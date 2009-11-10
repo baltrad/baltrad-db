@@ -1,0 +1,42 @@
+Import("env")
+
+env.AppendUnique(CPPPATH=["${jdk_include_dir}"])
+
+sources = ["FileCatalog.i"]
+
+build_dir = env.Dir(".").get_abspath()
+
+env["SWIGEXTRA"]["FileCatalog.i"] = [
+    "eu/baltrad/fc/Attribute.java",
+    "eu/baltrad/fc/ExpressionFactory.java",
+    "eu/baltrad/fc/Literal.java",
+    "eu/baltrad/fc/ResultSet.java",
+    "eu/baltrad/fc/BinaryOperator.java",
+    "eu/baltrad/fc/Expression.java",
+    "eu/baltrad/fc/FileCatalog.java",
+    "eu/baltrad/fc/Parentheses.java",
+    "eu/baltrad/fc/Element.java",
+    "eu/baltrad/fc/Label.java",
+    "eu/baltrad/fc/Query.java"
+]
+
+env["JARCHDIR"] = build_dir + "/classes"
+env["JAVASOURCEPATH"] = build_dir
+
+env.Append(SWIGFLAGS="-c++ -java -package eu.baltrad.fc".split())
+env.Append(SWIGOUTDIR=build_dir + "/eu/baltrad/fc")
+env.Append(SWIGPATH=env["CPPPATH"])
+
+lib = env.SharedLibrary("#lib/brfc_java", sources, LIBS=["brfc"])
+
+java = env.Java(target="classes", source=["eu", "java"])
+jar = env.Jar(target="#lib/jbrfc.jar", source=["classes/eu"])
+
+env.Default(lib)
+env.Default(java)
+env.Default(jar)
+
+env.Install("${install_root}/lib", lib)
+env.Install("${install_root}/java", jar)
+
+# vim:filetype=python:et:ts=4:sw=4:

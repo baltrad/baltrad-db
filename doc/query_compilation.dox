@@ -1,0 +1,24 @@
+/**
+ @page query_compilation Query Compilation
+
+Given a filter expression:
+
+@code
+Attribute::create("bla")->lt(Literal::create(1));
+@endcode
+
+this is represented as
+
+@dot
+  digraph example {
+      node [ shape="box" fontsize=8];
+      bla [ label="Attribute('bla')"];
+      lit_1 [ label="Literal(1)"];
+      op_lt [ label="BinaryOperator('\<')"];
+      op_lt -> bla [ arrowhead="open", style="dashed" ];
+      op_lt -> lit_1 [ arrowhead="open", style="dashed" ];
+  }
+@enddot
+
+*/
+// vim:filetype=doxygen:et:ts=4:sw=4:

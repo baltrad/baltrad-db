@@ -1,0 +1,32 @@
+Import("env")
+
+sources = [
+    "exceptions.cpp",
+    "hlhdf.cpp",
+    "Attribute.cpp",
+    "AttributeMapper.cpp",
+    "Converter.cpp",
+    "DataObject.cpp",
+    "Database.cpp",
+    "FileCatalog.cpp",
+    "File.cpp",
+    "Query.cpp",
+    "ResultSet.cpp",
+    "Source.cpp",
+    "SplitPath.cpp",
+    "expr/Compiler.cpp",
+    "expr/Expression.cpp",
+    "expr/Factory.cpp",
+    "expr/FromClause.cpp",
+    "expr/Select.cpp",
+    "expr/Selectable.cpp",
+    "expr/Visitor.cpp"
+]
+
+lib = env.SharedLibrary("#lib/brfc", sources, LIBS=["hdf5", "hlhdf", "QtSql"])
+
+env.Default(lib)
+
+env.Install("${install_root}/lib", lib)
+
+# vim:filetype=python:et:ts=4:sw=4:

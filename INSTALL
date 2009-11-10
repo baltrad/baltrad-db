@@ -1,0 +1,91 @@
+== Requirements ==
+
+Note that the version numbers supplied here are those
+used in developing the library, you might get away with
+lower version numbers in some cases (i.e boost dependencies
+are probably of version 1.37). 
+
+for building:
+* scons                         1.0
+
+library dependencies:
+* HLHDF library                 0.7.7
+* boost::iterator               1.40
+* boost::lambda                 1.40
+* boost::lexical_cast           1.40
+* boost::pointer_container      1.40
+* boost::smart_ptr              1.40
+* boost::string_algo            1.40
+* boost::utility                1.40
+* qt4-core                      4.4.3 
+* qt4-sql                       4.4.3
+
+additional test dependencies:
+* boost::test                   1.40
+
+run time dependencies:
+* postgresql driver for qt4-sql
+* postgresql                    8.3
+
+database creation dependencies:
+* sqlalchemy
+* python driver for postgresql
+
+documentation generation dependencies:
+* doxygen
+
+all boost libraries used are header only (except for boost::test)
+
+
+
+== generating documentation ==
+
+ $ scons doc
+
+
+
+== building ==
+
+to get a list of available variables:
+
+ $ scons --help
+
+You should probably specify installation prefix (the default is '/usr/local')
+and paths for any libraries you have installed somewhere other than '/usr'.
+
+Specified variables are cached in 'variables.cache' in distribution's root
+directory.
+
+The default is to build with no debugging symbols and to generate java
+bindings.
+
+just to give an example, the following is equivalent to default build:
+
+ $ scons prefix=/usr/local debug=no build_java=yes
+
+
+
+== running unit tests ==
+
+You can build unit test runner and run it, using target 'test'. To be able
+to run all tests, you should define 'test_db_dsn' variable. If you don't,
+only tests not dependent on database are compiled.
+ 
+ $ scons test test_db_dsn=postgresql://baltrad:baltrad@localhost/baltrad
+
+
+
+
+== installing ==
+
+If all is in order, feel free to install the library:
+
+ $ scons install
+
+To actually be of any use, you should also create a database:
+
+ $ createdb -O baltrad baltrad
+ 
+and then create tables in it:
+ 
+ $ python misc/db.py postgres://baltrad:password@localhost/baltrad

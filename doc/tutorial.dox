@@ -1,0 +1,293 @@
+/**
+@page tutorial Tutorial
+
+@section toc Table of Contents
+@li @ref intro
+@li @ref setup
+@li @ref importing
+@li @ref querying
+@li @ref removing
+
+@section intro Introduction
+
+This tutorial will give an overview of the implementation and intended
+usage of BALTRAD FileCatalog library. For reasons concerning linking from
+sample code-snippets to documentation, examples in this tutorial use C++
+syntax. Mapping to Java code should be quite straightforward. All
+@b relevant classes are made available under @c eu.baltrad.fc package,
+including those defined in brfc::expr namespace. Check @ref exposed_in_binds
+for a full list.
+
+There are a few naming differences though:
+
+@li brfc::expr::Factory is mapped to @c eu.baltrad.fc.ExpressionFactory
+@li brfc::brfc_error is mapped to @c eu.baltrad.fc.FileCatalogError
+@li brfc::fs_error is mapped to @c eu.baltrad.fc.FileSystemError
+@li brfc::db_error is mapped to @c eu.baltrad.fc.DatabaseError
+@li brfc::lookup_error is mapped to @c eu.baltrad.fc.LookupError
+@li brfc::duplicate_entry is mapped to @c eu.baltrad.fc.DuplicateEntry
+
+@note exception hierarchy still holds, only the names are different.
+
+Java samples, when provided, assume you have imported the classes from
+eu.baltrad.fc package.
+
+@section setup Setting Up
+
+The first thing you should do is instantate a brfc::FileCatalog instance,
+this is the main interface for interacting with the library. brfc::FileCatalog
+requires that you specify a database connection string and a filesystem
+directory where it will store imported files.
+
+Connection string is specified as a URI, for details, refer to brfc::Database
+documentation.
+
+Long story short:
+
+@code
+// define database connection
+const std::string dsn("postgresql://baltrad:baltrad@localhost/baltrad");
+// define a path where FileCatalog will store files
+const std::string storage_dir("/tmp");
+
+// create a FileCatalog instance, connecting it to database
+// and giving it a storage directory
+try {
+    brfc::FileCatalog fc(dsn, storage_dir);
+} catch (const brfc::db_error& e) {
+    // problem connecting to database
+} catch (const brfc::fs_error& e) {
+    // problem accessing storage directory
+}
+@endcode
+
+equivalent Java code would look like:
+
+@code
+String dsn("postgresql://baltrad:baltrad@localhost/baltrad");
+String storage_dir("/tmp");
+
+try {
+    FileCatalog fc(dsn, storage_dir);
+} catch (DatabaseError e) {
+    // problem connecting to database
+} catch (FileSytemError e) {
+    // problem accessing storeage directory
+}
+@endcode
+
+On instantiation, FileCatalog connects to the database and loads attribute
+specifications (expr::AttributeSpec).
+
+@section importing Importing files
+
+Importing a file is simple, just feed an absolute pathname to
+brfc::FileCatalog::catalog and if successful, you'll get back a path where the
+file is stored, relative to storage root.
+
+@code
+brfc::FileCatalog fc(dsn, storage_dir);
+
+try {
+    std::string stored_to = fc.catalog("/path/to/file.h5");
+} catch (const brfc::db_error& e) {
+    // problem storing file in database
+} catch (const brfc::fs_error& e) {
+    // opening the file failed or problem storing file on filesystem
+} catch (const brfc::duplicate_entry& e) {
+    // file already stored
+}
+@endcode
+
+On importing, HDF5 attributes (metadata) are read from file. Attributes that
+are recognized (have a matching brfc::AttributeSpec) are stored in database
+and are available for later querying. Attributes that are not valid, are
+silently ignored. Unfortunately there is currently no method for feedback on
+which attributes were ignored.
+
+Group information is stripped from the attribute, so an attribute with path
+@c /what/date gets stored as @c date.
+
+Before storing the value, HDF5 data is converted using a brfc::Converter,
+also defined in brfc::AttributeSpec. Refer to @ref converter for types of
+conversion available/used.
+
+@section querying Querying
+
+brfc::Query provides an interface to querying the database using attributes.
+You'll probably want to query for files matching certain criteria on an
+attribute, so we'll focus on that. You can get hold of a brfc::Query instance
+using brfc::FileCatalog::query.
+
+For convenience, a factory for creating elements usable in a query is provided
+(brfc::expr::Factory).
+This is the only way you can create them when using Java bindings, so we'll also
+be using it exclusively in the samples.
+
+File pathname can be queried using a pseudo-attribute named "path", this is the
+file path relative to storage root.
+
+To get an attribute from database, you must mark it for fetching using
+brfc::Query::fetch.
+
+To actually run the query, brfc::Query::execute must be called. Granted that no
+hickups were encountered, you'll get back a brfc::ResultSet instance containing
+the values of the attributes you requested.
+
+So, armed with that knowledge, lets query for all files stored in the catalog:
+
+@code
+// assuming we have a filecatalog instance
+brfc::FileCatalog fc;
+// create expression factory
+brfc::expr::Factory xpr;
+
+brfc::Query q = fc.query();
+
+// create "path" attribute
+brfc::expr::AttributePtr path = xpr.attribute("path");
+// mark it for fetching
+q.fetch(path);
+// execute
+brfc::ResultSet r = q.execute();
+
+// loop through results
+while (r.next()) {
+    // access the values
+    std::string path = r.string(0);
+}
+@endcode
+
+equivalent code in Java:
+
+@code
+// assuming we have a filecatalog instance
+FileCatalog fc;
+// create expression factory
+ExpressionFactory xpr;
+
+Query q = fc.query();
+
+// create "path" attribute
+Attribute path = xpr.attribute("path");
+// mark it for fetching
+q.fetch(path);
+// execute
+ResultSet r = q.execute();
+
+// loop through results
+while (r.next()) {
+    // access the values
+    std::string path = r.string(0);
+}
+@endcode
+
+Behind the scenes, an SQL query is created, where attributes are replaced
+with database columns according to what is specified in brfc::AttributeSpec
+entry for the attribute. See @ref query_compilation for details.
+
+Querying for all files is useful, but you probably want to get files with
+certain attributes defined. To achive that, you supply your query with
+filters using brfc::Query::filter. The filter accepts an arbitrary
+brfc::expr::Expression, which you can create using a combination of
+literals, comparison operators and logical operators.
+
+For example, let us fetch all polar volumes before 15.05.2009.
+
+@code
+// assuming a query
+brfc::Query q;
+brfc::expr::Factory xpr;
+
+// give back paths
+q.fetch(xpr.attribute("path"));
+// where date < 15.05.2009
+q.filter(xpr.lt(xpr.attribute("date"), xpr.date(2009, 5, 15)));
+// where object = PVOL
+q.filter(xpr.eq(xpr.attribute("object"), xpr.string("PVOL")));
+
+brfc::ResultSet r = q.execute();
+@endcode
+
+Specifying multiple filters is equivalent to using operator
+brfc::expr::Expression::and_ between the filter expressions.
+
+You could also use 'less than operator' straight from the attribute
+interface like this:
+
+@code
+//C++
+xpr.attribute("date")->lt(xpr.date(2009, 5, 15));
+//Java
+xpr.attribute("date").lt(xpr.date(2009, 5, 15));
+@endcode
+
+@note that when you use an attribute in a filter, that attribute @b MUST
+be present in the file metadata. If it's missing, it's not matching and
+is thus ignored completely. There is no way to specifiy a missing value
+yet (so this is a known limitation in current implementation).
+
+A problem you might encounter is when a file has the same attribute specified
+in many datasets. You will get as many rows as the number of values for the
+attribute. As in SQL, you can set a query to fetch only distinct rows using
+brfc::Query::distinct.
+
+
+Things are a bit trickier when you want to filter by source. A source in
+ODIM_H5 files can contain many attributes. Luckily, when storing the file
+it is associated with one distinct source. But you can query using all the
+possible fields. A source is split to pseudo-attributes with element names
+from ODIM_H5 source specification, prefixed with 'src_'. So WMO becomes
+src_WMO and so on. There are two groups of sources: radar sites and
+organisations/countries. Their attribute values don't overlap, meaning:
+radar sites have WMO, RAD and PLC specified, while the other group has
+CTY and ORG.
+
+There is one overlapping attribute though, named src_node, which for
+radar sites is the node value from ODIM_H5 specifiaction Table 9, and
+for countries/organisations the two-letter internet country code. So
+this is present in all sources. But it's not entirely useful right now.
+(If there is need, we might introduce sql LIKE operator so you can select
+over this attribute to get all country data (including radars) easily like
+this: <tt>xpr.attribute("src_node").like("se*");</tt>)
+
+@code
+brfc::expr::Factory xpr;
+
+brfc::Query q = fc.query();
+q.fetch(xpr.attribute("path"));
+q.filter(xpr.attribute("src_node")->eq(xpr.string("seang")));
+
+brfc::ResultSet r = q.execute();
+@endcode
+
+@section removing Removing files
+
+File removal is done by path name. Just feed a path relative to storage
+root (which you probably get through querying).
+
+for example, removing files older than from 2009.
+@code
+brfc::FileCatalog fc(dsn, storage_dir);
+brfc::expr::Factory xpr;
+
+brfc::Query q = fc.query();
+
+q.fetch(xpr.attribute("path"));
+q.filter(xpr.attribute("date")->lt(xpr.date(2009, 1, 1)));
+
+brfc::ResultSet r = q.execute();
+
+while (r.next()) {
+    try {
+        fc.remove(r.get_string(0));
+    } catch (const brfc::db_error& e) {
+        // removing from database failed
+    } catch (const brfc::fs_error& e) {
+        // removing from filesystem failed
+    }
+}
+@endcode
+
+*/
+// vim:filetype=doxygen:et:ts=4:sw=4:
