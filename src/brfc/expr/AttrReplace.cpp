@@ -15,6 +15,7 @@
 #include <brfc/expr/Table.hpp>
 
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/erase.hpp>
 #include <map>
 
 namespace brfc {
@@ -59,8 +60,10 @@ AttrReplace::do_visit(brfc::expr::Attribute& attr) {
 
     // if not specialized
     if (!mapper_->is_specialized(name)) {
+        std::string safe_name = name;
+        boost::erase_all(safe_name, "/");
         // alias the table (this attribute is always searched on this table)
-        value_t = Table::create(tc.table)->alias(name + "_values");
+        value_t = Table::create(tc.table)->alias(safe_name + "_values");
         TablePtr data_objects_t = Table::create("data_objects");
         TablePtr files_t = Table::create("files");
         // if not already defined, join
