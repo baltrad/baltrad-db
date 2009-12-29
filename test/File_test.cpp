@@ -11,6 +11,7 @@
 #include <QtCore/QVariant>
 
 #include "common.hpp"
+#include "TemporaryH5File.hpp"
 
 using namespace brfc;
 
@@ -68,22 +69,25 @@ BOOST_AUTO_TEST_CASE(open_nx_file) {
     BOOST_CHECK_THROW(File("/path/to/nxfile", m), fs_error);
 }
 
-BOOST_AUTO_TEST_CASE(read_write) {
-    File f;
+BOOST_AUTO_TEST_CASE(read) {
     AttributeMapper m;
     m.add_spec(0, "date", "date", "t", "v");
     m.add_spec(0, "time", "time", "t", "v");
 
     QVariant time(QTime(12, 5, 1));
     QVariant date(QDate(2000, 1, 2));
-    DataObject& d = f.data_object("/dataset1", true);
-    f.root().add_attribute("date", date);
-    f.root().add_attribute("time", time);
-    d.add_attribute("date", date);
-    f.write("/tmp/asd", m);
-    File g("/tmp/asd", m);
-    BOOST_CHECK_EQUAL(f.root().attribute("date").value(), date);
-    BOOST_CHECK_EQUAL(f.root().attribute("time").value(), time);
+
+    brfc::TemporaryH5File f;
+    f.add_attribute("/date", date);
+    f.add_attribute("/time", time);
+    f.add_group("/dataset1");
+    f.add_attribute("/dataset1/date", date);
+    f.write();
+
+    File g(f.filename(), m);
+    BOOST_CHECK_EQUAL(g.root().attribute("date").value(), date);
+    BOOST_CHECK_EQUAL(g.root().attribute("time").value(), time);
+    BOOST_CHECK_EQUAL(g.data_object("/dataset1").attribute("date").value(), date);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -103,17 +103,6 @@ class File : public boost::noncopyable {
      */
     std::string path() const;
 
-    /**
-     * @brief write the file to filesystem
-     *
-     * this method does not write correct ODIM_H5 files and is only
-     * usable for testing purposes of this module. 
-     * Since we don't deal with actual data, datasets get written as
-     * H5_Groups and ODIM_H5 groups (what etc) are omitted.
-     */
-    void write(const std::string& path,
-               const AttributeMapper& mapper) const;
-
   private:
     /**
      * @brief load from filesystem

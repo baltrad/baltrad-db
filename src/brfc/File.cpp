@@ -148,43 +148,4 @@ File::load(const std::string& path, const AttributeMapper& mapper) {
     }
 }
 
-void
-File::write(const std::string& path,
-            const AttributeMapper& mapper) const {
-    init_hlhdflib();
-    HL_NodeList* nodes = HLNodeList_new();
-    if (nodes == 0) {
-        throw brfc_error("could not allocate HL_NodeList");
-    }
-    
-    HL_Node* node = 0;
-    BOOST_FOREACH(const DataObject& dobj, root()) {
-        const std::string& node_path = dobj.path();
-        if (&dobj != root_.get()) { // root group is automatic
-            node = HLNode_newGroup(node_path.c_str());
-            if (node == 0)
-                throw brfc_error("could not create dataset: " + node_path);
-            if (HLNodeList_addNode(nodes, node) == 0)
-                throw brfc_error("could not add node: " + node_path);
-        }
-        BOOST_FOREACH(const Attribute& attr, dobj.attributes()) {
-            node = HLNode_newAttribute(attr.path().c_str());
-            const Converter& c = mapper.converter(attr.name());
-            HL_Data d = c.convert(attr.value());
-            HLNodeList_addNode(nodes, node);
-            HLNode_setScalarValue(node, d.size(), d.data(), d.type(), -1);
-        }
-    }
-
-    HL_Compression compression;
-    HLCompression_init(&compression, CT_ZLIB);
-    compression.level = 6;
-    if (HLNodeList_setFileName(nodes, path.c_str()) == 0)
-        throw brfc_error("could not set filename");
-    if (HLNodeList_write(nodes, 0, &compression) == 0)
-        throw brfc_error("could not write file");
-
-    HLNodeList_free(nodes);
-}
-
 } // namepsace brfc
