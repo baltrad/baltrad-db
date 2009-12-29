@@ -3,5 +3,6 @@ doc/html
 lib/
 test/runner
 *.pyc
+.*.swp
 variables.cache
 .sconsign.dblite
