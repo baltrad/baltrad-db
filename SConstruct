@@ -90,4 +90,10 @@ test = env.Command("test_runner", "#test/runner",
                    "LD_LIBRARY_PATH=./lib $SOURCE")
 env.Alias("test", test)
 
+hudsontest = env.Command("hudsontest", "#test/runner",
+                   "LD_LIBRARY_PATH=./lib $SOURCE "
+                   "--output_format=XML "
+                   "--log_level=all "
+                   "--report_level=no")
+
 # vim:filetype=python:et:ts=4:sw=4:
