@@ -32,14 +32,14 @@ struct Fixture {
             , td3("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 0), src)
             , query(&db, &mapper) {
         db.populate_attribute_mapper(mapper);
-        td1.data_object("/bla", true).add_attribute("xsize", QVariant(static_cast<int64_t>(1)));
-        td1.data_object("/bla", true).add_attribute("ysize", QVariant(static_cast<int64_t>(2)));
+        td1.data_object("/bla", true).add_attribute("where/xsize", QVariant(static_cast<int64_t>(1)));
+        td1.data_object("/bla", true).add_attribute("where/ysize", QVariant(static_cast<int64_t>(2)));
 
-        td2.data_object("/bla", true).add_attribute("xsize", QVariant(static_cast<int64_t>(2)));
-        td2.data_object("/bla", true).add_attribute("ysize", QVariant(static_cast<int64_t>(2)));
+        td2.data_object("/bla", true).add_attribute("where/xsize", QVariant(static_cast<int64_t>(2)));
+        td2.data_object("/bla", true).add_attribute("where/ysize", QVariant(static_cast<int64_t>(2)));
 
-        td3.data_object("/bla", true).add_attribute("xsize", QVariant(static_cast<int64_t>(3)));
-        td3.data_object("/bla2", true).add_attribute("xsize", QVariant(static_cast<int64_t>(3)));
+        td3.data_object("/bla", true).add_attribute("where/xsize", QVariant(static_cast<int64_t>(3)));
+        td3.data_object("/bla2", true).add_attribute("where/xsize", QVariant(static_cast<int64_t>(3)));
 
         td1.root().add_attribute("path", "test_data_1");
         td2.root().add_attribute("path", "test_data_2");
@@ -68,7 +68,7 @@ BOOST_FIXTURE_TEST_SUITE(Query_test, Fixture)
 
 BOOST_AUTO_TEST_CASE(test_simple) {
     ResultSet r = query.fetch(xpr.attribute("path"))
-                       .filter(xpr.attribute("xsize")->eq(xpr.integer(1)))
+                       .filter(xpr.attribute("where/xsize")->eq(xpr.integer(1)))
                        .execute();
     BOOST_REQUIRE(r.next());
     BOOST_CHECK_EQUAL(r.string(0), "test_data_1");
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(test_list_all_files) {
 }
 
 BOOST_AUTO_TEST_CASE(test_select_xsize) {
-    ResultSet r = query.fetch(xpr.attribute("xsize"))
-                       .filter(xpr.attribute("xsize")->eq(xpr.integer(1)))
+    ResultSet r = query.fetch(xpr.attribute("where/xsize"))
+                       .filter(xpr.attribute("where/xsize")->eq(xpr.integer(1)))
                        .execute();
     BOOST_REQUIRE(r.next());
     BOOST_CHECK_EQUAL(r.integer(0), 1);
@@ -96,8 +96,8 @@ BOOST_AUTO_TEST_CASE(test_select_xsize) {
 }
 
 BOOST_AUTO_TEST_CASE(test_select_on_double_attr) {
-    expr::AttributePtr xsize = xpr.attribute("xsize");
-    expr::AttributePtr ysize = xpr.attribute("ysize");
+    expr::AttributePtr xsize = xpr.attribute("where/xsize");
+    expr::AttributePtr ysize = xpr.attribute("where/ysize");
     ResultSet r = query.fetch(xpr.attribute("path"))
                        .filter(xsize->eq(xpr.integer(1))->or_(ysize->eq(xpr.integer(2))))
                        .execute();
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(test_select_on_double_attr) {
 }
 
 BOOST_AUTO_TEST_CASE(test_select_not_distinct) {
-    expr::AttributePtr xsize = xpr.attribute("xsize");
+    expr::AttributePtr xsize = xpr.attribute("where/xsize");
     ResultSet r = query.fetch(xpr.attribute("path"))
                        .filter(xsize->eq(xpr.integer(3)))
                        .execute();
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(test_select_not_distinct) {
 }
 
 BOOST_AUTO_TEST_CASE(test_select_distinct) {
-    expr::AttributePtr xsize = xpr.attribute("xsize");
+    expr::AttributePtr xsize = xpr.attribute("where/xsize");
     ResultSet r = query.fetch(xpr.attribute("path"))
                        .distinct()
                        .filter(xsize->eq(xpr.integer(3)))
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(test_select_distinct) {
 
 
 BOOST_AUTO_TEST_CASE(test_select_xsize2) {
-    expr::AttributePtr xsize = xpr.attribute("xsize");
+    expr::AttributePtr xsize = xpr.attribute("where/xsize");
     ResultSet r = query.fetch(xsize)
                        .filter(xsize->eq(xpr.integer(1))->or_(xsize->eq(xpr.integer(2))))
                        .execute();

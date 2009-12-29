@@ -39,25 +39,25 @@ File::File(const std::string& object,
            const std::string& source)
         : root_(new DataObject("", this)) {
     root_->add_attribute("Conventions", "ODIM_H5/V2_0");
-    root_->add_attribute("object", QString::fromStdString(object));
-    root_->add_attribute("version", QString::fromStdString(version));
-    root_->add_attribute("date", date);
-    root_->add_attribute("time", time);
-    root_->add_attribute("source", QString::fromStdString(source));
+    root_->add_attribute("what/object", QString::fromStdString(object));
+    root_->add_attribute("what/version", QString::fromStdString(version));
+    root_->add_attribute("what/date", date);
+    root_->add_attribute("what/time", time);
+    root_->add_attribute("what/source", QString::fromStdString(source));
 }
 
 Source
 File::source() const {
-    return Source(root_->attribute("source").value().toString());
+    return Source(root_->attribute("what/source").value().toString());
 }
 
 void
 File::set_path_from_attributes() {
-    QString path = root_->attribute("object").value().toString();
+    QString path = root_->attribute("what/object").value().toString();
     path += "_";
-    path += root_->attribute("date").value().toDate().toString("yyyyMMdd");
+    path += root_->attribute("what/date").value().toDate().toString("yyyyMMdd");
     path += "T";
-    path += root_->attribute("time").value().toTime().toString("hhmmss");
+    path += root_->attribute("what/time").value().toTime().toString("hhmmss");
     path += ".h5";
     root_->add_attribute("path", path);
 }
