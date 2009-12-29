@@ -90,4 +90,21 @@ BOOST_AUTO_TEST_CASE(read) {
     BOOST_CHECK_EQUAL(g.data_object("/dataset1").attribute("date").value(), date);
 }
 
+BOOST_AUTO_TEST_CASE(ignored_attributes) {
+    AttributeMapper m;
+
+    brfc::TemporaryH5File f;
+    f.add_attribute("/ignore", QVariant(2.0));
+    f.add_group("/dataset");
+    f.add_attribute("/dataset/ignore", QVariant(1.0));
+    f.write();
+
+    File g(f.filename(), m);
+    BOOST_CHECK_THROW(g.root().attribute("ignore"), brfc::lookup_error);
+    const File::StringVector& ignored = g.ignored_attributes();
+    BOOST_CHECK_EQUAL(ignored.size(), 2);
+    BOOST_CHECK(std::find(ignored.begin(), ignored.end(), "/ignore") != ignored.end());
+    BOOST_CHECK(std::find(ignored.begin(), ignored.end(), "/dataset/ignore") != ignored.end());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

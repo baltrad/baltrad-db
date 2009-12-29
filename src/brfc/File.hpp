@@ -2,9 +2,12 @@
 #define BRFC_FILE_H
 
 #include <string>
+#include <vector>
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
+
+#include <brfc/hlhdf.hpp>
 
 class QDate;
 class QTime;
@@ -17,18 +20,11 @@ class Source;
 
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
- *
- * @note Specification states that:
- *       <i>Software is encouraged to warn if it receives a ﬁle
- *       stored in a version which is different from the one it
- *       expects. The software should, however, proceed to read
- *       the ﬁle, ignoring Attributes it does not understand</i>
- *       This library currently silently ignores Attributes it does
- *       not recognize. (in the future, ignored Attributes should
- *       be made accessible through this interface).
  */
 class File : public boost::noncopyable {
   public:
+    typedef std::vector<std::string> StringVector;
+
     /**
      * @brief construct an empty File
      *
@@ -41,6 +37,9 @@ class File : public boost::noncopyable {
      * @param path absolute path to the file
      * @param mapper AttributeMapper instance used for converter lookups
      * @throw fs_error if file can not be opened
+     *
+     * full paths of ignored attributes (not defined in mapper) are stored
+     * and accessible through ignored_attributes();
      */
     File(const std::string& path, const AttributeMapper& mapper);
     
@@ -103,11 +102,21 @@ class File : public boost::noncopyable {
      */
     std::string path() const;
 
+    /**
+     * @brief get attributes ignored on loading
+     */
+    const StringVector& ignored_attributes() const {
+        return ignored_attributes_;
+    }
+
   private:
     /**
      * @brief load from filesystem
      */
     void load(const std::string& path, const AttributeMapper& mapper);
+
+    void add_attribute_from_node(HL_Node* node,
+                                 const AttributeMapper& mapper);
 
     /**
      * @brief figure out pathname from attributes
@@ -117,6 +126,7 @@ class File : public boost::noncopyable {
      */
     void set_path_from_attributes();
 
+    StringVector ignored_attributes_;
     boost::scoped_ptr<DataObject> root_;
 };
 

@@ -2,7 +2,6 @@
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/hlhdf.hpp>
 #include <brfc/Attribute.hpp>
 #include <brfc/AttributeMapper.hpp>
 #include <brfc/Converter.hpp>
@@ -103,9 +102,8 @@ File::data_object(const std::string& path,
 }
 
 void
-add_attribute_from_node(File& file,
-                        HL_Node* node,
-                        const AttributeMapper& mapper) {
+File::add_attribute_from_node(HL_Node* node,
+                              const AttributeMapper& mapper) {
     std::string nodename = HLNode_getName(node);
     unsigned char* data = HLNode_getData(node);
 
@@ -116,12 +114,12 @@ add_attribute_from_node(File& file,
     try {
         converter = &mapper.converter(path.attribute_name);
     } catch (const lookup_error& e) {
-        // silently ignore an unknown attribute
+        ignored_attributes_.push_back(nodename);
         return;
     }
 
     QVariant val = converter->convert(HLNode_getFormat(node), data);
-    DataObject& dobj = file.data_object(path.data_object_path, true);
+    DataObject& dobj = data_object(path.data_object_path, true);
     try {
         dobj.add_attribute(path.attribute_name, val);
     } catch (std::runtime_error& e) {
@@ -143,7 +141,7 @@ File::load(const std::string& path, const AttributeMapper& mapper) {
     for (int i=0; i < HLNodeList_getNumberOfNodes(nodes); ++i) {
         HL_Node* node = HLNodeList_getNodeByIndex(nodes, i);
         if (HLNode_getType(node) == ATTRIBUTE_ID) {
-            add_attribute_from_node(*this, node, mapper);
+            add_attribute_from_node(node, mapper);
         }
     }
 }
