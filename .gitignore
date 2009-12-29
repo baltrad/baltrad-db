@@ -1,4 +1,5 @@
 build/
+doc/html
 lib/
 test/runner
 *.pyc

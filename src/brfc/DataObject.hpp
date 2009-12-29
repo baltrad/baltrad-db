@@ -179,21 +179,36 @@ class DataObject : public boost::noncopyable {
     const File* file_;
 };
 
+/**
+ * @brief iterator over DataObject hierarchy
+ */
 template<typename T>
 class DataObjectIterator :
         public boost::iterator_facade<DataObjectIterator<T>,
                                       T,
                                       boost::forward_traversal_tag> {
   public:
+    /**
+     * @brief construct an empty iterator
+     *
+     * this also marks the end of the hierarchy
+     */
     DataObjectIterator()
             : stack_() {
     }
 
+    /**
+     * @brief construct pointing to a DataObject
+     * @param dobj DataObject to start iterating from
+     */
     explicit DataObjectIterator(T* dobj)
             : stack_() {
         stack_.push_back(dobj);
     }
 
+    /**
+     * @brief copy constructor
+     */
     template<typename OtherT>
     DataObjectIterator(const DataObjectIterator<OtherT>& other)
             : stack_(other.stack_.begin(), other.stack_.end()) {
@@ -204,6 +219,12 @@ class DataObjectIterator :
     template<typename>
     friend class DataObjectIterator;
 
+    /**
+     * @brief advance this iterator
+     *
+     * if there are elements in the stack, pop from the front
+     * and add it's children to the back of the stack.
+     */
     void increment() {
         if (not stack_.empty()) {
             T* cur = stack_.front();
@@ -214,11 +235,20 @@ class DataObjectIterator :
         }
     }
 
+    /**
+     * @brief value access
+     */
     T& dereference() const {
         BRFC_ASSERT(not stack_.empty());
         return *stack_.front();
     }
 
+    /**
+     * @brief equality comparison
+     *
+     * two iterators are equal if their stacks are empty,
+     * or if they have the same element in front of the stack.
+     */
     template<typename OtherT>
     bool equal(const DataObjectIterator<OtherT>& rhs) const {
         if (stack_.empty() && rhs.stack_.empty()) {
