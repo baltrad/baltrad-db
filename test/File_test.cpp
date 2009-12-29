@@ -34,32 +34,28 @@ BOOST_AUTO_TEST_CASE(root) {
     BOOST_CHECK_EQUAL(&f.root(), &f.data_object("/"));
 }
 
-BOOST_AUTO_TEST_CASE(split_path1) {
+BOOST_AUTO_TEST_CASE(split_short_path_without_group) {
     SplitPath p("/Conventions");
     BOOST_CHECK_EQUAL(p.data_object_path, "/");
-    BOOST_CHECK_EQUAL(p.attribute_group, "");
     BOOST_CHECK_EQUAL(p.attribute_name, "Conventions");
 }
 
-BOOST_AUTO_TEST_CASE(split_path2) {
+BOOST_AUTO_TEST_CASE(split_long_path_without_group) {
     SplitPath p("/path/to/object");
     BOOST_CHECK_EQUAL(p.data_object_path, "/path/to");
-    BOOST_CHECK_EQUAL(p.attribute_group, "");
     BOOST_CHECK_EQUAL(p.attribute_name, "object");
 }
 
-BOOST_AUTO_TEST_CASE(split_path3) {
+BOOST_AUTO_TEST_CASE(split_long_path_with_group) {
     SplitPath p("/path/to/what/object");
     BOOST_CHECK_EQUAL(p.data_object_path, "/path/to");
-    BOOST_CHECK_EQUAL(p.attribute_group, "what");
-    BOOST_CHECK_EQUAL(p.attribute_name, "object");
+    BOOST_CHECK_EQUAL(p.attribute_name, "what/object");
 }
 
-BOOST_AUTO_TEST_CASE(split_path4) {
+BOOST_AUTO_TEST_CASE(split_short_path_with_group) {
     SplitPath p("/what/date");
     BOOST_CHECK_EQUAL(p.data_object_path, "/");
-    BOOST_CHECK_EQUAL(p.attribute_group, "what");
-    BOOST_CHECK_EQUAL(p.attribute_name, "date");
+    BOOST_CHECK_EQUAL(p.attribute_name, "what/date");
 }
 
 BOOST_AUTO_TEST_CASE(path) {

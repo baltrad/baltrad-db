@@ -12,7 +12,6 @@ namespace brfc {
 
 SplitPath::SplitPath(const std::string& path)
         : attribute_name()
-        , attribute_group()
         , data_object_path() {
     split(path);
 }
@@ -30,7 +29,7 @@ SplitPath::split(const std::string& path) {
     // test if next to last element is a valid grouping
     const std::string& group = path_vec.back();
     if (group == "what" || group == "where" || group == "how") {
-        attribute_group = group;
+    	attribute_name = group + "/" + attribute_name;
         path_vec.pop_back();
     }
 

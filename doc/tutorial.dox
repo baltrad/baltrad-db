@@ -34,7 +34,7 @@ eu.baltrad.fc package.
 
 @section setup Setting Up
 
-The first thing you should do is instantate a brfc::FileCatalog instance,
+The first thing you should do is create a brfc::FileCatalog instance,
 this is the main interface for interacting with the library. brfc::FileCatalog
 requires that you specify a database connection string and a filesystem
 directory where it will store imported files.
@@ -105,8 +105,8 @@ and are available for later querying. Attributes that are not valid, are
 silently ignored. Unfortunately there is currently no method for feedback on
 which attributes were ignored.
 
-Group information is stripped from the attribute, so an attribute with path
-@c /what/date gets stored as @c date.
+Group information is part of the attribute name, so @c /what/date is looked up
+and stored as @c what/date.
 
 Before storing the value, HDF5 data is converted using a brfc::Converter,
 also defined in brfc::AttributeSpec. Refer to @ref converter for types of
@@ -202,9 +202,9 @@ brfc::expr::Factory xpr;
 // give back paths
 q.fetch(xpr.attribute("path"));
 // where date < 15.05.2009
-q.filter(xpr.lt(xpr.attribute("date"), xpr.date(2009, 5, 15)));
+q.filter(xpr.lt(xpr.attribute("what/date"), xpr.date(2009, 5, 15)));
 // where object = PVOL
-q.filter(xpr.eq(xpr.attribute("object"), xpr.string("PVOL")));
+q.filter(xpr.eq(xpr.attribute("what/object"), xpr.string("PVOL")));
 
 brfc::ResultSet r = q.execute();
 @endcode
@@ -217,9 +217,9 @@ interface like this:
 
 @code
 //C++
-xpr.attribute("date")->lt(xpr.date(2009, 5, 15));
+xpr.attribute("what/date")->lt(xpr.date(2009, 5, 15));
 //Java
-xpr.attribute("date").lt(xpr.date(2009, 5, 15));
+xpr.attribute("what/date").lt(xpr.date(2009, 5, 15));
 @endcode
 
 @note that when you use an attribute in a filter, that attribute @b MUST
@@ -274,7 +274,7 @@ brfc::expr::Factory xpr;
 brfc::Query q = fc.query();
 
 q.fetch(xpr.attribute("path"));
-q.filter(xpr.attribute("date")->lt(xpr.date(2009, 1, 1)));
+q.filter(xpr.attribute("what/date")->lt(xpr.date(2009, 1, 1)));
 
 brfc::ResultSet r = q.execute();
 

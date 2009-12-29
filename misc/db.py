@@ -131,7 +131,7 @@ special_storage = {
 
 # name, group, type
 attribute_entries = [
-    ("Conventions", "none", "string"),
+    ("Conventions", None, "string"),
 
     ##
     # Table 1
@@ -244,8 +244,7 @@ attribute_entries = [
     ("elangles",    "how", "sequence"),
     ("aztimes",     "how", "sequence"),
     # Cartesian images including composites
-    # XXX: duplicate with group mismatch
-    # ("angles",      "how", "sequence"), # dup
+    ("angles",      "how", "sequence"),
     ("arotation",   "how", "sequence"),
     ("camethod",    "how", "string"),
     ("nodes",       "how", "sequence"),
@@ -273,8 +272,7 @@ attribute_entries = [
     ("min",         "how", "real"),
     ("max",         "how", "real"),
     ("step",        "how", "real"),
-    # XXX: duplicate, with group mismatch
-    # ("levels",      "how", "int"), # dup
+    ("levels",      "how", "int"),
     ("peakpwr",     "how", "real"),
     ("avgpwr",      "how", "real"),
     ("dynrange",    "how", "real"),
@@ -305,8 +303,8 @@ attribute_entries = [
     # Table 17
     # Eight-bit Image attributes.
     ##
-    ("CLASS",         "none", "string"),
-    ("IMAGE_VERSION", "none", "string"),
+    ("CLASS",         None, "string"),
+    ("IMAGE_VERSION", None, "string"),
 ]
 
 virtual_attributes = [
@@ -396,7 +394,7 @@ def populate_attributes_table(engine):
     for (name, group, type) in attribute_entries:
         table, column = special_storage.get(name, default_storage[type])
         engine.execute(q,
-                       name=name,
+                       name="/".join((group, name)) if group else name,
                        converter=type,
                        storage_table=table,
                        storage_column=column)
