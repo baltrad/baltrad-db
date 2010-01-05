@@ -8,6 +8,7 @@
 #include <brfc/expr/Select.hpp>
 #include <brfc/expr/Parentheses.hpp>
 #include <brfc/expr/FromClause.hpp>
+#include <brfc/expr/Join.hpp>
 #include <brfc/expr/Label.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Column.hpp>
@@ -17,40 +18,41 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <map>
+#include <algorithm>
+#include <utility>
 
 namespace brfc {
 namespace expr {
 
-AttrReplace::AttrReplace(const AttributeMapper* mapper)
+AttrReplace::AttrReplace(SelectPtr select, const AttributeMapper* mapper)
         : Visitor(Visitor::POST_ORDER)
         , mapper_(mapper)
         , stack_()
-        , select_()
-        , join_where_() {
+        , select_(select)
+        , from_() {
+    // always select from files and sources
+    TablePtr files_t = Table::create("files");
+    TablePtr src_t = Table::create("sources");
+    
+    ExpressionPtr on = files_t->column("source_id")->eq(src_t->column("id"));
+    from_ = files_t->join(src_t, on);
 }
 
 void
-AttrReplace::replace(SelectPtr select) {
-    select_ = select;
-    try {
-        visit(*select_);
-    } catch (...) {
-        select_.reset();
-        throw;
-    }
-    join();
-    select_.reset();
-    join_where_.reset();
+AttrReplace::replace(SelectPtr select, const AttributeMapper* mapper) {
+    AttrReplace rpl(select, mapper);
+    rpl.replace_attributes();
+    rpl.build_from_clause();
 }
 
 void
-AttrReplace::do_visit(brfc::expr::Alias& alias) {
+AttrReplace::do_visit(Alias& alias) {
     alias.aliased(static_pointer_cast<Selectable>(pop()));
     push(alias.shared_from_this());
 }
 
 void
-AttrReplace::do_visit(brfc::expr::Attribute& attr) {
+AttrReplace::do_visit(Attribute& attr) {
     const std::string& name = attr.name();
 
     // query table and column where this value can be found
@@ -60,33 +62,38 @@ AttrReplace::do_visit(brfc::expr::Attribute& attr) {
 
     // if not specialized
     if (!mapper_->is_specialized(name)) {
+        // alias the table (this attribute is always searched on this table)
         std::string safe_name = name;
         boost::erase_all(safe_name, "/");
-        // alias the table (this attribute is always searched on this table)
         value_t = Table::create(tc.table)->alias(safe_name + "_values");
-        TablePtr data_objects_t = Table::create("data_objects");
-        TablePtr files_t = Table::create("files");
-        // if not already defined, join
-        if (!select_->from()->has(value_t)) {
-            select_->from()->add(value_t);
-            int id = mapper_->spec(attr.name()).id;
-            ExpressionPtr expr = value_t->column("attribute_id")->eq(Literal::create(id));
-            join_where(expr);
-            join_where(value_t->column("data_object_id")->eq(data_objects_t->column("id")));
+        if (not from_->contains(value_t)) {
+            // try to join data_objects, they have appear earlier in the join
+            join_data_objects(); 
+            TablePtr dobj_t = Table::create("data_objects");
+            ExpressionPtr on = value_t->column("data_object_id")->eq(dobj_t->column("id"));
+            on = on->and_(value_t->column("attribute_id")->eq(Literal::create(mapper_->spec(name).id)));
+            from_ = from_->join(value_t, on);
         }
-        if (!select_->from()->has(data_objects_t)) {
-            select_->from()->add(data_objects_t);
-            join_where(data_objects_t->column("file_id")->eq(files_t->column("id")));
-        }
-        
     } else {
         value_t = Table::create(tc.table);
-        if (!select_->from()->has(value_t))
-            select_->from()->add(value_t);
+        if (value_t->name() == "data_objects") {
+            join_data_objects();
+        }
     }
     // replace the attribute with value column
     ColumnPtr col = value_t->column(tc.column);
     col->accept(*this);
+}
+
+void
+AttrReplace::join_data_objects() {
+    // join data_objects if not already joined
+    TablePtr files_t = Table::create("files");
+    TablePtr dobj_t = Table::create("data_objects");
+    if (not from_->contains(dobj_t)) {
+        ExpressionPtr on = dobj_t->column("file_id")->eq(files_t->column("id"));
+        from_ = from_->join(dobj_t, on);
+    }
 }
 
 void
@@ -100,6 +107,14 @@ AttrReplace::do_visit(BinaryOperator& op) {
     op.rhs(static_pointer_cast<Expression>(pop()));
     op.lhs(static_pointer_cast<Expression>(pop()));
     push(op.shared_from_this());
+}
+
+void
+AttrReplace::do_visit(Join& join) {
+    join.condition(static_pointer_cast<Expression>(pop()));
+    join.to(static_pointer_cast<Selectable>(pop()));
+    join.from(static_pointer_cast<Selectable>(pop()));
+    push(join.shared_from_this());
 }
 
 void
@@ -149,18 +164,15 @@ AttrReplace::do_visit(FromClause& from) {
 }
 
 void
-AttrReplace::join_where(ExpressionPtr where) {
-    join_where_ = join_where_ ? join_where_->and_(where) : where;
+AttrReplace::replace_attributes() {
+    visit(*select_);
 }
 
 void
-AttrReplace::join() {
-    if (select_->where()) {
-        select_->where(select_->where()->parentheses());
-    }
-    if (join_where_) {
-        select_->append_where(join_where_->parentheses());
-    }
+AttrReplace::build_from_clause() {
+    FromClausePtr from_clause = FromClause::create();
+    from_clause->add(from_);
+    select_->from(from_clause);
 }
 
 ElementPtr

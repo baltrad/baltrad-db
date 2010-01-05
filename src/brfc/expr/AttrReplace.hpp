@@ -15,27 +15,28 @@ namespace expr {
 /**
  * @brief replace expr::Attribute with expr::Column
  *
- * XXX: come up with a better name for this class to reflect what
- *      it is actually doing
+ * The strategy is to first replace all the attributes with columns,
+ * collecting the unique tables/aliases. Since the Select has no from
+ * clause, we determine a central table and join the remaining tables to it
  */
 class AttrReplace : protected Visitor {
   public:
     /**
-     * @brief constructor
-     * @param mapper AttributeMapper instance to fetch mappings from
-     */
-    AttrReplace(const AttributeMapper* mapper);
-
-    /**
      * @brief replace attributes in a Select statement
      */
-    void replace(SelectPtr select);
+    static void replace(SelectPtr select, const AttributeMapper* mapper);
   
   protected:
     /**
+     * @brief constructor
+     * @param mapper AttributeMapper instance to fetch mappings from
+     */
+    AttrReplace(SelectPtr select, const AttributeMapper* mapper);
+
+    /**
      * @brief visit an Alias element
      */
-    virtual void do_visit(brfc::expr::Alias& alias);
+    virtual void do_visit(Alias& alias);
 
     /**
      * @brief visit an Attribute element
@@ -44,11 +45,13 @@ class AttrReplace : protected Visitor {
      * if it's not a specialized column,
      * add a where clause to attribute names
      */
-    virtual void do_visit(brfc::expr::Attribute& attr);
+    virtual void do_visit(Attribute& attr);
 
     virtual void do_visit(Column& column);
 
     virtual void do_visit(BinaryOperator& op);
+
+    virtual void do_visit(Join& join);
 
     virtual void do_visit(Label& label);
 
@@ -62,21 +65,21 @@ class AttrReplace : protected Visitor {
 
     virtual void do_visit(FromClause& from);
 
-    void reset();
+    void replace_attributes();
 
-    void join_where(ExpressionPtr where);
-
-    void join();
+    void build_from_clause();
 
     ElementPtr pop();
 
     void push(ElementPtr p);
 
+    void join_data_objects();
+
   private:
     const AttributeMapper* mapper_;
     std::vector<ElementPtr> stack_;
     SelectPtr select_;
-    ExpressionPtr join_where_;
+    JoinPtr from_;
 };
 
 } // namespace expr

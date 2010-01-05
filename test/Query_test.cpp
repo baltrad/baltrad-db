@@ -77,6 +77,7 @@ BOOST_AUTO_TEST_CASE(test_simple) {
 
 BOOST_AUTO_TEST_CASE(test_list_all_files) {
     ResultSet r = query.fetch(xpr.attribute("path")).execute();
+    BOOST_REQUIRE_EQUAL(r.size(), 3);
     BOOST_REQUIRE(r.next());
     BOOST_CHECK_EQUAL(r.string(0), "test_data_1");
     BOOST_REQUIRE(r.next());
