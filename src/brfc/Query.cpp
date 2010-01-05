@@ -55,8 +55,7 @@ Query::execute() {
     expr::TablePtr files_t = expr::Table::create("files");
     select_->from()->add(files_t);
 
-    expr::AttrReplace r(mapper_);
-    r.replace(select_);
+    expr::AttrReplace::replace(select_, mapper_);
     expr::Compiler compiler;
     compiler.compile(*select_);
 

@@ -6,6 +6,7 @@
 #include <brfc/expr/Visitor.hpp>
 #include <brfc/expr/Parentheses.hpp>
 #include <brfc/expr/FromClause.hpp>
+#include <brfc/expr/Join.hpp>
 #include <brfc/expr/Label.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Column.hpp>
@@ -59,6 +60,23 @@ void
 Compiler::do_visit(Attribute& expr) {
     BRFC_ASSERT(false); // attributes should be replaced at this point
     push(expr.name());
+}
+
+void
+Compiler::do_visit(Join& join) {
+    std::string condition = pop();
+    std::string to = pop();
+    std::string from = pop();
+    in_from_clause = true;
+    join.to()->accept(*this);
+    to = pop();
+    join.from()->accept(*this);
+    from = pop();
+    in_from_clause = false;
+    join.condition()->accept(*this);
+    condition = pop();
+    in_from_clause = true;
+    push(from + " JOIN " + to + " ON " + condition);
 }
 
 void

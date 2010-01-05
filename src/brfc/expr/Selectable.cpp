@@ -1,6 +1,7 @@
 #include <brfc/expr/Selectable.hpp>
 #include <brfc/expr/Alias.hpp>
 #include <brfc/expr/Column.hpp>
+#include <brfc/expr/Join.hpp>
 
 namespace brfc {
 namespace expr {
@@ -13,6 +14,11 @@ Selectable::alias(const std::string& name) {
 ColumnPtr
 Selectable::column(const std::string& name) {
     return Column::create(this->shared_from_this(), name);
+}
+
+JoinPtr
+Selectable::join(SelectablePtr rhs, ExpressionPtr condition) {
+    return Join::create(this->shared_from_this(), rhs, condition);
 }
 
 } // namespace expr

@@ -6,6 +6,7 @@
 #include <brfc/expr/Visitor.hpp>
 #include <brfc/expr/Parentheses.hpp>
 #include <brfc/expr/FromClause.hpp>
+#include <brfc/expr/Join.hpp>
 #include <brfc/expr/Label.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Column.hpp>
@@ -71,6 +72,17 @@ Visitor::visit(Label& label) {
     label.expression()->accept(*this);
     if (order_== POST_ORDER)
         do_visit(label);
+}
+
+void
+Visitor::visit(Join& join) {
+    if (order_ == PRE_ORDER)
+        do_visit(join);
+    join.from()->accept(*this);
+    join.to()->accept(*this);
+    join.condition()->accept(*this);
+    if (order_ == POST_ORDER)
+        do_visit(join);
 }
 
 void

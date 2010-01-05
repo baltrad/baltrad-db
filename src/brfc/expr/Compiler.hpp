@@ -91,6 +91,14 @@ class Compiler : public Visitor {
     virtual void do_visit(FromClause& expr);
 
     /**
+     * @brief compile Join to string form
+     * @pre stack contains expression, to and from in string form
+     * @post top of the stack contains 
+     *       '\<from\> JOIN \<to\> ON \<expression\>'
+     */
+    virtual void do_visit(Join& join);
+
+    /**
      * @brief compile Literal to string form
      * @post top of the stack contains literal binding key, binds contains
      *       a mapping of this key to value

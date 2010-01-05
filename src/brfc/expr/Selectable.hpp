@@ -20,6 +20,8 @@ class Selectable : public Element {
     ColumnPtr column(const std::string& name);
 
     AliasPtr alias(const std::string& name);
+
+    JoinPtr join(SelectablePtr rhs, ExpressionPtr condition);
 };
 
 }

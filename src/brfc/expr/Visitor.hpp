@@ -38,6 +38,7 @@ class Visitor {
     void visit(Column& expr);
     void visit(FromClause& from);
     void visit(BinaryOperator& op);
+    void visit(Join& join);
     void visit(Label& label);
     void visit(Literal& expr);
     void visit(Parentheses& expr);
@@ -55,6 +56,7 @@ class Visitor {
     virtual void do_visit(Column& expr) = 0;
     virtual void do_visit(FromClause& from) = 0;
     virtual void do_visit(BinaryOperator& op) = 0;
+    virtual void do_visit(Join& join) = 0;
     virtual void do_visit(Label& label) = 0;
     virtual void do_visit(Literal& expr) = 0;
     virtual void do_visit(Parentheses& expr) = 0;
