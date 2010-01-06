@@ -5,7 +5,6 @@
 #include <QtCore/QVariant>
 
 #include <unistd.h>
-#include <stdlib.h>
 #include <cstdlib>
 #include <cstring>
 
@@ -22,6 +21,24 @@ TempH5File::TempH5File()
 
 TempH5File::~TempH5File() {
     unlink(filename());
+}
+
+auto_ptr<TempH5File>
+TempH5File::minimal(const std::string& object,
+                    const QDate& date,
+                    const QTime& time,
+                    const std::string& source,
+                    const std::string& version) {
+    auto_ptr<TempH5File> f(new TempH5File());
+    f->add_attribute("/Conventions", "ODIM_H5/V2_0");
+    f->add_group("/what");
+    f->add_attribute("/what/object", QString::fromStdString(object));
+    f->add_attribute("/what/version", QString::fromStdString(version));
+    f->add_attribute("/what/date", date);
+    f->add_attribute("/what/time", time);
+    f->add_attribute("/what/source", QString::fromStdString(source));
+
+    return f;
 }
 
 void TempH5File::add_group(const char* path) {

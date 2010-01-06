@@ -6,12 +6,33 @@
 #include <brfc/Converter.hpp>
 
 class QVariant;
+class QDate;
+class QTime;
 
 namespace brfc {
 
 class TempH5File {
   public:
     TempH5File();
+
+    /**
+     * @brief construct with mandatory attributes present
+     * @param object /what/object
+     * @param date /what/date
+     * @param time /what/time
+     * @param source /what/source
+     * @param version /what/version
+     *
+     * this is the minimal "correct" file, given that parameters are
+     * correctly formed.
+     */
+    static auto_ptr<TempH5File>
+        minimal(const std::string& object,
+                const QDate& date,
+                const QTime& time,
+                const std::string& source,
+                const std::string& version="H5rad 2.0");
+
     ~TempH5File();
     void add_group(const char* path);
     void add_attribute(const char* path, const QVariant& value);
