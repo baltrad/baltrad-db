@@ -9,10 +9,10 @@ class QVariant;
 
 namespace brfc {
 
-class TemporaryH5File {
+class TempH5File {
   public:
-    TemporaryH5File();
-    ~TemporaryH5File();
+    TempH5File();
+    ~TempH5File();
     void add_group(const char* path);
     void add_attribute(const char* path, const QVariant& value);
     void write();

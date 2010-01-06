@@ -11,7 +11,7 @@
 #include <QtCore/QVariant>
 
 #include "common.hpp"
-#include "TemporaryH5File.hpp"
+#include "TempH5File.hpp"
 
 using namespace brfc;
 
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(read) {
     QVariant time(QTime(12, 5, 1));
     QVariant date(QDate(2000, 1, 2));
 
-    brfc::TemporaryH5File f;
+    brfc::TempH5File f;
     f.add_attribute("/date", date);
     f.add_attribute("/time", time);
     f.add_group("/dataset1");
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(read) {
 BOOST_AUTO_TEST_CASE(ignored_attributes) {
     AttributeMapper m;
 
-    brfc::TemporaryH5File f;
+    brfc::TempH5File f;
     f.add_attribute("/ignore", QVariant(2.0));
     f.add_group("/dataset");
     f.add_attribute("/dataset/ignore", QVariant(1.0));

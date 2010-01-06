@@ -1,4 +1,4 @@
-#include "TemporaryH5File.hpp"
+#include "TempH5File.hpp"
 
 #include <stdexcept>
 
@@ -11,7 +11,7 @@
 
 namespace brfc {
 
-TemporaryH5File::TemporaryH5File()
+TempH5File::TempH5File()
         : nodes_(HLNodeList_new(), &HLNodeList_free)
         , filename_(strdup("/tmp/brfctest_XXXXXX"), &free)
         , fd_(mkstemp(filename_.get())) {
@@ -20,11 +20,11 @@ TemporaryH5File::TemporaryH5File()
     close(fd_);
 }
 
-TemporaryH5File::~TemporaryH5File() {
+TempH5File::~TempH5File() {
     unlink(filename());
 }
 
-void TemporaryH5File::add_group(const char* path) {
+void TempH5File::add_group(const char* path) {
     std::string node_path(path);
     HL_Node* node = HLNode_newGroup(path);
     if (node == 0)
@@ -34,7 +34,7 @@ void TemporaryH5File::add_group(const char* path) {
 }
 
 void
-TemporaryH5File::add_attribute(const char* path, const QVariant& value) {
+TempH5File::add_attribute(const char* path, const QVariant& value) {
     // seek and create nodes
     HL_Node* node = HLNode_newAttribute(path);
     if (HLNodeList_addNode(nodes_.get(), node) == 0) {
@@ -47,12 +47,12 @@ TemporaryH5File::add_attribute(const char* path, const QVariant& value) {
 }
 
 const char*
-TemporaryH5File::filename() const {
+TempH5File::filename() const {
     return filename_.get();
 }
 
 void
-TemporaryH5File::write() {
+TempH5File::write() {
     HL_Compression compression;
     HLCompression_init(&compression, CT_ZLIB);
     compression.level = 6;
@@ -62,7 +62,7 @@ TemporaryH5File::write() {
         throw std::runtime_error("could not write file");
 }
 
-HL_Data TemporaryH5File::convert(const QVariant& value) {
+HL_Data TempH5File::convert(const QVariant& value) {
     switch (value.type()) {
         case QVariant::Double:
             return RealConverter().convert(value);
