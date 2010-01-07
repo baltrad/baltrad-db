@@ -79,7 +79,7 @@ class Query {
      * each row in the results contains a value for each attribute marked
      * for fetching, in the order they were marked.
      */
-    ResultSet execute();
+    shared_ptr<ResultSet> execute();
 
     const AttributeMapper* mapper() const { return mapper_; }
 

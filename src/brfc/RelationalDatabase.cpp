@@ -8,6 +8,7 @@
 #include <brfc/Attribute.hpp>
 #include <brfc/AttributeMapper.hpp>
 #include <brfc/ResultSet.hpp>
+#include <brfc/RelationalResultSet.hpp>
 #include <brfc/Query.hpp>
 
 #include <brfc/expr/Attribute.hpp>
@@ -81,7 +82,7 @@ RelationalDatabase::do_save_file(const File& file,
     save_recurse(file, mapper);
 }
 
-ResultSet
+shared_ptr<ResultSet>
 RelationalDatabase::do_query(const Query& query) {
     expr::SelectPtr select = expr::Select::create();
 
@@ -332,7 +333,7 @@ RelationalDatabase::query_id(const Source& src) {
     return query.value(0);
 }
 
-ResultSet
+shared_ptr<ResultSet>
 RelationalDatabase::query(const QString& query_str,
                           const BindMap& binds) const {
     BRFC_ASSERT(sql->isOpen());
@@ -342,20 +343,20 @@ RelationalDatabase::query(const QString& query_str,
         query.bindValue(bind.first, bind.second);
     }
     query.exec();
-    return ResultSet(query);
+    return shared_ptr<ResultSet>(new RelationalResultSet(query));
 }
 
 void
 RelationalDatabase::do_populate_attribute_mapper(AttributeMapper& mapper) {
-    ResultSet r = query("SELECT id, name, converter, "
-                               "storage_table, storage_column "
-                        "FROM attributes", BindMap());
-    while (r.next()) {
-        mapper.add_spec(r.integer(0), // id
-                        r.string(1),  // name
-                        r.string(2),  // converter
-                        r.string(3),  // table
-                        r.string(4)); // column
+    shared_ptr<ResultSet> r = query("SELECT id, name, converter, "
+                                  "storage_table, storage_column "
+                                  "FROM attributes", BindMap());
+    while (r->next()) {
+        mapper.add_spec(r->integer(0), // id
+                        r->string(1),  // name
+                        r->string(2),  // converter
+                        r->string(3),  // table
+                        r->string(4)); // column
     }
 }
 

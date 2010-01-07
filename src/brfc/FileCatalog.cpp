@@ -53,8 +53,8 @@ FileCatalog::is_cataloged(const File& f) const {
     expr::Factory xpr;
     expr::AttributePtr path_attr = xpr.attribute("path");
     q.fetch(path_attr).filter(path_attr->eq(xpr.string(f.path())));
-    ResultSet r = q.execute();
-    return r.next(); // has at least 1 row
+    shared_ptr<ResultSet> r = q.execute();
+    return r->next(); // has at least 1 row
 }
 
 std::string
@@ -102,9 +102,9 @@ void
 FileCatalog::clear() {
     Query q = query();
     q.fetch(expr::Attribute::create("path"));
-    ResultSet r = q.execute();
-    while (r.next()) {
-        remove(r.string(0));
+    shared_ptr<ResultSet> r = q.execute();
+    while (r->next()) {
+        remove(r->string(0));
     }
 }
 

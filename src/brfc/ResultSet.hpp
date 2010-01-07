@@ -1,13 +1,10 @@
 #ifndef BRFC_RESULT_SET_HPP
 #define BRFC_RESULT_SET_HPP
 
-#include <boost/scoped_ptr.hpp>
-
 #include <string>
 
 class QDate;
 class QTime;
-class QSqlQuery;
 class QVariant;
 
 namespace brfc {
@@ -19,26 +16,9 @@ namespace brfc {
 class ResultSet {
   public:
     /**
-     * @brief construct from QSqlQuery
-     *
-     * position is before first row.
-     */
-    explicit ResultSet(const QSqlQuery& query);
-    
-    /**
-     * @brief copy constructor
-     */
-    ResultSet(const ResultSet& other);
-
-    /**
-     * @brief copy assignment
-     */
-    ResultSet& operator=(const ResultSet& rhs);
-    
-    /**
      * @brief destructor
      */
-    ~ResultSet();
+    virtual ~ResultSet() { }
 
     /**
      * @name seeking
@@ -48,19 +28,25 @@ class ResultSet {
      * @brief move to next row
      * @return true if new row is valid
      */
-    bool next();
+    bool next() {
+        return do_next();
+    }
     
     /**
      * @brief seek to row
      * @param idx row number, starting from 0. if negative, before first row.
      * @return true if new row is valid
      */
-    bool seek(int idx);
+    bool seek(int idx) {
+        return do_seek(idx);
+    }
 
     /**
      * @brief get number of rows in result
      */
-    int size();
+    int size() {
+        return do_size();
+    }
     //@}
     
     /**
@@ -97,13 +83,16 @@ class ResultSet {
      */
     QTime time(unsigned int pos) const;
     //@}
-
-  private:
+  
+  protected:
+    virtual bool do_next() = 0;
+    virtual bool do_seek(int idx) = 0;
+    virtual int do_size() = 0;
+    
     QVariant value_at(unsigned int pos) const;
-
-    boost::scoped_ptr<QSqlQuery> query_;
+    virtual QVariant do_value_at(unsigned int pos) const = 0;
 };
 
-} // namespace brfc
+}
 
 #endif // BRFC_RESULT_SET_HPP

@@ -47,7 +47,7 @@ Query::filter(expr::ExpressionPtr expr) {
     return *this;
 }
 
-ResultSet
+shared_ptr<ResultSet>
 Query::execute() {
     return db_->query(*this);
 }

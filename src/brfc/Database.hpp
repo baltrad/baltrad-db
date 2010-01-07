@@ -3,7 +3,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include <brfc/ResultSet.hpp>
+#include <brfc/smart_ptr.hpp>
 
 class QString;
 class QVariant;
@@ -12,6 +12,7 @@ namespace brfc {
 
 class AttributeMapper;
 class File;
+class ResultSet;
 class Query;
 /**
  * @brief ABC for Database access
@@ -61,7 +62,7 @@ class Database : public boost::noncopyable {
     /**
      * @brief execute a select query
      */
-    ResultSet query(const Query& query) {
+    shared_ptr<ResultSet> query(const Query& query) {
         return do_query(query);
     }
     
@@ -88,7 +89,7 @@ class Database : public boost::noncopyable {
     virtual void do_save_file(const File& file,
                               const AttributeMapper& mapper) = 0;
 
-    virtual ResultSet do_query(const Query& query) = 0;
+    virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
 
     virtual void do_populate_attribute_mapper(AttributeMapper& mapper) = 0;
 

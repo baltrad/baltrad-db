@@ -18,7 +18,6 @@ class Attribute;
 class AttributeMapper;
 class DataObject;
 class File;
-class ResultSet;
 class Source;
 
 typedef std::map<QString, QVariant> BindMap;
@@ -47,7 +46,8 @@ class RelationalDatabase : public Database {
     /**
      * @brief execute a select query
      */
-    ResultSet query(const QString& query, const BindMap& binds) const;
+    shared_ptr<ResultSet> query(const QString& query,
+                              const BindMap& binds) const;
     
   protected:
     virtual void do_begin();
@@ -58,7 +58,7 @@ class RelationalDatabase : public Database {
     virtual void do_save_file(const File& file,
                               const AttributeMapper& mapper);
     
-    virtual ResultSet do_query(const Query& query);
+    virtual shared_ptr<ResultSet> do_query(const Query& query);
 
     virtual void do_populate_attribute_mapper(AttributeMapper& mapper);
 
