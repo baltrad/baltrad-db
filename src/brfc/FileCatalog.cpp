@@ -24,12 +24,14 @@ FileCatalog::FileCatalog(const std::string& dsn,
         : mapper_(new AttributeMapper())
         , db_(new RelationalDatabase(dsn))
         , storage_(new QDir(storage.c_str())) {
-    
-    if (!storage_->isAbsolute())
-        throw fs_error("storage must be an absolute path");
-    if (!storage_->exists())
-        throw fs_error("storage does not exist");
-    bootstrap();
+    init();
+}
+
+FileCatalog::FileCatalog(Database* db, const std::string& storage)
+        : mapper_(new AttributeMapper())
+        , db_(db)
+        , storage_(new QDir(storage.c_str())) {
+    init();
 }
 
 FileCatalog::~FileCatalog() {
@@ -37,7 +39,11 @@ FileCatalog::~FileCatalog() {
 }
 
 void
-FileCatalog::bootstrap() {
+FileCatalog::init() {
+    if (!storage_->isAbsolute())
+        throw fs_error("storage must be an absolute path");
+    if (!storage_->exists())
+        throw fs_error("storage does not exist");
     db_->populate_attribute_mapper(*mapper_);
 }
 

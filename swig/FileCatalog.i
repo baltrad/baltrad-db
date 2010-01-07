@@ -30,6 +30,7 @@
 
 %ignore brfc::AttributeMapper;
 %ignore brfc::Database;
+%ignore brfc::FileCatalog::FileCatalog(Database*, const std::string&);
 
 %ignore brfc::Query::Query;
 %ignore brfc::ResultSet::ResultSet;

@@ -40,6 +40,8 @@ class FileCatalog {
      */
     FileCatalog(const std::string& dsn, const std::string& storage);
 
+    FileCatalog(Database* db, const std::string& storage);
+
     /**
      * @brief destructor
      */
@@ -96,7 +98,7 @@ class FileCatalog {
     
   private:
 
-    void bootstrap();
+    void init();
 
     bool is_cataloged(const File& f) const;
     
