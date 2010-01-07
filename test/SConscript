@@ -8,5 +8,5 @@ if env.get("test_db_dsn"):
     env.Append(CCFLAGS=("-DBRFC_TEST_DB_DSN=\\\"%s\\\"" % env["test_db_dsn"]))
 
 env.Program("#test/runner", sources,
-            LIBS=["boost_unit_test_framework", "brfc", "hlhdf"])
+            LIBS=["gtest", "brfc", "hlhdf"])
 # vim:filetype=python:et:ts=4:sw=4:

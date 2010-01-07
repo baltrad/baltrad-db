@@ -27,6 +27,12 @@ vars.AddVariables(
                  "${boost_dir}/lib", PathVariable.PathIsDir),
     PathVariable("boost_include_dir", "Boost include directory",
                  "${boost_dir}/include", PathVariable.PathIsDir),
+    PathVariable("gtest_dir", "googletest install root",
+                 "/usr", PathVariable.PathIsDir),
+    PathVariable("gtest_lib_dir", "googletest libraries directory",
+                 "${gtest_dir}/include", PathVariable.PathIsDir),
+    PathVariable("gtest_include_dir", "googletest include directory",
+                 "${gtest_dir}/include", PathVariable.PathIsDir),
     BoolVariable("debug", "generate debug code", False),
     BoolVariable("build_java", "build java bindings", True),
                 ("install_root", "installation directory",
@@ -75,9 +81,13 @@ SConscript("src/brfc/SConscript",
            build_dir="build/brfc", duplicate=0,
            exports={"env": env.Clone()})
 
+testenv = env.Clone()
+testenv.AppendUnique(CPPPATH=["${gtest_include_dir}"])
+testenv.AppendUnique(LIBPATH=["${gtest_lib_dir}"])
+
 SConscript("test/SConscript",
            build_dir="build/test", duplicate=0,
-           exports={"env": env.Clone()})
+           exports={"env": testenv})
 
 if env["build_java"]:
     SConscript("swig/SConscript",

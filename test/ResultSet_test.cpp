@@ -1,4 +1,4 @@
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/RelationalDatabase.hpp>
@@ -16,8 +16,8 @@ using namespace brfc;
 #ifdef BRFC_TEST_DB_DSN
 namespace {
 
-struct Fixture {
-    Fixture()
+struct ResultSet_test : public testing::Test {
+    ResultSet_test()
             : db(BRFC_TEST_DB_DSN) {
     }
 
@@ -26,61 +26,57 @@ struct Fixture {
 
 } // namespace anonymous
 
-BOOST_FIXTURE_TEST_SUITE(ResultSet_test, Fixture)
-
-BOOST_AUTO_TEST_CASE(size) {
+TEST_F(ResultSet_test, size) {
     shared_ptr<ResultSet> r = db.query("SELECT 1", BindMap());
-    BOOST_CHECK_EQUAL(r->size(), 1);
+    EXPECT_EQ(r->size(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(next) {
+TEST_F(ResultSet_test, next) {
     shared_ptr<ResultSet> r = db.query("SELECT 1", BindMap());
-    BOOST_CHECK(r->next());
-    BOOST_CHECK(not r->next());
+    EXPECT_TRUE(r->next());
+    EXPECT_TRUE(not r->next());
 }
 
-BOOST_AUTO_TEST_CASE(integer) {
+TEST_F(ResultSet_test, integer) {
     shared_ptr<ResultSet> r = db.query("SELECT 1", BindMap());
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_EQUAL(r->integer(0), 1);
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(r->integer(0), 1);
 }
 
-BOOST_AUTO_TEST_CASE(real) {
+TEST_F(ResultSet_test, real) {
     shared_ptr<ResultSet> r = db.query("SELECT 1.1", BindMap());
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_CLOSE(r->real(0), 1.1, 0.00001);
+    ASSERT_TRUE(r->next());
+    EXPECT_NEAR(r->real(0), 1.1, 0.00001);
 }
 
-BOOST_AUTO_TEST_CASE(string) {
+TEST_F(ResultSet_test, string) {
     shared_ptr<ResultSet> r = db.query("SELECT 'bla'", BindMap());
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_EQUAL(r->string(0), "bla");
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(r->string(0), "bla");
 }
 
-BOOST_AUTO_TEST_CASE(boolean) {
+TEST_F(ResultSet_test, boolean) {
     shared_ptr<ResultSet> r = db.query("SELECT true", BindMap());
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_EQUAL(r->boolean(0), true);
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(r->boolean(0), true);
 }
 
-BOOST_AUTO_TEST_CASE(date) {
+TEST_F(ResultSet_test, date) {
     shared_ptr<ResultSet> r = db.query("SELECT DATE '2001-01-02'", BindMap());
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_EQUAL(r->date(0), QDate(2001, 1, 2));
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(r->date(0), QDate(2001, 1, 2));
 }
 
-BOOST_AUTO_TEST_CASE(time) {
+TEST_F(ResultSet_test, time) {
     shared_ptr<ResultSet> r = db.query("SELECT TIME '12:00:05'", BindMap());
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_EQUAL(r->time(0), QTime(12, 0, 5));
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(r->time(0), QTime(12, 0, 5));
 }
 
-BOOST_AUTO_TEST_CASE(invalid_column) {
+TEST_F(ResultSet_test, invalid_column) {
     shared_ptr<ResultSet> r = db.query("SELECT 1", BindMap());
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_THROW(r->integer(1), lookup_error);
+    ASSERT_TRUE(r->next());
+    EXPECT_THROW(r->integer(1), lookup_error);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
 
 #endif // BRFC_TEST_DB_DSN

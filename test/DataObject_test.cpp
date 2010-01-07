@@ -1,4 +1,4 @@
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <brfc/DataObject.hpp>
 
@@ -12,39 +12,37 @@
 
 using namespace brfc;
 
-BOOST_AUTO_TEST_SUITE(DataObject_test)
-
-BOOST_AUTO_TEST_CASE(get_nx_child) {
+TEST(DataObject_test, get_nx_child) {
     DataObject d("");
-    BOOST_CHECK_THROW(d.child("nx"), std::runtime_error);
+    EXPECT_THROW(d.child("nx"), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(get_same_child) {
+TEST(DataObject_test, get_same_child) {
     DataObject d("");
     DataObject& d1 = d.child("bla", true);
     d.child("asd", true);
     DataObject& d2 = d.child("bla");
-    BOOST_CHECK_EQUAL(&d1, &d2);
+    EXPECT_EQ(&d1, &d2);
 }
 
-BOOST_AUTO_TEST_CASE(iterator) {
+TEST(DataObject_test, iterator) {
     DataObject a("a");
     DataObject& b = a.add_child("b");
     DataObject::iterator i = a.begin();
-    BOOST_CHECK_EQUAL(&(*i), &a);
+    EXPECT_EQ(&(*i), &a);
     ++i;
-    BOOST_CHECK_EQUAL(&(*i), &b);
+    EXPECT_EQ(&(*i), &b);
 }
 
-BOOST_AUTO_TEST_CASE(iterator_end) {
+TEST(DataObject_test, iterator_end) {
     DataObject a("a");
     DataObject::iterator i = a.begin();
-    BOOST_CHECK(i != a.end());
+    EXPECT_TRUE(i != a.end());
     ++i;
-    BOOST_CHECK(i == a.end());
+    EXPECT_TRUE(i == a.end());
 }
 
-BOOST_AUTO_TEST_CASE(iterate_tree) {
+TEST(DataObject_test, iterate_tree) {
     DataObject a("a");
     a.add_child("b");
     DataObject& c = a.add_child("c");
@@ -61,25 +59,23 @@ BOOST_AUTO_TEST_CASE(iterate_tree) {
                    bind(&DataObject::name, _1));
     std::string name_str = boost::join(names, "");
 
-    BOOST_CHECK_EQUAL(name_str, expected);
+    EXPECT_EQ(name_str, expected);
 }
 
-BOOST_AUTO_TEST_CASE(path) {
+TEST(DataObject_test, path) {
     DataObject a("a");
     DataObject& b = a.add_child("b");
     DataObject& c = b.add_child("c");
     std::string expected = "a/b/c";
 
-    BOOST_CHECK_EQUAL(c.path(), expected);
+    EXPECT_EQ(c.path(), expected);
 }
 
 // compilational check
-BOOST_AUTO_TEST_CASE(const_iterator) {
+TEST(DataObject_test, const_iterator) {
     DataObject a("a");
     DataObject::iterator i = a.begin(); 
     DataObject::const_iterator ci = a.begin();
     const DataObject& b = a;
     DataObject::const_iterator cci = b.begin();
 }
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -1,4 +1,4 @@
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <brfc/AttributeMapper.hpp>
 #include <brfc/RelationalDatabase.hpp>
@@ -21,8 +21,8 @@ using namespace brfc;
 #ifdef BRFC_TEST_DB_DSN
 namespace {
 
-struct Fixture {
-    Fixture()
+struct Query_test : public testing::Test {
+    Query_test()
             : xpr()
             , mapper()
             , src("WMO:02606,RAD:SE50,PLC:Ängelholm")
@@ -50,7 +50,7 @@ struct Fixture {
         db.save_file(td3, mapper);
     }
 
-    ~Fixture() {
+    ~Query_test() {
         db.clean();
     }
 
@@ -64,100 +64,96 @@ struct Fixture {
 
 }
 
-BOOST_FIXTURE_TEST_SUITE(Query_test, Fixture)
-
-BOOST_AUTO_TEST_CASE(test_simple) {
+TEST_F(Query_test, test_simple) {
     shared_ptr<ResultSet> r = 
             query.fetch(xpr.attribute("path"))
                  .filter(xpr.attribute("where/xsize")->eq(xpr.integer(1)))
                  .execute();
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_EQUAL(r->string(0), "test_data_1");
-    BOOST_REQUIRE(not r->next());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(r->string(0), "test_data_1");
+    ASSERT_TRUE(not r->next());
 }
 
-BOOST_AUTO_TEST_CASE(test_list_all_files) {
+TEST_F(Query_test, test_list_all_files) {
     shared_ptr<ResultSet> r = query.fetch(xpr.attribute("path")).execute();
-    BOOST_REQUIRE_EQUAL(r->size(), 3);
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_EQUAL(r->string(0), "test_data_1");
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_EQUAL(r->string(0), "test_data_2");
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_EQUAL(r->string(0), "test_data_3");
-    BOOST_REQUIRE(not r->next());
+    ASSERT_EQ(r->size(), 3);
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(r->string(0), "test_data_1");
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(r->string(0), "test_data_2");
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(r->string(0), "test_data_3");
+    ASSERT_TRUE(not r->next());
 }
 
-BOOST_AUTO_TEST_CASE(test_select_xsize) {
+TEST_F(Query_test, test_select_xsize) {
     shared_ptr<ResultSet> r = query.fetch(xpr.attribute("where/xsize"))
                        .filter(xpr.attribute("where/xsize")->eq(xpr.integer(1)))
                        .execute();
-    BOOST_REQUIRE(r->next());
-    BOOST_CHECK_EQUAL(r->integer(0), 1);
-    BOOST_REQUIRE(not r->next());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(r->integer(0), 1);
+    ASSERT_TRUE(not r->next());
 }
 
-BOOST_AUTO_TEST_CASE(test_select_on_double_attr) {
+TEST_F(Query_test, test_select_on_double_attr) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
     shared_ptr<ResultSet> r = query.fetch(xpr.attribute("path"))
                        .filter(xsize->eq(xpr.integer(1))->or_(ysize->eq(xpr.integer(2))))
                        .execute();
-    BOOST_REQUIRE_EQUAL(r->size(), 2);
+    ASSERT_EQ(r->size(), 2);
     r->next();
     std::string first = r->string(0);
     r->next();
     std::string second = r->string(0);
-    BOOST_CHECK_NE(first, second);
+    EXPECT_NE(first, second);
 }
 
-BOOST_AUTO_TEST_CASE(test_select_not_distinct) {
+TEST_F(Query_test, test_select_not_distinct) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     shared_ptr<ResultSet> r =
             query.fetch(xpr.attribute("path"))
                  .filter(xsize->eq(xpr.integer(3)))
                  .execute();
-    BOOST_REQUIRE_EQUAL(r->size(), 2);
+    ASSERT_EQ(r->size(), 2);
     r->next();
     std::string first = r->string(0);
     r->next();
     std::string second = r->string(0);
-    BOOST_CHECK_EQUAL(first, second);
+    EXPECT_EQ(first, second);
 }
 
-BOOST_AUTO_TEST_CASE(test_select_distinct) {
+TEST_F(Query_test, test_select_distinct) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     shared_ptr<ResultSet> r = 
             query.fetch(xpr.attribute("path"))
                  .distinct(true)
                  .filter(xsize->eq(xpr.integer(3)))
                  .execute();
-    BOOST_REQUIRE_EQUAL(r->size(), 1);
+    ASSERT_EQ(r->size(), 1);
     r->next();
-    BOOST_CHECK_EQUAL("test_data_3", r->string(0));
+    EXPECT_EQ("test_data_3", r->string(0));
 }
 
 
-BOOST_AUTO_TEST_CASE(test_select_xsize2) {
+TEST_F(Query_test, test_select_xsize2) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     shared_ptr<ResultSet> r =
             query.fetch(xsize)
                  .filter(xsize->eq(xpr.integer(1))->or_(xsize->eq(xpr.integer(2))))
                  .execute();
-    BOOST_REQUIRE_EQUAL(r->size(), 2);
+    ASSERT_EQ(r->size(), 2);
 
 }
 
-BOOST_AUTO_TEST_CASE(test_select_by_wmo_code) {
+TEST_F(Query_test, test_select_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("src_WMO");
     shared_ptr<ResultSet> r =
             query.fetch(xpr.attribute("path"))
                  .filter(wmo_code->eq(xpr.integer(2606)))
                  .execute();
-    BOOST_REQUIRE_EQUAL(r->size(), 3);
+    ASSERT_EQ(r->size(), 3);
 
 }
-
-BOOST_AUTO_TEST_SUITE_END()
 
 #endif // BRFC_TEST_DB_DSN

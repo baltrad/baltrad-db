@@ -21,7 +21,7 @@ library dependencies:
 * qt4-sql                       4.4.3
 
 additional test dependencies:
-* boost::test                   1.40
+* gtest				1.4.0
 
 run time dependencies:
 * postgresql driver for qt4-sql
@@ -34,8 +34,7 @@ database creation dependencies:
 documentation generation dependencies:
 * doxygen
 
-all boost libraries used are header only (except for boost::test)
-
+all boost libraries used are header only
 
 
 == generating documentation ==
