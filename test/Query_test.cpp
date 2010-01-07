@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <brfc/AttributeMapper.hpp>
-#include <brfc/Database.hpp>
+#include <brfc/RelationalDatabase.hpp>
 #include <brfc/DataObject.hpp>
 #include <brfc/File.hpp>
 #include <brfc/Query.hpp>
@@ -45,9 +45,9 @@ struct Fixture {
         td2.root().add_attribute("path", "test_data_2");
         td3.root().add_attribute("path", "test_data_3");
 
-        db.save_recurse(td1, mapper);
-        db.save_recurse(td2, mapper);
-        db.save_recurse(td3, mapper);
+        db.save_file(td1, mapper);
+        db.save_file(td2, mapper);
+        db.save_file(td3, mapper);
     }
 
     ~Fixture() {
@@ -57,7 +57,7 @@ struct Fixture {
     expr::Factory xpr;
     AttributeMapper mapper;
     std::string src;
-    Database db;
+    RelationalDatabase db;
     File td1, td2, td3;
     Query query;
 };
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_select_not_distinct) {
 BOOST_AUTO_TEST_CASE(test_select_distinct) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     ResultSet r = query.fetch(xpr.attribute("path"))
-                       .distinct()
+                       .distinct(true)
                        .filter(xsize->eq(xpr.integer(3)))
                        .execute();
     BOOST_REQUIRE_EQUAL(r.size(), 1);

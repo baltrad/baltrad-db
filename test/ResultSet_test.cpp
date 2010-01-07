@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Database.hpp>
+#include <brfc/RelationalDatabase.hpp>
 #include <brfc/ResultSet.hpp>
 
 #include <QtCore/QDate>
@@ -21,7 +21,7 @@ struct Fixture {
             : db(BRFC_TEST_DB_DSN) {
     }
 
-    Database db;
+    RelationalDatabase db;
 };
 
 } // namespace anonymous

@@ -1,9 +1,9 @@
 #ifndef BRFC_QUERY_HPP
 #define BRFC_QUERY_HPP
 
-#include <boost/scoped_ptr.hpp>
-
 #include <brfc/expr/fwd.hpp>
+
+#include <vector>
 
 namespace brfc {
 
@@ -18,6 +18,8 @@ class ResultSet;
  */
 class Query {
   public:
+    typedef std::vector<expr::AttributePtr> AttributeVector;
+
     /**
      * @brief constructor
      * @param db Database instance this Query executes on
@@ -37,9 +39,11 @@ class Query {
     ~Query();
 
     /**
-     * @brief fetch unique rows
+     * @brief fetch unique results
      */
-    Query& distinct(bool distinct=true);
+    Query& distinct(bool distinct);
+
+    bool distinct() const { return distinct_; }
 
     /**
      * @brief mark an attribute for fetching
@@ -51,6 +55,10 @@ class Query {
      */
     Query& fetch(expr::AttributePtr attribute);
 
+    const AttributeVector& fetch() const {
+        return fetch_;
+    }
+
     /**
      * @brief add a filtering expression
      * @param expr filter expression
@@ -59,6 +67,10 @@ class Query {
      * successive filtering expressions are added together using AND
      */
     Query& filter(expr::ExpressionPtr expr);
+    
+    expr::ExpressionPtr filter() const {
+        return filter_;
+    }
 
     /**
      * @brief execute this query
@@ -69,10 +81,14 @@ class Query {
      */
     ResultSet execute();
 
+    const AttributeMapper* mapper() const { return mapper_; }
+
   private:
     Database* db_;
     const AttributeMapper* mapper_;
-    expr::SelectPtr select_;
+    bool distinct_;
+    AttributeVector fetch_;
+    expr::ExpressionPtr filter_;
 };
 
 } // namespace brfc

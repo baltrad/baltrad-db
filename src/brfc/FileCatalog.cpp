@@ -4,6 +4,7 @@
 #include <brfc/AttributeMapper.hpp>
 #include <brfc/File.hpp>
 #include <brfc/Database.hpp>
+#include <brfc/RelationalDatabase.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
 
@@ -21,7 +22,7 @@ namespace brfc {
 FileCatalog::FileCatalog(const std::string& dsn,
                          const std::string& storage)
         : mapper_(new AttributeMapper())
-        , db_(new Database(dsn))
+        , db_(new RelationalDatabase(dsn))
         , storage_(new QDir(storage.c_str())) {
     
     if (!storage_->isAbsolute())
@@ -66,7 +67,7 @@ FileCatalog::catalog(const std::string& path) {
     db_->begin();
     // try saving to database
     try {
-        db_->save_recurse(f, *mapper_);
+        db_->save_file(f, *mapper_);
     } catch (const db_error& e) {
         db_->rollback();
         throw;

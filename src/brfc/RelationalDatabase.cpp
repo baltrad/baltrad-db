@@ -1,4 +1,4 @@
-#include <brfc/Database.hpp>
+#include <brfc/RelationalDatabase.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
@@ -8,6 +8,14 @@
 #include <brfc/Attribute.hpp>
 #include <brfc/AttributeMapper.hpp>
 #include <brfc/ResultSet.hpp>
+#include <brfc/Query.hpp>
+
+#include <brfc/expr/Attribute.hpp>
+#include <brfc/expr/AttrReplace.hpp>
+#include <brfc/expr/Compiler.hpp>
+#include <brfc/expr/Expression.hpp>
+#include <brfc/expr/Select.hpp>
+#include <brfc/expr/Table.hpp>
 
 #include <boost/foreach.hpp>
 #include <boost/variant.hpp>
@@ -26,14 +34,14 @@
 namespace brfc {
 
 QString
-Database::qt_engine(const QString& /*engine*/) const {
+RelationalDatabase::qt_engine(const QString& /*engine*/) const {
     return "QPSQL";
 }
 
-Database::Database(const std::string& dsn_)
+RelationalDatabase::RelationalDatabase(const std::string& dsn_)
         : sql() {
     QUrl dsn(dsn_.c_str());
-    sql.reset(new QSqlDatabase(QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), "brfc")));
+    sql.reset(new ::QSqlDatabase(::QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), "brfc")));
     sql->setHostName(dsn.host());
     sql->setUserName(dsn.userName());
     sql->setPassword(dsn.password());
@@ -46,25 +54,53 @@ Database::Database(const std::string& dsn_)
         throw db_error(sql->lastError().text().toStdString());
 }
 
-Database::~Database() {
+RelationalDatabase::~RelationalDatabase() {
     sql->close();
     sql.reset(0);
-    QSqlDatabase::removeDatabase("brfc");
+    ::QSqlDatabase::removeDatabase("brfc");
 }
 
 void
-Database::begin() {
+RelationalDatabase::do_begin() {
     sql->transaction();
 }
 
 void
-Database::rollback() {
+RelationalDatabase::do_rollback() {
     sql->rollback();
 }
 
 void
-Database::commit() {
+RelationalDatabase::do_commit() {
     sql->commit();
+}
+
+void
+RelationalDatabase::do_save_file(const File& file,
+                                 const AttributeMapper& mapper) {
+    save_recurse(file, mapper);
+}
+
+ResultSet
+RelationalDatabase::do_query(const Query& query) {
+    expr::SelectPtr select = expr::Select::create();
+
+    BOOST_FOREACH(expr::AttributePtr expr, query.fetch()) {
+        select->what(expr);
+    }
+
+    select->where(query.filter());
+    select->distinct(query.distinct());
+
+    expr::TablePtr data_objects_t = expr::Table::create("data_objects");
+    expr::TablePtr files_t = expr::Table::create("files");
+
+    expr::AttrReplace::replace(select, query.mapper());
+    expr::Compiler compiler;
+    compiler.compile(*select);
+
+    return this->query(QString::fromStdString(compiler.compiled()),
+                       compiler.binds());
 }
 
 namespace {
@@ -85,7 +121,7 @@ class Insert {
         returning_.push_back(col.c_str());
     }
   
-    QSqlQuery query(const QSqlDatabase& db) const {
+    QSqlQuery query(const ::QSqlDatabase& db) const {
         QStringList cols, vals;
         BOOST_FOREACH(const BindMap::value_type& bind, binds_) {
             cols.push_back(bind.first);
@@ -136,8 +172,8 @@ extend_for_specializations(Insert& insert,
 } // namespace anonymous
 
 
-Database::id_type
-Database::save(const File& f, const AttributeMapper& mapper) {
+RelationalDatabase::id_type
+RelationalDatabase::save(const File& f, const AttributeMapper& mapper) {
     Insert stmt("files");
     id_type source_id = query_id(f.source());
     if (source_id.isNull()) {
@@ -158,7 +194,8 @@ Database::save(const File& f, const AttributeMapper& mapper) {
 }
 
 void
-Database::save_recurse(const File& f, const AttributeMapper& mapper) {
+RelationalDatabase::save_recurse(const File& f,
+                                 const AttributeMapper& mapper) {
     typedef std::map<const DataObject*, id_type> IdCache;
 
     id_type file_id = save(f, mapper);
@@ -178,11 +215,11 @@ Database::save_recurse(const File& f, const AttributeMapper& mapper) {
     }
 }
 
-Database::id_type
-Database::save(const DataObject& d,
-               const id_type& file_id,
-               const id_type& parent_id,
-               const AttributeMapper& mapper) {
+RelationalDatabase::id_type
+RelationalDatabase::save(const DataObject& d,
+                         const id_type& file_id,
+                         const id_type& parent_id,
+                         const AttributeMapper& mapper) {
     Insert stmt("data_objects");
     stmt.bind("parent_id", parent_id);
     stmt.bind("file_id", file_id);
@@ -199,11 +236,11 @@ Database::save(const DataObject& d,
     return query.value(0);
 }
 
-Database::id_type
-Database::save_recurse(const DataObject& dobj,
-                       const id_type& file_id,
-                       const id_type& parent_id,
-                       const AttributeMapper& mapper) {
+RelationalDatabase::id_type
+RelationalDatabase::save_recurse(const DataObject& dobj,
+                                 const id_type& file_id,
+                                 const id_type& parent_id,
+                                 const AttributeMapper& mapper) {
     id_type dobj_id = save(dobj, file_id, parent_id, mapper);
     BOOST_FOREACH(const Attribute& attr, dobj.attributes()) {
         save(attr, dobj_id, mapper);
@@ -212,9 +249,9 @@ Database::save_recurse(const DataObject& dobj,
 }
 
 void
-Database::save(const Attribute& attr,
-               const id_type& dobj_id,
-               const AttributeMapper& mapper) {
+RelationalDatabase::save(const Attribute& attr,
+                         const id_type& dobj_id,
+                         const AttributeMapper& mapper) {
     if (mapper.is_specialized(attr.name()))
         return;
 
@@ -231,8 +268,8 @@ Database::save(const Attribute& attr,
         throw db_error(query.lastError());
 }
 
-Database::id_type
-Database::query_id(const File& f) {
+RelationalDatabase::id_type
+RelationalDatabase::query_id(const File& f) {
     QSqlQuery query(*sql);
     query.prepare("SELECT id FROM files "
                   "WHERE path = :path ");
@@ -242,8 +279,8 @@ Database::query_id(const File& f) {
     return query.value(0);
 }
 
-Database::id_type
-Database::query_id(const DataObject& dobj) {
+RelationalDatabase::id_type
+RelationalDatabase::query_id(const DataObject& dobj) {
     id_type parent_id;
 
     if (dobj.parent()) {
@@ -266,8 +303,8 @@ Database::query_id(const DataObject& dobj) {
     return query.value(0);
 }
 
-Database::id_type
-Database::query_id(const Source& src) {
+RelationalDatabase::id_type
+RelationalDatabase::query_id(const Source& src) {
     QString query_str("SELECT id FROM sources WHERE ");
     QVariant bindvar;
     
@@ -296,7 +333,8 @@ Database::query_id(const Source& src) {
 }
 
 ResultSet
-Database::query(const QString& query_str, const BindMap& binds) {
+RelationalDatabase::query(const QString& query_str,
+                          const BindMap& binds) const {
     BRFC_ASSERT(sql->isOpen());
     QSqlQuery query(*sql);
     query.prepare(query_str);
@@ -308,7 +346,7 @@ Database::query(const QString& query_str, const BindMap& binds) {
 }
 
 void
-Database::populate_attribute_mapper(AttributeMapper& mapper) {
+RelationalDatabase::do_populate_attribute_mapper(AttributeMapper& mapper) {
     ResultSet r = query("SELECT id, name, converter, "
                                "storage_table, storage_column "
                         "FROM attributes", BindMap());
@@ -322,7 +360,7 @@ Database::populate_attribute_mapper(AttributeMapper& mapper) {
 }
 
 void
-Database::remove_file(const char* path) {
+RelationalDatabase::do_remove_file(const char* path) {
     QSqlQuery query(*sql);
     query.prepare("DELETE FROM files WHERE path = :path");
     query.bindValue(":path", path);
@@ -331,7 +369,7 @@ Database::remove_file(const char* path) {
 }
 
 void
-Database::clean() {
+RelationalDatabase::do_clean() {
     BRFC_ASSERT(sql->isOpen());
     QSqlQuery query(*sql);
     query.exec("DELETE FROM files");
