@@ -13,8 +13,7 @@ class QVariant;
 namespace brfc {
 
 /**
- * @brief wrapper around QSqlQuery
- * @ingroup exposed_in_binds
+ * @brief results from RelationalDatabase
  */
 class RelationalResultSet : public ResultSet {
   public:

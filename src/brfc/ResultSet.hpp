@@ -10,7 +10,7 @@ class QVariant;
 namespace brfc {
 
 /**
- * @brief wrapper around QSqlQuery
+ * @brief ABC for Query results
  * @ingroup exposed_in_binds
  */
 class ResultSet {
