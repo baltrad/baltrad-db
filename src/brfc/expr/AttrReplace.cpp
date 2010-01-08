@@ -56,7 +56,7 @@ AttrReplace::do_visit(Attribute& attr) {
     const std::string& name = attr.name();
 
     // query table and column where this value can be found
-    Mapping tc = mapper_->mapping(name);
+    Mapping mapping = mapper_->mapping(name);
 
     SelectablePtr value_t;
 
@@ -65,23 +65,23 @@ AttrReplace::do_visit(Attribute& attr) {
         // alias the table (this attribute is always searched on this table)
         std::string safe_name = name;
         boost::erase_all(safe_name, "/");
-        value_t = Table::create(tc.table)->alias(safe_name + "_values");
+        value_t = Table::create(mapping.table)->alias(safe_name + "_values");
         if (not from_->contains(value_t)) {
             // try to join data_objects, they have appear earlier in the join
             join_data_objects(); 
             TablePtr dobj_t = Table::create("data_objects");
             ExpressionPtr on = value_t->column("data_object_id")->eq(dobj_t->column("id"));
-            on = on->and_(value_t->column("attribute_id")->eq(Literal::create(mapper_->spec(name).id)));
+            on = on->and_(value_t->column("attribute_id")->eq(Literal::create(mapping.id)));
             from_ = from_->join(value_t, on);
         }
     } else {
-        value_t = Table::create(tc.table);
+        value_t = Table::create(mapping.table);
         if (value_t->name() == "data_objects") {
             join_data_objects();
         }
     }
     // replace the attribute with value column
-    ColumnPtr col = value_t->column(tc.column);
+    ColumnPtr col = value_t->column(mapping.column);
     col->accept(*this);
 }
 

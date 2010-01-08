@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/AttributeMapper.hpp>
+#include <brfc/AttributeSpecs.hpp>
 #include <brfc/File.hpp>
 #include <brfc/SplitPath.hpp>
 #include <brfc/DataObject.hpp>
@@ -63,14 +63,14 @@ TEST(File_test, path) {
 }
 
 TEST(File_test, open_nx_file) {
-    AttributeMapper m;
-    EXPECT_THROW(File("/path/to/nxfile", m), fs_error);
+    AttributeSpecs specs;
+    EXPECT_THROW(File("/path/to/nxfile", specs), fs_error);
 }
 
 TEST(File_test, read) {
-    AttributeMapper m;
-    m.add_spec(0, "date", "date", "t", "v");
-    m.add_spec(0, "time", "time", "t", "v");
+    AttributeSpecs specs;
+    specs.add("date", "date");
+    specs.add("time", "time");
 
     QVariant time(QTime(12, 5, 1));
     QVariant date(QDate(2000, 1, 2));
@@ -82,14 +82,14 @@ TEST(File_test, read) {
     f.add_attribute("/dataset1/date", date);
     f.write();
 
-    File g(f.filename(), m);
+    File g(f.filename(), specs);
     EXPECT_EQ(g.root().attribute("date").value(), date);
     EXPECT_EQ(g.root().attribute("time").value(), time);
     EXPECT_EQ(g.data_object("/dataset1").attribute("date").value(), date);
 }
 
 TEST(File_test, ignored_attributes) {
-    AttributeMapper m;
+    AttributeSpecs specs;
 
     brfc::TempH5File f;
     f.add_attribute("/ignore", QVariant(2.0));
@@ -97,7 +97,7 @@ TEST(File_test, ignored_attributes) {
     f.add_attribute("/dataset/ignore", QVariant(1.0));
     f.write();
 
-    File g(f.filename(), m);
+    File g(f.filename(), specs);
     EXPECT_THROW(g.root().attribute("ignore"), brfc::lookup_error);
     const File::StringVector& ignored = g.ignored_attributes();
     EXPECT_EQ(ignored.size(), 2);

@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <brfc/AttributeMapper.hpp>
 #include <brfc/RelationalDatabase.hpp>
 #include <brfc/DataObject.hpp>
 #include <brfc/File.hpp>
@@ -24,14 +23,12 @@ namespace {
 struct Query_test : public testing::Test {
     Query_test()
             : xpr()
-            , mapper()
             , src("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , db(BRFC_TEST_DB_DSN)
             , td1("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 0), src)
             , td2("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 0), src)
             , td3("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 0), src)
-            , query(&db, &mapper) {
-        db.populate_attribute_mapper(mapper);
+            , query(&db) {
         td1.data_object("/bla", true).add_attribute("where/xsize", QVariant(static_cast<int64_t>(1)));
         td1.data_object("/bla", true).add_attribute("where/ysize", QVariant(static_cast<int64_t>(2)));
 
@@ -45,9 +42,9 @@ struct Query_test : public testing::Test {
         td2.root().add_attribute("path", "test_data_2");
         td3.root().add_attribute("path", "test_data_3");
 
-        db.save_file(td1, mapper);
-        db.save_file(td2, mapper);
-        db.save_file(td3, mapper);
+        db.save_file(td1);
+        db.save_file(td2);
+        db.save_file(td3);
     }
 
     ~Query_test() {
@@ -55,7 +52,6 @@ struct Query_test : public testing::Test {
     }
 
     expr::Factory xpr;
-    AttributeMapper mapper;
     std::string src;
     RelationalDatabase db;
     File td1, td2, td3;

@@ -6,6 +6,7 @@
 #include <brfc/Source.hpp>
 #include <brfc/DataObject.hpp>
 #include <brfc/Attribute.hpp>
+#include <brfc/AttributeSpecs.hpp>
 #include <brfc/AttributeMapper.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/RelationalResultSet.hpp>
@@ -19,8 +20,6 @@
 #include <brfc/expr/Table.hpp>
 
 #include <boost/foreach.hpp>
-#include <boost/variant.hpp>
-#include <boost/algorithm/string/join.hpp>
 
 #include <QtCore/QUrl>
 #include <QtCore/QVariant>
@@ -40,7 +39,9 @@ RelationalDatabase::qt_engine(const QString& /*engine*/) const {
 }
 
 RelationalDatabase::RelationalDatabase(const std::string& dsn_)
-        : sql() {
+        : sql()
+        , mapper_(new AttributeMapper())
+        , specs_(new AttributeSpecs()) {
     QUrl dsn(dsn_.c_str());
     sql.reset(new ::QSqlDatabase(::QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), "brfc")));
     sql->setHostName(dsn.host());
@@ -53,12 +54,18 @@ RelationalDatabase::RelationalDatabase(const std::string& dsn_)
     sql->setDatabaseName(database);
     if (!sql->open())
         throw db_error(sql->lastError().text().toStdString());
+    populate_mapper_and_specs();
 }
 
 RelationalDatabase::~RelationalDatabase() {
     sql->close();
     sql.reset(0);
     ::QSqlDatabase::removeDatabase("brfc");
+}
+
+const AttributeSpecs&
+RelationalDatabase::specs() const {
+    return *specs_;
 }
 
 void
@@ -77,9 +84,8 @@ RelationalDatabase::do_commit() {
 }
 
 void
-RelationalDatabase::do_save_file(const File& file,
-                                 const AttributeMapper& mapper) {
-    save_recurse(file, mapper);
+RelationalDatabase::do_save_file(const File& file) {
+    save_recurse(file);
 }
 
 shared_ptr<ResultSet>
@@ -96,7 +102,7 @@ RelationalDatabase::do_query(const Query& query) {
     expr::TablePtr data_objects_t = expr::Table::create("data_objects");
     expr::TablePtr files_t = expr::Table::create("files");
 
-    expr::AttrReplace::replace(select, query.mapper());
+    expr::AttrReplace::replace(select, mapper_.get());
     expr::Compiler compiler;
     compiler.compile(*select);
 
@@ -174,7 +180,7 @@ extend_for_specializations(Insert& insert,
 
 
 RelationalDatabase::id_type
-RelationalDatabase::save(const File& f, const AttributeMapper& mapper) {
+RelationalDatabase::save(const File& f) {
     Insert stmt("files");
     id_type source_id = query_id(f.source());
     if (source_id.isNull()) {
@@ -184,7 +190,7 @@ RelationalDatabase::save(const File& f, const AttributeMapper& mapper) {
     stmt.bind("source_id", source_id);
     stmt.returning("id");
     
-    extend_for_specializations(stmt, f.root(), mapper);
+    extend_for_specializations(stmt, f.root(), *mapper_);
 
     QSqlQuery query = stmt.query(*sql);
 
@@ -195,11 +201,10 @@ RelationalDatabase::save(const File& f, const AttributeMapper& mapper) {
 }
 
 void
-RelationalDatabase::save_recurse(const File& f,
-                                 const AttributeMapper& mapper) {
+RelationalDatabase::save_recurse(const File& f) {
     typedef std::map<const DataObject*, id_type> IdCache;
 
-    id_type file_id = save(f, mapper);
+    id_type file_id = save(f);
     
     IdCache id_cache;
     const id_type* parent_id;
@@ -211,7 +216,7 @@ RelationalDatabase::save_recurse(const File& f,
         } else {
             parent_id = &null;
         }
-        id_type dobj_id = save_recurse(dobj, file_id, *parent_id, mapper);
+        id_type dobj_id = save_recurse(dobj, file_id, *parent_id);
         id_cache[&dobj] = dobj_id;
     }
 }
@@ -219,15 +224,14 @@ RelationalDatabase::save_recurse(const File& f,
 RelationalDatabase::id_type
 RelationalDatabase::save(const DataObject& d,
                          const id_type& file_id,
-                         const id_type& parent_id,
-                         const AttributeMapper& mapper) {
+                         const id_type& parent_id) {
     Insert stmt("data_objects");
     stmt.bind("parent_id", parent_id);
     stmt.bind("file_id", file_id);
     stmt.bind("name", d.name().c_str());
     stmt.returning("id");
 
-    extend_for_specializations(stmt, d, mapper);
+    extend_for_specializations(stmt, d, *mapper_);
 
     QSqlQuery query = stmt.query(*sql);
 
@@ -240,27 +244,25 @@ RelationalDatabase::save(const DataObject& d,
 RelationalDatabase::id_type
 RelationalDatabase::save_recurse(const DataObject& dobj,
                                  const id_type& file_id,
-                                 const id_type& parent_id,
-                                 const AttributeMapper& mapper) {
-    id_type dobj_id = save(dobj, file_id, parent_id, mapper);
+                                 const id_type& parent_id) {
+    id_type dobj_id = save(dobj, file_id, parent_id);
     BOOST_FOREACH(const Attribute& attr, dobj.attributes()) {
-        save(attr, dobj_id, mapper);
+        save(attr, dobj_id);
     }
     return dobj_id;
 }
 
 void
 RelationalDatabase::save(const Attribute& attr,
-                         const id_type& dobj_id,
-                         const AttributeMapper& mapper) {
-    if (mapper.is_specialized(attr.name()))
+                         const id_type& dobj_id) {
+    if (mapper_->is_specialized(attr.name()))
         return;
 
-    Mapping tc = mapper.mapping(attr.name());
+    Mapping mapping = mapper_->mapping(attr.name());
 
-    Insert stmt(tc.table);
+    Insert stmt(mapping.table);
     stmt.bind("data_object_id", dobj_id);
-    stmt.bind("attribute_id", mapper.spec(attr.name()).id);
+    stmt.bind("attribute_id", mapping.id);
     stmt.bind("value", attr.value());
 
     QSqlQuery query = stmt.query(*sql);
@@ -347,16 +349,16 @@ RelationalDatabase::query(const QString& query_str,
 }
 
 void
-RelationalDatabase::do_populate_attribute_mapper(AttributeMapper& mapper) {
+RelationalDatabase::populate_mapper_and_specs() {
     shared_ptr<ResultSet> r = query("SELECT id, name, converter, "
                                   "storage_table, storage_column "
                                   "FROM attributes", BindMap());
     while (r->next()) {
-        mapper.add_spec(r->integer(0), // id
-                        r->string(1),  // name
-                        r->string(2),  // converter
-                        r->string(3),  // table
-                        r->string(4)); // column
+        mapper_->add(Mapping(r->integer(0), // id
+                             r->string(1),  // name
+                             r->string(3),  // table
+                             r->string(4))); // column
+        specs_->add(r->string(1), r->string(2)); // name, typename
     }
 }
 

@@ -10,7 +10,6 @@ class QVariant;
 
 namespace brfc {
 
-class AttributeMapper;
 class File;
 class ResultSet;
 class Query;
@@ -55,8 +54,8 @@ class Database : public boost::noncopyable {
     /**
      * @brief save File to database
      */
-    void save_file(const File& file, const AttributeMapper& mapper) {
-        do_save_file(file, mapper);
+    void save_file(const File& file) {
+        do_save_file(file);
     }
 
     /**
@@ -64,13 +63,6 @@ class Database : public boost::noncopyable {
      */
     shared_ptr<ResultSet> query(const Query& query) {
         return do_query(query);
-    }
-    
-    /**
-     * @brief query populate AttributeMapper with values from database
-     */
-    void populate_attribute_mapper(AttributeMapper& mapper) {
-        return do_populate_attribute_mapper(mapper);
     }
     
     /**
@@ -86,12 +78,9 @@ class Database : public boost::noncopyable {
     virtual void do_commit() = 0;
 
     virtual void do_remove_file(const char* path) = 0;
-    virtual void do_save_file(const File& file,
-                              const AttributeMapper& mapper) = 0;
+    virtual void do_save_file(const File& file) = 0;
 
     virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
-
-    virtual void do_populate_attribute_mapper(AttributeMapper& mapper) = 0;
 
     virtual void do_clean() = 0;
 };

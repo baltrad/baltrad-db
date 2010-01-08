@@ -8,9 +8,8 @@
 
 namespace brfc {
 
-Query::Query(Database* db, const AttributeMapper* mapper)
+Query::Query(Database* db)
         : db_(db)
-        , mapper_(mapper)
         , distinct_()
         , fetch_()
         , filter_() {
@@ -18,7 +17,6 @@ Query::Query(Database* db, const AttributeMapper* mapper)
 
 Query::Query(const Query& other)
         : db_(other.db_)
-        , mapper_(other.mapper_)
         , distinct_(other.distinct_)
         , fetch_(other.fetch_)
         , filter_(other.filter_) {

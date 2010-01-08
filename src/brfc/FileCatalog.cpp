@@ -1,7 +1,7 @@
 #include <brfc/FileCatalog.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/AttributeMapper.hpp>
+#include <brfc/AttributeSpecs.hpp>
 #include <brfc/File.hpp>
 #include <brfc/Database.hpp>
 #include <brfc/RelationalDatabase.hpp>
@@ -21,15 +21,19 @@ namespace brfc {
 
 FileCatalog::FileCatalog(const std::string& dsn,
                          const std::string& storage)
-        : mapper_(new AttributeMapper())
-        , db_(new RelationalDatabase(dsn))
+        : db_(new RelationalDatabase(dsn))
+        , specs_()
         , storage_(new QDir(storage.c_str())) {
+    RelationalDatabase* rdb = static_cast<RelationalDatabase*>(db_.get());
+    specs_.reset(new AttributeSpecs(rdb->specs()));
     init();
 }
 
-FileCatalog::FileCatalog(Database* db, const std::string& storage)
-        : mapper_(new AttributeMapper())
-        , db_(db)
+FileCatalog::FileCatalog(Database* db,
+                         const std::string& storage,
+                         const AttributeSpecs& specs)
+        : db_(db)
+        , specs_(new AttributeSpecs(specs))
         , storage_(new QDir(storage.c_str())) {
     init();
 }
@@ -40,16 +44,15 @@ FileCatalog::~FileCatalog() {
 
 void
 FileCatalog::init() {
-    if (!storage_->isAbsolute())
+    if (not storage_->isAbsolute())
         throw fs_error("storage must be an absolute path");
-    if (!storage_->exists())
+    if (not storage_->exists())
         throw fs_error("storage does not exist");
-    db_->populate_attribute_mapper(*mapper_);
 }
 
 bool
 FileCatalog::is_cataloged(const std::string& path) const {
-    File f(path, *mapper_);
+    File f(path, *specs_);
     return is_cataloged(f);
 }
 
@@ -65,7 +68,7 @@ FileCatalog::is_cataloged(const File& f) const {
 
 std::string
 FileCatalog::catalog(const std::string& path) {
-    File f(path, *mapper_);
+    File f(path, *specs_);
 
     if (is_cataloged(f))
         throw duplicate_entry(path);
@@ -73,14 +76,14 @@ FileCatalog::catalog(const std::string& path) {
     db_->begin();
     // try saving to database
     try {
-        db_->save_file(f, *mapper_);
+        db_->save_file(f);
     } catch (const db_error& e) {
         db_->rollback();
         throw;
     }
     // database save OK, try copying to new location
     QString target = storage_->absoluteFilePath(f.path().c_str());
-    if (!QFile::copy(path.c_str(), target)) {
+    if (not QFile::copy(path.c_str(), target)) {
         db_->rollback();
         throw fs_error("could not copy " + std::string(path) +
                        " to " + target.toStdString());
@@ -96,7 +99,7 @@ FileCatalog::remove(const std::string& path) {
     db_->begin();
     db_->remove_file(path.c_str());
     //XXX: what about when it exists in db but not in fs?
-    if (!QFile::remove(target)) {
+    if (not QFile::remove(target)) {
         db_->rollback();
         throw fs_error("could not remove " + target.toStdString());
     } else {
@@ -116,7 +119,7 @@ FileCatalog::clear() {
 
 Query
 FileCatalog::query() const {
-    return Query(db_.get(), mapper_.get());
+    return Query(db_.get());
 }
 
 } // namespace brfc

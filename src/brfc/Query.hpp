@@ -7,7 +7,6 @@
 
 namespace brfc {
 
-class AttributeMapper;
 class Database;
 class ResultSet;
 
@@ -23,10 +22,8 @@ class Query {
     /**
      * @brief constructor
      * @param db Database instance this Query executes on
-     * @param mapper AttributeMapper instance used to solve
-     *        Attributes to Columns
      */
-    Query(Database* db, const AttributeMapper* mapper);
+    Query(Database* db);
 
     /**
      * @brief copy constructor
@@ -81,11 +78,8 @@ class Query {
      */
     shared_ptr<ResultSet> execute();
 
-    const AttributeMapper* mapper() const { return mapper_; }
-
   private:
     Database* db_;
-    const AttributeMapper* mapper_;
     bool distinct_;
     AttributeVector fetch_;
     expr::ExpressionPtr filter_;

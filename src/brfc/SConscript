@@ -5,6 +5,7 @@ sources = [
     "hlhdf.cpp",
     "Attribute.cpp",
     "AttributeMapper.cpp",
+    "AttributeSpecs.cpp",
     "Converter.cpp",
     "DataObject.cpp",
     "FileCatalog.cpp",

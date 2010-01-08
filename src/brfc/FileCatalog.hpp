@@ -12,7 +12,7 @@ class QDir;
  */
 namespace brfc {
     
-class AttributeMapper;
+class AttributeSpecs;
 class Database;
 class File;
 class Query;
@@ -29,18 +29,20 @@ class FileCatalog {
   public:
     /**
      * @brief constructor
-     * @param dsn database connection string (using SOCI URL-like syntax)
+     * @param dsn database connection string (using URL-like syntax)
      * @param storage absolute path to storage root
      *
      * @throw db_error if dsn is invalid or DB could not be opened
      * @throw fs_error if storage path does not exist
      *
-     * on creating a FileCatalog instance, owned AttributeMapper is filled
-     * with AttributeSpec s from Database
+     * on creating a FileCatalog instance, owned AttributeSpecs is filled
+     * from Database
      */
     FileCatalog(const std::string& dsn, const std::string& storage);
 
-    FileCatalog(Database* db, const std::string& storage);
+    FileCatalog(Database* db,
+                const std::string& storage,
+                const AttributeSpecs& specs);
 
     /**
      * @brief destructor
@@ -102,8 +104,8 @@ class FileCatalog {
 
     bool is_cataloged(const File& f) const;
     
-    boost::scoped_ptr<AttributeMapper> mapper_;
     boost::scoped_ptr<Database> db_;
+    boost::scoped_ptr<AttributeSpecs> specs_;
     boost::scoped_ptr<QDir> storage_;
 };
 

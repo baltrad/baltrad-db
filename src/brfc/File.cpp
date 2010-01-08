@@ -3,7 +3,7 @@
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/Attribute.hpp>
-#include <brfc/AttributeMapper.hpp>
+#include <brfc/AttributeSpecs.hpp>
 #include <brfc/Converter.hpp>
 #include <brfc/DataObject.hpp>
 #include <brfc/Source.hpp>
@@ -27,9 +27,9 @@ File::File()
 
 }
 
-File::File(const std::string& path, const AttributeMapper& mapper)
+File::File(const std::string& path, const AttributeSpecs& specs)
         : root_(new DataObject("", this)) {
-    load(path, mapper);
+    load(path, specs);
 }
 
 File::File(const std::string& object,
@@ -103,7 +103,7 @@ File::data_object(const std::string& path,
 
 void
 File::add_attribute_from_node(HL_Node* node,
-                              const AttributeMapper& mapper) {
+                              const AttributeSpecs& specs) {
     std::string nodename = HLNode_getName(node);
     unsigned char* data = HLNode_getData(node);
 
@@ -112,7 +112,7 @@ File::add_attribute_from_node(HL_Node* node,
     const Converter* converter = 0;
     
     try {
-        converter = &mapper.converter(path.attribute_name);
+        converter = &specs.converter(path.attribute_name);
     } catch (const lookup_error& e) {
         ignored_attributes_.push_back(nodename);
         return;
@@ -128,7 +128,7 @@ File::add_attribute_from_node(HL_Node* node,
 }
 
 void
-File::load(const std::string& path, const AttributeMapper& mapper) {
+File::load(const std::string& path, const AttributeSpecs& specs) {
     init_hlhdflib();
     HL_NodeList* nodes = HLNodeList_read(path.c_str());
     if (nodes == 0) {
@@ -141,7 +141,7 @@ File::load(const std::string& path, const AttributeMapper& mapper) {
     for (int i=0; i < HLNodeList_getNumberOfNodes(nodes); ++i) {
         HL_Node* node = HLNodeList_getNodeByIndex(nodes, i);
         if (HLNode_getType(node) == ATTRIBUTE_ID) {
-            add_attribute_from_node(node, mapper);
+            add_attribute_from_node(node, specs);
         }
     }
 }

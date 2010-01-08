@@ -16,9 +16,9 @@ struct AttributeMapper_test : public testing::Test {
 } // namespace anonymouse
 
 TEST_F(AttributeMapper_test, specializations_on) {
-    mapper.add_spec(0, "attr1", "string", "table1", "column1");
-    mapper.add_spec(1, "attr2", "string", "table1", "column2");
-    mapper.add_spec(2, "attr3", "string", "table2", "column1");
+    mapper.add(Mapping(0, "attr1", "table1", "column1"));
+    mapper.add(Mapping(1, "attr2", "table1", "column2"));
+    mapper.add(Mapping(2, "attr3", "table2", "column1"));
 
     MappingVector v = mapper.specializations_on("table1");
     ASSERT_EQ(v.size(), 2);

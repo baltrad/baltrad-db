@@ -16,6 +16,7 @@ namespace brfc {
 
 class Attribute;
 class AttributeMapper;
+class AttributeSpecs;
 class DataObject;
 class File;
 class Source;
@@ -47,44 +48,42 @@ class RelationalDatabase : public Database {
      * @brief execute a select query
      */
     shared_ptr<ResultSet> query(const QString& query,
-                              const BindMap& binds) const;
+                                const BindMap& binds) const;
     
+    const AttributeSpecs& specs() const;
+
   protected:
     virtual void do_begin();
     virtual void do_rollback();
     virtual void do_commit();
 
     virtual void do_remove_file(const char* path);
-    virtual void do_save_file(const File& file,
-                              const AttributeMapper& mapper);
+    virtual void do_save_file(const File& file);
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
-
-    virtual void do_populate_attribute_mapper(AttributeMapper& mapper);
 
     virtual void do_clean();
   
   private:
+    void init();
+
     /**
      * @brief save File to database
      */
-    id_type save(const File& file,
-                 const AttributeMapper& mapper);
+    id_type save(const File& file);
 
     /**
      * @brief save DataObject to database
      */
     id_type save(const DataObject& dobj,
                  const id_type& file_id,
-                 const id_type& parent_id,
-                 const AttributeMapper& mapper);
+                 const id_type& parent_id);
     
     /**
      * @brief save Attribute to database
      */
     void save(const Attribute& attr,
-              const id_type& dobj_id,
-              const AttributeMapper& mapper);
+              const id_type& dobj_id);
 
     /**
      * @brief remove file from database
@@ -96,7 +95,7 @@ class RelationalDatabase : public Database {
      *
      * saves File and all DataObjects (also recursively)
      */
-    void save_recurse(const File& file, const AttributeMapper& mapper);
+    void save_recurse(const File& file);
 
     /**
      * @brief save DataObject recursively
@@ -105,8 +104,7 @@ class RelationalDatabase : public Database {
      */
     id_type save_recurse(const DataObject& dobj,
                          const id_type& file_id,
-                         const id_type& parent_id,
-                         const AttributeMapper& mapper);
+                         const id_type& parent_id);
     
     /**
      * @brief query database id of a File
@@ -125,7 +123,11 @@ class RelationalDatabase : public Database {
         
     QString qt_engine(const QString& engine) const;
 
+    void populate_mapper_and_specs();
+
     boost::scoped_ptr<QSqlDatabase> sql;
+    boost::scoped_ptr<AttributeMapper> mapper_;
+    boost::scoped_ptr<AttributeSpecs> specs_;
 };
 
 }

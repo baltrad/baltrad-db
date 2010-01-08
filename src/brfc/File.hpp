@@ -14,7 +14,7 @@ class QTime;
 
 namespace brfc {
 
-class AttributeMapper;
+class AttributeSpecs;
 class DataObject;
 class Source;
 
@@ -35,13 +35,13 @@ class File : public boost::noncopyable {
     /**
      * @brief construct from physical file
      * @param path absolute path to the file
-     * @param mapper AttributeMapper instance used for converter lookups
+     * @param specs AttributeSpecs instance used for converter lookups
      * @throw fs_error if file can not be opened
      *
-     * full paths of ignored attributes (not defined in mapper) are stored
+     * full paths of ignored attributes (not defined in specs) are stored
      * and accessible through ignored_attributes();
      */
-    File(const std::string& path, const AttributeMapper& mapper);
+    File(const std::string& path, const AttributeSpecs& specs);
     
     /**
      * @brief construct with mandatory attributes present
@@ -113,10 +113,10 @@ class File : public boost::noncopyable {
     /**
      * @brief load from filesystem
      */
-    void load(const std::string& path, const AttributeMapper& mapper);
+    void load(const std::string& path, const AttributeSpecs& specs);
 
     void add_attribute_from_node(HL_Node* node,
-                                 const AttributeMapper& mapper);
+                                 const AttributeSpecs& specs);
 
     /**
      * @brief figure out pathname from attributes
