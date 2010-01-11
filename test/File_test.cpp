@@ -57,9 +57,9 @@ TEST(File_test, split_short_path_with_group) {
     EXPECT_EQ(p.attribute_name, "what/date");
 }
 
-TEST(File_test, path) {
+TEST(File_test, unique_identifier) {
     File f("pvol", "H5rad 2.0", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
-    EXPECT_EQ(f.path(), "pvol_20000102T120500.h5");
+    EXPECT_EQ(f.unique_identifier(), "pvol_20000102T120500_WMO:02606");
 }
 
 TEST(File_test, open_nx_file) {

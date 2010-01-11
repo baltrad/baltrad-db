@@ -56,9 +56,10 @@ class RelationalDatabase : public Database {
     virtual void do_begin();
     virtual void do_rollback();
     virtual void do_commit();
-
+    
+    virtual bool do_has_file(const File& file) const;
     virtual void do_remove_file(const char* path);
-    virtual void do_save_file(const File& file);
+    virtual void do_save_file(const char* path, const File& file);
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
@@ -70,7 +71,7 @@ class RelationalDatabase : public Database {
     /**
      * @brief save File to database
      */
-    id_type save(const File& file);
+    id_type save(const char* path, const File& file);
 
     /**
      * @brief save DataObject to database
@@ -95,7 +96,7 @@ class RelationalDatabase : public Database {
      *
      * saves File and all DataObjects (also recursively)
      */
-    void save_recurse(const File& file);
+    void save_recurse(const char* path, const File& file);
 
     /**
      * @brief save DataObject recursively

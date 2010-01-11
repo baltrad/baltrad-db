@@ -51,33 +51,20 @@ File::source() const {
     return Source(root_->attribute("what/source").value().toString());
 }
 
-void
-File::set_path_from_attributes() {
-    QString path = root_->attribute("what/object").value().toString();
-    path += "_";
-    path += root_->attribute("what/date").value().toDate().toString("yyyyMMdd");
-    path += "T";
-    path += root_->attribute("what/time").value().toTime().toString("hhmmss");
-    path += ".h5";
-    root_->add_attribute("path", path);
+std::string
+File::unique_identifier() const {
+    QString uid = root_->attribute("what/object").value().toString();
+    uid += "_";
+    uid += root_->attribute("what/date").value().toDate().toString("yyyyMMdd");
+    uid += "T";
+    uid += root_->attribute("what/time").value().toTime().toString("hhmmss");
+    uid += "_";
+    uid += root_->attribute("what/source").value().toString();
+    return uid.toStdString();
 }
 
 File::~File() {
 
-}
-
-std::string
-File::path() const {
-    /* XXX: this is a dirty hack
-     * we don't want to set path at loading because we might not
-     * have all the required attributes (we create non-conforming files
-     * for testing purposes).
-     */
-    if (!root_->has_attribute("path")) {
-        File* self = const_cast<File*>(this);
-        self->set_path_from_attributes();
-    }
-    return root_->attribute("path").value().toString().toStdString();
 }
 
 DataObject&

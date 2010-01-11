@@ -96,11 +96,14 @@ class File : public boost::noncopyable {
     Source source() const;
 
     /**
-     * @brief path this File should be stored to
+     * @brief string that uniquely identifies the file content
      *
-     * retrieve pseudo-attribute \c path on root DataObject
+     * concatenation of what/source, what/object, what/date and what/time.
+     *
+     * @note changes to this algorithm most probably trigger the need to
+     *       re-evaluate all files in the database
      */
-    std::string path() const;
+    std::string unique_identifier() const;
 
     /**
      * @brief get attributes ignored on loading

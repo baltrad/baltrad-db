@@ -23,6 +23,7 @@ sources = Table("sources", meta,
 
 files = Table("files", meta,
     Column("id", Integer, primary_key=True),
+    Column("unique_id", Text, unique=True, nullable=False),
     Column("path", Text, unique=True, nullable=False),
     Column("object", Text, nullable=False),
     Column("n_date", Date, nullable=False),

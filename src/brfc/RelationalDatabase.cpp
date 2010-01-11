@@ -83,9 +83,19 @@ RelationalDatabase::do_commit() {
     sql->commit();
 }
 
+bool
+RelationalDatabase::do_has_file(const File& file) const {
+    QSqlQuery query(*sql);
+    query.prepare("SELECT FROM files WHERE unique_id = :unique_id");
+    query.bindValue(":unique_id", file.unique_identifier().c_str());
+    if (!query.exec())
+        throw db_error(query.lastError());
+    return query.next(); // got a result row
+}
+
 void
-RelationalDatabase::do_save_file(const File& file) {
-    save_recurse(file);
+RelationalDatabase::do_save_file(const char* path, const File& file) {
+    save_recurse(path, file);
 }
 
 shared_ptr<ResultSet>
@@ -180,7 +190,7 @@ extend_for_specializations(Insert& insert,
 
 
 RelationalDatabase::id_type
-RelationalDatabase::save(const File& f) {
+RelationalDatabase::save(const char* path, const File& f) {
     Insert stmt("files");
     id_type source_id = query_id(f.source());
     if (source_id.isNull()) {
@@ -191,6 +201,8 @@ RelationalDatabase::save(const File& f) {
     stmt.returning("id");
     
     extend_for_specializations(stmt, f.root(), *mapper_);
+    stmt.bind("path", path);
+    stmt.bind("unique_id", f.unique_identifier().c_str());
 
     QSqlQuery query = stmt.query(*sql);
 
@@ -201,10 +213,10 @@ RelationalDatabase::save(const File& f) {
 }
 
 void
-RelationalDatabase::save_recurse(const File& f) {
+RelationalDatabase::save_recurse(const char* path, const File& f) {
     typedef std::map<const DataObject*, id_type> IdCache;
 
-    id_type file_id = save(f);
+    id_type file_id = save(path, f);
     
     IdCache id_cache;
     const id_type* parent_id;
@@ -276,7 +288,7 @@ RelationalDatabase::query_id(const File& f) {
     QSqlQuery query(*sql);
     query.prepare("SELECT id FROM files "
                   "WHERE path = :path ");
-    query.bindValue(":path", f.path().c_str());
+    query.bindValue(":path", f.root().attribute("path").value());
     query.exec();
     query.first();
     return query.value(0);

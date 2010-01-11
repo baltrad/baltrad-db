@@ -26,8 +26,8 @@ struct Query_test : public testing::Test {
             , src("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , db(BRFC_TEST_DB_DSN)
             , td1("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 0), src)
-            , td2("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 0), src)
-            , td3("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 0), src)
+            , td2("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 1), src)
+            , td3("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 2), src)
             , query(&db) {
         td1.data_object("/bla", true).add_attribute("where/xsize", QVariant(static_cast<int64_t>(1)));
         td1.data_object("/bla", true).add_attribute("where/ysize", QVariant(static_cast<int64_t>(2)));
@@ -38,13 +38,9 @@ struct Query_test : public testing::Test {
         td3.data_object("/bla", true).add_attribute("where/xsize", QVariant(static_cast<int64_t>(3)));
         td3.data_object("/bla2", true).add_attribute("where/xsize", QVariant(static_cast<int64_t>(3)));
 
-        td1.root().add_attribute("path", "test_data_1");
-        td2.root().add_attribute("path", "test_data_2");
-        td3.root().add_attribute("path", "test_data_3");
-
-        db.save_file(td1);
-        db.save_file(td2);
-        db.save_file(td3);
+        db.save_file("test_data_1", td1);
+        db.save_file("test_data_2", td2);
+        db.save_file("test_data_3", td3);
     }
 
     ~Query_test() {

@@ -18,36 +18,42 @@
 #include <QtCore/QDir>
 
 namespace brfc {
+    
+DefaultFileNamer::DefaultFileNamer(const std::string& path)
+        : path_(path) {
+    QDir dir_(path.c_str());
+    if (not dir_.isAbsolute())
+        throw fs_error("storage must be an absolute path");
+    if (not dir_.exists())
+        throw fs_error("storage does not exist");
+}
+
+std::string
+DefaultFileNamer::do_name(const File& f) const {
+    return path_ + "/" + f.unique_identifier() + ".h5";
+}
 
 FileCatalog::FileCatalog(const std::string& dsn,
                          const std::string& storage)
         : db_(new RelationalDatabase(dsn))
         , specs_()
-        , storage_(new QDir(storage.c_str())) {
+        , namer_(new DefaultFileNamer(storage)) {
     RelationalDatabase* rdb = static_cast<RelationalDatabase*>(db_.get());
     specs_.reset(new AttributeSpecs(rdb->specs()));
-    init();
 }
 
-FileCatalog::FileCatalog(Database* db,
+FileCatalog::FileCatalog(shared_ptr<Database> db,
                          const std::string& storage,
-                         const AttributeSpecs& specs)
+                         shared_ptr<AttributeSpecs> specs,
+                         shared_ptr<FileNamer> namer)
         : db_(db)
-        , specs_(new AttributeSpecs(specs))
-        , storage_(new QDir(storage.c_str())) {
-    init();
+        , specs_(specs)
+        , namer_(namer) {
+
 }
 
 FileCatalog::~FileCatalog() {
 
-}
-
-void
-FileCatalog::init() {
-    if (not storage_->isAbsolute())
-        throw fs_error("storage must be an absolute path");
-    if (not storage_->exists())
-        throw fs_error("storage does not exist");
 }
 
 bool
@@ -58,12 +64,7 @@ FileCatalog::is_cataloged(const std::string& path) const {
 
 bool
 FileCatalog::is_cataloged(const File& f) const {
-    Query q = query();
-    expr::Factory xpr;
-    expr::AttributePtr path_attr = xpr.attribute("path");
-    q.fetch(path_attr).filter(path_attr->eq(xpr.string(f.path())));
-    shared_ptr<ResultSet> r = q.execute();
-    return r->next(); // has at least 1 row
+    return db_->has_file(f);
 }
 
 std::string
@@ -72,36 +73,38 @@ FileCatalog::catalog(const std::string& path) {
 
     if (is_cataloged(f))
         throw duplicate_entry(path);
+    
+    std::string target = namer_->name(f);
+
+    if (not QDir::isAbsolutePath(target.c_str()))
+        throw std::runtime_error("namer must return absolute paths");
 
     db_->begin();
     // try saving to database
     try {
-        db_->save_file(f);
+        db_->save_file(target.c_str(), f);
     } catch (const db_error& e) {
         db_->rollback();
         throw;
     }
     // database save OK, try copying to new location
-    QString target = storage_->absoluteFilePath(f.path().c_str());
-    if (not QFile::copy(path.c_str(), target)) {
+    if (not QFile::copy(path.c_str(), target.c_str())) {
         db_->rollback();
-        throw fs_error("could not copy " + std::string(path) +
-                       " to " + target.toStdString());
+        throw fs_error("could not copy " + path + " to " + target);
     } else {
         db_->commit();
     }
-    return f.path();
+    return target;
 }
 
 void
 FileCatalog::remove(const std::string& path) {
-    QString target = storage_->absoluteFilePath(path.c_str());
     db_->begin();
     db_->remove_file(path.c_str());
     //XXX: what about when it exists in db but not in fs?
-    if (not QFile::remove(target)) {
+    if (not QFile::remove(path.c_str())) {
         db_->rollback();
-        throw fs_error("could not remove " + target.toStdString());
+        throw fs_error("could not remove " + path);
     } else {
         db_->commit();
     }

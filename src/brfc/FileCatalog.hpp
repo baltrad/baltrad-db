@@ -1,11 +1,9 @@
 #ifndef BRFC_FILE_CATALOGER_H
 #define BRFC_FILE_CATALOGER_H
 
-#include <boost/scoped_ptr.hpp>
+#include <brfc/smart_ptr.hpp>
+
 #include <string>
-
-
-class QDir;
 
 /**
  * @brief main namespace
@@ -16,6 +14,27 @@ class AttributeSpecs;
 class Database;
 class File;
 class Query;
+
+class FileNamer {
+  public:
+    std::string name(const File& f) const {
+        return do_name(f);
+    }
+
+  protected:
+    virtual std::string do_name(const File& f) const = 0;
+};
+
+class DefaultFileNamer : public FileNamer {
+  public:
+    DefaultFileNamer(const std::string& path);
+
+  protected:
+    virtual std::string do_name(const File& f) const;
+  
+  private:
+    std::string path_;
+};
 
 /**
  * @defgroup exposed_in_binds Exposed in bindings
@@ -40,9 +59,10 @@ class FileCatalog {
      */
     FileCatalog(const std::string& dsn, const std::string& storage);
 
-    FileCatalog(Database* db,
+    FileCatalog(shared_ptr<Database> db,
                 const std::string& storage,
-                const AttributeSpecs& specs);
+                shared_ptr<AttributeSpecs> specs,
+                shared_ptr<FileNamer> namer);
 
     /**
      * @brief destructor
@@ -77,7 +97,7 @@ class FileCatalog {
     
     /**
      * @brief remove file from catalog
-     * @param path file path relative to storage root
+     * @param path absolute path to file
      * @throw db_error if removing file entry from database fails
      * @throw fs_error if removing file entry from filesystem fails
      */
@@ -99,14 +119,11 @@ class FileCatalog {
     //void sync();
     
   private:
-
-    void init();
-
     bool is_cataloged(const File& f) const;
     
-    boost::scoped_ptr<Database> db_;
-    boost::scoped_ptr<AttributeSpecs> specs_;
-    boost::scoped_ptr<QDir> storage_;
+    shared_ptr<Database> db_;
+    shared_ptr<AttributeSpecs> specs_;
+    shared_ptr<FileNamer> namer_;
 };
 
 }
