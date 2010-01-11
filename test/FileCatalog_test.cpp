@@ -24,7 +24,6 @@ using testing::Return;
 using testing::StrEq;
 using testing::Throw;
 
-#ifdef BRFC_TEST_DB_DSN
 namespace {
 
 class MockDatabase : public Database {
@@ -74,10 +73,6 @@ struct FileCatalog_test : public testing::Test {
 };
 
 } // namespace anonymous
-
-TEST_F(FileCatalog_test, test_nx_storage_path_throws) {
-    EXPECT_THROW(FileCatalog(BRFC_TEST_DB_DSN, "/path/to/nxdir"), fs_error);
-}
 
 TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
     EXPECT_THROW(FileCatalog("invalid_dsn", tempdir->path()), db_error);
@@ -169,4 +164,6 @@ TEST_F(FileCatalog_test, test_removing_nx_file) {
     EXPECT_THROW(fc.remove("/path/to/nxfile"), fs_error);
 }
 
-#endif // ifdef BRFC_TEST_DB_DSN
+TEST(DefaultFileNamer_test, test_nx_storage_path_throws) {
+    EXPECT_THROW(DefaultFileNamer("/path/to/nxdir"), fs_error);
+}
