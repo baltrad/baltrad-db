@@ -20,8 +20,8 @@ using namespace brfc;
 #ifdef BRFC_TEST_DB_DSN
 namespace {
 
-struct Query_test : public testing::Test {
-    Query_test()
+struct RDB_Query_test : public testing::Test {
+    RDB_Query_test()
             : xpr()
             , src("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , db(BRFC_TEST_DB_DSN)
@@ -43,7 +43,7 @@ struct Query_test : public testing::Test {
         db.save_file("test_data_3", td3);
     }
 
-    ~Query_test() {
+    ~RDB_Query_test() {
         db.clean();
     }
 
@@ -56,7 +56,7 @@ struct Query_test : public testing::Test {
 
 }
 
-TEST_F(Query_test, test_simple) {
+TEST_F(RDB_Query_test, test_simple) {
     shared_ptr<ResultSet> r = 
             query.fetch(xpr.attribute("path"))
                  .filter(xpr.attribute("where/xsize")->eq(xpr.integer(1)))
@@ -66,7 +66,7 @@ TEST_F(Query_test, test_simple) {
     ASSERT_TRUE(not r->next());
 }
 
-TEST_F(Query_test, test_list_all_files) {
+TEST_F(RDB_Query_test, test_list_all_files) {
     shared_ptr<ResultSet> r = query.fetch(xpr.attribute("path")).execute();
     ASSERT_EQ(r->size(), 3);
     ASSERT_TRUE(r->next());
@@ -78,7 +78,7 @@ TEST_F(Query_test, test_list_all_files) {
     ASSERT_TRUE(not r->next());
 }
 
-TEST_F(Query_test, test_select_xsize) {
+TEST_F(RDB_Query_test, test_select_xsize) {
     shared_ptr<ResultSet> r = query.fetch(xpr.attribute("where/xsize"))
                        .filter(xpr.attribute("where/xsize")->eq(xpr.integer(1)))
                        .execute();
@@ -87,7 +87,7 @@ TEST_F(Query_test, test_select_xsize) {
     ASSERT_TRUE(not r->next());
 }
 
-TEST_F(Query_test, test_select_on_double_attr) {
+TEST_F(RDB_Query_test, test_select_on_double_attr) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
     shared_ptr<ResultSet> r = query.fetch(xpr.attribute("path"))
@@ -101,7 +101,7 @@ TEST_F(Query_test, test_select_on_double_attr) {
     EXPECT_NE(first, second);
 }
 
-TEST_F(Query_test, test_select_not_distinct) {
+TEST_F(RDB_Query_test, test_select_not_distinct) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     shared_ptr<ResultSet> r =
             query.fetch(xpr.attribute("path"))
@@ -115,7 +115,7 @@ TEST_F(Query_test, test_select_not_distinct) {
     EXPECT_EQ(first, second);
 }
 
-TEST_F(Query_test, test_select_distinct) {
+TEST_F(RDB_Query_test, test_select_distinct) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     shared_ptr<ResultSet> r = 
             query.fetch(xpr.attribute("path"))
@@ -128,7 +128,7 @@ TEST_F(Query_test, test_select_distinct) {
 }
 
 
-TEST_F(Query_test, test_select_xsize2) {
+TEST_F(RDB_Query_test, test_select_xsize2) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     shared_ptr<ResultSet> r =
             query.fetch(xsize)
@@ -138,7 +138,7 @@ TEST_F(Query_test, test_select_xsize2) {
 
 }
 
-TEST_F(Query_test, test_select_by_wmo_code) {
+TEST_F(RDB_Query_test, test_select_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("src_WMO");
     shared_ptr<ResultSet> r =
             query.fetch(xpr.attribute("path"))
