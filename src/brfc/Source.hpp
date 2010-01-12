@@ -22,7 +22,10 @@ class Source {
     /**
      * @brief combined WMO block and station number
      */
-    QVariant wmo_code() const { return get_opt("WMO").toInt(); }
+    QVariant wmo_code() const {
+        const QVariant& val = get_opt("WMO");
+        return val.isValid() ? val.toInt() : val;
+    }
 
     /**
      * @brief radar site as indexed in the OPERA database
@@ -32,7 +35,10 @@ class Source {
     /**
      * @brief originating centre
      */
-    QVariant originating_centre() const { return get_opt("ORG").toInt(); }
+    QVariant originating_centre() const {
+        const QVariant& val = get_opt("ORG");
+        return val.isValid() ? val.toInt() : val;
+    }
 
     /**
      * @brief place according to ODIM 2.0 spec, table 9
@@ -42,7 +48,10 @@ class Source {
     /**
      * @brief country code according to BUFR tables
      */
-    QVariant country_code() const { return get_opt("CTY").toInt(); }
+    QVariant country_code() const {
+        const QVariant& val = get_opt("CTY");
+        return val.isValid() ? val.toInt() : val;
+    }
 
     /**
      * @brief comment
@@ -56,6 +65,9 @@ class Source {
     
   private:
     typedef std::map<QString, QVariant> ElementMap;
+
+    void init();
+
     void parse_source(const QString& source);
 
     QVariant get_opt(const QString& key) const;
