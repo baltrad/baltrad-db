@@ -60,7 +60,6 @@ class FileCatalog {
     FileCatalog(const std::string& dsn, const std::string& storage);
 
     FileCatalog(shared_ptr<Database> db,
-                const std::string& storage,
                 shared_ptr<AttributeSpecs> specs,
                 shared_ptr<FileNamer> namer);
 

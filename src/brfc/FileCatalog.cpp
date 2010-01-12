@@ -43,7 +43,6 @@ FileCatalog::FileCatalog(const std::string& dsn,
 }
 
 FileCatalog::FileCatalog(shared_ptr<Database> db,
-                         const std::string& storage,
                          shared_ptr<AttributeSpecs> specs,
                          shared_ptr<FileNamer> namer)
         : db_(db)

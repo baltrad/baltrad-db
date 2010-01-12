@@ -50,7 +50,7 @@ struct FileCatalog_test : public testing::Test {
             , db(new MockDatabase())
             , namer(new MockNamer())
             , specs(new AttributeSpecs())
-            , fc(db, tempdir->path(), specs, namer)
+            , fc(db, specs, namer)
             , minfile(TempH5File::minimal("PVOL",
                                           QDate(2000, 1, 1),
                                           QTime(12, 0),
