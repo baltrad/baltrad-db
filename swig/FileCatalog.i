@@ -31,9 +31,9 @@
 %ignore brfc::AttributeMapper;
 %ignore brfc::AttributeSpecs;
 %ignore brfc::Database;
-%ignore brfc::FileCatalog::FileCatalog(Database*,
-                                       const std::string&,
-                                       const AttributeSpecs&);
+%ignore brfc::FileCatalog::FileCatalog(shared_ptr<Database>,
+                                       shared_ptr<AttributeSpecs>,
+                                       shared_ptr<FileNamer>);
 
 %ignore brfc::Query::Query;
 %ignore brfc::ResultSet::ResultSet;
@@ -82,6 +82,8 @@ SWIG_SHARED_PTR_DERIVED(Parentheses,
 SWIG_SHARED_PTR_DERIVED(Attribute,
                         brfc::expr::Expression,
                         brfc::expr::Attribute);
+
+SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 
 // Enable the JNI class to load the required native library.
 %pragma(java) jniclasscode=%{
