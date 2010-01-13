@@ -17,7 +17,7 @@ Factory::attribute(const std::string& name) const {
 
 LiteralPtr
 Factory::string(const std::string& value) const {
-    return Literal::create(QString::fromStdString(value));
+    return Literal::create(QString::fromUtf8(value.c_str()));
 }
 
 LiteralPtr

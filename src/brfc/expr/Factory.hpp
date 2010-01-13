@@ -20,6 +20,8 @@ class Factory {
 
     /**
      * @brief construct expr::Literal containing a string
+     *
+     * the value is assumed to be encoded in UTF-8
      */
     LiteralPtr string(const std::string& value) const;
 

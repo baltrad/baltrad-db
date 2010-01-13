@@ -14,6 +14,8 @@
 
 #include "common.hpp"
 
+#include <QtCore/QString>
+
 using namespace brfc::expr;
 
 namespace {
@@ -28,6 +30,12 @@ struct Expression_test: public testing::Test {
     Factory xpr;
 };
 
+}
+
+TEST_F(Expression_test, test_utf_string_literal) {
+    LiteralPtr lit = xpr.string("öäü");
+    QString s = lit->value().toString();
+    EXPECT_EQ(s.length(), 3);
 }
 
 TEST_F(Expression_test, test_simple) {
