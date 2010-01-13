@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/DataObject.hpp>
 
 #include <boost/algorithm/string/join.hpp>
@@ -9,6 +10,8 @@
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
+
+#include <QtCore/QVariant>
 
 using namespace brfc;
 
@@ -78,4 +81,10 @@ TEST(DataObject_test, const_iterator) {
     DataObject::const_iterator ci = a.begin();
     const DataObject& b = a;
     DataObject::const_iterator cci = b.begin();
+}
+
+TEST(DataObject_test, add_attribute_twice) {
+    DataObject a("a");
+    a.add_attribute("asd", 1);
+    EXPECT_THROW(a.add_attribute("asd", 1), duplicate_entry);
 }

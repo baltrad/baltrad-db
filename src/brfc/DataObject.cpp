@@ -9,6 +9,9 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/algorithm/string/join.hpp>
 
+using boost::lambda::bind;
+using boost::lambda::_1;
+
 namespace brfc {
 
 DataObject::DataObject(const std::string& name,
@@ -28,8 +31,6 @@ DataObject::~DataObject() {
 
 DataObject&
 DataObject::child(const std::string& name, bool create) {
-    using namespace boost::lambda;
-
     ChildVector::iterator i;
     i = std::find_if(children_.begin(), children_.end(),
                      bind(&DataObject::name_, _1) == name);
@@ -65,6 +66,11 @@ DataObject::add_child(const std::string& name) {
 void
 DataObject::add_attribute(const std::string& name,
                           const QVariant& value) {
+    AttributeVector::iterator i = 
+        std::find_if(attrs_.begin(), attrs_.end(),
+                     bind(&Attribute::name, _1) == name);
+    if (i != attrs_.end()) 
+        throw duplicate_entry(name);
     attrs_.push_back(new Attribute(name, value, this));
 }
 
@@ -86,8 +92,6 @@ DataObject::attribute(const std::string& name) const {
 
 Attribute&
 DataObject::attribute(const std::string& name) {
-    using namespace boost::lambda;
-
     AttributeVector::iterator i;
     i = std::find_if(attrs_.begin(), attrs_.end(),
                      bind(&Attribute::name, _1) == name);
