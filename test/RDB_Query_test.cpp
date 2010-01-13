@@ -25,9 +25,9 @@ struct RDB_Query_test : public testing::Test {
             : xpr()
             , src("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , db(BRFC_TEST_DB_DSN)
-            , td1("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 0), src)
-            , td2("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 1), src)
-            , td3("PVOL", "H5rad 2.0", QDate(2000, 1, 1), QTime(12, 2), src)
+            , td1("PVOL", QDate(2000, 1, 1), QTime(12, 0), src)
+            , td2("PVOL", QDate(2000, 1, 1), QTime(12, 1), src)
+            , td3("PVOL", QDate(2000, 1, 1), QTime(12, 2), src)
             , query(&db) {
         td1.data_object("/bla", true).add_attribute("where/xsize", QVariant(static_cast<int64_t>(1)));
         td1.data_object("/bla", true).add_attribute("where/ysize", QVariant(static_cast<int64_t>(2)));

@@ -46,19 +46,19 @@ class File : public boost::noncopyable {
     /**
      * @brief construct with mandatory attributes present
      * @param object /what/object
-     * @param version /what/version
      * @param date /what/date
      * @param time /what/time
      * @param source /what/source
+     * @param version /what/version
      *
      * this is the minimal "correct" file, given that parameters are
      * correctly formed.
      */
     File(const std::string& object,
-         const std::string& version,
          const QDate& date,
          const QTime& time,
-         const std::string& source);
+         const std::string& source,
+         const std::string& version="H5rad 2.0");
 
     /**
      * @brief destructor

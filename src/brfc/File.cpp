@@ -33,10 +33,10 @@ File::File(const std::string& path, const AttributeSpecs& specs)
 }
 
 File::File(const std::string& object,
-           const std::string& version,
            const QDate& date,
            const QTime& time,
-           const std::string& source)
+           const std::string& source,
+           const std::string& version)
         : root_(new DataObject("", this)) {
     root_->add_attribute("Conventions", "ODIM_H5/V2_0");
     root_->add_attribute("what/object", QString::fromStdString(object));
