@@ -314,6 +314,7 @@ virtual_attributes = [
     ("src_RAD", "string",   "sources", "radar_site"),
     ("src_ORG", "int",      "sources", "originating_centre"),
     ("src_CTY", "int",      "sources", "country_code"),
+    ("src_PLC", "string",   "sources", "place"),
     ("src_node", "string",  "sources", "node_id")
 ]
 
