@@ -33,6 +33,8 @@ vars.AddVariables(
                  "${gtest_dir}/include", PathVariable.PathIsDir),
     PathVariable("gtest_include_dir", "googletest include directory",
                  "${gtest_dir}/include", PathVariable.PathIsDir),
+    PathVariable("hudsontest_output", "where to generate output for HUDSON",
+                 "test_results.xml", PathVariable.PathAccept),
     BoolVariable("debug", "generate debug code", False),
     BoolVariable("build_java", "build java bindings", True),
                 ("install_root", "installation directory",
@@ -102,8 +104,6 @@ env.Alias("test", test)
 
 hudsontest = env.Command("hudsontest", "#test/runner",
                    "LD_LIBRARY_PATH=./lib $SOURCE "
-                   "--output_format=XML "
-                   "--log_level=all "
-                   "--report_level=no")
+                   "--gtest_output=xml:${hudsontest_output}")
 
 # vim:filetype=python:et:ts=4:sw=4:
