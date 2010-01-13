@@ -17,7 +17,6 @@
 #include <brfc/expr/Compiler.hpp>
 #include <brfc/expr/Expression.hpp>
 #include <brfc/expr/Select.hpp>
-#include <brfc/expr/Table.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -108,9 +107,6 @@ RelationalDatabase::do_query(const Query& query) {
 
     select->where(query.filter());
     select->distinct(query.distinct());
-
-    expr::TablePtr data_objects_t = expr::Table::create("data_objects");
-    expr::TablePtr files_t = expr::Table::create("files");
 
     expr::AttrReplace::replace(select, mapper_.get());
     expr::Compiler compiler;
