@@ -2,7 +2,7 @@ Import("env")
 
 sources = env.Glob("*.cpp")
 
-env.Append(CCFLAGS=["-g", "-DBOOST_TEST_DYN_LINK"])
+env.Append(CCFLAGS=["-g"])
 
 if env.get("test_db_dsn"):
     env.Append(CCFLAGS=("-DBRFC_TEST_DB_DSN=\\\"%s\\\"" % env["test_db_dsn"]))

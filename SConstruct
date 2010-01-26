@@ -30,7 +30,7 @@ vars.AddVariables(
     PathVariable("gtest_dir", "googletest install root",
                  "/usr", PathVariable.PathIsDir),
     PathVariable("gtest_lib_dir", "googletest libraries directory",
-                 "${gtest_dir}/include", PathVariable.PathIsDir),
+                 "${gtest_dir}/lib", PathVariable.PathIsDir),
     PathVariable("gtest_include_dir", "googletest include directory",
                  "${gtest_dir}/include", PathVariable.PathIsDir),
     PathVariable("hudsontest_output", "where to generate output for HUDSON",
@@ -87,6 +87,9 @@ testenv = env.Clone()
 testenv.AppendUnique(CPPPATH=["${gtest_include_dir}"])
 testenv.AppendUnique(LIBPATH=["${gtest_lib_dir}"])
 
+for path in ("#lib", "${gtest_lib_dir}", "${hlhdf_lib_dir}", "${qt_lib_dir}"):
+    testenv.AppendENVPath('LD_LIBRARY_PATH', env.Dir(path))
+
 SConscript("test/SConscript",
            build_dir="build/test", duplicate=0,
            exports={"env": testenv})
@@ -98,12 +101,12 @@ if env["build_java"]:
 
 env.Alias("install", [env["install_root"]])
 
-test = env.Command("test_runner", "#test/runner",
-                   "LD_LIBRARY_PATH=./lib $SOURCE")
+test = testenv.Command("test_runner", "#test/runner",
+                       "$SOURCE ")
 env.Alias("test", test)
 
-hudsontest = env.Command("hudsontest", "#test/runner",
-                   "LD_LIBRARY_PATH=./lib $SOURCE "
+hudsontest = testenv.Command("hudsontest", "#test/runner",
+                   "$SOURCE "
                    "--gtest_output=xml:${hudsontest_output}")
 
 # vim:filetype=python:et:ts=4:sw=4:
