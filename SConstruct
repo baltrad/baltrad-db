@@ -88,7 +88,7 @@ testenv.AppendUnique(CPPPATH=["${gtest_include_dir}"])
 testenv.AppendUnique(LIBPATH=["${gtest_lib_dir}"])
 
 for path in ("#lib", "${gtest_lib_dir}", "${hlhdf_lib_dir}", "${qt_lib_dir}"):
-    testenv.AppendENVPath('LD_LIBRARY_PATH', env.Dir(path))
+    testenv.AppendENVPath('LD_LIBRARY_PATH', env.Dir(path).abspath)
 
 SConscript("test/SConscript",
            build_dir="build/test", duplicate=0,
