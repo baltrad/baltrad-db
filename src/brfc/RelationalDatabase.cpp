@@ -190,8 +190,9 @@ RelationalDatabase::save(const char* path, const File& f) {
     Insert stmt("files");
     id_type source_id = query_id(f.source());
     if (source_id.isNull()) {
+        // XXX: we should get the string from the Source object
         throw db_error("could not db-lookup source: " +
-                       f.root().attribute("source").value().toString().toStdString());
+                       f.root().attribute("what/source").value().toString().toStdString());
     }
     stmt.bind("source_id", source_id);
     stmt.returning("id");
