@@ -206,4 +206,17 @@ TEST_F(RDB_Query_test, test_select_by_place) {
     EXPECT_TRUE(contains(v, "td5"));
 }
 
+TEST_F(RDB_Query_test, test_has_file) {
+    bool result = false;
+    ASSERT_NO_THROW(result = db.has_file(td1));
+    EXPECT_TRUE(result);
+}
+
+TEST_F(RDB_Query_test, test_has_nx_file) {
+    bool result = false;
+    File td("PVOL", QDate(2000, 1, 10), QTime(12, 0), src1);
+    ASSERT_NO_THROW(result = db.has_file(td));
+    EXPECT_FALSE(result);
+}
+
 #endif // BRFC_TEST_DB_DSN

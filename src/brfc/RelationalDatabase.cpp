@@ -85,7 +85,7 @@ RelationalDatabase::do_commit() {
 bool
 RelationalDatabase::do_has_file(const File& file) const {
     QSqlQuery query(*sql);
-    query.prepare("SELECT FROM files WHERE unique_id = :unique_id");
+    query.prepare("SELECT true FROM files WHERE unique_id = :unique_id");
     query.bindValue(":unique_id", file.unique_identifier().c_str());
     if (!query.exec())
         throw db_error(query.lastError());
