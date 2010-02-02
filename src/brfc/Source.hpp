@@ -58,11 +58,6 @@ class Source {
      */
     QVariant comment() const { return get_opt("CMT"); }
 
-    /**
-     * @brief does this source identify a radar site
-     */
-    bool identifies_radar() const;
-    
   private:
     typedef std::map<QString, QVariant> ElementMap;
 
