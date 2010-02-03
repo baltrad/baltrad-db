@@ -4,6 +4,8 @@
 #include <brfc/expr/fwd.hpp>
 #include <string>
 
+#include <QtCore/QtGlobal>
+
 namespace brfc {
 namespace expr {
 
@@ -28,7 +30,7 @@ class Factory {
     /**
      * @brief construct expr::Literal containing a 64-bit integer
      */
-    LiteralPtr integer(int64_t value) const;
+    LiteralPtr integer(qlonglong value) const;
 
     /**
      * @brief construct expr::Literal containing a double precision float

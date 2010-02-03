@@ -13,7 +13,7 @@ ResultSet::string(unsigned int pos) const {
     return value_at(pos).toString().toStdString();
 }
 
-int64_t
+qlonglong
 ResultSet::integer(unsigned int pos) const {
     return value_at(pos).toLongLong();
 }

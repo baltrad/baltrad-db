@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <QtCore/QtGlobal>
+
 class QDate;
 class QTime;
 class QVariant;
@@ -61,7 +63,7 @@ class ResultSet {
     /**
      * @brief get integer value at \c pos
      */
-    int64_t integer(unsigned int pos) const;
+    qlonglong integer(unsigned int pos) const;
 
     /**
      * @brief get real value at \c pos
