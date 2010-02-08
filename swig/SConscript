@@ -1,6 +1,6 @@
 Import("env")
 
-env.AppendUnique(CPPPATH=["${jdk_include_dir}"])
+env.AppendUnique(CPPPATH=["${jdk_include_dir}", "${jdk_include_dir}/linux"])
 
 sources = ["FileCatalog.i"]
 

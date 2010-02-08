@@ -1,3 +1,5 @@
+import os
+
 vars = Variables("variables.cache")
 
 vars.AddVariables(
@@ -47,7 +49,8 @@ env = Environment(tools=["default", "doxygen", "swig"],
                   variables=vars,
                   CCFLAGS=["-pedantic", "-Wall", "-Wno-long-long"],
                   CPPPATH=["#src"],
-                  LIBPATH=["#lib"])
+                  LIBPATH=["#lib"],
+                  ENV={"PATH": os.environ["PATH"]})
 
 env.Default(None)
 
