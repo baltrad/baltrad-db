@@ -10,7 +10,7 @@ vars.AddVariables(
     PathVariable("qt_lib_dir", "Qt4 libraries directory",
                  "${qt_dir}/lib", PathVariable.PathIsDir),
     PathVariable("qt_include_dir", "Qt4 include directory",
-                 "${qt_dir}/include/qt4", PathVariable.PathIsDir),
+                 "${qt_dir}/include", PathVariable.PathIsDir),
     PathVariable("hlhdf_dir", "HLHDF install root",
                  "/usr", PathVariable.PathIsDir),
     PathVariable("hlhdf_lib_dir", "HLHDF libraries directory",
