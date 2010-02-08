@@ -53,6 +53,7 @@ env = Environment(tools=["default", "doxygen", "swig"],
                   LIBPATH=["#lib"],
                   ENV={"PATH": os.environ["PATH"]})
 confenv = env.Clone()
+confenv["CCFLAGS"].remove("-pedantic")
 
 env.Default(env.Alias("shared-library"))
 
@@ -189,7 +190,7 @@ def CheckQt(ctx, qt_include_dir, qt_lib_dir):
     ctx.Message("Checking for Qt >= 4.5... ")
     oldlibs = ctx.AppendLIBS(["QtCore"])
     ctx.env.AppendUnique(CPPPATH=qt_include_dir, LIBPATH=qt_lib_dir)
-    ctx.env.AppendENVPath('LD_LIBRARY_PATH', qt_lib_dir)
+    ctx.env.AppendENVPath('LD_LIBRARY_PATH', env.Dir(qt_lib_dir).abspath)
     result, _ = ctx.TryRun("\n".join(src), ".cpp")
     ctx.Result(result)
     ctx.SetLIBS(oldlibs)
@@ -221,7 +222,8 @@ if "test" in _TARGET_STRS:
     rets.append(conf.CheckLibWithHeader("gmock", "gmock/gmock.h", "c++"))
 
 if "java-wrapper" in _TARGET_STRS:
-    conf.env.AppendUnique(CPPPATH="${jdk_include_dir}",
+    conf.env.AppendUnique(CPPPATH=["${jdk_include_dir}",
+                                   "${jdk_include_dir}/linux"],
                           LIBPATH="${jdk_lib_dir}")
     rets.append(conf.CheckCHeader("jni.h"))
 
