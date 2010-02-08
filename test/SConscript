@@ -2,6 +2,11 @@ Import("env")
 
 sources = env.Glob("*.cpp")
 
+# remove -pedantic flag if using older g++
+cxxver = tuple(map(int, env["CXXVERSION"].split(".")))
+if cxxver < (4, 3, 0):
+    env["CCFLAGS"].remove("-pedantic")
+
 env.Append(CCFLAGS=["-g"])
 
 if env.get("test_db_dsn"):
