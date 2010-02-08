@@ -215,7 +215,7 @@ if set(["shared-library", "java-wrapper", "test"]) & set(_TARGET_STRS):
     rets.append(conf.CheckBoost(env["boost_include_dir"]))
 
 
-if "test" in _TARGET_STRS:
+if set(["test", "hudsontest"]) & set(_TARGET_STRS):
     conf.env.AppendUnique(CPPPATH="${gtest_include_dir}",
                           LIBPATH="${gtest_lib_dir}")
     rets.append(conf.CheckLibWithHeader("gtest", "gtest/gtest.h", "c++"))
