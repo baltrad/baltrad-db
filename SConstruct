@@ -1,4 +1,5 @@
 import os
+import sys
 
 vars = Variables("variables.cache")
 
@@ -41,7 +42,7 @@ vars.AddVariables(
     BoolVariable("build_java", "build java bindings", True),
                 ("install_root", "installation directory",
                  "${prefix}/baltrad/db-${version}"),
-    ("test_db_dsn", "database to use for testing", None)
+                ("test_db_dsn", "database to use for testing", None)
 )
 
 env = Environment(tools=["default", "doxygen", "swig"],
@@ -52,7 +53,10 @@ env = Environment(tools=["default", "doxygen", "swig"],
                   LIBPATH=["#lib"],
                   ENV={"PATH": os.environ["PATH"]})
 
-env.Default(None)
+env.Default(env.Alias("shared-library"))
+
+if env["build_java"]:
+    env.Default(env.Alias("java-wrapper"))
 
 env["version"] = "devel"
 
@@ -65,7 +69,6 @@ if vars.UnknownVariables():
 vars.Save("variables.cache", env)
 
 Help(vars.GenerateHelpText(env))
-
 
 if env["debug"]:
     env.AppendUnique(CCFLAGS=["-g", "-fno-inline-functions"])
@@ -97,10 +100,9 @@ SConscript("test/SConscript",
            build_dir="build/test", duplicate=0,
            exports={"env": testenv})
 
-if env["build_java"]:
-    SConscript("swig/SConscript",
-               build_dir="build/swig", duplicate=0,
-               exports={"env": env.Clone()})
+SConscript("swig/SConscript",
+           build_dir="build/swig", duplicate=0,
+           exports={"env": env.Clone()})
 
 env.Alias("install", [env["install_root"]])
 
@@ -111,5 +113,115 @@ env.Alias("test", test)
 hudsontest = testenv.Command("hudsontest", "#test/runner",
                    "$SOURCE "
                    "--gtest_output=xml:${hudsontest_output}")
+
+##
+# configure
+##
+
+def CheckBoost(ctx, boost_include_dir):
+    ctx.Message("Checking for Boost version >= 1.38... ")
+    ctx.env.AppendUnique(CPPPATH=boost_include_dir)
+    src = (
+        "#include <boost/version.hpp>",
+        "int main(int argc, char** argv) {",
+        "    if (BOOST_VERSION / 100000 == 1 and BOOST_VERSION / 100 % 1000 >= 38)",
+        "        return 0;",
+        "    else",
+        "        return 1;",
+        "}"
+    )
+
+    result, _ = ctx.TryRun("\n".join(src), ".cpp")
+    ctx.Result(result)
+
+    if not result: return 0
+
+    headers = (
+        "enable_shared_from_this.hpp",
+        "foreach.hpp",
+        "lexical_cast.hpp",
+        "noncopyable.hpp",
+        "scoped_ptr.hpp",
+        "shared_ptr.hpp",
+        "algorithm/string/classification.hpp",
+        "algorithm/string/erase.hpp",
+        "algorithm/string/join.hpp",
+        "algorithm/string/split.hpp",
+        "iterator/iterator_facade.hpp",
+        "lambda/bind.hpp",
+        "lambda/lambda.hpp",
+        "numeric/conversion/cast.hpp",
+        "ptr_container/ptr_vector.hpp",
+    )
+
+
+    for header in headers:
+        result = conf.CheckCXXHeader("/".join(("boost", header)))
+        if not result:
+            return 0
+    return 1
+
+def CheckHlhdf(ctx, hlhdf_include_dir, hlhdf_lib_dir):
+    src = (
+        "#include \"hlhdf.h\"",
+        "int main() { return 0; }"
+    )
+    ctx.Message("Checking for HLHDF... ")
+    ctx.env.Append(LIBS=["hlhdf", "hdf5"])
+    ctx.env.AppendUnique(CPPPATH=hlhdf_include_dir, LIBPATH=hlhdf_lib_dir)
+    result = ctx.TryLink("\n".join(src), ".c")
+    ctx.Result(result)
+
+    return result
+
+def CheckQt(ctx, qt_include_dir, qt_lib_dir):
+    src = (
+        "#include <QtCore/QtGlobal>",
+        "int main(int argc, char** argv) {",
+        "    if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))",
+        "        return 0;",
+        "    else",
+        "        return 1;",
+        "}"
+    )
+    ctx.Message("Checking for Qt >= 4.5... ")
+    ctx.env.Append(LIBS=["QtCore"])
+    ctx.env.AppendUnique(CPPPATH=qt_include_dir, LIBPATH=qt_lib_dir)
+    result, _ = ctx.TryRun("\n".join(src), ".cpp")
+    ctx.Result(result)
+    
+    return result
+
+conf = Configure(env,
+                 custom_tests={
+                    "CheckBoost": CheckBoost,
+                    "CheckHlhdf": CheckHlhdf,
+                    "CheckQt": CheckQt
+                 },
+                 clean=False, help=False)
+
+rets = [] # list of conf return values
+
+_TARGET_STRS = map(str, BUILD_TARGETS)
+
+if set(["shared-library", "java-wrapper", "test"]) & set(_TARGET_STRS):
+    rets.append(conf.CheckQt(env["qt_include_dir"], env["qt_lib_dir"]))
+    rets.append(conf.CheckLibWithHeader("QtSql", "QtSql/QSqlDatabase", "c++"))
+    rets.append(conf.CheckHlhdf(env["hlhdf_include_dir"], env["hlhdf_lib_dir"]))
+    rets.append(conf.CheckBoost(env["boost_include_dir"]))
+
+
+if "test" in _TARGET_STRS:
+    rets.append(conf.CheckLibWithHeader("gtest", "gtest/gtest.h", "c++"))
+    rets.append(conf.CheckLibWithHeader("gmock", "gmock/gmock.h", "c++"))
+
+if "java-wrapper" in _TARGET_STRS:
+    rets.append(conf.CheckCHeader("jni.h"))
+
+if 0 in rets:
+    print >> sys.stderr, "\nMissing required dependencies."
+    Exit(1)
+
+env = conf.Finish()
 
 # vim:filetype=python:et:ts=4:sw=4:

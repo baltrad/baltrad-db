@@ -6,3 +6,5 @@ test/runner
 .*.swp
 variables.cache
 .sconsign.dblite
+.sconf_temp/
+config.log

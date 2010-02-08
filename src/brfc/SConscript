@@ -29,7 +29,7 @@ sources = [
 
 lib = env.SharedLibrary("#lib/brfc", sources, LIBS=["hdf5", "hlhdf", "QtSql"])
 
-env.Default(lib)
+env.Alias("shared-library", lib)
 
 env.Install("${install_root}/lib", lib)
 

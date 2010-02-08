@@ -32,9 +32,7 @@ lib = env.SharedLibrary("#lib/brfc_java", sources, LIBS=["brfc"])
 java = env.Java(target="classes", source=["eu", "java"])
 jar = env.Jar(target="#lib/jbrfc.jar", source=["classes/eu"])
 
-env.Default(lib)
-env.Default(java)
-env.Default(jar)
+env.Alias("java-wrapper", [lib, java, jar])
 
 env.Install("${install_root}/lib", lib)
 env.Install("${install_root}/java", jar)
