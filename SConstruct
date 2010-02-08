@@ -52,6 +52,7 @@ env = Environment(tools=["default", "doxygen", "swig"],
                   CPPPATH=["#src"],
                   LIBPATH=["#lib"],
                   ENV={"PATH": os.environ["PATH"]})
+confenv = env.Clone()
 
 env.Default(env.Alias("shared-library"))
 
@@ -167,10 +168,11 @@ def CheckHlhdf(ctx, hlhdf_include_dir, hlhdf_lib_dir):
         "int main() { return 0; }"
     )
     ctx.Message("Checking for HLHDF... ")
-    ctx.env.Append(LIBS=["hlhdf", "hdf5"])
+    oldlibs = ctx.AppendLIBS(["hlhdf", "hdf5"])
     ctx.env.AppendUnique(CPPPATH=hlhdf_include_dir, LIBPATH=hlhdf_lib_dir)
     result = ctx.TryLink("\n".join(src), ".c")
     ctx.Result(result)
+    ctx.SetLIBS(oldlibs)
 
     return result
 
@@ -185,14 +187,15 @@ def CheckQt(ctx, qt_include_dir, qt_lib_dir):
         "}"
     )
     ctx.Message("Checking for Qt >= 4.5... ")
-    ctx.env.Append(LIBS=["QtCore"])
+    oldlibs = ctx.AppendLIBS(["QtCore"])
     ctx.env.AppendUnique(CPPPATH=qt_include_dir, LIBPATH=qt_lib_dir)
+    ctx.env.AppendENVPath('LD_LIBRARY_PATH', qt_lib_dir)
     result, _ = ctx.TryRun("\n".join(src), ".cpp")
     ctx.Result(result)
-    
+    ctx.SetLIBS(oldlibs)
     return result
 
-conf = Configure(env,
+conf = Configure(confenv,
                  custom_tests={
                     "CheckBoost": CheckBoost,
                     "CheckHlhdf": CheckHlhdf,
@@ -212,10 +215,14 @@ if set(["shared-library", "java-wrapper", "test"]) & set(_TARGET_STRS):
 
 
 if "test" in _TARGET_STRS:
+    conf.env.AppendUnique(CPPPATH="${gtest_include_dir}",
+                          LIBPATH="${gtest_lib_dir}")
     rets.append(conf.CheckLibWithHeader("gtest", "gtest/gtest.h", "c++"))
     rets.append(conf.CheckLibWithHeader("gmock", "gmock/gmock.h", "c++"))
 
 if "java-wrapper" in _TARGET_STRS:
+    conf.env.AppendUnique(CPPPATH="${jdk_include_dir}",
+                          LIBPATH="${jdk_lib_dir}")
     rets.append(conf.CheckCHeader("jni.h"))
 
 if 0 in rets:
