@@ -145,6 +145,7 @@ def CheckBoost(ctx, boost_include_dir):
         "noncopyable.hpp",
         "scoped_ptr.hpp",
         "shared_ptr.hpp",
+        "variant.hpp",
         "algorithm/string/classification.hpp",
         "algorithm/string/erase.hpp",
         "algorithm/string/join.hpp",

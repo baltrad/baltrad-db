@@ -17,6 +17,7 @@
     #include <brfc/Query.hpp>
     #include <brfc/ResultSet.hpp>
     #include <brfc/Database.hpp>
+    #include <brfc/Variant.hpp>
     
     #include <brfc/expr/fwd.hpp>
     #include <brfc/expr/Element.hpp>
@@ -46,6 +47,10 @@
 %ignore brfc::ResultSet::date; // replaced
 %ignore brfc::ResultSet::operator=;
 %rename(boolean_) brfc::ResultSet::boolean;
+
+%ignore brfc::Variant::time; // replaced
+%ignore brfc::Variant::date; // replaced
+%ignore brfc::Variant::operator=;
 
 %ignore brfc::expr::Visitor;
 %ignore brfc::expr::Compiler;
@@ -169,6 +174,26 @@ SWIG_SHARED_PTR(Attribute, brfc::Attribute);
   }
 %}
 
+%extend brfc::Variant {
+    std::string _time_string() const {
+        return $self->time().toString("HH:mm:ss").toStdString();
+    }
+
+    std::string _date_string() const {
+        return $self->date().toString("yyyy-MM-dd").toStdString();
+    }
+}
+
+%typemap(javacode) brfc::Variant %{
+  public java.sql.Date date() {
+    return java.sql.Date.valueOf(_date_string());
+  }
+
+  public java.sql.Time time() {
+    return java.sql.Time.valueOf(_time_string());
+  }
+%}
+
 %include <brfc/expr/fwd.hpp>
 %include <brfc/expr/Element.hpp>
 %include <brfc/expr/Label.hpp>
@@ -187,6 +212,7 @@ SWIG_SHARED_PTR(Attribute, brfc::Attribute);
 %include <brfc/FileCatalog.hpp>
 %include <brfc/Query.hpp>
 %include <brfc/Source.hpp>
+%include <brfc/Variant.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:
 */
