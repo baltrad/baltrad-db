@@ -255,8 +255,8 @@ RelationalDatabase::save_recurse(const DataObject& dobj,
                                  const id_type& file_id,
                                  const id_type& parent_id) {
     id_type dobj_id = save(dobj, file_id, parent_id);
-    BOOST_FOREACH(const Attribute& attr, dobj.attributes()) {
-        save(attr, dobj_id);
+    BOOST_FOREACH(shared_ptr<Attribute> attr, dobj.attributes()) {
+        save(*attr, dobj_id);
     }
     return dobj_id;
 }

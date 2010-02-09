@@ -5,12 +5,7 @@
 
 #include <algorithm>
 
-#include <boost/lambda/lambda.hpp>
-#include <boost/lambda/bind.hpp>
 #include <boost/algorithm/string/join.hpp>
-
-using boost::lambda::bind;
-using boost::lambda::_1;
 
 namespace brfc {
 
@@ -31,18 +26,16 @@ DataObject::~DataObject() {
 
 DataObject&
 DataObject::child(const std::string& name, bool create) {
-    ChildVector::iterator i;
-    i = std::find_if(children_.begin(), children_.end(),
-                     bind(&DataObject::name_, _1) == name);
-
-    if (i == children_.end()) {
-        if (create) {
-            return add_child(name);
-        } else {
-            throw lookup_error("no child");
+    BOOST_FOREACH(shared_ptr<DataObject> child, children_) {
+        if (child->name() == name) {
+            return *child;
         }
+    }
+
+    if (create) {
+        return add_child(name);
     } else {
-        return *i;
+        throw lookup_error("no child");
     }
 }
 
@@ -59,19 +52,19 @@ DataObject::path() const {
 
 DataObject&
 DataObject::add_child(const std::string& name) {
-    children_.push_back(new DataObject(name, this));
-    return children_.back();
+    children_.push_back(shared_ptr<DataObject>(new DataObject(name, this)));
+    return *children_.back();
 }
 
 void
 DataObject::add_attribute(const std::string& name,
                           const QVariant& value) {
-    AttributeVector::iterator i = 
-        std::find_if(attrs_.begin(), attrs_.end(),
-                     bind(&Attribute::name, _1) == name);
-    if (i != attrs_.end()) 
-        throw duplicate_entry(name);
-    attrs_.push_back(new Attribute(name, value, this));
+    BOOST_FOREACH(shared_ptr<Attribute> attr, attrs_) {
+        if (attr->name() == name) {
+            throw duplicate_entry(name);
+        }
+    }
+    attrs_.push_back(shared_ptr<Attribute>(new Attribute(name, value, this)));
 }
 
 bool
@@ -93,12 +86,12 @@ DataObject::attribute(const std::string& name) const {
 Attribute&
 DataObject::attribute(const std::string& name) {
     AttributeVector::iterator i;
-    i = std::find_if(attrs_.begin(), attrs_.end(),
-                     bind(&Attribute::name, _1) == name);
-    if (i == attrs_.end()) {
-        throw lookup_error("no such attribute: " + name);
+    BOOST_FOREACH(shared_ptr<Attribute> attr, attrs_) {
+        if (attr->name() == name) {
+            return *attr;
+        }
     }
-    return *i;
+    throw lookup_error("no such attribute: " + name);
 }
 
 DataObject::iterator

@@ -13,7 +13,6 @@ library dependencies:
 * boost::iterator               1.40
 * boost::lambda                 1.40
 * boost::lexical_cast           1.40
-* boost::pointer_container      1.40
 * boost::smart_ptr              1.40
 * boost::string_algo            1.40
 * boost::utility                1.40

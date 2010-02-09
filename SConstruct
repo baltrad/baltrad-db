@@ -153,7 +153,6 @@ def CheckBoost(ctx, boost_include_dir):
         "lambda/bind.hpp",
         "lambda/lambda.hpp",
         "numeric/conversion/cast.hpp",
-        "ptr_container/ptr_vector.hpp",
     )
 
 

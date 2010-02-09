@@ -2,14 +2,15 @@
 #define BRFC_DATA_OBJECT_H
 
 #include <brfc/assert.hpp>
+#include <brfc/smart_ptr.hpp>
 #include <brfc/Attribute.hpp>
 
 #include <deque>
 #include <string>
+#include <vector>
 
 #include <boost/foreach.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
 namespace brfc {
@@ -29,7 +30,7 @@ class DataObject : public boost::noncopyable {
   public:
     typedef DataObjectIterator<DataObject> iterator;
     typedef DataObjectIterator<const DataObject> const_iterator;
-    typedef boost::ptr_vector<Attribute> AttributeVector;
+    typedef std::vector<shared_ptr<Attribute> > AttributeVector;
 
 
     /**
@@ -159,7 +160,7 @@ class DataObject : public boost::noncopyable {
     friend class DataObjectIterator<const DataObject>;
     friend class DataObjectIterator<DataObject>;
 
-    typedef boost::ptr_vector<DataObject> ChildVector;
+    typedef std::vector<shared_ptr<DataObject> > ChildVector;
 
     DataObject(const std::string& name,
                const DataObject* parent);
@@ -229,8 +230,8 @@ class DataObjectIterator :
         if (not stack_.empty()) {
             T* cur = stack_.front();
             stack_.pop_front();
-            BOOST_FOREACH(T& child, cur->children_) {
-                stack_.push_back(&child);
+            BOOST_FOREACH(shared_ptr<T> child, cur->children_) {
+                stack_.push_back(child.get());
             }
         }
     }
