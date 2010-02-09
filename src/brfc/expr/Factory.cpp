@@ -21,7 +21,7 @@ Factory::string(const std::string& value) const {
 }
 
 LiteralPtr
-Factory::integer(qlonglong value) const {
+Factory::integer(long long value) const {
     return Literal::create(value);
 }
 

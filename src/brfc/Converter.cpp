@@ -63,13 +63,13 @@ IntConverter::do_convert(HL_FormatSpecifier format,
     QVariant val;
     switch (format) {
         case HLHDF_INT:
-            val = numeric_cast<qlonglong>(*reinterpret_cast<int*>(data));
+            val = numeric_cast<long long>(*reinterpret_cast<int*>(data));
             break;
         case HLHDF_LONG:
-            val = numeric_cast<qlonglong>(*reinterpret_cast<int32_t*>(data));
+            val = numeric_cast<long long>(*reinterpret_cast<int32_t*>(data));
             break;
         case HLHDF_LLONG:
-            val = *reinterpret_cast<qlonglong*>(data);
+            val = *reinterpret_cast<long long*>(data);
             break;
         default:
             throw brfc_error("invalid format");
@@ -81,8 +81,8 @@ HL_Data
 IntConverter::do_convert(const QVariant& value) const {
     BRFC_ASSERT(value.type() == QVariant::LongLong);
     
-    qlonglong v = value.toLongLong();
-    return HL_Data(sizeof(qlonglong), "llong",
+    long long v = value.toLongLong();
+    return HL_Data(sizeof(long long), "llong",
                    reinterpret_cast<unsigned char*>(&v));
 }
 
