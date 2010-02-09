@@ -21,6 +21,7 @@ for a full list.
 There are a few naming differences though:
 
 @li brfc::expr::Factory is mapped to @c eu.baltrad.fc.ExpressionFactory
+@li brfc::expr::Attribute is mapped to @c eu.baltrad.fc.AttributeExpr
 @li brfc::brfc_error is mapped to @c eu.baltrad.fc.FileCatalogError
 @li brfc::fs_error is mapped to @c eu.baltrad.fc.FileSystemError
 @li brfc::db_error is mapped to @c eu.baltrad.fc.DatabaseError
@@ -169,7 +170,7 @@ ExpressionFactory xpr;
 Query q = fc.query();
 
 // create "path" attribute
-Attribute path = xpr.attribute("path");
+AttributeExpr path = xpr.attribute("path");
 // mark it for fetching
 q.fetch(path);
 // execute

@@ -9,6 +9,10 @@
 %{
     #include <brfc/exceptions.hpp>
     #include <brfc/smart_ptr.hpp>
+    #include <brfc/Source.hpp>
+    #include <brfc/Attribute.hpp>
+    #include <brfc/DataObject.hpp>
+    #include <brfc/File.hpp>
     #include <brfc/FileCatalog.hpp>
     #include <brfc/Query.hpp>
     #include <brfc/ResultSet.hpp>
@@ -56,8 +60,25 @@
 %ignore brfc::expr::Parentheses::create;
 %ignore brfc::expr::Label::create;
 
+// ignore File constructors
+%ignore brfc::File::File;
+%ignore brfc::File::File(const std::string& path,
+                         const AttributeSpecs& specs);
+%ignore brfc::File::File(const std::string& object,
+                         const QDate& date,
+                         const QTime& time,
+                         const std::string& source,
+                         const std::string& version);
+
+// ignore Source constructor
+%ignore brfc::Source::Source(const QString& source);
+
+%ignore brfc::Query::fetch;
+
 %rename(ExpressionFactory) brfc::expr::Factory;
+%rename(AttributeExpr) brfc::expr::Attribute;
 %rename(boolean_) brfc::expr::Factory::boolean;
+
 
 SWIG_SHARED_PTR(Element,
                 brfc::expr::Element)
@@ -79,11 +100,16 @@ SWIG_SHARED_PTR_DERIVED(Label,
 SWIG_SHARED_PTR_DERIVED(Parentheses,
                         brfc::expr::Expression,
                         brfc::expr::Parentheses);
-SWIG_SHARED_PTR_DERIVED(Attribute,
+SWIG_SHARED_PTR_DERIVED(AttributeExpr,
                         brfc::expr::Expression,
                         brfc::expr::Attribute);
 
 SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
+SWIG_SHARED_PTR(File, brfc::File);
+SWIG_SHARED_PTR(Attribute, brfc::Attribute);
+
+%template(AttributeVector) std::vector<brfc::shared_ptr<brfc::Attribute> >;
+%template(StringVector) std::vector<std::string>;
 
 // Enable the JNI class to load the required native library.
 %pragma(java) jniclasscode=%{
@@ -155,9 +181,12 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 
 %include <brfc/ResultSet.hpp>
 %include <brfc/Database.hpp>
+%include <brfc/Attribute.hpp>
+%include <brfc/DataObject.hpp>
+%include <brfc/File.hpp>
 %include <brfc/FileCatalog.hpp>
 %include <brfc/Query.hpp>
-
+%include <brfc/Source.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:
 */
