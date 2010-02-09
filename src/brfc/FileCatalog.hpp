@@ -84,7 +84,7 @@ class FileCatalog {
     /**
      * @brief import file to catalog
      * @param path absolute path to file
-     * @return path to the stored file (relative to storage root)
+     * @return File instance stored in database
      * @throw db_error if storing file to database fails
      * @throw fs_error if file can not be opened or copy to new destination
                        fails.
@@ -92,7 +92,7 @@ class FileCatalog {
      *
      * on import file is physically copied to a new location
      */
-    std::string catalog(const std::string& path);
+    shared_ptr<File> catalog(const std::string& path);
     
     /**
      * @brief remove file from catalog

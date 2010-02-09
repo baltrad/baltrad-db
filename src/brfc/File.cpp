@@ -23,12 +23,16 @@
 namespace brfc {
 
 File::File()
-        : root_(new DataObject("", this)) {
+        : root_(new DataObject("", this))
+        , ignored_attributes_()
+        , path_() {
 
 }
 
 File::File(const std::string& path, const AttributeSpecs& specs)
-        : root_(new DataObject("", this)) {
+        : root_(new DataObject("", this))
+        , ignored_attributes_()
+        , path_(path) {
     load(path, specs);
 }
 

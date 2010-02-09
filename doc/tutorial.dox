@@ -82,14 +82,14 @@ specifications (expr::AttributeSpec).
 @section importing Importing files
 
 Importing a file is simple, just feed an absolute pathname to
-brfc::FileCatalog::catalog and if successful, you'll get back a path where the
-file is stored, relative to storage root.
+brfc::FileCatalog::catalog and if successful, you'll get back a pointer
+to the File instance.
 
 @code
 brfc::FileCatalog fc(dsn, storage_dir);
 
 try {
-    std::string stored_to = fc.catalog("/path/to/file.h5");
+    std::shared_ptr<File> stored_to = fc.catalog("/path/to/file.h5");
 } catch (const brfc::db_error& e) {
     // problem storing file in database
 } catch (const brfc::fs_error& e) {

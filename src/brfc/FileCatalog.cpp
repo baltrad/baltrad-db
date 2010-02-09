@@ -66,22 +66,24 @@ FileCatalog::is_cataloged(const File& f) const {
     return db_->has_file(f);
 }
 
-std::string
+shared_ptr<File>
 FileCatalog::catalog(const std::string& path) {
-    File f(path, *specs_);
+    shared_ptr<File> f(new File(path, *specs_));
 
-    if (is_cataloged(f))
+    if (is_cataloged(*f))
         throw duplicate_entry(path);
     
-    std::string target = namer_->name(f);
+    std::string target = namer_->name(*f);
 
     if (not QDir::isAbsolutePath(target.c_str()))
         throw std::runtime_error("namer must return absolute paths");
 
+    f->path(target);
+
     db_->begin();
     // try saving to database
     try {
-        db_->save_file(target.c_str(), f);
+        db_->save_file(target.c_str(), *f);
     } catch (const db_error& e) {
         db_->rollback();
         throw;
@@ -93,7 +95,7 @@ FileCatalog::catalog(const std::string& path) {
     } else {
         db_->commit();
     }
-    return target;
+    return f;
 }
 
 void

@@ -87,8 +87,11 @@ TEST_F(FileCatalog_test, test_catalog) {
         .WillOnce(Return(target));
     EXPECT_CALL(*db, do_save_file(target.c_str(), _));
     EXPECT_CALL(*db, do_commit());
+    
+    // file is given the path returned by namer
+    shared_ptr<File> f = fc.catalog(minfile->filename());
+    EXPECT_EQ(f->path(), target);
 
-    fc.catalog(minfile->filename());
     EXPECT_TRUE(QFile::exists(target.c_str()));
 }
 

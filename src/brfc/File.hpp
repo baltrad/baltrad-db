@@ -20,6 +20,7 @@ class Source;
 
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
+ * @ingroup exposed_in_binds
  */
 class File : public boost::noncopyable {
   public:
@@ -112,6 +113,14 @@ class File : public boost::noncopyable {
         return ignored_attributes_;
     }
 
+    const std::string& path() const {
+        return path_;
+    }
+
+    void path(const std::string& path) {
+        path_ = path;
+    }
+
   private:
     /**
      * @brief load from filesystem
@@ -129,8 +138,9 @@ class File : public boost::noncopyable {
      */
     void set_path_from_attributes();
 
-    StringVector ignored_attributes_;
     boost::scoped_ptr<DataObject> root_;
+    StringVector ignored_attributes_;
+    std::string path_;
 };
 
 } // namespace brfc
