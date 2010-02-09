@@ -41,7 +41,12 @@ TEST(Variant_test, copy_assign) {
 TEST(Variant_test, string) {
     Variant v("öäüxyz");
     EXPECT_EQ(v.type(), Variant::STRING);
-    EXPECT_STREQ(v.string(), "öäüxyz");
+    EXPECT_EQ(v.string(), "öäüxyz");
     EXPECT_FALSE(v.is_null());
     EXPECT_THROW(v.longlong(), value_error);
+}
+
+TEST(Variant_test, qstring) {
+    Variant v("öäüxyz");
+    EXPECT_EQ(v.qstring().length(), 6);
 }

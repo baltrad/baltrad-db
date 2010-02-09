@@ -10,6 +10,8 @@
 #include <QtCore/QDate>
 #include <QtCore/QTime>
 
+#include <string>
+
 namespace brfc {
 
 class Variant {
@@ -88,8 +90,12 @@ class Variant {
     bool is_date() const { return type_ == DATE; }
     bool is_time() const { return type_ == TIME; }
 
-    const char* string() const {
-        return get<QString>().toUtf8();
+    std::string string() const {
+        return std::string(get<QString>().toUtf8().constData());
+    }
+
+    const QString& qstring() const {
+        return get<const QString&>();
     }
 
     long long longlong() const {
@@ -104,12 +110,12 @@ class Variant {
         return get<bool>();
     }
 
-    QDate date() const {
-        return get<QDate>();
+    const QDate& date() const {
+        return get<const QDate&>();
     }
 
-    QTime time() const {
-        return get<QTime>();
+    const QTime& time() const {
+        return get<const QTime&>();
     }
 
   private:
@@ -117,8 +123,8 @@ class Variant {
     T get() const {
         try {
             return boost::get<T>(value_);
-        } catch (const boost::bad_get& exc) {
-            throw value_error(exc.what());
+        } catch (const boost::bad_get&) {
+            throw value_error("held variant value is not of requested type");
         }
     }
 
