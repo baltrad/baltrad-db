@@ -65,8 +65,9 @@
 %ignore brfc::expr::Parentheses::create;
 %ignore brfc::expr::Label::create;
 
-// ignore File constructors
+// ignore File members
 %ignore brfc::File::File;
+%ignore brfc::File::db_id(long long db_id);
 
 // ignore Source constructor
 %ignore brfc::Source::Source(const QString& source);

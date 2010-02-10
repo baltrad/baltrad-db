@@ -34,7 +34,7 @@ class MockDatabase : public Database {
     
     MOCK_CONST_METHOD1(do_has_file, bool(const File&));
     MOCK_METHOD1(do_remove_file, void(const char*));
-    MOCK_METHOD2(do_save_file, void(const char*, const File&));
+    MOCK_METHOD2(do_save_file, long long(const char*, const File&));
     MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
     MOCK_METHOD0(do_clean, void());  
 };
@@ -85,12 +85,14 @@ TEST_F(FileCatalog_test, test_catalog) {
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return(target));
-    EXPECT_CALL(*db, do_save_file(target.c_str(), _));
+    EXPECT_CALL(*db, do_save_file(target.c_str(), _))
+        .WillOnce(Return(1));
     EXPECT_CALL(*db, do_commit());
     
     // file is given the path returned by namer
     shared_ptr<File> f = fc.catalog(minfile->filename());
     EXPECT_EQ(f->path(), target);
+    EXPECT_EQ(f->db_id(), 1);
 
     EXPECT_TRUE(QFile::exists(target.c_str()));
 }
@@ -117,7 +119,8 @@ TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return(target));
-    EXPECT_CALL(*db, do_save_file(target.c_str(), _));
+    EXPECT_CALL(*db, do_save_file(target.c_str(), _))
+        .WillOnce(Return(1));
     EXPECT_CALL(*db, do_rollback());
 
     tempdir.reset(); // tempdir removed

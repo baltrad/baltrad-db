@@ -121,6 +121,10 @@ class File : public boost::noncopyable {
         path_ = path;
     }
 
+    long long db_id() const { return db_id_; }
+
+    void db_id(long long db_id) { db_id_ = db_id; }
+
   private:
     /**
      * @brief load from filesystem
@@ -141,6 +145,7 @@ class File : public boost::noncopyable {
     boost::scoped_ptr<DataObject> root_;
     StringVector ignored_attributes_;
     std::string path_;
+    long long db_id_;
 };
 
 } // namespace brfc

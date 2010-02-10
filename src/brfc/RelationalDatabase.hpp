@@ -60,7 +60,7 @@ class RelationalDatabase : public Database {
     
     virtual bool do_has_file(const File& file) const;
     virtual void do_remove_file(const char* path);
-    virtual void do_save_file(const char* path, const File& file);
+    virtual long long do_save_file(const char* path, const File& file);
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
@@ -97,7 +97,7 @@ class RelationalDatabase : public Database {
      *
      * saves File and all DataObjects (also recursively)
      */
-    void save_recurse(const char* path, const File& file);
+    long long save_recurse(const char* path, const File& file);
 
     /**
      * @brief save DataObject recursively

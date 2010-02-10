@@ -26,14 +26,16 @@ namespace brfc {
 File::File()
         : root_(new DataObject("", this))
         , ignored_attributes_()
-        , path_() {
+        , path_()
+        , db_id_(0) {
 
 }
 
 File::File(const std::string& path, const AttributeSpecs& specs)
         : root_(new DataObject("", this))
         , ignored_attributes_()
-        , path_(path) {
+        , path_(path)
+        , db_id_(0) {
     load(path, specs);
 }
 
@@ -42,7 +44,10 @@ File::File(const std::string& object,
            const QTime& time,
            const std::string& source,
            const std::string& version)
-        : root_(new DataObject("", this)) {
+        : root_(new DataObject("", this))
+        , ignored_attributes_()
+        , path_()
+        , db_id_(0) {
     root_->add_attribute("Conventions", Variant("ODIM_H5/V2_0"));
     root_->add_attribute("what/object", Variant(object.c_str()));
     root_->add_attribute("what/version", Variant(version.c_str()));

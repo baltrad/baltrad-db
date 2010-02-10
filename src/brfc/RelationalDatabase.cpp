@@ -93,9 +93,9 @@ RelationalDatabase::do_has_file(const File& file) const {
     return query.next(); // got a result row
 }
 
-void
+long long
 RelationalDatabase::do_save_file(const char* path, const File& file) {
-    save_recurse(path, file);
+    return save_recurse(path, file);
 }
 
 shared_ptr<ResultSet>
@@ -210,7 +210,7 @@ RelationalDatabase::save(const char* path, const File& f) {
     return query.value(0);
 }
 
-void
+long long
 RelationalDatabase::save_recurse(const char* path, const File& f) {
     typedef std::map<const DataObject*, id_type> IdCache;
 
@@ -229,6 +229,7 @@ RelationalDatabase::save_recurse(const char* path, const File& f) {
         id_type dobj_id = save_recurse(dobj, file_id, *parent_id);
         id_cache[&dobj] = dobj_id;
     }
+    return file_id.toLongLong();
 }
 
 RelationalDatabase::id_type

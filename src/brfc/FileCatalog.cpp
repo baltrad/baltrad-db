@@ -83,7 +83,8 @@ FileCatalog::catalog(const std::string& path) {
     db_->begin();
     // try saving to database
     try {
-        db_->save_file(target.c_str(), *f);
+        long long id = db_->save_file(target.c_str(), *f);
+        f->db_id(id);
     } catch (const db_error& e) {
         db_->rollback();
         throw;
