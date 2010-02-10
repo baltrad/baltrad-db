@@ -17,32 +17,32 @@ Factory::attribute(const std::string& name) const {
 
 LiteralPtr
 Factory::string(const std::string& value) const {
-    return Literal::create(QString::fromUtf8(value.c_str()));
+    return Literal::create(Variant(value.c_str()));
 }
 
 LiteralPtr
 Factory::integer(long long value) const {
-    return Literal::create(value);
+    return Literal::create(Variant(value));
 }
 
 LiteralPtr
 Factory::real(double value) const {
-    return Literal::create(value);
+    return Literal::create(Variant(value));
 }
 
 LiteralPtr
 Factory::date(int year, int month, int day) const {
-    return Literal::create(QDate(year, month, day));
+    return Literal::create(Variant(QDate(year, month, day)));
 }
 
 LiteralPtr
 Factory::time(int hour, int minute, int second) const {
-    return Literal::create(QTime(hour, minute, second));
+    return Literal::create(Variant(QTime(hour, minute, second)));
 }
 
 LiteralPtr
 Factory::boolean(bool value) const {
-    return Literal::create(value);
+    return Literal::create(Variant(value));
 }
 
 BinaryOperatorPtr

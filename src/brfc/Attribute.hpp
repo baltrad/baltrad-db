@@ -7,11 +7,10 @@
 #include <boost/scoped_ptr.hpp>
 
 
-class QVariant;
-
 namespace brfc {
 
 class DataObject;
+class Variant;
 
 /**
  * @brief Attribute read from HDF5 file
@@ -25,7 +24,7 @@ class Attribute : public boost::noncopyable {
      * @param data_object owning DataObject
      */
     Attribute(const std::string& name,
-              const QVariant& value,
+              const Variant& value,
               const DataObject* data_object=0);
     
     /**
@@ -41,12 +40,12 @@ class Attribute : public boost::noncopyable {
     /**
      * @brief attribute value
      */
-    const QVariant& value() const { return *value_; }
+    const Variant& value() const { return *value_; }
     
     /**
      * @brief set attribute value
      */
-    void value(const QVariant& value);
+    void value(const Variant& value);
 
     /**
      * @brief full path of this attribute
@@ -62,7 +61,7 @@ class Attribute : public boost::noncopyable {
   private:
     const DataObject* data_object_;
     std::string name_;
-    boost::scoped_ptr<QVariant> value_;
+    boost::scoped_ptr<Variant> value_;
 };
 
 

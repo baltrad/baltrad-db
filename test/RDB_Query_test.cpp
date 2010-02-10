@@ -51,23 +51,23 @@ struct RDB_Query_test : public testing::Test {
     }
 
     virtual void SetUp() {
-        td1.data_object("/do1", true).add_attribute("where/xsize", 1);
-        td1.data_object("/do1", true).add_attribute("where/ysize", 2);
+        td1.data_object("/do1", true).add_attribute("where/xsize", Variant(1));
+        td1.data_object("/do1", true).add_attribute("where/ysize", Variant(2));
 
-        td2.data_object("/do1", true).add_attribute("where/xsize", 2);
-        td2.data_object("/do1", true).add_attribute("where/ysize", 2);
+        td2.data_object("/do1", true).add_attribute("where/xsize", Variant(2));
+        td2.data_object("/do1", true).add_attribute("where/ysize", Variant(2));
 
-        td3.data_object("/do1", true).add_attribute("where/xsize", 3);
-        td3.data_object("/do2", true).add_attribute("where/xsize", 3);
+        td3.data_object("/do1", true).add_attribute("where/xsize", Variant(3));
+        td3.data_object("/do2", true).add_attribute("where/xsize", Variant(3));
 
-        td4.data_object("/do1", true).add_attribute("where/xsize", 6);
-        td4.data_object("/do1", true).add_attribute("where/ysize", 4);
-        td4.data_object("/do2", true).add_attribute("where/ysize", 5);
+        td4.data_object("/do1", true).add_attribute("where/xsize", Variant(6));
+        td4.data_object("/do1", true).add_attribute("where/ysize", Variant(4));
+        td4.data_object("/do2", true).add_attribute("where/ysize", Variant(5));
 
-        td5.data_object("/do1", true).add_attribute("where/xsize", 5);
-        td5.data_object("/do1", true).add_attribute("where/ysize", 2);
-        td5.data_object("/do2", true).add_attribute("where/xsize", 2);
-        td5.data_object("/do2", true).add_attribute("where/ysize", 5);
+        td5.data_object("/do1", true).add_attribute("where/xsize", Variant(5));
+        td5.data_object("/do1", true).add_attribute("where/ysize", Variant(2));
+        td5.data_object("/do2", true).add_attribute("where/xsize", Variant(2));
+        td5.data_object("/do2", true).add_attribute("where/ysize", Variant(5));
 
         db.save_file("td1", td1);
         db.save_file("td2", td2);

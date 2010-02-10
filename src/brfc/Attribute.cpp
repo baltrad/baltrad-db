@@ -2,17 +2,16 @@
 
 #include <brfc/exceptions.hpp>
 #include <brfc/DataObject.hpp>
-
-#include <QtCore/QVariant>
+#include <brfc/Variant.hpp>
 
 namespace brfc {
 
 Attribute::Attribute(const std::string& name,
-                     const QVariant& value,
+                     const Variant& value,
                      const DataObject* data_object)
         : data_object_(data_object)
         , name_(name)
-        , value_(new QVariant(value)) {
+        , value_(new Variant(value)) {
 }
 
 Attribute::~Attribute() {
@@ -20,7 +19,7 @@ Attribute::~Attribute() {
 }
 
 void
-Attribute::value(const QVariant& value) {
+Attribute::value(const Variant& value) {
     *value_ = value;
 }
 

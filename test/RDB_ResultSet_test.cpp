@@ -3,11 +3,11 @@
 #include <brfc/exceptions.hpp>
 #include <brfc/RelationalDatabase.hpp>
 #include <brfc/ResultSet.hpp>
+#include <brfc/Variant.hpp>
 
 #include <QtCore/QDate>
 #include <QtCore/QString>
 #include <QtCore/QTime>
-#include <QtCore/QVariant>
 
 #include "common.hpp"
 
@@ -44,7 +44,7 @@ TEST_F(RDB_ResultSet_test, integer) {
 }
 
 TEST_F(RDB_ResultSet_test, real) {
-    shared_ptr<ResultSet> r = db.query("SELECT 1.1", BindMap());
+    shared_ptr<ResultSet> r = db.query("SELECT 1.1::real", BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_NEAR(r->real(0), 1.1, 0.00001);
 }

@@ -8,6 +8,7 @@
 #include <brfc/DataObject.hpp>
 #include <brfc/Source.hpp>
 #include <brfc/SplitPath.hpp>
+#include <brfc/Variant.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -18,7 +19,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QString>
 #include <QtCore/QTime>
-#include <QtCore/QVariant>
+
 
 namespace brfc {
 
@@ -42,29 +43,29 @@ File::File(const std::string& object,
            const std::string& source,
            const std::string& version)
         : root_(new DataObject("", this)) {
-    root_->add_attribute("Conventions", "ODIM_H5/V2_0");
-    root_->add_attribute("what/object", QString::fromStdString(object));
-    root_->add_attribute("what/version", QString::fromStdString(version));
-    root_->add_attribute("what/date", date);
-    root_->add_attribute("what/time", time);
-    root_->add_attribute("what/source", QString::fromStdString(source));
+    root_->add_attribute("Conventions", Variant("ODIM_H5/V2_0"));
+    root_->add_attribute("what/object", Variant(object.c_str()));
+    root_->add_attribute("what/version", Variant(version.c_str()));
+    root_->add_attribute("what/date", Variant(date));
+    root_->add_attribute("what/time", Variant(time));
+    root_->add_attribute("what/source", Variant(source.c_str()));
 }
 
 Source
 File::source() const {
-    return Source(root_->attribute("what/source").value().toString());
+    return Source(root_->attribute("what/source").value().qstring());
 }
 
 std::string
 File::unique_identifier() const {
-    QString uid = root_->attribute("what/object").value().toString();
+    QString uid = root_->attribute("what/object").value().qstring();
     uid += "_";
-    uid += root_->attribute("what/date").value().toDate().toString("yyyyMMdd");
+    uid += root_->attribute("what/date").value().date().toString("yyyyMMdd");
     uid += "T";
-    uid += root_->attribute("what/time").value().toTime().toString("hhmmss");
+    uid += root_->attribute("what/time").value().time().toString("hhmmss");
     uid += "_";
-    uid += root_->attribute("what/source").value().toString();
-    return uid.toStdString();
+    uid += root_->attribute("what/source").value().qstring();
+    return uid.toUtf8().constData();
 }
 
 File::~File() {
@@ -109,7 +110,7 @@ File::add_attribute_from_node(HL_Node* node,
         return;
     }
 
-    QVariant val = converter->convert(HLNode_getFormat(node), data);
+    const Variant& val = converter->convert(HLNode_getFormat(node), data);
     DataObject& dobj = data_object(path.data_object_path, true);
     try {
         dobj.add_attribute(path.attribute_name, val);

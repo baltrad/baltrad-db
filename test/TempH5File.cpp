@@ -1,8 +1,8 @@
 #include "TempH5File.hpp"
 
-#include <stdexcept>
+#include <brfc/Variant.hpp>
 
-#include <QtCore/QVariant>
+#include <stdexcept>
 
 #include <unistd.h>
 #include <cstdlib>
@@ -30,13 +30,13 @@ TempH5File::minimal(const std::string& object,
                     const std::string& source,
                     const std::string& version) {
     auto_ptr<TempH5File> f(new TempH5File());
-    f->add_attribute("/Conventions", "ODIM_H5/V2_0");
+    f->add_attribute("/Conventions", Variant("ODIM_H5/V2_0"));
     f->add_group("/what");
-    f->add_attribute("/what/object", QString::fromStdString(object));
-    f->add_attribute("/what/version", QString::fromStdString(version));
-    f->add_attribute("/what/date", date);
-    f->add_attribute("/what/time", time);
-    f->add_attribute("/what/source", QString::fromStdString(source));
+    f->add_attribute("/what/object", Variant(object.c_str()));
+    f->add_attribute("/what/version", Variant(version.c_str()));
+    f->add_attribute("/what/date", Variant(date));
+    f->add_attribute("/what/time", Variant(time));
+    f->add_attribute("/what/source", Variant(source.c_str()));
 
     return f;
 }
@@ -51,7 +51,7 @@ void TempH5File::add_group(const char* path) {
 }
 
 void
-TempH5File::add_attribute(const char* path, const QVariant& value) {
+TempH5File::add_attribute(const char* path, const Variant& value) {
     // seek and create nodes
     HL_Node* node = HLNode_newAttribute(path);
     if (HLNodeList_addNode(nodes_.get(), node) == 0) {
@@ -79,18 +79,17 @@ TempH5File::write() {
         throw std::runtime_error("could not write file");
 }
 
-HL_Data TempH5File::convert(const QVariant& value) {
+HL_Data TempH5File::convert(const Variant& value) {
     switch (value.type()) {
-        case QVariant::Double:
+        case Variant::DOUBLE:
             return RealConverter().convert(value);
-        case QVariant::LongLong:
-        case QVariant::Int:
+        case Variant::LONGLONG:
             return IntConverter().convert(value);
-        case QVariant::String:
+        case Variant::STRING:
             return StringConverter().convert(value);
-        case QVariant::Date:
+        case Variant::DATE:
             return DateConverter().convert(value);
-        case QVariant::Time:
+        case Variant::TIME:
             return TimeConverter().convert(value);
         default:
             throw std::runtime_error("could not convert");

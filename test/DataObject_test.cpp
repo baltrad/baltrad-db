@@ -2,6 +2,7 @@
 
 #include <brfc/exceptions.hpp>
 #include <brfc/DataObject.hpp>
+#include <brfc/Variant.hpp>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/lambda/lambda.hpp>
@@ -10,8 +11,6 @@
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
-
-#include <QtCore/QVariant>
 
 using namespace brfc;
 
@@ -85,6 +84,6 @@ TEST(DataObject_test, const_iterator) {
 
 TEST(DataObject_test, add_attribute_twice) {
     DataObject a("a");
-    a.add_attribute("asd", 1);
-    EXPECT_THROW(a.add_attribute("asd", 1), duplicate_entry);
+    a.add_attribute("asd", Variant(1));
+    EXPECT_THROW(a.add_attribute("asd", Variant(1)), duplicate_entry);
 }

@@ -1,7 +1,9 @@
 #include <brfc/RelationalResultSet.hpp>
 
-#include <QtCore/QVariant>
+#include <brfc/exceptions.hpp>
+#include <brfc/Variant.hpp>
 
+#include <QtCore/QVariant>
 #include <QtSql/QSqlQuery>
 
 namespace brfc {
@@ -42,9 +44,13 @@ RelationalResultSet::do_size() {
     return query_->size();
 }
 
-QVariant
+Variant
 RelationalResultSet::do_value_at(unsigned int pos) const {
-    return query_->value(pos);
+    const QVariant& var = query_->value(pos);
+    if (not var.isValid()) {
+        throw lookup_error("invalid position");
+    }
+    return Variant(var);
 }
 
 } // namespace brfc

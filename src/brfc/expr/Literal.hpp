@@ -2,8 +2,7 @@
 #define BRFC_EXPR_LITERAL_HPP
 
 #include <brfc/expr/Expression.hpp>
-
-#include <QtCore/QVariant>
+#include <brfc/Variant.hpp>
 
 namespace brfc {
 namespace expr {
@@ -15,20 +14,20 @@ namespace expr {
  */
 class Literal : public Expression {
   public:
-    static LiteralPtr create(const QVariant& value) {
+    static LiteralPtr create(const Variant& value) {
         return LiteralPtr(new Literal(value));
     }
 
     std::string string() const {
-        return value_.toString().toStdString();
+        return value_.string();
     }
 
-    const QVariant& value() const {
+    const Variant& value() const {
         return value_;
     }
 
   protected:
-    explicit Literal(const QVariant& value)
+    explicit Literal(const Variant& value)
             : value_(value) {
     }
 
@@ -37,7 +36,7 @@ class Literal : public Expression {
     }
 
   private:
-    QVariant value_;
+    Variant value_;
 };
 
 }

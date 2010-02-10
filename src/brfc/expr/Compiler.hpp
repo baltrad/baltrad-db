@@ -2,9 +2,9 @@
 #define BRFC_EXPR_COMPILER_HPP
 
 #include <brfc/assert.hpp>
+#include <brfc/Variant.hpp>
 #include <brfc/expr/Visitor.hpp>
 
-#include <QtCore/QVariant>
 
 #include <map>
 #include <string>
@@ -18,7 +18,7 @@ namespace expr {
  */
 class Compiler : public Visitor {
   public:
-    typedef std::map<QString, QVariant> BindMap;
+    typedef std::map<QString, Variant> BindMap;
 
     /**
      * @brief constructor

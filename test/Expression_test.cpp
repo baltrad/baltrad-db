@@ -11,19 +11,21 @@
 #include <brfc/expr/Parentheses.hpp>
 #include <brfc/expr/Table.hpp>
 #include <brfc/expr/Select.hpp>
+#include <brfc/Variant.hpp>
 
 #include "common.hpp"
 
 #include <QtCore/QString>
 
+using namespace brfc;
 using namespace brfc::expr;
 
 namespace {
 
 struct Expression_test: public testing::Test {
-    QVariant bind(const QString& key) const {
+    Variant bind(const QString& key) const {
         Compiler::BindMap::const_iterator i = compiler.binds().find(key);
-        return i != compiler.binds().end() ? i->second : QVariant();
+        return i != compiler.binds().end() ? i->second : Variant();
     }
 
     Compiler compiler;
@@ -34,7 +36,7 @@ struct Expression_test: public testing::Test {
 
 TEST_F(Expression_test, test_utf_string_literal) {
     LiteralPtr lit = xpr.string("öäü");
-    QString s = lit->value().toString();
+    QString s = lit->value().qstring();
     EXPECT_EQ(s.length(), 3);
 }
 
@@ -42,32 +44,32 @@ TEST_F(Expression_test, test_simple) {
     ExpressionPtr expr = xpr.integer(1)->lt(xpr.integer(2));
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), ":lit_0 < :lit_1");
-    EXPECT_EQ(bind(":lit_0"), 1);
-    EXPECT_EQ(bind(":lit_1"), 2);
+    EXPECT_EQ(bind(":lit_0"), Variant(1));
+    EXPECT_EQ(bind(":lit_1"), Variant(2));
 }
 
 TEST_F(Expression_test, test_between) {
     ExpressionPtr expr = xpr.integer(1)->between(xpr.integer(0), xpr.integer(2));
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), ":lit_0 >= :lit_1 AND :lit_2 <= :lit_3");
-    EXPECT_EQ(bind(":lit_0"), 1);
-    EXPECT_EQ(bind(":lit_1"), 0);
-    EXPECT_EQ(bind(":lit_2"), 1);
-    EXPECT_EQ(bind(":lit_3"), 2);
+    EXPECT_EQ(bind(":lit_0"), Variant(1));
+    EXPECT_EQ(bind(":lit_1"), Variant(0));
+    EXPECT_EQ(bind(":lit_2"), Variant(1));
+    EXPECT_EQ(bind(":lit_3"), Variant(2));
 }
 
 TEST_F(Expression_test, test_string_literal) {
     LiteralPtr l = xpr.string("a string");
     compiler.compile(*l);
     EXPECT_EQ(compiler.compiled(), ":lit_0");
-    EXPECT_EQ(bind(":lit_0"), "a string");
+    EXPECT_EQ(bind(":lit_0"), Variant("a string"));
 }
 
 TEST_F(Expression_test, test_parentheses) {
     ExpressionPtr expr = xpr.integer(1)->parentheses();
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), "(:lit_0)");
-    EXPECT_EQ(bind(":lit_0"), 1);
+    EXPECT_EQ(bind(":lit_0"), Variant(1));
 }
 
 TEST_F(Expression_test, test_column) {
@@ -138,5 +140,5 @@ TEST_F(Expression_test, test_select) {
     std::string expected = "SELECT t1.c1, t1.c2, t2.c3\nFROM t1, t2\nWHERE t1.c1 < :lit_0";
     compiler.compile(*select);
     EXPECT_EQ(compiler.compiled(), expected);
-    EXPECT_EQ(bind(":lit_0"), 1);
+    EXPECT_EQ(bind(":lit_0"), Variant(1));
 }

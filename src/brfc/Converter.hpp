@@ -8,9 +8,9 @@ extern "C" {
 #include <string>
 #include <vector>
 
-class QVariant;
-
 namespace brfc {
+
+class Variant;
 
 /**
  * @brief HLHDF scalar data
@@ -36,25 +36,25 @@ class HL_Data {
 };
 
 /**
- * @brief ABC for HDF5 data to QVariant conversion
+ * @brief ABC for HDF5 data to Variant conversion
  */
 class Converter {
   public:
     /**
-     * @brief convert data from HLHDF format to QVariant
+     * @brief convert data from HLHDF format to Variant
      * @param format format as defined in HLHDF library
      * @param data value bytes
-     * @return QVariant containing the value
+     * @return Variant containing the value
      *
      * @see do_convert
      */
-    QVariant convert(HL_FormatSpecifier format,
+    Variant convert(HL_FormatSpecifier format,
                      unsigned char* data) const;
     
     /**
      * @brief convert QVaraint to HLHDF format
      */
-    HL_Data convert(const QVariant& value) const;
+    HL_Data convert(const Variant& value) const;
 
     /**
      * @brief destructor
@@ -65,13 +65,13 @@ class Converter {
     /**
      * @brief do the actual conversion
      */
-    virtual QVariant do_convert(HL_FormatSpecifier format,
-                                unsigned char* data) const = 0;
+    virtual Variant do_convert(HL_FormatSpecifier format,
+                               unsigned char* data) const = 0;
 
     /**
      * @brief do the actial conversion
      */
-    virtual HL_Data do_convert(const QVariant& value) const = 0;
+    virtual HL_Data do_convert(const Variant& value) const = 0;
 };
 
 /**
@@ -80,13 +80,15 @@ class Converter {
  */
 /**
  * @brief Conversion from HLHDF_STRING to QString
+ *
+ * the string is assumed to be encoded in UTF-8
  */
 class StringConverter : public Converter {
   protected:
-    virtual QVariant do_convert(HL_FormatSpecifier format,
-                                unsigned char* data) const;
+    virtual Variant do_convert(HL_FormatSpecifier format,
+                               unsigned char* data) const;
     
-    virtual HL_Data do_convert(const QVariant& value) const;
+    virtual HL_Data do_convert(const Variant& value) const;
 };
 
 /**
@@ -97,10 +99,10 @@ class DateConverter : public StringConverter {
     /**
      * date values in ODIM_H5 files are encoded as YYYYMMDD strings
      */
-    virtual QVariant do_convert(HL_FormatSpecifier format,
-                                unsigned char* data) const;
+    virtual Variant do_convert(HL_FormatSpecifier format,
+                               unsigned char* data) const;
 
-    virtual HL_Data do_convert(const QVariant& value) const;
+    virtual HL_Data do_convert(const Variant& value) const;
 };
 
 /**
@@ -111,10 +113,10 @@ class TimeConverter : public StringConverter {
     /**
      * time values in ODIM_H5 files are encoded as HHMMSS strings
      */
-    virtual QVariant do_convert(HL_FormatSpecifier format,
-                                unsigned char* data) const;
+    virtual Variant do_convert(HL_FormatSpecifier format,
+                               unsigned char* data) const;
 
-    virtual HL_Data do_convert(const QVariant& value) const;
+    virtual HL_Data do_convert(const Variant& value) const;
 };
 
 /**
@@ -122,10 +124,10 @@ class TimeConverter : public StringConverter {
  */
 class IntConverter : public Converter {
   protected:
-    virtual QVariant do_convert(HL_FormatSpecifier format,
-                                unsigned char* data) const;
+    virtual Variant do_convert(HL_FormatSpecifier format,
+                               unsigned char* data) const;
 
-    virtual HL_Data do_convert(const QVariant& value) const;
+    virtual HL_Data do_convert(const Variant& value) const;
 };
 
 /**
@@ -133,10 +135,10 @@ class IntConverter : public Converter {
  */
 class RealConverter : public Converter {
   protected:
-    virtual QVariant do_convert(HL_FormatSpecifier format,
-                                unsigned char* data) const;
+    virtual Variant do_convert(HL_FormatSpecifier format,
+                               unsigned char* data) const;
 
-    virtual HL_Data do_convert(const QVariant& value) const;
+    virtual HL_Data do_convert(const Variant& value) const;
 };
 
 /**
@@ -147,10 +149,10 @@ class BoolConverter : public StringConverter {
     /**
      * boolean values in ODIM_H5 files are encoded as "True"/"False" strings
      */
-    virtual QVariant do_convert(HL_FormatSpecifier format,
-                                unsigned char* data) const;
+    virtual Variant do_convert(HL_FormatSpecifier format,
+                               unsigned char* data) const;
 
-    virtual HL_Data do_convert(const QVariant& value) const;
+    virtual HL_Data do_convert(const Variant& value) const;
 };
 
 /**

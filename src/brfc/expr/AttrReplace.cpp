@@ -71,7 +71,7 @@ AttrReplace::do_visit(Attribute& attr) {
             join_data_objects(); 
             TablePtr dobj_t = Table::create("data_objects");
             ExpressionPtr on = value_t->column("data_object_id")->eq(dobj_t->column("id"));
-            on = on->and_(value_t->column("attribute_id")->eq(Literal::create(mapping.id)));
+            on = on->and_(value_t->column("attribute_id")->eq(Literal::create(Variant(mapping.id))));
             from_ = from_->join(value_t, on);
         }
     } else {

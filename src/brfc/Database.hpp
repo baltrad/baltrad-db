@@ -5,9 +5,6 @@
 
 #include <brfc/smart_ptr.hpp>
 
-class QString;
-class QVariant;
-
 namespace brfc {
 
 class File;

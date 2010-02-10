@@ -5,9 +5,10 @@
 
 class QDate;
 class QTime;
-class QVariant;
 
 namespace brfc {
+
+class Variant;
 
 /**
  * @brief ABC for Query results
@@ -82,6 +83,11 @@ class ResultSet {
      * @brief get time value at \c pos
      */
     QTime time(unsigned int pos) const;
+
+    /**
+     * @brief get value at \c pos as Variant
+     */
+    Variant value(unsigned int pos) const;
     //@}
   
   protected:
@@ -89,8 +95,8 @@ class ResultSet {
     virtual bool do_seek(int idx) = 0;
     virtual int do_size() = 0;
     
-    QVariant value_at(unsigned int pos) const;
-    virtual QVariant do_value_at(unsigned int pos) const = 0;
+    Variant value_at(unsigned int pos) const;
+    virtual Variant do_value_at(unsigned int pos) const = 0;
 };
 
 }

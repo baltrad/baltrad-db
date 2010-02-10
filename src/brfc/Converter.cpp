@@ -2,8 +2,8 @@
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/Variant.hpp>
 
-#include <QtCore/QVariant>
 #include <QtCore/QDate>
 #include <QtCore/QTime>
 
@@ -14,22 +14,22 @@
 
 namespace brfc {
 
-QVariant
+Variant
 Converter::convert(HL_FormatSpecifier format,
                    unsigned char* data) const {
     return do_convert(format, data);
 }
 
 HL_Data
-Converter::convert(const QVariant& value) const {
+Converter::convert(const Variant& value) const {
     return do_convert(value);
 }
 
-QVariant
+Variant
 RealConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     using boost::numeric_cast;
-    QVariant val;
+    double val;
     switch (format) {
         case HLHDF_FLOAT:
             val = numeric_cast<double>(*reinterpret_cast<float*>(data));
@@ -44,23 +44,23 @@ RealConverter::do_convert(HL_FormatSpecifier format,
         default:
             throw brfc_error("invalid format");
     }
-    return val;
+    return Variant(val);
 }
 
 HL_Data
-RealConverter::do_convert(const QVariant& value) const {
-    BRFC_ASSERT(value.type() == QVariant::Double);
+RealConverter::do_convert(const Variant& value) const {
+    BRFC_ASSERT(value.type() == Variant::DOUBLE);
 
-    double v = value.toDouble();
+    double v = value.double_();
     return HL_Data(sizeof(double), "double",
                    reinterpret_cast<unsigned char*>(&v));
 }
 
-QVariant
+Variant
 IntConverter::do_convert(HL_FormatSpecifier format,
                          unsigned char* data) const {
     using boost::numeric_cast;
-    QVariant val;
+    long long val;
     switch (format) {
         case HLHDF_INT:
             val = numeric_cast<long long>(*reinterpret_cast<int*>(data));
@@ -74,73 +74,73 @@ IntConverter::do_convert(HL_FormatSpecifier format,
         default:
             throw brfc_error("invalid format");
     }
-    return val;
+    return Variant(val);
 }
 
 HL_Data
-IntConverter::do_convert(const QVariant& value) const {
-    BRFC_ASSERT(value.type() == QVariant::LongLong);
+IntConverter::do_convert(const Variant& value) const {
+    BRFC_ASSERT(value.type() == Variant::LONGLONG);
     
-    long long v = value.toLongLong();
+    long long v = value.longlong();
     return HL_Data(sizeof(long long), "llong",
                    reinterpret_cast<unsigned char*>(&v));
 }
 
-QVariant
+Variant
 StringConverter::do_convert(HL_FormatSpecifier format,
                             unsigned char* data) const {
     BRFC_ASSERT(format == HLHDF_STRING);
-    return QVariant(QString(reinterpret_cast<char*>(data)));
+    return Variant(reinterpret_cast<char*>(data));
 }
 
 HL_Data
-StringConverter::do_convert(const QVariant& value) const {
-    BRFC_ASSERT(value.type() == QVariant::String);
+StringConverter::do_convert(const Variant& value) const {
+    BRFC_ASSERT(value.type() == Variant::STRING);
     
-    //XXX: test for Unicode strings!
-    std::string v = value.toString().toStdString();
+    const std::string& v = value.string();
     return HL_Data(v.size() + 1, "string",
                    reinterpret_cast<unsigned char*>(
                          const_cast<char*>(v.c_str())));
 }
 
 
-QVariant
+Variant
 DateConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
-    QString str = StringConverter::do_convert(format, data).toString();
-    QDate date =  QDate::fromString(str, "yyyyMMdd");
+    const Variant& var = StringConverter::do_convert(format, data);
+    QDate date =  QDate::fromString(var.qstring(), "yyyyMMdd");
     BRFC_ASSERT(date.isValid());
-    return date;
+    return Variant(date);
 }
 
 HL_Data
-DateConverter::do_convert(const QVariant& value) const {
-    BRFC_ASSERT(value.type() == QVariant::Date);
-    QString str = value.toDate().toString("yyyyMMdd");
-    return StringConverter::do_convert(str);
+DateConverter::do_convert(const Variant& value) const {
+    BRFC_ASSERT(value.type() == Variant::DATE);
+    Variant var(value.date().toString("yyyyMMdd"));
+    return StringConverter::do_convert(var);
 }
 
-QVariant
+Variant
 TimeConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
-    QString str = StringConverter::do_convert(format, data).toString();
-    QTime time = QTime::fromString(str, "hhmmss");
+    const Variant& var = StringConverter::do_convert(format, data);
+    QTime time = QTime::fromString(var.qstring(), "hhmmss");
     BRFC_ASSERT(time.isValid());
-    return time;
+    return Variant(time);
 }
 
 HL_Data
-TimeConverter::do_convert(const QVariant& value) const {
-    BRFC_ASSERT(value.type() == QVariant::Time);
-    QString str = value.toTime().toString("hhmmss");
-    return StringConverter::do_convert(str);
+TimeConverter::do_convert(const Variant& value) const {
+    BRFC_ASSERT(value.type() == Variant::TIME);
+    Variant var(value.time().toString("hhmmss"));
+    return StringConverter::do_convert(var);
 }
 
-QVariant
+Variant
 BoolConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
-    QString str = StringConverter::do_convert(format, data).toString();
+    const Variant& var = StringConverter::do_convert(format, data);
+    const QString& str = var.qstring();
     bool val = false;
     if (str == "True") {
         val = true;
@@ -149,15 +149,15 @@ BoolConverter::do_convert(HL_FormatSpecifier format,
     } else {
         BRFC_ASSERT(false);
     }
-    return val;
+    return Variant(val);
 }
 
 HL_Data
-BoolConverter::do_convert(const QVariant& value) const {
-    BRFC_ASSERT(value.type() == QVariant::Bool);
+BoolConverter::do_convert(const Variant& value) const {
+    BRFC_ASSERT(value.type() == Variant::BOOL);
 
     QString bool_str;
-    if (value.toBool()) {
+    if (value.bool_()) {
         bool_str = "False";
     } else {
         bool_str = "True";
@@ -165,7 +165,7 @@ BoolConverter::do_convert(const QVariant& value) const {
 
     StringConverter str_conv;
 
-    return str_conv.convert(bool_str);
+    return str_conv.convert(Variant(bool_str));
 }
 
 } // namespace brfc

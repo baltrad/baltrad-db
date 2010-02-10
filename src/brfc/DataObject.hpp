@@ -16,6 +16,7 @@
 namespace brfc {
 
 class File;
+class Variant;
 
 template<typename T>
 class DataObjectIterator;
@@ -91,7 +92,7 @@ class DataObject : public boost::noncopyable {
      * @param value Attribute value
      */
     void add_attribute(const std::string& name,
-                       const QVariant& value);
+                       const Variant& value);
     
     //@{
     /**

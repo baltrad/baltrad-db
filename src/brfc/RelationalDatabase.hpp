@@ -20,8 +20,9 @@ class AttributeSpecs;
 class DataObject;
 class File;
 class Source;
+class Variant;
 
-typedef std::map<QString, QVariant> BindMap;
+typedef std::map<QString, Variant> BindMap;
 
 /**
  * @brief Database using QtSql

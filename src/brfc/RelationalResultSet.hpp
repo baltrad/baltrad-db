@@ -8,7 +8,6 @@
 class QDate;
 class QTime;
 class QSqlQuery;
-class QVariant;
 
 namespace brfc {
 
@@ -44,7 +43,7 @@ class RelationalResultSet : public ResultSet {
     virtual bool do_seek(int idx);
     virtual int do_size();
 
-    QVariant do_value_at(unsigned int pos) const;
+    Variant do_value_at(unsigned int pos) const;
   
   private:
     boost::scoped_ptr<QSqlQuery> query_;

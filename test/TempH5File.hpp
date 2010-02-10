@@ -5,11 +5,12 @@
 #include <brfc/smart_ptr.hpp>
 #include <brfc/Converter.hpp>
 
-class QVariant;
 class QDate;
 class QTime;
 
 namespace brfc {
+
+class Variant;
 
 class TempH5File {
   public:
@@ -35,12 +36,12 @@ class TempH5File {
 
     ~TempH5File();
     void add_group(const char* path);
-    void add_attribute(const char* path, const QVariant& value);
+    void add_attribute(const char* path, const Variant& value);
     void write();
     const char* filename() const;
 
   private:
-    HL_Data convert(const QVariant& value);
+    HL_Data convert(const Variant& value);
     
     shared_ptr<HL_NodeList> nodes_;
     shared_ptr<char> filename_;

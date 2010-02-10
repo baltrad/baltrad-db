@@ -5,10 +5,10 @@
 #include <brfc/File.hpp>
 #include <brfc/SplitPath.hpp>
 #include <brfc/DataObject.hpp>
+#include <brfc/Variant.hpp>
 
 #include <QtCore/QDate>
 #include <QtCore/QTime>
-#include <QtCore/QVariant>
 
 #include "common.hpp"
 #include "TempH5File.hpp"
@@ -72,8 +72,8 @@ TEST(File_test, read) {
     specs.add("date", "date");
     specs.add("time", "time");
 
-    QVariant time(QTime(12, 5, 1));
-    QVariant date(QDate(2000, 1, 2));
+    Variant time(QTime(12, 5, 1));
+    Variant date(QDate(2000, 1, 2));
 
     brfc::TempH5File f;
     f.add_attribute("/date", date);
@@ -92,9 +92,9 @@ TEST(File_test, ignored_attributes) {
     AttributeSpecs specs;
 
     brfc::TempH5File f;
-    f.add_attribute("/ignore", QVariant(2.0));
+    f.add_attribute("/ignore", Variant(2.0));
     f.add_group("/dataset");
-    f.add_attribute("/dataset/ignore", QVariant(1.0));
+    f.add_attribute("/dataset/ignore", Variant(1.0));
     f.write();
 
     File g(f.filename(), specs);

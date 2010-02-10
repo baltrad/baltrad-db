@@ -58,7 +58,7 @@ DataObject::add_child(const std::string& name) {
 
 void
 DataObject::add_attribute(const std::string& name,
-                          const QVariant& value) {
+                          const Variant& value) {
     BOOST_FOREACH(shared_ptr<Attribute> attr, attrs_) {
         if (attr->name() == name) {
             throw duplicate_entry(name);

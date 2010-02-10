@@ -11,6 +11,7 @@
 #include <brfc/ResultSet.hpp>
 #include <brfc/RelationalResultSet.hpp>
 #include <brfc/Query.hpp>
+#include <brfc/Variant.hpp>
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/AttrReplace.hpp>
@@ -120,13 +121,13 @@ namespace {
 
 class Insert {
   public:
-    typedef std::map<QString, QVariant> BindMap;
+    typedef std::map<QString, Variant> BindMap;
 
     Insert(const std::string& table)
           : table_(table.c_str()) {
     }
         
-    void bind(const QString& key, const QVariant& value) {
+    void bind(const QString& key, const Variant& value) {
         binds_[key] = value;
     }
 
@@ -152,7 +153,7 @@ class Insert {
         q.prepare(query_str.join(""));
 
         BOOST_FOREACH(const BindMap::value_type& bind, binds_) {
-            q.bindValue(":" + bind.first, bind.second);
+            q.bindValue(":" + bind.first, bind.second.to_qvariant());
         }
 
         return q;
@@ -177,7 +178,7 @@ extend_for_specializations(Insert& insert,
         try {
             insert.bind(m.column.c_str(), dobj.attribute(m.attribute).value());
         } catch (const brfc::lookup_error& e) {
-            insert.bind(m.column.c_str(), QVariant());
+            insert.bind(m.column.c_str(), Variant());
         }
     }
 }
@@ -192,14 +193,14 @@ RelationalDatabase::save(const char* path, const File& f) {
     if (source_id.isNull()) {
         // XXX: we should get the string from the Source object
         throw db_error("could not db-lookup source: " +
-                       f.root().attribute("what/source").value().toString().toStdString());
+                       f.root().attribute("what/source").value().string());
     }
     stmt.bind("source_id", source_id);
     stmt.returning("id");
     
     extend_for_specializations(stmt, f.root(), *mapper_);
-    stmt.bind("path", path);
-    stmt.bind("unique_id", f.unique_identifier().c_str());
+    stmt.bind("path", Variant(path));
+    stmt.bind("unique_id", Variant(f.unique_identifier().c_str()));
 
     QSqlQuery query = stmt.query(*sql);
 
@@ -237,7 +238,7 @@ RelationalDatabase::save(const DataObject& d,
     Insert stmt("data_objects");
     stmt.bind("parent_id", parent_id);
     stmt.bind("file_id", file_id);
-    stmt.bind("name", d.name().c_str());
+    stmt.bind("name", Variant(d.name().c_str()));
     stmt.returning("id");
 
     extend_for_specializations(stmt, d, *mapper_);
@@ -271,7 +272,7 @@ RelationalDatabase::save(const Attribute& attr,
 
     Insert stmt(mapping.table);
     stmt.bind("data_object_id", dobj_id);
-    stmt.bind("attribute_id", mapping.id);
+    stmt.bind("attribute_id", Variant(mapping.id));
     stmt.bind("value", attr.value());
 
     QSqlQuery query = stmt.query(*sql);
@@ -285,7 +286,7 @@ RelationalDatabase::query_id(const File& f) {
     QSqlQuery query(*sql);
     query.prepare("SELECT id FROM files "
                   "WHERE path = :path ");
-    query.bindValue(":path", f.root().attribute("path").value());
+    query.bindValue(":path", f.root().attribute("path").value().to_qvariant());
     query.exec();
     query.first();
     return query.value(0);
@@ -351,7 +352,7 @@ RelationalDatabase::query(const QString& query_str,
     QSqlQuery query(*sql);
     query.prepare(query_str);
     BOOST_FOREACH(const BindMap::value_type& bind, binds) {
-        query.bindValue(bind.first, bind.second);
+        query.bindValue(bind.first, bind.second.to_qvariant());
     }
     query.exec();
     return shared_ptr<ResultSet>(new RelationalResultSet(query));
