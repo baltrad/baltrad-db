@@ -7,10 +7,13 @@
 #include <boost/variant.hpp>
 
 #include <QtCore/QString>
+#include <QtCore/QVariant>
 #include <QtCore/QDate>
 #include <QtCore/QTime>
 
 #include <string>
+
+class QVariant;
 
 namespace brfc {
 
@@ -36,38 +39,45 @@ class Variant {
             , value_(other.value_) {
     }
 
-    Variant(const char* value)
+    Variant(const QVariant& other);
+
+    explicit Variant(const char* value)
             : type_(STRING)
             , value_(QString::fromUtf8(value)) {
     }
 
-    Variant(int value)
+    explicit Variant(const QString& value)
+            : type_(STRING)
+            , value_(value) {
+    }
+
+    explicit Variant(int value)
             : type_(LONGLONG)
             , value_(static_cast<long long>(value)) {
     
     }
 
-    Variant(long long value)
+    explicit Variant(long long value)
             : type_(LONGLONG)
             , value_(value) {
     }
 
-    Variant(double value)
+    explicit Variant(double value)
             : type_(DOUBLE)
             , value_(value) {
     }
 
-    Variant(bool value)
+    explicit Variant(bool value)
             : type_(BOOL)
             , value_(value) {
     }
 
-    Variant(const QDate& value)
+    explicit Variant(const QDate& value)
             : type_(DATE)
             , value_(value) {
     }
 
-    Variant(const QTime& value)
+    explicit Variant(const QTime& value)
             : type_(TIME)
             , value_(value) {
     }
@@ -118,13 +128,20 @@ class Variant {
         return get<const QTime&>();
     }
 
+    QVariant to_qvariant() const;
+
   private:
+    friend bool operator==(const Variant&, const Variant&);
+
     template<typename T>
     T get() const {
         try {
             return boost::get<T>(value_);
         } catch (const boost::bad_get&) {
-            throw value_error("held variant value is not of requested type");
+            throw value_error("held variant (" +
+                              std::string(value_.type().name()) +
+                              ") is not of requested type (" +
+                              std::string(typeid(T).name()) + ")");
         }
     }
 
@@ -136,6 +153,21 @@ class Variant {
                            QDate,
                            QTime> ValueType;
     ValueType value_;
+};
+
+bool operator==(const Variant& lhs, const Variant& rhs);
+
+inline
+bool operator!=(const Variant& lhs, const Variant& rhs) {
+    return not (lhs == rhs);
+}
+
+class variant_to_qvariant : public boost::static_visitor<QVariant> {
+  public:
+    template<typename T>
+    QVariant operator()(const T& value) const {
+        return QVariant(value);
+    }
 };
 
 } // namespace brfc
