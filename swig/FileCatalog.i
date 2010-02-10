@@ -67,16 +67,16 @@
 
 // ignore File constructors
 %ignore brfc::File::File;
-%ignore brfc::File::File(const std::string& path,
-                         const AttributeSpecs& specs);
-%ignore brfc::File::File(const std::string& object,
-                         const QDate& date,
-                         const QTime& time,
-                         const std::string& source,
-                         const std::string& version);
 
 // ignore Source constructor
 %ignore brfc::Source::Source(const QString& source);
+
+// ignore Variant members
+%ignore brfc::Variant::Variant;
+%ignore brfc::operator=;
+%ignore brfc::Variant::qstring;
+%ignore brfc::Variant::to_qvariant;
+%ignore brfc::variant_to_qvariant;
 
 %ignore brfc::Query::fetch;
 
