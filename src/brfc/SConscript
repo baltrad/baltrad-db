@@ -16,6 +16,7 @@ sources = [
     "ResultSet.cpp",
     "Source.cpp",
     "SplitPath.cpp",
+    "Variant.cpp",
     "expr/AttrReplace.cpp",
     "expr/Compiler.cpp",
     "expr/Expression.cpp",
