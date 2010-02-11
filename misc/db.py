@@ -444,10 +444,10 @@ class StringIOExecutor(object):
         if isinstance(object, sqlexpr.Insert):
             if "id" in object.table.columns and "id" not in kw:
                 kw["id"] = self.generate_id(object.table)
-                nullable = [col for col in object.table.columns if col.nullable]
-                for col in nullable:
-                    if col.key not in kw:
-                        kw[col.key] = None
+            nullable = [col for col in object.table.columns if col.nullable]
+            for col in nullable:
+                if col.key not in kw:
+                    kw[col.key] = None
         kw = self.escape(kw)
         print >> self.content, Template(unicode(object)).substitute(kw) + ";"
     
