@@ -58,7 +58,7 @@ File::File(const std::string& object,
 
 Source
 File::source() const {
-    return Source(root_->attribute("what/source").value().qstring());
+    return Source::from_source_attribute(root_->attribute("what/source").value().qstring());
 }
 
 std::string

@@ -323,17 +323,17 @@ RelationalDatabase::query_id(const Source& src) {
     QVariant bindvar;
     
     // singe-site data
-    if (src.wmo_code().isValid()) {
+    if (src.wmo_code()) {
         query_str += "wmo_code = ?";
         bindvar = src.wmo_code();
-    } else if (src.radar_site().isValid()) {
+    } else if (src.radar_site() != "") {
         query_str += "radar_site = ?";
-        bindvar = src.radar_site();
+        bindvar = QString::fromUtf8(src.radar_site().c_str());
     // composites
-    } else if (src.originating_centre().isValid()) {
+    } else if (src.originating_centre()) {
         query_str += "originating_centre = ?";
-        bindvar = src.radar_site();
-    } else if (src.country_code().isValid()) {
+        bindvar = src.originating_centre();
+    } else if (src.country_code()) {
         query_str += "country_code = ?";
         bindvar = src.country_code();
     }

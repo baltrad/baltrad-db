@@ -3,32 +3,34 @@
 #include <brfc/Source.hpp>
 #include <brfc/exceptions.hpp>
 
-#include "common.hpp"
+#include <QtCore/QString>
 
 using namespace brfc;
 
 TEST(Source_test, valid_source) {
-    Source s("WMO:02606,RAD:SE50");
+    QString value = QString::fromUtf8("WMO:02606,RAD:SE50");
+    const Source& s = Source::from_source_attribute(value);
+    
+    EXPECT_EQ(s.wmo_code(), 2606);
 
-    EXPECT_TRUE(s.wmo_code().isValid());
-    EXPECT_EQ(s.wmo_code().toInt(), 2606);
+    EXPECT_EQ(s.radar_site(), "SE50");
 
-    EXPECT_TRUE(s.radar_site().isValid());
-    EXPECT_EQ(s.radar_site().toString(), "SE50");
-
-    EXPECT_FALSE(s.originating_centre().isValid());
-    EXPECT_FALSE(s.place().isValid());
-    EXPECT_FALSE(s.country_code().isValid());
+    EXPECT_EQ(s.originating_centre(), 0);
+    EXPECT_EQ(s.place(), "");
+    EXPECT_EQ(s.country_code(), 0);
 }
 
 TEST(Source_test, from_empty_source) {
-    EXPECT_THROW(Source(""), value_error);
+    QString value = QString::fromUtf8("");
+    EXPECT_THROW(Source::from_source_attribute(value), value_error);
 }
 
 TEST(Source_test, from_source_missing_value) {
-    EXPECT_THROW(Source("WMO:"), value_error);
+    QString value = QString::fromUtf8("WMO:");
+    EXPECT_THROW(Source::from_source_attribute(value), value_error);
 }
 
 TEST(Source_test, from_source_with_invalid_key) {
-    EXPECT_THROW(Source("asd:qwe"), value_error);
+    QString value = QString::fromUtf8("asd:qwe");
+    EXPECT_THROW(Source::from_source_attribute(value), value_error);
 }

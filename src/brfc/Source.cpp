@@ -5,34 +5,29 @@
 
 #include <boost/foreach.hpp>
 
-#include <vector>
+#include <map>
 
 #include <QtCore/QStringList>
 
 namespace brfc {
 
 Source::Source()
-        : map_() {
-    init();
-}
-        
-Source::Source(const QString& source)
-        : map_() {
-    init();
-    parse_source(source);
-}
-
-void
-Source::init() {
-    map_["WMO"] = QVariant();
-    map_["RAD"] = QVariant();
-    map_["ORG"] = QVariant();
-    map_["PLC"] = QVariant();
-    map_["CTY"] = QVariant();
-    map_["CMT"] = QVariant();
+        : db_id_(0)
+        , wmo_code_(0)
+        , radar_site_()
+        , originating_centre_(0)
+        , place_()
+        , country_code_(0)
+        , comment_() {
 }
 
-void Source::parse_source(const QString& source) {
+namespace {
+
+typedef std::map<QString, QString> ElementMap;
+    
+ElementMap
+parse_source(const QString& source) {
+    ElementMap map;
     QStringList elems = source.split(",");
     try {
         BRFC_ASSERT(elems.size() != 0);
@@ -41,22 +36,39 @@ void Source::parse_source(const QString& source) {
             BRFC_ASSERT(kv.size() == 2);
             BRFC_ASSERT(kv[0].length() > 0);
             BRFC_ASSERT(kv[1].length() > 0);
-            if (map_.find(kv.at(0)) == map_.end()) {
-                throw value_error(source.toStdString());
-            }
-            map_[kv.at(0)] = kv.at(1);
+            map[kv.at(0)] = kv.at(1);
         }
     } catch (const assertion_error& e) {
         throw value_error(e.what());
     }
+    return map;
 }
 
+} // namespace anonymous
 
-QVariant
-Source::get_opt(const QString& key) const {
-    ElementMap::const_iterator i = map_.find(key);
-    BRFC_ASSERT(i != map_.end());
-    return i->second;
+Source
+Source::from_source_attribute(const QString& source) {
+    const ElementMap& elements = parse_source(source);
+    Source src;
+    BOOST_FOREACH(const ElementMap::value_type& entry, elements) {
+        if (entry.first == "WMO") {
+            src.wmo_code(entry.second.toInt());
+        } else if (entry.first == "RAD") {
+            src.radar_site(entry.second.toUtf8().constData());
+        } else if (entry.first == "ORG") {
+            src.originating_centre(entry.second.toInt());
+        } else if (entry.first == "PLC") {
+            src.place(entry.second.toUtf8().constData());
+        } else if (entry.first == "CTY") {
+            src.country_code(entry.second.toInt());
+        } else if (entry.first == "CMT") {
+            src.comment(entry.second.toUtf8().constData());
+        } else {
+            throw value_error("invalid field in source: " +
+                              std::string(entry.first.toUtf8().constData()));
+        }
+    }
+    return src;
 }
 
 } // namespace brfc

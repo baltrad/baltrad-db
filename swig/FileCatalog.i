@@ -69,8 +69,9 @@
 %ignore brfc::File::File;
 %ignore brfc::File::db_id(long long db_id);
 
-// ignore Source constructor
-%ignore brfc::Source::Source(const QString& source);
+// ignore Source members
+%ignore brfc::Source::Source;
+%ignore brfc::Source::from_source_attribute;
 
 // ignore Variant members
 %ignore brfc::Variant::Variant;
