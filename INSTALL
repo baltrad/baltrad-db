@@ -10,14 +10,15 @@ for building:
 
 library dependencies:
 * HLHDF library                 0.7.7
-* boost::iterator               1.40
-* boost::lambda                 1.40
-* boost::lexical_cast           1.40
-* boost::smart_ptr              1.40
-* boost::string_algo            1.40
-* boost::utility                1.40
-* qt4-core                      4.4.3 
-* qt4-sql                       4.4.3
+* boost::iterator               1.38
+* boost::lambda                 1.38
+* boost::lexical_cast           1.38
+* boost::smart_ptr              1.38
+* boost::string_algo            1.38
+* boost::utility                1.38
+* boost::variant		1.38
+* QtCore                        4.5
+* QtSql                         4.5
 
 additional test dependencies:
 * gtest				1.4.0
@@ -25,10 +26,6 @@ additional test dependencies:
 run time dependencies:
 * postgresql driver for qt4-sql
 * postgresql                    8.3
-
-database creation dependencies:
-* sqlalchemy
-* python driver for postgresql
 
 documentation generation dependencies:
 * doxygen
@@ -80,10 +77,9 @@ If all is in order, feel free to install the library:
 
  $ scons install
 
-To actually be of any use, you should also create a database:
+To actually be of any use, you should also create a database. Table creation
+statements can be found in schema/postgresql/create.sql. Just feed the file
+to the database and you should be set to go.
 
- $ createdb -O baltrad baltrad
- 
-and then create tables in it:
- 
- $ python misc/db.py postgres://baltrad:password@localhost/baltrad
+ $ createdb baltrad
+ $ psql < ./schema/postgresql/create.sql
