@@ -1,13 +1,21 @@
 # -*- coding: UTF-8 -*-
+import codecs
+import itertools
+import os
 import sys
+import string
+import StringIO as stringio
+
 from sqlalchemy import (MetaData, Table, Column, ForeignKey,
                         ForeignKeyConstraint, PrimaryKeyConstraint,
-                        UniqueConstraint, create_engine)
+                        create_engine)
 
 from sqlalchemy.types import (Text, Integer, Float, Date, Time,
                               Boolean)
 
 from sqlalchemy.databases.postgres import PGBigInteger
+
+from sqlalchemy.sql import expression as sqlexpr
 
 
 meta = MetaData()
@@ -423,10 +431,68 @@ def populate_sources_table(engine):
                        radar_site=site,
                        node_id=node_id,
                        place=place)
+
+class Template(string.Template):
+    delimiter = ":"
+
+class StringIOExecutor(object):
+    def __init__(self):
+        self._ids = {}
+        self.content = stringio.StringIO()
+
+    def __call__(self, object, *args, **kw):
+        if isinstance(object, sqlexpr.Insert):
+            if "id" in object.table.columns and "id" not in kw:
+                kw["id"] = self.generate_id(object.table)
+                nullable = [col for col in object.table.columns if col.nullable]
+                for col in nullable:
+                    if col.key not in kw:
+                        kw[col.key] = None
+        kw = self.escape(kw)
+        print >> self.content, Template(unicode(object)).substitute(kw) + ";"
     
-if __name__ == "__main__":
-    engine = create_engine(sys.argv[1])
-    meta.drop_all(bind=engine)
+    def escape(self, params):
+        escaped = {}
+        for param, value in params.iteritems():
+            if isinstance(value, basestring):
+                value = u"'%s'" % value
+            elif value is None:
+                value = u"NULL"
+            escaped[param] = value
+        return escaped
+    
+    def generate_id(self, table):
+        if table not in self._ids:
+            gen = (i for i in itertools.count(1))
+            self._ids[table] = gen
+        return self._ids[table].next()
+    
+    def write_content(self, path):
+        path = os.path.abspath(path)
+        dir, file = os.path.split(path)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        f = codecs.open(path, "w", encoding="utf-8")
+        f.write(self.content.getvalue())
+        f.close()
+        self.content = stringio.StringIO()
+
+def main():
+    if len(sys.argv) < 3:
+        print >> sys.stderr, "usage %s <dialect> <outdir>" % sys.argv[0]
+        sys.exit(1)
+    dialect_name = sys.argv[1]
+    outdir = os.path.abspath(sys.argv[2])
+    
+    executor = StringIOExecutor()
+    engine = create_engine("%s://" % dialect_name,
+                           strategy="mock", executor=executor)
     meta.create_all(bind=engine)
     populate_attributes_table(engine)
     populate_sources_table(engine)
+    executor.write_content(os.path.join(outdir, dialect_name, "create.sql"))
+    meta.drop_all(bind=engine)
+    executor.write_content(os.path.join(outdir, dialect_name, "drop.sql"))
+    
+if __name__ == "__main__":
+    main()
