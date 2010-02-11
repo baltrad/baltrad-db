@@ -62,6 +62,11 @@ TEST(File_test, unique_identifier) {
     EXPECT_EQ(f.unique_identifier(), "pvol_20000102T120500_WMO:02606");
 }
 
+TEST(File_test, unique_identifier_with_unicode) {
+    File f("pvol", QDate(2000, 1, 2), QTime(12, 5), "PLC:Ängelholm");
+    EXPECT_EQ(f.unique_identifier(), "pvol_20000102T120500_PLC:Ängelholm");
+}
+
 TEST(File_test, open_nx_file) {
     AttributeSpecs specs;
     EXPECT_THROW(File("/path/to/nxfile", specs), fs_error);

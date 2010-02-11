@@ -44,6 +44,7 @@ TEST(Variant_test, string) {
     Variant v("öäüxyz");
     EXPECT_EQ(v.type(), Variant::STRING);
     EXPECT_EQ(v.string(), "öäüxyz");
+    EXPECT_EQ(std::string(v.string()).size(), 9);
     EXPECT_FALSE(v.is_null());
     EXPECT_THROW(v.longlong(), value_error);
 }

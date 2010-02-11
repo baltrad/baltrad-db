@@ -87,7 +87,7 @@ bool
 RelationalDatabase::do_has_file(const File& file) const {
     QSqlQuery query(*sql);
     query.prepare("SELECT true FROM files WHERE unique_id = :unique_id");
-    query.bindValue(":unique_id", file.unique_identifier().c_str());
+    query.bindValue(":unique_id", QString::fromUtf8(file.unique_identifier().c_str()));
     if (!query.exec())
         throw db_error(query.lastError());
     return query.next(); // got a result row
