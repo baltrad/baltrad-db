@@ -196,11 +196,32 @@ def CheckQt(ctx, qt_include_dir, qt_lib_dir):
     ctx.SetLIBS(oldlibs)
     return result
 
+def CheckQtSqlDrivers(ctx, qt_include_dir, qt_lib_dir):
+    src = (
+        "#include <QtSql/QSqlDatabase>",
+        "#include <QtCore/QStringList>",
+        "#include <iostream>",
+        "int main(int argc, char** argv) {",
+        "   QStringList drivers = QSqlDatabase::drivers();",
+        "   std::cout << drivers.join(\" \").toStdString();",
+        "   return 0;",
+        "}\n"
+    )
+    ctx.Message("Checking for available QtSql drivers... ")
+    oldlibs = ctx.AppendLIBS(["QtSql"])
+    ctx.env.AppendUnique(CPPPATH=qt_include_dir, LIBPATH=qt_lib_dir)
+    ctx.env.AppendENVPath('LD_LIBRARY_PATH', env.Dir(qt_lib_dir).abspath)
+    result, drivers = ctx.TryRun("\n".join(src), ".cpp")
+    ctx.Result(drivers)
+    ctx.SetLIBS(oldlibs)
+    return drivers.split(" ")
+
 conf = Configure(confenv,
                  custom_tests={
                     "CheckBoost": CheckBoost,
                     "CheckHlhdf": CheckHlhdf,
-                    "CheckQt": CheckQt
+                    "CheckQt": CheckQt,
+                    "CheckQtSqlDrivers": CheckQtSqlDrivers,
                  },
                  clean=False, help=False)
 
@@ -208,12 +229,12 @@ rets = [] # list of conf return values
 
 _TARGET_STRS = map(str, BUILD_TARGETS)
 
-if set(["shared-library", "java-wrapper", "test"]) & set(_TARGET_STRS):
+if set(["shared-library", "java-wrapper", "test", "hudsontest"]) & set(_TARGET_STRS):
     rets.append(conf.CheckQt(env["qt_include_dir"], env["qt_lib_dir"]))
     rets.append(conf.CheckLibWithHeader("QtSql", "QtSql/QSqlDatabase", "c++"))
+    conf.CheckQtSqlDrivers(env["qt_include_dir"], env["qt_lib_dir"])
     rets.append(conf.CheckHlhdf(env["hlhdf_include_dir"], env["hlhdf_lib_dir"]))
     rets.append(conf.CheckBoost(env["boost_include_dir"]))
-
 
 if set(["test", "hudsontest"]) & set(_TARGET_STRS):
     conf.env.AppendUnique(CPPPATH="${gtest_include_dir}",
