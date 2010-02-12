@@ -65,6 +65,8 @@ class RelationalDatabase : public Database {
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
     virtual void do_clean();
+
+    QSqlDatabase& connection() const { return *sql_; }
   
   private:
     void init();
@@ -127,7 +129,7 @@ class RelationalDatabase : public Database {
 
     void populate_mapper_and_specs();
 
-    boost::scoped_ptr<QSqlDatabase> sql;
+    boost::scoped_ptr<QSqlDatabase> sql_;
     boost::scoped_ptr<AttributeMapper> mapper_;
     boost::scoped_ptr<AttributeSpecs> specs_;
 };

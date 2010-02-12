@@ -39,27 +39,27 @@ RelationalDatabase::qt_engine(const QString& /*engine*/) const {
 }
 
 RelationalDatabase::RelationalDatabase(const std::string& dsn_)
-        : sql()
+        : sql_()
         , mapper_(new AttributeMapper())
         , specs_(new AttributeSpecs()) {
     QUrl dsn(dsn_.c_str());
-    sql.reset(new ::QSqlDatabase(::QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), "brfc")));
-    sql->setHostName(dsn.host());
-    sql->setUserName(dsn.userName());
-    sql->setPassword(dsn.password());
+    sql_.reset(new ::QSqlDatabase(::QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), "brfc")));
+    sql_->setHostName(dsn.host());
+    sql_->setUserName(dsn.userName());
+    sql_->setPassword(dsn.password());
     QString database = dsn.path();
     if (database.startsWith("/")) {
         database.remove(0, 1); // remove slash
     }
-    sql->setDatabaseName(database);
-    if (!sql->open())
-        throw db_error(sql->lastError().text().toStdString());
+    sql_->setDatabaseName(database);
+    if (!sql_->open())
+        throw db_error(sql_->lastError().text().toStdString());
     populate_mapper_and_specs();
 }
 
 RelationalDatabase::~RelationalDatabase() {
-    sql->close();
-    sql.reset(0);
+    sql_->close();
+    sql_.reset(0);
     ::QSqlDatabase::removeDatabase("brfc");
 }
 
@@ -70,22 +70,22 @@ RelationalDatabase::specs() const {
 
 void
 RelationalDatabase::do_begin() {
-    sql->transaction();
+    connection().transaction();
 }
 
 void
 RelationalDatabase::do_rollback() {
-    sql->rollback();
+    connection().rollback();
 }
 
 void
 RelationalDatabase::do_commit() {
-    sql->commit();
+    connection().commit();
 }
 
 bool
 RelationalDatabase::do_has_file(const File& file) const {
-    QSqlQuery query(*sql);
+    QSqlQuery query(connection());
     query.prepare("SELECT true FROM files WHERE unique_id = :unique_id");
     query.bindValue(":unique_id", QString::fromUtf8(file.unique_identifier().c_str()));
     if (!query.exec())
@@ -202,7 +202,7 @@ RelationalDatabase::save(const char* path, const File& f) {
     stmt.bind("path", Variant(path));
     stmt.bind("unique_id", Variant(f.unique_identifier().c_str()));
 
-    QSqlQuery query = stmt.query(*sql);
+    QSqlQuery query = stmt.query(connection());
 
     if (!query.exec())
         throw db_error(query.lastError());
@@ -244,7 +244,7 @@ RelationalDatabase::save(const DataObject& d,
 
     extend_for_specializations(stmt, d, *mapper_);
 
-    QSqlQuery query = stmt.query(*sql);
+    QSqlQuery query = stmt.query(connection());
 
     if (!query.exec())
         throw db_error(query.lastError());
@@ -276,7 +276,7 @@ RelationalDatabase::save(const Attribute& attr,
     stmt.bind("attribute_id", Variant(mapping.id));
     stmt.bind("value", attr.value());
 
-    QSqlQuery query = stmt.query(*sql);
+    QSqlQuery query = stmt.query(connection());
 
     if (!query.exec())
         throw db_error(query.lastError());
@@ -284,7 +284,7 @@ RelationalDatabase::save(const Attribute& attr,
 
 RelationalDatabase::id_type
 RelationalDatabase::query_id(const File& f) {
-    QSqlQuery query(*sql);
+    QSqlQuery query(connection());
     query.prepare("SELECT id FROM files "
                   "WHERE path = :path ");
     query.bindValue(":path", f.root().attribute("path").value().to_qvariant());
@@ -304,7 +304,7 @@ RelationalDatabase::query_id(const DataObject& dobj) {
     id_type file_id = query_id(*dobj.file());
     std::string op = parent_id.isNull() ? "IS NULL" : "= :parent_id";
     const std::string& name = dobj.name();
-    QSqlQuery query(*sql);
+    QSqlQuery query(connection());
     query.prepare(("SELECT id FROM data_objects "
                    "WHERE parent_id " + op + " "
                       "AND file_id = :file_id "
@@ -338,7 +338,7 @@ RelationalDatabase::query_id(const Source& src) {
         bindvar = src.country_code();
     }
 
-    QSqlQuery query(*sql);
+    QSqlQuery query(connection());
     query.prepare(query_str);
     query.bindValue(0, bindvar);
     query.exec();
@@ -349,8 +349,8 @@ RelationalDatabase::query_id(const Source& src) {
 shared_ptr<ResultSet>
 RelationalDatabase::query(const QString& query_str,
                           const BindMap& binds) const {
-    BRFC_ASSERT(sql->isOpen());
-    QSqlQuery query(*sql);
+    BRFC_ASSERT(connection().isOpen());
+    QSqlQuery query(connection());
     query.prepare(query_str);
     BOOST_FOREACH(const BindMap::value_type& bind, binds) {
         query.bindValue(bind.first, bind.second.to_qvariant());
@@ -375,7 +375,7 @@ RelationalDatabase::populate_mapper_and_specs() {
 
 void
 RelationalDatabase::do_remove_file(const char* path) {
-    QSqlQuery query(*sql);
+    QSqlQuery query(connection());
     query.prepare("DELETE FROM files WHERE path = :path");
     query.bindValue(":path", path);
     if (!query.exec())
@@ -384,8 +384,8 @@ RelationalDatabase::do_remove_file(const char* path) {
 
 void
 RelationalDatabase::do_clean() {
-    BRFC_ASSERT(sql->isOpen());
-    QSqlQuery query(*sql);
+    BRFC_ASSERT(connection().isOpen());
+    QSqlQuery query(connection());
     query.exec("DELETE FROM files");
 }
 
