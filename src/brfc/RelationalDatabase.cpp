@@ -24,7 +24,6 @@
 #include <QtCore/QUrl>
 #include <QtCore/QVariant>
 #include <QtCore/QStringList>
-#include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
@@ -41,26 +40,30 @@ RelationalDatabase::qt_engine(const QString& /*engine*/) const {
 RelationalDatabase::RelationalDatabase(const std::string& dsn_)
         : sql_()
         , mapper_(new AttributeMapper())
-        , specs_(new AttributeSpecs()) {
+        , specs_(new AttributeSpecs())
+        , dialect_() {
     QUrl dsn(dsn_.c_str());
-    sql_.reset(new ::QSqlDatabase(::QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), "brfc")));
-    sql_->setHostName(dsn.host());
-    sql_->setUserName(dsn.userName());
-    sql_->setPassword(dsn.password());
+    QString name = QString("brfc-") + QString::number(connection_count_++);
+    sql_ = ::QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), name);
+    sql_.setHostName(dsn.host());
+    sql_.setUserName(dsn.userName());
+    sql_.setPassword(dsn.password());
     QString database = dsn.path();
     if (database.startsWith("/")) {
         database.remove(0, 1); // remove slash
     }
-    sql_->setDatabaseName(database);
-    if (!sql_->open())
-        throw db_error(sql_->lastError().text().toStdString());
+    sql_.setDatabaseName(database);
+    if (!sql_.open())
+        throw db_error(sql_.lastError().text().toStdString());
+    dialect_ = dsn.scheme();
     populate_mapper_and_specs();
 }
 
+unsigned int RelationalDatabase::connection_count_ = 0;
+
 RelationalDatabase::~RelationalDatabase() {
-    sql_->close();
-    sql_.reset(0);
-    ::QSqlDatabase::removeDatabase("brfc");
+    sql_.close();
+    ::QSqlDatabase::removeDatabase(sql_.connectionName());
 }
 
 const AttributeSpecs&

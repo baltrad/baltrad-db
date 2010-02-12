@@ -6,10 +6,11 @@
 #include <string>
 #include <map>
 
+#include <QtCore/QString>
+#include <QtSql/QSqlDatabase>
+
 #include <boost/scoped_ptr.hpp>
 
-class QSqlDatabase;
-class QString;
 class QVariant;
 
 namespace brfc {
@@ -53,6 +54,8 @@ class RelationalDatabase : public Database {
     
     const AttributeSpecs& specs() const;
 
+    void populate_mapper_and_specs();
+
   protected:
     virtual void do_begin();
     virtual void do_rollback();
@@ -66,7 +69,12 @@ class RelationalDatabase : public Database {
 
     virtual void do_clean();
 
-    QSqlDatabase& connection() const { return *sql_; }
+    QSqlDatabase& connection() const {
+        RelationalDatabase* self = const_cast<RelationalDatabase*>(this);
+        return self->sql_;
+    }
+
+    QString dialect() const { return dialect_; }
   
   private:
     void init();
@@ -127,12 +135,13 @@ class RelationalDatabase : public Database {
         
     QString qt_engine(const QString& engine) const;
 
-    void populate_mapper_and_specs();
-
-    boost::scoped_ptr<QSqlDatabase> sql_;
+    QSqlDatabase sql_;
     boost::scoped_ptr<AttributeMapper> mapper_;
     boost::scoped_ptr<AttributeSpecs> specs_;
+    QString dialect_;
+    static unsigned int connection_count_;
 };
+
 
 }
 
