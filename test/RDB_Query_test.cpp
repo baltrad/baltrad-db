@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <brfc/RelationalDatabase.hpp>
+#include <brfc/TestRDB.hpp>
 #include <brfc/DataObject.hpp>
 #include <brfc/File.hpp>
 #include <brfc/Query.hpp>
@@ -18,9 +18,11 @@
 #include <algorithm>
 #include <vector>
 
+#include "config.hpp"
+#include "common.hpp"
+
 using namespace brfc;
 
-#ifdef BRFC_TEST_DB_DSN
 namespace {
 
 /**
@@ -36,18 +38,18 @@ namespace {
  *   1 td5  SCAN 2002-02-01 12:00     5     2
  *                                    2     5
  */
-struct RDB_Query_test : public testing::Test {
+struct RDB_Query_test : public testing::TestWithParam<const char*> {
     RDB_Query_test()
             : xpr()
             , src1("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , src2("WMO:02666,RAD:SE51,PLC:Karlskrona")
-            , db(BRFC_TEST_DB_DSN)
+            , db(TestRDBEnv::get_database(GetParam()))
             , td1("PVOL", QDate(2000, 1, 1), QTime(12, 0), src1)
             , td2("PVOL", QDate(2000, 1, 1), QTime(12, 1), src2)
             , td3("PVOL", QDate(2000, 1, 1), QTime(12, 2), src1)
             , td4("CVOL", QDate(2001, 1, 1), QTime(12, 0), src2)
             , td5("SCAN", QDate(2002, 2, 1), QTime(12, 0), src1)
-            , query(&db) {
+            , query(db) {
     }
 
     virtual void SetUp() {
@@ -69,27 +71,27 @@ struct RDB_Query_test : public testing::Test {
         td5.data_object("/do2", true).add_attribute("where/xsize", Variant(2));
         td5.data_object("/do2", true).add_attribute("where/ysize", Variant(5));
 
-        db.save_file("td1", td1);
-        db.save_file("td2", td2);
-        db.save_file("td3", td3);
-        db.save_file("td4", td4);
-        db.save_file("td5", td5);
+        db->save_file("td1", td1);
+        db->save_file("td2", td2);
+        db->save_file("td3", td3);
+        db->save_file("td4", td4);
+        db->save_file("td5", td5);
     }
 
     virtual void TearDown() {
-        db.clean();
+        db->clean();
     }
-
+    
     expr::Factory xpr;
     std::string src1, src2;
-    RelationalDatabase db;
+    TestRDB* db;
     File td1, td2, td3, td4, td5;
     Query query;
 };
 
 }
 
-TEST_F(RDB_Query_test, test_simple) {
+TEST_P(RDB_Query_test, test_simple) {
     shared_ptr<ResultSet> r = 
             query.fetch(xpr.attribute("path"))
                  .filter(xpr.attribute("where/xsize")->eq(xpr.integer(1)))
@@ -115,7 +117,7 @@ bool contains(const C& container, const V& val) {
     return std::find(container.begin(), container.end(), val) != container.end();
 }
 
-TEST_F(RDB_Query_test, test_list_all_files) {
+TEST_P(RDB_Query_test, test_list_all_files) {
     shared_ptr<ResultSet> r = query.fetch(xpr.attribute("path")).execute();
 
     EXPECT_EQ(r->size(), 5);
@@ -128,7 +130,7 @@ TEST_F(RDB_Query_test, test_list_all_files) {
     EXPECT_TRUE(contains(v, "td5"));
 }
 
-TEST_F(RDB_Query_test, test_filter_by_object) {
+TEST_P(RDB_Query_test, test_filter_by_object) {
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
              .filter(xpr.attribute("what/object")->eq(xpr.string("PVOL")))
@@ -142,7 +144,7 @@ TEST_F(RDB_Query_test, test_filter_by_object) {
     EXPECT_TRUE(contains(v, "td3"));
 }
 
-TEST_F(RDB_Query_test, test_fetch_xsize_filtering_by_xsize) {
+TEST_P(RDB_Query_test, test_fetch_xsize_filtering_by_xsize) {
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("where/xsize"))
              .filter(xpr.attribute("where/xsize")->eq(xpr.integer(2)))
@@ -150,7 +152,7 @@ TEST_F(RDB_Query_test, test_fetch_xsize_filtering_by_xsize) {
     EXPECT_EQ(r->size(), 2);
 }
 
-TEST_F(RDB_Query_test, test_filter_by_xsize_or_ysize) {
+TEST_P(RDB_Query_test, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
     shared_ptr<ResultSet> r =
@@ -166,7 +168,7 @@ TEST_F(RDB_Query_test, test_filter_by_xsize_or_ysize) {
     EXPECT_TRUE(contains(v, "td5"));
 }
 
-TEST_F(RDB_Query_test, test_filter_by_xsize_distinct) {
+TEST_P(RDB_Query_test, test_filter_by_xsize_distinct) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     shared_ptr<ResultSet> r = 
         query.fetch(xpr.attribute("path"))
@@ -178,7 +180,7 @@ TEST_F(RDB_Query_test, test_filter_by_xsize_distinct) {
     EXPECT_EQ(r->string(0), "td3");
 }
 
-TEST_F(RDB_Query_test, test_select_by_wmo_code) {
+TEST_P(RDB_Query_test, test_select_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("src_WMO");
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
@@ -192,7 +194,7 @@ TEST_F(RDB_Query_test, test_select_by_wmo_code) {
     EXPECT_TRUE(contains(v, "td4"));
 }
 
-TEST_F(RDB_Query_test, test_select_by_place) {
+TEST_P(RDB_Query_test, test_select_by_place) {
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
              .filter(xpr.attribute("src_PLC")->eq(xpr.string("Ängelholm")))
@@ -206,17 +208,19 @@ TEST_F(RDB_Query_test, test_select_by_place) {
     EXPECT_TRUE(contains(v, "td5"));
 }
 
-TEST_F(RDB_Query_test, test_has_file) {
+TEST_P(RDB_Query_test, test_has_file) {
     bool result = false;
-    ASSERT_NO_THROW(result = db.has_file(td1));
+    ASSERT_NO_THROW(result = db->has_file(td1));
     EXPECT_TRUE(result);
 }
 
-TEST_F(RDB_Query_test, test_has_nx_file) {
+TEST_P(RDB_Query_test, test_has_nx_file) {
     bool result = false;
     File td("PVOL", QDate(2000, 1, 10), QTime(12, 0), src1);
-    ASSERT_NO_THROW(result = db.has_file(td));
+    ASSERT_NO_THROW(result = db->has_file(td));
     EXPECT_FALSE(result);
 }
 
-#endif // BRFC_TEST_DB_DSN
+INSTANTIATE_TEST_CASE_P(RDB_Query_test_p,
+                        RDB_Query_test,
+                        ::testing::ValuesIn(test_dsns));
