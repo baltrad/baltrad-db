@@ -44,7 +44,8 @@ class DataObject : public boost::noncopyable {
             , parent_(0)
             , children_()
             , attrs_()
-            , file_(file) {
+            , file_(file)
+            , db_id_(0) {
 
     }
 
@@ -156,6 +157,12 @@ class DataObject : public boost::noncopyable {
     iterator end();
     const_iterator end() const; 
     //@}
+    
+    long long db_id() const { return db_id_; }
+    
+    void db_id(long long db_id) {
+        db_id_ = db_id;
+    }
 
   private:
     friend class DataObjectIterator<const DataObject>;
@@ -179,6 +186,7 @@ class DataObject : public boost::noncopyable {
     ChildVector children_;
     AttributeVector attrs_;
     const File* file_;
+    long long db_id_;
 };
 
 /**
