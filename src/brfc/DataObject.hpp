@@ -160,7 +160,7 @@ class DataObject : public boost::noncopyable {
     
     long long db_id() const { return db_id_; }
     
-    void db_id(long long db_id) {
+    void db_id(long long db_id) const {
         db_id_ = db_id;
     }
 
@@ -186,7 +186,7 @@ class DataObject : public boost::noncopyable {
     ChildVector children_;
     AttributeVector attrs_;
     const File* file_;
-    long long db_id_;
+    mutable long long db_id_;
 };
 
 /**

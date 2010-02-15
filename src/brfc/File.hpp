@@ -123,7 +123,7 @@ class File : public boost::noncopyable {
 
     long long db_id() const { return db_id_; }
 
-    void db_id(long long db_id) { db_id_ = db_id; }
+    void db_id(long long db_id) const { db_id_ = db_id; }
 
   private:
     /**
@@ -145,7 +145,7 @@ class File : public boost::noncopyable {
     boost::scoped_ptr<DataObject> root_;
     StringVector ignored_attributes_;
     std::string path_;
-    long long db_id_;
+    mutable long long db_id_;
 };
 
 } // namespace brfc
