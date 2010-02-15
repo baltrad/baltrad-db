@@ -32,6 +32,123 @@
 
 namespace brfc {
 
+namespace {
+
+class DataObjectSaver {
+  public:
+    DataObjectSaver(RelationalDatabase* rdb)
+            : rdb_(rdb)
+            , qry_(rdb->connection())
+            , special_(rdb->mapper().specializations_on("data_objects")) {
+        QStringList columns, binds; 
+        columns.append("parent_id");
+        columns.append("file_id");
+        columns.append("name");
+        BOOST_FOREACH(const Mapping& mapping, special_) {
+            columns.append(mapping.column.c_str());
+        }
+        BOOST_FOREACH(const QString& column, columns) {
+            binds.append(":" + column);
+        }
+        qry_.prepare("INSERT INTO data_objects(" + columns.join(", ") +
+                     ") VALUES(" + binds.join(", ") + ") RETURNING id");
+    }
+    
+    void operator()(const DataObject& dobj) {
+        bind_plain(dobj);
+        bind_specializations(dobj);
+
+        if (not qry_.exec())
+            throw db_error(qry_.lastError());
+        dobj.db_id(last_id());
+    }
+
+  private:
+    void bind_plain(const DataObject& dobj) {
+        QVariant file_id, parent_id;
+        if (dobj.parent())
+            parent_id = dobj.parent()->db_id();
+        if (dobj.file())
+            file_id = dobj.file()->db_id();
+
+        qry_.bindValue(":parent_id", parent_id);
+        qry_.bindValue(":file_id", file_id);
+        qry_.bindValue(":name", dobj.name().c_str());
+    }
+
+    void bind_specializations(const DataObject& dobj) {
+        BOOST_FOREACH(const Mapping& mapping, special_) {
+            QVariant val;
+            try {
+                val = dobj.attribute(mapping.attribute).value().to_qvariant();
+            } catch (const brfc::lookup_error& e) {
+                // value is null
+            }
+            qry_.bindValue(":" + QString::fromUtf8(mapping.column.c_str()), val);
+        }
+    }
+
+    long long last_id() {
+        qry_.first();
+        return qry_.value(0).toLongLong();
+    }
+
+    RelationalDatabase* rdb_;
+    QSqlQuery qry_;
+    MappingVector special_;
+};
+
+class AttributeSaver {
+  public:
+    AttributeSaver(RelationalDatabase* rdb)
+            : rdb_(rdb)
+            , mapper_(&rdb->mapper())
+            , queries_() {
+    }
+
+    void operator()(const Attribute& attr) {
+        // ignore specialized attributes
+        if (mapper_->is_specialized(attr.name()))
+            return;
+
+        const Mapping& mapping = mapper_->mapping(attr.name());
+
+        QSqlQuery& qry = query_by_table(mapping.table);
+        QVariant dobj_id;
+        if (attr.data_object())
+            dobj_id = attr.data_object()->db_id();
+        qry.bindValue("data_object_id", dobj_id);
+        qry.bindValue("attribute_id", mapping.id);
+        qry.bindValue("value", attr.value().to_qvariant());
+
+        if (not qry.exec())
+            throw db_error(qry.lastError());
+    }
+
+  private:
+    typedef std::map<std::string, QSqlQuery> QueryMap;
+
+    QSqlQuery& query_by_table(const std::string& table) {
+        QueryMap::iterator iter = queries_.find(table);
+        if (iter == queries_.end()) {
+            QSqlQuery qry(rdb_->connection()); 
+            qry.prepare("INSERT INTO " + QString::fromUtf8(table.c_str()) +
+                        "(data_object_id, attribute_id, value) " +
+                        "VALUES(:data_object_id, :attribute_id, :value)");
+            QueryMap::value_type val(table, qry);
+            iter = queries_.insert(val).first;
+        }
+        return iter->second;
+    }
+
+    RelationalDatabase* rdb_;
+    const AttributeMapper* mapper_;
+    QueryMap queries_;
+};
+
+} // namespace anonymous
+
+
 QString
 RelationalDatabase::qt_engine(const QString& /*engine*/) const {
     return "QPSQL";
@@ -71,6 +188,11 @@ RelationalDatabase::specs() const {
     return *specs_;
 }
 
+const AttributeMapper&
+RelationalDatabase::mapper() const {
+    return *mapper_;
+}
+
 void
 RelationalDatabase::do_begin() {
     connection().transaction();
@@ -98,7 +220,20 @@ RelationalDatabase::do_has_file(const File& file) const {
 
 long long
 RelationalDatabase::do_save_file(const char* path, const File& file) {
-    return save_recurse(path, file);
+    id_type file_id = save(path, file);
+    file.db_id(file_id.toLongLong());
+
+    DataObjectSaver save_data_object(this);
+    AttributeSaver save_attribute(this);
+    
+    BOOST_FOREACH(const DataObject& dobj, file.root()) {
+        save_data_object(dobj);
+        BOOST_FOREACH(shared_ptr<Attribute> attr, dobj.attributes()) {
+            save_attribute(*attr);
+        }
+    }
+
+    return file_id.toLongLong();
 }
 
 shared_ptr<ResultSet>
@@ -120,204 +255,47 @@ RelationalDatabase::do_query(const Query& query) {
                        compiler.binds());
 }
 
-namespace {
-
-class Insert {
-  public:
-    typedef std::map<QString, Variant> BindMap;
-
-    Insert(const std::string& table)
-          : table_(table.c_str()) {
-    }
-        
-    void bind(const QString& key, const Variant& value) {
-        binds_[key] = value;
-    }
-
-    void returning(const std::string& col) {
-        returning_.push_back(col.c_str());
-    }
-  
-    QSqlQuery query(const ::QSqlDatabase& db) const {
-        QStringList cols, vals;
-        BOOST_FOREACH(const BindMap::value_type& bind, binds_) {
-            cols.push_back(bind.first);
-            vals.push_back(":" + bind.first);
-        }
-
-        QStringList query_str;
-        query_str << "INSERT INTO " << table_
-                  << "(" << cols.join(", ") << ") "
-                  << "VALUES (" << vals.join(", ") << ")";
-        if (!returning_.empty())
-            query_str << " RETURNING " << returning_.join(", ");
-
-        QSqlQuery q(db);
-        q.prepare(query_str.join(""));
-
-        BOOST_FOREACH(const BindMap::value_type& bind, binds_) {
-            q.bindValue(":" + bind.first, bind.second.to_qvariant());
-        }
-
-        return q;
-    }
-
-    std::string table() const {
-        return table_.toStdString();
-    }
-
-  private:
-    QString table_;
-    QStringList returning_;
-    BindMap binds_;
-};
-
-void
-extend_for_specializations(Insert& insert,
-                           const DataObject& dobj,
-                           const AttributeMapper& mapper) {
-    MappingVector v = mapper.specializations_on(insert.table());
-    BOOST_FOREACH(const Mapping& m, v) {
-        try {
-            insert.bind(m.column.c_str(), dobj.attribute(m.attribute).value());
-        } catch (const brfc::lookup_error& e) {
-            insert.bind(m.column.c_str(), Variant());
-        }
-    }
-}
-
-} // namespace anonymous
-
-
 RelationalDatabase::id_type
 RelationalDatabase::save(const char* path, const File& f) {
-    Insert stmt("files");
+    QStringList columns, binds;
+    columns.append("source_id");
+    columns.append("unique_id");
+
+    const MappingVector& special = mapper().specializations_on("files");
+    BOOST_FOREACH(const Mapping& mapping, special) {
+        columns.append(mapping.column.c_str());
+    }
+    BOOST_FOREACH(const QString& column, columns) {
+        binds.append(":" + column);
+    }
+
+    QSqlQuery qry(connection());
+    qry.prepare("INSERT INTO files(" + columns.join(", ") +
+                ") VALUES(" + binds.join(", ") + ") RETURNING id");
+
     id_type source_id = query_id(f.source());
     if (source_id.isNull()) {
         // XXX: we should get the string from the Source object
         throw db_error("could not db-lookup source: " +
                        f.root().attribute("what/source").value().string());
     }
-    stmt.bind("source_id", source_id);
-    stmt.returning("id");
-    
-    extend_for_specializations(stmt, f.root(), *mapper_);
-    stmt.bind("path", Variant(path));
-    stmt.bind("unique_id", Variant(f.unique_identifier().c_str()));
+    qry.bindValue(":source_id", source_id);
 
-    QSqlQuery query = stmt.query(connection());
-
-    if (!query.exec())
-        throw db_error(query.lastError());
-    query.first();
-    return query.value(0);
-}
-
-long long
-RelationalDatabase::save_recurse(const char* path, const File& f) {
-    typedef std::map<const DataObject*, id_type> IdCache;
-
-    id_type file_id = save(path, f);
-    
-    IdCache id_cache;
-    const id_type* parent_id;
-    id_type null;
-    BOOST_FOREACH(const DataObject& dobj, f.root()) {
-        if (dobj.parent()) {
-            const DataObject* parent = dobj.parent();
-            parent_id = &id_cache[parent];
-        } else {
-            parent_id = &null;
-        }
-        id_type dobj_id = save_recurse(dobj, file_id, *parent_id);
-        id_cache[&dobj] = dobj_id;
-    }
-    return file_id.toLongLong();
-}
-
-RelationalDatabase::id_type
-RelationalDatabase::save(const DataObject& d,
-                         const id_type& file_id,
-                         const id_type& parent_id) {
-    Insert stmt("data_objects");
-    stmt.bind("parent_id", parent_id);
-    stmt.bind("file_id", file_id);
-    stmt.bind("name", Variant(d.name().c_str()));
-    stmt.returning("id");
-
-    extend_for_specializations(stmt, d, *mapper_);
-
-    QSqlQuery query = stmt.query(connection());
-
-    if (!query.exec())
-        throw db_error(query.lastError());
-    query.first();
-    return query.value(0);
-}
-
-RelationalDatabase::id_type
-RelationalDatabase::save_recurse(const DataObject& dobj,
-                                 const id_type& file_id,
-                                 const id_type& parent_id) {
-    id_type dobj_id = save(dobj, file_id, parent_id);
-    BOOST_FOREACH(shared_ptr<Attribute> attr, dobj.attributes()) {
-        save(*attr, dobj_id);
-    }
-    return dobj_id;
-}
-
-void
-RelationalDatabase::save(const Attribute& attr,
-                         const id_type& dobj_id) {
-    if (mapper_->is_specialized(attr.name()))
-        return;
-
-    Mapping mapping = mapper_->mapping(attr.name());
-
-    Insert stmt(mapping.table);
-    stmt.bind("data_object_id", dobj_id);
-    stmt.bind("attribute_id", Variant(mapping.id));
-    stmt.bind("value", attr.value());
-
-    QSqlQuery query = stmt.query(connection());
-
-    if (!query.exec())
-        throw db_error(query.lastError());
-}
-
-RelationalDatabase::id_type
-RelationalDatabase::query_id(const File& f) {
-    QSqlQuery query(connection());
-    query.prepare("SELECT id FROM files "
-                  "WHERE path = :path ");
-    query.bindValue(":path", f.root().attribute("path").value().to_qvariant());
-    query.exec();
-    query.first();
-    return query.value(0);
-}
-
-RelationalDatabase::id_type
-RelationalDatabase::query_id(const DataObject& dobj) {
-    id_type parent_id;
-
-    if (dobj.parent()) {
-        parent_id = query_id(*dobj.parent());
+    BOOST_FOREACH(const Mapping& mapping, special) {
+        if (mapping.attribute == "path")
+            continue;
+        const QVariant& value = 
+                f.root().attribute(mapping.attribute).value().to_qvariant();
+        qry.bindValue(":" + QString::fromUtf8(mapping.column.c_str()), value);
     }
 
-    id_type file_id = query_id(*dobj.file());
-    std::string op = parent_id.isNull() ? "IS NULL" : "= :parent_id";
-    const std::string& name = dobj.name();
-    QSqlQuery query(connection());
-    query.prepare(("SELECT id FROM data_objects "
-                   "WHERE parent_id " + op + " "
-                      "AND file_id = :file_id "
-                      "AND name = :name").c_str());
-    query.bindValue(":parent_id", parent_id);
-    query.bindValue(":file_id", file_id);
-    query.bindValue(":name", name.c_str());
-    query.exec();
-    query.first();
-    return query.value(0);
+    qry.bindValue(":path", path);
+    qry.bindValue(":unique_id", QString::fromUtf8(f.unique_identifier().c_str()));
+
+    if (not qry.exec())
+        throw db_error(qry.lastError());
+    qry.first();
+    return qry.value(0);
 }
 
 RelationalDatabase::id_type

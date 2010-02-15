@@ -54,7 +54,14 @@ class RelationalDatabase : public Database {
     
     const AttributeSpecs& specs() const;
 
+    const AttributeMapper& mapper() const;
+
     void populate_mapper_and_specs();
+
+    QSqlDatabase& connection() const {
+        RelationalDatabase* self = const_cast<RelationalDatabase*>(this);
+        return self->sql_;
+    }
 
   protected:
     virtual void do_begin();
@@ -69,11 +76,6 @@ class RelationalDatabase : public Database {
 
     virtual void do_clean();
 
-    QSqlDatabase& connection() const {
-        RelationalDatabase* self = const_cast<RelationalDatabase*>(this);
-        return self->sql_;
-    }
-
     QString dialect() const { return dialect_; }
   
   private:
@@ -85,13 +87,6 @@ class RelationalDatabase : public Database {
     id_type save(const char* path, const File& file);
 
     /**
-     * @brief save DataObject to database
-     */
-    id_type save(const DataObject& dobj,
-                 const id_type& file_id,
-                 const id_type& parent_id);
-    
-    /**
      * @brief save Attribute to database
      */
     void save(const Attribute& attr,
@@ -102,32 +97,6 @@ class RelationalDatabase : public Database {
      */
     void remove_file(const char* path);
     
-    /**
-     * @brief save File recursively
-     *
-     * saves File and all DataObjects (also recursively)
-     */
-    long long save_recurse(const char* path, const File& file);
-
-    /**
-     * @brief save DataObject recursively
-     *
-     * saves DataObject and all Attributes
-     */
-    id_type save_recurse(const DataObject& dobj,
-                         const id_type& file_id,
-                         const id_type& parent_id);
-    
-    /**
-     * @brief query database id of a File
-     */
-    id_type query_id(const File& file);
-    
-    /**
-     * @brief query database id of a DataObject
-     */
-    id_type query_id(const DataObject& dobj);
-
     /**
      * @brief query database id of a Source
      */
