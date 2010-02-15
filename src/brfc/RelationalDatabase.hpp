@@ -63,6 +63,10 @@ class RelationalDatabase : public Database {
         return self->sql_;
     }
 
+    bool supports_returning() const {
+        return supports_returning_;
+    }
+
   protected:
     virtual void do_begin();
     virtual void do_rollback();
@@ -108,6 +112,7 @@ class RelationalDatabase : public Database {
     boost::scoped_ptr<AttributeMapper> mapper_;
     boost::scoped_ptr<AttributeSpecs> specs_;
     QString dialect_;
+    bool supports_returning_;
     static unsigned int connection_count_;
 };
 

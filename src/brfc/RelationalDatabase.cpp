@@ -50,8 +50,11 @@ class DataObjectSaver {
         BOOST_FOREACH(const QString& column, columns) {
             binds.append(":" + column);
         }
-        qry_.prepare("INSERT INTO data_objects(" + columns.join(", ") +
-                     ") VALUES(" + binds.join(", ") + ") RETURNING id");
+        QString qrystr("INSERT INTO data_objects(" + columns.join(", ") +
+                       ") VALUES(" + binds.join(", ") + ")");
+        if (rdb->supports_returning())
+            qrystr += " RETURNING id";
+        qry_.prepare(qrystr);
     }
     
     void operator()(const DataObject& dobj) {
@@ -89,8 +92,12 @@ class DataObjectSaver {
     }
 
     long long last_id() {
-        qry_.first();
-        return qry_.value(0).toLongLong();
+        if (rdb_->supports_returning()) {
+            qry_.first();
+            return qry_.value(0).toLongLong();
+        } else {
+            return qry_.lastInsertId().toLongLong();
+        }
     }
 
     RelationalDatabase* rdb_;
@@ -150,15 +157,22 @@ class AttributeSaver {
 
 
 QString
-RelationalDatabase::qt_engine(const QString& /*engine*/) const {
-    return "QPSQL";
+RelationalDatabase::qt_engine(const QString& dialect) const {
+    if (dialect == "postgresql")
+        return "QPSQL";
+    else if (dialect == "sqlite")
+        return "QSQLITE";
+    else
+        throw db_error("unsupported dialect:" +
+                       std::string(dialect.toUtf8().constData()));
 }
 
 RelationalDatabase::RelationalDatabase(const std::string& dsn_)
         : sql_()
         , mapper_(new AttributeMapper())
         , specs_(new AttributeSpecs())
-        , dialect_() {
+        , dialect_()
+        , supports_returning_(false) {
     QUrl dsn(dsn_.c_str());
     QString name = QString("brfc-") + QString::number(connection_count_++);
     sql_ = ::QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), name);
@@ -173,6 +187,8 @@ RelationalDatabase::RelationalDatabase(const std::string& dsn_)
     if (!sql_.open())
         throw db_error(sql_.lastError().text().toStdString());
     dialect_ = dsn.scheme();
+    if (dialect_ == "postgresql")
+        supports_returning_ = true;
     populate_mapper_and_specs();
 }
 
@@ -270,8 +286,11 @@ RelationalDatabase::save(const char* path, const File& f) {
     }
 
     QSqlQuery qry(connection());
-    qry.prepare("INSERT INTO files(" + columns.join(", ") +
-                ") VALUES(" + binds.join(", ") + ") RETURNING id");
+    QString qrystr("INSERT INTO files(" + columns.join(", ") +
+                   ") VALUES(" + binds.join(", ") + ")");
+    if (supports_returning())
+        qrystr += " RETURNING id";
+    qry.prepare(qrystr);
 
     id_type source_id = query_id(f.source());
     if (source_id.isNull()) {
@@ -294,8 +313,12 @@ RelationalDatabase::save(const char* path, const File& f) {
 
     if (not qry.exec())
         throw db_error(qry.lastError());
-    qry.first();
-    return qry.value(0);
+    if (supports_returning()) {
+        qry.first();
+        return qry.value(0);
+    } else {
+        return qry.lastInsertId();
+    }
 }
 
 RelationalDatabase::id_type
