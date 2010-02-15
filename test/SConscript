@@ -1,6 +1,42 @@
+import codecs
+
 Import("env")
 
+class pysubstitute(object):
+    def __init__(self, values, encoding="utf-8"):
+        self.values = values
+        self.encoding = encoding
+
+    def __call__(self, target, source, env):
+        for dst, src in zip(target, source):
+            infile = codecs.open(str(src), "r", encoding=self.encoding).read()
+            outfile = codecs.open(str(dst), "w", encoding=self.encoding)
+            outfile.write(infile % self.values)
+            outfile.close()
+
+def strlit(var):
+    return "\"%s\"" % var
+
+config_values = {
+    "test_dsn_count": len(env["test_db_dsns"]),
+    "test_dsns": ",\n".join(map(strlit, env["test_db_dsns"])),
+    "test_schema_dir": strlit(env.Dir("#schema").abspath)
+}
+
+config_hpp = env.Command("config.hpp", "config.hpp.in",
+                         pysubstitute(config_values))
+config_cpp = env.Command("config.cpp", "config.cpp.in",
+                         pysubstitute(config_values))
+env.AlwaysBuild([config_hpp, config_cpp])
+
 sources = env.Glob("*.cpp")
+
+# add config file dependencies
+for src in sources:
+    if str(src) == "config.cpp":
+        env.Depends(src, config_hpp)
+    else:
+        env.Depends(src, [config_hpp, config_cpp])
 
 # remove -pedantic flag if using older g++
 cxxver = tuple(map(int, env["CXXVERSION"].split(".")))
@@ -8,9 +44,6 @@ if cxxver < (4, 3, 0):
     env["CCFLAGS"].remove("-pedantic")
 
 env.Append(CCFLAGS=["-g"])
-
-if env.get("test_db_dsn"):
-    env.Append(CCFLAGS=("-DBRFC_TEST_DB_DSN=\\\"%s\\\"" % env["test_db_dsn"]))
 
 env.Program("#test/runner", sources,
             LIBS=["gtest", "gmock", "brfc", "hlhdf"])

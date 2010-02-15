@@ -8,7 +8,7 @@ namespace brfc {
 #define BRFC_TEST_DSN_COUNT 1
 
 extern const char* test_schema_dir;
-extern const char* test_dsns[BRFC_TEST_DSN_COUNT];
+extern const char* test_dsns[%(test_dsn_count)d];
 
 } // namespace brfc
 

@@ -1,6 +1,12 @@
 import os
 import sys
 
+def convert_test_db_dsns(value):
+    if value.startswith("["):
+        return eval(value)
+    else:
+        return value.split(",")
+
 vars = Variables("variables.cache")
 
 vars.AddVariables(
@@ -42,7 +48,8 @@ vars.AddVariables(
     BoolVariable("build_java", "build java bindings", True),
                 ("install_root", "installation directory",
                  "${prefix}/baltrad/db-${version}"),
-                ("test_db_dsn", "database to use for testing", None)
+                ("test_db_dsns", "comma separated dsns to test against", [], None,
+                 convert_test_db_dsns)
 )
 
 env = Environment(tools=["default", "doxygen", "swig"],
@@ -99,7 +106,7 @@ for path in ("#lib", "${gtest_lib_dir}", "${hlhdf_lib_dir}", "${qt_lib_dir}"):
     testenv.AppendENVPath('LD_LIBRARY_PATH', env.Dir(path).abspath)
 
 SConscript("test/SConscript",
-           build_dir="build/test", duplicate=0,
+           build_dir="build/test", duplicate=1,
            exports={"env": testenv})
 
 SConscript("swig/SConscript",
@@ -232,7 +239,6 @@ _TARGET_STRS = map(str, BUILD_TARGETS)
 if set(["shared-library", "java-wrapper", "test", "hudsontest"]) & set(_TARGET_STRS):
     rets.append(conf.CheckQt(env["qt_include_dir"], env["qt_lib_dir"]))
     rets.append(conf.CheckLibWithHeader("QtSql", "QtSql/QSqlDatabase", "c++"))
-    conf.CheckQtSqlDrivers(env["qt_include_dir"], env["qt_lib_dir"])
     rets.append(conf.CheckHlhdf(env["hlhdf_include_dir"], env["hlhdf_lib_dir"]))
     rets.append(conf.CheckBoost(env["boost_include_dir"]))
 
@@ -241,6 +247,11 @@ if set(["test", "hudsontest"]) & set(_TARGET_STRS):
                           LIBPATH="${gtest_lib_dir}")
     rets.append(conf.CheckLibWithHeader("gtest", "gtest/gtest.h", "c++"))
     rets.append(conf.CheckLibWithHeader("gmock", "gmock/gmock.h", "c++"))
+    drivers = conf.CheckQtSqlDrivers(env["qt_include_dir"], env["qt_lib_dir"])
+    sqlite_dsns = [dsn for dsn in env["test_db_dsns"]
+                   if dsn.startswith("sqlite")]
+    if not sqlite_dsns and "SQLITE" in drivers:
+        env["test_db_dsns"].append("sqlite:///:memory:")
 
 if "java-wrapper" in _TARGET_STRS:
     conf.env.AppendUnique(CPPPATH=["${jdk_include_dir}",

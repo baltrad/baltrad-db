@@ -1,0 +1,10 @@
+#include "config.hpp"
+
+namespace brfc {
+
+const char* test_schema_dir = %(test_schema_dir)s;
+const char* test_dsns[%(test_dsn_count)d] = {
+    %(test_dsns)s
+};
+
+} // namespace brfc
