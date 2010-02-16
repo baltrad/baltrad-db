@@ -12,6 +12,7 @@
 #include <boost/scoped_ptr.hpp>
 
 class QVariant;
+class QCoreApplication;
 
 namespace brfc {
 
@@ -85,6 +86,8 @@ class RelationalDatabase : public Database {
   private:
     void init();
 
+    void init_qapp();
+
     /**
      * @brief save File to database
      */
@@ -114,6 +117,10 @@ class RelationalDatabase : public Database {
     QString dialect_;
     bool supports_returning_;
     static unsigned int connection_count_;
+    static unsigned int instance_count_;
+    static int argc_;
+    static char* argv_[];
+    static QCoreApplication* qapp_;
 };
 
 

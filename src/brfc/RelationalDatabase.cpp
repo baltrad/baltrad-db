@@ -21,9 +21,10 @@
 
 #include <boost/foreach.hpp>
 
+#include <QtCore/QCoreApplication>
+#include <QtCore/QStringList>
 #include <QtCore/QUrl>
 #include <QtCore/QVariant>
-#include <QtCore/QStringList>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
@@ -173,6 +174,7 @@ RelationalDatabase::RelationalDatabase(const std::string& dsn_)
         , specs_(new AttributeSpecs())
         , dialect_()
         , supports_returning_(false) {
+    init_qapp();
     QUrl dsn(dsn_.c_str());
     QString name = QString("brfc-") + QString::number(connection_count_++);
     sql_ = ::QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), name);
@@ -190,13 +192,31 @@ RelationalDatabase::RelationalDatabase(const std::string& dsn_)
     if (dialect_ == "postgresql")
         supports_returning_ = true;
     populate_mapper_and_specs();
+    if (instance_count_ == 0) {
+        init_qapp();
+    }
+    ++instance_count_;
+}
+
+void
+RelationalDatabase::init_qapp() {
+    qapp_ = new QCoreApplication(argc_, argv_);
 }
 
 unsigned int RelationalDatabase::connection_count_ = 0;
+unsigned int RelationalDatabase::instance_count_ = 0;
+int RelationalDatabase::argc_ = 1;
+char* RelationalDatabase::argv_[] = {"brfc"};
+QCoreApplication* RelationalDatabase::qapp_ = 0;
 
 RelationalDatabase::~RelationalDatabase() {
+    --instance_count_;
     sql_.close();
     ::QSqlDatabase::removeDatabase(sql_.connectionName());
+    if (instance_count_ == 0) {
+        delete qapp_;
+        qapp_ = 0;
+    }
 }
 
 const AttributeSpecs&
