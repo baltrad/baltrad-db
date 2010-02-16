@@ -385,6 +385,8 @@ RelationalDatabase::query(const QString& query_str,
 
 void
 RelationalDatabase::populate_mapper_and_specs() {
+    mapper_->clear();
+    specs_->clear();
     shared_ptr<ResultSet> r = query("SELECT id, name, converter, "
                                   "storage_table, storage_column "
                                   "FROM attributes", BindMap());

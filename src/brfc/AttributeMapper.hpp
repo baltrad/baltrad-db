@@ -99,6 +99,8 @@ class AttributeMapper {
      */
     Mapping
     mapping(const std::string& attribute) const;
+
+    void clear() { mappings_.clear(); }
     
   private:
     typedef std::map<std::string, Mapping> MappingMap;

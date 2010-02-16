@@ -56,6 +56,8 @@ class AttributeSpecs {
      */
     const Converter& converter(const std::string& name) const;
 
+    void clear() { specs_.clear(); }
+
   private:
     typedef std::map<std::string, std::string> AttributeSpecMap;
     typedef std::map<std::string, shared_ptr<Converter> > ConverterMap;
