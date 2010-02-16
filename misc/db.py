@@ -448,6 +448,8 @@ class StringIOExecutor(object):
             for col in nullable:
                 if col.key not in kw:
                     kw[col.key] = None
+        if isinstance(object, basestring) and object.startswith("\nDROP TABLE"):
+            object = object.replace("DROP TABLE", "DROP TABLE IF EXISTS")
         kw = self.escape(kw)
         print >> self.content, Template(unicode(object)).substitute(kw) + ";"
     

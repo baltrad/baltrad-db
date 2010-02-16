@@ -27,6 +27,7 @@ void
 TestRDBEnv::SetUp() {
     BOOST_FOREACH(const char* dsn, test_dsns) {
         TestRDB* db = new TestRDB(dsn, test_schema_dir);
+        db->drop(); // just in case it's dirty, drops are conditional
         db->create();
         databases_[dsn] = db;
     }
