@@ -5,10 +5,14 @@
 
 namespace brfc {
 
-#define BRFC_TEST_DSN_COUNT 1
+#define BRFC_TEST_DSN_COUNT %(test_dsn_count)d
 
 extern const char* test_schema_dir;
+#if BRFC_TEST_DSN_COUNT >= 1
 extern const char* test_dsns[%(test_dsn_count)d];
+#else
+extern const char* test_dsns[1];
+#endif // BRFC_TEST_DSN_COUNT
 
 } // namespace brfc
 

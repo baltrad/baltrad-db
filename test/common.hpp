@@ -27,7 +27,8 @@ class TestRDBEnv : public ::testing::Environment {
     virtual void TearDown();
 
   private:
-    static std::map<const char*, TestRDB*> databases_;
+    typedef std::map<const char*, TestRDB*> DatabaseMap;
+    static DatabaseMap databases_;
 };
 
 } // namespace brfc

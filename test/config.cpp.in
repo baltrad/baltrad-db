@@ -3,8 +3,13 @@
 namespace brfc {
 
 const char* test_schema_dir = %(test_schema_dir)s;
+
+#if BRFC_TEST_DSN_COUNT >= 1
 const char* test_dsns[%(test_dsn_count)d] = {
     %(test_dsns)s
 };
+#else
+const char* test_dsns[1] = {""};
+#endif // BRFC_TEST_DSN_COUNT
 
 } // namespace brfc

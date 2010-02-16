@@ -25,20 +25,21 @@ TestRDBEnv::get_database(const char* dsn) {
 
 void
 TestRDBEnv::SetUp() {
+#if BRFC_TEST_DSN_COUNT >= 1
     BOOST_FOREACH(const char* dsn, test_dsns) {
         TestRDB* db = new TestRDB(dsn, test_schema_dir);
         db->drop(); // just in case it's dirty, drops are conditional
         db->create();
         databases_[dsn] = db;
     }
+#endif // BRFC_TEST_DSN_COUNT
 }
 
 void
 TestRDBEnv::TearDown() {
-    BOOST_FOREACH(const char* dsn, test_dsns) {
-        TestRDB* db = databases_[dsn];
-        db->drop();
-        delete db;
+    BOOST_FOREACH(DatabaseMap::value_type& entry, databases_) {
+        entry.second->drop();
+        delete entry.second;
     }
 }
 

@@ -79,6 +79,8 @@ TEST_P(RDB_ResultSet_test, invalid_column) {
     EXPECT_THROW(r->integer(1), lookup_error);
 }
 
+#if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(RDB_ResultSet_test_p,
                         RDB_ResultSet_test,
                         ::testing::ValuesIn(test_dsns));
+#endif // BRFC_TEST_DSN_COUNT
