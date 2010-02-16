@@ -241,6 +241,8 @@ _TARGET_STRS = map(str, BUILD_TARGETS)
 if set(["shared-library", "java-wrapper", "test", "hudsontest"]) & set(_TARGET_STRS):
     rets.append(conf.CheckQt(env["qt_include_dir"], env["qt_lib_dir"]))
     rets.append(conf.CheckLibWithHeader("QtSql", "QtSql/QSqlDatabase", "c++"))
+    drivers = conf.CheckQtSqlDrivers(env["qt_include_dir"], env["qt_lib_dir"])
+    conf.env["qtsql_drivers"] = drivers
     rets.append(conf.CheckHlhdf(env["hlhdf_include_dir"], env["hlhdf_lib_dir"]))
     rets.append(conf.CheckBoost(env["boost_include_dir"]))
 
@@ -253,13 +255,12 @@ if set(["test", "hudsontest"]) & set(_TARGET_STRS):
                           LIBPATH="${gtest_lib_dir}")
     rets.append(conf.CheckLibWithHeader("gtest", "gtest/gtest.h", "c++"))
     rets.append(conf.CheckLibWithHeader("gmock", "gmock/gmock.h", "c++"))
-    drivers = conf.CheckQtSqlDrivers(env["qt_include_dir"], env["qt_lib_dir"])
     for dsn in env["test_db_dsns"]:
         dialect = dsn.split(":", 1)[0]
         if dialect not in db_driver_map:
             print "Invalid dialect specified in %r" % dsn
             rets.append(0)
-        elif db_driver_map[dialect] not in drivers:
+        elif db_driver_map[dialect] not in conf.env["qtsql_drivers"]:
             print "Missing QtSql driver for %s" % dialect
             rets.append(0)
     #XXX: enable when fully supporting sqlite
