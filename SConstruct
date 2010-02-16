@@ -2,10 +2,9 @@ import os
 import sys
 
 def convert_test_db_dsns(value):
-    if value.startswith("["):
-        return eval(value)
-    else:
-        return value.split(",")
+    dsns = value.split(",")
+    dsns = [dsn for dsn in dsns if dsn.strip()]
+    return dsns
 
 vars = Variables("variables.cache")
 
@@ -48,8 +47,7 @@ vars.AddVariables(
     BoolVariable("build_java", "build java bindings", True),
                 ("install_root", "installation directory",
                  "${prefix}/baltrad/db-${version}"),
-                ("test_db_dsns", "comma separated dsns to test against", [], None,
-                 convert_test_db_dsns)
+                ("test_db_dsns", "comma separated dsns to test against", "")
 )
 
 env = Environment(tools=["default", "doxygen", "swig"],
@@ -76,6 +74,8 @@ if vars.UnknownVariables():
     Exit(1)
 
 vars.Save("variables.cache", env)
+
+env["test_db_dsns"] = convert_test_db_dsns(env["test_db_dsns"])
 
 Help(vars.GenerateHelpText(env))
 
@@ -248,10 +248,11 @@ if set(["test", "hudsontest"]) & set(_TARGET_STRS):
     rets.append(conf.CheckLibWithHeader("gtest", "gtest/gtest.h", "c++"))
     rets.append(conf.CheckLibWithHeader("gmock", "gmock/gmock.h", "c++"))
     drivers = conf.CheckQtSqlDrivers(env["qt_include_dir"], env["qt_lib_dir"])
-    sqlite_dsns = [dsn for dsn in env["test_db_dsns"]
-                   if dsn.startswith("sqlite")]
-    if not sqlite_dsns and "SQLITE" in drivers:
-        env["test_db_dsns"].append("sqlite:///:memory:")
+    #XXX: enable when fully supporting sqlite
+    #sqlite_dsns = [dsn for dsn in env["test_db_dsns"]
+    #               if dsn.startswith("sqlite")]
+    #if not sqlite_dsns and "SQLITE" in drivers:
+    #    env["test_db_dsns"].append("sqlite:///:memory:")
 
 if "java-wrapper" in _TARGET_STRS:
     conf.env.AppendUnique(CPPPATH=["${jdk_include_dir}",
