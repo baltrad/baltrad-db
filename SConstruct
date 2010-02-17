@@ -41,12 +41,14 @@ vars.AddVariables(
                  "${gtest_dir}/lib", PathVariable.PathIsDir),
     PathVariable("gtest_include_dir", "googletest include directory",
                  "${gtest_dir}/include", PathVariable.PathIsDir),
-    PathVariable("hudsontest_output", "where to generate output for HUDSON",
-                 "test_results.xml", PathVariable.PathAccept),
+    PathVariable("junit_dir", "directory where junit4.jar is found",
+                 "/usr/share/java", PathVariable.PathIsDir),
+    PathVariable("ant_dir", "directory where ant libraries are found",
+                 "/usr/share/java", PathVariable.PathIsDir),
     BoolVariable("debug", "generate debug code", False),
     BoolVariable("build_java", "build java bindings", True),
-                ("install_root", "installation directory",
-                 "${prefix}/baltrad/db-${version}"),
+    PathVariable("install_root", "installation directory",
+                 "${prefix}/baltrad/db-${version}", PathVariable.PathAccept),
                 ("test_db_dsns", "comma separated dsns to test against", "")
 )
 
@@ -109,19 +111,30 @@ SConscript("test/SConscript",
            build_dir="build/test", duplicate=1,
            exports={"env": testenv})
 
+jtestenv = env.Clone()
+SConscript("test/java/SConscript",
+           build_dir="build/test/java", duplicate=0,
+           exports={"env": jtestenv})
+
+
+
 SConscript("swig/SConscript",
            build_dir="build/swig", duplicate=0,
            exports={"env": env.Clone()})
 
 env.Alias("install", [env["install_root"]])
 
-test = testenv.Command("test_runner", "#test/runner",
-                       "$SOURCE ")
-env.Alias("test", test)
+run_gtest_tests = testenv.Command("run_gtest_tests", "#test/runner",
+                                  "$SOURCE "
+                                  "--gtest_output=xml:test/reports/gtest.xml")
+env.Alias("test", run_gtest_tests)
 
-hudsontest = testenv.Command("hudsontest", "#test/runner",
-                   "$SOURCE "
-                   "--gtest_output=xml:${hudsontest_output}")
+run_java_tests = testenv.Command("run_java_tests", "#lib/jbrfc_test.jar",
+    "ant "
+    "-lib ./lib -lib ${junit_dir} -lib ${ant_dir} "
+    "-f test/java/build.xml")
+
+env.Alias("hudsontest", [run_gtest_tests, run_java_tests])
 
 ##
 # configure
@@ -162,7 +175,6 @@ def CheckBoost(ctx, boost_include_dir):
         "lambda/lambda.hpp",
         "numeric/conversion/cast.hpp",
     )
-
 
     for header in headers:
         result = conf.CheckCXXHeader("/".join(("boost", header)))

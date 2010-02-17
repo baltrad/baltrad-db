@@ -1,0 +1,18 @@
+Import("env")
+
+classpath = [
+    env.File("#lib/jbrfc.jar").abspath,
+    env.Dir(env["junit_dir"]).File("junit4.jar").abspath,
+]
+
+java =Java(target="classes", source="eu", JAVACLASSPATH=classpath)
+
+env.Depends(java, env.Alias("java-wrapper"))
+
+build_dir = env.Dir(".").get_abspath()
+jar = Jar(target="#lib/jbrfc_test.jar", source="classes/eu",
+          JARCHDIR=env.Dir(".").abspath + "/classes")
+
+env.Alias("javatest", jar)
+
+# vim:filetype=python:et:ts=4:sw=4:

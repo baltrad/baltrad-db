@@ -2,6 +2,7 @@ build/
 doc/html
 lib/
 test/runner
+test/reports
 *.pyc
 .*.swp
 variables.cache

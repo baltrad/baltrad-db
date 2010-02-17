@@ -1,0 +1,9 @@
+<project name="baltrad-db" default="execute_tests" basedir="../../">
+  <target name="execute_tests">
+    <mkdir dir="test/reports"/>
+    <junit showoutput="true" printsummary="no">
+      <formatter type="xml" />
+      <test name="eu.baltrad.fc.TestQString" todir="test/reports" />
+    </junit>
+  </target>
+</project>
