@@ -5,6 +5,7 @@
 %include "std_string.i"
 %include "std_vector.i"
 %include "stdint.i"
+%include "QString.i"
 
 %{
     #include <brfc/exceptions.hpp>
@@ -18,6 +19,7 @@
     #include <brfc/ResultSet.hpp>
     #include <brfc/Database.hpp>
     #include <brfc/Variant.hpp>
+    #include <brfc/TestSwig.hpp>
     
     #include <brfc/expr/fwd.hpp>
     #include <brfc/expr/Element.hpp>
@@ -215,6 +217,7 @@ SWIG_SHARED_PTR(Attribute, brfc::Attribute);
 %include <brfc/Query.hpp>
 %include <brfc/Source.hpp>
 %include <brfc/Variant.hpp>
+%include <brfc/TestSwig.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:
 */
