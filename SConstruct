@@ -42,7 +42,7 @@ vars.AddVariables(
     PathVariable("gtest_include_dir", "googletest include directory",
                  "${gtest_dir}/include", PathVariable.PathIsDir),
     PathVariable("junit_dir", "directory where junit4.jar is found",
-                 "/usr/share/java", PathVariable.PathIsDir),
+                 Dir("#deplib").abspath, PathVariable.PathIsDir),
     PathVariable("ant_dir", "directory where ant libraries are found",
                  "/usr/share/java", PathVariable.PathIsDir),
     BoolVariable("debug", "generate debug code", False),
