@@ -2,10 +2,11 @@
 
 #include <brfc/exceptions.hpp>
 #include <brfc/AttributeSpecs.hpp>
-#include <brfc/File.hpp>
+#include <brfc/DefaultFileNamer.hpp>
 #include <brfc/Database.hpp>
-#include <brfc/RelationalDatabase.hpp>
+#include <brfc/File.hpp>
 #include <brfc/Query.hpp>
+#include <brfc/RelationalDatabase.hpp>
 #include <brfc/ResultSet.hpp>
 
 #include <brfc/expr/BinaryOperator.hpp>
@@ -19,20 +20,6 @@
 
 namespace brfc {
     
-DefaultFileNamer::DefaultFileNamer(const QString& path)
-        : path_(path) {
-    QDir dir_(path);
-    if (not dir_.isAbsolute())
-        throw fs_error("storage must be an absolute path");
-    if (not dir_.exists())
-        throw fs_error("storage does not exist");
-}
-
-QString
-DefaultFileNamer::do_name(const File& f) const {
-    return path_ + "/" + f.unique_identifier() + ".h5";
-}
-
 FileCatalog::FileCatalog(const QString& dsn,
                          const QString& storage)
         : db_(new RelationalDatabase(dsn))

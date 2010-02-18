@@ -8,6 +8,7 @@ sources = [
     "AttributeSpecs.cpp",
     "Converter.cpp",
     "DataObject.cpp",
+    "DefaultFileNamer.cpp",
     "FileCatalog.cpp",
     "File.cpp",
     "Query.cpp",

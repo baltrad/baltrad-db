@@ -2,6 +2,7 @@
 #define BRFC_FILE_CATALOGER_H
 
 #include <brfc/smart_ptr.hpp>
+#include <brfc/FileNamer.hpp>
 
 #include <QtCore/QString>
 
@@ -14,29 +15,6 @@ class AttributeSpecs;
 class Database;
 class File;
 class Query;
-
-class FileNamer {
-  public:
-    QString name(const File& f) const {
-        return do_name(f);
-    }
-
-    virtual ~FileNamer() { }
-
-  protected:
-    virtual QString do_name(const File& f) const = 0;
-};
-
-class DefaultFileNamer : public FileNamer {
-  public:
-    DefaultFileNamer(const QString& path);
-
-  protected:
-    virtual QString do_name(const File& f) const;
-  
-  private:
-    QString path_;
-};
 
 /**
  * @defgroup exposed_in_binds Exposed in bindings

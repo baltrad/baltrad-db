@@ -167,9 +167,4 @@ TEST_F(FileCatalog_test, test_removing_nx_file) {
     EXPECT_THROW(fc.remove("/path/to/nxfile"), fs_error);
 }
 
-TEST(DefaultFileNamer_test, test_nx_storage_path_throws) {
-    EXPECT_THROW(DefaultFileNamer("/path/to/nxdir"), fs_error);
-}
-
 } // namespace brfc
-
