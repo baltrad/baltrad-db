@@ -54,18 +54,18 @@ Source::from_source_attribute(const QString& source) {
         if (entry.first == "WMO") {
             src.wmo_code(entry.second.toInt());
         } else if (entry.first == "RAD") {
-            src.radar_site(entry.second.toUtf8().constData());
+            src.radar_site(entry.second);
         } else if (entry.first == "ORG") {
             src.originating_centre(entry.second.toInt());
         } else if (entry.first == "PLC") {
-            src.place(entry.second.toUtf8().constData());
+            src.place(entry.second);
         } else if (entry.first == "CTY") {
             src.country_code(entry.second.toInt());
         } else if (entry.first == "CMT") {
-            src.comment(entry.second.toUtf8().constData());
+            src.comment(entry.second);
         } else {
-            throw value_error("invalid field in source: " +
-                              std::string(entry.first.toUtf8().constData()));
+            QString err = QString("invalid field in source: ") + source;
+            throw value_error(err.toUtf8().constData());
         }
     }
     return src;

@@ -3,9 +3,9 @@
 #include <brfc/Source.hpp>
 #include <brfc/exceptions.hpp>
 
-#include <QtCore/QString>
+#include "common.hpp"
 
-using namespace brfc;
+namespace brfc {
 
 TEST(Source_test, valid_source) {
     QString value = QString::fromUtf8("WMO:02606,RAD:SE50");
@@ -34,3 +34,5 @@ TEST(Source_test, from_source_with_invalid_key) {
     QString value = QString::fromUtf8("asd:qwe");
     EXPECT_THROW(Source::from_source_attribute(value), value_error);
 }
+
+} // namespace brfc

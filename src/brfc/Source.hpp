@@ -1,9 +1,7 @@
 #ifndef BRFC_SOURCE_H
 #define BRFC_SOURCE_H
 
-#include <string>
-
-class QString;
+#include <QtCore/QString>
 
 namespace brfc {
 
@@ -33,9 +31,9 @@ class Source {
     /**
      * @brief radar site as indexed in the OPERA database
      */
-    const std::string& radar_site() const { return radar_site_; }
+    const QString& radar_site() const { return radar_site_; }
 
-    void radar_site(const char* value) {
+    void radar_site(const QString& value) {
         radar_site_ = value;
     }
 
@@ -51,9 +49,9 @@ class Source {
     /**
      * @brief place according to ODIM 2.0 spec, table 9
      */
-    const std::string& place() const { return place_; }
+    const QString& place() const { return place_; }
 
-    void place(const char* value) {
+    void place(const QString& value) {
         place_ = value;
     }
 
@@ -69,20 +67,20 @@ class Source {
     /**
      * @brief comment
      */
-    const std::string& comment() const { return comment_; }
+    const QString& comment() const { return comment_; }
 
-    void comment(const char* value) {
+    void comment(const QString& value) {
         comment_ = value;
     }
 
   private:
     long long db_id_;
     int wmo_code_;
-    std::string radar_site_;
+    QString radar_site_;
     int originating_centre_;
-    std::string place_;
+    QString place_;
     int country_code_;
-    std::string comment_;
+    QString comment_;
 };
 
 }

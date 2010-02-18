@@ -354,7 +354,7 @@ RelationalDatabase::query_id(const Source& src) {
         bindvar = src.wmo_code();
     } else if (src.radar_site() != "") {
         query_str += "radar_site = ?";
-        bindvar = QString::fromUtf8(src.radar_site().c_str());
+        bindvar = src.radar_site();
     // composites
     } else if (src.originating_centre()) {
         query_str += "originating_centre = ?";
