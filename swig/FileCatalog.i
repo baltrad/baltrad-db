@@ -60,6 +60,7 @@
 
 %ignore brfc::expr::Element::accept;
 %ignore brfc::expr::Expression::shared_from_this;
+%ignore brfc::expr::Factory::string(const char* value) const;
 %ignore brfc::expr::Literal::create;
 %ignore brfc::expr::Literal::value;
 %ignore brfc::expr::BinaryOperator::create;
@@ -118,7 +119,7 @@ SWIG_SHARED_PTR(File, brfc::File);
 SWIG_SHARED_PTR(Attribute, brfc::Attribute);
 
 %template(AttributeVector) std::vector<brfc::shared_ptr<brfc::Attribute> >;
-%template(StringVector) std::vector<std::string>;
+%template(StringVector) std::vector<QString>;
 
 // Enable the JNI class to load the required native library.
 %pragma(java) jniclasscode=%{
@@ -159,12 +160,12 @@ SWIG_SHARED_PTR(Attribute, brfc::Attribute);
 }
 
 %extend brfc::ResultSet {
-    std::string _time_string(unsigned int pos) const {
-        return $self->time(pos).toString("HH:mm:ss").toStdString();
+    QString _time_string(unsigned int pos) const {
+        return $self->time(pos).toString("HH:mm:ss");
     }
 
-    std::string _date_string(unsigned int pos) const {
-        return $self->date(pos).toString("yyyy-MM-dd").toStdString();
+    QString _date_string(unsigned int pos) const {
+        return $self->date(pos).toString("yyyy-MM-dd");
     }
 }
 
@@ -179,12 +180,12 @@ SWIG_SHARED_PTR(Attribute, brfc::Attribute);
 %}
 
 %extend brfc::Variant {
-    std::string _time_string() const {
-        return $self->time().toString("HH:mm:ss").toStdString();
+    QString _time_string() const {
+        return $self->time().toString("HH:mm:ss");
     }
 
-    std::string _date_string() const {
-        return $self->date().toString("yyyy-MM-dd").toStdString();
+    QString _date_string() const {
+        return $self->date().toString("yyyy-MM-dd");
     }
 }
 
