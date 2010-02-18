@@ -12,9 +12,9 @@
 
 namespace brfc {
 
-TestRDB::TestRDB(const std::string& dsn, const std::string& schema_dir)
+TestRDB::TestRDB(const QString& dsn, const QString& schema_dir)
         : RelationalDatabase(dsn)
-        , schema_dir_(QString::fromUtf8(schema_dir.c_str())) {
+        , schema_dir_(schema_dir) {
     schema_dir_.makeAbsolute();
 }
 

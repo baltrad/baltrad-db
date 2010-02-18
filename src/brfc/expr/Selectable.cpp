@@ -7,12 +7,12 @@ namespace brfc {
 namespace expr {
 
 AliasPtr
-Selectable::alias(const std::string& name) {
+Selectable::alias(const QString& name) {
     return Alias::create(this->shared_from_this(), name);
 }
 
 ColumnPtr
-Selectable::column(const std::string& name) {
+Selectable::column(const QString& name) {
     return Column::create(this->shared_from_this(), name);
 }
 

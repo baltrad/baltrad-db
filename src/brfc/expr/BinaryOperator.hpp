@@ -2,7 +2,8 @@
 #define BRFC_EXPR_BINARY_OPERATOR_HPP
 
 #include <brfc/expr/Expression.hpp>
-#include <string>
+
+#include <QtCore/QString>
 
 namespace brfc {
 namespace expr {
@@ -13,7 +14,7 @@ namespace expr {
  */
 class BinaryOperator : public Expression {
   public:
-    static BinaryOperatorPtr create(const std::string& op,
+    static BinaryOperatorPtr create(const QString& op,
                                     ExpressionPtr lhs,
                                     ExpressionPtr rhs) {
         return BinaryOperatorPtr(new BinaryOperator(op, lhs, rhs));
@@ -24,10 +25,10 @@ class BinaryOperator : public Expression {
 
     ExpressionPtr lhs() const { return lhs_; }
     ExpressionPtr rhs() const { return rhs_; }
-    const std::string& op() const { return op_; }
+    const QString& op() const { return op_; }
 
   protected:
-    BinaryOperator(const std::string& op,
+    BinaryOperator(const QString& op,
                    ExpressionPtr lhs,
                    ExpressionPtr rhs)
             : Expression()
@@ -41,7 +42,7 @@ class BinaryOperator : public Expression {
     }
 
   private:
-    std::string op_;
+    QString op_;
     ExpressionPtr lhs_;
     ExpressionPtr rhs_;
 };

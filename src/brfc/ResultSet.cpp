@@ -8,7 +8,7 @@
 
 namespace brfc {
 
-std::string
+QString
 ResultSet::string(unsigned int pos) const {
     return value_at(pos).string();
 }

@@ -5,6 +5,8 @@
 
 #include <brfc/smart_ptr.hpp>
 
+class QString;
+
 namespace brfc {
 
 class File;
@@ -51,7 +53,7 @@ class Database : public boost::noncopyable {
     /**
      * @brief remove file from database
      */
-    void remove_file(const char* path) {
+    void remove_file(const QString& path) {
         do_remove_file(path);
     }
     
@@ -59,7 +61,7 @@ class Database : public boost::noncopyable {
      * @brief save File to database
      * @return database id associated with the file
      */
-    long long save_file(const char* path, const File& file) {
+    long long save_file(const QString& path, const File& file) {
         return do_save_file(path, file);
     }
 
@@ -83,8 +85,8 @@ class Database : public boost::noncopyable {
     virtual void do_commit() = 0;
     
     virtual bool do_has_file(const File& file) const = 0;
-    virtual void do_remove_file(const char* path) = 0;
-    virtual long long do_save_file(const char* path, const File& file) = 0;
+    virtual void do_remove_file(const QString& path) = 0;
+    virtual long long do_save_file(const QString& path, const File& file) = 0;
 
     virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
 

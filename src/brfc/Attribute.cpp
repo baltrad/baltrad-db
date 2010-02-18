@@ -6,7 +6,7 @@
 
 namespace brfc {
 
-Attribute::Attribute(const std::string& name,
+Attribute::Attribute(const QString& name,
                      const Variant& value,
                      const DataObject* data_object)
         : data_object_(data_object)
@@ -23,9 +23,9 @@ Attribute::value(const Variant& value) {
     *value_ = value;
 }
 
-std::string
+QString
 Attribute::path() const {
-    return data_object_->path() + "/" + name_;
+    return data_object_->path() + QString::fromUtf8("/") + name_;
 }
 
 } // namespace brfc

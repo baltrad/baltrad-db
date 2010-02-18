@@ -90,17 +90,18 @@ Variant
 StringConverter::do_convert(HL_FormatSpecifier format,
                             unsigned char* data) const {
     BRFC_ASSERT(format == HLHDF_STRING);
-    return Variant(reinterpret_cast<char*>(data));
+    QString s = QString::fromUtf8(reinterpret_cast<char*>(data));
+    return Variant(s);
 }
 
 HL_Data
 StringConverter::do_convert(const Variant& value) const {
     BRFC_ASSERT(value.type() == Variant::STRING);
     
-    const std::string& v = value.string();
+    QByteArray v = value.string().toUtf8();
     return HL_Data(v.size() + 1, "string",
                    reinterpret_cast<unsigned char*>(
-                         const_cast<char*>(v.c_str())));
+                         const_cast<char*>(v.constData())));
 }
 
 
@@ -108,7 +109,7 @@ Variant
 DateConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     const Variant& var = StringConverter::do_convert(format, data);
-    QDate date =  QDate::fromString(var.qstring(), "yyyyMMdd");
+    QDate date =  QDate::fromString(var.string(), "yyyyMMdd");
     BRFC_ASSERT(date.isValid());
     return Variant(date);
 }
@@ -124,7 +125,7 @@ Variant
 TimeConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     const Variant& var = StringConverter::do_convert(format, data);
-    QTime time = QTime::fromString(var.qstring(), "hhmmss");
+    QTime time = QTime::fromString(var.string(), "hhmmss");
     BRFC_ASSERT(time.isValid());
     return Variant(time);
 }
@@ -140,7 +141,7 @@ Variant
 BoolConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     const Variant& var = StringConverter::do_convert(format, data);
-    const QString& str = var.qstring();
+    const QString& str = var.string();
     bool val = false;
     if (str == "True") {
         val = true;

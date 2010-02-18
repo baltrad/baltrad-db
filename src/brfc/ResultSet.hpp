@@ -1,8 +1,7 @@
 #ifndef BRFC_RESULT_SET_HPP
 #define BRFC_RESULT_SET_HPP
 
-#include <string>
-
+class QString;
 class QDate;
 class QTime;
 
@@ -57,7 +56,7 @@ class ResultSet {
     /**
      * @brief get string value at \c pos
      */
-    std::string string(unsigned int pos) const;
+    QString string(unsigned int pos) const;
 
     /**
      * @brief get integer value at \c pos

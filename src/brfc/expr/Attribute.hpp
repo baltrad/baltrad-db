@@ -4,6 +4,8 @@
 #include <brfc/expr/Expression.hpp>
 #include <brfc/expr/Visitor.hpp>
 
+#include <QtCore/QString>
+
 namespace brfc {
 namespace expr {
 
@@ -13,16 +15,16 @@ namespace expr {
  */
 class Attribute : public Expression {
   public:
-    static AttributePtr create(const std::string& name) {
+    static AttributePtr create(const QString& name) {
         return AttributePtr(new Attribute(name));
     }
 
-    const std::string& name() const {
+    const QString& name() const {
         return name_;
     }
 
   protected:
-    Attribute(const std::string& name)
+    Attribute(const QString& name)
             : name_(name) {
     }
 
@@ -31,7 +33,7 @@ class Attribute : public Expression {
     }
 
   private:
-    std::string name_;
+    QString name_;
 };
 
 }

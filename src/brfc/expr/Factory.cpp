@@ -11,13 +11,18 @@ namespace brfc {
 namespace expr {
 
 AttributePtr
-Factory::attribute(const std::string& name) const {
+Factory::attribute(const QString& name) const {
     return Attribute::create(name);
 }
 
 LiteralPtr
-Factory::string(const std::string& value) const {
-    return Literal::create(Variant(value.c_str()));
+Factory::string(const QString& value) const {
+    return Literal::create(Variant(value));
+}
+
+LiteralPtr
+Factory::string(const char* value) const {
+    return Literal::create(Variant(value));
 }
 
 LiteralPtr

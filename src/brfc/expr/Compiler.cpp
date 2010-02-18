@@ -14,30 +14,31 @@
 #include <brfc/expr/Table.hpp>
 
 #include <boost/foreach.hpp>
-#include <boost/algorithm/string/join.hpp>
 #include <algorithm>
+
+#include <QtCore/QStringList>
 
 namespace brfc {
 namespace expr {
 
-std::string
+QString
 Compiler::pop() {
     BRFC_ASSERT(!stack_.empty());
-    std::string top = stack_.back();
+    QString top = stack_.back();
     stack_.pop_back();
     return top;
 }
 
 void
-Compiler::push(const std::string& top) {
+Compiler::push(const QString& top) {
     stack_.push_back(top);
 }
 
 
 void
 Compiler::do_visit(BinaryOperator& expr) {
-    std::string rhs = pop();
-    std::string lhs = pop();
+    const QString& rhs = pop();
+    const QString& lhs = pop();
     push(lhs + " " + expr.op() + " " + rhs);
 }
 
@@ -64,9 +65,9 @@ Compiler::do_visit(Attribute& expr) {
 
 void
 Compiler::do_visit(Join& join) {
-    std::string condition = pop();
-    std::string to = pop();
-    std::string from = pop();
+    QString condition = pop();
+    QString to = pop();
+    QString from = pop();
     in_from_clause = true;
     join.to()->accept(*this);
     to = pop();
@@ -82,7 +83,7 @@ Compiler::do_visit(Join& join) {
 void
 Compiler::do_visit(Literal& expr) {
     QString key = QString(":lit_") + QString::number(literal_count_++);
-    push(key.toStdString());
+    push(key);
     binds_[key] = expr.value();
 }
 
@@ -98,39 +99,39 @@ Compiler::do_visit(Parentheses& expr) {
 
 void
 Compiler::do_visit(FromClause& from) {
-    std::vector<std::string> from_clause_elements;
-    for (size_t i = 0; i < from.elements().size(); ++i) {
-        from_clause_elements.push_back(pop());
-    }
-    std::reverse(from_clause_elements.begin(), from_clause_elements.end());
-    if (!from.empty()) {
-        std::string from_clause = "\nFROM " + boost::join(from_clause_elements, ", ");
+    if (not from.empty()) {
+        QStringList from_clause_elements;
+        for (size_t i = 0; i < from.elements().size(); ++i) {
+            from_clause_elements.push_back(pop());
+        }
+        std::reverse(from_clause_elements.begin(), from_clause_elements.end());
+        QString from_clause = "\nFROM " + from_clause_elements.join(", ");
         push(from_clause);
     }
 }
 
 void
 Compiler::do_visit(Select& select) {
-    std::string where_clause;
+    QString where_clause;
     if (select.where())
         where_clause = "\nWHERE " + pop();
-    std::string from_clause;
+    QString from_clause;
     if (!select.from()->empty())
         from_clause = pop();
     
-    std::vector<std::string> result_column_elm;
+    QStringList result_column_elm;
     for (size_t i = 0; i < select.what().size(); ++i) {
         result_column_elm.push_back(pop());
     }
     std::reverse(result_column_elm.begin(), result_column_elm.end());
-    std::string result_columns = boost::join(result_column_elm, ", ");
+    QString result_columns = result_column_elm.join(", ");
 
-    std::string distinct = select.distinct() ? "DISTINCT " : "";
+    QString distinct = select.distinct() ? "DISTINCT " : "";
     // SELECT columns FROM from_obj WHERE where_clause
-    std::string clause = "SELECT " + distinct
-                                   + result_columns
-                                   + from_clause
-                                   + where_clause;
+    QString clause = "SELECT " + distinct
+                               + result_columns
+                               + from_clause
+                               + where_clause;
     push(clause);
 }
 

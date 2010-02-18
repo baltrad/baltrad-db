@@ -9,6 +9,8 @@
 
 #include <brfc/hlhdf.hpp>
 
+#include <QtCore/QString>
+
 class QDate;
 class QTime;
 
@@ -24,7 +26,7 @@ class Source;
  */
 class File : public boost::noncopyable {
   public:
-    typedef std::vector<std::string> StringVector;
+    typedef std::vector<QString> StringVector;
 
     /**
      * @brief construct an empty File
@@ -42,7 +44,7 @@ class File : public boost::noncopyable {
      * full paths of ignored attributes (not defined in specs) are stored
      * and accessible through ignored_attributes();
      */
-    File(const std::string& path, const AttributeSpecs& specs);
+    File(const QString& path, const AttributeSpecs& specs);
     
     /**
      * @brief construct with mandatory attributes present
@@ -55,11 +57,11 @@ class File : public boost::noncopyable {
      * this is the minimal "correct" file, given that parameters are
      * correctly formed.
      */
-    File(const std::string& object,
+    File(const QString& object,
          const QDate& date,
          const QTime& time,
-         const std::string& source,
-         const std::string& version="H5rad 2.0");
+         const QString& source,
+         const QString& version=QString::fromUtf8("H5rad 2.0"));
 
     /**
      * @brief destructor
@@ -74,7 +76,7 @@ class File : public boost::noncopyable {
      *
      * data_object("/path/to/dataobject")
      */
-    DataObject& data_object(const std::string& path,
+    DataObject& data_object(const QString& path,
                             bool create_missing=false); 
     
     /**
@@ -104,7 +106,7 @@ class File : public boost::noncopyable {
      * @note changes to this algorithm most probably trigger the need to
      *       re-evaluate all files in the database
      */
-    std::string unique_identifier() const;
+    QString unique_identifier() const;
 
     /**
      * @brief get attributes ignored on loading
@@ -113,11 +115,11 @@ class File : public boost::noncopyable {
         return ignored_attributes_;
     }
 
-    const std::string& path() const {
+    const QString& path() const {
         return path_;
     }
 
-    void path(const std::string& path) {
+    void path(const QString& path) {
         path_ = path;
     }
 
@@ -129,7 +131,7 @@ class File : public boost::noncopyable {
     /**
      * @brief load from filesystem
      */
-    void load(const std::string& path, const AttributeSpecs& specs);
+    void load(const QString& path, const AttributeSpecs& specs);
 
     void add_attribute_from_node(HL_Node* node,
                                  const AttributeSpecs& specs);
@@ -144,7 +146,7 @@ class File : public boost::noncopyable {
 
     boost::scoped_ptr<DataObject> root_;
     StringVector ignored_attributes_;
-    std::string path_;
+    QString path_;
     mutable long long db_id_;
 };
 

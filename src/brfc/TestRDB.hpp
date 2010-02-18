@@ -14,7 +14,7 @@ namespace brfc {
  */
 class TestRDB : public RelationalDatabase {
   public:
-    TestRDB(const std::string& dsn, const std::string& schema_dir);
+    TestRDB(const QString& dsn, const QString& schema_dir);
 
     void create();
     void drop();

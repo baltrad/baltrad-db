@@ -3,7 +3,7 @@
 
 #include <brfc/smart_ptr.hpp>
 
-#include <string>
+#include <QtCore/QString>
 
 /**
  * @brief main namespace
@@ -17,23 +17,23 @@ class Query;
 
 class FileNamer {
   public:
-    std::string name(const File& f) const {
+    QString name(const File& f) const {
         return do_name(f);
     }
 
   protected:
-    virtual std::string do_name(const File& f) const = 0;
+    virtual QString do_name(const File& f) const = 0;
 };
 
 class DefaultFileNamer : public FileNamer {
   public:
-    DefaultFileNamer(const std::string& path);
+    DefaultFileNamer(const QString& path);
 
   protected:
-    virtual std::string do_name(const File& f) const;
+    virtual QString do_name(const File& f) const;
   
   private:
-    std::string path_;
+    QString path_;
 };
 
 /**
@@ -57,7 +57,7 @@ class FileCatalog {
      * on creating a FileCatalog instance, owned AttributeSpecs is filled
      * from Database
      */
-    FileCatalog(const std::string& dsn, const std::string& storage);
+    FileCatalog(const QString& dsn, const QString& storage);
 
     FileCatalog(shared_ptr<Database> db,
                 shared_ptr<AttributeSpecs> specs,
@@ -79,7 +79,7 @@ class FileCatalog {
      * already present in database. For the exact rules on how the path is
      * determined, refer to File documentation.
      */
-    bool is_cataloged(const std::string& path) const;
+    bool is_cataloged(const QString& path) const;
     
     /**
      * @brief import file to catalog
@@ -92,7 +92,7 @@ class FileCatalog {
      *
      * on import file is physically copied to a new location
      */
-    shared_ptr<File> catalog(const std::string& path);
+    shared_ptr<File> catalog(const QString& path);
     
     /**
      * @brief remove file from catalog
@@ -100,7 +100,7 @@ class FileCatalog {
      * @throw db_error if removing file entry from database fails
      * @throw fs_error if removing file entry from filesystem fails
      */
-    void remove(const std::string& path);
+    void remove(const QString& path);
 
     /**
      * @brief get a query object bound to owned database

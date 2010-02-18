@@ -2,7 +2,8 @@
 #define BRFC_EXPR_LABEL_HPP
 
 #include <brfc/expr/Expression.hpp>
-#include <string>
+
+#include <QtCore/QString>
 
 namespace brfc {
 namespace expr {
@@ -16,15 +17,15 @@ namespace expr {
  */
 class Label : public Expression {
   public:
-    static LabelPtr create(ExpressionPtr expression, const std::string& label) {
+    static LabelPtr create(ExpressionPtr expression, const QString& label) {
         return LabelPtr(new Label(expression, label));
     }
 
-    void label(const std::string& label) {
+    void label(const QString& label) {
         label_ = label;
     }
 
-    const std::string& label() const {
+    const QString& label() const {
         return label_;
     }
 
@@ -40,7 +41,7 @@ class Label : public Expression {
     }
 
   protected:
-    explicit Label(ExpressionPtr expression, const std::string& label)
+    explicit Label(ExpressionPtr expression, const QString& label)
             : expression_(expression)
             , label_(label) {
     }
@@ -51,7 +52,7 @@ class Label : public Expression {
 
   private:
     ExpressionPtr expression_;
-    std::string label_;
+    QString label_;
 };
 
 }

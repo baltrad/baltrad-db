@@ -3,7 +3,8 @@
 
 #include <brfc/expr/fwd.hpp>
 #include <brfc/expr/Element.hpp>
-#include <string>
+
+class QString;
 
 namespace brfc {
 namespace expr {
@@ -82,7 +83,7 @@ class Expression : public Element {
     /**
      * @brief label this expression
      */
-    LabelPtr label(const std::string& label) const;
+    LabelPtr label(const QString& label) const;
 
   protected:
     Expression()

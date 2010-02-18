@@ -4,7 +4,8 @@
 #include <brfc/smart_ptr.hpp>
 
 #include <map>
-#include <string>
+
+#include <QtCore/QString>
 
 namespace brfc {
 
@@ -44,9 +45,9 @@ class AttributeSpecs {
      * @param type name of the attribute type
      * @throw value_error 
      */
-    void add(const std::string& name, const std::string& type);
+    void add(const QString& name, const QString& type);
 
-    bool has(const std::string& name) const;
+    bool has(const QString& name) const;
 
     /**
      * @brief get Converter
@@ -54,13 +55,13 @@ class AttributeSpecs {
      * @return Converter for the Attribute
      * @throw lookup_error if not found
      */
-    const Converter& converter(const std::string& name) const;
+    const Converter& converter(const QString& name) const;
 
     void clear() { specs_.clear(); }
 
   private:
-    typedef std::map<std::string, std::string> AttributeSpecMap;
-    typedef std::map<std::string, shared_ptr<Converter> > ConverterMap;
+    typedef std::map<QString, QString> AttributeSpecMap;
+    typedef std::map<QString, shared_ptr<Converter> > ConverterMap;
 
     AttributeSpecMap specs_;
     ConverterMap converters_;

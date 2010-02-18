@@ -19,22 +19,22 @@
 
 namespace brfc {
     
-DefaultFileNamer::DefaultFileNamer(const std::string& path)
+DefaultFileNamer::DefaultFileNamer(const QString& path)
         : path_(path) {
-    QDir dir_(path.c_str());
+    QDir dir_(path);
     if (not dir_.isAbsolute())
         throw fs_error("storage must be an absolute path");
     if (not dir_.exists())
         throw fs_error("storage does not exist");
 }
 
-std::string
+QString
 DefaultFileNamer::do_name(const File& f) const {
     return path_ + "/" + f.unique_identifier() + ".h5";
 }
 
-FileCatalog::FileCatalog(const std::string& dsn,
-                         const std::string& storage)
+FileCatalog::FileCatalog(const QString& dsn,
+                         const QString& storage)
         : db_(new RelationalDatabase(dsn))
         , specs_()
         , namer_(new DefaultFileNamer(storage)) {
@@ -56,7 +56,7 @@ FileCatalog::~FileCatalog() {
 }
 
 bool
-FileCatalog::is_cataloged(const std::string& path) const {
+FileCatalog::is_cataloged(const QString& path) const {
     File f(path, *specs_);
     return is_cataloged(f);
 }
@@ -67,15 +67,15 @@ FileCatalog::is_cataloged(const File& f) const {
 }
 
 shared_ptr<File>
-FileCatalog::catalog(const std::string& path) {
+FileCatalog::catalog(const QString& path) {
     shared_ptr<File> f(new File(path, *specs_));
 
     if (is_cataloged(*f))
-        throw duplicate_entry(path);
+        throw duplicate_entry(path.toUtf8().constData());
     
-    std::string target = namer_->name(*f);
+    QString target = namer_->name(*f);
 
-    if (not QDir::isAbsolutePath(target.c_str()))
+    if (not QDir::isAbsolutePath(target))
         throw std::runtime_error("namer must return absolute paths");
 
     f->path(target);
@@ -83,16 +83,18 @@ FileCatalog::catalog(const std::string& path) {
     db_->begin();
     // try saving to database
     try {
-        long long id = db_->save_file(target.c_str(), *f);
+        long long id = db_->save_file(target, *f);
         f->db_id(id);
     } catch (const db_error& e) {
         db_->rollback();
         throw;
     }
     // database save OK, try copying to new location
-    if (not QFile::copy(path.c_str(), target.c_str())) {
+    if (not QFile::copy(path, target)) {
         db_->rollback();
-        throw fs_error("could not copy " + path + " to " + target);
+        QString err = QString::fromUtf8("could not copy ") + path +
+                      QString::fromUtf8(" to ") + target;
+        throw fs_error(err.toUtf8().constData());
     } else {
         db_->commit();
     }
@@ -100,13 +102,14 @@ FileCatalog::catalog(const std::string& path) {
 }
 
 void
-FileCatalog::remove(const std::string& path) {
+FileCatalog::remove(const QString& path) {
     db_->begin();
-    db_->remove_file(path.c_str());
+    db_->remove_file(path);
     //XXX: what about when it exists in db but not in fs?
-    if (not QFile::remove(path.c_str())) {
+    if (not QFile::remove(path)) {
         db_->rollback();
-        throw fs_error("could not remove " + path);
+        QString err = QString::fromUtf8("could not remove ") + path;
+        throw fs_error(err.toUtf8().constData());
     } else {
         db_->commit();
     }

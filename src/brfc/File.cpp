@@ -10,14 +10,13 @@
 #include <brfc/SplitPath.hpp>
 #include <brfc/Variant.hpp>
 
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/split.hpp>
 #include <boost/foreach.hpp>
 
+#include <QtCore/QByteArray>
 #include <QtCore/QDate>
 #include <QtCore/QFile>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QTime>
 
 
@@ -31,7 +30,7 @@ File::File()
 
 }
 
-File::File(const std::string& path, const AttributeSpecs& specs)
+File::File(const QString& path, const AttributeSpecs& specs)
         : root_(new DataObject("", this))
         , ignored_attributes_()
         , path_(path)
@@ -39,38 +38,41 @@ File::File(const std::string& path, const AttributeSpecs& specs)
     load(path, specs);
 }
 
-File::File(const std::string& object,
+File::File(const QString& object,
            const QDate& date,
            const QTime& time,
-           const std::string& source,
-           const std::string& version)
+           const QString& source,
+           const QString& version)
         : root_(new DataObject("", this))
         , ignored_attributes_()
         , path_()
         , db_id_(0) {
     root_->add_attribute("Conventions", Variant("ODIM_H5/V2_0"));
-    root_->add_attribute("what/object", Variant(object.c_str()));
-    root_->add_attribute("what/version", Variant(version.c_str()));
+    root_->add_attribute("what/object", Variant(object));
+    root_->add_attribute("what/version", Variant(version));
     root_->add_attribute("what/date", Variant(date));
     root_->add_attribute("what/time", Variant(time));
-    root_->add_attribute("what/source", Variant(source.c_str()));
+    root_->add_attribute("what/source", Variant(source));
 }
 
 Source
 File::source() const {
-    return Source::from_source_attribute(root_->attribute("what/source").value().qstring());
+    // XXX: return a "default" (null) source if no such attribute?
+    //      right now lookup_error is propagated
+    const QString& src = root_->attribute("what/source").value().string();
+    return Source::from_source_attribute(src);
 }
 
-std::string
+QString
 File::unique_identifier() const {
-    QString uid = root_->attribute("what/object").value().qstring();
+    QString uid = root_->attribute("what/object").value().string();
     uid += "_";
     uid += root_->attribute("what/date").value().date().toString("yyyyMMdd");
     uid += "T";
     uid += root_->attribute("what/time").value().time().toString("hhmmss");
     uid += "_";
-    uid += root_->attribute("what/source").value().qstring();
-    return uid.toUtf8().constData();
+    uid += root_->attribute("what/source").value().string();
+    return uid;
 }
 
 File::~File() {
@@ -78,22 +80,21 @@ File::~File() {
 }
 
 DataObject&
-File::data_object(const std::string& path,
-                      bool create_missing) {
-    BRFC_ASSERT(path.find('/') == 0);
+File::data_object(const QString& path,
+                  bool create_missing) {
+    BRFC_ASSERT(path.startsWith('/'));
 
-    std::vector<std::string> path_vec;
-    boost::split(path_vec, path, boost::is_any_of("/"));
+    QStringList elems = path.split('/');
+    
+    elems.pop_front(); // remove root, this is empty as path starts with '/'
 
-    path_vec.erase(path_vec.begin()); // remove root
-
-    if (path.rfind('/') == path.size() - 1) {
-        path_vec.pop_back();
+    if (path.endsWith('/')) {
+        elems.pop_back(); // last element is empty
     }
     
     DataObject* dobj = root_.get();
-    BOOST_FOREACH(const std::string& element, path_vec) {
-        dobj = &dobj->child(element, create_missing);
+    BOOST_FOREACH(const QString& elem, elems) {
+        dobj = &dobj->child(elem, create_missing);
     }
     return *dobj;
 }
@@ -101,7 +102,7 @@ File::data_object(const std::string& path,
 void
 File::add_attribute_from_node(HL_Node* node,
                               const AttributeSpecs& specs) {
-    std::string nodename = HLNode_getName(node);
+    QString nodename = QString::fromUtf8(HLNode_getName(node));
     unsigned char* data = HLNode_getData(node);
 
     SplitPath path(nodename);
@@ -125,15 +126,16 @@ File::add_attribute_from_node(HL_Node* node,
 }
 
 void
-File::load(const std::string& path, const AttributeSpecs& specs) {
+File::load(const QString& path, const AttributeSpecs& specs) {
     init_hlhdflib();
-    HL_NodeList* nodes = HLNodeList_read(path.c_str());
+    QByteArray pathbytes = path.toUtf8();
+    HL_NodeList* nodes = HLNodeList_read(pathbytes.constData());
     if (nodes == 0) {
-        throw fs_error("could not open file: " + path);
+        throw fs_error("could not open file: " +
+                       std::string(pathbytes.constData()));
     }
     HLNodeList_selectMetadataNodes(nodes);
     HLNodeList_fetchMarkedNodes(nodes);
-
 
     for (int i=0; i < HLNodeList_getNumberOfNodes(nodes); ++i) {
         HL_Node* node = HLNodeList_getNodeByIndex(nodes, i);

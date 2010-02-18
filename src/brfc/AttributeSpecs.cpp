@@ -28,26 +28,26 @@ AttributeSpecs::~AttributeSpecs() {
 }
 
 void
-AttributeSpecs::add(const std::string& name, const std::string& type) {
+AttributeSpecs::add(const QString& name, const QString& type) {
     if (has(name))
-        throw duplicate_entry(name);
+        throw duplicate_entry(name.toUtf8().constData());
     ConverterMap::const_iterator iter = converters_.find(type);
     if (iter == converters_.end())
-        throw lookup_error(type);
+        throw lookup_error(type.toUtf8().constData());
     specs_.insert(std::make_pair(name, type));
 }
 
 bool
-AttributeSpecs::has(const std::string& name) const {
+AttributeSpecs::has(const QString& name) const {
     AttributeSpecMap::const_iterator iter = specs_.find(name);
     return iter != specs_.end();
 }
 
 const Converter&
-AttributeSpecs::converter(const std::string& name) const {
+AttributeSpecs::converter(const QString& name) const {
     AttributeSpecMap::const_iterator iter = specs_.find(name);
     if (iter == specs_.end())
-        throw lookup_error(name);
+        throw lookup_error(name.toUtf8().constData());
     ConverterMap::const_iterator i = converters_.find(iter->second);
     return *(i->second);
 }

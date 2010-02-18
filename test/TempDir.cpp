@@ -11,6 +11,7 @@
 #include <errno.h>
 
 #include <iostream>
+#include <QtCore/QString>
 
 namespace brfc {
 
@@ -25,9 +26,9 @@ TempDir::~TempDir() {
     rmdir_recurse(path_.get());
 }
 
-std::string
+QString
 TempDir::path() const {
-    return path_.get();
+    return QString::fromUtf8(path_.get());
 }
 
 void

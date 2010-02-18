@@ -10,7 +10,7 @@ namespace expr {
 class Alias : public Selectable {
   public:
     static AliasPtr create(SelectablePtr aliased,
-                           const std::string& alias) {
+                           const QString& alias) {
         return AliasPtr(new Alias(aliased, alias));
     }
 
@@ -22,21 +22,21 @@ class Alias : public Selectable {
         return aliased_;
     }
 
-    void alias(const std::string& alias) {
+    void alias(const QString& alias) {
         alias_ = alias;
     }
 
-    const std::string& alias() const {
+    const QString& alias() const {
         return alias_;
     }
 
-    virtual std::string name() const {
+    virtual QString name() const {
         return alias_;
     }
 
   protected:
     Alias(SelectablePtr aliased,
-          const std::string& alias)
+          const QString& alias)
             : aliased_(aliased)
             , alias_(alias) {
     }
@@ -47,7 +47,7 @@ class Alias : public Selectable {
 
   private:
     SelectablePtr aliased_;
-    std::string alias_;
+    QString alias_;
 };
 
 }

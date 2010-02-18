@@ -20,34 +20,33 @@ TempH5File::TempH5File()
 }
 
 TempH5File::~TempH5File() {
-    unlink(filename());
+    unlink(filename_.get());
 }
 
 auto_ptr<TempH5File>
-TempH5File::minimal(const std::string& object,
+TempH5File::minimal(const QString& object,
                     const QDate& date,
                     const QTime& time,
-                    const std::string& source,
-                    const std::string& version) {
+                    const QString& source,
+                    const QString& version) {
     auto_ptr<TempH5File> f(new TempH5File());
     f->add_attribute("/Conventions", Variant("ODIM_H5/V2_0"));
     f->add_group("/what");
-    f->add_attribute("/what/object", Variant(object.c_str()));
-    f->add_attribute("/what/version", Variant(version.c_str()));
+    f->add_attribute("/what/object", Variant(object));
+    f->add_attribute("/what/version", Variant(version));
     f->add_attribute("/what/date", Variant(date));
     f->add_attribute("/what/time", Variant(time));
-    f->add_attribute("/what/source", Variant(source.c_str()));
+    f->add_attribute("/what/source", Variant(source));
 
     return f;
 }
 
 void TempH5File::add_group(const char* path) {
-    std::string node_path(path);
     HL_Node* node = HLNode_newGroup(path);
     if (node == 0)
-        throw std::runtime_error("could not create dataset: " + node_path);
+        throw std::runtime_error("could not create dataset");
     if (HLNodeList_addNode(nodes_.get(), node) == 0)
-        throw std::runtime_error("could not add node: " + node_path);
+        throw std::runtime_error("could not add node");
 }
 
 void
@@ -63,9 +62,9 @@ TempH5File::add_attribute(const char* path, const Variant& value) {
     HLNode_setScalarValue(node, d.size(), d.data(), d.type(), -1);
 }
 
-const char*
+QString
 TempH5File::filename() const {
-    return filename_.get();
+    return QString::fromUtf8(filename_.get());
 }
 
 void
@@ -73,7 +72,7 @@ TempH5File::write() {
     HL_Compression compression;
     HLCompression_init(&compression, CT_ZLIB);
     compression.level = 6;
-    if (HLNodeList_setFileName(nodes_.get(), filename()) == 0)
+    if (HLNodeList_setFileName(nodes_.get(), filename_.get()) == 0)
         throw std::runtime_error("could not set filename");
     if (HLNodeList_write(nodes_.get(), 0, &compression) == 0)
         throw std::runtime_error("could not write file");
@@ -91,6 +90,8 @@ HL_Data TempH5File::convert(const Variant& value) {
             return DateConverter().convert(value);
         case Variant::TIME:
             return TimeConverter().convert(value);
+        case Variant::BOOL:
+            return BoolConverter().convert(value);
         default:
             throw std::runtime_error("could not convert");
     }

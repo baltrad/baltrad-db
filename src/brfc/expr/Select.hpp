@@ -10,7 +10,7 @@ namespace expr {
 
 class Select : public Selectable {
   public:
-    virtual std::string name() const { return ""; }
+    virtual QString name() const { return ""; }
 
     static SelectPtr create() {
         return SelectPtr(new Select());

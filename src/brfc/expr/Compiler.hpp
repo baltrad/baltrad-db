@@ -50,7 +50,7 @@ class Compiler : public Visitor {
     /**
      * @brief access to compiled string
      */
-    const std::string& compiled() const { return stack_.back(); }
+    const QString& compiled() const { return stack_.back(); }
 
   protected:
     /**
@@ -135,12 +135,12 @@ class Compiler : public Visitor {
     virtual void do_visit(Table& expr);
 
   private:
-    std::string pop();
-    void push(const std::string& str);
+    QString pop();
+    void push(const QString& str);
 
     unsigned int literal_count_;
     BindMap binds_;
-    std::vector<std::string> stack_;
+    std::vector<QString> stack_;
 };
 
 }

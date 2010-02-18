@@ -6,9 +6,10 @@
 
 #include <gtest/gtest.h>
 
-class QVariant;
 class QDate;
+class QString;
 class QTime;
+class QVariant;
 
 namespace brfc {
 
@@ -35,6 +36,9 @@ class TestRDBEnv : public ::testing::Environment {
 
 std::ostream&
 operator<<(std::ostream& out, const QVariant& value);
+
+std::ostream&
+operator<<(std::ostream& out, const QString& value);
 
 std::ostream&
 operator<<(std::ostream& out, const QDate& value);

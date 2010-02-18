@@ -100,11 +100,7 @@ class Variant {
     bool is_date() const { return type_ == DATE; }
     bool is_time() const { return type_ == TIME; }
 
-    std::string string() const {
-        return std::string(get<QString>().toUtf8().constData());
-    }
-
-    const QString& qstring() const {
+    const QString& string() const {
         return get<const QString&>();
     }
 

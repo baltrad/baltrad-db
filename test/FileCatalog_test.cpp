@@ -13,6 +13,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/QFile>
 
+#include "common.hpp"
 #include "TempDir.hpp"
 #include "TempH5File.hpp"
 
@@ -33,15 +34,15 @@ class MockDatabase : public Database {
     MOCK_METHOD0(do_commit, void());
     
     MOCK_CONST_METHOD1(do_has_file, bool(const File&));
-    MOCK_METHOD1(do_remove_file, void(const char*));
-    MOCK_METHOD2(do_save_file, long long(const char*, const File&));
+    MOCK_METHOD1(do_remove_file, void(const QString&));
+    MOCK_METHOD2(do_save_file, long long(const QString&, const File&));
     MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
     MOCK_METHOD0(do_clean, void());  
 };
 
 class MockNamer : public FileNamer {
   public:
-    MOCK_CONST_METHOD1(do_name, std::string(const File&));
+    MOCK_CONST_METHOD1(do_name, QString(const File&));
 };
 
 struct FileCatalog_test : public testing::Test {
@@ -79,13 +80,13 @@ TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
 }
 
 TEST_F(FileCatalog_test, test_catalog) {
-    std::string target = tempdir->path() + "/test";
+    const QString& target = tempdir->path() + "/test";
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return(target));
-    EXPECT_CALL(*db, do_save_file(target.c_str(), _))
+    EXPECT_CALL(*db, do_save_file(target, _))
         .WillOnce(Return(1));
     EXPECT_CALL(*db, do_commit());
     
@@ -94,39 +95,39 @@ TEST_F(FileCatalog_test, test_catalog) {
     EXPECT_EQ(f->path(), target);
     EXPECT_EQ(f->db_id(), 1);
 
-    EXPECT_TRUE(QFile::exists(target.c_str()));
+    EXPECT_TRUE(QFile::exists(target));
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
-    std::string target = tempdir->path() + "/test";
+    const QString& target = tempdir->path() + "/test";
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return(target));
-    EXPECT_CALL(*db, do_save_file(target.c_str(), _))
+    EXPECT_CALL(*db, do_save_file(target, _))
         .WillOnce(Throw(db_error("")));
     EXPECT_CALL(*db, do_rollback());
     
     EXPECT_THROW(fc.catalog(minfile->filename()), db_error);
-    EXPECT_FALSE(QFile::exists(target.c_str()));
+    EXPECT_FALSE(QFile::exists(target));
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
-    std::string target = tempdir->path() + "/test";
+    const QString& target = tempdir->path() + "/test";
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return(target));
-    EXPECT_CALL(*db, do_save_file(target.c_str(), _))
+    EXPECT_CALL(*db, do_save_file(target, _))
         .WillOnce(Return(1));
     EXPECT_CALL(*db, do_rollback());
 
     tempdir.reset(); // tempdir removed
 
     EXPECT_THROW(fc.catalog(minfile->filename()), fs_error);
-    EXPECT_FALSE(QFile::exists(target.c_str()));
+    EXPECT_FALSE(QFile::exists(target));
 }
 
 TEST_F(FileCatalog_test, test_double_import_throws) {
@@ -148,23 +149,23 @@ TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {
-    std::string target = tempdir->path() + "/testfile";
-    QFile f(target.c_str());
+    const QString& target = tempdir->path() + "/testfile";
+    QFile f(target);
     ASSERT_TRUE(f.open(QIODevice::WriteOnly));
     f.close();
 
     EXPECT_CALL(*db, do_begin());
-    EXPECT_CALL(*db, do_remove_file(StrEq(target)));
+    EXPECT_CALL(*db, do_remove_file(target));
     EXPECT_CALL(*db, do_commit());
 
-    EXPECT_NO_THROW(fc.remove(target.c_str()));
+    EXPECT_NO_THROW(fc.remove(target));
 
-    EXPECT_FALSE(QFile::exists(target.c_str()));
+    EXPECT_FALSE(QFile::exists(target));
 }
 
 TEST_F(FileCatalog_test, test_removing_nx_file) {
     EXPECT_CALL(*db, do_begin());
-    EXPECT_CALL(*db, do_remove_file(StrEq("/path/to/nxfile")));
+    EXPECT_CALL(*db, do_remove_file(QString("/path/to/nxfile")));
     EXPECT_CALL(*db, do_rollback());
 
     EXPECT_THROW(fc.remove("/path/to/nxfile"), fs_error);

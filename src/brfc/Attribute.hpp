@@ -1,11 +1,10 @@
 #ifndef BRFC_ATTRIBUTE_H
 #define BRFC_ATTRIBUTE_H
 
-#include <string>
-
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 
+#include <QtCore/QString>
 
 namespace brfc {
 
@@ -23,7 +22,7 @@ class Attribute : public boost::noncopyable {
      * @param value attribute value
      * @param data_object owning DataObject
      */
-    Attribute(const std::string& name,
+    Attribute(const QString& name,
               const Variant& value,
               const DataObject* data_object=0);
     
@@ -51,16 +50,16 @@ class Attribute : public boost::noncopyable {
      * @brief full path of this attribute
      * full path of the data object + attribute name
      */
-    std::string path() const;
+    QString path() const;
 
     /**
      * @brief name of this attribute
      */
-    const std::string& name() const { return name_; }
+    const QString& name() const { return name_; }
 
   private:
     const DataObject* data_object_;
-    std::string name_;
+    QString name_;
     boost::scoped_ptr<Variant> value_;
 };
 

@@ -2,42 +2,41 @@
 
 #include <brfc/assert.hpp>
 
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/split.hpp>
-
-#include <vector>
+#include <QtCore/QStringList>
 
 namespace brfc {
 
-SplitPath::SplitPath(const std::string& path)
+SplitPath::SplitPath(const QString& path)
         : attribute_name()
         , data_object_path() {
     split(path);
 }
 
 void
-SplitPath::split(const std::string& path) {
-    std::vector<std::string> path_vec;
-    boost::split(path_vec, path, boost::is_any_of("/"));
+SplitPath::split(const QString& path) {
+    QString sep = QString::fromUtf8("/");
+    QStringList elems = path.split(sep);
 
-    BRFC_ASSERT(path_vec.size() >= 2);
+    BRFC_ASSERT(elems.size() >= 2);
 
     // last element is always attribute name
-    attribute_name = path_vec.back(); path_vec.pop_back();
+    attribute_name = elems.takeLast();
 
     // test if next to last element is a valid grouping
-    const std::string& group = path_vec.back();
-    if (group == "what" || group == "where" || group == "how") {
-    	attribute_name = group + "/" + attribute_name;
-        path_vec.pop_back();
+    QStringList valid_groups;
+    valid_groups.append(QString::fromUtf8("what"));
+    valid_groups.append(QString::fromUtf8("where"));
+    valid_groups.append(QString::fromUtf8("how"));
+
+    if (valid_groups.contains(elems.last())) {
+        attribute_name = elems.takeLast() + sep + attribute_name;
     }
 
     // rest of the element is data object path
-    if (path_vec.size() <= 1) {
-        data_object_path = "/";
+    if (elems.size() <= 1) {
+        data_object_path = sep;
     } else {
-        data_object_path = boost::join(path_vec, "/");
+        data_object_path = elems.join(sep);
     }
 }
 

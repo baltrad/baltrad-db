@@ -53,19 +53,17 @@ AttrReplace::do_visit(Alias& alias) {
 
 void
 AttrReplace::do_visit(Attribute& attr) {
-    const std::string& name = attr.name();
+    QString name = attr.name();
 
     // query table and column where this value can be found
     Mapping mapping = mapper_->mapping(name);
 
     SelectablePtr value_t;
 
-    // if not specialized
-    if (!mapper_->is_specialized(name)) {
+    if (not mapper_->is_specialized(name)) {
         // alias the table (this attribute is always searched on this table)
-        std::string safe_name = name;
-        boost::erase_all(safe_name, "/");
-        value_t = Table::create(mapping.table)->alias(safe_name + "_values");
+        QString alias = name.remove("/") + "_values";
+        value_t = Table::create(mapping.table)->alias(alias);
         if (not from_->contains(value_t)) {
             // try to join data_objects, they have appear earlier in the join
             join_data_objects(); 

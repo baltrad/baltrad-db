@@ -3,18 +3,15 @@
 
 #include <brfc/smart_ptr.hpp>
 
-#include <string>
-#include <vector>
+class QString;
 
 namespace brfc {
 
 class TempDir {
   public:
-    typedef std::vector<std::string> FileVector;
-
     TempDir();
     ~TempDir();
-    std::string path() const;
+    QString path() const;
 
   private:
     void rmdir_recurse(const char* path);

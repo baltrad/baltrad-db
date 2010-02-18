@@ -52,6 +52,11 @@ std::ostream& operator<<(std::ostream& out, const QVariant& value) {
     return out;
 }
 
+std::ostream& operator<<(std::ostream& out, const QString& value) {
+    out << value.toStdString();
+    return out;
+}
+
 std::ostream& operator<<(std::ostream& out, const QDate& value) {
     out << value.toString().toStdString();
     return out;

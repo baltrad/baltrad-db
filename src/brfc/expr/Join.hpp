@@ -15,7 +15,7 @@ class Join : public Selectable {
         return JoinPtr(new Join(from, to, condition));
     }
 
-    virtual std::string name() const { return ""; }
+    virtual QString name() const { return ""; }
 
     SelectablePtr from() const {
         return from_;

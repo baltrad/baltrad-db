@@ -41,17 +41,12 @@ TEST(Variant_test, copy_assign) {
 }
 
 TEST(Variant_test, string) {
-    Variant v("öäüxyz");
+    QString val = QString::fromUtf8("öäõxyz");
+    Variant v(val);
     EXPECT_EQ(v.type(), Variant::STRING);
-    EXPECT_EQ(v.string(), "öäüxyz");
-    EXPECT_EQ(std::string(v.string()).size(), 9);
+    EXPECT_EQ(v.string(), val);
     EXPECT_FALSE(v.is_null());
     EXPECT_THROW(v.longlong(), value_error);
-}
-
-TEST(Variant_test, qstring) {
-    Variant v("öäüxyz");
-    EXPECT_EQ(v.qstring().length(), 6);
 }
 
 TEST(Variant_test, from_invalid_qvariant) {
@@ -79,6 +74,11 @@ TEST(Variant_test, longlong_to_qvariant) {
     QVariant qv = v.to_qvariant();
     EXPECT_EQ(qv.type(), QVariant::LongLong);
     EXPECT_EQ(qv.toLongLong(), 1);
+}
+
+TEST(Variant_test, from_string_literal) {
+    Variant v("asd");
+    EXPECT_EQ(v.type(), Variant::STRING);
 }
 
 TEST(Variant_test, equality_comparison) {

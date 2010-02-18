@@ -46,7 +46,7 @@ class DataObjectSaver {
         columns.append("file_id");
         columns.append("name");
         BOOST_FOREACH(const Mapping& mapping, special_) {
-            columns.append(mapping.column.c_str());
+            columns.append(mapping.column);
         }
         BOOST_FOREACH(const QString& column, columns) {
             binds.append(":" + column);
@@ -55,7 +55,8 @@ class DataObjectSaver {
                        ") VALUES(" + binds.join(", ") + ")");
         if (rdb->supports_returning())
             qrystr += " RETURNING id";
-        qry_.prepare(qrystr);
+        if (not qry_.prepare(qrystr))
+            throw db_error(qry_.lastError());
     }
     
     void operator()(const DataObject& dobj) {
@@ -77,7 +78,7 @@ class DataObjectSaver {
 
         qry_.bindValue(":parent_id", parent_id);
         qry_.bindValue(":file_id", file_id);
-        qry_.bindValue(":name", dobj.name().c_str());
+        qry_.bindValue(":name", dobj.name());
     }
 
     void bind_specializations(const DataObject& dobj) {
@@ -88,7 +89,7 @@ class DataObjectSaver {
             } catch (const brfc::lookup_error& e) {
                 // value is null
             }
-            qry_.bindValue(":" + QString::fromUtf8(mapping.column.c_str()), val);
+            qry_.bindValue(":" + mapping.column, val);
         }
     }
 
@@ -134,13 +135,13 @@ class AttributeSaver {
     }
 
   private:
-    typedef std::map<std::string, QSqlQuery> QueryMap;
+    typedef std::map<QString, QSqlQuery> QueryMap;
 
-    QSqlQuery& query_by_table(const std::string& table) {
+    QSqlQuery& query_by_table(const QString& table) {
         QueryMap::iterator iter = queries_.find(table);
         if (iter == queries_.end()) {
             QSqlQuery qry(rdb_->connection()); 
-            qry.prepare("INSERT INTO " + QString::fromUtf8(table.c_str()) +
+            qry.prepare("INSERT INTO " + table +
                         "(data_object_id, attribute_id, value) " +
                         "VALUES(:data_object_id, :attribute_id, :value)");
             QueryMap::value_type val(table, qry);
@@ -159,23 +160,25 @@ class AttributeSaver {
 
 QString
 RelationalDatabase::qt_engine(const QString& dialect) const {
-    if (dialect == "postgresql")
+    if (dialect == "postgresql") {
         return "QPSQL";
-    else if (dialect == "sqlite")
+    } else if (dialect == "sqlite") {
         return "QSQLITE";
-    else
-        throw db_error("unsupported dialect:" +
-                       std::string(dialect.toUtf8().constData()));
+    } else {
+        QString err = QString::fromUtf8("unsupported dialect: ") +
+                      dialect;
+        throw db_error(err.toUtf8().constData());
+    }
 }
 
-RelationalDatabase::RelationalDatabase(const std::string& dsn_)
+RelationalDatabase::RelationalDatabase(const QString& dsn_)
         : sql_()
         , mapper_(new AttributeMapper())
         , specs_(new AttributeSpecs())
         , dialect_()
         , supports_returning_(false) {
     init_qapp();
-    QUrl dsn(dsn_.c_str());
+    QUrl dsn(dsn_);
     QString name = QString("brfc-") + QString::number(connection_count_++);
     sql_ = ::QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), name);
     sql_.setHostName(dsn.host());
@@ -187,7 +190,7 @@ RelationalDatabase::RelationalDatabase(const std::string& dsn_)
     }
     sql_.setDatabaseName(database);
     if (!sql_.open())
-        throw db_error(sql_.lastError().text().toStdString());
+        throw db_error(sql_.lastError());
     dialect_ = dsn.scheme();
     if (dialect_ == "postgresql")
         supports_returning_ = true;
@@ -200,13 +203,13 @@ RelationalDatabase::RelationalDatabase(const std::string& dsn_)
 
 void
 RelationalDatabase::init_qapp() {
-    qapp_ = new QCoreApplication(argc_, argv_);
+    qapp_ = new QCoreApplication(argc_, const_cast<char**>(argv_));
 }
 
 unsigned int RelationalDatabase::connection_count_ = 0;
 unsigned int RelationalDatabase::instance_count_ = 0;
 int RelationalDatabase::argc_ = 1;
-char* RelationalDatabase::argv_[] = {"brfc"};
+const char* RelationalDatabase::argv_[] = {"brfc"};
 QCoreApplication* RelationalDatabase::qapp_ = 0;
 
 RelationalDatabase::~RelationalDatabase() {
@@ -248,14 +251,14 @@ bool
 RelationalDatabase::do_has_file(const File& file) const {
     QSqlQuery query(connection());
     query.prepare("SELECT true FROM files WHERE unique_id = :unique_id");
-    query.bindValue(":unique_id", QString::fromUtf8(file.unique_identifier().c_str()));
+    query.bindValue(":unique_id", file.unique_identifier());
     if (!query.exec())
         throw db_error(query.lastError());
     return query.next(); // got a result row
 }
 
 long long
-RelationalDatabase::do_save_file(const char* path, const File& file) {
+RelationalDatabase::do_save_file(const QString& path, const File& file) {
     id_type file_id = save(path, file);
     file.db_id(file_id.toLongLong());
 
@@ -287,19 +290,18 @@ RelationalDatabase::do_query(const Query& query) {
     expr::Compiler compiler;
     compiler.compile(*select);
 
-    return this->query(QString::fromStdString(compiler.compiled()),
-                       compiler.binds());
+    return this->query(compiler.compiled(), compiler.binds());
 }
 
 RelationalDatabase::id_type
-RelationalDatabase::save(const char* path, const File& f) {
+RelationalDatabase::save(const QString& path, const File& f) {
     QStringList columns, binds;
     columns.append("source_id");
     columns.append("unique_id");
 
     const MappingVector& special = mapper().specializations_on("files");
     BOOST_FOREACH(const Mapping& mapping, special) {
-        columns.append(mapping.column.c_str());
+        columns.append(mapping.column);
     }
     BOOST_FOREACH(const QString& column, columns) {
         binds.append(":" + column);
@@ -325,11 +327,11 @@ RelationalDatabase::save(const char* path, const File& f) {
             continue;
         const QVariant& value = 
                 f.root().attribute(mapping.attribute).value().to_qvariant();
-        qry.bindValue(":" + QString::fromUtf8(mapping.column.c_str()), value);
+        qry.bindValue(":" + mapping.column, value);
     }
 
     qry.bindValue(":path", path);
-    qry.bindValue(":unique_id", QString::fromUtf8(f.unique_identifier().c_str()));
+    qry.bindValue(":unique_id", f.unique_identifier());
 
     if (not qry.exec())
         throw db_error(qry.lastError());
@@ -400,7 +402,7 @@ RelationalDatabase::populate_mapper_and_specs() {
 }
 
 void
-RelationalDatabase::do_remove_file(const char* path) {
+RelationalDatabase::do_remove_file(const QString& path) {
     QSqlQuery query(connection());
     query.prepare("DELETE FROM files WHERE path = :path");
     query.bindValue(":path", path);

@@ -6,12 +6,13 @@
 #include <brfc/Attribute.hpp>
 
 #include <deque>
-#include <string>
 #include <vector>
 
 #include <boost/foreach.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+
+#include <QtCore/QString>
 
 namespace brfc {
 
@@ -39,7 +40,7 @@ class DataObject : public boost::noncopyable {
      * @param name name of this DataObject
      * @param file pointer to File containing this DataObject
      */
-    explicit DataObject(const std::string& name, const File* file=0)
+    explicit DataObject(const QString& name, const File* file=0)
             : name_(name)
             , parent_(0)
             , children_()
@@ -68,7 +69,7 @@ class DataObject : public boost::noncopyable {
      *
      * DataObjects share common File
      */
-    DataObject& add_child(const std::string& name);
+    DataObject& add_child(const QString& name);
 
     /**
      * @brief get hold of a child DataObject
@@ -77,7 +78,7 @@ class DataObject : public boost::noncopyable {
      * @return reference to the child
      * @throw lookup_error if child does not exist and create is false
      */
-    DataObject& child(const std::string& name, bool create=false);
+    DataObject& child(const QString& name, bool create=false);
 
     /**
      * @brief get full path of this DataObject
@@ -85,14 +86,14 @@ class DataObject : public boost::noncopyable {
      * path is the concatenation of all names up to root node,
      * separated by '/'
      */
-    std::string path() const;
+    QString path() const;
 
     /**
      * @brief add an Attribute to this DataObject
      * @param name name of the Attribute
      * @param value Attribute value
      */
-    void add_attribute(const std::string& name,
+    void add_attribute(const QString& name,
                        const Variant& value);
     
     //@{
@@ -102,8 +103,8 @@ class DataObject : public boost::noncopyable {
      * @return reference to requested Attribute
      * @throw lookup_error if no such Attribute is attached to this DataObject
      */
-    const Attribute& attribute(const std::string& name) const;
-    Attribute& attribute(const std::string& name);
+    const Attribute& attribute(const QString& name) const;
+    Attribute& attribute(const QString& name);
     //@}
 
 
@@ -112,7 +113,7 @@ class DataObject : public boost::noncopyable {
      * @param name Attribute name
      * @return true if this DataObject has an Attribute identified by \c name
      */
-    bool has_attribute(const std::string& name) const;
+    bool has_attribute(const QString& name) const;
     
     /**
      * @brief get hold of parent DataObject
@@ -124,7 +125,7 @@ class DataObject : public boost::noncopyable {
     /**
      * @brief name of this DataObject
      */
-    const std::string& name() const {
+    const QString& name() const {
         return name_;
     }
 
@@ -170,7 +171,7 @@ class DataObject : public boost::noncopyable {
 
     typedef std::vector<shared_ptr<DataObject> > ChildVector;
 
-    DataObject(const std::string& name,
+    DataObject(const QString& name,
                const DataObject* parent);
 
     /**
@@ -181,7 +182,7 @@ class DataObject : public boost::noncopyable {
     }
 
 
-    std::string name_;
+    QString name_;
     const DataObject* parent_;
     ChildVector children_;
     AttributeVector attrs_;

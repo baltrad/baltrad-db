@@ -4,6 +4,8 @@
 #include <brfc/expr/Label.hpp>
 #include <brfc/expr/Parentheses.hpp>
 
+#include <QtCore/QString>
+
 namespace brfc {
 namespace expr {
 
@@ -61,7 +63,7 @@ Expression::parentheses() const {
 }
 
 LabelPtr
-Expression::label(const std::string& label) const {
+Expression::label(const QString& label) const {
     return Label::create(this->shared_from_this(), label);
 }
 

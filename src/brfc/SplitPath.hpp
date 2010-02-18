@@ -1,7 +1,7 @@
 #ifndef BRFC_SPLIT_PATH_HPP
 #define BRFC_SPLIT_PATH_HPP
 
-#include <string>
+#include <QtCore/QString>
 
 namespace brfc {
 
@@ -14,13 +14,13 @@ namespace brfc {
  *  \li path to data object
  */
 struct SplitPath {
-    explicit SplitPath(const std::string& path);
+    explicit SplitPath(const QString& path);
 
-    std::string attribute_name;
-    std::string data_object_path;
+    QString attribute_name;
+    QString data_object_path;
   
   private:
-    void split(const std::string& path);
+    void split(const QString& path);
 };
 
 }

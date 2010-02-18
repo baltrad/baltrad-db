@@ -2,7 +2,8 @@
 #define BRFC_EXPR_FACTORY_HPP
 
 #include <brfc/expr/fwd.hpp>
-#include <string>
+
+#include <QtCore/QString>
 
 namespace brfc {
 namespace expr {
@@ -16,14 +17,19 @@ class Factory {
     /**
      * @brief construct expr::Attribute
      */
-    AttributePtr attribute(const std::string& name) const;
+    AttributePtr attribute(const QString& name) const;
 
     /**
      * @brief construct expr::Literal containing a string
-     *
-     * the value is assumed to be encoded in UTF-8
+     * @{
      */
-    LiteralPtr string(const std::string& value) const;
+    LiteralPtr string(const QString& value) const;
+    LiteralPtr string(const char* value) const;
+
+    /**
+     * @}
+     */
+
 
     /**
      * @brief construct expr::Literal containing a 64-bit integer

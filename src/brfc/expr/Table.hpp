@@ -8,20 +8,20 @@ namespace expr {
 
 class Table : public Selectable {
   public:
-    static TablePtr create(const std::string& name) {
+    static TablePtr create(const QString& name) {
         return TablePtr(new Table(name));
     }
 
-    void name(const std::string& name) {
+    void name(const QString& name) {
         name_ = name;
     }
 
-    virtual std::string name() const {
+    virtual QString name() const {
         return name_;
     }
 
   protected:
-    explicit Table(const std::string& name)
+    explicit Table(const QString& name)
             : name_(name) {
     }
 
@@ -30,7 +30,7 @@ class Table : public Selectable {
     }
   
   private:
-    std::string name_;
+    QString name_;
 };
 
 }

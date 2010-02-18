@@ -3,7 +3,8 @@
 
 #include <brfc/expr/fwd.hpp>
 #include <brfc/expr/Element.hpp>
-#include <string>
+
+#include <QtCore/QString>
 
 namespace brfc {
 namespace expr {
@@ -15,11 +16,11 @@ class Selectable : public Element {
                 const_pointer_cast<Element>(Element::shared_from_this()));
     }
 
-    virtual std::string name() const = 0;
+    virtual QString name() const = 0;
 
-    ColumnPtr column(const std::string& name);
+    ColumnPtr column(const QString& name);
 
-    AliasPtr alias(const std::string& name);
+    AliasPtr alias(const QString& name);
 
     JoinPtr join(SelectablePtr rhs, ExpressionPtr condition);
 };

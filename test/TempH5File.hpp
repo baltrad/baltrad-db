@@ -5,7 +5,10 @@
 #include <brfc/smart_ptr.hpp>
 #include <brfc/Converter.hpp>
 
+#include <QtCore/QString>
+
 class QDate;
+class QString;
 class QTime;
 
 namespace brfc {
@@ -28,17 +31,17 @@ class TempH5File {
      * correctly formed.
      */
     static auto_ptr<TempH5File>
-        minimal(const std::string& object,
+        minimal(const QString& object,
                 const QDate& date,
                 const QTime& time,
-                const std::string& source,
-                const std::string& version="H5rad 2.0");
+                const QString& source,
+                const QString& version=QString::fromUtf8("H5rad 2.0"));
 
     ~TempH5File();
     void add_group(const char* path);
     void add_attribute(const char* path, const Variant& value);
     void write();
-    const char* filename() const;
+    QString filename() const;
 
   private:
     HL_Data convert(const Variant& value);

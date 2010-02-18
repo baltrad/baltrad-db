@@ -3,7 +3,8 @@
 
 #include <brfc/expr/fwd.hpp>
 #include <brfc/expr/Expression.hpp>
-#include <string>
+
+#include <QtCore/QString>
 
 namespace brfc {
 namespace expr {
@@ -11,7 +12,7 @@ namespace expr {
 class Column : public Expression {
   public:
     static ColumnPtr create(SelectablePtr selectable,
-                            const std::string& name) {
+                            const QString& name) {
         return ColumnPtr(new Column(selectable, name));
     }
 
@@ -21,15 +22,15 @@ class Column : public Expression {
 
     SelectablePtr selectable() const { return selectable_; }
 
-    void name(const std::string& name) {
+    void name(const QString& name) {
         name_ = name;
     }
 
-    const std::string& name() const { return name_; }
+    const QString& name() const { return name_; }
 
   protected:
     Column(SelectablePtr selectable,
-           const std::string& name)
+           const QString& name)
             : selectable_(selectable)
             , name_(name) {
 
@@ -41,7 +42,7 @@ class Column : public Expression {
 
   private:
     SelectablePtr selectable_;
-    std::string name_;
+    QString name_;
 };
 
 }

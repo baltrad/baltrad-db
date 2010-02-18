@@ -11,12 +11,10 @@
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 
-#include <QtCore/QVariant>
 #include <QtCore/QDate>
+#include <QtCore/QStringList>
 #include <QtCore/QTime>
-
-#include <algorithm>
-#include <vector>
+#include <QtCore/QVariant>
 
 #include "config.hpp"
 #include "common.hpp"
@@ -83,7 +81,7 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
     }
     
     expr::Factory xpr;
-    std::string src1, src2;
+    QString src1, src2;
     TestRDB* db;
     File td1, td2, td3, td4, td5;
     Query query;
@@ -101,33 +99,26 @@ TEST_P(RDB_Query_test, test_simple) {
     ASSERT_TRUE(not r->next());
 }
 
-typedef std::vector<std::string> StringVec;
-
-StringVec
+QStringList
 extract_strings_at(ResultSet& r, int pos) {
-    std::vector<std::string> vec;
+    QStringList strings;
     while (r.next()) {
-        vec.push_back(r.string(pos));
+        strings.append(r.string(pos));
     }
-    return vec;
-}
-
-template<typename C, typename V>
-bool contains(const C& container, const V& val) {
-    return std::find(container.begin(), container.end(), val) != container.end();
+    return strings;
 }
 
 TEST_P(RDB_Query_test, test_list_all_files) {
     shared_ptr<ResultSet> r = query.fetch(xpr.attribute("path")).execute();
 
     EXPECT_EQ(r->size(), 5);
-    StringVec v = extract_strings_at(*r, 0);
+    const QStringList& v = extract_strings_at(*r, 0);
 
-    EXPECT_TRUE(contains(v, "td1"));
-    EXPECT_TRUE(contains(v, "td2"));
-    EXPECT_TRUE(contains(v, "td3"));
-    EXPECT_TRUE(contains(v, "td4"));
-    EXPECT_TRUE(contains(v, "td5"));
+    EXPECT_TRUE(v.contains("td1"));
+    EXPECT_TRUE(v.contains("td2"));
+    EXPECT_TRUE(v.contains("td3"));
+    EXPECT_TRUE(v.contains("td4"));
+    EXPECT_TRUE(v.contains("td5"));
 }
 
 TEST_P(RDB_Query_test, test_filter_by_object) {
@@ -137,11 +128,11 @@ TEST_P(RDB_Query_test, test_filter_by_object) {
              .execute();
 
     EXPECT_EQ(r->size(), 3);
-    StringVec v = extract_strings_at(*r, 0);
+    const QStringList& v = extract_strings_at(*r, 0);
 
-    EXPECT_TRUE(contains(v, "td1"));
-    EXPECT_TRUE(contains(v, "td2"));
-    EXPECT_TRUE(contains(v, "td3"));
+    EXPECT_TRUE(v.contains("td1"));
+    EXPECT_TRUE(v.contains("td2"));
+    EXPECT_TRUE(v.contains("td3"));
 }
 
 TEST_P(RDB_Query_test, test_fetch_xsize_filtering_by_xsize) {
@@ -161,11 +152,11 @@ TEST_P(RDB_Query_test, test_filter_by_xsize_or_ysize) {
              .execute();
 
     EXPECT_EQ(r->size(), 3);
-    StringVec v = extract_strings_at(*r, 0);
+    const QStringList& v = extract_strings_at(*r, 0);
 
-    EXPECT_TRUE(contains(v, "td1"));
-    EXPECT_TRUE(contains(v, "td2"));
-    EXPECT_TRUE(contains(v, "td5"));
+    EXPECT_TRUE(v.contains("td1"));
+    EXPECT_TRUE(v.contains("td2"));
+    EXPECT_TRUE(v.contains("td5"));
 }
 
 TEST_P(RDB_Query_test, test_filter_by_xsize_distinct) {
@@ -188,10 +179,10 @@ TEST_P(RDB_Query_test, test_select_by_wmo_code) {
              .execute();
 
     EXPECT_EQ(r->size(), 2);
-    StringVec v = extract_strings_at(*r, 0);
+    const QStringList& v = extract_strings_at(*r, 0);
 
-    EXPECT_TRUE(contains(v, "td2"));
-    EXPECT_TRUE(contains(v, "td4"));
+    EXPECT_TRUE(v.contains("td2"));
+    EXPECT_TRUE(v.contains("td4"));
 }
 
 TEST_P(RDB_Query_test, test_select_by_place) {
@@ -201,11 +192,11 @@ TEST_P(RDB_Query_test, test_select_by_place) {
              .execute();
 
     EXPECT_EQ(r->size(), 3);
-    StringVec v = extract_strings_at(*r, 0);
+    const QStringList& v = extract_strings_at(*r, 0);
 
-    EXPECT_TRUE(contains(v, "td1"));
-    EXPECT_TRUE(contains(v, "td3"));
-    EXPECT_TRUE(contains(v, "td5"));
+    EXPECT_TRUE(v.contains("td1"));
+    EXPECT_TRUE(v.contains("td3"));
+    EXPECT_TRUE(v.contains("td5"));
 }
 
 TEST_P(RDB_Query_test, test_has_file) {

@@ -40,7 +40,7 @@ class RelationalDatabase : public Database {
      *
      * the only engine currently supported is 'postgresql'
      */
-    explicit RelationalDatabase(const std::string& dsn);
+    explicit RelationalDatabase(const QString& dsn);
     
     /**
      * @brief destructor
@@ -74,8 +74,8 @@ class RelationalDatabase : public Database {
     virtual void do_commit();
     
     virtual bool do_has_file(const File& file) const;
-    virtual void do_remove_file(const char* path);
-    virtual long long do_save_file(const char* path, const File& file);
+    virtual void do_remove_file(const QString& path);
+    virtual long long do_save_file(const QString& path, const File& file);
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
@@ -91,7 +91,7 @@ class RelationalDatabase : public Database {
     /**
      * @brief save File to database
      */
-    id_type save(const char* path, const File& file);
+    id_type save(const QString& path, const File& file);
 
     /**
      * @brief save Attribute to database
@@ -102,7 +102,7 @@ class RelationalDatabase : public Database {
     /**
      * @brief remove file from database
      */
-    void remove_file(const char* path);
+    void remove_file(const QString& path);
     
     /**
      * @brief query database id of a Source
@@ -119,7 +119,7 @@ class RelationalDatabase : public Database {
     static unsigned int connection_count_;
     static unsigned int instance_count_;
     static int argc_;
-    static char* argv_[];
+    static const char* argv_[];
     static QCoreApplication* qapp_;
 };
 

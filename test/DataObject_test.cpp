@@ -4,13 +4,11 @@
 #include <brfc/DataObject.hpp>
 #include <brfc/Variant.hpp>
 
-#include <boost/algorithm/string/join.hpp>
-#include <boost/lambda/lambda.hpp>
-#include <boost/lambda/bind.hpp>
-
-#include <algorithm>
 #include <stdexcept>
-#include <vector>
+
+#include <QtCore/QStringList>
+
+#include "common.hpp"
 
 using namespace brfc;
 
@@ -52,14 +50,14 @@ TEST(DataObject_test, iterate_tree) {
     DataObject& e = a.add_child("e");
     e.add_child("f");
     d.add_child("g");
-    std::string expected = "abcedfg";
+    QString expected = "abcedfg";
 
-    std::vector<std::string> names(7);
+    QStringList names;
 
-    using namespace boost::lambda;
-    std::transform(a.begin(), a.end(), names.begin(),
-                   bind(&DataObject::name, _1));
-    std::string name_str = boost::join(names, "");
+    BOOST_FOREACH(const DataObject& dobj, a) {
+        names.append(dobj.name());
+    }
+    QString name_str = names.join("");
 
     EXPECT_EQ(name_str, expected);
 }
@@ -68,7 +66,7 @@ TEST(DataObject_test, path) {
     DataObject a("a");
     DataObject& b = a.add_child("b");
     DataObject& c = b.add_child("c");
-    std::string expected = "a/b/c";
+    QString expected("a/b/c");
 
     EXPECT_EQ(c.path(), expected);
 }
