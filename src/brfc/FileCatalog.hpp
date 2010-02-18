@@ -21,6 +21,8 @@ class FileNamer {
         return do_name(f);
     }
 
+    virtual ~FileNamer() { }
+
   protected:
     virtual QString do_name(const File& f) const = 0;
 };
