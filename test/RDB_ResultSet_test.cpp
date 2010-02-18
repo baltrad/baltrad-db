@@ -12,9 +12,7 @@
 #include "config.hpp"
 #include "common.hpp"
 
-using namespace brfc;
-
-namespace {
+namespace brfc {
 
 struct RDB_ResultSet_test : public testing::TestWithParam<const char*> {
     RDB_ResultSet_test()
@@ -23,8 +21,6 @@ struct RDB_ResultSet_test : public testing::TestWithParam<const char*> {
 
     TestRDB* db;
 };
-
-} // namespace anonymous
 
 TEST_P(RDB_ResultSet_test, size) {
     shared_ptr<ResultSet> r = db->query("SELECT 1", BindMap());
@@ -84,3 +80,6 @@ INSTANTIATE_TEST_CASE_P(RDB_ResultSet_test_p,
                         RDB_ResultSet_test,
                         ::testing::ValuesIn(test_dsns));
 #endif // BRFC_TEST_DSN_COUNT
+
+} // namespace brfc
+

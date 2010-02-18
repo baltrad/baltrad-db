@@ -19,9 +19,7 @@
 #include "config.hpp"
 #include "common.hpp"
 
-using namespace brfc;
-
-namespace {
+namespace brfc {
 
 /**
  * test data for this fixture:
@@ -86,8 +84,6 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
     File td1, td2, td3, td4, td5;
     Query query;
 };
-
-}
 
 TEST_P(RDB_Query_test, test_simple) {
     shared_ptr<ResultSet> r = 
@@ -217,3 +213,6 @@ INSTANTIATE_TEST_CASE_P(RDB_Query_test_p,
                         RDB_Query_test,
                         ::testing::ValuesIn(test_dsns));
 #endif // BRFC_TEST_DSN_COUNT
+
+} // namespace brfc
+

@@ -4,9 +4,7 @@
 
 #include "common.hpp"
 
-using namespace brfc;
-
-namespace {
+namespace brfc {
 struct AttributeMapper_test : public testing::Test {
     static void SetUpTestCase() {
         mapper.add(Mapping(0, "attr1", "table1", "column1"));
@@ -20,8 +18,6 @@ struct AttributeMapper_test : public testing::Test {
 
 AttributeMapper AttributeMapper_test::mapper;
 
-} // namespace anonymouse
-
 TEST_F(AttributeMapper_test, specializations_on) {
     MappingVector v = mapper.specializations_on("table1");
     ASSERT_EQ(v.size(), 2);
@@ -33,3 +29,6 @@ TEST_F(AttributeMapper_test, is_specialized) {
     EXPECT_TRUE(mapper.is_specialized("attr1"));
     EXPECT_FALSE(mapper.is_specialized("attr4"));
 }
+
+} // namespace brfc
+

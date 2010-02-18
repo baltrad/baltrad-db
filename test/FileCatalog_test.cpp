@@ -18,14 +18,12 @@
 #include "TempH5File.hpp"
 
 
-using namespace brfc;
-
 using testing::_;
 using testing::Return;
 using testing::StrEq;
 using testing::Throw;
 
-namespace {
+namespace brfc {
 
 class MockDatabase : public Database {
   public:
@@ -72,8 +70,6 @@ struct FileCatalog_test : public testing::Test {
     FileCatalog fc;
     auto_ptr<TempH5File> minfile;
 };
-
-} // namespace anonymous
 
 TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
     EXPECT_THROW(FileCatalog("invalid_dsn", tempdir->path()), db_error);
@@ -174,3 +170,6 @@ TEST_F(FileCatalog_test, test_removing_nx_file) {
 TEST(DefaultFileNamer_test, test_nx_storage_path_throws) {
     EXPECT_THROW(DefaultFileNamer("/path/to/nxdir"), fs_error);
 }
+
+} // namespace brfc
+

@@ -10,7 +10,7 @@
 
 #include "common.hpp"
 
-using namespace brfc;
+namespace brfc {
 
 TEST(DataObject_test, get_nx_child) {
     DataObject d("");
@@ -85,3 +85,5 @@ TEST(DataObject_test, add_attribute_twice) {
     a.add_attribute("asd", Variant(1));
     EXPECT_THROW(a.add_attribute("asd", Variant(1)), duplicate_entry);
 }
+
+} // namespace brfc

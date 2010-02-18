@@ -17,10 +17,9 @@
 
 #include <QtCore/QString>
 
-using namespace brfc;
-using namespace brfc::expr;
+namespace brfc {
 
-namespace {
+using namespace expr;
 
 struct Expression_test: public testing::Test {
     Variant bind(const QString& key) const {
@@ -31,8 +30,6 @@ struct Expression_test: public testing::Test {
     Compiler compiler;
     Factory xpr;
 };
-
-}
 
 TEST_F(Expression_test, test_utf_string_literal) {
     LiteralPtr lit = xpr.string("öäü");
@@ -142,3 +139,6 @@ TEST_F(Expression_test, test_select) {
     EXPECT_EQ(compiler.compiled(), expected);
     EXPECT_EQ(bind(":lit_0"), Variant(1));
 }
+
+} // namespace brfc
+

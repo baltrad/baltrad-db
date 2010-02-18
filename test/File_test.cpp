@@ -13,7 +13,7 @@
 #include "common.hpp"
 #include "TempH5File.hpp"
 
-using namespace brfc;
+namespace brfc {
 
 TEST(File_test, get_same_node) {
     File f;
@@ -105,7 +105,9 @@ TEST(File_test, ignored_attributes) {
     File g(f.filename(), specs);
     EXPECT_THROW(g.root().attribute("ignore"), brfc::lookup_error);
     const File::StringVector& ignored = g.ignored_attributes();
-    EXPECT_EQ(ignored.size(), 2);
+    EXPECT_EQ(ignored.size(), (size_t)2);
     EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/ignore") != ignored.end());
     EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/dataset/ignore") != ignored.end());
 }
+
+} // namespace brfc
