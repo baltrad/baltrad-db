@@ -19,6 +19,14 @@ class Source {
      */
     static Source from_source_attribute(const QString& source);
 
+    long long db_id() const {
+        return db_id_;
+    }
+
+    void db_id(long long db_id) {
+        db_id_ = db_id;
+    }
+
     /**
      * @brief combined WMO block and station number
      */

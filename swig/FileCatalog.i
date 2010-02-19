@@ -117,6 +117,7 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
 SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 SWIG_SHARED_PTR(File, brfc::File);
 SWIG_SHARED_PTR(Attribute, brfc::Attribute);
+SWIG_SHARED_PTR(Source, brfc::Source);
 
 %template(AttributeVector) std::vector<brfc::shared_ptr<brfc::Attribute> >;
 %template(StringVector) std::vector<QString>;

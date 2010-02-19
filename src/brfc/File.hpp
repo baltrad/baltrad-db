@@ -5,9 +5,9 @@
 #include <vector>
 
 #include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <brfc/hlhdf.hpp>
+#include <brfc/smart_ptr.hpp>
 
 #include <QtCore/QString>
 
@@ -93,10 +93,10 @@ class File : public boost::noncopyable {
     
     /**
      * @brief get the Source definiton
-     *
-     * construct a Source instance from Attribute 'source' on root DataObject
      */
-    Source source() const;
+    shared_ptr<Source> source() const;
+
+    void source(shared_ptr<Source> src);
 
     /**
      * @brief string that uniquely identifies the file content
@@ -147,6 +147,7 @@ class File : public boost::noncopyable {
     boost::scoped_ptr<DataObject> root_;
     StringVector ignored_attributes_;
     QString path_;
+    shared_ptr<Source> source_;
     mutable long long db_id_;
 };
 

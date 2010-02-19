@@ -2,8 +2,9 @@
 
 #include <brfc/exceptions.hpp>
 #include <brfc/AttributeSpecs.hpp>
-#include <brfc/DefaultFileNamer.hpp>
 #include <brfc/Database.hpp>
+#include <brfc/DataObject.hpp>
+#include <brfc/DefaultFileNamer.hpp>
 #include <brfc/File.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/RelationalDatabase.hpp>
@@ -56,6 +57,9 @@ FileCatalog::is_cataloged(const File& f) const {
 shared_ptr<File>
 FileCatalog::catalog(const QString& path) {
     shared_ptr<File> f(new File(path, *specs_));
+    
+    QString src = f->root().attribute("what/source").value().string();
+    f->source(db_->load_source(src));
 
     if (is_cataloged(*f))
         throw duplicate_entry(path.toUtf8().constData());

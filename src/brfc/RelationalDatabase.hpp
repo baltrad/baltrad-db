@@ -76,6 +76,8 @@ class RelationalDatabase : public Database {
     virtual bool do_has_file(const File& file) const;
     virtual void do_remove_file(const QString& path);
     virtual long long do_save_file(const QString& path, const File& file);
+
+    virtual shared_ptr<Source> do_load_source(const QString& srcstr);
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
@@ -104,11 +106,6 @@ class RelationalDatabase : public Database {
      */
     void remove_file(const QString& path);
     
-    /**
-     * @brief query database id of a Source
-     */
-    id_type query_id(const Source& src);
-        
     QString qt_engine(const QString& engine) const;
 
     QSqlDatabase sql_;

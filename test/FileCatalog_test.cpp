@@ -6,6 +6,7 @@
 #include <brfc/Database.hpp>
 #include <brfc/File.hpp>
 #include <brfc/FileCatalog.hpp>
+#include <brfc/Source.hpp>
 #include <brfc/Query.hpp>
 
 #include <QtCore/QDate>
@@ -19,8 +20,8 @@
 
 
 using testing::_;
+using testing::DefaultValue;
 using testing::Return;
-using testing::StrEq;
 using testing::Throw;
 
 namespace brfc {
@@ -34,6 +35,7 @@ class MockDatabase : public Database {
     MOCK_CONST_METHOD1(do_has_file, bool(const File&));
     MOCK_METHOD1(do_remove_file, void(const QString&));
     MOCK_METHOD2(do_save_file, long long(const QString&, const File&));
+    MOCK_METHOD1(do_load_source, shared_ptr<Source>(const QString&));
     MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
     MOCK_METHOD0(do_clean, void());  
 };
@@ -50,10 +52,12 @@ struct FileCatalog_test : public testing::Test {
             , namer(new MockNamer())
             , specs(new AttributeSpecs())
             , fc(db, specs, namer)
+            , src_str("WMO:02606")
+            , default_src(new Source())
             , minfile(TempH5File::minimal("PVOL",
                                           QDate(2000, 1, 1),
                                           QTime(12, 0),
-                                          "WMO:02606")) {
+                                          src_str)) {
         minfile->write();
         specs->add("Conventions", "string");
         specs->add("what/object", "string");
@@ -61,6 +65,7 @@ struct FileCatalog_test : public testing::Test {
         specs->add("what/date", "date");
         specs->add("what/time", "time");
         specs->add("what/source", "string");
+        DefaultValue<shared_ptr<Source> >::Set(default_src);
     }
 
     auto_ptr<TempDir> tempdir;
@@ -68,6 +73,8 @@ struct FileCatalog_test : public testing::Test {
     shared_ptr<MockNamer> namer;
     shared_ptr<AttributeSpecs> specs;
     FileCatalog fc;
+    QString src_str;
+    shared_ptr<Source> default_src;
     auto_ptr<TempH5File> minfile;
 };
 
@@ -77,6 +84,7 @@ TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
 
 TEST_F(FileCatalog_test, test_catalog) {
     const QString& target = tempdir->path() + "/test";
+    EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
@@ -96,6 +104,7 @@ TEST_F(FileCatalog_test, test_catalog) {
 
 TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
     const QString& target = tempdir->path() + "/test";
+    EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
@@ -111,6 +120,7 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
 
 TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
     const QString& target = tempdir->path() + "/test";
+    EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));

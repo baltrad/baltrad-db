@@ -26,6 +26,7 @@ File::File()
         : root_(new DataObject("", this))
         , ignored_attributes_()
         , path_()
+        , source_()
         , db_id_(0) {
 
 }
@@ -34,6 +35,7 @@ File::File(const QString& path, const AttributeSpecs& specs)
         : root_(new DataObject("", this))
         , ignored_attributes_()
         , path_(path)
+        , source_()
         , db_id_(0) {
     load(path, specs);
 }
@@ -46,6 +48,7 @@ File::File(const QString& object,
         : root_(new DataObject("", this))
         , ignored_attributes_()
         , path_()
+        , source_()
         , db_id_(0) {
     root_->add_attribute("Conventions", Variant("ODIM_H5/V2_0"));
     root_->add_attribute("what/object", Variant(object));
@@ -55,12 +58,14 @@ File::File(const QString& object,
     root_->add_attribute("what/source", Variant(source));
 }
 
-Source
+shared_ptr<Source>
 File::source() const {
-    // XXX: return a "default" (null) source if no such attribute?
-    //      right now lookup_error is propagated
-    const QString& src = root_->attribute("what/source").value().string();
-    return Source::from_source_attribute(src);
+    return source_;
+}
+
+void
+File::source(shared_ptr<Source> source) {
+    source_ = source;
 }
 
 QString

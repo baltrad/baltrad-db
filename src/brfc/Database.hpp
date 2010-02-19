@@ -12,6 +12,8 @@ namespace brfc {
 class File;
 class ResultSet;
 class Query;
+class Source;
+
 /**
  * @brief ABC for Database access
  */
@@ -66,12 +68,19 @@ class Database : public boost::noncopyable {
     }
 
     /**
+     * @brief load Source from DB by contents of /what/source
+     */
+    shared_ptr<Source> load_source(const QString& source) {
+        return do_load_source(source);
+    }
+    
+    /**
      * @brief execute a select query
      */
     shared_ptr<ResultSet> query(const Query& query) {
         return do_query(query);
     }
-    
+
     /**
      * @brief delete all files from database
      */
@@ -87,6 +96,8 @@ class Database : public boost::noncopyable {
     virtual bool do_has_file(const File& file) const = 0;
     virtual void do_remove_file(const QString& path) = 0;
     virtual long long do_save_file(const QString& path, const File& file) = 0;
+
+    virtual shared_ptr<Source> do_load_source(const QString& source) = 0;
 
     virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
 
