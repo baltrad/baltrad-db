@@ -388,7 +388,7 @@ RelationalDatabase::do_load_source(const QString& srcstr) {
     src_p->wmo_code(query.value(2).toInt());
     src_p->radar_site(query.value(3).toString());
     src_p->originating_centre(query.value(4).toInt());
-//    src_p->node_id(query.value(5).toString());
+    src_p->node_id(query.value(5).toString());
     src_p->place(query.value(6).toString());
 
     return src_p;

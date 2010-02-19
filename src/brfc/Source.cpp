@@ -18,7 +18,7 @@ Source::Source()
         , originating_centre_(0)
         , place_()
         , country_code_(0)
-        , comment_() {
+        , node_id_() {
 }
 
 namespace {
@@ -62,7 +62,7 @@ Source::from_source_attribute(const QString& source) {
         } else if (entry.first == "CTY") {
             src.country_code(entry.second.toInt());
         } else if (entry.first == "CMT") {
-            src.comment(entry.second);
+            // ignore, this is not relevant
         } else {
             QString err = QString("invalid field in source: ") + source;
             throw value_error(err.toUtf8().constData());

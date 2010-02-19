@@ -10,12 +10,17 @@ class Source {
     Source();
 
     /**
-     * @brief construct from ODIM_H5 'what/source' metadata attribute
+     * @brief construct from ODIM_H5 '/what/source' metadata attribute
+     *
+     * @param source contents of '/what/source'
+     * @throw value_error when source contains invalid fields or not
+     *        correctly formed
      *
      * valid elements are [WMO,RAD,ORG,PLC,CTY,CMT]
      * string should consist of element-value pairs, where
      * element and value are separated by a colon.
      * pairs are separated by comma.
+     *
      */
     static Source from_source_attribute(const QString& source);
 
@@ -72,13 +77,10 @@ class Source {
         country_code_ = value;
     }
 
-    /**
-     * @brief comment
-     */
-    const QString& comment() const { return comment_; }
+    QString node_id() const { return node_id_; }
 
-    void comment(const QString& value) {
-        comment_ = value;
+    void node_id(const QString& value) {
+        node_id_ = value;
     }
 
   private:
@@ -88,7 +90,7 @@ class Source {
     int originating_centre_;
     QString place_;
     int country_code_;
-    QString comment_;
+    QString node_id_;
 };
 
 }
