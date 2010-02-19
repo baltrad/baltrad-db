@@ -51,7 +51,7 @@ class RelationalDatabase : public Database {
      * @brief execute a select query
      */
     shared_ptr<ResultSet> query(const QString& query,
-                                const BindMap& binds) const;
+                                const BindMap& binds);
     
     const AttributeSpecs& specs() const;
 
@@ -59,9 +59,8 @@ class RelationalDatabase : public Database {
 
     void populate_mapper_and_specs();
 
-    QSqlDatabase& connection() const {
-        RelationalDatabase* self = const_cast<RelationalDatabase*>(this);
-        return self->sql_;
+    QSqlDatabase& connection() {
+        return sql_;
     }
 
     bool supports_returning() const {
@@ -73,7 +72,7 @@ class RelationalDatabase : public Database {
     virtual void do_rollback();
     virtual void do_commit();
     
-    virtual bool do_has_file(const File& file) const;
+    virtual bool do_has_file(const File& file);
     virtual void do_remove_file(const QString& path);
     virtual long long do_save_file(const QString& path, const File& file);
 

@@ -48,7 +48,7 @@ class Database : public boost::noncopyable {
     /**
      * @brief is file stored
      */
-    bool has_file(const File& file) const {
+    bool has_file(const File& file) {
         return do_has_file(file);
     }
     
@@ -93,7 +93,7 @@ class Database : public boost::noncopyable {
     virtual void do_rollback() = 0;
     virtual void do_commit() = 0;
     
-    virtual bool do_has_file(const File& file) const = 0;
+    virtual bool do_has_file(const File& file) = 0;
     virtual void do_remove_file(const QString& path) = 0;
     virtual long long do_save_file(const QString& path, const File& file) = 0;
 

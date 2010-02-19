@@ -32,7 +32,7 @@ class MockDatabase : public Database {
     MOCK_METHOD0(do_rollback, void());
     MOCK_METHOD0(do_commit, void());
     
-    MOCK_CONST_METHOD1(do_has_file, bool(const File&));
+    MOCK_METHOD1(do_has_file, bool(const File&));
     MOCK_METHOD1(do_remove_file, void(const QString&));
     MOCK_METHOD2(do_save_file, long long(const QString&, const File&));
     MOCK_METHOD1(do_load_source, shared_ptr<Source>(const QString&));

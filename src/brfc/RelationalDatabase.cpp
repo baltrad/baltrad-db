@@ -248,7 +248,7 @@ RelationalDatabase::do_commit() {
 }
 
 bool
-RelationalDatabase::do_has_file(const File& file) const {
+RelationalDatabase::do_has_file(const File& file) {
     QSqlQuery query(connection());
     query.prepare("SELECT true FROM files WHERE unique_id = :unique_id");
     query.bindValue(":unique_id", file.unique_identifier());
@@ -396,7 +396,7 @@ RelationalDatabase::do_load_source(const QString& srcstr) {
 
 shared_ptr<ResultSet>
 RelationalDatabase::query(const QString& query_str,
-                          const BindMap& binds) const {
+                          const BindMap& binds) {
     BRFC_ASSERT(connection().isOpen());
     QSqlQuery query(connection());
     query.prepare(query_str);
