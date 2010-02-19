@@ -1,6 +1,8 @@
 import os
 import sys
 
+EnsureSConsVersion(1, 2)
+
 def convert_test_db_dsns(value):
     dsns = value.split(",")
     dsns = [dsn for dsn in dsns if dsn.strip()]
@@ -52,7 +54,7 @@ vars.AddVariables(
                 ("test_db_dsns", "comma separated dsns to test against", "")
 )
 
-env = Environment(tools=["default", "doxygen", "swig"],
+env = Environment(tools=["default", "doxygen", "swig", "textfile"],
                   toolpath=["scons_tools"],
                   variables=vars,
                   CCFLAGS=["-pedantic", "-Wall", "-Wno-long-long"],
