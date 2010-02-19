@@ -2,9 +2,10 @@
 
 #include <brfc/exceptions.hpp>
 #include <brfc/AttributeSpecs.hpp>
-#include <brfc/File.hpp>
-#include <brfc/SplitPath.hpp>
 #include <brfc/DataObject.hpp>
+#include <brfc/File.hpp>
+#include <brfc/Source.hpp>
+#include <brfc/SplitPath.hpp>
 #include <brfc/Variant.hpp>
 
 #include <QtCore/QDate>
@@ -59,12 +60,18 @@ TEST(File_test, split_short_path_with_group) {
 
 TEST(File_test, unique_identifier) {
     File f("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
-    EXPECT_EQ(f.unique_identifier(), "pvol_20000102T120500_WMO:02606");
+    shared_ptr<Source> src(new Source());
+    src->node_id("seang");
+    f.source(src);
+    EXPECT_EQ(f.unique_identifier(), "pvol_20000102T120500_seang");
 }
 
 TEST(File_test, unique_identifier_with_unicode) {
     File f("pvol", QDate(2000, 1, 2), QTime(12, 5), "PLC:Ängelholm");
-    EXPECT_EQ(f.unique_identifier(), "pvol_20000102T120500_PLC:Ängelholm");
+    shared_ptr<Source> src(new Source());
+    src->node_id("seang");
+    f.source(src);
+    EXPECT_EQ(f.unique_identifier(), "pvol_20000102T120500_seang");
 }
 
 TEST(File_test, open_nx_file) {

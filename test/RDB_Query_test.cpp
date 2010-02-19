@@ -209,6 +209,7 @@ TEST_P(RDB_Query_test, test_has_file) {
 TEST_P(RDB_Query_test, test_has_nx_file) {
     bool result = false;
     File td("PVOL", QDate(2000, 1, 10), QTime(12, 0), src1);
+    td.source(db->load_source(src1));
     ASSERT_NO_THROW(result = db->has_file(td));
     EXPECT_FALSE(result);
 }

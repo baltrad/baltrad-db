@@ -70,13 +70,17 @@ File::source(shared_ptr<Source> source) {
 
 QString
 File::unique_identifier() const {
+    if (not source_) {
+        //XXX: needs a better exception type
+        throw value_error("can't form unique_id: not associated with source");
+    }
     QString uid = root_->attribute("what/object").value().string();
     uid += "_";
     uid += root_->attribute("what/date").value().date().toString("yyyyMMdd");
     uid += "T";
     uid += root_->attribute("what/time").value().time().toString("hhmmss");
     uid += "_";
-    uid += root_->attribute("what/source").value().string();
+    uid += source_->node_id();
     return uid;
 }
 
