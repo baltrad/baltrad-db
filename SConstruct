@@ -142,41 +142,30 @@ env.Alias("hudsontest", [run_gtest_tests, run_java_tests])
 # configure
 ##
 
-def CheckBoost(ctx, boost_include_dir):
-    ctx.Message("Checking for Boost version >= 1.38... ")
-    ctx.env.AppendUnique(CPPPATH=boost_include_dir)
+def CheckBoostVersion(ctx, version):
+    ctx.Message("Checking for Boost version >= %s... " % version)
+
+    # Boost versions are in format major.minor.subminor
+    v_arr = version.split(".")
+    version_n = 0
+    if len(v_arr) > 0:
+        version_n += int(v_arr[0])*100000
+    if len(v_arr) > 1:
+        version_n += int(v_arr[1])*100
+    if len(v_arr) > 2:
+        version_n += int(v_arr[2])
+
     src = (
         "#include <boost/version.hpp>",
-        "int main(int argc, char** argv) {",
-        "    if (BOOST_VERSION / 100000 == 1 and BOOST_VERSION / 100 % 1000 >= 38)",
-        "        return 0;",
-        "    else",
-        "        return 1;",
-        "}"
+        "#if BOOST_VERSION < %d" % version_n,
+        "#error Installed boost is too old!",
+        "#endif",
+        "int main() { return 0; }"
     )
 
-    result, _ = ctx.TryRun("\n".join(src), ".cpp")
+    result = ctx.TryCompile("\n".join(src), ".cpp")
     ctx.Result(result)
-
-    if not result: return 0
-
-    headers = (
-        "enable_shared_from_this.hpp",
-        "foreach.hpp",
-        "lexical_cast.hpp",
-        "noncopyable.hpp",
-        "scoped_ptr.hpp",
-        "shared_ptr.hpp",
-        "variant.hpp",
-        "iterator/iterator_facade.hpp",
-        "numeric/conversion/cast.hpp",
-    )
-
-    for header in headers:
-        result = conf.CheckCXXHeader("/".join(("boost", header)))
-        if not result:
-            return 0
-    return 1
+    return result
 
 def CheckHlhdf(ctx, hlhdf_include_dir, hlhdf_lib_dir):
     src = (
@@ -235,7 +224,7 @@ def CheckQtSqlDrivers(ctx, qt_include_dir, qt_lib_dir):
 
 conf = Configure(confenv,
                  custom_tests={
-                    "CheckBoost": CheckBoost,
+                    "CheckBoostVersion": CheckBoostVersion,
                     "CheckHlhdf": CheckHlhdf,
                     "CheckQt": CheckQt,
                     "CheckQtSqlDrivers": CheckQtSqlDrivers,
@@ -252,7 +241,25 @@ if set(["shared-library", "java-wrapper", "test", "hudsontest"]) & set(_TARGET_S
     drivers = conf.CheckQtSqlDrivers(env["qt_include_dir"], env["qt_lib_dir"])
     conf.env["qtsql_drivers"] = drivers
     rets.append(conf.CheckHlhdf(env["hlhdf_include_dir"], env["hlhdf_lib_dir"]))
-    rets.append(conf.CheckBoost(env["boost_include_dir"]))
+    conf.env.AppendUnique(CPPPATH=env["boost_include_dir"])
+    rets.append(conf.CheckBoostVersion("1.38"))
+
+    headers = (
+        "enable_shared_from_this.hpp",
+        "foreach.hpp",
+        "lexical_cast.hpp",
+        "noncopyable.hpp",
+        "scoped_ptr.hpp",
+        "shared_ptr.hpp",
+        "variant.hpp",
+        "iterator/iterator_facade.hpp",
+        "numeric/conversion/cast.hpp",
+    )
+
+    for header in headers:
+        rets.append(conf.CheckCXXHeader("/".join(("boost", header))))
+
+
 
 if set(["test", "hudsontest"]) & set(_TARGET_STRS):
     db_driver_map = {
