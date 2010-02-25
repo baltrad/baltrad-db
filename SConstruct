@@ -168,13 +168,7 @@ def CheckBoost(ctx, boost_include_dir):
         "scoped_ptr.hpp",
         "shared_ptr.hpp",
         "variant.hpp",
-        "algorithm/string/classification.hpp",
-        "algorithm/string/erase.hpp",
-        "algorithm/string/join.hpp",
-        "algorithm/string/split.hpp",
         "iterator/iterator_facade.hpp",
-        "lambda/bind.hpp",
-        "lambda/lambda.hpp",
         "numeric/conversion/cast.hpp",
     )
 

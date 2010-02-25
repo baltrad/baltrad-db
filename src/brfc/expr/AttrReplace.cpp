@@ -16,7 +16,6 @@
 #include <brfc/expr/Table.hpp>
 
 #include <boost/foreach.hpp>
-#include <boost/algorithm/string/erase.hpp>
 #include <map>
 #include <algorithm>
 #include <utility>

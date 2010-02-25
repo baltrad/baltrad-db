@@ -11,17 +11,16 @@ for building:
 library dependencies:
 * HLHDF library                 0.7.7
 * boost::iterator               1.38
-* boost::lambda                 1.38
 * boost::lexical_cast           1.38
 * boost::smart_ptr              1.38
-* boost::string_algo            1.38
 * boost::utility                1.38
-* boost::variant		1.38
+* boost::variant                1.38
 * QtCore                        4.5
 * QtSql                         4.5
 
 additional test dependencies:
-* gtest				1.4.0
+* gtest                         1.4.0
+* gmock                         1.4.0
 
 run time dependencies:
 * postgresql driver for qt4-sql
