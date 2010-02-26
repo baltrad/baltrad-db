@@ -1,6 +1,10 @@
 import os
 import sys
 
+
+from build_helper import (CheckBoostVersion, CheckHlhdf, CheckQt,
+                          CheckQtSqlDrivers)
+
 EnsureSConsVersion(1, 2)
 
 def convert_test_db_dsns(value):
@@ -54,6 +58,10 @@ vars.AddVariables(
                 ("test_db_dsns", "comma separated dsns to test against", "")
 )
 
+##
+# set up default environment
+##
+
 env = Environment(tools=["default", "doxygen", "swig", "textfile"],
                   toolpath=["scons_tools"],
                   variables=vars,
@@ -94,6 +102,114 @@ env.AppendUnique(CPPPATH=["${qt_include_dir}",
 env.AppendUnique(LIBPATH=["${qt_lib_dir}",
                           "${hlhdf_lib_dir}",
                           "${boost_lib_dir}"])
+
+##
+# configure
+##
+
+class Config(object):
+    _custom_tests = {
+       "CheckBoostVersion": CheckBoostVersion,
+       "CheckHlhdf": CheckHlhdf,
+       "CheckQt": CheckQt,
+       "CheckQtSqlDrivers": CheckQtSqlDrivers,
+    }
+
+    def __init__(self, env):
+        self.cfg = env.Configure(custom_tests=self._custom_tests,
+                                 clean=False, help=False)
+    
+    def check(self):
+        cfg = self.cfg
+
+        cfg.env.AppendUnique(CPPPATH=env["qt_include_dir"],
+                             LIBPATH=env["qt_lib_dir"])
+        cfg.env.AppendENVPath("LD_LIBRARY_PATH",
+                              env.Dir(env["qt_lib_dir"]).abspath)
+        self.qt = cfg.CheckQt()
+        self.qtsql = cfg.CheckLibWithHeader("QtSql", "QtSql/QSqlDatabase", "c++")
+        self.qtsql_drivers = cfg.CheckQtSqlDrivers()
+
+        cfg.env.AppendUnique(CPPPATH=env["hlhdf_include_dir"],
+                             LIBPATH=env["hlhdf_lib_dir"])
+        self.hlhdf = cfg.CheckHlhdf()
+
+        cfg.env.AppendUnique(CPPPATH=env["boost_include_dir"])
+        self.boost = 0 not in [cfg.CheckBoostVersion("1.38"),
+                               self._check_boost_headers()]
+
+        cfg.env.AppendUnique(CPPPATH="${gtest_include_dir}",
+                             LIBPATH="${gtest_lib_dir}")
+        self.gtest = cfg.CheckLibWithHeader("gtest", "gtest/gtest.h", "c++")
+        self.gmock = cfg.CheckLibWithHeader("gmock", "gmock/gmock.h", "c++")
+
+        cfg.env.AppendUnique(CPPPATH=["${jdk_include_dir}",
+                                       "${jdk_include_dir}/linux"],
+                              LIBPATH="${jdk_lib_dir}")
+        self.jni = cfg.CheckCHeader("jni.h")
+        cfg.Finish()
+   
+    def _check_boost_headers(self):
+        headers = (
+            "enable_shared_from_this.hpp",
+            "foreach.hpp",
+            "lexical_cast.hpp",
+            "noncopyable.hpp",
+            "scoped_ptr.hpp",
+            "shared_ptr.hpp",
+            "variant.hpp",
+            "iterator/iterator_facade.hpp",
+            "numeric/conversion/cast.hpp",
+        )
+
+        rets = []
+        for header in headers:
+            rets.append(self.cfg.CheckCXXHeader("/".join(("boost", header))))
+        return 0 not in rets
+    
+    def has_sql_dialect(self, dialect):
+        db_driver_map = {
+            "sqlite": "QSQLITE",
+            "postgresql": "QPSQL",
+        }
+        try:
+            driver = db_driver_map[dialect]
+        except KeyError:
+            return False
+        else:
+            return driver in self.qtsql_drivers
+
+conf = Config(confenv)
+conf.check()
+
+
+def conf_obj(value):
+    return Value(getattr(conf, value))
+
+def conf_has(target, source, env):
+    if not isinstance(source, list):
+        source = [source]
+    missing = []
+    for src in source:
+        if not src.value:
+            missing.append(str(src))
+    if missing:
+        print >> sys.stderr, "missing dependencies: %s" % " ".join(missing)
+        return 1
+
+env.Append(BUILDERS={"ConfHas": env.Builder(action=conf_has, source_factory=conf_obj)})
+
+
+# remove dsns with unavailable driver
+for dsn in env["test_db_dsns"]:
+    dialect = dsn.split(":", 1)[0]
+    if not conf.has_sql_dialect(dialect):
+        env["test_db_dsns"].remove(dsn)
+        print "removed %r from test_db_dsns: dialect unavailable" % dsn
+
+##
+# set up targets
+##
 
 doc = env.Doxygen("doc/Doxyfile")
 env.Alias("doc", doc)
@@ -138,162 +254,5 @@ run_java_tests = testenv.Command("run_java_tests", "#lib/jbrfc_test.jar",
 
 env.Alias("hudsontest", [run_gtest_tests, run_java_tests])
 
-##
-# configure
-##
-
-def CheckBoostVersion(ctx, version):
-    ctx.Message("Checking for Boost version >= %s... " % version)
-
-    # Boost versions are in format major.minor.subminor
-    v_arr = version.split(".")
-    version_n = 0
-    if len(v_arr) > 0:
-        version_n += int(v_arr[0])*100000
-    if len(v_arr) > 1:
-        version_n += int(v_arr[1])*100
-    if len(v_arr) > 2:
-        version_n += int(v_arr[2])
-
-    src = (
-        "#include <boost/version.hpp>",
-        "#if BOOST_VERSION < %d" % version_n,
-        "#error Installed boost is too old!",
-        "#endif",
-        "int main() { return 0; }"
-    )
-
-    result = ctx.TryCompile("\n".join(src), ".cpp")
-    ctx.Result(result)
-    return result
-
-def CheckHlhdf(ctx, hlhdf_include_dir, hlhdf_lib_dir):
-    src = (
-        "#include \"hlhdf.h\"",
-        "int main() { return 0; }"
-    )
-    ctx.Message("Checking for HLHDF... ")
-    oldlibs = ctx.AppendLIBS(["hlhdf", "hdf5"])
-    ctx.env.AppendUnique(CPPPATH=hlhdf_include_dir, LIBPATH=hlhdf_lib_dir)
-    result = ctx.TryLink("\n".join(src), ".c")
-    ctx.Result(result)
-    ctx.SetLIBS(oldlibs)
-
-    return result
-
-def CheckQt(ctx, qt_include_dir, qt_lib_dir):
-    src = (
-        "#include <QtCore/QtGlobal>",
-        "int main(int argc, char** argv) {",
-        "    if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))",
-        "        return 0;",
-        "    else",
-        "        return 1;",
-        "}"
-    )
-    ctx.Message("Checking for Qt >= 4.5... ")
-    oldlibs = ctx.AppendLIBS(["QtCore"])
-    ctx.env.AppendUnique(CPPPATH=qt_include_dir, LIBPATH=qt_lib_dir)
-    ctx.env.AppendENVPath('LD_LIBRARY_PATH', env.Dir(qt_lib_dir).abspath)
-    result, _ = ctx.TryRun("\n".join(src), ".cpp")
-    ctx.Result(result)
-    ctx.SetLIBS(oldlibs)
-    return result
-
-def CheckQtSqlDrivers(ctx, qt_include_dir, qt_lib_dir):
-    src = (
-        "#include <QtSql/QSqlDatabase>",
-        "#include <QtCore/QCoreApplication>",
-        "#include <QtCore/QStringList>",
-        "#include <iostream>",
-        "int main(int argc, char** argv) {",
-        "   QCoreApplication app(argc, argv);",
-        "   QStringList drivers = QSqlDatabase::drivers();",
-        "   std::cout << drivers.join(\" \").toStdString();",
-        "   return 0;",
-        "}\n"
-    )
-    ctx.Message("Checking for available QtSql drivers... ")
-    oldlibs = ctx.AppendLIBS(["QtSql"])
-    ctx.env.AppendUnique(CPPPATH=qt_include_dir, LIBPATH=qt_lib_dir)
-    ctx.env.AppendENVPath('LD_LIBRARY_PATH', env.Dir(qt_lib_dir).abspath)
-    result, drivers = ctx.TryRun("\n".join(src), ".cpp")
-    ctx.Result(drivers)
-    ctx.SetLIBS(oldlibs)
-    return drivers.split(" ")
-
-conf = Configure(confenv,
-                 custom_tests={
-                    "CheckBoostVersion": CheckBoostVersion,
-                    "CheckHlhdf": CheckHlhdf,
-                    "CheckQt": CheckQt,
-                    "CheckQtSqlDrivers": CheckQtSqlDrivers,
-                 },
-                 clean=False, help=False)
-
-rets = [] # list of conf return values
-
-_TARGET_STRS = map(str, BUILD_TARGETS)
-
-if set(["shared-library", "java-wrapper", "test", "hudsontest"]) & set(_TARGET_STRS):
-    rets.append(conf.CheckQt(env["qt_include_dir"], env["qt_lib_dir"]))
-    rets.append(conf.CheckLibWithHeader("QtSql", "QtSql/QSqlDatabase", "c++"))
-    drivers = conf.CheckQtSqlDrivers(env["qt_include_dir"], env["qt_lib_dir"])
-    conf.env["qtsql_drivers"] = drivers
-    rets.append(conf.CheckHlhdf(env["hlhdf_include_dir"], env["hlhdf_lib_dir"]))
-    conf.env.AppendUnique(CPPPATH=env["boost_include_dir"])
-    rets.append(conf.CheckBoostVersion("1.38"))
-
-    headers = (
-        "enable_shared_from_this.hpp",
-        "foreach.hpp",
-        "lexical_cast.hpp",
-        "noncopyable.hpp",
-        "scoped_ptr.hpp",
-        "shared_ptr.hpp",
-        "variant.hpp",
-        "iterator/iterator_facade.hpp",
-        "numeric/conversion/cast.hpp",
-    )
-
-    for header in headers:
-        rets.append(conf.CheckCXXHeader("/".join(("boost", header))))
-
-
-
-if set(["test", "hudsontest"]) & set(_TARGET_STRS):
-    db_driver_map = {
-        "sqlite": "QSQLITE",
-        "postgresql": "QPSQL",
-    }
-    conf.env.AppendUnique(CPPPATH="${gtest_include_dir}",
-                          LIBPATH="${gtest_lib_dir}")
-    rets.append(conf.CheckLibWithHeader("gtest", "gtest/gtest.h", "c++"))
-    rets.append(conf.CheckLibWithHeader("gmock", "gmock/gmock.h", "c++"))
-    for dsn in env["test_db_dsns"]:
-        dialect = dsn.split(":", 1)[0]
-        if dialect not in db_driver_map:
-            print "Invalid dialect specified in %r" % dsn
-            rets.append(0)
-        elif db_driver_map[dialect] not in conf.env["qtsql_drivers"]:
-            print "Missing QtSql driver for %s" % dialect
-            rets.append(0)
-    #XXX: enable when fully supporting sqlite
-    #sqlite_dsns = [dsn for dsn in env["test_db_dsns"]
-    #               if dsn.startswith("sqlite")]
-    #if not sqlite_dsns and "SQLITE" in drivers:
-    #    env["test_db_dsns"].append("sqlite:///:memory:")
-
-if "java-wrapper" in _TARGET_STRS:
-    conf.env.AppendUnique(CPPPATH=["${jdk_include_dir}",
-                                   "${jdk_include_dir}/linux"],
-                          LIBPATH="${jdk_lib_dir}")
-    rets.append(conf.CheckCHeader("jni.h"))
-
-if 0 in rets:
-    print >> sys.stderr, "\nMissing required dependencies."
-    Exit(1)
-
-env = conf.Finish()
 
 # vim:filetype=python:et:ts=4:sw=4:

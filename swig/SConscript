@@ -19,6 +19,10 @@ env.AlwaysBuild("FileCatalog_wrap.cc")
 
 lib = env.SharedLibrary("#lib/brfc_java", sources, LIBS=["brfc"])
 
+confdeps = env.ConfHas("#java-wrapper-confdeps", ["jni", "qt", "hlhdf"])
+
+env.Requires(lib, confdeps)
+
 env.Clean(lib, Dir(".").Dir("eu"))
 
 java = env.Java(target="classes", source=["eu", "java"])

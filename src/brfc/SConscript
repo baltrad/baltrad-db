@@ -31,7 +31,11 @@ sources = [
     "expr/Visitor.cpp"
 ]
 
+confdeps = env.ConfHas("#shared-library-confdeps", ["qt", "qtsql", "hlhdf", "boost"])
+
 lib = env.SharedLibrary("#lib/brfc", sources, LIBS=["hdf5", "hlhdf", "QtSql"])
+
+env.Requires(lib, confdeps)
 
 env.Alias("shared-library", lib)
 
