@@ -24,7 +24,8 @@ class Attribute : public boost::noncopyable {
      */
     Attribute(const QString& name,
               const Variant& value,
-              const DataObject* data_object=0);
+              const DataObject* data_object=0,
+              bool ignore_in_hash=false);
     
     /**
      * @brief destructor
@@ -45,6 +46,12 @@ class Attribute : public boost::noncopyable {
      * @brief set attribute value
      */
     void value(const Variant& value);
+
+    bool ignore_in_hash() const { return ignore_in_hash_; }
+
+    void ignore_in_hash(bool ignore_in_hash) {
+        ignore_in_hash_ = ignore_in_hash;
+    }
 
     /**
      * @brief full path of this attribute
@@ -71,6 +78,7 @@ class Attribute : public boost::noncopyable {
     const DataObject* data_object_;
     QString name_;
     boost::scoped_ptr<Variant> value_;
+    bool ignore_in_hash_;
 };
 
 

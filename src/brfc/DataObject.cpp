@@ -60,13 +60,16 @@ DataObject::add_child(const QString& name) {
 
 void
 DataObject::add_attribute(const QString& name,
-                          const Variant& value) {
+                          const Variant& value,
+                          bool ignore_in_hash) {
     BOOST_FOREACH(shared_ptr<Attribute> attr, attrs_) {
         if (attr->name() == name) {
             throw duplicate_entry(name.toUtf8().constData());
         }
     }
-    attrs_.push_back(shared_ptr<Attribute>(new Attribute(name, value, this)));
+    shared_ptr<Attribute> attr(new Attribute(name, value, this,
+                                             ignore_in_hash));
+    attrs_.push_back(attr);
 }
 
 bool

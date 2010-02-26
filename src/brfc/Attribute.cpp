@@ -8,10 +8,12 @@ namespace brfc {
 
 Attribute::Attribute(const QString& name,
                      const Variant& value,
-                     const DataObject* data_object)
+                     const DataObject* data_object,
+                     bool ignore_in_hash)
         : data_object_(data_object)
         , name_(name)
-        , value_(new Variant(value)) {
+        , value_(new Variant(value))
+        , ignore_in_hash_(ignore_in_hash) {
 }
 
 Attribute::~Attribute() {

@@ -92,9 +92,11 @@ class DataObject : public boost::noncopyable {
      * @brief add an Attribute to this DataObject
      * @param name name of the Attribute
      * @param value Attribute value
+     * @param ignore_in_hash should this attribute be ignored when hashing
      */
     void add_attribute(const QString& name,
-                       const Variant& value);
+                       const Variant& value,
+                       bool ignore_in_hash=false);
     
     //@{
     /**

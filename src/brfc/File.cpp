@@ -117,8 +117,10 @@ File::add_attribute_from_node(HL_Node* node,
     SplitPath path(nodename);
 
     const Converter* converter = 0;
+    const AttributeSpec* spec = 0;
     
     try {
+        spec = &specs.get(path.attribute_name);
         converter = &specs.converter(path.attribute_name);
     } catch (const lookup_error& e) {
         ignored_attributes_.push_back(nodename);
@@ -127,11 +129,7 @@ File::add_attribute_from_node(HL_Node* node,
 
     const Variant& val = converter->convert(HLNode_getFormat(node), data);
     DataObject& dobj = data_object(path.data_object_path, true);
-    try {
-        dobj.add_attribute(path.attribute_name, val);
-    } catch (std::runtime_error& e) {
-
-    }
+    dobj.add_attribute(path.attribute_name, val, spec->ignore_in_hash);
 }
 
 void
