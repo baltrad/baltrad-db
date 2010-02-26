@@ -48,7 +48,10 @@ class Attribute : public boost::noncopyable {
 
     /**
      * @brief full path of this attribute
+     *
      * full path of the data object + attribute name
+     *
+     * when the attribute is not associated with a DataObject, just the name
      */
     QString path() const;
 
@@ -56,6 +59,13 @@ class Attribute : public boost::noncopyable {
      * @brief name of this attribute
      */
     const QString& name() const { return name_; }
+    
+    /**
+     * @brief string representation of this attribute
+     *
+     * /path/to/attribute=value
+     */
+    QString to_string() const;
 
   private:
     const DataObject* data_object_;

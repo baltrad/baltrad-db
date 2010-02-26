@@ -25,7 +25,16 @@ Attribute::value(const Variant& value) {
 
 QString
 Attribute::path() const {
-    return data_object_->path() + QString::fromUtf8("/") + name_;
+    if (data_object_ == 0) {
+        return name_;
+    } else {
+        return data_object_->path() + "/" + name_;
+    }
+}
+
+QString
+Attribute::to_string() const {
+    return path() + "=" + value_->to_string();
 }
 
 } // namespace brfc
