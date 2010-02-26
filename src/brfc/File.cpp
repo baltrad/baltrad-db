@@ -50,12 +50,12 @@ File::File(const QString& object,
         , path_()
         , source_()
         , db_id_(0) {
-    root_->add_attribute("Conventions", Variant("ODIM_H5/V2_0"));
+    root_->add_attribute("Conventions", Variant("ODIM_H5/V2_0"), true);
     root_->add_attribute("what/object", Variant(object));
     root_->add_attribute("what/version", Variant(version));
     root_->add_attribute("what/date", Variant(date));
     root_->add_attribute("what/time", Variant(time));
-    root_->add_attribute("what/source", Variant(source));
+    root_->add_attribute("what/source", Variant(source), true);
 }
 
 shared_ptr<Source>
