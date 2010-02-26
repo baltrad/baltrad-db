@@ -412,14 +412,17 @@ RelationalDatabase::populate_mapper_and_specs() {
     mapper_->clear();
     specs_->clear();
     shared_ptr<ResultSet> r = query("SELECT id, name, converter, "
-                                  "storage_table, storage_column "
-                                  "FROM attributes", BindMap());
+                                    "storage_table, storage_column, "
+                                    "ignore_in_hash "
+                                    "FROM attributes", BindMap());
     while (r->next()) {
         mapper_->add(Mapping(r->integer(0), // id
                              r->string(1),  // name
                              r->string(3),  // table
                              r->string(4))); // column
-        specs_->add(r->string(1), r->string(2)); // name, typename
+        specs_->add(AttributeSpec(r->string(1), // name
+                                  r->string(2), // typename
+                                  r->boolean(5))); // ignored in has
     }
 }
 

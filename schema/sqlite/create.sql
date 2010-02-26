@@ -5,6 +5,7 @@ CREATE TABLE attributes (
 	converter TEXT NOT NULL, 
 	storage_table TEXT NOT NULL, 
 	storage_column TEXT NOT NULL, 
+	ignore_in_hash BOOLEAN NOT NULL, 
 	PRIMARY KEY (id), 
 	 UNIQUE (name)
 )
@@ -20,12 +21,12 @@ CREATE TABLE sources (
 	node_id TEXT NOT NULL, 
 	place TEXT, 
 	PRIMARY KEY (id), 
-	 UNIQUE (wmo_code), 
-	 UNIQUE (country_code), 
 	 UNIQUE (radar_site), 
+	 UNIQUE (wmo_code), 
+	 UNIQUE (originating_centre), 
+	 UNIQUE (country_code), 
 	 UNIQUE (node_id), 
-	 UNIQUE (place), 
-	 UNIQUE (originating_centre)
+	 UNIQUE (place)
 )
 
 ;
@@ -57,16 +58,16 @@ CREATE TABLE data_objects (
 	endtime TIME, 
 	file_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(file_id) REFERENCES files (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(parent_id) REFERENCES data_objects (id)
+	 FOREIGN KEY(parent_id) REFERENCES data_objects (id), 
+	 FOREIGN KEY(file_id) REFERENCES files (id) ON DELETE CASCADE
 )
 
 ;
 
-CREATE TABLE attribute_values_str (
+CREATE TABLE attribute_values_int (
 	attribute_id INTEGER NOT NULL, 
 	data_object_id INTEGER NOT NULL, 
-	value TEXT NOT NULL, 
+	value INTEGER NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
 	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
@@ -85,10 +86,10 @@ CREATE TABLE attribute_values_date (
 
 ;
 
-CREATE TABLE attribute_values_bool (
+CREATE TABLE attribute_values_time (
 	attribute_id INTEGER NOT NULL, 
 	data_object_id INTEGER NOT NULL, 
-	value BOOLEAN NOT NULL, 
+	value TIME NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
 	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
@@ -96,10 +97,10 @@ CREATE TABLE attribute_values_bool (
 
 ;
 
-CREATE TABLE attribute_values_time (
+CREATE TABLE attribute_values_bool (
 	attribute_id INTEGER NOT NULL, 
 	data_object_id INTEGER NOT NULL, 
-	value TIME NOT NULL, 
+	value BOOLEAN NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
 	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
@@ -118,10 +119,10 @@ CREATE TABLE attribute_values_real (
 
 ;
 
-CREATE TABLE attribute_values_int (
+CREATE TABLE attribute_values_str (
 	attribute_id INTEGER NOT NULL, 
 	data_object_id INTEGER NOT NULL, 
-	value INTEGER NOT NULL, 
+	value TEXT NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
 	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
@@ -136,123 +137,123 @@ CREATE TABLE attribute_groups (
 )
 
 ;
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (1, 'Conventions', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (2, 'what/object', 'string', 'files', 'object');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (3, 'what/version', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (4, 'what/date', 'date', 'files', 'n_date');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (5, 'what/time', 'time', 'files', 'n_time');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (6, 'what/source', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (7, 'where/lon', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (8, 'where/lat', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (9, 'where/height', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (10, 'where/elangle', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (11, 'where/nbins', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (12, 'where/rstart', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (13, 'where/rscale', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (14, 'where/nrays', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (15, 'where/a1gate', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (16, 'where/startaz', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (17, 'where/stopaz', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (18, 'where/projdef', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (19, 'where/xsize', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (20, 'where/ysize', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (21, 'where/xscale', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (22, 'where/yscale', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (23, 'where/LL_lon', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (24, 'where/LL_lat', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (25, 'where/UL_lon', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (26, 'where/UL_lat', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (27, 'where/UR_lon', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (28, 'where/UR_lat', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (29, 'where/LR_lon', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (30, 'where/LR_lat', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (31, 'where/minheight', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (32, 'where/maxheight', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (33, 'where/az_angle', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (34, 'where/angles', 'sequence', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (35, 'where/range', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (36, 'where/start_lon', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (37, 'where/start_lat', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (38, 'where/stop_lon', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (39, 'where/stop_lat', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (40, 'where/levels', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (41, 'where/interval', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (42, 'how/task', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (43, 'how/startepochs', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (44, 'how/endepochs', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (45, 'how/system', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (46, 'how/software', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (47, 'how/sw_version', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (48, 'how/zr_a', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (49, 'how/zr_b', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (50, 'how/kr_a', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (51, 'how/kr_b', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (52, 'how/simulated', 'bool', 'attribute_values_bool', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (53, 'how/beamwidth', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (54, 'how/wavelength', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (55, 'how/rpm', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (56, 'how/pulsewidth', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (57, 'how/lowprf', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (58, 'how/highprf', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (59, 'how/azmethod', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (60, 'how/binmethod', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (61, 'how/azangles', 'sequence', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (62, 'how/elangles', 'sequence', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (63, 'how/aztimes', 'sequence', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (64, 'how/angles', 'sequence', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (65, 'how/arotation', 'sequence', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (66, 'how/camethod', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (67, 'how/nodes', 'sequence', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (68, 'how/ACCnum', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (69, 'how/minrange', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (70, 'how/maxrange', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (71, 'how/NI', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (72, 'how/dealiased', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (73, 'how/pointaccEL', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (74, 'how/pointaccAZ', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (75, 'how/malfunc', 'bool', 'attribute_values_bool', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (76, 'how/radar_msg', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (77, 'how/radhoriz', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (78, 'how/MDS', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (79, 'how/OUR', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (80, 'how/Dclutter', 'sequence', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (81, 'how/comment', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (82, 'how/SQI', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (83, 'how/CSR', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (84, 'how/LOG', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (85, 'how/VPRCorr', 'bool', 'attribute_values_bool', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (86, 'how/freeze', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (87, 'how/min', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (88, 'how/max', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (89, 'how/step', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (90, 'how/levels', 'int', 'attribute_values_int', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (91, 'how/peakpwr', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (92, 'how/avgpwr', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (93, 'how/dynrange', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (94, 'how/RAC', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (95, 'how/BBC', 'bool', 'attribute_values_bool', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (96, 'how/PAC', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (97, 'how/S2N', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (98, 'how/polarization', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (99, 'what/product', 'string', 'data_objects', 'product');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (100, 'what/quantity', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (101, 'what/startdate', 'date', 'data_objects', 'startdate');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (102, 'what/starttime', 'time', 'data_objects', 'starttime');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (103, 'what/enddate', 'date', 'data_objects', 'enddate');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (104, 'what/endtime', 'time', 'data_objects', 'endtime');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (105, 'what/gain', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (106, 'what/offset', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (107, 'what/nodata', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (108, 'what/undetect', 'real', 'attribute_values_real', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (109, 'CLASS', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (110, 'IMAGE_VERSION', 'string', 'attribute_values_str', 'value');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (111, 'path', 'string', 'files', 'path');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (112, 'src_WMO', 'int', 'sources', 'wmo_code');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (113, 'src_RAD', 'string', 'sources', 'radar_site');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (114, 'src_ORG', 'int', 'sources', 'originating_centre');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (115, 'src_CTY', 'int', 'sources', 'country_code');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (116, 'src_PLC', 'string', 'sources', 'place');
-INSERT INTO attributes (id, name, converter, storage_table, storage_column) VALUES (117, 'src_node', 'string', 'sources', 'node_id');
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (1, 'Conventions', 'string', 'attribute_values_str', 'value', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (2, 'what/object', 'string', 'files', 'object', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (3, 'what/version', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (4, 'what/date', 'date', 'files', 'n_date', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (5, 'what/time', 'time', 'files', 'n_time', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (6, 'what/source', 'string', 'attribute_values_str', 'value', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (7, 'where/lon', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (8, 'where/lat', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (9, 'where/height', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (10, 'where/elangle', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (11, 'where/nbins', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (12, 'where/rstart', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (13, 'where/rscale', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (14, 'where/nrays', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (15, 'where/a1gate', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (16, 'where/startaz', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (17, 'where/stopaz', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (18, 'where/projdef', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (19, 'where/xsize', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (20, 'where/ysize', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (21, 'where/xscale', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (22, 'where/yscale', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (23, 'where/LL_lon', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (24, 'where/LL_lat', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (25, 'where/UL_lon', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (26, 'where/UL_lat', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (27, 'where/UR_lon', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (28, 'where/UR_lat', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (29, 'where/LR_lon', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (30, 'where/LR_lat', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (31, 'where/minheight', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (32, 'where/maxheight', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (33, 'where/az_angle', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (34, 'where/angles', 'sequence', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (35, 'where/range', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (36, 'where/start_lon', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (37, 'where/start_lat', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (38, 'where/stop_lon', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (39, 'where/stop_lat', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (40, 'where/levels', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (41, 'where/interval', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (42, 'how/task', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (43, 'how/startepochs', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (44, 'how/endepochs', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (45, 'how/system', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (46, 'how/software', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (47, 'how/sw_version', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (48, 'how/zr_a', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (49, 'how/zr_b', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (50, 'how/kr_a', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (51, 'how/kr_b', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (52, 'how/simulated', 'bool', 'attribute_values_bool', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (53, 'how/beamwidth', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (54, 'how/wavelength', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (55, 'how/rpm', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (56, 'how/pulsewidth', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (57, 'how/lowprf', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (58, 'how/highprf', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (59, 'how/azmethod', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (60, 'how/binmethod', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (61, 'how/azangles', 'sequence', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (62, 'how/elangles', 'sequence', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (63, 'how/aztimes', 'sequence', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (64, 'how/angles', 'sequence', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (65, 'how/arotation', 'sequence', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (66, 'how/camethod', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (67, 'how/nodes', 'sequence', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (68, 'how/ACCnum', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (69, 'how/minrange', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (70, 'how/maxrange', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (71, 'how/NI', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (72, 'how/dealiased', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (73, 'how/pointaccEL', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (74, 'how/pointaccAZ', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (75, 'how/malfunc', 'bool', 'attribute_values_bool', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (76, 'how/radar_msg', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (77, 'how/radhoriz', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (78, 'how/MDS', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (79, 'how/OUR', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (80, 'how/Dclutter', 'sequence', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (81, 'how/comment', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (82, 'how/SQI', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (83, 'how/CSR', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (84, 'how/LOG', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (85, 'how/VPRCorr', 'bool', 'attribute_values_bool', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (86, 'how/freeze', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (87, 'how/min', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (88, 'how/max', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (89, 'how/step', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (90, 'how/levels', 'int', 'attribute_values_int', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (91, 'how/peakpwr', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (92, 'how/avgpwr', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (93, 'how/dynrange', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (94, 'how/RAC', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (95, 'how/BBC', 'bool', 'attribute_values_bool', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (96, 'how/PAC', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (97, 'how/S2N', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (98, 'how/polarization', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (99, 'what/product', 'string', 'data_objects', 'product', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (100, 'what/quantity', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (101, 'what/startdate', 'date', 'data_objects', 'startdate', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (102, 'what/starttime', 'time', 'data_objects', 'starttime', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (103, 'what/enddate', 'date', 'data_objects', 'enddate', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (104, 'what/endtime', 'time', 'data_objects', 'endtime', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (105, 'what/gain', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (106, 'what/offset', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (107, 'what/nodata', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (108, 'what/undetect', 'real', 'attribute_values_real', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (109, 'CLASS', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (110, 'IMAGE_VERSION', 'string', 'attribute_values_str', 'value', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (111, 'path', 'string', 'files', 'path', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (112, 'src_WMO', 'int', 'sources', 'wmo_code', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (113, 'src_RAD', 'string', 'sources', 'radar_site', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (114, 'src_ORG', 'int', 'sources', 'originating_centre', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (115, 'src_CTY', 'int', 'sources', 'country_code', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (116, 'src_PLC', 'string', 'sources', 'place', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (117, 'src_node', 'string', 'sources', 'node_id', True);
 INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (1, 632, NULL, NULL, 99, 'nl', NULL);
 INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (2, 611, NULL, NULL, 94, 'dk', NULL);
 INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (3, 633, NULL, NULL, 88, 'no', NULL);

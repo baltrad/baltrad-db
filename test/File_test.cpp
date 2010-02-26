@@ -81,8 +81,8 @@ TEST(File_test, open_nx_file) {
 
 TEST(File_test, read) {
     AttributeSpecs specs;
-    specs.add("date", "date");
-    specs.add("time", "time");
+    specs.add(AttributeSpec("date", "date"));
+    specs.add(AttributeSpec("time", "time"));
 
     Variant time(QTime(12, 5, 1));
     Variant date(QDate(2000, 1, 2));

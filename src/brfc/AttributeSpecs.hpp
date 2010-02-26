@@ -11,6 +11,20 @@ namespace brfc {
 
 class Converter;
 
+struct AttributeSpec {
+    AttributeSpec(const QString& name_,
+                  const QString& type_,
+                  bool ignore_in_hash_=false)
+            : name(name_)
+            , type(type_)
+            , ignore_in_hash(ignore_in_hash_) {
+    }
+
+    QString name; ///< name of the Attribute
+    QString type; ///< type name of the attribute type
+    bool ignore_in_hash; ///< ignore this attribute when hashing metadata
+};
+
 /**
  * @brief Attribute specifications
  *
@@ -41,13 +55,13 @@ class AttributeSpecs {
     /**
      * @brief add a specification
      *
-     * @param name name of the Attribute
-     * @param type name of the attribute type
      * @throw value_error 
      */
-    void add(const QString& name, const QString& type);
+    void add(const AttributeSpec& spec);
 
     bool has(const QString& name) const;
+
+    const AttributeSpec& get(const QString& name) const;
 
     /**
      * @brief get Converter
@@ -60,7 +74,7 @@ class AttributeSpecs {
     void clear() { specs_.clear(); }
 
   private:
-    typedef std::map<QString, QString> AttributeSpecMap;
+    typedef std::map<QString, AttributeSpec> AttributeSpecMap;
     typedef std::map<QString, shared_ptr<Converter> > ConverterMap;
 
     AttributeSpecMap specs_;

@@ -59,12 +59,12 @@ struct FileCatalog_test : public testing::Test {
                                           QTime(12, 0),
                                           src_str)) {
         minfile->write();
-        specs->add("Conventions", "string");
-        specs->add("what/object", "string");
-        specs->add("what/version", "string");
-        specs->add("what/date", "date");
-        specs->add("what/time", "time");
-        specs->add("what/source", "string");
+        specs->add(AttributeSpec("Conventions", "string"));
+        specs->add(AttributeSpec("what/object", "string"));
+        specs->add(AttributeSpec("what/version", "string"));
+        specs->add(AttributeSpec("what/date", "date"));
+        specs->add(AttributeSpec("what/time", "time"));
+        specs->add(AttributeSpec("what/source", "string"));
         DefaultValue<shared_ptr<Source> >::Set(default_src);
     }
 

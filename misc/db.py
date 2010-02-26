@@ -61,7 +61,8 @@ attributes = Table("attributes", meta,
     Column("name", Text, nullable=False, unique=True),
     Column("converter", Text, nullable=False),
     Column("storage_table", Text, nullable=False),
-    Column("storage_column", Text, nullable=False))
+    Column("storage_column", Text, nullable=False),
+    Column("ignore_in_hash", Boolean, nullable=False, default=False))
 
 attribute_values_int = Table("attribute_values_int", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
@@ -326,6 +327,10 @@ virtual_attributes = [
     ("src_node", "string",  "sources", "node_id")
 ]
 
+ignored_in_hash = [
+    "what/source",
+    "Conventions",
+]
 
 countries = {
     "dk": 611,
@@ -403,18 +408,21 @@ def populate_attributes_table(engine):
 
     for (name, group, type) in attribute_entries:
         table, column = special_storage.get(name, default_storage[type])
+        full_name = "/".join((group, name)) if group else name
         engine.execute(q,
-                       name="/".join((group, name)) if group else name,
+                       name=full_name,
                        converter=type,
                        storage_table=table,
-                       storage_column=column)
+                       storage_column=column,
+                       ignore_in_hash=full_name in ignored_in_hash)
     
     for (name, type, table, column) in virtual_attributes:
         engine.execute(q,
                        name=name,
                        converter=type,
                        storage_table=table,
-                       storage_column=column)
+                       storage_column=column,
+                       ignore_in_hash=True)
 
 def populate_sources_table(engine):
     q = sources.insert()
