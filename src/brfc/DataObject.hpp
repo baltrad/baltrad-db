@@ -84,7 +84,7 @@ class DataObject : public boost::noncopyable {
      * @brief get full path of this DataObject
      * 
      * path is the concatenation of all names up to root node,
-     * separated by '/'
+     * separated by '/'. The path is absolute.
      */
     QString path() const;
 

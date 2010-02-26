@@ -44,6 +44,11 @@ DataObject::path() const {
         names.push_front(dobj->name());
         dobj = dobj->parent();
     }
+
+    // ensure we get a / at the beginning
+    if (names.front() != "")
+        names.push_front("");
+
     return names.join("/");
 }
 

@@ -66,9 +66,17 @@ TEST(DataObject_test, path) {
     DataObject a("a");
     DataObject& b = a.add_child("b");
     DataObject& c = b.add_child("c");
-    QString expected("a/b/c");
+    QString expected("/a/b/c");
 
     EXPECT_EQ(c.path(), expected);
+}
+
+TEST(DataObject_test, path_with_unnamed_root) {
+    DataObject root("");
+    DataObject& a = root.add_child("a");
+    DataObject& b = a.add_child("b");
+
+    EXPECT_EQ(b.path(), "/a/b");
 }
 
 // compilational check
