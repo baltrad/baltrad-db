@@ -101,7 +101,9 @@ class File : public boost::noncopyable {
     /**
      * @brief string that uniquely identifies the file content
      *
-     * concatenation of what/source, what/object, what/date and what/time.
+     * SHA-1 hash of concatenated string representation of all attributes
+     * not marked to be ignored in hashing plus node_id of the associated
+     * Source.
      *
      * @note changes to this algorithm most probably trigger the need to
      *       re-evaluate all files in the database

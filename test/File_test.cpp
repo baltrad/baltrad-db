@@ -16,7 +16,22 @@
 
 namespace brfc {
 
-TEST(File_test, get_same_node) {
+struct File_test : public testing::Test {
+    File_test()
+            : specs()
+            , src(new Source()) {
+
+    }
+
+    virtual void SetUp() {
+        src->node_id("seang");
+    }
+
+    AttributeSpecs specs;
+    shared_ptr<Source> src;
+};
+
+TEST_F(File_test, get_same_node) {
     File f;
     DataObject& d1 = f.data_object("/path/to/object", true);
     DataObject& d2 = f.data_object("/path/to/object", true);
@@ -24,63 +39,77 @@ TEST(File_test, get_same_node) {
     EXPECT_EQ(&d1, &d2);
 }
 
-TEST(File_test, get_nx_node) {
+TEST_F(File_test, get_nx_node) {
     File f;
     EXPECT_THROW(f.data_object("/nx"), std::runtime_error);
 }
 
-TEST(File_test, root) {
+TEST_F(File_test, root) {
     File f;
     EXPECT_EQ(&f.root(), &f.data_object("/"));
 }
 
-TEST(File_test, split_short_path_without_group) {
+TEST_F(File_test, split_short_path_without_group) {
     SplitPath p("/Conventions");
     EXPECT_EQ(p.data_object_path, "/");
     EXPECT_EQ(p.attribute_name, "Conventions");
 }
 
-TEST(File_test, split_long_path_without_group) {
+TEST_F(File_test, split_long_path_without_group) {
     SplitPath p("/path/to/object");
     EXPECT_EQ(p.data_object_path, "/path/to");
     EXPECT_EQ(p.attribute_name, "object");
 }
 
-TEST(File_test, split_long_path_with_group) {
+TEST_F(File_test, split_long_path_with_group) {
     SplitPath p("/path/to/what/object");
     EXPECT_EQ(p.data_object_path, "/path/to");
     EXPECT_EQ(p.attribute_name, "what/object");
 }
 
-TEST(File_test, split_short_path_with_group) {
+TEST_F(File_test, split_short_path_with_group) {
     SplitPath p("/what/date");
     EXPECT_EQ(p.data_object_path, "/");
     EXPECT_EQ(p.attribute_name, "what/date");
 }
 
-TEST(File_test, unique_identifier) {
+TEST_F(File_test, unique_identifier_same_meta) {
+    File f1("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
+    File f2("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
+    f1.source(src);
+    f2.source(src);
+    EXPECT_EQ(f1.unique_identifier(), f2.unique_identifier());
+}
+
+TEST_F(File_test, unique_identifier_different_meta) {
+    File f1("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
+    File f2("pvol", QDate(2001, 1, 2), QTime(12, 5), "WMO:02606");
+    f1.source(src);
+    f2.source(src);
+    EXPECT_NE(f1.unique_identifier(), f2.unique_identifier());
+}
+
+TEST_F(File_test, unique_identifier_ignore_attribute) {
     File f("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
-    shared_ptr<Source> src(new Source());
-    src->node_id("seang");
     f.source(src);
-    EXPECT_EQ(f.unique_identifier(), "pvol_20000102T120500_seang");
+    QString uid = f.unique_identifier();
+    f.root().add_attribute("bla", Variant(1), true);
+    EXPECT_EQ(uid, f.unique_identifier());
 }
 
-TEST(File_test, unique_identifier_with_unicode) {
-    File f("pvol", QDate(2000, 1, 2), QTime(12, 5), "PLC:Ängelholm");
-    shared_ptr<Source> src(new Source());
-    src->node_id("seang");
+TEST_F(File_test, unique_identifier_changes_when_meta_changes) {
+    File f("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
     f.source(src);
-    EXPECT_EQ(f.unique_identifier(), "pvol_20000102T120500_seang");
+    QString uid = f.unique_identifier();
+    f.root().add_attribute("bla", Variant(1), false);
+    EXPECT_NE(uid, f.unique_identifier());
 }
 
-TEST(File_test, open_nx_file) {
-    AttributeSpecs specs;
+TEST_F(File_test, open_nx_file) {
     EXPECT_THROW(File("/path/to/nxfile", specs), fs_error);
 }
 
-TEST(File_test, read) {
-    AttributeSpecs specs;
+TEST_F(File_test, read) {
     specs.add(AttributeSpec("date", "date"));
     specs.add(AttributeSpec("time", "time"));
 
@@ -100,9 +129,7 @@ TEST(File_test, read) {
     EXPECT_EQ(g.data_object("/dataset1").attribute("date").value(), date);
 }
 
-TEST(File_test, ignored_attributes) {
-    AttributeSpecs specs;
-
+TEST_F(File_test, ignored_attributes) {
     brfc::TempH5File f;
     f.add_attribute("/ignore", Variant(2.0));
     f.add_group("/dataset");

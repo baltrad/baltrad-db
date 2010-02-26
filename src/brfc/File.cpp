@@ -18,6 +18,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QTime>
+#include <QtCore/QCryptographicHash>
 
 
 namespace brfc {
@@ -74,14 +75,20 @@ File::unique_identifier() const {
         //XXX: needs a better exception type
         throw value_error("can't form unique_id: not associated with source");
     }
-    QString uid = root_->attribute("what/object").value().string();
-    uid += "_";
-    uid += root_->attribute("what/date").value().date().toString("yyyyMMdd");
-    uid += "T";
-    uid += root_->attribute("what/time").value().time().toString("hhmmss");
-    uid += "_";
-    uid += source_->node_id();
-    return uid;
+    
+    QStringList strs(source_->node_id());
+    BOOST_FOREACH(const DataObject& dobj, *root_) {
+        BOOST_FOREACH(shared_ptr<Attribute> attr, dobj.attributes()) {
+            if (not attr->ignore_in_hash())
+                strs.append(attr->to_string());
+        }
+    }
+    strs.sort(); // ensure same order
+
+    QByteArray bytes = strs.join("").toUtf8();
+    QByteArray hash = QCryptographicHash::hash(bytes,
+                                               QCryptographicHash::Sha1);
+    return QString::fromAscii(hash.toHex());
 }
 
 File::~File() {
