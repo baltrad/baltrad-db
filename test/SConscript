@@ -25,10 +25,12 @@ if cxxver < (4, 3, 0):
 
 env.Append(CCFLAGS=["-g"])
 
-runner = env.Program("#test/runner", sources,
-            LIBS=["gtest", "gmock", "brfc", "hlhdf"])
-
 confdeps = env.ConfHas("#gtest-confdeps", ["gtest", "gmock", "hlhdf"])
 
-env.Requires(runner, confdeps)
+objects = env.SharedObject(sources)
+env.Requires(objects, confdeps)
+
+runner = env.Program("#test/runner", objects,
+            LIBS=["gtest", "gmock", "brfc", "hlhdf"])
+
 # vim:filetype=python:et:ts=4:sw=4:
