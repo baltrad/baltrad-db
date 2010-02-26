@@ -97,3 +97,28 @@ TEST(Variant_test, equality_comparison) {
     EXPECT_NE(v3, v4);
     EXPECT_EQ(v4, v4);
 }
+
+TEST(Variant_test, null_to_string) {
+    EXPECT_EQ(Variant().to_string(), "");
+}
+
+TEST(Variant_test, int_to_string) {
+    EXPECT_EQ(Variant(10).to_string(), "10");
+}
+
+TEST(Variant_test, double_to_string) {
+    EXPECT_EQ(Variant("1.1").to_string(), "1.1");
+}
+
+TEST(Variant_test, bool_to_string) {
+    EXPECT_EQ(Variant(true).to_string(), "True");
+    EXPECT_EQ(Variant(false).to_string(), "False");
+}
+
+TEST(Variant_test, date_to_string) {
+    EXPECT_EQ(Variant(QDate(2000, 11, 12)).to_string(), "20001112");
+}
+
+TEST(Variant_test, time_to_string) {
+    EXPECT_EQ(Variant(QTime(12, 34, 56)).to_string(), "123456");
+}

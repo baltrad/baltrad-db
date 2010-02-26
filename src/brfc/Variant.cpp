@@ -55,6 +55,42 @@ Variant::to_qvariant() const {
     return boost::apply_visitor(variant_to_qvariant(), value_);
 }
 
+namespace {
+
+class variant_to_string : public boost::static_visitor<QString> {
+  public:
+    QString operator()(const QString& value) const {
+        return value;
+    }
+
+    QString operator()(long long value) const {
+        return QString::number(value);
+    }
+
+    QString operator()(double value) const {
+        return QString::number(value);
+    }
+
+    QString operator()(bool value) const {
+        return value ? "True" : "False";
+    }
+
+    QString operator()(const QDate& value) const {
+        return value.toString("yyyyMMdd");
+    }
+
+    QString operator()(const QTime& value) const {
+        return value.toString("hhmmss");
+    }
+};
+
+} // namespace anonymous
+
+QString
+Variant::to_string() const {
+    return boost::apply_visitor(variant_to_string(), value_);
+}
+
 bool
 operator==(const Variant& lhs, const Variant& rhs) {
     return lhs.type_ == rhs.type_ and lhs.value_ == rhs.value_;

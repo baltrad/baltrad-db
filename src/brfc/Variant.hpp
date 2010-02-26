@@ -126,6 +126,8 @@ class Variant {
 
     QVariant to_qvariant() const;
 
+    QString to_string() const;
+
   private:
     friend bool operator==(const Variant&, const Variant&);
 
