@@ -11,6 +11,8 @@
     #include <brfc/exceptions.hpp>
     #include <brfc/smart_ptr.hpp>
     #include <brfc/Source.hpp>
+    #include <brfc/SourceCentre.hpp>
+    #include <brfc/SourceRadar.hpp>
     #include <brfc/Attribute.hpp>
     #include <brfc/DataObject.hpp>
     #include <brfc/File.hpp>
@@ -117,7 +119,10 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
 SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 SWIG_SHARED_PTR(File, brfc::File);
 SWIG_SHARED_PTR(Attribute, brfc::Attribute);
+
 SWIG_SHARED_PTR(Source, brfc::Source);
+SWIG_SHARED_PTR_DERIVED(SourceRadar, brfc::Source, brfc::SourceRadar);
+SWIG_SHARED_PTR_DERIVED(SourceCentre, brfc::Source, brfc::SourceCentre);
 
 %template(AttributeVector) std::vector<brfc::shared_ptr<brfc::Attribute> >;
 %template(StringVector) std::vector<QString>;
@@ -218,6 +223,8 @@ SWIG_SHARED_PTR(Source, brfc::Source);
 %include <brfc/FileCatalog.hpp>
 %include <brfc/Query.hpp>
 %include <brfc/Source.hpp>
+%include <brfc/SourceCentre.hpp>
+%include <brfc/SourceRadar.hpp>
 %include <brfc/Variant.hpp>
 %include <brfc/TestSwig.hpp>
 
