@@ -1,5 +1,6 @@
 #include "TempH5File.hpp"
 
+#include <brfc/Converter.hpp>
 #include <brfc/Variant.hpp>
 
 #include <stdexcept>
@@ -49,6 +50,31 @@ void TempH5File::add_group(const char* path) {
         throw std::runtime_error("could not add node");
 }
 
+namespace {
+
+HL_Data
+convert(const Variant& value) {
+    switch (value.type()) {
+        case Variant::DOUBLE:
+            return RealConverter().convert(value);
+        case Variant::LONGLONG:
+            return IntConverter().convert(value);
+        case Variant::STRING:
+            return StringConverter().convert(value);
+        case Variant::DATE:
+            return DateConverter().convert(value);
+        case Variant::TIME:
+            return TimeConverter().convert(value);
+        case Variant::BOOL:
+            return BoolConverter().convert(value);
+        default:
+            throw std::runtime_error("could not convert");
+    }
+}
+
+} // namespace anonymous
+
+
 void
 TempH5File::add_attribute(const char* path, const Variant& value) {
     // seek and create nodes
@@ -76,25 +102,6 @@ TempH5File::write() {
         throw std::runtime_error("could not set filename");
     if (HLNodeList_write(nodes_.get(), 0, &compression) == 0)
         throw std::runtime_error("could not write file");
-}
-
-HL_Data TempH5File::convert(const Variant& value) {
-    switch (value.type()) {
-        case Variant::DOUBLE:
-            return RealConverter().convert(value);
-        case Variant::LONGLONG:
-            return IntConverter().convert(value);
-        case Variant::STRING:
-            return StringConverter().convert(value);
-        case Variant::DATE:
-            return DateConverter().convert(value);
-        case Variant::TIME:
-            return TimeConverter().convert(value);
-        case Variant::BOOL:
-            return BoolConverter().convert(value);
-        default:
-            throw std::runtime_error("could not convert");
-    }
 }
 
 } // namespace brfc

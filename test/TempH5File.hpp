@@ -3,7 +3,6 @@
 
 #include <brfc/hlhdf.hpp>
 #include <brfc/smart_ptr.hpp>
-#include <brfc/Converter.hpp>
 
 #include <QtCore/QString>
 
@@ -44,8 +43,6 @@ class TempH5File {
     QString filename() const;
 
   private:
-    HL_Data convert(const Variant& value);
-    
     shared_ptr<HL_NodeList> nodes_;
     shared_ptr<char> filename_;
     int fd_;
