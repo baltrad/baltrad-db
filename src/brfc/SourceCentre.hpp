@@ -11,7 +11,8 @@ class SourceCentre : public Source {
     SourceCentre()
             : Source()
             , originating_centre_(0)
-            , country_code_(0) {
+            , country_code_(0)
+            , wmo_cccc_() {
 
     }
 
@@ -33,9 +34,19 @@ class SourceCentre : public Source {
         country_code_ = value;
     }
 
+    /**
+     * @brief WMO CCCC from Volume C1
+     */
+    QString wmo_cccc() const { return wmo_cccc_; }
+
+    void wmo_cccc(const QString& value) {
+        wmo_cccc_ = value;
+    }
+
   private:
     int originating_centre_;
     int country_code_;
+    QString wmo_cccc_;
 };
 
 } // namespace brfc

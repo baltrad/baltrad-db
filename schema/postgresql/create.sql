@@ -7,6 +7,19 @@ CREATE TABLE attribute_groups (
 
 ;
 
+CREATE TABLE attributes (
+	id SERIAL NOT NULL, 
+	name TEXT NOT NULL, 
+	converter TEXT NOT NULL, 
+	storage_table TEXT NOT NULL, 
+	storage_column TEXT NOT NULL, 
+	ignore_in_hash BOOLEAN NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (name)
+)
+
+;
+
 CREATE TABLE sources (
 	id SERIAL NOT NULL, 
 	node_id TEXT NOT NULL, 
@@ -26,8 +39,8 @@ CREATE TABLE files (
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
 	 UNIQUE (unique_id), 
-	 UNIQUE (path), 
-	 FOREIGN KEY(source_id) REFERENCES sources (id)
+	 FOREIGN KEY(source_id) REFERENCES sources (id), 
+	 UNIQUE (path)
 )
 
 ;
@@ -43,60 +56,8 @@ CREATE TABLE data_objects (
 	endtime TIME WITHOUT TIME ZONE, 
 	file_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(file_id) REFERENCES files (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(parent_id) REFERENCES data_objects (id)
-)
-
-;
-
-CREATE TABLE source_centres (
-	id INTEGER NOT NULL, 
-	originating_centre INTEGER, 
-	country_code INTEGER, 
-	PRIMARY KEY (id), 
-	 FOREIGN KEY(id) REFERENCES sources (id), 
-	 UNIQUE (originating_centre), 
-	 UNIQUE (country_code)
-)
-
-;
-
-CREATE TABLE source_radars (
-	id INTEGER NOT NULL, 
-	centre_id INTEGER NOT NULL, 
-	radar_site TEXT, 
-	wmo_code INTEGER, 
-	place TEXT, 
-	PRIMARY KEY (id), 
-	 FOREIGN KEY(id) REFERENCES sources (id), 
-	 UNIQUE (place), 
-	 UNIQUE (radar_site), 
-	 FOREIGN KEY(centre_id) REFERENCES source_centres (id), 
-	 UNIQUE (wmo_code)
-)
-
-;
-
-CREATE TABLE attributes (
-	id SERIAL NOT NULL, 
-	name TEXT NOT NULL, 
-	converter TEXT NOT NULL, 
-	storage_table TEXT NOT NULL, 
-	storage_column TEXT NOT NULL, 
-	ignore_in_hash BOOLEAN NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (name)
-)
-
-;
-
-CREATE TABLE attribute_values_str (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value TEXT NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+	 FOREIGN KEY(parent_id) REFERENCES data_objects (id), 
+	 FOREIGN KEY(file_id) REFERENCES files (id) ON DELETE CASCADE
 )
 
 ;
@@ -123,10 +84,21 @@ CREATE TABLE attribute_values_date (
 
 ;
 
-CREATE TABLE attribute_values_time (
+CREATE TABLE attribute_values_str (
 	attribute_id INTEGER NOT NULL, 
 	data_object_id INTEGER NOT NULL, 
-	value TIME WITHOUT TIME ZONE NOT NULL, 
+	value TEXT NOT NULL, 
+	PRIMARY KEY (attribute_id, data_object_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
+	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE attribute_values_bool (
+	attribute_id INTEGER NOT NULL, 
+	data_object_id INTEGER NOT NULL, 
+	value BOOLEAN NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
 	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
@@ -145,13 +117,43 @@ CREATE TABLE attribute_values_real (
 
 ;
 
-CREATE TABLE attribute_values_bool (
+CREATE TABLE attribute_values_time (
 	attribute_id INTEGER NOT NULL, 
 	data_object_id INTEGER NOT NULL, 
-	value BOOLEAN NOT NULL, 
+	value TIME WITHOUT TIME ZONE NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
 	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE source_centres (
+	id INTEGER NOT NULL, 
+	originating_centre INTEGER NOT NULL, 
+	country_code INTEGER NOT NULL, 
+	wmo_cccc VARCHAR(4) NOT NULL, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(id) REFERENCES sources (id), 
+	 UNIQUE (country_code), 
+	 UNIQUE (wmo_cccc), 
+	 UNIQUE (originating_centre)
+)
+
+;
+
+CREATE TABLE source_radars (
+	id INTEGER NOT NULL, 
+	centre_id INTEGER NOT NULL, 
+	radar_site TEXT, 
+	wmo_code INTEGER, 
+	place TEXT, 
+	PRIMARY KEY (id), 
+	 UNIQUE (place), 
+	 FOREIGN KEY(id) REFERENCES sources (id), 
+	 UNIQUE (radar_site), 
+	 FOREIGN KEY(centre_id) REFERENCES source_centres (id), 
+	 UNIQUE (wmo_code)
 )
 
 ;
@@ -273,21 +275,21 @@ INSERT INTO attributes (id, name, converter, storage_table, storage_column, igno
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (116, 'src_PLC', 'string', 'source_radars', 'place', True);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (117, 'src_node', 'string', 'sources', 'node_id', True);
 INSERT INTO sources (id, node_id) VALUES (1, 'nl');
-INSERT INTO source_centres (id, originating_centre, country_code) VALUES (1, 99, 632);
+INSERT INTO source_centres (id, originating_centre, country_code, wmo_cccc) VALUES (1, 99, 632, 'EHDB');
 INSERT INTO sources (id, node_id) VALUES (2, 'dk');
-INSERT INTO source_centres (id, originating_centre, country_code) VALUES (2, 94, 611);
+INSERT INTO source_centres (id, originating_centre, country_code, wmo_cccc) VALUES (2, 94, 611, 'EKMI');
 INSERT INTO sources (id, node_id) VALUES (3, 'no');
-INSERT INTO source_centres (id, originating_centre, country_code) VALUES (3, 88, 633);
+INSERT INTO source_centres (id, originating_centre, country_code, wmo_cccc) VALUES (3, 88, 633, 'ENMI');
 INSERT INTO sources (id, node_id) VALUES (4, 'ee');
-INSERT INTO source_centres (id, originating_centre, country_code) VALUES (4, 231, 612);
+INSERT INTO source_centres (id, originating_centre, country_code, wmo_cccc) VALUES (4, 231, 612, 'EEMH');
 INSERT INTO sources (id, node_id) VALUES (5, 'lv');
-INSERT INTO source_centres (id, originating_centre, country_code) VALUES (5, 236, 625);
+INSERT INTO source_centres (id, originating_centre, country_code, wmo_cccc) VALUES (5, 236, 625, 'EVRR');
 INSERT INTO sources (id, node_id) VALUES (6, 'se');
-INSERT INTO source_centres (id, originating_centre, country_code) VALUES (6, 82, 643);
+INSERT INTO source_centres (id, originating_centre, country_code, wmo_cccc) VALUES (6, 82, 643, 'ESWI');
 INSERT INTO sources (id, node_id) VALUES (7, 'fi');
-INSERT INTO source_centres (id, originating_centre, country_code) VALUES (7, 86, 613);
+INSERT INTO source_centres (id, originating_centre, country_code, wmo_cccc) VALUES (7, 86, 613, 'EFKL');
 INSERT INTO sources (id, node_id) VALUES (8, 'pl');
-INSERT INTO source_centres (id, originating_centre, country_code) VALUES (8, 220, 634);
+INSERT INTO source_centres (id, originating_centre, country_code, wmo_cccc) VALUES (8, 220, 634, 'SOWR');
 INSERT INTO sources (id, node_id) VALUES (9, 'dkbor');
 INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (9, 2, 'DN44', NULL, 'Bornholm');
 INSERT INTO sources (id, node_id) VALUES (10, 'dkste');

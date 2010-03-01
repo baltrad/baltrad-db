@@ -361,7 +361,7 @@ RelationalDatabase::load_source_centre(shared_ptr<SourceCentre> src) {
     }
 
     QString qstr = QString("SELECT sources.id, node_id, country_code, ") +
-                   QString("originating_centre ") +
+                   QString("originating_centre, wmo_cccc ") +
                    QString("FROM source_centres ") +
                    QString("JOIN sources ON sources.id = source_centres.id ") +
                    QString("WHERE ") + wcl.join(" OR ");
@@ -385,6 +385,7 @@ RelationalDatabase::load_source_centre(shared_ptr<SourceCentre> src) {
     src->node_id(qry.value(1).toString());
     src->country_code(qry.value(2).toInt());
     src->originating_centre(qry.value(3).toInt());
+    src->wmo_cccc(qry.value(4).toString());
 }
 
 void

@@ -11,7 +11,7 @@ from sqlalchemy import (MetaData, Table, Column, ForeignKey,
                         create_engine)
 
 from sqlalchemy.types import (Text, Integer, Float, Date, Time,
-                              Boolean)
+                              Boolean, String)
 
 from sqlalchemy.databases.postgres import PGBigInteger
 
@@ -28,8 +28,9 @@ sources = Table("sources", meta,
 source_centres = Table("source_centres", meta,
     Column("id", Integer, ForeignKey(sources.c.id),
            primary_key=True),
-    Column("originating_centre", Integer, unique=True),
-    Column("country_code", Integer, unique=True)
+    Column("originating_centre", Integer, nullable=False, unique=True),
+    Column("country_code", Integer, nullable=False, unique=True),
+    Column("wmo_cccc", String(4), nullable=False, unique=True)
 )
 
 source_radars = Table("source_radars", meta,
@@ -378,6 +379,17 @@ org_centres = {
     "se": 82, # norrköping
 }
 
+wmo_ccccs = {
+    "dk": "EKMI",
+    "ee": "EEMH",
+    "fi": "EFKL",
+    "lv": "EVRR",
+    "nl": "EHDB",
+    "no": "ENMI",
+    "pl": "SOWR",
+    "se": "ESWI",
+}
+
 # country code, CID, WMO code, node, plc
 radars = [
     ("dk", "DN44",             0, "dkbor", u"Bornholm"),
@@ -457,6 +469,7 @@ def populate_sources_table(engine):
         engine.execute(source_centres.insert(),
                        id=id,
                        country_code=country,
+                       wmo_cccc=wmo_ccccs[cc],
                        originating_centre=org_centres[cc])
     
     for (cc, site, wmo_code, node_id, place) in radars:
