@@ -9,10 +9,17 @@ namespace expr {
 
 class Join : public Selectable {
   public:
+    enum Type {
+        NONE = 0,
+        INNER = 1,
+        LEFT = 2
+    };
+
     static JoinPtr create(SelectablePtr from,
                           SelectablePtr to,
-                          ExpressionPtr condition) {
-        return JoinPtr(new Join(from, to, condition));
+                          ExpressionPtr condition,
+                          Type type=INNER) {
+        return JoinPtr(new Join(from, to, condition, type));
     }
 
     virtual QString name() const { return ""; }
@@ -49,8 +56,10 @@ class Join : public Selectable {
      */
     bool contains(SelectablePtr element) const;
 
+    Type type() const { return type_; }
+
   protected:
-    Join(SelectablePtr from, SelectablePtr to, ExpressionPtr condition);
+    Join(SelectablePtr from, SelectablePtr to, ExpressionPtr condition, Type type);
 
     virtual void do_accept(Visitor& visitor);
 
@@ -58,6 +67,7 @@ class Join : public Selectable {
     SelectablePtr from_;
     SelectablePtr to_;
     ExpressionPtr condition_;
+    Type type_;
 };
 
 } // namespace expr

@@ -23,6 +23,8 @@ class Selectable : public Element {
     AliasPtr alias(const QString& name);
 
     JoinPtr join(SelectablePtr rhs, ExpressionPtr condition);
+
+    JoinPtr outerjoin(SelectablePtr rhs, ExpressionPtr condition);
 };
 
 }

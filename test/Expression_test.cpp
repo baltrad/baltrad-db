@@ -89,6 +89,16 @@ TEST_F(Expression_test, test_basic_join) {
     EXPECT_EQ(compiler.compiled(), "t1 JOIN t2 ON t1.c1 = t2.c2");
 }
 
+TEST_F(Expression_test, test_outerjoin) {
+    SelectablePtr t1 = Table::create("t1");
+    SelectablePtr t2 = Table::create("t2");
+    JoinPtr j = t1->outerjoin(t2, t1->column("c1")->eq(t2->column("c2")));
+    compiler.compile(*j);
+    EXPECT_EQ(compiler.compiled(), "t1 LEFT JOIN t2 ON t1.c1 = t2.c2");
+}
+
+
+
 TEST_F(Expression_test, test_join_with_alias) {
     TablePtr t1 = Table::create("t1");
     SelectablePtr a = Table::create("t2")->alias("a");

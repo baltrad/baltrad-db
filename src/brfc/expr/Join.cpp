@@ -5,10 +5,14 @@
 namespace brfc {
 namespace expr {
 
-Join::Join(SelectablePtr from, SelectablePtr to, ExpressionPtr condition)
+Join::Join(SelectablePtr from,
+           SelectablePtr to,
+           ExpressionPtr condition,
+           Type type)
         : from_(from)
         , to_(to)
-        , condition_(condition) {
+        , condition_(condition)
+        , type_(type) {
 
 }
 

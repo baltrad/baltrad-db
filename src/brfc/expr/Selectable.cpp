@@ -18,7 +18,12 @@ Selectable::column(const QString& name) {
 
 JoinPtr
 Selectable::join(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition);
+    return Join::create(this->shared_from_this(), rhs, condition, Join::INNER);
+}
+
+JoinPtr
+Selectable::outerjoin(SelectablePtr rhs, ExpressionPtr condition) {
+    return Join::create(this->shared_from_this(), rhs, condition, Join::LEFT);
 }
 
 } // namespace expr

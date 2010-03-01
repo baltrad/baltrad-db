@@ -68,6 +68,19 @@ Compiler::do_visit(Join& join) {
     QString condition = pop();
     QString to = pop();
     QString from = pop();
+
+    QString jointype;
+    switch (join.type()) {
+        case Join::INNER:
+            jointype = " JOIN ";
+            break;
+        case Join::LEFT:
+            jointype = " LEFT JOIN ";
+            break;
+        default:
+            BRFC_ASSERT(false);
+    }
+
     in_from_clause = true;
     join.to()->accept(*this);
     to = pop();
@@ -77,7 +90,8 @@ Compiler::do_visit(Join& join) {
     join.condition()->accept(*this);
     condition = pop();
     in_from_clause = true;
-    push(from + " JOIN " + to + " ON " + condition);
+
+    push(from + jointype + to + " ON " + condition);
 }
 
 void
