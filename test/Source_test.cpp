@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <brfc/Source.hpp>
+#include <brfc/SourceRadar.hpp>
+#include <brfc/SourceCentre.hpp>
 #include <brfc/exceptions.hpp>
 
 #include "common.hpp"
@@ -9,15 +11,17 @@ namespace brfc {
 
 TEST(Source_test, valid_source) {
     QString value = QString::fromUtf8("WMO:02606,RAD:SE50");
-    const Source& s = Source::from_source_attribute(value);
+    shared_ptr<Source> s = Source::from_source_attribute(value);
+
+    shared_ptr<SourceRadar> rad = dynamic_pointer_cast<SourceRadar>(s);
+
+    EXPECT_TRUE(rad);
     
-    EXPECT_EQ(s.wmo_code(), 2606);
+    EXPECT_EQ(rad->wmo_code(), 2606);
 
-    EXPECT_EQ(s.radar_site(), "SE50");
+    EXPECT_EQ(rad->radar_site(), "SE50");
 
-    EXPECT_EQ(s.originating_centre(), 0);
-    EXPECT_EQ(s.place(), "");
-    EXPECT_EQ(s.country_code(), 0);
+    EXPECT_EQ(rad->place(), "");
 }
 
 TEST(Source_test, from_empty_source) {

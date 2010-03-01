@@ -22,6 +22,8 @@ class AttributeSpecs;
 class DataObject;
 class File;
 class Source;
+class SourceCentre;
+class SourceRadar;
 class Variant;
 
 typedef std::map<QString, Variant> BindMap;
@@ -88,6 +90,9 @@ class RelationalDatabase : public Database {
     void init();
 
     void init_qapp();
+
+    void load_source_radar(shared_ptr<SourceRadar> src);
+    void load_source_centre(shared_ptr<SourceCentre> src);
 
     /**
      * @brief save File to database

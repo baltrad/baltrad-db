@@ -2,15 +2,17 @@
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/File.hpp>
-#include <brfc/Source.hpp>
-#include <brfc/DataObject.hpp>
 #include <brfc/Attribute.hpp>
 #include <brfc/AttributeSpecs.hpp>
 #include <brfc/AttributeMapper.hpp>
+#include <brfc/DataObject.hpp>
+#include <brfc/File.hpp>
+#include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/RelationalResultSet.hpp>
-#include <brfc/Query.hpp>
+#include <brfc/Source.hpp>
+#include <brfc/SourceCentre.hpp>
+#include <brfc/SourceRadar.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/expr/Attribute.hpp>
@@ -339,59 +341,121 @@ RelationalDatabase::save(const QString& path, const File& f) {
     }
 }
 
-shared_ptr<Source>
-RelationalDatabase::do_load_source(const QString& srcstr) {
+void
+RelationalDatabase::load_source_centre(shared_ptr<SourceCentre> src) {
     QStringList wcl;
     QList<QVariant> binds;
 
-    Source src = Source::from_source_attribute(srcstr);
-
-    // wmo_code or radar_site is required for radar sources
-    if (src.wmo_code()) {
-        wcl.append("wmo_code = ?");
-        binds.append(src.wmo_code());
-    } else if (src.radar_site() != "") {
-        wcl.append("radar_site = ?");
-        binds.append(src.radar_site());
     // originating_centre or country_code is required for org. sources
-    } else if (src.originating_centre()) {
+    if (src->originating_centre()) {
         wcl.append("originating_centre = ?");
-        binds.append(src.originating_centre());
-    } else if (src.country_code()) {
+        binds.append(src->originating_centre());
+    }
+    if (src->country_code()) {
         wcl.append("country_code = ?");
-        binds.append(src.country_code());
+        binds.append(src->country_code());
+    }
+    if (src->db_id()) {
+        wcl.append("sources.id = ?");
+        binds.append(src->db_id());
     }
 
-    QString qstr = QString("SELECT id, country_code, wmo_code, ") +
-                   QString("radar_site, originating_centre, node_id, ") +
-                   QString("place FROM sources WHERE ") + wcl.join(" OR ");
+    QString qstr = QString("SELECT sources.id, node_id, country_code, ") +
+                   QString("originating_centre ") +
+                   QString("FROM source_centres ") +
+                   QString("JOIN sources ON sources.id = source_centres.id ") +
+                   QString("WHERE ") + wcl.join(" OR ");
 
-    QSqlQuery query(connection());
-    query.prepare(qstr);
+    QSqlQuery qry(connection());
+    qry.prepare(qstr);
     BOOST_FOREACH(const QVariant& bind, binds) {
-        query.addBindValue(bind);
+        qry.addBindValue(bind);
     }
 
-    if (not query.exec()) 
-        throw db_error(query.lastError());
-    if (query.size() < 1) {
+    if (not qry.exec()) 
+        throw db_error(qry.lastError());
+    if (qry.size() < 1) {
         throw lookup_error("no source found");
-    } else if (query.size() > 1) {
+    } else if (qry.size() > 1) {
         throw lookup_error("multiple sources found");
     }
-    query.first();
+    qry.first();
 
-    shared_ptr<Source> src_p(new Source());
+    src->db_id(qry.value(0).toLongLong());
+    src->node_id(qry.value(1).toString());
+    src->country_code(qry.value(2).toInt());
+    src->originating_centre(qry.value(3).toInt());
+}
 
-    src_p->db_id(query.value(0).toLongLong());
-    src_p->country_code(query.value(1).toInt());
-    src_p->wmo_code(query.value(2).toInt());
-    src_p->radar_site(query.value(3).toString());
-    src_p->originating_centre(query.value(4).toInt());
-    src_p->node_id(query.value(5).toString());
-    src_p->place(query.value(6).toString());
+void
+RelationalDatabase::load_source_radar(shared_ptr<SourceRadar> src) {
+    QStringList wcl;
+    QList<QVariant> binds;
 
-    return src_p;
+    // wmo_code or radar_site is required for radar sources
+    if (src->wmo_code()) {
+        wcl.append("wmo_code = ?");
+        binds.append(src->wmo_code());
+    }
+    if (src->radar_site() != "") {
+        wcl.append("radar_site = ?");
+        binds.append(src->radar_site());
+    }
+    if (src->place() != "") {
+        wcl.append("place = ?");
+        binds.append(src->place());
+    }
+
+    QString qstr = QString("SELECT sources.id, node_id, centre_id, ") +
+                   QString("wmo_code, radar_site, place ") +
+                   QString("FROM source_radars ") +
+                   QString("JOIN sources ON source_radars.id = sources.id ") +
+                   QString("WHERE ") + wcl.join(" OR ");
+    
+    QSqlQuery qry(connection());
+    qry.prepare(qstr);
+    BOOST_FOREACH(const QVariant& bind, binds) {
+        qry.addBindValue(bind);
+    }
+
+    if (not qry.exec()) 
+        throw db_error(qry.lastError());
+    if (qry.size() < 1) {
+        throw lookup_error("no source found");
+    } else if (qry.size() > 1) {
+        throw lookup_error("multiple sources found");
+    }
+    qry.first();
+
+    shared_ptr<SourceCentre> centre(new SourceCentre());
+    centre->db_id(qry.value(2).toLongLong()); 
+    load_source_centre(centre);
+
+    src->centre(centre);
+    src->db_id(qry.value(0).toLongLong());
+    src->node_id(qry.value(1).toString());
+    src->wmo_code(qry.value(3).toInt());
+    src->radar_site(qry.value(4).toString());
+    src->place(qry.value(5).toString());
+}
+
+shared_ptr<Source>
+RelationalDatabase::do_load_source(const QString& srcstr) {
+
+    shared_ptr<Source> src = Source::from_source_attribute(srcstr);
+    shared_ptr<SourceRadar> radar;
+    shared_ptr<SourceCentre> centre;
+
+    if (radar = dynamic_pointer_cast<SourceRadar>(src)) {
+        load_source_radar(radar);
+        return radar;
+    } else if (centre = dynamic_pointer_cast<SourceCentre>(src)) {
+        load_source_centre(centre);
+        return centre;
+    } else {
+        throw lookup_error(srcstr.toUtf8().constData());
+    }
+
 }
 
 shared_ptr<ResultSet>

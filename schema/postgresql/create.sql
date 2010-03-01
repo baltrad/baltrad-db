@@ -1,32 +1,17 @@
 
-CREATE TABLE attributes (
+CREATE TABLE attribute_groups (
 	id SERIAL NOT NULL, 
-	name TEXT NOT NULL, 
-	converter TEXT NOT NULL, 
-	storage_table TEXT NOT NULL, 
-	storage_column TEXT NOT NULL, 
-	ignore_in_hash BOOLEAN NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (name)
+	name INTEGER NOT NULL, 
+	PRIMARY KEY (id)
 )
 
 ;
 
 CREATE TABLE sources (
 	id SERIAL NOT NULL, 
-	country_code INTEGER, 
-	wmo_code INTEGER, 
-	radar_site TEXT, 
-	originating_centre INTEGER, 
 	node_id TEXT NOT NULL, 
-	place TEXT, 
 	PRIMARY KEY (id), 
-	 UNIQUE (wmo_code), 
-	 UNIQUE (radar_site), 
-	 UNIQUE (originating_centre), 
-	 UNIQUE (node_id), 
-	 UNIQUE (country_code), 
-	 UNIQUE (place)
+	 UNIQUE (node_id)
 )
 
 ;
@@ -40,8 +25,8 @@ CREATE TABLE files (
 	n_time TIME WITHOUT TIME ZONE NOT NULL, 
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 UNIQUE (path), 
 	 UNIQUE (unique_id), 
+	 UNIQUE (path), 
 	 FOREIGN KEY(source_id) REFERENCES sources (id)
 )
 
@@ -58,41 +43,49 @@ CREATE TABLE data_objects (
 	endtime TIME WITHOUT TIME ZONE, 
 	file_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(parent_id) REFERENCES data_objects (id), 
-	 FOREIGN KEY(file_id) REFERENCES files (id) ON DELETE CASCADE
+	 FOREIGN KEY(file_id) REFERENCES files (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(parent_id) REFERENCES data_objects (id)
 )
 
 ;
 
-CREATE TABLE attribute_values_time (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value TIME WITHOUT TIME ZONE NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+CREATE TABLE source_centres (
+	id INTEGER NOT NULL, 
+	originating_centre INTEGER, 
+	country_code INTEGER, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(id) REFERENCES sources (id), 
+	 UNIQUE (originating_centre), 
+	 UNIQUE (country_code)
 )
 
 ;
 
-CREATE TABLE attribute_values_bool (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value BOOLEAN NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+CREATE TABLE source_radars (
+	id INTEGER NOT NULL, 
+	centre_id INTEGER NOT NULL, 
+	radar_site TEXT, 
+	wmo_code INTEGER, 
+	place TEXT, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(id) REFERENCES sources (id), 
+	 UNIQUE (place), 
+	 UNIQUE (radar_site), 
+	 FOREIGN KEY(centre_id) REFERENCES source_centres (id), 
+	 UNIQUE (wmo_code)
 )
 
 ;
 
-CREATE TABLE attribute_values_real (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value FLOAT(10) NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+CREATE TABLE attributes (
+	id SERIAL NOT NULL, 
+	name TEXT NOT NULL, 
+	converter TEXT NOT NULL, 
+	storage_table TEXT NOT NULL, 
+	storage_column TEXT NOT NULL, 
+	ignore_in_hash BOOLEAN NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (name)
 )
 
 ;
@@ -130,10 +123,35 @@ CREATE TABLE attribute_values_date (
 
 ;
 
-CREATE TABLE attribute_groups (
-	id SERIAL NOT NULL, 
-	name INTEGER NOT NULL, 
-	PRIMARY KEY (id)
+CREATE TABLE attribute_values_time (
+	attribute_id INTEGER NOT NULL, 
+	data_object_id INTEGER NOT NULL, 
+	value TIME WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (attribute_id, data_object_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
+	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE attribute_values_real (
+	attribute_id INTEGER NOT NULL, 
+	data_object_id INTEGER NOT NULL, 
+	value FLOAT(10) NOT NULL, 
+	PRIMARY KEY (attribute_id, data_object_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
+	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE attribute_values_bool (
+	attribute_id INTEGER NOT NULL, 
+	data_object_id INTEGER NOT NULL, 
+	value BOOLEAN NOT NULL, 
+	PRIMARY KEY (attribute_id, data_object_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
+	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
 )
 
 ;
@@ -248,61 +266,113 @@ INSERT INTO attributes (id, name, converter, storage_table, storage_column, igno
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (109, 'CLASS', 'string', 'attribute_values_str', 'value', False);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (110, 'IMAGE_VERSION', 'string', 'attribute_values_str', 'value', False);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (111, 'path', 'string', 'files', 'path', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (112, 'src_WMO', 'int', 'sources', 'wmo_code', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (113, 'src_RAD', 'string', 'sources', 'radar_site', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (114, 'src_ORG', 'int', 'sources', 'originating_centre', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (115, 'src_CTY', 'int', 'sources', 'country_code', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (116, 'src_PLC', 'string', 'sources', 'place', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (112, 'src_WMO', 'int', 'source_radars', 'wmo_code', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (113, 'src_RAD', 'string', 'source_radars', 'radar_site', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (114, 'src_ORG', 'int', 'source_centres', 'originating_centre', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (115, 'src_CTY', 'int', 'source_centres', 'country_code', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (116, 'src_PLC', 'string', 'source_radars', 'place', True);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (117, 'src_node', 'string', 'sources', 'node_id', True);
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (1, 632, NULL, NULL, 99, 'nl', NULL);
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (2, 611, NULL, NULL, 94, 'dk', NULL);
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (3, 633, NULL, NULL, 88, 'no', NULL);
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (4, 612, NULL, NULL, 231, 'ee', NULL);
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (5, 625, NULL, NULL, 236, 'lv', NULL);
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (6, 643, NULL, NULL, 82, 'se', NULL);
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (7, 613, NULL, NULL, 86, 'fi', NULL);
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (8, 634, NULL, NULL, 220, 'pl', NULL);
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (9, NULL, NULL, 'DN44', NULL, 'dkbor', 'Bornholm');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (10, NULL, 6180, 'DN41', NULL, 'dkste', 'Stevns');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (11, NULL, NULL, 'DN42', NULL, 'dkrom', 'Rømø');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (12, NULL, NULL, 'DN43', NULL, 'dksin', 'Sindal');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (13, NULL, 26038, 'EE-HARKU', NULL, 'eetal', 'Harku');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (14, NULL, 26232, 'EE-SYRGAVERE', NULL, 'eesur', 'Sürgavere');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (15, NULL, 2975, 'FI42', NULL, 'fivan', 'Vantaa');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (16, NULL, 2941, 'FI43', NULL, 'fiika', 'Ikaalinen');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (17, NULL, 2954, 'FI44', NULL, 'fianj', 'Anjalankoski');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (18, NULL, 2918, 'FI45', NULL, 'fikuo', 'Kuopio');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (19, NULL, 2933, 'FI46', NULL, 'fikor', 'Korpo');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (20, NULL, 2870, 'FI47', NULL, 'fiuta', 'Utajärvi');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (21, NULL, 2840, 'FI48', NULL, 'filuo', 'Luosto');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (22, NULL, 2925, 'FI49', NULL, 'fivim', 'Vimpeli');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (23, NULL, 26422, 'LVaa', NULL, 'lvrix', 'Riga');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (24, NULL, 6260, 'NL50', NULL, 'nldbl', 'De Bilt');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (25, NULL, 6234, 'NL51', NULL, 'nldhl', 'Den Helder');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (26, NULL, 1104, 'NOaa', NULL, 'norst', 'Røst');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (27, NULL, 1405, 'NOab', NULL, 'nobom', 'Bømlo');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (28, NULL, 1499, 'NO41', NULL, 'nosol', 'Oslo');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (29, NULL, 1438, 'NO42', NULL, 'nohgb', 'Hægebostad');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (30, NULL, 1247, 'NO43', NULL, 'norsa', 'Rissa');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (31, NULL, 1018, 'NOac', NULL, 'noand', 'Andøya');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (32, NULL, 1042, 'NOad', NULL, 'nohas', 'Hasvik');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (33, NULL, 12374, 'PL41', NULL, 'plleg', 'Legionowo');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (34, NULL, 12514, 'PL42', NULL, 'plram', 'Ramza');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (35, NULL, 12544, 'PL43', NULL, 'plpas', 'Pastewnik');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (36, NULL, 12579, 'PL44', NULL, 'plrze', 'Rzeszow');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (37, NULL, 12331, 'PL45', NULL, 'plpoz', 'Poznan');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (38, NULL, 12220, 'PL46', NULL, 'plswi', 'Swidwin');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (39, NULL, 12151, 'PL47', NULL, 'plgda', 'Gdansk');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (40, NULL, 12568, 'PL48', NULL, 'plbrz', 'Brzuchania');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (41, NULL, 2032, 'SE40', NULL, 'sekir', 'Kiruna');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (42, NULL, 2092, 'SE41', NULL, 'selul', 'Luleå');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (43, NULL, 2200, 'SE42', NULL, 'seosu', 'Östersund');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (44, NULL, 2262, 'SE43', NULL, 'seovi', 'Örnsköldsvik');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (45, NULL, 2334, 'SE44', NULL, 'sehud', 'Hudiksvall');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (46, NULL, 2430, 'SE45', NULL, 'selek', 'Leksand');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (47, NULL, 2451, 'SE46', NULL, 'searl', 'Arlanda');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (48, NULL, 2588, 'SE47', NULL, 'sease', 'Ase');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (49, NULL, 2570, 'SE48', NULL, 'sevil', 'Vilebo');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (50, NULL, 2600, 'SE49', NULL, 'sevar', 'Vara');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (51, NULL, 2606, 'SE50', NULL, 'seang', 'Ängelholm');
-INSERT INTO sources (id, country_code, wmo_code, radar_site, originating_centre, node_id, place) VALUES (52, NULL, 2666, 'SE51', NULL, 'sekkr', 'Karlskrona');
+INSERT INTO sources (id, node_id) VALUES (1, 'nl');
+INSERT INTO source_centres (id, originating_centre, country_code) VALUES (1, 99, 632);
+INSERT INTO sources (id, node_id) VALUES (2, 'dk');
+INSERT INTO source_centres (id, originating_centre, country_code) VALUES (2, 94, 611);
+INSERT INTO sources (id, node_id) VALUES (3, 'no');
+INSERT INTO source_centres (id, originating_centre, country_code) VALUES (3, 88, 633);
+INSERT INTO sources (id, node_id) VALUES (4, 'ee');
+INSERT INTO source_centres (id, originating_centre, country_code) VALUES (4, 231, 612);
+INSERT INTO sources (id, node_id) VALUES (5, 'lv');
+INSERT INTO source_centres (id, originating_centre, country_code) VALUES (5, 236, 625);
+INSERT INTO sources (id, node_id) VALUES (6, 'se');
+INSERT INTO source_centres (id, originating_centre, country_code) VALUES (6, 82, 643);
+INSERT INTO sources (id, node_id) VALUES (7, 'fi');
+INSERT INTO source_centres (id, originating_centre, country_code) VALUES (7, 86, 613);
+INSERT INTO sources (id, node_id) VALUES (8, 'pl');
+INSERT INTO source_centres (id, originating_centre, country_code) VALUES (8, 220, 634);
+INSERT INTO sources (id, node_id) VALUES (9, 'dkbor');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (9, 2, 'DN44', NULL, 'Bornholm');
+INSERT INTO sources (id, node_id) VALUES (10, 'dkste');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (10, 2, 'DN41', 6180, 'Stevns');
+INSERT INTO sources (id, node_id) VALUES (11, 'dkrom');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (11, 2, 'DN42', NULL, 'Rømø');
+INSERT INTO sources (id, node_id) VALUES (12, 'dksin');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (12, 2, 'DN43', NULL, 'Sindal');
+INSERT INTO sources (id, node_id) VALUES (13, 'eetal');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (13, 4, 'EE-HARKU', 26038, 'Harku');
+INSERT INTO sources (id, node_id) VALUES (14, 'eesur');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (14, 4, 'EE-SYRGAVERE', 26232, 'Sürgavere');
+INSERT INTO sources (id, node_id) VALUES (15, 'fivan');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (15, 7, 'FI42', 2975, 'Vantaa');
+INSERT INTO sources (id, node_id) VALUES (16, 'fiika');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (16, 7, 'FI43', 2941, 'Ikaalinen');
+INSERT INTO sources (id, node_id) VALUES (17, 'fianj');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (17, 7, 'FI44', 2954, 'Anjalankoski');
+INSERT INTO sources (id, node_id) VALUES (18, 'fikuo');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (18, 7, 'FI45', 2918, 'Kuopio');
+INSERT INTO sources (id, node_id) VALUES (19, 'fikor');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (19, 7, 'FI46', 2933, 'Korpo');
+INSERT INTO sources (id, node_id) VALUES (20, 'fiuta');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (20, 7, 'FI47', 2870, 'Utajärvi');
+INSERT INTO sources (id, node_id) VALUES (21, 'filuo');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (21, 7, 'FI48', 2840, 'Luosto');
+INSERT INTO sources (id, node_id) VALUES (22, 'fivim');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (22, 7, 'FI49', 2925, 'Vimpeli');
+INSERT INTO sources (id, node_id) VALUES (23, 'lvrix');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (23, 5, 'LVaa', 26422, 'Riga');
+INSERT INTO sources (id, node_id) VALUES (24, 'nldbl');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (24, 1, 'NL50', 6260, 'De Bilt');
+INSERT INTO sources (id, node_id) VALUES (25, 'nldhl');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (25, 1, 'NL51', 6234, 'Den Helder');
+INSERT INTO sources (id, node_id) VALUES (26, 'norst');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (26, 3, 'NOaa', 1104, 'Røst');
+INSERT INTO sources (id, node_id) VALUES (27, 'nobom');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (27, 3, 'NOab', 1405, 'Bømlo');
+INSERT INTO sources (id, node_id) VALUES (28, 'nosol');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (28, 3, 'NO41', 1499, 'Oslo');
+INSERT INTO sources (id, node_id) VALUES (29, 'nohgb');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (29, 3, 'NO42', 1438, 'Hægebostad');
+INSERT INTO sources (id, node_id) VALUES (30, 'norsa');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (30, 3, 'NO43', 1247, 'Rissa');
+INSERT INTO sources (id, node_id) VALUES (31, 'noand');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (31, 3, 'NOac', 1018, 'Andøya');
+INSERT INTO sources (id, node_id) VALUES (32, 'nohas');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (32, 3, 'NOad', 1042, 'Hasvik');
+INSERT INTO sources (id, node_id) VALUES (33, 'plleg');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (33, 8, 'PL41', 12374, 'Legionowo');
+INSERT INTO sources (id, node_id) VALUES (34, 'plram');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (34, 8, 'PL42', 12514, 'Ramza');
+INSERT INTO sources (id, node_id) VALUES (35, 'plpas');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (35, 8, 'PL43', 12544, 'Pastewnik');
+INSERT INTO sources (id, node_id) VALUES (36, 'plrze');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (36, 8, 'PL44', 12579, 'Rzeszow');
+INSERT INTO sources (id, node_id) VALUES (37, 'plpoz');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (37, 8, 'PL45', 12331, 'Poznan');
+INSERT INTO sources (id, node_id) VALUES (38, 'plswi');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (38, 8, 'PL46', 12220, 'Swidwin');
+INSERT INTO sources (id, node_id) VALUES (39, 'plgda');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (39, 8, 'PL47', 12151, 'Gdansk');
+INSERT INTO sources (id, node_id) VALUES (40, 'plbrz');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (40, 8, 'PL48', 12568, 'Brzuchania');
+INSERT INTO sources (id, node_id) VALUES (41, 'sekir');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (41, 6, 'SE40', 2032, 'Kiruna');
+INSERT INTO sources (id, node_id) VALUES (42, 'selul');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (42, 6, 'SE41', 2092, 'Luleå');
+INSERT INTO sources (id, node_id) VALUES (43, 'seosu');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (43, 6, 'SE42', 2200, 'Östersund');
+INSERT INTO sources (id, node_id) VALUES (44, 'seovi');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (44, 6, 'SE43', 2262, 'Örnsköldsvik');
+INSERT INTO sources (id, node_id) VALUES (45, 'sehud');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (45, 6, 'SE44', 2334, 'Hudiksvall');
+INSERT INTO sources (id, node_id) VALUES (46, 'selek');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (46, 6, 'SE45', 2430, 'Leksand');
+INSERT INTO sources (id, node_id) VALUES (47, 'searl');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (47, 6, 'SE46', 2451, 'Arlanda');
+INSERT INTO sources (id, node_id) VALUES (48, 'sease');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (48, 6, 'SE47', 2588, 'Ase');
+INSERT INTO sources (id, node_id) VALUES (49, 'sevil');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (49, 6, 'SE48', 2570, 'Vilebo');
+INSERT INTO sources (id, node_id) VALUES (50, 'sevar');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (50, 6, 'SE49', 2600, 'Vara');
+INSERT INTO sources (id, node_id) VALUES (51, 'seang');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (51, 6, 'SE50', 2606, 'Ängelholm');
+INSERT INTO sources (id, node_id) VALUES (52, 'sekkr');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (52, 6, 'SE51', 2666, 'Karlskrona');

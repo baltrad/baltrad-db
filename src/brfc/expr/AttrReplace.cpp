@@ -32,9 +32,15 @@ AttrReplace::AttrReplace(SelectPtr select, const AttributeMapper* mapper)
     // always select from files and sources
     TablePtr files_t = Table::create("files");
     TablePtr src_t = Table::create("sources");
+    TablePtr src_radars_t = Table::create("source_radars");
+    TablePtr src_centres_t = Table::create("source_centres");
     
     ExpressionPtr on = files_t->column("source_id")->eq(src_t->column("id"));
     from_ = files_t->join(src_t, on);
+    on = src_t->column("id")->eq(src_radars_t->column("id"));
+    from_ = from_->outerjoin(src_radars_t, on);
+    on = src_t->column("id")->eq(src_centres_t->column("id"));
+    from_ = from_->outerjoin(src_centres_t, on);
 }
 
 void

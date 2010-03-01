@@ -2,28 +2,19 @@
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/SourceCentre.hpp>
+#include <brfc/SourceRadar.hpp>
 
 #include <boost/foreach.hpp>
 
-#include <map>
-
 #include <QtCore/QStringList>
+#include <QtCore/QMap>
 
 namespace brfc {
 
-Source::Source()
-        : db_id_(0)
-        , wmo_code_(0)
-        , radar_site_()
-        , originating_centre_(0)
-        , place_()
-        , country_code_(0)
-        , node_id_() {
-}
-
 namespace {
 
-typedef std::map<QString, QString> ElementMap;
+typedef QMap<QString, QString> ElementMap;
     
 ElementMap
 parse_source(const QString& source) {
@@ -46,29 +37,27 @@ parse_source(const QString& source) {
 
 } // namespace anonymous
 
-Source
+shared_ptr<Source>
 Source::from_source_attribute(const QString& source) {
-    const ElementMap& elements = parse_source(source);
+    const ElementMap& elems = parse_source(source);
     Source src;
-    BOOST_FOREACH(const ElementMap::value_type& entry, elements) {
-        if (entry.first == "WMO") {
-            src.wmo_code(entry.second.toInt());
-        } else if (entry.first == "RAD") {
-            src.radar_site(entry.second);
-        } else if (entry.first == "ORG") {
-            src.originating_centre(entry.second.toInt());
-        } else if (entry.first == "PLC") {
-            src.place(entry.second);
-        } else if (entry.first == "CTY") {
-            src.country_code(entry.second.toInt());
-        } else if (entry.first == "CMT") {
-            // ignore, this is not relevant
-        } else {
-            QString err = QString("invalid field in source: ") + source;
-            throw value_error(err.toUtf8().constData());
-        }
+    if (elems.contains("WMO") or
+        elems.contains("RAD") or
+        elems.contains("PLC")) {
+        
+        shared_ptr<SourceRadar> src(new SourceRadar());
+        src->wmo_code(elems.value("WMO", "0").toInt());
+        src->radar_site(elems.value("RAD", ""));
+        src->place(elems.value("PLC", ""));
+        return src;
+    } else if (elems.contains("CTY") or elems.contains("ORG")) {
+        shared_ptr<SourceCentre> src(new SourceCentre());
+        src->country_code(elems.value("CTY", "0").toInt());
+        src->originating_centre(elems.value("ORG", "0").toInt());
+        return src;
+    } else {
+        throw value_error("no fields in source to determine type");
     }
-    return src;
 }
 
 } // namespace brfc

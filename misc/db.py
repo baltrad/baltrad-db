@@ -22,12 +22,25 @@ meta = MetaData()
 
 sources = Table("sources", meta,
     Column("id", Integer, primary_key=True),
-    Column("country_code", Integer, unique=True),
-    Column("wmo_code", Integer, unique=True),
-    Column("radar_site", Text, unique=True),
-    Column("originating_centre", Integer, unique=True),
     Column("node_id", Text, nullable=False, unique=True),
-    Column("place", Text, unique=True))
+)
+
+source_centres = Table("source_centres", meta,
+    Column("id", Integer, ForeignKey(sources.c.id),
+           primary_key=True),
+    Column("originating_centre", Integer, unique=True),
+    Column("country_code", Integer, unique=True)
+)
+
+source_radars = Table("source_radars", meta,
+    Column("id", Integer, ForeignKey(sources.c.id),
+           primary_key=True),
+    Column("centre_id", Integer, ForeignKey(source_centres.c.id),
+           nullable=False),
+    Column("radar_site", Text, unique=True),
+    Column("wmo_code", Integer, unique=True),
+    Column("place", Text, unique=True)
+)
 
 files = Table("files", meta,
     Column("id", Integer, primary_key=True),
@@ -37,7 +50,8 @@ files = Table("files", meta,
     Column("n_date", Date, nullable=False),
     Column("n_time", Time, nullable=False),
     Column("source_id", Integer, ForeignKey(sources.c.id),
-           nullable=False))
+           nullable=False)
+)
 
 data_objects = Table("data_objects", meta,
     Column("id", Integer, primary_key=True),
@@ -50,11 +64,13 @@ data_objects = Table("data_objects", meta,
     Column("endtime", Time),
     Column("file_id", Integer, nullable=False),
     ForeignKeyConstraint(["file_id"], [files.c.id],
-                         ondelete="CASCADE"))
+                         ondelete="CASCADE")
+)
 
 attribute_groups = Table("attribute_groups", meta,
     Column("id", Integer, primary_key=True),
-    Column("name", Integer, nullable=False))
+    Column("name", Integer, nullable=False)
+)
 
 attributes = Table("attributes", meta,
     Column("id", Integer, primary_key=True),
@@ -62,7 +78,8 @@ attributes = Table("attributes", meta,
     Column("converter", Text, nullable=False),
     Column("storage_table", Text, nullable=False),
     Column("storage_column", Text, nullable=False),
-    Column("ignore_in_hash", Boolean, nullable=False, default=False))
+    Column("ignore_in_hash", Boolean, nullable=False, default=False)
+)
 
 attribute_values_int = Table("attribute_values_int", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
@@ -71,7 +88,8 @@ attribute_values_int = Table("attribute_values_int", meta,
     Column("value", PGBigInteger, nullable=False),
     ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id"))
+    PrimaryKeyConstraint("attribute_id", "data_object_id")
+)
 
 attribute_values_str = Table("attribute_values_str", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
@@ -80,7 +98,8 @@ attribute_values_str = Table("attribute_values_str", meta,
     Column("value", Text, nullable=False),
     ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id"))
+    PrimaryKeyConstraint("attribute_id", "data_object_id")
+)
 
 attribute_values_real = Table("attribute_values_real", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
@@ -89,7 +108,8 @@ attribute_values_real = Table("attribute_values_real", meta,
     Column("value", Float, nullable=False),
     ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id"))
+    PrimaryKeyConstraint("attribute_id", "data_object_id")
+)
 
 attribute_values_bool = Table("attribute_values_bool", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
@@ -98,7 +118,8 @@ attribute_values_bool = Table("attribute_values_bool", meta,
     Column("value", Boolean, nullable=False),
     ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id"))
+    PrimaryKeyConstraint("attribute_id", "data_object_id")
+)
 
 attribute_values_date = Table("attribute_values_date", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
@@ -107,7 +128,8 @@ attribute_values_date = Table("attribute_values_date", meta,
     Column("value", Date, nullable=False),
     ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id"))
+    PrimaryKeyConstraint("attribute_id", "data_object_id")
+)
 
 attribute_values_time = Table("attribute_values_time", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
@@ -116,7 +138,8 @@ attribute_values_time = Table("attribute_values_time", meta,
     Column("value", Time, nullable=False),
     ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id"))
+    PrimaryKeyConstraint("attribute_id", "data_object_id")
+)
 
 default_storage = {
     "string": ("attribute_values_str", "value"),
@@ -319,11 +342,11 @@ attribute_entries = [
 
 virtual_attributes = [
     ("path",    "string",   "files",   "path"),
-    ("src_WMO", "int",      "sources", "wmo_code"),
-    ("src_RAD", "string",   "sources", "radar_site"),
-    ("src_ORG", "int",      "sources", "originating_centre"),
-    ("src_CTY", "int",      "sources", "country_code"),
-    ("src_PLC", "string",   "sources", "place"),
+    ("src_WMO", "int",      "source_radars", "wmo_code"),
+    ("src_RAD", "string",   "source_radars", "radar_site"),
+    ("src_ORG", "int",      "source_centres", "originating_centre"),
+    ("src_CTY", "int",      "source_centres", "country_code"),
+    ("src_PLC", "string",   "source_radars", "place"),
     ("src_node", "string",  "sources", "node_id")
 ]
 
@@ -425,19 +448,25 @@ def populate_attributes_table(engine):
                        ignore_in_hash=True)
 
 def populate_sources_table(engine):
-    q = sources.insert()
+    idgen = (i for i in itertools.count(1))
+    centre_ids = {}
 
     for cc, country in countries.iteritems():
-        engine.execute(q,
+        centre_ids[cc] = id = idgen.next()
+        engine.execute(sources.insert(), id=id, node_id=cc)
+        engine.execute(source_centres.insert(),
+                       id=id,
                        country_code=country,
-                       originating_centre=org_centres[cc],
-                       node_id=cc)
+                       originating_centre=org_centres[cc])
     
     for (cc, site, wmo_code, node_id, place) in radars:
-        engine.execute(q,
+        id = idgen.next()
+        engine.execute(sources.insert(), id=id, node_id=node_id)
+        engine.execute(source_radars.insert(),
+                       id=id,
+                       centre_id=centre_ids[cc],
                        wmo_code=(wmo_code if wmo_code != 0  else None),
                        radar_site=site,
-                       node_id=node_id,
                        place=place)
 
 class Template(string.Template):
