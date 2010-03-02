@@ -42,18 +42,15 @@
 %ignore brfc::Database;
 %ignore brfc::FileCatalog::FileCatalog(shared_ptr<Database>,
                                        shared_ptr<AttributeSpecs>,
-                                       shared_ptr<FileNamer>);
+                                       shared_ptr<FileNamer>,
+                                       const QString&);
 
 %ignore brfc::Query::Query;
 %ignore brfc::ResultSet::ResultSet;
 
-%ignore brfc::ResultSet::time; // replaced
-%ignore brfc::ResultSet::date; // replaced
 %ignore brfc::ResultSet::operator=;
 %rename(boolean_) brfc::ResultSet::boolean;
 
-%ignore brfc::Variant::time; // replaced
-%ignore brfc::Variant::date; // replaced
 %ignore brfc::Variant::operator=;
 
 %ignore brfc::expr::Visitor;
@@ -90,6 +87,9 @@
 %rename(ExpressionFactory) brfc::expr::Factory;
 %rename(AttributeExpr) brfc::expr::Attribute;
 %rename(boolean_) brfc::expr::Factory::boolean;
+
+%rename(Date) QDate;
+%rename(Time) QTime;
 
 
 SWIG_SHARED_PTR(Element,
@@ -165,45 +165,29 @@ SWIG_SHARED_PTR_DERIVED(SourceCentre, brfc::Source, brfc::SourceCentre);
     }
 }
 
-%extend brfc::ResultSet {
-    QString _time_string(unsigned int pos) const {
-        return $self->time(pos).toString("HH:mm:ss");
-    }
 
-    QString _date_string(unsigned int pos) const {
-        return $self->date(pos).toString("yyyy-MM-dd");
-    }
-}
+class QDate {
+  public:
+    QDate(int year, int month, int day);
 
-%typemap(javacode) brfc::ResultSet %{
-  public java.sql.Date date(long pos) {
-    return java.sql.Date.valueOf(_date_string(pos));
-  }
+    int year() const;
+    int month() const;
+    int day() const;
+};
 
-  public java.sql.Time time(long pos) {
-    return java.sql.Time.valueOf(_time_string(pos));
-  }
-%}
 
-%extend brfc::Variant {
-    QString _time_string() const {
-        return $self->time().toString("HH:mm:ss");
-    }
+class QTime {
+  public:
+    QTime(int hour, int minute, int second=0, int ms=0);
 
-    QString _date_string() const {
-        return $self->date().toString("yyyy-MM-dd");
-    }
-}
+    int hour() const;
+    int minute() const;
+    int second() const;
+    int msec() const;
+};
 
-%typemap(javacode) brfc::Variant %{
-  public java.sql.Date date() {
-    return java.sql.Date.valueOf(_date_string());
-  }
-
-  public java.sql.Time time() {
-    return java.sql.Time.valueOf(_time_string());
-  }
-%}
+%include <QtCore/QDate>
+%include <QtCore/QTime>
 
 %include <brfc/expr/fwd.hpp>
 %include <brfc/expr/Element.hpp>
