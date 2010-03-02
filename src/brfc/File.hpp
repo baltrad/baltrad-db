@@ -128,6 +128,40 @@ class File : public boost::noncopyable {
     long long db_id() const { return db_id_; }
 
     void db_id(long long db_id) const { db_id_ = db_id; }
+    
+    /**
+     * @name mandatory attribute access shorthands
+     * @{
+     */
+
+    /**
+     * @brief access /what/object
+     *
+     * equivalent to @c root().attribute("what/object").value().string()
+     */
+    QString what_object() const;
+
+    /**
+     * @brief access /what/date
+     *
+     * equivalent to @c root().attribute("what/date").value().date()
+     */
+    QDate what_date() const;
+
+    /**
+     * @brief access /what/time
+     *
+     * equivalent to @c root().attribute("what/time").value().time()
+     */
+    QTime what_time() const;
+
+    /**
+     * @brief access /what/source
+     *
+     * equivalent to @c root().attribute("what/source").value().string()
+     */
+    QString what_source() const;
+    ///@}
 
   private:
     /**

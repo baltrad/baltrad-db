@@ -70,8 +70,7 @@ shared_ptr<File>
 FileCatalog::catalog(const QString& path) {
     shared_ptr<File> f(new File(path, *specs_));
     
-    QString src = f->root().attribute("what/source").value().string();
-    f->source(db_->load_source(src));
+    f->source(db_->load_source(f->what_source()));
 
     if (is_cataloged(*f))
         throw duplicate_entry(path.toUtf8().constData());

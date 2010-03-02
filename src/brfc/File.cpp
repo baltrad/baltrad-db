@@ -70,6 +70,26 @@ File::source(shared_ptr<Source> source) {
 }
 
 QString
+File::what_object() const {
+    return root_->attribute("what/object").value().string();
+}
+
+QDate
+File::what_date() const {
+    return root_->attribute("what/date").value().date();
+}
+
+QTime
+File::what_time() const {
+    return root_->attribute("what/time").value().time();
+}
+
+QString
+File::what_source() const {
+    return root_->attribute("what/source").value().string();
+}
+
+QString
 File::unique_identifier() const {
     if (not source_) {
         //XXX: needs a better exception type

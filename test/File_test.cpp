@@ -81,6 +81,18 @@ TEST_F(File_test, unique_identifier_same_meta) {
     EXPECT_EQ(f1.unique_identifier(), f2.unique_identifier());
 }
 
+TEST_F(File_test, required_attribute_shortcuts) {
+    QString object("pvol");
+    QDate date(2000, 1, 2);
+    QTime time(12, 5);
+    QString source("WMO:02606");
+    File f1(object, date, time, source);
+    EXPECT_EQ(f1.what_object(), object);
+    EXPECT_EQ(f1.what_date(), date);
+    EXPECT_EQ(f1.what_time(), time);
+    EXPECT_EQ(f1.what_source(), source);
+}
+
 TEST_F(File_test, unique_identifier_different_meta) {
     File f1("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
     File f2("pvol", QDate(2001, 1, 2), QTime(12, 5), "WMO:02606");
