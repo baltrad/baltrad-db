@@ -5,6 +5,7 @@
 #include <brfc/FileNamer.hpp>
 
 #include <QtCore/QString>
+#include <QtCore/QDir>
 
 /**
  * @brief main namespace
@@ -41,7 +42,8 @@ class FileCatalog {
 
     FileCatalog(shared_ptr<Database> db,
                 shared_ptr<AttributeSpecs> specs,
-                shared_ptr<FileNamer> namer);
+                shared_ptr<FileNamer> namer,
+                const QString& storage);
 
     /**
      * @brief destructor
@@ -55,9 +57,11 @@ class FileCatalog {
      * @throw fs_error if file can not be opened
      * @return true if file is cataloged
      *
-     * a file is cataloged when a file with a proposed storage path is
-     * already present in database. For the exact rules on how the path is
-     * determined, refer to File documentation.
+     * a file is cataloged when a file with the same unique identifier is
+     * already present in database. For the exact rules on how the unique id
+     * is determined, refer to File documentation.
+     *
+     * @sa File::unique_identifier
      */
     bool is_cataloged(const QString& path) const;
     
@@ -99,10 +103,13 @@ class FileCatalog {
     
   private:
     bool is_cataloged(const File& f) const;
+
+    void check_storage() const;
     
     shared_ptr<Database> db_;
     shared_ptr<AttributeSpecs> specs_;
     shared_ptr<FileNamer> namer_;
+    QDir storage_;
 };
 
 }

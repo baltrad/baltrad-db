@@ -4,7 +4,7 @@
 #include <brfc/AttributeSpecs.hpp>
 #include <brfc/DataObject.hpp>
 #include <brfc/File.hpp>
-#include <brfc/Source.hpp>
+#include <brfc/SourceRadar.hpp>
 #include <brfc/SplitPath.hpp>
 #include <brfc/Variant.hpp>
 
@@ -19,7 +19,7 @@ namespace brfc {
 struct File_test : public testing::Test {
     File_test()
             : specs()
-            , src(new Source()) {
+            , src(new SourceRadar()) {
 
     }
 
@@ -28,7 +28,7 @@ struct File_test : public testing::Test {
     }
 
     AttributeSpecs specs;
-    shared_ptr<Source> src;
+    shared_ptr<SourceRadar> src;
 };
 
 TEST_F(File_test, get_same_node) {

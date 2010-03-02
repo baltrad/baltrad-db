@@ -7,6 +7,7 @@
 #include <brfc/File.hpp>
 #include <brfc/FileCatalog.hpp>
 #include <brfc/Source.hpp>
+#include <brfc/SourceRadar.hpp>
 #include <brfc/Query.hpp>
 
 #include <QtCore/QDate>
@@ -51,9 +52,9 @@ struct FileCatalog_test : public testing::Test {
             , db(new MockDatabase())
             , namer(new MockNamer())
             , specs(new AttributeSpecs())
-            , fc(db, specs, namer)
+            , fc(db, specs, namer, tempdir->path())
             , src_str("WMO:02606")
-            , default_src(new Source())
+            , default_src(new SourceRadar())
             , minfile(TempH5File::minimal("PVOL",
                                           QDate(2000, 1, 1),
                                           QTime(12, 0),
@@ -89,7 +90,7 @@ TEST_F(FileCatalog_test, test_catalog) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
-        .WillOnce(Return(target));
+        .WillOnce(Return("test"));
     EXPECT_CALL(*db, do_save_file(target, _))
         .WillOnce(Return(1));
     EXPECT_CALL(*db, do_commit());
@@ -109,7 +110,7 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
-        .WillOnce(Return(target));
+        .WillOnce(Return("test"));
     EXPECT_CALL(*db, do_save_file(target, _))
         .WillOnce(Throw(db_error("")));
     EXPECT_CALL(*db, do_rollback());
@@ -125,7 +126,7 @@ TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
-        .WillOnce(Return(target));
+        .WillOnce(Return("test"));
     EXPECT_CALL(*db, do_save_file(target, _))
         .WillOnce(Return(1));
     EXPECT_CALL(*db, do_rollback());

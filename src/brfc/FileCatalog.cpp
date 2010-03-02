@@ -25,22 +25,34 @@ FileCatalog::FileCatalog(const QString& dsn,
                          const QString& storage)
         : db_(new RelationalDatabase(dsn))
         , specs_()
-        , namer_(new DefaultFileNamer(storage)) {
+        , namer_(new DefaultFileNamer())
+        , storage_(storage) {
+    check_storage();
     RelationalDatabase* rdb = static_cast<RelationalDatabase*>(db_.get());
     specs_.reset(new AttributeSpecs(rdb->specs()));
 }
 
 FileCatalog::FileCatalog(shared_ptr<Database> db,
                          shared_ptr<AttributeSpecs> specs,
-                         shared_ptr<FileNamer> namer)
+                         shared_ptr<FileNamer> namer,
+                         const QString& storage)
         : db_(db)
         , specs_(specs)
-        , namer_(namer) {
-
+        , namer_(namer)
+        , storage_(storage) {
+    check_storage();
 }
 
 FileCatalog::~FileCatalog() {
 
+}
+
+void
+FileCatalog::check_storage() const {
+    if (not storage_.isAbsolute())
+        throw fs_error("storage must be an absolute path");
+    if (not storage_.exists())
+        throw fs_error("storage does not exist");
 }
 
 bool
@@ -66,8 +78,10 @@ FileCatalog::catalog(const QString& path) {
     
     QString target = namer_->name(*f);
 
-    if (not QDir::isAbsolutePath(target))
-        throw std::runtime_error("namer must return absolute paths");
+    if (QDir::isAbsolutePath(target))
+        throw std::runtime_error("namer must not return absolute paths");
+    
+    target = QDir::cleanPath(storage_.absoluteFilePath(target));
 
     f->path(target);
 

@@ -7,16 +7,29 @@ namespace brfc {
 
 class File;
 
+/**
+ * @brief ABC for generating filenames for File instances
+ */
 class FileNamer {
   public:
-    QString name(const File& f) const {
-        return do_name(f);
+    /**
+     * @brief name a File
+     * @param file File to be named
+     * @return the generated filename
+     *
+     * @sa do_name
+     */
+    QString name(const File& file) const {
+        return do_name(file);
     }
 
+    /**
+     * @brief destructor
+     */
     virtual ~FileNamer() { }
 
   protected:
-    virtual QString do_name(const File& f) const = 0;
+    virtual QString do_name(const File& file) const = 0;
 };
 
 } // namespace brfc
