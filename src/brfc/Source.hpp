@@ -45,6 +45,8 @@ class Source {
         node_id_ = value;
     }
 
+    virtual QString wmo_cccc() const = 0;
+
   private:
     long long db_id_;
     QString node_id_;

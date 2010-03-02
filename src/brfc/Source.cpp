@@ -40,7 +40,6 @@ parse_source(const QString& source) {
 shared_ptr<Source>
 Source::from_source_attribute(const QString& source) {
     const ElementMap& elems = parse_source(source);
-    Source src;
     if (elems.contains("WMO") or
         elems.contains("RAD") or
         elems.contains("PLC")) {

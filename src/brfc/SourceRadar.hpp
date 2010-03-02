@@ -3,6 +3,7 @@
 
 #include <brfc/Source.hpp>
 #include <brfc/SourceCentre.hpp>
+#include <brfc/assert.hpp>
 
 namespace brfc {
 
@@ -46,6 +47,11 @@ class SourceRadar : public Source {
 
     void centre(shared_ptr<SourceCentre> value) {
         centre_= value;
+    }
+
+    virtual QString wmo_cccc() const {
+        BRFC_ASSERT(centre_);
+        return centre_->wmo_cccc();
     }
    
   private:

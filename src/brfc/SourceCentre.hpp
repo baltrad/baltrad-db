@@ -37,7 +37,7 @@ class SourceCentre : public Source {
     /**
      * @brief WMO CCCC from Volume C1
      */
-    QString wmo_cccc() const { return wmo_cccc_; }
+    virtual QString wmo_cccc() const { return wmo_cccc_; }
 
     void wmo_cccc(const QString& value) {
         wmo_cccc_ = value;
