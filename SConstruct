@@ -1,5 +1,6 @@
 import os
 import sys
+import urlparse
 
 
 from build_helper import (CheckBoostVersion, CheckHlhdf, CheckQt,
@@ -47,8 +48,6 @@ vars.AddVariables(
                  "${gtest_dir}/lib", PathVariable.PathIsDir),
     PathVariable("gtest_include_dir", "googletest include directory",
                  "${gtest_dir}/include", PathVariable.PathIsDir),
-    PathVariable("junit_dir", "directory where junit4.jar is found",
-                 Dir("#deplib").abspath, PathVariable.PathIsDir),
     PathVariable("ant_dir", "directory where ant libraries are found",
                  "/usr/share/java", PathVariable.PathIsDir),
     BoolVariable("debug", "generate debug code", False),
@@ -247,10 +246,25 @@ run_gtest_tests = testenv.Command("run_gtest_tests", "#test/runner",
                                   "--gtest_output=xml:test/reports/gtest.xml")
 env.Alias("test", run_gtest_tests)
 
+urlparse.uses_netloc.append("postgresql")
+
+def ant_testdb_properties():
+    # pick out postgresql dsn if present
+    for dsn in env["test_db_dsns"]:
+        url = urlparse.urlsplit(dsn)
+        if url.scheme != "postgresql":
+            continue
+        jdbcurl = "".join(["jdbc:", url.scheme, "://", url.hostname, url.path])
+        return ["-Ddb.url=%s" % jdbcurl,
+                "-Ddb.username=%s" % url.username,
+                "-Ddb.password=%s" % url.password]
+    return []
+
 run_java_tests = testenv.Command("run_java_tests", "#lib/jbrfc_test.jar",
     "ant "
-    "-lib ./lib -lib ${junit_dir} -lib ${ant_dir} "
-    "-f test/java/build.xml")
+    "-lib ./lib -lib ./deplib -lib ${ant_dir} " +
+    " ".join(ant_testdb_properties()) + 
+    " -f test/java/build.xml")
 
 env.Alias("hudsontest", [run_gtest_tests, run_java_tests])
 

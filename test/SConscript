@@ -23,8 +23,6 @@ cxxver = tuple(map(int, env["CXXVERSION"].split(".")))
 if cxxver < (4, 3, 0):
     env["CCFLAGS"].remove("-pedantic")
 
-env.Append(CCFLAGS=["-g"])
-
 confdeps = env.ConfHas("#gtest-confdeps", ["gtest", "gmock", "hlhdf"])
 
 objects = env.SharedObject(sources)

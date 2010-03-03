@@ -1,5 +1,16 @@
 <project name="baltrad-db" default="execute_tests" basedir="../../">
-  <target name="execute_tests">
+  <target name="create_postgresql_testdb">
+    <sql rdbms="postgres"
+         driver="org.postgresql.Driver"
+         url="${db.url}"
+         userid="${db.username}" 
+         password="${db.password}">
+      <transaction src="schema/postgresql/drop.sql" />
+      <transaction src="schema/postgresql/create.sql" />
+    </sql>
+  </target>
+
+  <target name="execute_tests" depends="create_postgresql_testdb">
     <mkdir dir="test/reports"/>
     <junit showoutput="true" printsummary="no">
       <formatter type="xml" />

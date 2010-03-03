@@ -2,7 +2,7 @@ Import("env")
 
 classpath = [
     env.File("#lib/jbrfc.jar").abspath,
-    env.Dir(env["junit_dir"]).File("junit4.jar").abspath,
+    env.Dir("#deplib").File("junit4.jar").abspath,
 ]
 
 java =Java(target="classes", source="eu", JAVACLASSPATH=classpath)
