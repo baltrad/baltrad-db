@@ -16,7 +16,7 @@ config_cpp = env.Substfile("config.cpp.in", SUBST_DICT=config_values)
 
 env.Depends([config_hpp, config_cpp], env.Value(env["test_db_dsns"]))
 
-sources = Glob("*.cpp")
+sources = Glob("*.cpp") + Glob("oh5/*.cpp")
 
 # remove -pedantic flag if using older g++
 cxxver = tuple(map(int, env["CXXVERSION"].split(".")))

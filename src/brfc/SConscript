@@ -28,7 +28,11 @@ sources = [
     "expr/Join.cpp",
     "expr/Select.cpp",
     "expr/Selectable.cpp",
-    "expr/Visitor.cpp"
+    "expr/Visitor.cpp",
+    "oh5/Attribute.cpp",
+    "oh5/AttributeGroup.cpp",
+    "oh5/DataObject.cpp",
+    "oh5/Node.cpp",
 ]
 
 confdeps = env.ConfHas("#shared-library-confdeps",
