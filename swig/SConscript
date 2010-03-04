@@ -2,22 +2,29 @@ Import("env")
 
 env.AppendUnique(CPPPATH=["${jdk_include_dir}", "${jdk_include_dir}/linux"])
 
-sources = ["FileCatalog.i"]
-
 Execute(Delete(env.Dir(".").Dir("eu")))
 Execute(Mkdir(env.Dir(".").Dir("eu/baltrad/fc")))
+Execute(Delete(env.Dir(".").Dir("classes")))
+
 build_dir = env.Dir(".").get_abspath()
 
 env["JARCHDIR"] = build_dir + "/classes"
 env["JAVASOURCEPATH"] = build_dir
 
-env.Append(SWIGFLAGS="-c++ -java -package eu.baltrad.fc".split())
-env.Append(SWIGOUTDIR=build_dir + "/eu/baltrad/fc")
 env.Append(SWIGPATH=env["CPPPATH"])
 
-env.AlwaysBuild("FileCatalog_wrap.cc")
+fc_env = env.Clone()
+fc_env.Append(SWIGFLAGS="-c++ -java -package eu.baltrad.fc".split())
+fc_env.Append(SWIGOUTDIR=build_dir + "/eu/baltrad/fc")
+fc = fc_env.SharedObject(["fc.i"])
 
-lib = env.SharedLibrary("#lib/brfc_java", sources, LIBS=["brfc"])
+fc_expr_env = env.Clone()
+fc_expr_env.Append(SWIGFLAGS="-c++ -java -package eu.baltrad.fc.expr".split())
+fc_expr_env.Append(SWIGOUTDIR=build_dir + "/eu/baltrad/fc/expr")
+fc_expr = fc_env.SharedObject(["fc_expr.i"])
+
+
+lib = env.SharedLibrary("#lib/brfc_java", [fc, fc_expr], LIBS=["brfc"])
 
 confdeps = env.ConfHas("#java-wrapper-confdeps", ["jni", "qt", "hlhdf"])
 
