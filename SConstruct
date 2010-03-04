@@ -64,7 +64,7 @@ vars.AddVariables(
 env = Environment(tools=["default", "doxygen", "swig", "textfile"],
                   toolpath=["scons_tools"],
                   variables=vars,
-                  CCFLAGS=["-pedantic", "-Wall", "-Wno-long-long"],
+                  CCFLAGS=["-pedantic", "-Wall", "-Wno-long-long", "-std=c++0x"],
                   CPPPATH=["#src"],
                   LIBPATH=["#lib"],
                   ENV={"PATH": os.environ["PATH"]})
