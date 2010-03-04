@@ -73,4 +73,89 @@ def CheckQtSqlDrivers(ctx):
     ctx.SetLIBS(oldlibs)
     return drivers.split(" ")
 
+# from python2.5
+class BaseResult(tuple):
+    """Base class for the parsed result objects.
 
+    This provides the attributes shared by the two derived result
+    objects as read-only properties.  The derived classes are
+    responsible for checking the right number of arguments were
+    supplied to the constructor.
+
+    """
+
+    __slots__ = ()
+
+    # Attributes that access the basic components of the URL:
+
+    @property
+    def scheme(self):
+        return self[0]
+
+    @property
+    def netloc(self):
+        return self[1]
+
+    @property
+    def path(self):
+        return self[2]
+
+    @property
+    def query(self):
+        return self[-2]
+
+    @property
+    def fragment(self):
+        return self[-1]
+
+    # Additional attributes that provide access to parsed-out portions
+    # of the netloc:
+
+    @property
+    def username(self):
+        netloc = self.netloc
+        if "@" in netloc:
+            userinfo = netloc.split("@", 1)[0]
+            if ":" in userinfo:
+                userinfo = userinfo.split(":", 1)[0]
+            return userinfo
+        return None
+
+    @property
+    def password(self):
+        netloc = self.netloc
+        if "@" in netloc:
+            userinfo = netloc.split("@", 1)[0]
+            if ":" in userinfo:
+                return userinfo.split(":", 1)[1]
+        return None
+
+    @property
+    def hostname(self):
+        netloc = self.netloc
+        if "@" in netloc:
+            netloc = netloc.split("@", 1)[1]
+        if ":" in netloc:
+            netloc = netloc.split(":", 1)[0]
+        return netloc.lower() or None
+
+    @property
+    def port(self):
+        netloc = self.netloc
+        if "@" in netloc:
+            netloc = netloc.split("@", 1)[1]
+        if ":" in netloc:
+            port = netloc.split(":", 1)[1]
+            return int(port, 10)
+        return None
+
+class SplitResult(BaseResult):
+
+    __slots__ = ()
+
+    def __new__(cls, scheme, netloc, path, query, fragment):
+        return BaseResult.__new__(
+            cls, (scheme, netloc, path, query, fragment))
+
+    def geturl(self):
+        return urlunsplit(self)

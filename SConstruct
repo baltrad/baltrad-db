@@ -4,7 +4,7 @@ import urlparse
 
 
 from build_helper import (CheckBoostVersion, CheckHlhdf, CheckQt,
-                          CheckQtSqlDrivers)
+                          CheckQtSqlDrivers, SplitResult)
 
 EnsureSConsVersion(1, 2)
 
@@ -64,7 +64,7 @@ vars.AddVariables(
 env = Environment(tools=["default", "doxygen", "swig", "textfile"],
                   toolpath=["scons_tools"],
                   variables=vars,
-                  CCFLAGS=["-pedantic", "-Wall", "-Wno-long-long", "-std=c++0x"],
+                  CCFLAGS=["-pedantic", "-Wall", "-Wno-long-long"],
                   CPPPATH=["#src"],
                   LIBPATH=["#lib"],
                   ENV={"PATH": os.environ["PATH"]})
@@ -251,7 +251,7 @@ urlparse.uses_netloc.append("postgresql")
 def ant_testdb_properties():
     # pick out postgresql dsn if present
     for dsn in env["test_db_dsns"]:
-        url = urlparse.urlsplit(dsn)
+        url = SplitResult(*urlparse.urlsplit(dsn))
         if url.scheme != "postgresql":
             continue
         jdbcurl = "".join(["jdbc:", url.scheme, "://", url.hostname, url.path])
