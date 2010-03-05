@@ -1,5 +1,5 @@
-#ifndef BRFC_ATTRIBUTE_GROUP_HPP
-#define BRFC_ATTRIBUTE_GROUP_HPP
+#ifndef BRFC_OH5_ATTRIBUTE_GROUP_HPP
+#define BRFC_OH5_ATTRIBUTE_GROUP_HPP
 
 #include <brfc/oh5/Node.hpp>
 
@@ -28,4 +28,4 @@ class AttributeGroup : public Node {
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_ATTRIBUTE_GROUP_HPP
+#endif // BRFC_OH5_ATTRIBUTE_GROUP_HPP

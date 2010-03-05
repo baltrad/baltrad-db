@@ -1,5 +1,5 @@
-#ifndef BRFC_NODE_HPP
-#define BRFC_NODE_HPP
+#ifndef BRFC_OH5_NODE_HPP
+#define BRFC_OH5_NODE_HPP
 
 #include <deque>
 #include <vector>
@@ -143,4 +143,4 @@ class NodeIterator :
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_NODE_HPP
+#endif // BRFC_OH5_NODE_HPP

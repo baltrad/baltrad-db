@@ -1,5 +1,5 @@
-#ifndef BRFC_DATA_OBJECT_HPP
-#define BRFC_DATA_OBJECT_HPP
+#ifndef BRFC_OH5_DATA_OBJECT_HPP
+#define BRFC_OH5_DATA_OBJECT_HPP
 
 #include <brfc/oh5/Node.hpp>
 
@@ -28,4 +28,4 @@ class DataObject : public Node {
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_DATA_OBJECT_HPP
+#endif // BRFC_OH5_DATA_OBJECT_HPP

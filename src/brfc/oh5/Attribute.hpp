@@ -1,5 +1,5 @@
-#ifndef BRFC_ATTRIBUTE_H
-#define BRFC_ATTRIBUTE_H
+#ifndef BRFC_OH5_ATTRIBUTE_H
+#define BRFC_OH5_ATTRIBUTE_H
 
 #include <brfc/oh5/Node.hpp>
 
@@ -102,4 +102,4 @@ class Attribute : public Node {
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_ATTRIBUTE_H  
+#endif // BRFC_OH5_ATTRIBUTE_H
