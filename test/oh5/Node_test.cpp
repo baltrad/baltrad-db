@@ -12,17 +12,33 @@
 namespace brfc {
 namespace oh5 {
 
+class FakeNode : public Node {
+  public:
+    FakeNode(const QString& name)
+            : Node(name) {
+    }
+  
+  protected:
+    template<class T, class A1> 
+    friend 
+    shared_ptr<T> boost::make_shared(const A1& a1);
+
+    virtual bool do_accepts_child(const Node& node) const {
+        return true;
+    }
+};
+
 struct Node_test : public ::testing::Test {
     Node_test()
-            : a(make_shared<Node>("a"))
-            , b(make_shared<Node>("b"))
-            , c(make_shared<Node>("c"))
-            , f(make_shared<Node>("f")) {
+            : a(make_shared<FakeNode>("a"))
+            , b(make_shared<FakeNode>("b"))
+            , c(make_shared<FakeNode>("c"))
+            , f(make_shared<FakeNode>("f")) {
         a->add_child(b);
         b->add_child(c);
     }
 
-    shared_ptr<Node> a, b, c, f;
+    shared_ptr<FakeNode> a, b, c, f;
 };
 
 TEST_F(Node_test, test_has_child) {

@@ -100,9 +100,7 @@ class Node : public boost::noncopyable,
     /**
      * default implementation always returns true
      */
-    virtual bool do_accepts_child(const Node& child) const {
-        return true;
-    }
+    virtual bool do_accepts_child(const Node& child) const = 0;
 
   private:
     friend class NodeIterator<Node>;

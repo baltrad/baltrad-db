@@ -88,7 +88,7 @@ class Attribute : public Node {
      *
      * Attribute is last in the hierarchy and doesn't accept any children 
      */
-    virtual bool do_accept_child(const Node& node) const {
+    virtual bool do_accepts_child(const Node& node) const {
         return false;
     }
 
