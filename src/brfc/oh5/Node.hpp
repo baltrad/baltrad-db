@@ -1,9 +1,12 @@
 #ifndef BRFC_NODE_HPP
 #define BRFC_NODE_HPP
 
+#include <deque>
 #include <vector>
 
 #include <boost/noncopyable.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+
 #include <QtCore/QString>
 
 #include <brfc/smart_ptr.hpp>
@@ -11,10 +14,15 @@
 namespace brfc {
 namespace oh5 {
 
+template<typename T>
+class NodeIterator;
+
 class Node : public boost::noncopyable,
              public enable_shared_from_this<Node> {
   public:
     typedef std::vector<shared_ptr<Node> > ChildVector;
+    typedef NodeIterator<Node> iterator;
+    typedef NodeIterator<const Node> const_iterator;
 
     virtual ~Node();
 
@@ -61,6 +69,12 @@ class Node : public boost::noncopyable,
     const ChildVector& children() const {
         return children_;
     }
+    
+    iterator begin();
+    const_iterator begin() const;
+    
+    iterator end();
+    const_iterator end() const;
 
   protected:
     // allow make_shared access to constructor
@@ -91,10 +105,41 @@ class Node : public boost::noncopyable,
     }
 
   private:
+    friend class NodeIterator<Node>;
+    friend class NodeIterator<const Node>;
+
     QString name_;
     weak_ptr<Node> parent_;
     ChildVector children_;
 
+};
+
+template<typename T>
+class NodeIterator :
+        public boost::iterator_facade<NodeIterator<T>,
+                                      T,
+                                      boost::forward_traversal_tag> {
+  public:
+    NodeIterator();
+
+    explicit NodeIterator(T& node);
+
+    template<typename OtherT>
+    NodeIterator(const NodeIterator<OtherT>& other);
+
+  private:
+    friend class boost::iterator_core_access;
+    template<typename>
+    friend class NodeIterator;
+    
+    void increment();
+
+    T& dereference() const;
+
+    template<typename OtherT>
+    bool equal(const NodeIterator<OtherT>& rhs) const;
+
+    std::deque<shared_ptr<T> > stack_;
 };
 
 } // namespace oh5

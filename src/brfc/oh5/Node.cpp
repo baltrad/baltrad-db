@@ -106,5 +106,98 @@ Node::has_child_by_name(const QString& name) const {
     return false;
 }
 
+Node::iterator
+Node::begin() {
+    return iterator(*this);
+}
+
+Node::const_iterator
+Node::begin() const {
+    return const_iterator(*this);
+}
+
+Node::iterator
+Node::end() {
+    return iterator();
+}
+
+Node::const_iterator
+Node::end() const {
+    return const_iterator();
+}
+
+
+/***
+ * NodeIterator implementation
+ */
+
+template<typename T>
+NodeIterator<T>::NodeIterator()
+        : stack_() {
+
+}
+
+template<typename T>
+NodeIterator<T>::NodeIterator(T& node)
+        : stack_() {
+    stack_.push_back(node.shared_from_this());
+}
+
+template<typename T>
+template<typename OtherT>
+NodeIterator<T>::NodeIterator(const NodeIterator<OtherT>& other)
+        : stack_(other.stack_.begin(), other.stack_.end()) {
+
+}
+
+template<typename T>
+void
+NodeIterator<T>::increment() {
+    if (not stack_.empty()) {
+        shared_ptr<T> cur = stack_.front();
+        stack_.pop_front();
+        BOOST_FOREACH(shared_ptr<T> child, cur->children_) {
+            stack_.push_back(child);
+        }
+    }
+}
+
+template<typename T>
+T&
+NodeIterator<T>::dereference() const {
+    BRFC_ASSERT(not stack_.empty());
+    return *stack_.front();
+}
+
+template<typename T>
+template<typename OtherT>
+bool
+NodeIterator<T>::equal(const NodeIterator<OtherT>& rhs) const {
+    if (stack_.empty() && rhs.stack_.empty()) {
+        return true;
+    } else if (not stack_.empty() && not rhs.stack_.empty()) {
+        return stack_.front() == rhs.stack_.front();
+    } else {
+        return false;
+    }
+}
+
+// explicitly instatitate the templates
+template class NodeIterator<Node>;
+template class NodeIterator<const Node>;
+
+template
+bool NodeIterator<Node>::equal(const NodeIterator<const Node>&) const;
+
+template
+bool NodeIterator<Node>::equal(const NodeIterator<Node>&) const;
+
+template
+bool NodeIterator<const Node>::equal(const NodeIterator<Node>&) const;
+
+template
+bool NodeIterator<const Node>::equal(const NodeIterator<const Node>&) const;
+
+
 } // namespace oh5
 } // namespace brfc

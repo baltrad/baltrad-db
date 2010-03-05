@@ -1,9 +1,13 @@
+#include <boost/foreach.hpp>
 #include <gtest/gtest.h>
+#include <QtCore/QStringList>
 
 #include "../common.hpp"
 
 #include <brfc/exceptions.hpp>
 #include <brfc/oh5/Node.hpp>
+
+#include <iostream>
 
 namespace brfc {
 namespace oh5 {
@@ -73,6 +77,31 @@ TEST_F(Node_test, changing_child_name_throws_when_parent_has_entry) {
 TEST_F(Node_test, is_root) {
     EXPECT_TRUE(a->is_root());
     EXPECT_FALSE(b->is_root());
+}
+
+TEST_F(Node_test, iterator) {
+    Node::iterator i = a->begin();
+    EXPECT_EQ(&(*i), a.get());
+    ++i;
+    EXPECT_EQ(&(*i), b.get());
+}
+
+TEST_F(Node_test, iterator_end) {
+    Node::iterator i = f->begin();
+    EXPECT_TRUE(i != f->end());
+    ++i;
+    EXPECT_TRUE(i == f->end());
+}
+
+TEST_F(Node_test, iterate_tree) {
+    a->add_child(f);
+
+    QStringList names;
+    BOOST_FOREACH(Node& node, *a) {
+        names.append(node.name());
+    }
+
+    EXPECT_EQ(names.join(""), "abfc");
 }
 
 } // namespace oh5
