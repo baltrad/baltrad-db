@@ -6,7 +6,15 @@
 namespace brfc {
 namespace oh5 {
 
+class Attribute;
+
 class Group : public Node {
+  public:
+    /**
+     * @throw lookup_error when attribute can't be found
+     */
+    shared_ptr<Attribute> attribute(const QString& path);
+
   protected:
     template<class T, class A1> 
     friend 

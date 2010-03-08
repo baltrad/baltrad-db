@@ -6,6 +6,11 @@
 namespace brfc {
 namespace oh5 {
 
+shared_ptr<Attribute>
+Group::attribute(const QString& name) {
+    return dynamic_pointer_cast<Attribute>(child_by_path(name));
+}
+
 bool
 Group::do_accepts_child(const Node& node) const {
     return true;

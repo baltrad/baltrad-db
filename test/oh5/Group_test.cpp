@@ -33,5 +33,16 @@ TEST_F(oh5_Group_test, test_add_child_group) {
     EXPECT_NO_THROW(g->add_child(d));
 }
 
+TEST_F(oh5_Group_test, test_attribute_access) {
+    shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
+    g->add_child(what);
+    shared_ptr<Attribute> a1 = make_shared<Attribute>("a1", Variant(1));
+    what->add_child(a1);
+
+    EXPECT_EQ(g->attribute("what/a1"), a1);
+    EXPECT_FALSE(g->attribute("a1"));
+    EXPECT_FALSE(g->attribute("what"));
+}
+
 } // namespace oh5
 } // namespace brfc
