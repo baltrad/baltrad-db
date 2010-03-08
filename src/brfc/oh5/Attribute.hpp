@@ -9,9 +9,6 @@ class Variant;
 
 namespace oh5 {
 
-class AttributeGroup;
-class DataObject;
-
 /**
  * @brief Attribute read from HDF5 file
  */
@@ -21,18 +18,6 @@ class Attribute : public Node {
      * @brief destructor
      */
     virtual ~Attribute();
-    
-    /**
-     * @brief DataObject this attribute is associated with
-     *
-     * this is the nearest DataObject traversing towards root or null
-     */
-    shared_ptr<DataObject> data_object() const;
-    
-    /**
-     * @brief AttributeGroup this attribuet is associated with
-     */
-    shared_ptr<AttributeGroup> group() const;
     
     /**
      * @brief attribute value
@@ -53,7 +38,8 @@ class Attribute : public Node {
     /**
      * @brief full name of this attribute
      *
-     * if the attribute is in a group, return the name with group prepended
+     * if the attribute is in an AttributeGroup, return the name with
+     * group name prepended.
      */
     QString full_name() const;
     
@@ -77,7 +63,6 @@ class Attribute : public Node {
      * @brief constructor
      * @param name name of the attribute
      * @param value attribute value
-     * @param data_object owning DataObject
      */
     Attribute(const QString& name,
               const Variant& value,
@@ -92,8 +77,11 @@ class Attribute : public Node {
         return false;
     }
 
+    virtual bool do_accepts_parent(const Node& node) const {
+        return true;
+    }
+
   private:
-    const DataObject* data_object_;
     scoped_ptr<Variant> value_;
     bool ignore_in_hash_;
 };

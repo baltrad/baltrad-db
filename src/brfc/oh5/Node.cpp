@@ -63,6 +63,8 @@ Node::add_child(shared_ptr<Node> node) {
         throw duplicate_entry(node->name().toUtf8().constData());
     } else if (not accepts_child(*node)) {
         throw value_error("node not accepted as child");
+    } else if (not node->accepts_parent(*this)) {
+        throw value_error("node does not accept this as parent");
     }
 
     shared_ptr<Node> old_parent = node->parent();

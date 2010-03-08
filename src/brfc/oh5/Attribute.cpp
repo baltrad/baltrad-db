@@ -3,7 +3,6 @@
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/DataObject.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -20,23 +19,6 @@ Attribute::~Attribute() {
 
 }
 
-shared_ptr<AttributeGroup>
-Attribute::group() const {
-    return dynamic_pointer_cast<AttributeGroup>(parent());
-}
-
-shared_ptr<DataObject>
-Attribute::data_object() const {
-    shared_ptr<Node> dobj;
-
-    if (group()) {
-        dobj = group()->parent();
-    } else {
-        dobj = parent();
-    }
-    return dynamic_pointer_cast<DataObject>(dobj);
-}
-
 void
 Attribute::value(const Variant& value) {
     *value_ = value;
@@ -44,8 +26,10 @@ Attribute::value(const Variant& value) {
 
 QString
 Attribute::full_name() const {
-    if (group()) {
-        return group()->name() + "/" + name();
+    shared_ptr<AttributeGroup> grp =
+        dynamic_pointer_cast<AttributeGroup>(parent());
+    if (grp) {
+        return grp->name() + "/" + name();
     } else {
         return name();
     }

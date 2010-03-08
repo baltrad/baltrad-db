@@ -66,6 +66,13 @@ class Node : public boost::noncopyable,
         return do_accepts_child(node);
     }
 
+    /**
+     * @sa do_accepts_parent
+     */
+    bool accepts_parent(const Node& node) const {
+        return do_accepts_parent(node);
+    }
+
     const ChildVector& children() const {
         return children_;
     }
@@ -97,10 +104,9 @@ class Node : public boost::noncopyable,
 
     void parent(shared_ptr<Node> node);
     
-    /**
-     * default implementation always returns true
-     */
-    virtual bool do_accepts_child(const Node& child) const = 0;
+    virtual bool do_accepts_child(const Node& node) const = 0;
+
+    virtual bool do_accepts_parent(const Node& node) const = 0;
 
   private:
     friend class NodeIterator<Node>;

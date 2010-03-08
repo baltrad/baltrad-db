@@ -10,27 +10,27 @@
 namespace brfc {
 namespace oh5 {
 
-struct AttributeGroup_test : public ::testing::Test {
-    AttributeGroup_test()
-            : g(make_shared<AttributeGroup>("g")) {
+struct oh5_Group_test : public ::testing::Test {
+    oh5_Group_test()
+            : g(make_shared<Group>("g")) {
     }
 
-    shared_ptr<AttributeGroup> g;
+    shared_ptr<Group> g;
 };
 
-TEST_F(AttributeGroup_test, test_add_child_attribute) {
+TEST_F(oh5_Group_test, test_add_child_attribute) {
     shared_ptr<Attribute> a = make_shared<Attribute>("a", Variant(1));
     EXPECT_NO_THROW(g->add_child(a));
 }
 
-TEST_F(AttributeGroup_test, test_add_child_attributegroup) {
+TEST_F(oh5_Group_test, test_add_child_attributegroup) {
     shared_ptr<AttributeGroup> g2 = make_shared<AttributeGroup>("g2");
-    EXPECT_THROW(g->add_child(g2), value_error);
+    EXPECT_NO_THROW(g->add_child(g2));
 }
 
-TEST_F(AttributeGroup_test, test_add_child_group) {
+TEST_F(oh5_Group_test, test_add_child_group) {
     shared_ptr<Group> d = make_shared<Group>("d");
-    EXPECT_THROW(g->add_child(d), value_error);
+    EXPECT_NO_THROW(g->add_child(d));
 }
 
 } // namespace oh5

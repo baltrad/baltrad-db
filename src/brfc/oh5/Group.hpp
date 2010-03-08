@@ -1,12 +1,12 @@
-#ifndef BRFC_OH5_DATA_OBJECT_HPP
-#define BRFC_OH5_DATA_OBJECT_HPP
+#ifndef BRFC_OH5_GROUP_HPP
+#define BRFC_OH5_GROUP_HPP
 
 #include <brfc/oh5/Node.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-class DataObject : public Node {
+class Group : public Node {
   protected:
     template<class T, class A1> 
     friend 
@@ -14,18 +14,18 @@ class DataObject : public Node {
 
     /**
      * @brief constructor
-     *
-     * use make_shared<Node> to call
      */
-    DataObject(const QString& name)
+    Group(const QString& name)
         : Node(name) {
     }
 
     virtual bool do_accepts_child(const Node& node) const;
+
+    virtual bool do_accepts_parent(const Node& node) const;
 
 };
 
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_OH5_DATA_OBJECT_HPP
+#endif // BRFC_OH5_GROUP_HPP
