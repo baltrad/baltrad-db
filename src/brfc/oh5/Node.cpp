@@ -108,6 +108,28 @@ Node::has_child_by_name(const QString& name) const {
     return false;
 }
 
+shared_ptr<Node>
+Node::child_by_name(const QString& name) {
+    BOOST_FOREACH(shared_ptr<Node> node, children_) {
+        if (node->name() == name) {
+            return node;
+        }
+    }
+    return shared_ptr<Node>();
+}
+
+shared_ptr<Node>
+Node::child_by_path(const QString& path) {
+    QStringList names = path.split("/");
+    shared_ptr<Node> cur = shared_from_this();
+    BOOST_FOREACH(const QString& name, names) {
+        cur = cur->child_by_name(name);
+        if (not cur)
+            break;
+    }
+    return cur;
+}
+
 Node::iterator
 Node::begin() {
     return iterator(*this);

@@ -124,5 +124,16 @@ TEST_F(Node_test, iterate_tree) {
     EXPECT_EQ(names.join(""), "abfc");
 }
 
+TEST_F(Node_test, child_by_name) {
+    EXPECT_EQ(a->child_by_name("b"), b);
+    EXPECT_FALSE(a->child_by_name("c"));
+}
+
+TEST_F(Node_test, child_by_path) {
+    EXPECT_EQ(a->child_by_path("b/c"), c);
+    EXPECT_EQ(a->child_by_path("b"), b);
+    EXPECT_FALSE(a->child_by_path("b/q"));
+}
+
 } // namespace oh5
 } // namespace brfc

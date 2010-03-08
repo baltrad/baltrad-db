@@ -59,6 +59,12 @@ class Node : public boost::noncopyable,
 
     void remove_child(Node& node);
 
+    shared_ptr<Node>
+    child_by_name(const QString& name);
+
+    shared_ptr<Node>
+    child_by_path(const QString& path);
+
     /**
      * @sa do_accepts_child
      */
