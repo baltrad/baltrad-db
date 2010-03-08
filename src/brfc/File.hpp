@@ -44,7 +44,8 @@ class File : public boost::noncopyable {
      * full paths of ignored attributes (not defined in specs) are stored
      * and accessible through ignored_attributes();
      */
-    File(const QString& path, const AttributeSpecs& specs);
+    static shared_ptr<File>
+    from_filesystem(const QString& path, const AttributeSpecs& specs);
     
     /**
      * @brief construct with mandatory attributes present
@@ -57,11 +58,12 @@ class File : public boost::noncopyable {
      * this is the minimal "correct" file, given that parameters are
      * correctly formed.
      */
-    File(const QString& object,
-         const QDate& date,
-         const QTime& time,
-         const QString& source,
-         const QString& version=QString::fromUtf8("H5rad 2.0"));
+    static shared_ptr<File>
+    minimal(const QString& object,
+            const QDate& date,
+            const QTime& time,
+            const QString& source,
+            const QString& version=QString::fromUtf8("H5rad 2.0"));
 
     /**
      * @brief destructor

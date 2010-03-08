@@ -40,43 +40,43 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
             , src1("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , src2("WMO:02666,RAD:SE51,PLC:Karlskrona")
             , db(TestRDBEnv::get_database(GetParam()))
-            , td1("PVOL", QDate(2000, 1, 1), QTime(12, 0), src1)
-            , td2("PVOL", QDate(2000, 1, 1), QTime(12, 1), src2)
-            , td3("PVOL", QDate(2000, 1, 1), QTime(12, 2), src1)
-            , td4("CVOL", QDate(2001, 1, 1), QTime(12, 0), src2)
-            , td5("SCAN", QDate(2002, 2, 1), QTime(12, 0), src1)
+            , td1(File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), src1))
+            , td2(File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 1), src2))
+            , td3(File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 2), src1))
+            , td4(File::minimal("CVOL", QDate(2001, 1, 1), QTime(12, 0), src2))
+            , td5(File::minimal("SCAN", QDate(2002, 2, 1), QTime(12, 0), src1))
             , query(db) {
     }
 
     virtual void SetUp() {
-        td1.data_object("/do1", true).add_attribute("where/xsize", Variant(1));
-        td1.data_object("/do1", true).add_attribute("where/ysize", Variant(2));
-        td1.source(db->load_source(src1));
+        td1->data_object("/do1", true).add_attribute("where/xsize", Variant(1));
+        td1->data_object("/do1", true).add_attribute("where/ysize", Variant(2));
+        td1->source(db->load_source(src1));
 
-        td2.data_object("/do1", true).add_attribute("where/xsize", Variant(2));
-        td2.data_object("/do1", true).add_attribute("where/ysize", Variant(2));
-        td2.source(db->load_source(src2));
+        td2->data_object("/do1", true).add_attribute("where/xsize", Variant(2));
+        td2->data_object("/do1", true).add_attribute("where/ysize", Variant(2));
+        td2->source(db->load_source(src2));
 
-        td3.data_object("/do1", true).add_attribute("where/xsize", Variant(3));
-        td3.data_object("/do2", true).add_attribute("where/xsize", Variant(3));
-        td3.source(db->load_source(src1));
+        td3->data_object("/do1", true).add_attribute("where/xsize", Variant(3));
+        td3->data_object("/do2", true).add_attribute("where/xsize", Variant(3));
+        td3->source(db->load_source(src1));
 
-        td4.data_object("/do1", true).add_attribute("where/xsize", Variant(6));
-        td4.data_object("/do1", true).add_attribute("where/ysize", Variant(4));
-        td4.data_object("/do2", true).add_attribute("where/ysize", Variant(5));
-        td4.source(db->load_source(src2));
+        td4->data_object("/do1", true).add_attribute("where/xsize", Variant(6));
+        td4->data_object("/do1", true).add_attribute("where/ysize", Variant(4));
+        td4->data_object("/do2", true).add_attribute("where/ysize", Variant(5));
+        td4->source(db->load_source(src2));
 
-        td5.data_object("/do1", true).add_attribute("where/xsize", Variant(5));
-        td5.data_object("/do1", true).add_attribute("where/ysize", Variant(2));
-        td5.data_object("/do2", true).add_attribute("where/xsize", Variant(2));
-        td5.data_object("/do2", true).add_attribute("where/ysize", Variant(5));
-        td5.source(db->load_source(src1));
+        td5->data_object("/do1", true).add_attribute("where/xsize", Variant(5));
+        td5->data_object("/do1", true).add_attribute("where/ysize", Variant(2));
+        td5->data_object("/do2", true).add_attribute("where/xsize", Variant(2));
+        td5->data_object("/do2", true).add_attribute("where/ysize", Variant(5));
+        td5->source(db->load_source(src1));
 
-        db->save_file("td1", td1);
-        db->save_file("td2", td2);
-        db->save_file("td3", td3);
-        db->save_file("td4", td4);
-        db->save_file("td5", td5);
+        db->save_file("td1", *td1);
+        db->save_file("td2", *td2);
+        db->save_file("td3", *td3);
+        db->save_file("td4", *td4);
+        db->save_file("td5", *td5);
     }
 
     virtual void TearDown() {
@@ -86,7 +86,7 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
     expr::Factory xpr;
     QString src1, src2;
     TestRDB* db;
-    File td1, td2, td3, td4, td5;
+    shared_ptr<File> td1, td2, td3, td4, td5;
     Query query;
 };
 
@@ -202,15 +202,15 @@ TEST_P(RDB_Query_test, test_select_by_place) {
 
 TEST_P(RDB_Query_test, test_has_file) {
     bool result = false;
-    ASSERT_NO_THROW(result = db->has_file(td1));
+    ASSERT_NO_THROW(result = db->has_file(*td1));
     EXPECT_TRUE(result);
 }
 
 TEST_P(RDB_Query_test, test_has_nx_file) {
     bool result = false;
-    File td("PVOL", QDate(2000, 1, 10), QTime(12, 0), src1);
-    td.source(db->load_source(src1));
-    ASSERT_NO_THROW(result = db->has_file(td));
+    shared_ptr<File> td = File::minimal("PVOL", QDate(2000, 1, 10), QTime(12, 0), src1);
+    td->source(db->load_source(src1));
+    ASSERT_NO_THROW(result = db->has_file(*td));
     EXPECT_FALSE(result);
 }
 

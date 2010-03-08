@@ -19,8 +19,20 @@ namespace brfc {
 struct File_test : public testing::Test {
     File_test()
             : specs()
-            , src(new SourceRadar()) {
-
+            , src(new SourceRadar())
+            , f1(File::minimal("pvol",
+                               QDate(2000, 1, 2),
+                               QTime(12, 5),
+                               "WMO:02606"))
+            , f2(File::minimal("pvol",
+                               QDate(2001, 1, 2),
+                               QTime(12, 5),
+                               "WMO:02606"))
+            // same as f1
+            , f3(File::minimal("pvol",
+                               QDate(2000, 1, 2),
+                               QTime(12, 5),
+                               "WMO:02606")) {
     }
 
     virtual void SetUp() {
@@ -29,6 +41,7 @@ struct File_test : public testing::Test {
 
     AttributeSpecs specs;
     shared_ptr<SourceRadar> src;
+    shared_ptr<File> f1, f2, f3;
 };
 
 TEST_F(File_test, get_same_node) {
@@ -73,52 +86,41 @@ TEST_F(File_test, split_short_path_with_group) {
     EXPECT_EQ(p.attribute_name, "what/date");
 }
 
-TEST_F(File_test, unique_identifier_same_meta) {
-    File f1("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
-    File f2("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
-    f1.source(src);
-    f2.source(src);
-    EXPECT_EQ(f1.unique_identifier(), f2.unique_identifier());
+TEST_F(File_test, required_attribute_shortcuts) {
+    EXPECT_EQ(f1->what_object(), "pvol");
+    EXPECT_EQ(f1->what_date(), QDate(2000, 1, 2));
+    EXPECT_EQ(f1->what_time(), QTime(12, 5));
+    EXPECT_EQ(f1->what_source(), "WMO:02606");
 }
 
-TEST_F(File_test, required_attribute_shortcuts) {
-    QString object("pvol");
-    QDate date(2000, 1, 2);
-    QTime time(12, 5);
-    QString source("WMO:02606");
-    File f1(object, date, time, source);
-    EXPECT_EQ(f1.what_object(), object);
-    EXPECT_EQ(f1.what_date(), date);
-    EXPECT_EQ(f1.what_time(), time);
-    EXPECT_EQ(f1.what_source(), source);
+TEST_F(File_test, unique_identifier_same_meta) {
+    f1->source(src);
+    f3->source(src);
+    EXPECT_EQ(f1->unique_identifier(), f3->unique_identifier());
 }
 
 TEST_F(File_test, unique_identifier_different_meta) {
-    File f1("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
-    File f2("pvol", QDate(2001, 1, 2), QTime(12, 5), "WMO:02606");
-    f1.source(src);
-    f2.source(src);
-    EXPECT_NE(f1.unique_identifier(), f2.unique_identifier());
+    f1->source(src);
+    f2->source(src);
+    EXPECT_NE(f1->unique_identifier(), f2->unique_identifier());
 }
 
 TEST_F(File_test, unique_identifier_ignore_attribute) {
-    File f("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
-    f.source(src);
-    QString uid = f.unique_identifier();
-    f.root().add_attribute("bla", Variant(1), true);
-    EXPECT_EQ(uid, f.unique_identifier());
+    f1->source(src);
+    QString uid = f1->unique_identifier();
+    f1->root().add_attribute("bla", Variant(1), true);
+    EXPECT_EQ(uid, f1->unique_identifier());
 }
 
 TEST_F(File_test, unique_identifier_changes_when_meta_changes) {
-    File f("pvol", QDate(2000, 1, 2), QTime(12, 5), "WMO:02606");
-    f.source(src);
-    QString uid = f.unique_identifier();
-    f.root().add_attribute("bla", Variant(1), false);
-    EXPECT_NE(uid, f.unique_identifier());
+    f1->source(src);
+    QString uid = f1->unique_identifier();
+    f1->root().add_attribute("bla", Variant(1), false);
+    EXPECT_NE(uid, f1->unique_identifier());
 }
 
 TEST_F(File_test, open_nx_file) {
-    EXPECT_THROW(File("/path/to/nxfile", specs), fs_error);
+    EXPECT_THROW(File::from_filesystem("/path/to/nxfile", specs), fs_error);
 }
 
 TEST_F(File_test, read) {
@@ -135,10 +137,10 @@ TEST_F(File_test, read) {
     f.add_attribute("/dataset1/date", date);
     f.write();
 
-    File g(f.filename(), specs);
-    EXPECT_EQ(g.root().attribute("date").value(), date);
-    EXPECT_EQ(g.root().attribute("time").value(), time);
-    EXPECT_EQ(g.data_object("/dataset1").attribute("date").value(), date);
+    shared_ptr<File> g = File::from_filesystem(f.filename(), specs);
+    EXPECT_EQ(g->root().attribute("date").value(), date);
+    EXPECT_EQ(g->root().attribute("time").value(), time);
+    EXPECT_EQ(g->data_object("/dataset1").attribute("date").value(), date);
 }
 
 TEST_F(File_test, ignored_attributes) {
@@ -148,9 +150,9 @@ TEST_F(File_test, ignored_attributes) {
     f.add_attribute("/dataset/ignore", Variant(1.0));
     f.write();
 
-    File g(f.filename(), specs);
-    EXPECT_THROW(g.root().attribute("ignore"), brfc::lookup_error);
-    const File::StringVector& ignored = g.ignored_attributes();
+    shared_ptr<File> g = File::from_filesystem(f.filename(), specs);
+    EXPECT_THROW(g->root().attribute("ignore"), brfc::lookup_error);
+    const File::StringVector& ignored = g->ignored_attributes();
     EXPECT_EQ(ignored.size(), (size_t)2);
     EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/ignore") != ignored.end());
     EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/dataset/ignore") != ignored.end());

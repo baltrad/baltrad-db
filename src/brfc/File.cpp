@@ -32,31 +32,27 @@ File::File()
 
 }
 
-File::File(const QString& path, const AttributeSpecs& specs)
-        : root_(new DataObject("", this))
-        , ignored_attributes_()
-        , path_(path)
-        , source_()
-        , db_id_(0) {
-    load(path, specs);
+shared_ptr<File>
+File::from_filesystem(const QString& path, const AttributeSpecs& specs) {
+    shared_ptr<File> f(new File);
+    f->load(path, specs);
+    return f;
 }
 
-File::File(const QString& object,
-           const QDate& date,
-           const QTime& time,
-           const QString& source,
-           const QString& version)
-        : root_(new DataObject("", this))
-        , ignored_attributes_()
-        , path_()
-        , source_()
-        , db_id_(0) {
-    root_->add_attribute("Conventions", Variant("ODIM_H5/V2_0"), true);
-    root_->add_attribute("what/object", Variant(object));
-    root_->add_attribute("what/version", Variant(version));
-    root_->add_attribute("what/date", Variant(date));
-    root_->add_attribute("what/time", Variant(time));
-    root_->add_attribute("what/source", Variant(source), true);
+shared_ptr<File>
+File::minimal(const QString& object,
+              const QDate& date,
+              const QTime& time,
+              const QString& source,
+              const QString& version) {
+    shared_ptr<File> f(new File);
+    f->root_->add_attribute("Conventions", Variant("ODIM_H5/V2_0"), true);
+    f->root_->add_attribute("what/object", Variant(object));
+    f->root_->add_attribute("what/version", Variant(version));
+    f->root_->add_attribute("what/date", Variant(date));
+    f->root_->add_attribute("what/time", Variant(time));
+    f->root_->add_attribute("what/source", Variant(source), true);
+    return f;
 }
 
 shared_ptr<Source>
