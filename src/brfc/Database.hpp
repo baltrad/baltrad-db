@@ -9,10 +9,13 @@ class QString;
 
 namespace brfc {
 
-class File;
 class ResultSet;
 class Query;
 class Source;
+
+namespace oh5 {
+    class File;
+}
 
 /**
  * @brief ABC for Database access
@@ -48,7 +51,7 @@ class Database : public boost::noncopyable {
     /**
      * @brief is file stored
      */
-    bool has_file(const File& file) {
+    bool has_file(const oh5::File& file) {
         return do_has_file(file);
     }
     
@@ -60,10 +63,10 @@ class Database : public boost::noncopyable {
     }
     
     /**
-     * @brief save File to database
+     * @brief save file to database
      * @return database id associated with the file
      */
-    long long save_file(const QString& path, const File& file) {
+    long long save_file(const QString& path, const oh5::File& file) {
         return do_save_file(path, file);
     }
 
@@ -93,9 +96,9 @@ class Database : public boost::noncopyable {
     virtual void do_rollback() = 0;
     virtual void do_commit() = 0;
     
-    virtual bool do_has_file(const File& file) = 0;
+    virtual bool do_has_file(const oh5::File& file) = 0;
     virtual void do_remove_file(const QString& path) = 0;
-    virtual long long do_save_file(const QString& path, const File& file) = 0;
+    virtual long long do_save_file(const QString& path, const oh5::File& file) = 0;
 
     virtual shared_ptr<Source> do_load_source(const QString& source) = 0;
 

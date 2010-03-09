@@ -6,7 +6,6 @@
 
 #include <boost/noncopyable.hpp>
 
-#include <brfc/hlhdf.hpp>
 #include <brfc/smart_ptr.hpp>
 
 #include <QtCore/QString>
@@ -17,8 +16,12 @@ class QTime;
 namespace brfc {
 
 class AttributeSpecs;
-class DataObject;
 class Source;
+
+namespace oh5 {
+
+class Group;
+class Root;
 
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
@@ -33,8 +36,8 @@ class File : public boost::noncopyable {
      *
      * this is mainly useful for testing purposes
      */
-    File();
-    
+    static shared_ptr<File> create();
+
     /**
      * @brief construct from physical file
      * @param path absolute path to the file
@@ -71,32 +74,39 @@ class File : public boost::noncopyable {
     ~File();
 
     /**
-     * @brief get hold of DataObject at path
-     * @param path path to DataObject, where elements are separated by '/'
-     * @param create_missing should missing DataObjects on path be created
-     * @return reference to requested DataObject
+     * @brief get hold of Group at path
+     * @param path path to Group, where elements are separated by '/'
+     * @return pointer to requested Group if found
      *
-     * data_object("/path/to/dataobject")
+     * group("path/to/group")
+     * @{
      */
-    DataObject& data_object(const QString& path,
-                            bool create_missing=false); 
+    shared_ptr<const Group> group(const QString& path) const;
+
+    shared_ptr<Group> group(const QString& path);
+    ///@}
     
     /**
-     * @brief get root DataObject
-     * 
-     * equivalent to: \code data_object("/") \endcode
+     * @brief get the root group
+     * @{
      */
-    const DataObject& root() const { return *root_; }
+    shared_ptr<const Root> root() const { return root_; }
 
-    /**
-     * @brief get root DataObject
-     */
-    DataObject& root() { return *root_; }
+    shared_ptr<Root> root() { return root_; }
+    ///@}
     
     /**
      * @brief get the Source definiton
+     * @{
      */
-    shared_ptr<Source> source() const;
+    shared_ptr<const Source> source() const {
+        return source_;
+    }
+
+    shared_ptr<Source> source() {
+        return source_;
+    }
+    ///@}
 
     void source(shared_ptr<Source> src);
 
@@ -114,11 +124,20 @@ class File : public boost::noncopyable {
 
     /**
      * @brief get attributes ignored on loading
+     * @{
      */
     const StringVector& ignored_attributes() const {
         return ignored_attributes_;
     }
 
+    StringVector& ignored_attributes() {
+        return ignored_attributes_;
+    }
+    ///@}
+
+    /**
+     * @{
+     */
     const QString& path() const {
         return path_;
     }
@@ -126,10 +145,15 @@ class File : public boost::noncopyable {
     void path(const QString& path) {
         path_ = path;
     }
-
+    ///@}
+    
+    /**
+     * @{
+     */
     long long db_id() const { return db_id_; }
 
     void db_id(long long db_id) const { db_id_ = db_id; }
+    ///@}
     
     /**
      * @name mandatory attribute access shorthands
@@ -165,29 +189,25 @@ class File : public boost::noncopyable {
     QString what_source() const;
     ///@}
 
+  protected:
+    File();
+    
   private:
-    /**
-     * @brief load from filesystem
-     */
-    void load(const QString& path, const AttributeSpecs& specs);
-
-    void add_attribute_from_node(HL_Node* node,
-                                 const AttributeSpecs& specs);
-
     /**
      * @brief figure out pathname from attributes
      *
-     * pseudo-attribute \c path on root DataObject is set to a relative
+     * pseudo-attribute \c path on root Group is set to a relative
      * path where this File should be stored to.
      */
     void set_path_from_attributes();
-
-    boost::scoped_ptr<DataObject> root_;
+    
+    shared_ptr<Root> root_;
     StringVector ignored_attributes_;
     QString path_;
     shared_ptr<Source> source_;
     mutable long long db_id_;
 };
 
+} // namespace oh5
 } // namespace brfc
 #endif // BRFC_FILE_H

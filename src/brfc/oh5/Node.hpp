@@ -14,6 +14,8 @@
 namespace brfc {
 namespace oh5 {
 
+class File;
+
 template<typename T>
 class NodeIterator;
 
@@ -43,6 +45,15 @@ class Node : public boost::noncopyable,
     bool is_root() const {
         return parent_.expired();
     }
+    
+    /**
+     * @{
+     * @brief get root node
+     */
+    shared_ptr<Node> root();
+
+    shared_ptr<const Node> root() const;
+    ///@}
 
     /**
      * @brief add a child node
@@ -58,12 +69,26 @@ class Node : public boost::noncopyable,
     bool has_child(const Node& node) const;
 
     void remove_child(Node& node);
-
+    
+    /**
+     * @{
+     */
     shared_ptr<Node>
     child_by_name(const QString& name);
 
+    shared_ptr<const Node>
+    child_by_name(const QString& name) const;
+    ///@}
+    
+    /**
+     * @{
+     */
     shared_ptr<Node>
     child_by_path(const QString& path);
+
+    shared_ptr<const Node>
+    child_by_path(const QString& path) const;
+    ///@}
 
     /**
      * @sa do_accepts_child
@@ -82,6 +107,23 @@ class Node : public boost::noncopyable,
     const ChildVector& children() const {
         return children_;
     }
+
+    /**
+     * @brief file this node is associated with
+     *
+     * default implementation returns the file associated with root and
+     * for root returns a null pointer.
+     * @{
+     */
+    shared_ptr<const File> file() const {
+        return do_file();
+    }
+
+    shared_ptr<File> file() {
+        const Node* self = const_cast<const Node*>(this);
+        return const_pointer_cast<File>(self->file());
+    }
+    ///@}
     
     iterator begin();
     const_iterator begin() const;
@@ -113,6 +155,8 @@ class Node : public boost::noncopyable,
     virtual bool do_accepts_child(const Node& node) const = 0;
 
     virtual bool do_accepts_parent(const Node& node) const = 0;
+
+    virtual shared_ptr<const File> do_file() const;
 
   private:
     friend class NodeIterator<Node>;

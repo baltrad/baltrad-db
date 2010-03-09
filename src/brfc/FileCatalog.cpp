@@ -3,9 +3,7 @@
 #include <brfc/exceptions.hpp>
 #include <brfc/AttributeSpecs.hpp>
 #include <brfc/Database.hpp>
-#include <brfc/DataObject.hpp>
 #include <brfc/DefaultFileNamer.hpp>
-#include <brfc/File.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/RelationalDatabase.hpp>
 #include <brfc/ResultSet.hpp>
@@ -14,6 +12,8 @@
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/Factory.hpp>
 #include <brfc/expr/Literal.hpp>
+
+#include <brfc/oh5/File.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -57,18 +57,18 @@ FileCatalog::check_storage() const {
 
 bool
 FileCatalog::is_cataloged(const QString& path) const {
-    shared_ptr<File> f = File::from_filesystem(path, *specs_);
+    shared_ptr<oh5::File> f = oh5::File::from_filesystem(path, *specs_);
     return is_cataloged(*f);
 }
 
 bool
-FileCatalog::is_cataloged(const File& f) const {
+FileCatalog::is_cataloged(const oh5::File& f) const {
     return db_->has_file(f);
 }
 
-shared_ptr<File>
+shared_ptr<const oh5::File>
 FileCatalog::catalog(const QString& path) {
-    shared_ptr<File> f = File::from_filesystem(path, *specs_);
+    shared_ptr<oh5::File> f = oh5::File::from_filesystem(path, *specs_);
     
     f->source(db_->load_source(f->what_source()));
 

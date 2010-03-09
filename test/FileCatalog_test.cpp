@@ -4,11 +4,12 @@
 #include <brfc/exceptions.hpp>
 #include <brfc/AttributeSpecs.hpp>
 #include <brfc/Database.hpp>
-#include <brfc/File.hpp>
 #include <brfc/FileCatalog.hpp>
 #include <brfc/Source.hpp>
 #include <brfc/SourceRadar.hpp>
 #include <brfc/Query.hpp>
+
+#include <brfc/oh5/File.hpp>
 
 #include <QtCore/QDate>
 #include <QtCore/QTime>
@@ -33,9 +34,9 @@ class MockDatabase : public Database {
     MOCK_METHOD0(do_rollback, void());
     MOCK_METHOD0(do_commit, void());
     
-    MOCK_METHOD1(do_has_file, bool(const File&));
+    MOCK_METHOD1(do_has_file, bool(const oh5::File&));
     MOCK_METHOD1(do_remove_file, void(const QString&));
-    MOCK_METHOD2(do_save_file, long long(const QString&, const File&));
+    MOCK_METHOD2(do_save_file, long long(const QString&, const oh5::File&));
     MOCK_METHOD1(do_load_source, shared_ptr<Source>(const QString&));
     MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
     MOCK_METHOD0(do_clean, void());  
@@ -43,7 +44,7 @@ class MockDatabase : public Database {
 
 class MockNamer : public FileNamer {
   public:
-    MOCK_CONST_METHOD1(do_name, QString(const File&));
+    MOCK_CONST_METHOD1(do_name, QString(const oh5::File&));
 };
 
 struct FileCatalog_test : public testing::Test {
@@ -96,7 +97,7 @@ TEST_F(FileCatalog_test, test_catalog) {
     EXPECT_CALL(*db, do_commit());
     
     // file is given the path returned by namer
-    shared_ptr<File> f = fc.catalog(minfile->filename());
+    shared_ptr<const oh5::File> f = fc.catalog(minfile->filename());
     EXPECT_EQ(f->path(), target);
     EXPECT_EQ(f->db_id(), 1);
 

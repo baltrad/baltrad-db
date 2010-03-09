@@ -110,6 +110,12 @@ Node::has_child_by_name(const QString& name) const {
 
 shared_ptr<Node>
 Node::child_by_name(const QString& name) {
+    const Node* self = const_cast<const Node*>(this);
+    return const_pointer_cast<Node>(self->child_by_name(name));
+}
+
+shared_ptr<const Node>
+Node::child_by_name(const QString& name) const {
     BOOST_FOREACH(shared_ptr<Node> node, children_) {
         if (node->name() == name) {
             return node;
@@ -120,8 +126,14 @@ Node::child_by_name(const QString& name) {
 
 shared_ptr<Node>
 Node::child_by_path(const QString& path) {
+    const Node* self = const_cast<const Node*>(this);
+    return const_pointer_cast<Node>(self->child_by_path(path));
+}
+
+shared_ptr<const Node>
+Node::child_by_path(const QString& path) const {
     QStringList names = path.split("/");
-    shared_ptr<Node> cur = shared_from_this();
+    shared_ptr<const Node> cur = shared_from_this();
     BOOST_FOREACH(const QString& name, names) {
         cur = cur->child_by_name(name);
         if (not cur)
@@ -150,6 +162,29 @@ Node::end() const {
     return const_iterator();
 }
 
+shared_ptr<const Node>
+Node::root() const {
+    shared_ptr<const Node> root = shared_from_this();
+    while (root->parent()) {
+        root = root->parent();
+    }
+    return root;
+}
+
+shared_ptr<Node>
+Node::root() {
+    const Node* self = const_cast<const Node*>(this);
+    return const_pointer_cast<Node>(self->root());
+}
+
+shared_ptr<const File>
+Node::do_file() const {
+    if (is_root()) {
+        return shared_ptr<const File>();
+    } else {
+        return root()->file();
+    }
+}
 
 /***
  * NodeIterator implementation

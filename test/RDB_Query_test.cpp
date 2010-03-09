@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <brfc/TestRDB.hpp>
-#include <brfc/DataObject.hpp>
-#include <brfc/File.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
 
@@ -10,6 +8,13 @@
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
+
+#include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/File.hpp>
+
+#include <boost/foreach.hpp>
 
 #include <QtCore/QDate>
 #include <QtCore/QStringList>
@@ -40,36 +45,62 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
             , src1("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , src2("WMO:02666,RAD:SE51,PLC:Karlskrona")
             , db(TestRDBEnv::get_database(GetParam()))
-            , td1(File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), src1))
-            , td2(File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 1), src2))
-            , td3(File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 2), src1))
-            , td4(File::minimal("CVOL", QDate(2001, 1, 1), QTime(12, 0), src2))
-            , td5(File::minimal("SCAN", QDate(2002, 2, 1), QTime(12, 0), src1))
+            , td1(oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), src1))
+            , td2(oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 1), src2))
+            , td3(oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 2), src1))
+            , td4(oh5::File::minimal("CVOL", QDate(2001, 1, 1), QTime(12, 0), src2))
+            , td5(oh5::File::minimal("SCAN", QDate(2002, 2, 1), QTime(12, 0), src1))
             , query(db) {
     }
 
+    void add_attribute(oh5::File& file, const QString& path, const Variant& value) {
+        QStringList names = path.split("/");
+        shared_ptr<oh5::Attribute> attr = make_shared<oh5::Attribute>(names.takeLast(), value);
+        QString attrgroup_name = names.takeLast();
+        shared_ptr<oh5::Group> group = file.root();
+        shared_ptr<oh5::Group> next_group;
+        BOOST_FOREACH(const QString& name, names) {
+            next_group = group->group_by_name(name);
+            if (not next_group) {
+                next_group = make_shared<oh5::Group>(name);
+                group->add_child(next_group);
+            }
+            group = next_group;
+        }
+        if (not group->has_child_by_name(attrgroup_name)) {
+            shared_ptr<oh5::AttributeGroup> attrgroup =
+                make_shared<oh5::AttributeGroup>(attrgroup_name);
+            group->add_child(attrgroup);
+            group = attrgroup;
+        } else {
+            group = dynamic_pointer_cast<oh5::Group>(group->child_by_name(attrgroup_name));
+        }
+
+        group->add_child(attr);
+    }
+
     virtual void SetUp() {
-        td1->data_object("/do1", true).add_attribute("where/xsize", Variant(1));
-        td1->data_object("/do1", true).add_attribute("where/ysize", Variant(2));
+        add_attribute(*td1, "do1/where/xsize", Variant(1));
+        add_attribute(*td1, "do1/where/ysize", Variant(2));
         td1->source(db->load_source(src1));
 
-        td2->data_object("/do1", true).add_attribute("where/xsize", Variant(2));
-        td2->data_object("/do1", true).add_attribute("where/ysize", Variant(2));
+        add_attribute(*td2, "do1/where/xsize", Variant(2));
+        add_attribute(*td2, "do1/where/ysize", Variant(2));
         td2->source(db->load_source(src2));
 
-        td3->data_object("/do1", true).add_attribute("where/xsize", Variant(3));
-        td3->data_object("/do2", true).add_attribute("where/xsize", Variant(3));
+        add_attribute(*td3, "do1/where/xsize", Variant(3));
+        add_attribute(*td3, "do2/where/xsize", Variant(3));
         td3->source(db->load_source(src1));
 
-        td4->data_object("/do1", true).add_attribute("where/xsize", Variant(6));
-        td4->data_object("/do1", true).add_attribute("where/ysize", Variant(4));
-        td4->data_object("/do2", true).add_attribute("where/ysize", Variant(5));
+        add_attribute(*td4, "do1/where/xsize", Variant(6));
+        add_attribute(*td4, "do1/where/ysize", Variant(4));
+        add_attribute(*td4, "do2/where/ysize", Variant(5));
         td4->source(db->load_source(src2));
 
-        td5->data_object("/do1", true).add_attribute("where/xsize", Variant(5));
-        td5->data_object("/do1", true).add_attribute("where/ysize", Variant(2));
-        td5->data_object("/do2", true).add_attribute("where/xsize", Variant(2));
-        td5->data_object("/do2", true).add_attribute("where/ysize", Variant(5));
+        add_attribute(*td5, "do1/where/xsize", Variant(5));
+        add_attribute(*td5, "do1/where/ysize", Variant(2));
+        add_attribute(*td5, "do2/where/xsize", Variant(2));
+        add_attribute(*td5, "do2/where/ysize", Variant(5));
         td5->source(db->load_source(src1));
 
         db->save_file("td1", *td1);
@@ -86,7 +117,7 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
     expr::Factory xpr;
     QString src1, src2;
     TestRDB* db;
-    shared_ptr<File> td1, td2, td3, td4, td5;
+    shared_ptr<oh5::File> td1, td2, td3, td4, td5;
     Query query;
 };
 
@@ -208,7 +239,7 @@ TEST_P(RDB_Query_test, test_has_file) {
 
 TEST_P(RDB_Query_test, test_has_nx_file) {
     bool result = false;
-    shared_ptr<File> td = File::minimal("PVOL", QDate(2000, 1, 10), QTime(12, 0), src1);
+    shared_ptr<oh5::File> td = oh5::File::minimal("PVOL", QDate(2000, 1, 10), QTime(12, 0), src1);
     td->source(db->load_source(src1));
     ASSERT_NO_THROW(result = db->has_file(*td));
     EXPECT_FALSE(result);

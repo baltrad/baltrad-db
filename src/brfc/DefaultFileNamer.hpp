@@ -22,7 +22,7 @@ class DefaultFileNamer : public FileNamer {
     DefaultFileNamer();
 
   protected:
-    virtual QString do_name(const File& f) const;
+    virtual QString do_name(const oh5::File& f) const;
 };
 
 } // namespace brfc

@@ -19,6 +19,16 @@ Attribute::~Attribute() {
 
 }
 
+shared_ptr<const Group>
+Attribute::parent_group() const {
+    shared_ptr<const AttributeGroup> parent_p =
+        dynamic_pointer_cast<const AttributeGroup>(parent());
+    if (parent_p)
+        return dynamic_pointer_cast<const Group>(parent_p->parent());
+    else
+        return dynamic_pointer_cast<const Group>(parent());
+}
+
 void
 Attribute::value(const Variant& value) {
     *value_ = value;

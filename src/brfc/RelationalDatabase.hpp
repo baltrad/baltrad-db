@@ -16,17 +16,21 @@ class QCoreApplication;
 
 namespace brfc {
 
-class Attribute;
 class AttributeMapper;
 class AttributeSpecs;
-class DataObject;
-class File;
 class Source;
 class SourceCentre;
 class SourceRadar;
 class Variant;
 
+namespace oh5 {
+
+class File;
+
+}
+
 typedef std::map<QString, Variant> BindMap;
+typedef std::map<weak_ptr<void>, long long> IdCache;
 
 /**
  * @brief Database using QtSql
@@ -74,9 +78,10 @@ class RelationalDatabase : public Database {
     virtual void do_rollback();
     virtual void do_commit();
     
-    virtual bool do_has_file(const File& file);
+    virtual bool do_has_file(const oh5::File& file);
     virtual void do_remove_file(const QString& path);
-    virtual long long do_save_file(const QString& path, const File& file);
+    virtual long long do_save_file(const QString& path,
+                                   const oh5::File& file);
 
     virtual shared_ptr<Source> do_load_source(const QString& srcstr);
     
@@ -95,15 +100,9 @@ class RelationalDatabase : public Database {
     void load_source_centre(shared_ptr<SourceCentre> src);
 
     /**
-     * @brief save File to database
+     * @brief save file to database
      */
-    id_type save(const QString& path, const File& file);
-
-    /**
-     * @brief save Attribute to database
-     */
-    void save(const Attribute& attr,
-              const id_type& dobj_id);
+    id_type save(const QString& path, const oh5::File& file);
 
     /**
      * @brief remove file from database
@@ -117,6 +116,7 @@ class RelationalDatabase : public Database {
     boost::scoped_ptr<AttributeSpecs> specs_;
     QString dialect_;
     bool supports_returning_;
+    IdCache id_cache_;
     static unsigned int connection_count_;
     static unsigned int instance_count_;
     static int argc_;

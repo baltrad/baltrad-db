@@ -44,5 +44,16 @@ TEST_F(oh5_Group_test, test_attribute_access) {
     EXPECT_FALSE(g->attribute("what"));
 }
 
+TEST_F(oh5_Group_test, test_group_by_name) {
+    shared_ptr<Group> g2 = make_shared<Group>("g2");
+    g->add_child(g2);
+    shared_ptr<AttributeGroup> ag = make_shared<AttributeGroup>("ag");
+    g2->add_child(ag);
+    
+    EXPECT_EQ(g->group_by_name("g2"), g2);
+    EXPECT_EQ(g2->group_by_name("ag"), ag);
+    EXPECT_FALSE(g->group_by_name("ag"));
+}
+
 } // namespace oh5
 } // namespace brfc

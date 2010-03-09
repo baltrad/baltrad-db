@@ -14,8 +14,11 @@ namespace brfc {
     
 class AttributeSpecs;
 class Database;
-class File;
 class Query;
+
+namespace oh5 {
+    class File;
+}
 
 /**
  * @defgroup exposed_in_binds Exposed in bindings
@@ -76,7 +79,7 @@ class FileCatalog {
      *
      * on import file is physically copied to a new location
      */
-    shared_ptr<File> catalog(const QString& path);
+    shared_ptr<const oh5::File> catalog(const QString& path);
     
     /**
      * @brief remove file from catalog
@@ -102,7 +105,7 @@ class FileCatalog {
     //void sync();
     
   private:
-    bool is_cataloged(const File& f) const;
+    bool is_cataloged(const oh5::File& f) const;
 
     void check_storage() const;
     

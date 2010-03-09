@@ -9,6 +9,8 @@ class Variant;
 
 namespace oh5 {
 
+class Group;
+
 /**
  * @brief Attribute read from HDF5 file
  */
@@ -18,6 +20,13 @@ class Attribute : public Node {
      * @brief destructor
      */
     virtual ~Attribute();
+    
+    /**
+     * @brief return nearest Group
+     *
+     * if the attribute is in an AttributeGroup, bypass it
+     */
+    shared_ptr<const Group> parent_group() const;
     
     /**
      * @brief attribute value

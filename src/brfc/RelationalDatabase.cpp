@@ -2,11 +2,8 @@
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/Attribute.hpp>
 #include <brfc/AttributeSpecs.hpp>
 #include <brfc/AttributeMapper.hpp>
-#include <brfc/DataObject.hpp>
-#include <brfc/File.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/RelationalResultSet.hpp>
@@ -14,6 +11,13 @@
 #include <brfc/SourceCentre.hpp>
 #include <brfc/SourceRadar.hpp>
 #include <brfc/Variant.hpp>
+
+#include <brfc/visit.hpp>
+
+#include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/Root.hpp>
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/AttrReplace.hpp>
@@ -37,9 +41,9 @@ namespace brfc {
 
 namespace {
 
-class DataObjectSaver {
+class GroupSaver {
   public:
-    DataObjectSaver(RelationalDatabase* rdb)
+    GroupSaver(RelationalDatabase* rdb)
             : rdb_(rdb)
             , qry_(rdb->connection())
             , special_(rdb->mapper().specializations_on("data_objects")) {
@@ -61,36 +65,37 @@ class DataObjectSaver {
             throw db_error(qry_.lastError());
     }
     
-    void operator()(const DataObject& dobj) {
-        bind_plain(dobj);
-        bind_specializations(dobj);
+    void operator()(const oh5::Group& group) {
+        bind_plain(group);
+        bind_specializations(group);
 
         if (not qry_.exec())
             throw db_error(qry_.lastError());
-        dobj.db_id(last_id());
+        group.db_id(last_id());
     }
 
   private:
-    void bind_plain(const DataObject& dobj) {
+    void bind_plain(const oh5::Group& group) {
         QVariant file_id, parent_id;
-        if (dobj.parent())
-            parent_id = dobj.parent()->db_id();
-        if (dobj.file())
-            file_id = dobj.file()->db_id();
+        if (group.parent()) {
+            shared_ptr<const oh5::Group> parent =
+                dynamic_pointer_cast<const oh5::Group>(group.parent());
+            parent_id = parent->db_id();
+        }
+        if (group.file())
+            file_id = group.file()->db_id();
 
         qry_.bindValue(":parent_id", parent_id);
         qry_.bindValue(":file_id", file_id);
-        qry_.bindValue(":name", dobj.name());
+        qry_.bindValue(":name", group.name());
     }
 
-    void bind_specializations(const DataObject& dobj) {
+    void bind_specializations(const oh5::Group& group) {
         BOOST_FOREACH(const Mapping& mapping, special_) {
             QVariant val;
-            try {
-                val = dobj.attribute(mapping.attribute).value().to_qvariant();
-            } catch (const brfc::lookup_error& e) {
-                // value is null
-            }
+            shared_ptr<const oh5::Attribute> attr = group.attribute(mapping.attribute);
+            if (attr)
+                val = attr->value().to_qvariant();
             qry_.bindValue(":" + mapping.column, val);
         }
     }
@@ -117,17 +122,17 @@ class AttributeSaver {
             , queries_() {
     }
 
-    void operator()(const Attribute& attr) {
+    void operator()(const oh5::Attribute& attr) {
         // ignore specialized attributes
-        if (mapper_->is_specialized(attr.name()))
+        if (mapper_->is_specialized(attr.full_name()))
             return;
 
-        const Mapping& mapping = mapper_->mapping(attr.name());
+        const Mapping& mapping = mapper_->mapping(attr.full_name());
 
         QSqlQuery& qry = query_by_table(mapping.table);
         QVariant dobj_id;
-        if (attr.data_object())
-            dobj_id = attr.data_object()->db_id();
+        if (attr.parent_group())
+            dobj_id = attr.parent_group()->db_id();
         qry.bindValue("data_object_id", dobj_id);
         qry.bindValue("attribute_id", mapping.id);
         qry.bindValue("value", attr.value().to_qvariant());
@@ -250,7 +255,7 @@ RelationalDatabase::do_commit() {
 }
 
 bool
-RelationalDatabase::do_has_file(const File& file) {
+RelationalDatabase::do_has_file(const oh5::File& file) {
     QSqlQuery query(connection());
     query.prepare("SELECT true FROM files WHERE unique_id = :unique_id");
     query.bindValue(":unique_id", file.unique_identifier());
@@ -259,19 +264,43 @@ RelationalDatabase::do_has_file(const File& file) {
     return query.next(); // got a result row
 }
 
+class SaveVisitor {
+  public:
+    SaveVisitor(RelationalDatabase* db)
+            : save_attribute_(db)
+            , save_group_(db) {
+    }
+
+    typedef mpl::vector<const oh5::AttributeGroup,
+                        const oh5::Group,
+                        const oh5::Attribute> accepted_types;
+
+    void operator()(const oh5::AttributeGroup& group) {
+        // no-op
+    }
+
+    void operator()(const oh5::Group& group) {
+        save_group_(group);
+    }
+    
+    void operator()(const oh5::Attribute& attribute) {
+        save_attribute_(attribute);
+    }
+
+  private:
+    AttributeSaver save_attribute_;
+    GroupSaver save_group_;
+};
+
 long long
-RelationalDatabase::do_save_file(const QString& path, const File& file) {
+RelationalDatabase::do_save_file(const QString& path, const oh5::File& file) {
     id_type file_id = save(path, file);
     file.db_id(file_id.toLongLong());
 
-    DataObjectSaver save_data_object(this);
-    AttributeSaver save_attribute(this);
+    SaveVisitor visitor(this);
     
-    BOOST_FOREACH(const DataObject& dobj, file.root()) {
-        save_data_object(dobj);
-        BOOST_FOREACH(shared_ptr<Attribute> attr, dobj.attributes()) {
-            save_attribute(*attr);
-        }
+    BOOST_FOREACH(const oh5::Node& node, *file.root()) {
+        visit(node, visitor);
     }
 
     return file_id.toLongLong();
@@ -296,7 +325,7 @@ RelationalDatabase::do_query(const Query& query) {
 }
 
 RelationalDatabase::id_type
-RelationalDatabase::save(const QString& path, const File& f) {
+RelationalDatabase::save(const QString& path, const oh5::File& f) {
     QStringList columns, binds;
     columns.append("source_id");
     columns.append("unique_id");
@@ -323,7 +352,7 @@ RelationalDatabase::save(const QString& path, const File& f) {
         if (mapping.attribute == "path")
             continue;
         const QVariant& value = 
-                f.root().attribute(mapping.attribute).value().to_qvariant();
+                f.root()->attribute(mapping.attribute)->value().to_qvariant();
         qry.bindValue(":" + mapping.column, value);
     }
 

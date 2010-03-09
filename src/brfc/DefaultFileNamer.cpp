@@ -1,11 +1,10 @@
 #include <brfc/DefaultFileNamer.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Attribute.hpp>
-#include <brfc/DataObject.hpp>
-#include <brfc/File.hpp>
 #include <brfc/Source.hpp>
 #include <brfc/Variant.hpp>
+#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/Attribute.hpp>
 
 namespace brfc {
 
@@ -13,7 +12,7 @@ DefaultFileNamer::DefaultFileNamer() {
 }
 
 QString
-DefaultFileNamer::do_name(const File& f) const {
+DefaultFileNamer::do_name(const oh5::File& f) const {
     QString name = QString("Z_");
     name.append(f.what_object());
     name.append("_C_");

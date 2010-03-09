@@ -5,7 +5,9 @@
 
 namespace brfc {
 
-class File;
+namespace oh5 {
+    class File;
+}
 
 /**
  * @brief ABC for generating filenames for File instances
@@ -19,7 +21,7 @@ class FileNamer {
      *
      * @sa do_name
      */
-    QString name(const File& file) const {
+    QString name(const oh5::File& file) const {
         return do_name(file);
     }
 
@@ -29,7 +31,7 @@ class FileNamer {
     virtual ~FileNamer() { }
 
   protected:
-    virtual QString do_name(const File& file) const = 0;
+    virtual QString do_name(const oh5::File& file) const = 0;
 };
 
 } // namespace brfc
