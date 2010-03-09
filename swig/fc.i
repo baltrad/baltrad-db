@@ -32,6 +32,23 @@
     #include <QtCore/QDate>
 %} 
 
+%typemap(javabody) QDate,
+                   QTime,
+                   brfc::Variant,
+                   std::vector<QString> %{
+  private long swigCPtr;
+  protected boolean swigCMemOwn;
+
+  public $javaclassname(long cPtr, boolean cMemoryOwn) {
+    swigCMemOwn = cMemoryOwn;
+    swigCPtr = cPtr;
+  }
+
+  public static long getCPtr($javaclassname obj) {
+    return (obj == null) ? 0 : obj.swigCPtr;
+  }
+%}
+
 %ignore brfc::AttributeMapper;
 %ignore brfc::AttributeSpecs;
 %ignore brfc::Database;
@@ -72,6 +89,19 @@ SWIG_SHARED_PTR_DERIVED(SourceCentre, brfc::Source, brfc::SourceCentre);
 
 %template(StringVector) std::vector<QString>;
 
+%pragma(java) jniclassimports=%{
+    import eu.baltrad.fc.expr.Expression;
+%}
+
+%typemap(javaimports) brfc::Query, brfc::Query* %{
+    import eu.baltrad.fc.expr.Expression;
+%}
+
+%typemap(javaimports) brfc::FileCatalog, brfc::FileCatalog* %{
+    import eu.baltrad.fc.oh5.File;
+%}
+
+
 // Enable the JNI class to load the required native library.
 %pragma(java) jniclasscode=%{
   static {
@@ -83,6 +113,22 @@ SWIG_SHARED_PTR_DERIVED(SourceCentre, brfc::Source, brfc::SourceCentre);
     }
   }
 %}
+
+%typemap(javabody) brfc::Source %{
+  private long swigCPtr;
+  private boolean swigCMemOwnBase;
+
+  public $javaclassname(long cPtr, boolean cMemoryOwn) {
+    swigCMemOwnBase = cMemoryOwn;
+    swigCPtr = cPtr;
+  }
+
+  public static long getCPtr($javaclassname obj) {
+    return (obj == null) ? 0 : obj.swigCPtr;
+  }
+%}
+
+
 
 class QDate {
   public:

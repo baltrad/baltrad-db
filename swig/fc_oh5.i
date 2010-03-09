@@ -33,6 +33,39 @@ SWIG_SHARED_PTR_DERIVED(AttributeGroup,
 
 %template(NodeVector) std::vector<brfc::shared_ptr<brfc::oh5::Node> >;
 
+%typemap(javaimports) brfc::oh5::File, brfc::oh5::File* %{
+    import eu.baltrad.fc.Date;
+    import eu.baltrad.fc.Time;
+    import eu.baltrad.fc.Source;
+    import eu.baltrad.fc.StringVector;
+%}
+
+%typemap(javaimports) brfc::oh5::Attribute, brfc::oh5::Attribute* %{
+    import eu.baltrad.fc.Variant;
+%}
+
+%pragma(java) jniclassimports=%{
+    import eu.baltrad.fc.Date;
+    import eu.baltrad.fc.Time;
+    import eu.baltrad.fc.Source;
+    import eu.baltrad.fc.Variant;
+%}
+
+
+%typemap(javabody) brfc::oh5::File %{
+  private long swigCPtr;
+  private boolean swigCMemOwnBase;
+
+  public $javaclassname(long cPtr, boolean cMemoryOwn) {
+    swigCMemOwnBase = cMemoryOwn;
+    swigCPtr = cPtr;
+  }
+
+  public static long getCPtr($javaclassname obj) {
+    return (obj == null) ? 0 : obj.swigCPtr;
+  }
+%}
+
 %include <brfc/oh5/Node.hpp>
 %include <brfc/oh5/Group.hpp>
 %include <brfc/oh5/AttributeGroup.hpp>
