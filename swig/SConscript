@@ -21,10 +21,15 @@ fc = fc_env.SharedObject(["fc.i"])
 fc_expr_env = env.Clone()
 fc_expr_env.Append(SWIGFLAGS="-c++ -java -package eu.baltrad.fc.expr".split())
 fc_expr_env.Append(SWIGOUTDIR=build_dir + "/eu/baltrad/fc/expr")
-fc_expr = fc_env.SharedObject(["fc_expr.i"])
+fc_expr = fc_expr_env.SharedObject(["fc_expr.i"])
+
+fc_oh5_env = env.Clone()
+fc_oh5_env.Append(SWIGFLAGS="-c++ -java -package eu.baltrad.fc.oh5".split())
+fc_oh5_env.Append(SWIGOUTDIR=build_dir + "/eu/baltrad/fc/oh5")
+fc_oh5 = fc_oh5_env.SharedObject(["fc_oh5.i"])
 
 
-lib = env.SharedLibrary("#lib/brfc_java", [fc, fc_expr], LIBS=["brfc"])
+lib = env.SharedLibrary("#lib/brfc_java", [fc, fc_expr, fc_oh5], LIBS=["brfc"])
 
 confdeps = env.ConfHas("#java-wrapper-confdeps", ["jni", "qt", "hlhdf"])
 
