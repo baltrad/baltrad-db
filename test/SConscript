@@ -1,5 +1,3 @@
-import codecs
-
 Import("env")
 
 def strlit(var):
@@ -13,6 +11,7 @@ config_values = {
 
 config_hpp = env.Substfile("config.hpp.in", SUBST_DICT=config_values)
 config_cpp = env.Substfile("config.cpp.in", SUBST_DICT=config_values)
+env.AppendUnique(CPPPATH=Dir("."))
 
 env.Depends([config_hpp, config_cpp], env.Value(env["test_db_dsns"]))
 
@@ -27,6 +26,7 @@ confdeps = env.ConfHas("#gtest-confdeps", ["gtest", "gmock", "hlhdf"])
 
 objects = env.SharedObject(sources)
 env.Requires(objects, confdeps)
+env.Depends(objects, [config_hpp])
 
 runner = env.Program("#test/runner", objects,
             LIBS=["gtest", "gmock", "brfc", "hlhdf"])

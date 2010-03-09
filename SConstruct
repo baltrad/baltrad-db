@@ -225,7 +225,7 @@ for path in ("#lib", "${gtest_lib_dir}", "${hlhdf_lib_dir}", "${qt_lib_dir}"):
     testenv.AppendENVPath('LD_LIBRARY_PATH', env.Dir(path).abspath)
 
 SConscript("test/SConscript",
-           build_dir="build/test", duplicate=1,
+           build_dir="build/test", duplicate=0,
            exports={"env": testenv})
 
 jtestenv = env.Clone()
