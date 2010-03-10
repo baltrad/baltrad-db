@@ -1,9 +1,13 @@
 %module fc_test
 
 %include "common.i"
+%import "fc_oh5.i"
 
 %{
     #include <brfc/test/TestSwig.hpp>
+    #include <brfc/test/TestRDB.hpp>
+    #include <brfc/test/TempH5File.hpp>
+    #include <brfc/test/TempDir.hpp>
 %}
 
 // Enable the JNI class to load the required native library.
@@ -18,7 +22,18 @@
   }
 %}
 
+%pragma(java) jniclassimports=%{
+    import eu.baltrad.fc.oh5.File;
+%}
+
+%typemap(javaimports) brfc::test::TempH5File %{
+    import eu.baltrad.fc.oh5.File;
+%}
+
 %include <brfc/test/TestSwig.hpp>
+%include <brfc/test/TestRDB.hpp>
+%include <brfc/test/TempH5File.hpp>
+%include <brfc/test/TempDir.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:
 */

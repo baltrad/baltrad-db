@@ -257,7 +257,9 @@ def ant_testdb_properties():
         jdbcurl = "".join(["jdbc:", url.scheme, "://", url.hostname, url.path])
         return ["-Ddb.url=%s" % jdbcurl,
                 "-Ddb.username=%s" % url.username,
-                "-Ddb.password=%s" % url.password]
+                "-Ddb.password=%s" % url.password,
+                "-Ddb.test_db_dsn=%s" % dsn,
+                "-Ddb.test_db_schema_dir=%s" % env.Dir("#schema").abspath]
     return []
 
 run_java_tests = testenv.Command("run_java_tests", "#lib/jbrfc_test.jar",
