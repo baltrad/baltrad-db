@@ -1,6 +1,6 @@
 package eu.baltrad.fc;
 
-import eu.baltrad.fc.TestSwig;
+import eu.baltrad.fc.test.TestSwig;
 
 import junit.framework.TestCase;
 

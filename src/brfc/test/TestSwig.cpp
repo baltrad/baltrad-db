@@ -1,6 +1,7 @@
-#include <brfc/TestSwig.hpp>
+#include <brfc/test/TestSwig.hpp>
 
 namespace brfc {
+namespace test {
 
 std::string
 TestSwig::qstring_to_string(QString str) {
@@ -23,4 +24,5 @@ TestSwig::string_to_qstringconstref(const std::string& str) {
     return for_constref_;
 }
 
+} // namespace test
 } // namespace brfc

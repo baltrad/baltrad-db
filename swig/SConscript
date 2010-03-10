@@ -28,8 +28,14 @@ fc_oh5_env.Append(SWIGFLAGS="-c++ -java -package eu.baltrad.fc.oh5".split())
 fc_oh5_env.Append(SWIGOUTDIR=build_dir + "/eu/baltrad/fc/oh5")
 fc_oh5 = fc_oh5_env.SharedObject(["fc_oh5.i"])
 
+fc_test_env = env.Clone()
+fc_test_env.Append(SWIGFLAGS="-c++ -java -package eu.baltrad.fc.test".split())
+fc_test_env.Append(SWIGOUTDIR=build_dir + "/eu/baltrad/fc/test")
+fc_test = fc_test_env.SharedObject(["fc_test.i"])
 
-lib = env.SharedLibrary("#lib/brfc_java", [fc, fc_expr, fc_oh5], LIBS=["brfc"])
+lib = env.SharedLibrary("#lib/brfc_java",
+                        [fc, fc_expr, fc_oh5, fc_test],
+                        LIBS=["brfc"])
 
 confdeps = env.ConfHas("#java-wrapper-confdeps", ["jni", "qt", "hlhdf"])
 

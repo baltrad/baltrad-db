@@ -5,6 +5,7 @@
 #include <QtCore/QString>
 
 namespace brfc {
+namespace test {
 
 class TestSwig {
   public:
@@ -24,6 +25,7 @@ class TestSwig {
     QString for_constref_;
 };
 
+} // namespace test
 } // namespace brfc
 
 #endif // BRFC_TEST_SWIG_HPP

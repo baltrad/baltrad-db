@@ -13,22 +13,27 @@ class QVariant;
 
 namespace brfc {
 
-    class TestRDB;
-    class Variant;
+class Variant;
+
+namespace test {
+
+class TestRDB;
+
+}
 
 class TestRDBEnv : public ::testing::Environment {
   public:
     
     virtual ~TestRDBEnv() { }
 
-    static TestRDB* get_database(const char* dsn);
+    static test::TestRDB* get_database(const char* dsn);
 
     virtual void SetUp();
 
     virtual void TearDown();
 
   private:
-    typedef std::map<const char*, TestRDB*> DatabaseMap;
+    typedef std::map<const char*, test::TestRDB*> DatabaseMap;
     static DatabaseMap databases_;
 };
 

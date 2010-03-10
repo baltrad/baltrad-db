@@ -2,8 +2,9 @@
 
 #include <brfc/exceptions.hpp>
 #include <brfc/ResultSet.hpp>
-#include <brfc/TestRDB.hpp>
 #include <brfc/Variant.hpp>
+
+#include <brfc/test/TestRDB.hpp>
 
 #include <QtCore/QDate>
 #include <QtCore/QString>
@@ -19,7 +20,7 @@ struct RDB_ResultSet_test : public testing::TestWithParam<const char*> {
             : db(TestRDBEnv::get_database(GetParam())) {
     }
 
-    TestRDB* db;
+    test::TestRDB* db;
 };
 
 TEST_P(RDB_ResultSet_test, size) {

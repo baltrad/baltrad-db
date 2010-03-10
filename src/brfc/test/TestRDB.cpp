@@ -1,6 +1,4 @@
-#include <brfc/TestRDB.hpp>
-
-#include <brfc/exceptions.hpp>
+#include <brfc/test/TestRDB.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -10,7 +8,10 @@
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
 
+#include <brfc/exceptions.hpp>
+
 namespace brfc {
+namespace test {
 
 TestRDB::TestRDB(const QString& dsn, const QString& schema_dir)
         : RelationalDatabase(dsn)
@@ -61,4 +62,5 @@ TestRDB::exec_queries_from(const QString& file) {
     commit();
 }
 
+} // namespace test
 } // namespace brfc

@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <brfc/TestRDB.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
 
@@ -13,6 +12,8 @@
 #include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/Root.hpp>
 #include <brfc/oh5/File.hpp>
+
+#include <brfc/test/TestRDB.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -116,7 +117,7 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
     
     expr::Factory xpr;
     QString src1, src2;
-    TestRDB* db;
+    test::TestRDB* db;
     shared_ptr<oh5::File> td1, td2, td3, td4, td5;
     Query query;
 };
