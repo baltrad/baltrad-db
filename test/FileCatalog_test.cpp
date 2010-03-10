@@ -57,11 +57,12 @@ struct FileCatalog_test : public testing::Test {
             , fc(db, specs, namer, tempdir->path())
             , src_str("WMO:02606")
             , default_src(new oh5::SourceRadar())
-            , minfile(test::TempH5File::minimal("PVOL",
-                                                QDate(2000, 1, 1),
-                                                QTime(12, 0),
-                                                src_str)) {
-        minfile->write();
+            , tempfile()
+            , minfile(oh5::File::minimal("PVOL",
+                                         QDate(2000, 1, 1),
+                                         QTime(12, 0),
+                                         src_str)) {
+        tempfile.write(*minfile);
         specs->add(oh5::AttributeSpec("Conventions", "string"));
         specs->add(oh5::AttributeSpec("what/object", "string"));
         specs->add(oh5::AttributeSpec("what/version", "string"));
@@ -78,7 +79,8 @@ struct FileCatalog_test : public testing::Test {
     FileCatalog fc;
     QString src_str;
     shared_ptr<oh5::Source> default_src;
-    auto_ptr<test::TempH5File> minfile;
+    test::TempH5File tempfile;
+    shared_ptr<oh5::File> minfile;
 };
 
 TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
@@ -98,7 +100,7 @@ TEST_F(FileCatalog_test, test_catalog) {
     EXPECT_CALL(*db, do_commit());
     
     // file is given the path returned by namer
-    shared_ptr<const oh5::File> f = fc.catalog(minfile->filename());
+    shared_ptr<const oh5::File> f = fc.catalog(tempfile.filename());
     EXPECT_EQ(f->path(), target);
     EXPECT_EQ(f->db_id(), 1);
 
@@ -117,7 +119,7 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
         .WillOnce(Throw(db_error("")));
     EXPECT_CALL(*db, do_rollback());
     
-    EXPECT_THROW(fc.catalog(minfile->filename()), db_error);
+    EXPECT_THROW(fc.catalog(tempfile.filename()), db_error);
     EXPECT_FALSE(QFile::exists(target));
 }
 
@@ -135,7 +137,7 @@ TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
 
     tempdir.reset(); // tempdir removed
 
-    EXPECT_THROW(fc.catalog(minfile->filename()), fs_error);
+    EXPECT_THROW(fc.catalog(tempfile.filename()), fs_error);
     EXPECT_FALSE(QFile::exists(target));
 }
 
@@ -143,7 +145,7 @@ TEST_F(FileCatalog_test, test_double_import_throws) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(true));
 
-    EXPECT_THROW(fc.catalog(minfile->filename()), duplicate_entry);
+    EXPECT_THROW(fc.catalog(tempfile.filename()), duplicate_entry);
 }
 
 TEST_F(FileCatalog_test, test_is_cataloged_on_nx_file) {
@@ -154,7 +156,7 @@ TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
 
-    EXPECT_FALSE(fc.is_cataloged(minfile->filename()));
+    EXPECT_FALSE(fc.is_cataloged(tempfile.filename()));
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {

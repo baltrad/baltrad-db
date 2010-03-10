@@ -19,26 +19,42 @@ namespace oh5 {
 
 class oh5_FileLoader_test : public ::testing::Test {
   public:
+    oh5_FileLoader_test()
+            : tempfile()
+            , specs()
+            , t_12_05_01(QTime(12, 5, 1))
+            , d_2000_01_02(QDate(2000, 1, 2)) {
+    }
 
+    virtual void SetUp() {
+        specs.add(AttributeSpec("date", "date"));
+        specs.add(AttributeSpec("time", "time"));
+    }
+
+    virtual void TearDown() {
+        specs.clear();
+    }
+
+    test::TempH5File tempfile;
     AttributeSpecs specs;
+    Variant t_12_05_01;
+    Variant d_2000_01_02;
 };
 
 
 TEST_F(oh5_FileLoader_test, load) {
-    specs.add(AttributeSpec("date", "date"));
-    specs.add(AttributeSpec("time", "time"));
+    shared_ptr<File> f = File::create();
 
-    Variant time(QTime(12, 5, 1));
-    Variant date(QDate(2000, 1, 2));
+    f->root()->add_child(make_shared<Attribute>("date", d_2000_01_02));
+    f->root()->add_child(make_shared<Attribute>("time", t_12_05_01));
+    
+    shared_ptr<Group> ds1 = make_shared<Group>("dataset1");
+    ds1->add_child(make_shared<Attribute>("date", d_2000_01_02));
+    f->root()->add_child(ds1);
 
-    test::TempH5File f;
-    f.add_attribute("/date", date);
-    f.add_attribute("/time", time);
-    f.add_group("/dataset1");
-    f.add_attribute("/dataset1/date", date);
-    f.write();
+    tempfile.write(*f);
 
-    shared_ptr<File> g = File::from_filesystem(f.filename(), specs);
+    shared_ptr<File> g = File::from_filesystem(tempfile.filename(), specs);
     shared_ptr<Root> root = g->root();
     EXPECT_EQ((size_t)3, root->children().size());
     EXPECT_TRUE(root->has_child_by_name("date"));
@@ -48,20 +64,28 @@ TEST_F(oh5_FileLoader_test, load) {
     ASSERT_TRUE(root->attribute("time"));
     ASSERT_TRUE(g->group("/dataset1"));
     ASSERT_TRUE(g->group("/dataset1")->attribute("date"));
-    EXPECT_EQ(date, root->attribute("date")->value());
-    EXPECT_EQ(time, root->attribute("time")->value());
-    EXPECT_EQ(date, g->group("/dataset1")->attribute("date")->value());
+    EXPECT_EQ(d_2000_01_02, root->attribute("date")->value());
+    EXPECT_EQ(t_12_05_01, root->attribute("time")->value());
+    EXPECT_EQ(d_2000_01_02, g->group("/dataset1")->attribute("date")->value());
 }
 
 TEST_F(oh5_FileLoader_test, ignored_attributes) {
-    test::TempH5File f;
-    f.add_attribute("/ignore", Variant(2.0));
-    f.add_group("/dataset");
-    f.add_attribute("/dataset/ignore", Variant(1.0));
-    f.write();
+    shared_ptr<File> f = File::create();
 
-    shared_ptr<File> g = File::from_filesystem(f.filename(), specs);
-    EXPECT_FALSE(g->root()->attribute("ignore"));
+    f->root()->add_child(make_shared<Attribute>("ignore", Variant(2.0)));
+
+    shared_ptr<Group> ds = make_shared<Group>("dataset");
+    ds->add_child(make_shared<Attribute>("ignore", Variant(1.0)));
+    f->root()->add_child(ds);
+
+    tempfile.write(*f);
+
+    shared_ptr<File> g = File::from_filesystem(tempfile.filename(), specs);
+
+    shared_ptr<Root> root = g->root();
+    EXPECT_FALSE(root->attribute("ignore"));
+    EXPECT_FALSE(root->attribute("dataset/ignore"));
+
     const File::StringVector& ignored = g->ignored_attributes();
     EXPECT_EQ(ignored.size(), (size_t)2);
     EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/ignore") != ignored.end());

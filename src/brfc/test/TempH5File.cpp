@@ -1,93 +1,118 @@
 #include <brfc/test/TempH5File.hpp>
 
-#include <brfc/oh5/Converter.hpp>
-#include <brfc/Variant.hpp>
-
-#include <stdexcept>
-
-#include <unistd.h>
 #include <cstdlib>
 #include <cstring>
+#include <stdexcept>
+#include <unistd.h>
+
+#include <boost/foreach.hpp>
+
+#include <brfc/visit.hpp>
+#include <brfc/Variant.hpp>
+#include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/Converter.hpp>
+#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/Root.hpp>
 
 namespace brfc {
 namespace test {
 
 TempH5File::TempH5File()
-        : nodes_(HLNodeList_new(), &HLNodeList_free)
-        , filename_(strdup("/tmp/brfctest_XXXXXX"), &free)
-        , fd_(mkstemp(filename_.get())) {
-    if (fd_ == -1)
+        : filename_(strdup("/tmp/brfctest_XXXXXX"), &free) {
+    int fd = mkstemp(filename_.get());
+    if (fd == -1)
         throw std::runtime_error("could not create temporary file");
-    close(fd_);
+    close(fd);
 }
 
 TempH5File::~TempH5File() {
     unlink(filename_.get());
 }
 
-auto_ptr<TempH5File>
-TempH5File::minimal(const QString& object,
-                    const QDate& date,
-                    const QTime& time,
-                    const QString& source,
-                    const QString& version) {
-    auto_ptr<TempH5File> f(new TempH5File());
-    f->add_attribute("/Conventions", Variant("ODIM_H5/V2_0"));
-    f->add_group("/what");
-    f->add_attribute("/what/object", Variant(object));
-    f->add_attribute("/what/version", Variant(version));
-    f->add_attribute("/what/date", Variant(date));
-    f->add_attribute("/what/time", Variant(time));
-    f->add_attribute("/what/source", Variant(source));
-
-    return f;
-}
-
-void TempH5File::add_group(const char* path) {
-    HL_Node* node = HLNode_newGroup(path);
-    if (node == 0)
-        throw std::runtime_error("could not create dataset");
-    if (HLNodeList_addNode(nodes_.get(), node) == 0)
-        throw std::runtime_error("could not add node");
-}
-
 namespace {
 
-oh5::HL_Data
-convert(const Variant& value) {
-    switch (value.type()) {
-        case Variant::DOUBLE:
-            return oh5::RealConverter().convert(value);
-        case Variant::LONGLONG:
-            return oh5::IntConverter().convert(value);
-        case Variant::STRING:
-            return oh5::StringConverter().convert(value);
-        case Variant::DATE:
-            return oh5::DateConverter().convert(value);
-        case Variant::TIME:
-            return oh5::TimeConverter().convert(value);
-        case Variant::BOOL:
-            return oh5::BoolConverter().convert(value);
-        default:
-            throw std::runtime_error("could not convert");
+class GatherHLNodes {
+  public:
+    typedef mpl::vector<const oh5::Root,
+                        const oh5::Group,
+                        const oh5::Attribute> accepted_types;
+    
+    GatherHLNodes()
+        : nodes_(HLNodeList_new(), &HLNodeList_free) {
+
     }
-}
+
+    void operator()(const oh5::Root& root) {
+        // pass, the file already has a root group by default
+    }
+
+    void operator()(const oh5::Group& group) {
+        const QString& path = group.path();
+
+        // create node
+        HL_Node* node = HLNode_newGroup(path.toAscii().constData());
+        if (node == 0)
+            throw std::runtime_error("could not create group node");
+        
+        // add node to nodelist
+        if (HLNodeList_addNode(nodes_.get(), node) == 0)
+            throw std::runtime_error("could not add group node");
+    }
+
+    void operator()(const oh5::Attribute& attr) {
+        const QString& path = attr.path();
+
+        // create node
+        HL_Node* node = HLNode_newAttribute(path.toAscii().constData());
+        if (node == 0)
+            throw std::runtime_error("could not create attribute node");
+        
+        // add node to nodelist
+        if (HLNodeList_addNode(nodes_.get(), node) == 0) {
+            throw std::runtime_error("could not add attribute node");
+        }
+
+        // convert and set value
+        oh5::HL_Data d = convert(attr.value());
+        HLNode_setScalarValue(node, d.size(), d.data(), d.type(), -1);
+    }
+
+    oh5::HL_Data
+    convert(const Variant& value) {
+        switch (value.type()) {
+            case Variant::DOUBLE:
+                return oh5::RealConverter().convert(value);
+            case Variant::LONGLONG:
+                return oh5::IntConverter().convert(value);
+            case Variant::STRING:
+                return oh5::StringConverter().convert(value);
+            case Variant::DATE:
+                return oh5::DateConverter().convert(value);
+            case Variant::TIME:
+                return oh5::TimeConverter().convert(value);
+            case Variant::BOOL:
+                return oh5::BoolConverter().convert(value);
+            default:
+                throw std::runtime_error("could not convert");
+        }
+    }
+
+    void write(const char* filename) {
+        HL_Compression compression;
+        HLCompression_init(&compression, CT_ZLIB);
+        compression.level = 6;
+        if (HLNodeList_setFileName(nodes_.get(), filename) == 0)
+            throw std::runtime_error("could not set filename");
+        if (HLNodeList_write(nodes_.get(), 0, &compression) == 0)
+            throw std::runtime_error("could not write file");
+    }
+
+  private:
+    shared_ptr<HL_NodeList> nodes_;
+};
 
 } // namespace anonymous
 
-
-void
-TempH5File::add_attribute(const char* path, const Variant& value) {
-    // seek and create nodes
-    HL_Node* node = HLNode_newAttribute(path);
-    if (HLNodeList_addNode(nodes_.get(), node) == 0) {
-        throw std::runtime_error("couldn't add node");
-    }
-    // convert value
-    oh5::HL_Data d = convert(value);
-    // add node
-    HLNode_setScalarValue(node, d.size(), d.data(), d.type(), -1);
-}
 
 QString
 TempH5File::filename() const {
@@ -95,14 +120,14 @@ TempH5File::filename() const {
 }
 
 void
-TempH5File::write() {
-    HL_Compression compression;
-    HLCompression_init(&compression, CT_ZLIB);
-    compression.level = 6;
-    if (HLNodeList_setFileName(nodes_.get(), filename_.get()) == 0)
-        throw std::runtime_error("could not set filename");
-    if (HLNodeList_write(nodes_.get(), 0, &compression) == 0)
-        throw std::runtime_error("could not write file");
+TempH5File::write(const oh5::File& file) {
+    GatherHLNodes node_gather;
+
+    BOOST_FOREACH(const oh5::Node& node, *file.root()) {
+        visit(node, node_gather);
+    }
+    
+    node_gather.write(filename_.get());
 }
 
 } // namespace test
