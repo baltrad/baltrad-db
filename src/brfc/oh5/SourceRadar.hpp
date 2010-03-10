@@ -1,11 +1,12 @@
-#ifndef BRFC_SOURCE_RADAR_HPP
-#define BRFC_SOURCE_RADAR_HPP
+#ifndef BRFC_OH5_SOURCE_RADAR_HPP
+#define BRFC_OH5_SOURCE_RADAR_HPP
 
-#include <brfc/Source.hpp>
-#include <brfc/SourceCentre.hpp>
 #include <brfc/assert.hpp>
+#include <brfc/oh5/Source.hpp>
+#include <brfc/oh5/SourceCentre.hpp>
 
 namespace brfc {
+namespace oh5 {
 
 class SourceRadar : public Source {
   public:
@@ -61,6 +62,7 @@ class SourceRadar : public Source {
     shared_ptr<SourceCentre> centre_;
 };
 
+} // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_SOURCE_RADAR_HPP
+#endif // BRFC_OH5_SOURCE_RADAR_HPP

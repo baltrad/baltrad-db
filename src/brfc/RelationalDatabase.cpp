@@ -6,9 +6,6 @@
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/RelationalResultSet.hpp>
-#include <brfc/Source.hpp>
-#include <brfc/SourceCentre.hpp>
-#include <brfc/SourceRadar.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/visit.hpp>
@@ -18,6 +15,9 @@
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/SourceCentre.hpp>
+#include <brfc/oh5/SourceRadar.hpp>
+
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/AttrReplace.hpp>
@@ -371,7 +371,7 @@ RelationalDatabase::save(const QString& path, const oh5::File& f) {
 }
 
 void
-RelationalDatabase::load_source_centre(shared_ptr<SourceCentre> src) {
+RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src) {
     QStringList wcl;
     QList<QVariant> binds;
 
@@ -418,7 +418,7 @@ RelationalDatabase::load_source_centre(shared_ptr<SourceCentre> src) {
 }
 
 void
-RelationalDatabase::load_source_radar(shared_ptr<SourceRadar> src) {
+RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     QStringList wcl;
     QList<QVariant> binds;
 
@@ -457,7 +457,7 @@ RelationalDatabase::load_source_radar(shared_ptr<SourceRadar> src) {
     }
     qry.first();
 
-    shared_ptr<SourceCentre> centre(new SourceCentre());
+    shared_ptr<oh5::SourceCentre> centre(new oh5::SourceCentre());
     centre->db_id(qry.value(2).toLongLong()); 
     load_source_centre(centre);
 
@@ -469,17 +469,17 @@ RelationalDatabase::load_source_radar(shared_ptr<SourceRadar> src) {
     src->place(qry.value(5).toString());
 }
 
-shared_ptr<Source>
+shared_ptr<oh5::Source>
 RelationalDatabase::do_load_source(const QString& srcstr) {
 
-    shared_ptr<Source> src = Source::from_source_attribute(srcstr);
-    shared_ptr<SourceRadar> radar;
-    shared_ptr<SourceCentre> centre;
+    shared_ptr<oh5::Source> src = oh5::Source::from_source_attribute(srcstr);
+    shared_ptr<oh5::SourceRadar> radar;
+    shared_ptr<oh5::SourceCentre> centre;
 
-    if (radar = dynamic_pointer_cast<SourceRadar>(src)) {
+    if (radar = dynamic_pointer_cast<oh5::SourceRadar>(src)) {
         load_source_radar(radar);
         return radar;
-    } else if (centre = dynamic_pointer_cast<SourceCentre>(src)) {
+    } else if (centre = dynamic_pointer_cast<oh5::SourceCentre>(src)) {
         load_source_centre(centre);
         return centre;
     } else {

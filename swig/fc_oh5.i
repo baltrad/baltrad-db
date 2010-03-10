@@ -10,6 +10,9 @@
     #include <brfc/oh5/File.hpp>
     #include <brfc/oh5/Group.hpp>
     #include <brfc/oh5/Root.hpp>
+    #include <brfc/oh5/Source.hpp>
+    #include <brfc/oh5/SourceCentre.hpp>
+    #include <brfc/oh5/SourceRadar.hpp>
 
     #include <QtCore/QDate>
     #include <QtCore/QTime>
@@ -31,28 +34,37 @@ SWIG_SHARED_PTR_DERIVED(AttributeGroup,
                         brfc::oh5::Group,
                         brfc::oh5::AttributeGroup);
 
+SWIG_SHARED_PTR(Source, brfc::oh5::Source);
+SWIG_SHARED_PTR_DERIVED(SourceCentre,
+                        brfc::oh5::Source,
+                        brfc::oh5::SourceCentre);
+SWIG_SHARED_PTR_DERIVED(SourceRadar,
+                        brfc::oh5::Source,
+                        brfc::oh5::SourceRadar);
+
 %template(NodeVector) std::vector<brfc::shared_ptr<brfc::oh5::Node> >;
 
-%typemap(javaimports) brfc::oh5::File, brfc::oh5::File* %{
+%typemap(javaimports) brfc::oh5::File,
+                      brfc::oh5::File* %{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.Time;
-    import eu.baltrad.fc.Source;
     import eu.baltrad.fc.StringVector;
 %}
 
-%typemap(javaimports) brfc::oh5::Attribute, brfc::oh5::Attribute* %{
+%typemap(javaimports) brfc::oh5::Attribute,
+                      brfc::oh5::Attribute* %{
     import eu.baltrad.fc.Variant;
 %}
 
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.Time;
-    import eu.baltrad.fc.Source;
     import eu.baltrad.fc.Variant;
 %}
 
-
-%typemap(javabody) brfc::oh5::File %{
+// make constructors for SWIG_SHARED_PTR public
+%typemap(javabody) brfc::oh5::File,
+                   brfc::oh5::Source %{
   private long swigCPtr;
   private boolean swigCMemOwnBase;
 
@@ -66,11 +78,18 @@ SWIG_SHARED_PTR_DERIVED(AttributeGroup,
   }
 %}
 
+// ignore Source members
+%ignore brfc::Source::Source;
+%ignore brfc::Source::from_source_attribute;
+
 %include <brfc/oh5/Node.hpp>
 %include <brfc/oh5/Group.hpp>
 %include <brfc/oh5/AttributeGroup.hpp>
 %include <brfc/oh5/Root.hpp>
 %include <brfc/oh5/Attribute.hpp>
+%include <brfc/oh5/Source.hpp>
+%include <brfc/oh5/SourceCentre.hpp>
+%include <brfc/oh5/SourceRadar.hpp>
 %include <brfc/oh5/File.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:

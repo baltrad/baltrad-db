@@ -15,13 +15,12 @@ class QTime;
 
 namespace brfc {
 
-class Source;
-
 namespace oh5 {
 
 class AttributeSpecs;
 class Group;
 class Root;
+class Source;
 
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification

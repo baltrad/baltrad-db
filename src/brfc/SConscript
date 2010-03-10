@@ -9,7 +9,6 @@ sources = [
     "RelationalDatabase.cpp",
     "RelationalResultSet.cpp",
     "ResultSet.cpp",
-    "Source.cpp",
     "TestRDB.cpp",
     "TestSwig.cpp",
     "Variant.cpp",
@@ -32,6 +31,7 @@ sources = [
     "oh5/FileLoader.cpp",
     "oh5/Node.cpp",
     "oh5/Root.cpp",
+    "oh5/Source.cpp",
 ]
 
 confdeps = env.ConfHas("#shared-library-confdeps",

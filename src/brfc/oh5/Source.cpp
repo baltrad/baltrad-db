@@ -1,16 +1,17 @@
-#include <brfc/Source.hpp>
-
-#include <brfc/assert.hpp>
-#include <brfc/exceptions.hpp>
-#include <brfc/SourceCentre.hpp>
-#include <brfc/SourceRadar.hpp>
+#include <brfc/oh5/Source.hpp>
 
 #include <boost/foreach.hpp>
 
 #include <QtCore/QStringList>
 #include <QtCore/QMap>
 
+#include <brfc/assert.hpp>
+#include <brfc/exceptions.hpp>
+#include <brfc/oh5/SourceCentre.hpp>
+#include <brfc/oh5/SourceRadar.hpp>
+
 namespace brfc {
+namespace oh5 {
 
 namespace {
 
@@ -59,4 +60,5 @@ Source::from_source_attribute(const QString& source) {
     }
 }
 
+} // namespace oh5
 } // namespace brfc

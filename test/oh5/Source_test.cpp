@@ -1,15 +1,16 @@
 #include <gtest/gtest.h>
 
-#include <brfc/Source.hpp>
-#include <brfc/SourceRadar.hpp>
-#include <brfc/SourceCentre.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/oh5/Source.hpp>
+#include <brfc/oh5/SourceRadar.hpp>
+#include <brfc/oh5/SourceCentre.hpp>
 
-#include "common.hpp"
+#include "../common.hpp"
 
 namespace brfc {
+namespace oh5 {
 
-TEST(Source_test, valid_source) {
+TEST(oh5_Source_test, valid_source) {
     QString value = QString::fromUtf8("WMO:02606,RAD:SE50");
     shared_ptr<Source> s = Source::from_source_attribute(value);
 
@@ -24,19 +25,20 @@ TEST(Source_test, valid_source) {
     EXPECT_EQ(rad->place(), "");
 }
 
-TEST(Source_test, from_empty_source) {
+TEST(oh5_Source_test, from_empty_source) {
     QString value = QString::fromUtf8("");
     EXPECT_THROW(Source::from_source_attribute(value), value_error);
 }
 
-TEST(Source_test, from_source_missing_value) {
+TEST(oh5_Source_test, from_source_missing_value) {
     QString value = QString::fromUtf8("WMO:");
     EXPECT_THROW(Source::from_source_attribute(value), value_error);
 }
 
-TEST(Source_test, from_source_with_invalid_key) {
+TEST(oh5_Source_test, from_source_with_invalid_key) {
     QString value = QString::fromUtf8("asd:qwe");
     EXPECT_THROW(Source::from_source_attribute(value), value_error);
 }
 
+} // namespace oh5
 } // namespace brfc

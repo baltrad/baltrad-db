@@ -17,15 +17,15 @@ class QCoreApplication;
 namespace brfc {
 
 class AttributeMapper;
-class Source;
-class SourceCentre;
-class SourceRadar;
 class Variant;
 
 namespace oh5 {
 
 class AttributeSpecs;
 class File;
+class Source;
+class SourceCentre;
+class SourceRadar;
 
 }
 
@@ -83,7 +83,7 @@ class RelationalDatabase : public Database {
     virtual long long do_save_file(const QString& path,
                                    const oh5::File& file);
 
-    virtual shared_ptr<Source> do_load_source(const QString& srcstr);
+    virtual shared_ptr<oh5::Source> do_load_source(const QString& srcstr);
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
@@ -96,8 +96,8 @@ class RelationalDatabase : public Database {
 
     void init_qapp();
 
-    void load_source_radar(shared_ptr<SourceRadar> src);
-    void load_source_centre(shared_ptr<SourceCentre> src);
+    void load_source_radar(shared_ptr<oh5::SourceRadar> src);
+    void load_source_centre(shared_ptr<oh5::SourceCentre> src);
 
     /**
      * @brief save file to database

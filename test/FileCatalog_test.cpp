@@ -4,12 +4,12 @@
 #include <brfc/exceptions.hpp>
 #include <brfc/Database.hpp>
 #include <brfc/FileCatalog.hpp>
-#include <brfc/Source.hpp>
-#include <brfc/SourceRadar.hpp>
 #include <brfc/Query.hpp>
 
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
+#include <brfc/oh5/Source.hpp>
+#include <brfc/oh5/SourceRadar.hpp>
 
 #include <QtCore/QDate>
 #include <QtCore/QTime>
@@ -37,7 +37,7 @@ class MockDatabase : public Database {
     MOCK_METHOD1(do_has_file, bool(const oh5::File&));
     MOCK_METHOD1(do_remove_file, void(const QString&));
     MOCK_METHOD2(do_save_file, long long(const QString&, const oh5::File&));
-    MOCK_METHOD1(do_load_source, shared_ptr<Source>(const QString&));
+    MOCK_METHOD1(do_load_source, shared_ptr<oh5::Source>(const QString&));
     MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
     MOCK_METHOD0(do_clean, void());  
 };
@@ -55,7 +55,7 @@ struct FileCatalog_test : public testing::Test {
             , specs(new oh5::AttributeSpecs())
             , fc(db, specs, namer, tempdir->path())
             , src_str("WMO:02606")
-            , default_src(new SourceRadar())
+            , default_src(new oh5::SourceRadar())
             , minfile(TempH5File::minimal("PVOL",
                                           QDate(2000, 1, 1),
                                           QTime(12, 0),
@@ -67,7 +67,7 @@ struct FileCatalog_test : public testing::Test {
         specs->add(oh5::AttributeSpec("what/date", "date"));
         specs->add(oh5::AttributeSpec("what/time", "time"));
         specs->add(oh5::AttributeSpec("what/source", "string"));
-        DefaultValue<shared_ptr<Source> >::Set(default_src);
+        DefaultValue<shared_ptr<oh5::Source> >::Set(default_src);
     }
 
     auto_ptr<TempDir> tempdir;
@@ -76,7 +76,7 @@ struct FileCatalog_test : public testing::Test {
     shared_ptr<oh5::AttributeSpecs> specs;
     FileCatalog fc;
     QString src_str;
-    shared_ptr<Source> default_src;
+    shared_ptr<oh5::Source> default_src;
     auto_ptr<TempH5File> minfile;
 };
 

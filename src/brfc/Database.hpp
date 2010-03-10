@@ -11,10 +11,12 @@ namespace brfc {
 
 class ResultSet;
 class Query;
-class Source;
 
 namespace oh5 {
-    class File;
+
+class File;
+class Source;
+
 }
 
 /**
@@ -71,9 +73,9 @@ class Database : public boost::noncopyable {
     }
 
     /**
-     * @brief load Source from DB by contents of /what/source
+     * @brief load source from DB by contents of /what/source
      */
-    shared_ptr<Source> load_source(const QString& source) {
+    shared_ptr<oh5::Source> load_source(const QString& source) {
         return do_load_source(source);
     }
     
@@ -100,7 +102,7 @@ class Database : public boost::noncopyable {
     virtual void do_remove_file(const QString& path) = 0;
     virtual long long do_save_file(const QString& path, const oh5::File& file) = 0;
 
-    virtual shared_ptr<Source> do_load_source(const QString& source) = 0;
+    virtual shared_ptr<oh5::Source> do_load_source(const QString& source) = 0;
 
     virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
 

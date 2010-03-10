@@ -8,9 +8,6 @@
 %{
     #include <brfc/exceptions.hpp>
     #include <brfc/smart_ptr.hpp>
-    #include <brfc/Source.hpp>
-    #include <brfc/SourceCentre.hpp>
-    #include <brfc/SourceRadar.hpp>
     #include <brfc/FileCatalog.hpp>
     #include <brfc/Query.hpp>
     #include <brfc/ResultSet.hpp>
@@ -65,10 +62,6 @@
 
 %ignore brfc::Variant::operator=;
 
-// ignore Source members
-%ignore brfc::Source::Source;
-%ignore brfc::Source::from_source_attribute;
-
 // ignore Variant members
 %ignore brfc::Variant::Variant;
 %ignore brfc::operator=;
@@ -82,10 +75,6 @@
 %rename(Time) QTime;
 
 SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
-
-SWIG_SHARED_PTR(Source, brfc::Source);
-SWIG_SHARED_PTR_DERIVED(SourceRadar, brfc::Source, brfc::SourceRadar);
-SWIG_SHARED_PTR_DERIVED(SourceCentre, brfc::Source, brfc::SourceCentre);
 
 %template(StringVector) std::vector<QString>;
 
@@ -114,22 +103,6 @@ SWIG_SHARED_PTR_DERIVED(SourceCentre, brfc::Source, brfc::SourceCentre);
   }
 %}
 
-%typemap(javabody) brfc::Source %{
-  private long swigCPtr;
-  private boolean swigCMemOwnBase;
-
-  public $javaclassname(long cPtr, boolean cMemoryOwn) {
-    swigCMemOwnBase = cMemoryOwn;
-    swigCPtr = cPtr;
-  }
-
-  public static long getCPtr($javaclassname obj) {
-    return (obj == null) ? 0 : obj.swigCPtr;
-  }
-%}
-
-
-
 class QDate {
   public:
     QDate(int year, int month, int day);
@@ -157,9 +130,6 @@ class QTime {
 %include <brfc/Database.hpp>
 %include <brfc/FileCatalog.hpp>
 %include <brfc/Query.hpp>
-%include <brfc/Source.hpp>
-%include <brfc/SourceCentre.hpp>
-%include <brfc/SourceRadar.hpp>
 %include <brfc/Variant.hpp>
 %include <brfc/TestSwig.hpp>
 

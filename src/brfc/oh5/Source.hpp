@@ -1,11 +1,12 @@
-#ifndef BRFC_SOURCE_H
-#define BRFC_SOURCE_H
+#ifndef BRFC_OH5_SOURCE_H
+#define BRFC_OH5_SOURCE_H
 
 #include <brfc/smart_ptr.hpp>
 
 #include <QtCore/QString>
 
 namespace brfc {
+namespace oh5 {
 
 class Source {
   public:
@@ -52,6 +53,7 @@ class Source {
     QString node_id_;
 };
 
-}
+} // namespace oh5
+} // namespace brfc
 
-#endif // BRFC_SOURCE_H
+#endif // BRFC_OH5_SOURCE_H

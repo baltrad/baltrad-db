@@ -1,9 +1,10 @@
-#ifndef BRFC_SOURCE_CENTRE_HPP
-#define BRFC_SOURCE_CENTRE_HPP
+#ifndef BRFC_OH5_SOURCE_CENTRE_HPP
+#define BRFC_OH5_SOURCE_CENTRE_HPP
 
-#include <brfc/Source.hpp>
+#include <brfc/oh5/Source.hpp>
 
 namespace brfc {
+namespace oh5 {
 
 class SourceCentre : public Source {
   public:
@@ -49,6 +50,7 @@ class SourceCentre : public Source {
     QString wmo_cccc_;
 };
 
+} // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_SOURCE_CENTRE_HPP
+#endif // BRFC_OH5_SOURCE_CENTRE_HPP

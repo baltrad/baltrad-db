@@ -12,7 +12,6 @@
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/Source.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -20,6 +19,7 @@
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/FileLoader.hpp>
 #include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/Source.hpp>
 
 namespace brfc {
 namespace oh5 {
