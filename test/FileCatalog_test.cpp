@@ -12,6 +12,7 @@
 #include <brfc/oh5/SourceRadar.hpp>
 
 #include <brfc/test/TempH5File.hpp>
+#include <brfc/test/TempDir.hpp>
 
 #include <QtCore/QDate>
 #include <QtCore/QTime>
@@ -19,7 +20,6 @@
 #include <QtCore/QFile>
 
 #include "common.hpp"
-#include "TempDir.hpp"
 
 
 using testing::_;
@@ -50,7 +50,7 @@ class MockNamer : public FileNamer {
 
 struct FileCatalog_test : public testing::Test {
     FileCatalog_test()
-            : tempdir(new TempDir())
+            : tempdir(new test::TempDir())
             , db(new MockDatabase())
             , namer(new MockNamer())
             , specs(new oh5::AttributeSpecs())
@@ -72,7 +72,7 @@ struct FileCatalog_test : public testing::Test {
         DefaultValue<shared_ptr<oh5::Source> >::Set(default_src);
     }
 
-    auto_ptr<TempDir> tempdir;
+    auto_ptr<test::TempDir> tempdir;
     shared_ptr<MockDatabase> db;
     shared_ptr<MockNamer> namer;
     shared_ptr<oh5::AttributeSpecs> specs;

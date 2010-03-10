@@ -1,19 +1,20 @@
-#include "TempDir.hpp"
+#include <brfc/test/TempDir.hpp>
 
 #include <cstdlib>
 #include <cstring>
 #include <dirent.h>
+#include <errno.h>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <errno.h>
 
-#include <iostream>
 #include <QtCore/QString>
 
 namespace brfc {
+namespace test {
 
 TempDir::TempDir()
         : path_(strdup("/tmp/brfctest_XXXXXX"), &free) {
@@ -23,6 +24,11 @@ TempDir::TempDir()
 }
 
 TempDir::~TempDir() {
+    unlink();
+}
+
+void
+TempDir::unlink() {
     rmdir_recurse(path_.get());
 }
 
@@ -45,7 +51,7 @@ TempDir::rmdir_recurse(const char* path) {
         if (ent->d_type == DT_DIR) {
             rmdir_recurse(full_path.c_str());
         } else {
-            if (unlink(full_path.c_str()) == -1)
+            if (::unlink(full_path.c_str()) == -1)
                 std::cerr << "could not unlink " << full_path
                           << ": " << strerror(errno) << std::endl;
         }
@@ -56,4 +62,5 @@ TempDir::rmdir_recurse(const char* path) {
                   << ": " << strerror(errno) << std::endl;
 }
 
+} // namespace test
 } // namespace brfc
