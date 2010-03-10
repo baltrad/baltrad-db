@@ -2,7 +2,6 @@
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/AttributeSpecs.hpp>
 #include <brfc/AttributeMapper.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
@@ -16,6 +15,7 @@
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/Root.hpp>
 
@@ -181,7 +181,7 @@ RelationalDatabase::qt_engine(const QString& dialect) const {
 RelationalDatabase::RelationalDatabase(const QString& dsn_)
         : sql_()
         , mapper_(new AttributeMapper())
-        , specs_(new AttributeSpecs())
+        , specs_(new oh5::AttributeSpecs())
         , dialect_()
         , supports_returning_(false) {
     init_qapp();
@@ -229,7 +229,7 @@ RelationalDatabase::~RelationalDatabase() {
     }
 }
 
-const AttributeSpecs&
+const oh5::AttributeSpecs&
 RelationalDatabase::specs() const {
     return *specs_;
 }
@@ -514,9 +514,9 @@ RelationalDatabase::populate_mapper_and_specs() {
                              r->string(1),  // name
                              r->string(3),  // table
                              r->string(4))); // column
-        specs_->add(AttributeSpec(r->string(1), // name
-                                  r->string(2), // typename
-                                  r->boolean(5))); // ignored in has
+        specs_->add(oh5::AttributeSpec(r->string(1), // name
+                                       r->string(2), // typename
+                                       r->boolean(5))); // ignored in hash
     }
 }
 

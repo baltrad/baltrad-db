@@ -1,18 +1,19 @@
-#include <brfc/Converter.hpp>
+#include <brfc/oh5/Converter.hpp>
+
+#include <algorithm>
+#include <string>
+
+#include <boost/numeric/conversion/cast.hpp>
+
+#include <QtCore/QDate>
+#include <QtCore/QTime>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 
-#include <QtCore/QDate>
-#include <QtCore/QTime>
-
-#include <boost/numeric/conversion/cast.hpp>
-
-#include <algorithm>
-#include <string>
-
 namespace brfc {
+namespace oh5 {
 
 Variant
 Converter::convert(HL_FormatSpecifier format,
@@ -169,4 +170,5 @@ BoolConverter::do_convert(const Variant& value) const {
     return str_conv.convert(Variant(bool_str));
 }
 
+} // namespace oh5
 } // namespace brfc

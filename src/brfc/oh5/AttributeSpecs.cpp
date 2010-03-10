@@ -1,9 +1,10 @@
-#include <brfc/AttributeSpecs.hpp>
+#include <brfc/oh5/AttributeSpecs.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Converter.hpp>
+#include <brfc/oh5/Converter.hpp>
 
 namespace brfc {
+namespace oh5 {
 
 AttributeSpecs::AttributeSpecs()
          : specs_()
@@ -60,4 +61,5 @@ AttributeSpecs::converter(const QString& name) const {
     return *(i->second);
 }
 
+} // namespace oh5
 } // namespace brfc

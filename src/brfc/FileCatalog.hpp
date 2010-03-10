@@ -12,11 +12,11 @@
  */
 namespace brfc {
     
-class AttributeSpecs;
 class Database;
 class Query;
 
 namespace oh5 {
+    class AttributeSpecs;
     class File;
 }
 
@@ -44,7 +44,7 @@ class FileCatalog {
     FileCatalog(const QString& dsn, const QString& storage);
 
     FileCatalog(shared_ptr<Database> db,
-                shared_ptr<AttributeSpecs> specs,
+                shared_ptr<oh5::AttributeSpecs> specs,
                 shared_ptr<FileNamer> namer,
                 const QString& storage);
 
@@ -110,7 +110,7 @@ class FileCatalog {
     void check_storage() const;
     
     shared_ptr<Database> db_;
-    shared_ptr<AttributeSpecs> specs_;
+    shared_ptr<oh5::AttributeSpecs> specs_;
     shared_ptr<FileNamer> namer_;
     QDir storage_;
 };

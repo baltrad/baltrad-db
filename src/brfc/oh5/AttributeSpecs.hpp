@@ -1,5 +1,5 @@
-#ifndef BRFC_ATTRIBUTE_SPECS_HPP
-#define BRFC_ATTRIBUTE_SPECS_HPP
+#ifndef BRFC_OH5_ATTRIBUTE_SPECS_HPP
+#define BRFC_OH5_ATTRIBUTE_SPECS_HPP
 
 #include <brfc/smart_ptr.hpp>
 
@@ -8,6 +8,7 @@
 #include <QtCore/QString>
 
 namespace brfc {
+namespace oh5 {
 
 class Converter;
 
@@ -81,6 +82,7 @@ class AttributeSpecs {
     ConverterMap converters_;
 };
 
+} // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_ATTRIBUTE_SPECS_HPP
+#endif // BRFC_OH5_ATTRIBUTE_SPECS_HPP

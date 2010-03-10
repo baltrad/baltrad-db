@@ -2,10 +2,7 @@ Import("env")
 
 sources = [
     "exceptions.cpp",
-    "hlhdf.cpp",
     "AttributeMapper.cpp",
-    "AttributeSpecs.cpp",
-    "Converter.cpp",
     "DefaultFileNamer.cpp",
     "FileCatalog.cpp",
     "Query.cpp",
@@ -25,8 +22,11 @@ sources = [
     "expr/Select.cpp",
     "expr/Selectable.cpp",
     "expr/Visitor.cpp",
+    "oh5/hlhdf.cpp",
     "oh5/Attribute.cpp",
     "oh5/AttributeGroup.cpp",
+    "oh5/AttributeSpecs.cpp",
+    "oh5/Converter.cpp",
     "oh5/Group.cpp",
     "oh5/File.cpp",
     "oh5/FileLoader.cpp",

@@ -3,15 +3,13 @@
 
 #include <QtCore/QStringList>
 
-#include <brfc/hlhdf.hpp>
 #include <brfc/smart_ptr.hpp>
+#include <brfc/oh5/hlhdf.hpp>
 
 namespace brfc {
-
-class AttributeSpecs;
-
 namespace oh5 {
 
+class AttributeSpecs;
 class File;
 class Group;
 

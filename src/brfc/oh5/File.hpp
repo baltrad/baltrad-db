@@ -15,11 +15,11 @@ class QTime;
 
 namespace brfc {
 
-class AttributeSpecs;
 class Source;
 
 namespace oh5 {
 
+class AttributeSpecs;
 class Group;
 class Root;
 

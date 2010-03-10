@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/AttributeSpecs.hpp>
 #include <brfc/SourceRadar.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/Root.hpp>
 

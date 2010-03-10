@@ -17,7 +17,6 @@ class QCoreApplication;
 namespace brfc {
 
 class AttributeMapper;
-class AttributeSpecs;
 class Source;
 class SourceCentre;
 class SourceRadar;
@@ -25,6 +24,7 @@ class Variant;
 
 namespace oh5 {
 
+class AttributeSpecs;
 class File;
 
 }
@@ -59,7 +59,7 @@ class RelationalDatabase : public Database {
     shared_ptr<ResultSet> query(const QString& query,
                                 const BindMap& binds);
     
-    const AttributeSpecs& specs() const;
+    const oh5::AttributeSpecs& specs() const;
 
     const AttributeMapper& mapper() const;
 
@@ -113,7 +113,7 @@ class RelationalDatabase : public Database {
 
     QSqlDatabase sql_;
     boost::scoped_ptr<AttributeMapper> mapper_;
-    boost::scoped_ptr<AttributeSpecs> specs_;
+    boost::scoped_ptr<oh5::AttributeSpecs> specs_;
     QString dialect_;
     bool supports_returning_;
     IdCache id_cache_;

@@ -1,7 +1,6 @@
 #include <brfc/FileCatalog.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/AttributeSpecs.hpp>
 #include <brfc/Database.hpp>
 #include <brfc/DefaultFileNamer.hpp>
 #include <brfc/Query.hpp>
@@ -13,6 +12,7 @@
 #include <brfc/expr/Factory.hpp>
 #include <brfc/expr/Literal.hpp>
 
+#include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 
 #include <boost/foreach.hpp>
@@ -29,11 +29,11 @@ FileCatalog::FileCatalog(const QString& dsn,
         , storage_(storage) {
     check_storage();
     RelationalDatabase* rdb = static_cast<RelationalDatabase*>(db_.get());
-    specs_.reset(new AttributeSpecs(rdb->specs()));
+    specs_.reset(new oh5::AttributeSpecs(rdb->specs()));
 }
 
 FileCatalog::FileCatalog(shared_ptr<Database> db,
-                         shared_ptr<AttributeSpecs> specs,
+                         shared_ptr<oh5::AttributeSpecs> specs,
                          shared_ptr<FileNamer> namer,
                          const QString& storage)
         : db_(db)

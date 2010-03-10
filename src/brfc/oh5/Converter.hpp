@@ -1,5 +1,5 @@
-#ifndef BRFC_CONVERTER_HPP
-#define BRFC_CONVERTER_HPP
+#ifndef BRFC_OH5_CONVERTER_HPP
+#define BRFC_OH5_CONVERTER_HPP
 
 extern "C" {
     #include <hlhdf_types.h>
@@ -11,6 +11,8 @@ extern "C" {
 namespace brfc {
 
 class Variant;
+
+namespace oh5 {
 
 /**
  * @brief HLHDF scalar data
@@ -169,6 +171,7 @@ class SequenceConverter : public StringConverter {
 
 //@}
 
-}
+} // namespace oh5
+} // namespace brfc
 
-#endif // BRFC_CONVERTER_HPP
+#endif // BRFC_OH5_CONVERTER_HPP

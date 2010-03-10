@@ -1,7 +1,6 @@
 #include <brfc/AttributeMapper.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Converter.hpp>
 
 #include <boost/foreach.hpp>
 

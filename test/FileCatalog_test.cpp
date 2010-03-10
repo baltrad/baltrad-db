@@ -2,13 +2,13 @@
 #include <gmock/gmock.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/AttributeSpecs.hpp>
 #include <brfc/Database.hpp>
 #include <brfc/FileCatalog.hpp>
 #include <brfc/Source.hpp>
 #include <brfc/SourceRadar.hpp>
 #include <brfc/Query.hpp>
 
+#include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 
 #include <QtCore/QDate>
@@ -52,7 +52,7 @@ struct FileCatalog_test : public testing::Test {
             : tempdir(new TempDir())
             , db(new MockDatabase())
             , namer(new MockNamer())
-            , specs(new AttributeSpecs())
+            , specs(new oh5::AttributeSpecs())
             , fc(db, specs, namer, tempdir->path())
             , src_str("WMO:02606")
             , default_src(new SourceRadar())
@@ -61,19 +61,19 @@ struct FileCatalog_test : public testing::Test {
                                           QTime(12, 0),
                                           src_str)) {
         minfile->write();
-        specs->add(AttributeSpec("Conventions", "string"));
-        specs->add(AttributeSpec("what/object", "string"));
-        specs->add(AttributeSpec("what/version", "string"));
-        specs->add(AttributeSpec("what/date", "date"));
-        specs->add(AttributeSpec("what/time", "time"));
-        specs->add(AttributeSpec("what/source", "string"));
+        specs->add(oh5::AttributeSpec("Conventions", "string"));
+        specs->add(oh5::AttributeSpec("what/object", "string"));
+        specs->add(oh5::AttributeSpec("what/version", "string"));
+        specs->add(oh5::AttributeSpec("what/date", "date"));
+        specs->add(oh5::AttributeSpec("what/time", "time"));
+        specs->add(oh5::AttributeSpec("what/source", "string"));
         DefaultValue<shared_ptr<Source> >::Set(default_src);
     }
 
     auto_ptr<TempDir> tempdir;
     shared_ptr<MockDatabase> db;
     shared_ptr<MockNamer> namer;
-    shared_ptr<AttributeSpecs> specs;
+    shared_ptr<oh5::AttributeSpecs> specs;
     FileCatalog fc;
     QString src_str;
     shared_ptr<Source> default_src;

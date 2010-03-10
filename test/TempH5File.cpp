@@ -1,6 +1,6 @@
 #include "TempH5File.hpp"
 
-#include <brfc/Converter.hpp>
+#include <brfc/oh5/Converter.hpp>
 #include <brfc/Variant.hpp>
 
 #include <stdexcept>
@@ -52,21 +52,21 @@ void TempH5File::add_group(const char* path) {
 
 namespace {
 
-HL_Data
+oh5::HL_Data
 convert(const Variant& value) {
     switch (value.type()) {
         case Variant::DOUBLE:
-            return RealConverter().convert(value);
+            return oh5::RealConverter().convert(value);
         case Variant::LONGLONG:
-            return IntConverter().convert(value);
+            return oh5::IntConverter().convert(value);
         case Variant::STRING:
-            return StringConverter().convert(value);
+            return oh5::StringConverter().convert(value);
         case Variant::DATE:
-            return DateConverter().convert(value);
+            return oh5::DateConverter().convert(value);
         case Variant::TIME:
-            return TimeConverter().convert(value);
+            return oh5::TimeConverter().convert(value);
         case Variant::BOOL:
-            return BoolConverter().convert(value);
+            return oh5::BoolConverter().convert(value);
         default:
             throw std::runtime_error("could not convert");
     }
@@ -83,7 +83,7 @@ TempH5File::add_attribute(const char* path, const Variant& value) {
         throw std::runtime_error("couldn't add node");
     }
     // convert value
-    HL_Data d = convert(value);
+    oh5::HL_Data d = convert(value);
     // add node
     HLNode_setScalarValue(node, d.size(), d.data(), d.type(), -1);
 }

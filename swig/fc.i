@@ -50,10 +50,10 @@
 %}
 
 %ignore brfc::AttributeMapper;
-%ignore brfc::AttributeSpecs;
+%ignore brfc::oh5::AttributeSpecs;
 %ignore brfc::Database;
 %ignore brfc::FileCatalog::FileCatalog(shared_ptr<Database>,
-                                       shared_ptr<AttributeSpecs>,
+                                       shared_ptr<oh5::AttributeSpecs>,
                                        shared_ptr<FileNamer>,
                                        const QString&);
 

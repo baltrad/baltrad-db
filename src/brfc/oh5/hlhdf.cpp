@@ -1,6 +1,7 @@
-#include <brfc/hlhdf.hpp>
+#include <brfc/oh5/hlhdf.hpp>
 
 namespace brfc {
+namespace oh5 {
 
 void
 init_hlhdflib() {
@@ -12,4 +13,5 @@ init_hlhdflib() {
     }
 }
 
+} // namespace oh5
 } // namespace brfc
