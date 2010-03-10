@@ -11,6 +11,8 @@
 #include <brfc/oh5/Source.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
+#include <brfc/test/TempH5File.hpp>
+
 #include <QtCore/QDate>
 #include <QtCore/QTime>
 #include <QtCore/QVariant>
@@ -18,7 +20,6 @@
 
 #include "common.hpp"
 #include "TempDir.hpp"
-#include "TempH5File.hpp"
 
 
 using testing::_;
@@ -56,10 +57,10 @@ struct FileCatalog_test : public testing::Test {
             , fc(db, specs, namer, tempdir->path())
             , src_str("WMO:02606")
             , default_src(new oh5::SourceRadar())
-            , minfile(TempH5File::minimal("PVOL",
-                                          QDate(2000, 1, 1),
-                                          QTime(12, 0),
-                                          src_str)) {
+            , minfile(test::TempH5File::minimal("PVOL",
+                                                QDate(2000, 1, 1),
+                                                QTime(12, 0),
+                                                src_str)) {
         minfile->write();
         specs->add(oh5::AttributeSpec("Conventions", "string"));
         specs->add(oh5::AttributeSpec("what/object", "string"));
@@ -77,7 +78,7 @@ struct FileCatalog_test : public testing::Test {
     FileCatalog fc;
     QString src_str;
     shared_ptr<oh5::Source> default_src;
-    auto_ptr<TempH5File> minfile;
+    auto_ptr<test::TempH5File> minfile;
 };
 
 TEST_F(FileCatalog_test, test_invalid_dsn_throws) {

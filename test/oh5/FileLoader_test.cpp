@@ -7,12 +7,12 @@
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/FileLoader.hpp>
 #include <brfc/oh5/Root.hpp>
+#include <brfc/test/TempH5File.hpp>
 
 #include <QtCore/QDate>
 #include <QtCore/QTime>
 
 #include "../common.hpp"
-#include "../TempH5File.hpp"
 
 namespace brfc {
 namespace oh5 {
@@ -31,7 +31,7 @@ TEST_F(oh5_FileLoader_test, load) {
     Variant time(QTime(12, 5, 1));
     Variant date(QDate(2000, 1, 2));
 
-    brfc::TempH5File f;
+    test::TempH5File f;
     f.add_attribute("/date", date);
     f.add_attribute("/time", time);
     f.add_group("/dataset1");
@@ -54,7 +54,7 @@ TEST_F(oh5_FileLoader_test, load) {
 }
 
 TEST_F(oh5_FileLoader_test, ignored_attributes) {
-    brfc::TempH5File f;
+    test::TempH5File f;
     f.add_attribute("/ignore", Variant(2.0));
     f.add_group("/dataset");
     f.add_attribute("/dataset/ignore", Variant(1.0));
