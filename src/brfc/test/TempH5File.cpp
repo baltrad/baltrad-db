@@ -26,7 +26,12 @@ TempH5File::TempH5File()
 }
 
 TempH5File::~TempH5File() {
-    unlink(filename_.get());
+    unlink();
+}
+
+void
+TempH5File::unlink() {
+    ::unlink(filename_.get());
 }
 
 namespace {

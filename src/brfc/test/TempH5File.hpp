@@ -33,6 +33,8 @@ class TempH5File {
      * unlinks the file
      */
     ~TempH5File();
+
+    void unlink();
     
     void write(const oh5::File& f);
     
