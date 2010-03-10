@@ -1,4 +1,4 @@
-#include "TempH5File.hpp"
+#include <brfc/test/TempH5File.hpp>
 
 #include <brfc/oh5/Converter.hpp>
 #include <brfc/Variant.hpp>
@@ -10,6 +10,7 @@
 #include <cstring>
 
 namespace brfc {
+namespace test {
 
 TempH5File::TempH5File()
         : nodes_(HLNodeList_new(), &HLNodeList_free)
@@ -104,4 +105,5 @@ TempH5File::write() {
         throw std::runtime_error("could not write file");
 }
 
+} // namespace test
 } // namespace brfc

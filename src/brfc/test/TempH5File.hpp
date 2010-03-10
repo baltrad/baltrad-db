@@ -14,6 +14,8 @@ namespace brfc {
 
 class Variant;
 
+namespace test {
+
 class TempH5File {
   public:
     TempH5File();
@@ -48,6 +50,7 @@ class TempH5File {
     int fd_;
 };
 
+} // namepsace test
 } // namespace brfc
 
 #endif // BRFC_TEMPORARY_H5_FILE_HPP
