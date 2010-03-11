@@ -24,6 +24,12 @@ vars.AddVariables(
                  "${qt_dir}/lib", PathVariable.PathIsDir),
     PathVariable("qt_include_dir", "Qt4 include directory",
                  "${qt_dir}/include", PathVariable.PathIsDir),
+    PathVariable("hdf5_dir", "HDF5 install root",
+                 "/usr", PathVariable.PathIsDir),
+    PathVariable("hdf5_lib_dir", "HDF5 libraries directory",
+                 "${hdf5_dir}/lib", PathVariable.PathIsDir),
+    PathVariable("hdf5_include_dir", "HDF5 include directory",
+                 "${hdf5_dir}/include", PathVariable.PathIsDir),
     PathVariable("hlhdf_dir", "HLHDF install root",
                  "/usr", PathVariable.PathIsDir),
     PathVariable("hlhdf_lib_dir", "HLHDF libraries directory",
@@ -96,9 +102,11 @@ else:
     env.AppendUnique(CCFLAGS=["-O2", "-fno-strict-aliasing"])
 
 env.AppendUnique(CPPPATH=["${qt_include_dir}",
+                          "${hdf5_include_dir}",
                           "${hlhdf_include_dir}",
                           "${boost_include_dir}"])
 env.AppendUnique(LIBPATH=["${qt_lib_dir}",
+                          "${hdf5_lib_dir}",
                           "${hlhdf_lib_dir}",
                           "${boost_lib_dir}"])
 
