@@ -27,6 +27,7 @@
 %ignore brfc::expr::Attribute::create;
 %ignore brfc::expr::Parentheses::create;
 %ignore brfc::expr::Label::create;
+%ignore brfc::expr::Expression::label;
 
 %rename(ExpressionFactory) brfc::expr::Factory;
 %rename(AttributeExpr) brfc::expr::Attribute;
@@ -73,8 +74,8 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
 
 %include <brfc/expr/fwd.hpp>
 %include <brfc/expr/Element.hpp>
-%include <brfc/expr/Label.hpp>
 %include <brfc/expr/Expression.hpp>
+%include <brfc/expr/Label.hpp>
 %include <brfc/expr/Factory.hpp>
 %include <brfc/expr/Attribute.hpp>
 %include <brfc/expr/Parentheses.hpp>
