@@ -2,18 +2,22 @@ Import("env")
 
 env.AppendUnique(CPPPATH=["${jdk_include_dir}", "${jdk_include_dir}/linux"])
 
-Execute(Delete(env.Dir(".").Dir("eu")))
-Execute(Mkdir(env.Dir(".").Dir("eu/baltrad/fc")))
-Execute(Delete(env.Dir(".").Dir("classes")))
+#Execute(Delete(env.Dir(".").Dir("eu")))
+#Execute(Mkdir(env.Dir(".").Dir("eu/baltrad/fc")))
+#Execute(Delete(env.Dir(".").Dir("classes")))
 
 build_dir = env.Dir(".").get_abspath()
 
 env["JARCHDIR"] = build_dir + "/classes"
 env["JAVASOURCEPATH"] = build_dir
+env["JAVACLASSPATH"] = build_dir
 
 env.Append(SWIGPATH=env["CPPPATH"])
 
 fc_env = env.Clone()
+Execute(Mkdir(env.Dir(".").Dir("eu/baltrad/fc/").get_abspath()))
+Execute(Touch(env.Dir(".").File("eu/baltrad/fc/fcJNI.java").get_abspath()))
+
 fc_env.Append(SWIGFLAGS="-c++ -java -package eu.baltrad.fc".split())
 fc_env.Append(SWIGOUTDIR=build_dir + "/eu/baltrad/fc")
 fc = fc_env.SharedObject(["fc.i"])
