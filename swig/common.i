@@ -1,4 +1,3 @@
-
 #define SWIG_SHARED_PTR_NAMESPACE brfc
 %include "boost_shared_ptr.i"
 %include "std_string.i"
@@ -11,6 +10,11 @@
     #include <brfc/exceptions.hpp>
     #include <brfc/smart_ptr.hpp>
 %}
+
+%ignore boost::noncopyable;
+namespace boost {
+    class noncopyable {};
+}
 
 %exception {
     try {
