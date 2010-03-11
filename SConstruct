@@ -137,6 +137,10 @@ class Config(object):
         self.qtsql = cfg.CheckLibWithHeader("QtSql", "QtSql/QSqlDatabase", "c++")
         self.qtsql_drivers = cfg.CheckQtSqlDrivers()
 
+        cfg.env.AppendUnique(CPPPATH=env["hdf5_include_dir"],
+                             LIBPATH=env["hdf5_lib_dir"])
+        self.hdf5 = cfg.CheckLibWithHeader("hdf5", "hdf5.h", "c++")
+
         cfg.env.AppendUnique(CPPPATH=env["hlhdf_include_dir"],
                              LIBPATH=env["hlhdf_lib_dir"])
         self.hlhdf = cfg.CheckHlhdf()
