@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <brfc/oh5/FileLoader.hpp>
+#include <brfc/oh5/SplitPath.hpp>
 
 #include "../common.hpp"
 

@@ -13,28 +13,6 @@ class AttributeSpecs;
 class File;
 class Group;
 
-/**
- * @brief split a path to an Attribute in HDF5 file
- *
- * path will be split to three components:
- *  \li attribute name (prefixed with 'where/', 'what/' or 'how/' group if
- *                     applicable
- *  \li path to data object
- */
-struct SplitPath {
-    explicit SplitPath(const QString& path,
-                       const QStringList& attributegroup_names);
-
-    QString attribute_name;
-    QString full_attribute_name;
-    QString group_path;
-  
-  private:
-    void split(const QString& path,
-               const QStringList& attributegroup_names);
-};
-
-
 class FileLoader {
   public:
     FileLoader(const AttributeSpecs* specs);

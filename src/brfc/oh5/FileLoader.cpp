@@ -2,7 +2,6 @@
 
 #include <boost/foreach.hpp>
 
-#include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 
@@ -12,41 +11,10 @@
 #include <brfc/oh5/Converter.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/SplitPath.hpp>
 
 namespace brfc {
 namespace oh5 {
-
-SplitPath::SplitPath(const QString& path,
-                     const QStringList& attributegroup_names)
-        : attribute_name()
-        , group_path() {
-    split(path, attributegroup_names);
-}
-
-void
-SplitPath::split(const QString& path,
-                 const QStringList& attributegroup_names) {
-    QString sep = QString::fromUtf8("/");
-    QStringList elems = path.split(sep);
-
-    BRFC_ASSERT(elems.size() >= 2);
-
-    // last element is always attribute name
-    attribute_name = elems.takeLast();
-
-    if (attributegroup_names.contains(elems.last())) {
-        full_attribute_name = elems.last() + sep + attribute_name;
-    } else {
-        full_attribute_name = attribute_name;
-    }
-
-    // rest of the element is data object path
-    if (elems.size() <= 1) {
-        group_path = sep;
-    } else {
-        group_path = elems.join(sep);
-    }
-}
 
 
 FileLoader::FileLoader(const AttributeSpecs* specs)
