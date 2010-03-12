@@ -5,6 +5,10 @@
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/Data.hpp>
+#include <brfc/oh5/DataSet.hpp>
+#include <brfc/oh5/Quality.hpp>
+#include <brfc/oh5/Root.hpp>
 
 #include "../common.hpp"
 
@@ -35,11 +39,6 @@ TEST_F(oh5_Attribute_test, test_full_name) {
     EXPECT_EQ(a2->full_name(), "g1/a2");
 }
 
-TEST_F(oh5_Attribute_test, add_child) {
-    EXPECT_THROW(a1->add_child(g1), value_error);
-    EXPECT_THROW(a1->add_child(d1), value_error);
-}
-
 TEST_F(oh5_Attribute_test, to_string) {
     EXPECT_EQ(a1->to_string(), "/a1=1");
     d1->add_child(g1);
@@ -47,6 +46,35 @@ TEST_F(oh5_Attribute_test, to_string) {
     EXPECT_EQ(a2->to_string(), "/d1/g1/a2=2");
 }
 
+TEST_F(oh5_Attribute_test, test_add_child_Attribute) {
+    shared_ptr<Attribute> a = make_shared<Attribute>("a", Variant(1));
+    EXPECT_THROW(a1->add_child(a), value_error);
+}
+
+TEST_F(oh5_Attribute_test, test_add_child_AttributeGroup) {
+    shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
+    EXPECT_THROW(a1->add_child(what), value_error);
+}
+
+TEST_F(oh5_Attribute_test, test_add_child_Data) {
+    shared_ptr<Data> data1 = make_shared<Data>("data1");
+    EXPECT_THROW(a1->add_child(data1), value_error);
+}
+
+TEST_F(oh5_Attribute_test, test_add_child_DataSet) {
+    shared_ptr<DataSet> dataset2 = make_shared<DataSet>("dataset2");
+    EXPECT_THROW(a1->add_child(dataset2), value_error);
+}
+
+TEST_F(oh5_Attribute_test, test_add_child_Quality) {
+    shared_ptr<Quality> a1 = make_shared<Quality>("a1");
+    EXPECT_THROW(a1->add_child(a1), value_error);
+}
+
+TEST_F(oh5_Attribute_test, test_add_child_Root) {
+    shared_ptr<Root> root = make_shared<Root>();
+    EXPECT_THROW(a1->add_child(root), value_error);
+}
 
 } // namepsace oh5
 } // namespace brfc

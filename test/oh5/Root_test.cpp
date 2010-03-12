@@ -4,7 +4,10 @@
 #include <brfc/Variant.hpp>
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/Data.hpp>
+#include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/File.hpp>
+#include <brfc/oh5/Quality.hpp>
 #include <brfc/oh5/Root.hpp>
 
 #include "../common.hpp"
@@ -14,41 +17,57 @@ namespace oh5 {
 
 struct oh5_Root_test : public ::testing::Test {
     oh5_Root_test()
-            : r(make_shared<Root>()) {
+            : root(make_shared<Root>()) {
     }
 
-    shared_ptr<Root> r;
+    shared_ptr<Root> root;
 };
 
-TEST_F(oh5_Root_test, test_add_as_child) {
+TEST_F(oh5_Root_test, test_add_child_Attribute) {
     shared_ptr<Attribute> a = make_shared<Attribute>("a", Variant(1));
-    EXPECT_THROW(a->add_child(r), value_error);
+    EXPECT_NO_THROW(root->add_child(a));
+}
 
-    shared_ptr<AttributeGroup> ag = make_shared<AttributeGroup>("ag");
-    EXPECT_THROW(ag->add_child(r), value_error);
+TEST_F(oh5_Root_test, test_add_child_AttributeGroup) {
+    shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
+    EXPECT_NO_THROW(root->add_child(what));
+}
 
-    shared_ptr<Group> g = make_shared<Group>("g");
-    EXPECT_THROW(g->add_child(r), value_error);
+TEST_F(oh5_Root_test, test_add_child_Data) {
+    shared_ptr<Data> data1 = make_shared<Data>("data1");
+    EXPECT_THROW(root->add_child(data1), value_error);
+}
 
-    shared_ptr<Root> r2 = make_shared<Root>();
-    EXPECT_THROW(r2->add_child(r), value_error);
+TEST_F(oh5_Root_test, test_add_child_DataSet) {
+    shared_ptr<DataSet> dataset2 = make_shared<DataSet>("dataset2");
+    EXPECT_NO_THROW(root->add_child(dataset2));
+}
+
+TEST_F(oh5_Root_test, test_add_child_Quality) {
+    shared_ptr<Quality> quality1 = make_shared<Quality>("quality1");
+    EXPECT_THROW(root->add_child(quality1), value_error);
+}
+
+TEST_F(oh5_Root_test, test_add_child_Root) {
+    shared_ptr<Root> root2 = make_shared<Root>();
+    EXPECT_THROW(root->add_child(root2), value_error);
 }
 
 TEST_F(oh5_Root_test, test_file) {
-    EXPECT_FALSE(r->file());
+    EXPECT_FALSE(root->file());
     shared_ptr<File> f = File::create();
-    r->file(f);
-    EXPECT_EQ(f, r->file());
+    root->file(f);
+    EXPECT_EQ(f, root->file());
 }
 
 // tests functionality implemented at Node level
 TEST_F(oh5_Root_test, test_file_through_child_node) {
-    shared_ptr<Group> g = make_shared<Group>("g");
-    r->add_child(g);
-    EXPECT_FALSE(g->file());
+    shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
+    root->add_child(what);
+    EXPECT_FALSE(what->file());
     shared_ptr<File> f = File::create();
-    r->file(f);
-    EXPECT_EQ(f, g->file());
+    root->file(f);
+    EXPECT_EQ(f, what->file());
 }
 
 } // namespace oh5

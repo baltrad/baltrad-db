@@ -10,6 +10,7 @@ namespace oh5 {
  * @brief the root group
  *
  * can have no parent
+ * can have Attribute, AttributeGroup or DataSet as child
  */
 class Root : public Group {
   public:
@@ -29,10 +30,7 @@ class Root : public Group {
     /**
      * @brief constructor
      */
-    Root()
-            : Group("")
-            , file_() {
-    }
+    Root();
 
     /**
      * @return false
@@ -40,6 +38,8 @@ class Root : public Group {
     virtual bool do_accepts_parent(const Node& node) const {
         return false;
     }
+
+    virtual bool do_accepts_child(const Node& node) const;
 
     virtual shared_ptr<const File> do_file() const {
         return file_.lock();
