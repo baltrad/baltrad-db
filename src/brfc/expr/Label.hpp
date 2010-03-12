@@ -17,16 +17,16 @@ namespace expr {
  */
 class Label : public Expression {
   public:
-    static LabelPtr create(ExpressionPtr expression, const QString& label) {
-        return LabelPtr(new Label(expression, label));
+    static LabelPtr create(ExpressionPtr expression, const QString& name) {
+        return LabelPtr(new Label(expression, name));
     }
 
-    void label(const QString& label) {
-        label_ = label;
+    void name(const QString& name) {
+        name_ = name;
     }
 
-    const QString& label() const {
-        return label_;
+    const QString& name() const {
+        return name_;
     }
 
     void expression(ExpressionPtr expression) {
@@ -41,9 +41,9 @@ class Label : public Expression {
     }
 
   protected:
-    explicit Label(ExpressionPtr expression, const QString& label)
+    explicit Label(ExpressionPtr expression, const QString& name)
             : expression_(expression)
-            , label_(label) {
+            , name_(name) {
     }
 
     virtual void do_accept(Visitor& visitor) {
@@ -52,7 +52,7 @@ class Label : public Expression {
 
   private:
     ExpressionPtr expression_;
-    QString label_;
+    QString name_;
 };
 
 }

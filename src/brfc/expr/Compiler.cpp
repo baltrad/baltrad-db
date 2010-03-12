@@ -103,7 +103,7 @@ Compiler::do_visit(Literal& expr) {
 
 void
 Compiler::do_visit(Label& label) {
-    push(pop() + " AS " + label.label());
+    push(pop() + " AS " + label.name());
 }
 
 void
