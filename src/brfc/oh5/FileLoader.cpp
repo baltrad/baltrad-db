@@ -65,22 +65,22 @@ FileLoader::add_attribute_from_node(HL_Node* node) {
     QString nodename = QString::fromUtf8(HLNode_getName(node));
     unsigned char* data = HLNode_getData(node);
 
-    SplitPath path(nodename, attributegroup_names_);
+    SplitPath path(nodename);
 
     const Converter* converter = 0;
     const AttributeSpec* spec = 0;
     
     try {
-        spec = &specs_->get(path.full_attribute_name);
-        converter = &specs_->converter(path.full_attribute_name);
+        spec = &specs_->get(path.full_attribute_name());
+        converter = &specs_->converter(path.full_attribute_name());
     } catch (const lookup_error& e) {
         file_->ignored_attributes().push_back(nodename);
         return;
     }
 
     const Variant& value = converter->convert(HLNode_getFormat(node), data);
-    shared_ptr<Group> group = get_or_create_group(path.group_path);
-    shared_ptr<Attribute> attr = make_shared<Attribute>(path.attribute_name,
+    shared_ptr<Group> group = get_or_create_group(path.group_path());
+    shared_ptr<Attribute> attr = make_shared<Attribute>(path.attribute_name(),
                                                         value,
                                                         spec->ignore_in_hash);
     group->add_child(attr);
