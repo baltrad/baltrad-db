@@ -218,6 +218,30 @@ TEST_P(RDB_Query_test, test_select_by_wmo_code) {
     EXPECT_TRUE(v.contains("td4"));
 }
 
+TEST_P(RDB_Query_test, test_select_by_or_node) {
+    expr::AttributePtr node = xpr.attribute("src_node");
+    shared_ptr<ResultSet> r =
+        query.fetch(xpr.attribute("path"))
+             .filter(node->eq(xpr.string("seang"))->or_(node->eq(xpr.string("sekkr"))))
+             .execute();
+    EXPECT_EQ(r->size(), 5);
+    const QStringList& v = extract_strings_at(*r, 0);
+    EXPECT_TRUE(v.contains("td1"));
+    EXPECT_TRUE(v.contains("td2"));
+    EXPECT_TRUE(v.contains("td3"));
+    EXPECT_TRUE(v.contains("td4"));
+    EXPECT_TRUE(v.contains("td5"));
+}
+
+TEST_P(RDB_Query_test, test_select_by_and_node) {
+    expr::AttributePtr node = xpr.attribute("src_node");
+    shared_ptr<ResultSet> r =
+        query.fetch(xpr.attribute("path"))
+             .filter(node->eq(xpr.string("seang"))->and_(node->eq(xpr.string("sekkr"))))
+             .execute();
+    EXPECT_EQ(r->size(), 0);
+}
+
 TEST_P(RDB_Query_test, test_select_by_place) {
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
