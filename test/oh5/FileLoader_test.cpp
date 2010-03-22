@@ -30,6 +30,8 @@ class oh5_FileLoader_test : public ::testing::Test {
     virtual void SetUp() {
         specs.add(AttributeSpec("date", "date"));
         specs.add(AttributeSpec("time", "time"));
+        specs.add(AttributeSpec("what/date", "date"));
+        specs.add(AttributeSpec("what/time", "time"));
     }
 
     virtual void TearDown() {
@@ -67,7 +69,7 @@ TEST_F(oh5_FileLoader_test, load) {
     ASSERT_TRUE(g->group("/what")->attribute("date"));
     EXPECT_EQ(d_2000_01_02, root->attribute("date")->value());
     EXPECT_EQ(t_12_05_01, root->attribute("time")->value());
-    EXPECT_EQ(d_2000_01_02, g->group("/what1")->attribute("date")->value());
+    EXPECT_EQ(d_2000_01_02, g->group("/what")->attribute("date")->value());
 }
 
 TEST_F(oh5_FileLoader_test, ignored_attributes) {

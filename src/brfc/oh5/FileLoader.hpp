@@ -12,6 +12,7 @@ namespace oh5 {
 class AttributeSpecs;
 class File;
 class Group;
+class SplitPath;
 
 class FileLoader {
   public:
@@ -22,12 +23,9 @@ class FileLoader {
     ~FileLoader();
   
   private:
-    shared_ptr<Group> get_or_create_group(const QString& path);
+    shared_ptr<Group> get_or_create_group(const SplitPath& path);
 
     void add_attribute_from_node(HL_Node* node);
-
-    shared_ptr<Group> create_group(const QString& name);
-
 
     const AttributeSpecs* specs_;
     shared_ptr<File> file_;

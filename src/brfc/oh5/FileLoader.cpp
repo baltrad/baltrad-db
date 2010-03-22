@@ -9,7 +9,10 @@
 #include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/Converter.hpp>
+#include <brfc/oh5/Data.hpp>
+#include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/File.hpp>
+#include <brfc/oh5/Quality.hpp>
 #include <brfc/oh5/Root.hpp>
 #include <brfc/oh5/SplitPath.hpp>
 
@@ -30,32 +33,33 @@ FileLoader::~FileLoader() {
 
 }
 
+namespace {
+
+template<typename T>
 shared_ptr<Group>
-FileLoader::create_group(const QString& name) {
-    if (attributegroup_names_.contains(name)) {
-        return make_shared<AttributeGroup>(name);
-    } else {
-        return make_shared<Group>(name);
+get_or_create_child(Group& group, const QString& name) {
+    shared_ptr<Group> child = group.group_by_name(name);
+    if (not child) {
+        child = make_shared<T>(name);
+        group.add_child(child);
     }
+    return child;
 }
 
-shared_ptr<Group>
-FileLoader::get_or_create_group(const QString& path) {
-    QStringList names = path.split("/");
-    names.removeFirst(); // leading /
-    if (names.front() == "")
-        names.removeFirst();
+} // namespace anonymous
 
+shared_ptr<Group>
+FileLoader::get_or_create_group(const SplitPath& path) {
     shared_ptr<Group> group = file_->root();
 
-    BOOST_FOREACH(const QString& name, names) {
-        shared_ptr<Group> next_group = group->group_by_name(name);
-        if (not next_group) {
-            next_group = create_group(name);
-            group->add_child(next_group);
-        }
-        group = next_group;
-    }
+    if (path.dataset() != "")
+        group = get_or_create_child<DataSet>(*group, path.dataset());
+    if (path.data() != "")
+        group = get_or_create_child<Data>(*group, path.data());
+    if (path.quality() != "")
+        group = get_or_create_child<Quality>(*group, path.quality());
+    if (path.attribute_group() != "")
+        group = get_or_create_child<AttributeGroup>(*group, path.attribute_group());
 
     return group;
 }
@@ -79,7 +83,7 @@ FileLoader::add_attribute_from_node(HL_Node* node) {
     }
 
     const Variant& value = converter->convert(HLNode_getFormat(node), data);
-    shared_ptr<Group> group = get_or_create_group(path.group_path());
+    shared_ptr<Group> group = get_or_create_group(path);
     shared_ptr<Attribute> attr = make_shared<Attribute>(path.attribute_name(),
                                                         value,
                                                         spec->ignore_in_hash);
