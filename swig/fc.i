@@ -68,8 +68,6 @@
 %ignore brfc::Variant::to_qvariant;
 %ignore brfc::variant_to_qvariant;
 
-%ignore brfc::Query::fetch;
-
 %rename(Date) QDate;
 %rename(Time) QTime;
 
@@ -79,10 +77,12 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.expr.Expression;
+    import eu.baltrad.fc.expr.AttributeExpr;
 %}
 
 %typemap(javaimports) brfc::Query, brfc::Query* %{
     import eu.baltrad.fc.expr.Expression;
+    import eu.baltrad.fc.expr.AttributeExpr;
 %}
 
 %typemap(javaimports) brfc::FileCatalog, brfc::FileCatalog* %{
