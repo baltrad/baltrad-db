@@ -30,6 +30,8 @@ sources = [
     "oh5/Node.cpp",
     "oh5/Root.cpp",
     "oh5/Source.cpp",
+    "oh5/SourceCentre.cpp",
+    "oh5/SourceRadar.cpp",
     "test/TempDir.cpp",
     "test/TempH5File.cpp",
     "test/TestRDB.cpp",

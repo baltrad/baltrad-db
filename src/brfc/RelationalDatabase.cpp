@@ -404,9 +404,11 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src) {
     if (not qry.exec()) 
         throw db_error(qry.lastError());
     if (qry.size() < 1) {
-        throw lookup_error("no source found");
+        throw lookup_error("no source found: " +
+                           src->to_string().toStdString());
     } else if (qry.size() > 1) {
-        throw lookup_error("multiple sources found");
+        throw lookup_error("multiple sources found: " +
+                           src->to_string().toStdString());
     }
     qry.first();
 
@@ -451,9 +453,11 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     if (not qry.exec()) 
         throw db_error(qry.lastError());
     if (qry.size() < 1) {
-        throw lookup_error("no source found");
+        throw lookup_error("no source found: " +
+                           src->to_string().toStdString());
     } else if (qry.size() > 1) {
-        throw lookup_error("multiple sources found");
+        throw lookup_error("multiple sources found: " +
+                           src->to_string().toStdString());
     }
     qry.first();
 

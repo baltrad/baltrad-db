@@ -44,6 +44,8 @@ class SourceCentre : public Source {
         wmo_cccc_ = value;
     }
 
+    virtual QString to_string() const;
+
   private:
     int originating_centre_;
     int country_code_;
