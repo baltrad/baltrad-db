@@ -8,19 +8,34 @@ namespace oh5 {
 
 class Attribute;
 
+/**
+ * @brief ABC for ODIM_H5 elements that can have children
+ */
 class Group : public Node {
   public:
     /**
-     * @{
+     * @brief destructor
      */
-    shared_ptr<Attribute> attribute(const QString& path);
+    virtual ~Group();
 
-    shared_ptr<const Attribute> attribute(const QString& path) const;
+    /**
+     * @{
+     * @return pointer to Attribute or null if not found
+     */
+    shared_ptr<Attribute> attribute(const QString& name);
+
+    shared_ptr<const Attribute> attribute(const QString& name) const;
     ///@}
-
+    
+    /**
+     * @{
+     * @brief access child group by name
+     * @return pointer to Group or null if not found
+     */
     shared_ptr<Group> group_by_name(const QString& name);
 
-    virtual ~Group();
+    shared_ptr<const Group> group_by_name(const QString& name) const;
+    ///@}
 
     // XXX: this needs to go!
     long long db_id() const { return db_id_; }
