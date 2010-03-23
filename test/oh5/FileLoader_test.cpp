@@ -92,6 +92,15 @@ TEST_F(oh5_FileLoader_test, ignored_attributes) {
     EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/dataset/ignore") != ignored.end());
 }
 
+TEST_F(oh5_FileLoader_test, invalid_conversion_throws) {
+    shared_ptr<File> f = File::create();
+
+    f->root()->add_child(make_shared<Attribute>("date", t_12_05_01));
+
+    tempfile.write(*f);
+
+    ASSERT_THROW(File::from_filesystem(tempfile.filename(), specs), value_error);
+}
 
 
 } // namespace oh5

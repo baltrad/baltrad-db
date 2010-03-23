@@ -110,12 +110,17 @@ FileLoader::add_attribute_from_node(HL_Node* node) {
         return;
     }
 
-    const Variant& value = converter->convert(HLNode_getFormat(node), data);
-    shared_ptr<Group> group = get_or_create_group(path.group_path);
-    shared_ptr<Attribute> attr = make_shared<Attribute>(path.attribute_name,
+    try {
+        const Variant& value = converter->convert(HLNode_getFormat(node), data);
+        shared_ptr<Group> group = get_or_create_group(path.group_path);
+        shared_ptr<Attribute> attr = make_shared<Attribute>(path.attribute_name,
                                                         value,
                                                         spec->ignore_in_hash);
-    group->add_child(attr);
+        group->add_child(attr);
+    } catch (const value_error& e) {
+        throw value_error(nodename.toStdString() + ": " + e.what());
+    }
+
 }
 
 shared_ptr<File>
