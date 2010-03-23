@@ -46,7 +46,6 @@
 %}
 
 %ignore brfc::AttributeMapper;
-%ignore brfc::oh5::AttributeSpecs;
 %ignore brfc::Database;
 %ignore brfc::FileCatalog::FileCatalog(shared_ptr<Database>,
                                        shared_ptr<oh5::AttributeSpecs>,

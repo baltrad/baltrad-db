@@ -7,8 +7,12 @@
     #include <brfc/oh5/Node.hpp>
     #include <brfc/oh5/Attribute.hpp>
     #include <brfc/oh5/AttributeGroup.hpp>
+    #include <brfc/oh5/AttributeSpecs.hpp>
+    #include <brfc/oh5/Data.hpp>
+    #include <brfc/oh5/DataSet.hpp>
     #include <brfc/oh5/File.hpp>
     #include <brfc/oh5/Group.hpp>
+    #include <brfc/oh5/Quality.hpp>
     #include <brfc/oh5/Root.hpp>
     #include <brfc/oh5/Source.hpp>
     #include <brfc/oh5/SourceCentre.hpp>
@@ -17,6 +21,11 @@
     #include <QtCore/QDate>
     #include <QtCore/QTime>
 %}
+
+%ignore brfc::oh5::AttributeSpecs::converter;
+
+%ignore brfc::oh5::Node::begin;
+%ignore brfc::oh5::Node::end;
 
 SWIG_SHARED_PTR(File, brfc::oh5::File);
 
@@ -33,6 +42,16 @@ SWIG_SHARED_PTR_DERIVED(Root,
 SWIG_SHARED_PTR_DERIVED(AttributeGroup,
                         brfc::oh5::Group,
                         brfc::oh5::AttributeGroup);
+SWIG_SHARED_PTR_DERIVED(DataSet,
+                        brfc::oh5::Group,
+                        brfc::oh5::DataSet);
+SWIG_SHARED_PTR_DERIVED(Data,
+                        brfc::oh5::Group,
+                        brfc::oh5::Data);
+SWIG_SHARED_PTR_DERIVED(Quality,
+                        brfc::oh5::Group,
+                        brfc::oh5::Quality);
+
 
 SWIG_SHARED_PTR(Source, brfc::oh5::Source);
 SWIG_SHARED_PTR_DERIVED(SourceCentre,
@@ -85,6 +104,10 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
 %include <brfc/oh5/Node.hpp>
 %include <brfc/oh5/Group.hpp>
 %include <brfc/oh5/AttributeGroup.hpp>
+%include <brfc/oh5/AttributeSpecs.hpp>
+%include <brfc/oh5/DataSet.hpp>
+%include <brfc/oh5/Data.hpp>
+%include <brfc/oh5/Quality.hpp>
 %include <brfc/oh5/Root.hpp>
 %include <brfc/oh5/Attribute.hpp>
 %include <brfc/oh5/Source.hpp>
