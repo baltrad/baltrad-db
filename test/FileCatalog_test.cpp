@@ -100,7 +100,7 @@ TEST_F(FileCatalog_test, test_catalog) {
     EXPECT_CALL(*db, do_commit());
     
     // file is given the path returned by namer
-    shared_ptr<const oh5::File> f = fc.catalog(tempfile.filename());
+    shared_ptr<const oh5::File> f = fc.catalog(tempfile.path());
     EXPECT_EQ(f->path(), target);
     EXPECT_EQ(f->db_id(), 1);
 
@@ -119,7 +119,7 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
         .WillOnce(Throw(db_error("")));
     EXPECT_CALL(*db, do_rollback());
     
-    EXPECT_THROW(fc.catalog(tempfile.filename()), db_error);
+    EXPECT_THROW(fc.catalog(tempfile.path()), db_error);
     EXPECT_FALSE(QFile::exists(target));
 }
 
@@ -137,7 +137,7 @@ TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
 
     tempdir.reset(); // tempdir removed
 
-    EXPECT_THROW(fc.catalog(tempfile.filename()), fs_error);
+    EXPECT_THROW(fc.catalog(tempfile.path()), fs_error);
     EXPECT_FALSE(QFile::exists(target));
 }
 
@@ -145,7 +145,7 @@ TEST_F(FileCatalog_test, test_double_import_throws) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(true));
 
-    EXPECT_THROW(fc.catalog(tempfile.filename()), duplicate_entry);
+    EXPECT_THROW(fc.catalog(tempfile.path()), duplicate_entry);
 }
 
 TEST_F(FileCatalog_test, test_is_cataloged_on_nx_file) {
@@ -156,7 +156,7 @@ TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
 
-    EXPECT_FALSE(fc.is_cataloged(tempfile.filename()));
+    EXPECT_FALSE(fc.is_cataloged(tempfile.path()));
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {

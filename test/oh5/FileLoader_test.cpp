@@ -56,8 +56,8 @@ TEST_F(oh5_FileLoader_test, load) {
 
     tempfile.write(*f);
 
-    shared_ptr<File> g = File::from_filesystem(tempfile.filename(), specs);
-    EXPECT_EQ(g->path(), tempfile.filename());
+    shared_ptr<File> g = File::from_filesystem(tempfile.path(), specs);
+    EXPECT_EQ(g->path(), tempfile.path());
     shared_ptr<Root> root = g->root();
     EXPECT_EQ((size_t)3, root->children().size());
     EXPECT_TRUE(root->has_child_by_name("date"));
@@ -83,7 +83,7 @@ TEST_F(oh5_FileLoader_test, ignored_attributes) {
 
     tempfile.write(*f);
 
-    shared_ptr<File> g = File::from_filesystem(tempfile.filename(), specs);
+    shared_ptr<File> g = File::from_filesystem(tempfile.path(), specs);
 
     shared_ptr<Root> root = g->root();
     EXPECT_FALSE(root->attribute("ignore"));
