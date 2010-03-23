@@ -41,7 +41,7 @@ class Group : public Node {
         : Node(name) {
     }
 
-    virtual bool do_accepts_child(const Node& node) const;
+    virtual bool do_accepts_child(const Node& node) const = 0;
 
     virtual bool do_accepts_parent(const Node& node) const;
   

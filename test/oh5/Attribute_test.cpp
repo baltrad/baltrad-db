@@ -20,30 +20,33 @@ struct oh5_Attribute_test : public ::testing::Test {
     oh5_Attribute_test()
             : a1(make_shared<Attribute>("a1", Variant(1)))
             , a2(make_shared<Attribute>("a2", Variant(2)))
-            , g1(make_shared<AttributeGroup>("g1"))
-            , d1(make_shared<Group>("d1")) {
+            , what(make_shared<AttributeGroup>("what"))
+            , dataset1(make_shared<DataSet>("dataset1"))
+            , root(make_shared<Root>()) {
 
     }
     
     shared_ptr<Attribute> a1;
     shared_ptr<Attribute> a2;
-    shared_ptr<AttributeGroup> g1;
-    shared_ptr<Group> d1;
+    shared_ptr<AttributeGroup> what;
+    shared_ptr<DataSet> dataset1;
+    shared_ptr<Root> root;
 };
 
 TEST_F(oh5_Attribute_test, test_full_name) {
     EXPECT_EQ(a1->full_name(), "a1");
-    d1->add_child(a1);
+    root->add_child(a1);
     EXPECT_EQ(a1->full_name(), "a1");
-    g1->add_child(a2);
-    EXPECT_EQ(a2->full_name(), "g1/a2");
+    what->add_child(a2);
+    EXPECT_EQ(a2->full_name(), "what/a2");
 }
 
 TEST_F(oh5_Attribute_test, to_string) {
     EXPECT_EQ(a1->to_string(), "/a1=1");
-    d1->add_child(g1);
-    g1->add_child(a2);
-    EXPECT_EQ(a2->to_string(), "/d1/g1/a2=2");
+    root->add_child(dataset1);
+    dataset1->add_child(what);
+    what->add_child(a2);
+    EXPECT_EQ(a2->to_string(), "/dataset1/what/a2=2");
 }
 
 TEST_F(oh5_Attribute_test, test_add_child_Attribute) {

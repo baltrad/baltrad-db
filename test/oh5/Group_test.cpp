@@ -10,12 +10,29 @@
 namespace brfc {
 namespace oh5 {
 
-struct oh5_Group_test : public ::testing::Test {
-    oh5_Group_test()
-            : g(make_shared<Group>("g")) {
+class FakeGroup : public Group {
+  public:
+    FakeGroup(const QString& name)
+            : Group(name) {
     }
 
-    shared_ptr<Group> g;
+  protected:
+  /*
+    template<class T, class A1> 
+    friend 
+    shared_ptr<T> boost::make_shared(const A1& a1);
+*/
+    virtual bool do_accepts_child(const Node& child) const {
+        return true;
+    }
+};
+
+struct oh5_Group_test : public ::testing::Test {
+    oh5_Group_test()
+            : g(make_shared<FakeGroup>("g")) {
+    }
+
+    shared_ptr<FakeGroup> g;
 };
 
 TEST_F(oh5_Group_test, test_add_child_attribute) {
@@ -29,7 +46,7 @@ TEST_F(oh5_Group_test, test_add_child_attributegroup) {
 }
 
 TEST_F(oh5_Group_test, test_add_child_group) {
-    shared_ptr<Group> d = make_shared<Group>("d");
+    shared_ptr<FakeGroup> d = make_shared<FakeGroup>("d");
     EXPECT_NO_THROW(g->add_child(d));
 }
 
@@ -45,7 +62,7 @@ TEST_F(oh5_Group_test, test_attribute_access) {
 }
 
 TEST_F(oh5_Group_test, test_group_by_name) {
-    shared_ptr<Group> g2 = make_shared<Group>("g2");
+    shared_ptr<FakeGroup> g2 = make_shared<FakeGroup>("g2");
     g->add_child(g2);
     shared_ptr<AttributeGroup> ag = make_shared<AttributeGroup>("ag");
     g2->add_child(ag);
