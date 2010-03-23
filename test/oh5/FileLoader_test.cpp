@@ -44,7 +44,6 @@ class oh5_FileLoader_test : public ::testing::Test {
     Variant d_2000_01_02;
 };
 
-
 TEST_F(oh5_FileLoader_test, load) {
     shared_ptr<File> f = File::create();
 
@@ -58,6 +57,7 @@ TEST_F(oh5_FileLoader_test, load) {
     tempfile.write(*f);
 
     shared_ptr<File> g = File::from_filesystem(tempfile.filename(), specs);
+    EXPECT_EQ(g->path(), tempfile.filename());
     shared_ptr<Root> root = g->root();
     EXPECT_EQ((size_t)3, root->children().size());
     EXPECT_TRUE(root->has_child_by_name("date"));

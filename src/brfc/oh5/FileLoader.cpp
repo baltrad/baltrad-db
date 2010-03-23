@@ -103,6 +103,7 @@ FileLoader::load(const QString& path) {
     HLNodeList_fetchMarkedNodes(nodes);
 
     file_ = File::create();
+    file_->path(path);
 
     for (int i=0; i < HLNodeList_getNumberOfNodes(nodes); ++i) {
         HL_Node* node = HLNodeList_getNodeByIndex(nodes, i);
