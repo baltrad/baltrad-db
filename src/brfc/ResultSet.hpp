@@ -1,6 +1,8 @@
 #ifndef BRFC_RESULT_SET_HPP
 #define BRFC_RESULT_SET_HPP
 
+#include <boost/noncopyable.hpp>
+
 class QString;
 class QDate;
 class QTime;
@@ -13,7 +15,7 @@ class Variant;
  * @brief ABC for Query results
  * @ingroup exposed_in_binds
  */
-class ResultSet {
+class ResultSet : public boost::noncopyable {
   public:
     /**
      * @brief destructor

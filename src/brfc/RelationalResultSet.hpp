@@ -24,16 +24,6 @@ class RelationalResultSet : public ResultSet {
     explicit RelationalResultSet(const QSqlQuery& query);
     
     /**
-     * @brief copy constructor
-     */
-    RelationalResultSet(const RelationalResultSet& other);
-
-    /**
-     * @brief copy assignment
-     */
-    RelationalResultSet& operator=(const RelationalResultSet& rhs);
-    
-    /**
      * @brief destructor
      */
     virtual ~RelationalResultSet();
