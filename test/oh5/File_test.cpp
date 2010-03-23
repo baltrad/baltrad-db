@@ -17,8 +17,8 @@
 namespace brfc {
 namespace oh5 {
 
-struct File_test : public testing::Test {
-    File_test()
+struct oh5_File_test : public testing::Test {
+    oh5_File_test()
             : specs()
             , src(new SourceRadar())
             , f1(File::minimal("pvol",
@@ -46,7 +46,7 @@ struct File_test : public testing::Test {
 };
 
 /*
-TEST_F(File_test, get_same_node) {
+TEST_F(oh5_File_test, get_same_node) {
     File f;
     DataObject& d1 = f.data_object("/path/to/object", true);
     DataObject& d2 = f.data_object("/path/to/object", true);
@@ -55,51 +55,51 @@ TEST_F(File_test, get_same_node) {
 }
 */
 
-TEST_F(File_test, get_nx_node) {
+TEST_F(oh5_File_test, get_nx_node) {
     shared_ptr<File> f = File::create();
     EXPECT_FALSE(f->group("/nx"));
 }
 
-TEST_F(File_test, root) {
+TEST_F(oh5_File_test, root) {
     shared_ptr<File> f = File::create();
     EXPECT_EQ(f->root(), f->group("/"));
     EXPECT_EQ(f, f->root()->file());
 }
 
-TEST_F(File_test, required_attribute_shortcuts) {
+TEST_F(oh5_File_test, required_attribute_shortcuts) {
     EXPECT_EQ(f1->what_object(), "pvol");
     EXPECT_EQ(f1->what_date(), QDate(2000, 1, 2));
     EXPECT_EQ(f1->what_time(), QTime(12, 5));
     EXPECT_EQ(f1->what_source(), "WMO:02606");
 }
 
-TEST_F(File_test, unique_identifier_same_meta) {
+TEST_F(oh5_File_test, unique_identifier_same_meta) {
     f1->source(src);
     f3->source(src);
     EXPECT_EQ(f1->unique_identifier(), f3->unique_identifier());
 }
 
-TEST_F(File_test, unique_identifier_different_meta) {
+TEST_F(oh5_File_test, unique_identifier_different_meta) {
     f1->source(src);
     f2->source(src);
     EXPECT_NE(f1->unique_identifier(), f2->unique_identifier());
 }
 
-TEST_F(File_test, unique_identifier_ignore_attribute) {
+TEST_F(oh5_File_test, unique_identifier_ignore_attribute) {
     f1->source(src);
     QString uid = f1->unique_identifier();
     f1->root()->add_child(make_shared<Attribute>("bla", Variant(1), true));
     EXPECT_EQ(uid, f1->unique_identifier());
 }
 
-TEST_F(File_test, unique_identifier_changes_when_meta_changes) {
+TEST_F(oh5_File_test, unique_identifier_changes_when_meta_changes) {
     f1->source(src);
     QString uid = f1->unique_identifier();
     f1->root()->add_child(make_shared<Attribute>("bla", Variant(1), false));
     EXPECT_NE(uid, f1->unique_identifier());
 }
 
-TEST_F(File_test, open_nx_file) {
+TEST_F(oh5_File_test, open_nx_file) {
     EXPECT_THROW(File::from_filesystem("/path/to/nxfile", specs), fs_error);
 }
 
