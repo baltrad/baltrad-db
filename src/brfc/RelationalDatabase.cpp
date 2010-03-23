@@ -533,11 +533,4 @@ RelationalDatabase::do_remove_file(const QString& path) {
         throw db_error(query.lastError());
 }
 
-void
-RelationalDatabase::do_clean() {
-    BRFC_ASSERT(connection().isOpen());
-    QSqlQuery query(connection());
-    query.exec("DELETE FROM files");
-}
-
 }
