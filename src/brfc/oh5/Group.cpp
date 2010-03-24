@@ -22,12 +22,12 @@ Group::attribute(const QString& name) const {
 }
 
 shared_ptr<Group>
-Group::group_by_name(const QString& name) {
+Group::child_group_by_name(const QString& name) {
     return dynamic_pointer_cast<Group>(child_by_name(name));
 }
 
 shared_ptr<const Group>
-Group::group_by_name(const QString& name) const {
+Group::child_group_by_name(const QString& name) const {
     return dynamic_pointer_cast<const Group>(child_by_name(name));
 }
 

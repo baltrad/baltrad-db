@@ -32,9 +32,9 @@ class Group : public Node {
      * @brief access child group by name
      * @return pointer to Group or null if not found
      */
-    shared_ptr<Group> group_by_name(const QString& name);
+    shared_ptr<Group> child_group_by_name(const QString& name);
 
-    shared_ptr<const Group> group_by_name(const QString& name) const;
+    shared_ptr<const Group> child_group_by_name(const QString& name) const;
     ///@}
 
     // XXX: this needs to go!

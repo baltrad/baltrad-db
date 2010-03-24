@@ -61,15 +61,15 @@ TEST_F(oh5_Group_test, test_attribute_access) {
     EXPECT_FALSE(g->attribute("what"));
 }
 
-TEST_F(oh5_Group_test, test_group_by_name) {
+TEST_F(oh5_Group_test, test_child_group_by_name) {
     shared_ptr<FakeGroup> g2 = make_shared<FakeGroup>("g2");
     g->add_child(g2);
     shared_ptr<AttributeGroup> ag = make_shared<AttributeGroup>("ag");
     g2->add_child(ag);
     
-    EXPECT_EQ(g->group_by_name("g2"), g2);
-    EXPECT_EQ(g2->group_by_name("ag"), ag);
-    EXPECT_FALSE(g->group_by_name("ag"));
+    EXPECT_EQ(g->child_group_by_name("g2"), g2);
+    EXPECT_EQ(g2->child_group_by_name("ag"), ag);
+    EXPECT_FALSE(g->child_group_by_name("ag"));
 }
 
 } // namespace oh5

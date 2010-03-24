@@ -35,7 +35,7 @@ namespace {
 template<typename T>
 shared_ptr<Group>
 get_or_create_child(Group& group, const QString& name) {
-    shared_ptr<Group> child = group.group_by_name(name);
+    shared_ptr<Group> child = group.child_group_by_name(name);
     if (not child) {
         child = make_shared<T>(name);
         group.add_child(child);
