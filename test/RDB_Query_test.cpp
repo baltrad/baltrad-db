@@ -270,6 +270,16 @@ TEST_P(RDB_Query_test, test_has_nx_file) {
     EXPECT_FALSE(result);
 }
 
+TEST_P(RDB_Query_test, test_query_file_id) {
+    shared_ptr<ResultSet> r = 
+        query.fetch(xpr.attribute("file_id"))
+             .filter(xpr.attribute("path")->eq(xpr.string("td1")))
+             .execute();
+    EXPECT_EQ(r->size(), 1);
+    r->next();
+    EXPECT_EQ(r->integer(0), td1->db_id());
+}
+
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(RDB_Query_test_p,
                         RDB_Query_test,

@@ -332,6 +332,9 @@ RelationalDatabase::save(const QString& path, const oh5::File& f) {
 
     const MappingVector& special = mapper().specializations_on("files");
     BOOST_FOREACH(const Mapping& mapping, special) {
+        // XXX: get rid of this
+        if (mapping.attribute == "file_id") 
+            continue;
         columns.append(mapping.column);
     }
     BOOST_FOREACH(const QString& column, columns) {
@@ -349,7 +352,8 @@ RelationalDatabase::save(const QString& path, const oh5::File& f) {
         throw db_error("no Source associated with File");
 
     BOOST_FOREACH(const Mapping& mapping, special) {
-        if (mapping.attribute == "path")
+        // XXX: do something about it, we can't continue adding here
+        if (mapping.attribute == "path" || mapping.attribute == "file_id")
             continue;
         const QVariant& value = 
                 f.root()->attribute(mapping.attribute)->value().to_qvariant();
