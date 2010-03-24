@@ -11,13 +11,13 @@ Group::~Group() {
 }
 
 shared_ptr<Attribute>
-Group::attribute(const QString& name) {
+Group::child_attribute(const QString& name) {
     const Group* self = const_cast<const Group*>(this);
-    return const_pointer_cast<Attribute>(self->attribute(name));
+    return const_pointer_cast<Attribute>(self->child_attribute(name));
 }
 
 shared_ptr<const Attribute>
-Group::attribute(const QString& name) const {
+Group::child_attribute(const QString& name) const {
     return dynamic_pointer_cast<const Attribute>(child_by_path(name));
 }
 

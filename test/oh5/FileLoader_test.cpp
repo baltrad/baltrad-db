@@ -63,13 +63,13 @@ TEST_F(oh5_FileLoader_test, load) {
     EXPECT_TRUE(root->has_child_by_name("date"));
     EXPECT_TRUE(root->has_child_by_name("time"));
     EXPECT_TRUE(root->has_child_by_name("what"));
-    ASSERT_TRUE(root->attribute("date"));
-    ASSERT_TRUE(root->attribute("time"));
+    ASSERT_TRUE(root->child_attribute("date"));
+    ASSERT_TRUE(root->child_attribute("time"));
     ASSERT_TRUE(g->group("/what"));
-    ASSERT_TRUE(g->group("/what")->attribute("date"));
-    EXPECT_EQ(d_2000_01_02, root->attribute("date")->value());
-    EXPECT_EQ(t_12_05_01, root->attribute("time")->value());
-    EXPECT_EQ(d_2000_01_02, g->group("/what")->attribute("date")->value());
+    ASSERT_TRUE(g->group("/what")->child_attribute("date"));
+    EXPECT_EQ(d_2000_01_02, root->child_attribute("date")->value());
+    EXPECT_EQ(t_12_05_01, root->child_attribute("time")->value());
+    EXPECT_EQ(d_2000_01_02, g->group("/what")->child_attribute("date")->value());
 
     // nothing ignored
     EXPECT_EQ(g->ignored_attributes().size(), 0);
@@ -90,8 +90,8 @@ TEST_F(oh5_FileLoader_test, ignored_attributes) {
 
     shared_ptr<Root> root = g->root();
     // still present in the structure
-    EXPECT_TRUE(root->attribute("ignore"));
-    EXPECT_TRUE(root->attribute("what/ignore"));
+    EXPECT_TRUE(root->child_attribute("ignore"));
+    EXPECT_TRUE(root->child_attribute("what/ignore"));
 
     // accessible through ignored_attributes
     const File::StringVector& ignored = g->ignored_attributes();

@@ -56,9 +56,9 @@ TEST_F(oh5_Group_test, test_attribute_access) {
     shared_ptr<Attribute> a1 = make_shared<Attribute>("a1", Variant(1));
     what->add_child(a1);
 
-    EXPECT_EQ(g->attribute("what/a1"), a1);
-    EXPECT_FALSE(g->attribute("a1"));
-    EXPECT_FALSE(g->attribute("what"));
+    EXPECT_EQ(g->child_attribute("what/a1"), a1);
+    EXPECT_FALSE(g->child_attribute("a1"));
+    EXPECT_FALSE(g->child_attribute("what"));
 }
 
 TEST_F(oh5_Group_test, test_child_group_by_name) {

@@ -21,10 +21,11 @@ class Group : public Node {
     /**
      * @{
      * @return pointer to Attribute or null if not found
+     *
      */
-    shared_ptr<Attribute> attribute(const QString& name);
+    shared_ptr<Attribute> child_attribute(const QString& name);
 
-    shared_ptr<const Attribute> attribute(const QString& name) const;
+    shared_ptr<const Attribute> child_attribute(const QString& name) const;
     ///@}
     
     /**

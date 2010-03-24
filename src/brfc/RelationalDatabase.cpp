@@ -93,7 +93,8 @@ class GroupSaver {
     void bind_specializations(const oh5::Group& group) {
         BOOST_FOREACH(const Mapping& mapping, special_) {
             QVariant val;
-            shared_ptr<const oh5::Attribute> attr = group.attribute(mapping.attribute);
+            shared_ptr<const oh5::Attribute> attr =
+                group.child_attribute(mapping.attribute);
             if (attr)
                 val = attr->value().to_qvariant();
             qry_.bindValue(":" + mapping.column, val);
@@ -356,7 +357,7 @@ RelationalDatabase::save(const QString& path, const oh5::File& f) {
         if (mapping.attribute == "path" || mapping.attribute == "file_id")
             continue;
         const QVariant& value = 
-                f.root()->attribute(mapping.attribute)->value().to_qvariant();
+                f.root()->child_attribute(mapping.attribute)->value().to_qvariant();
         qry.bindValue(":" + mapping.column, value);
     }
 

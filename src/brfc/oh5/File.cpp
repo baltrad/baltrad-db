@@ -74,22 +74,22 @@ File::source(shared_ptr<Source> source) {
 
 QString
 File::what_object() const {
-    return root_->attribute("what/object")->value().string();
+    return root_->child_attribute("what/object")->value().string();
 }
 
 QDate
 File::what_date() const {
-    return root_->attribute("what/date")->value().date();
+    return root_->child_attribute("what/date")->value().date();
 }
 
 QTime
 File::what_time() const {
-    return root_->attribute("what/time")->value().time();
+    return root_->child_attribute("what/time")->value().time();
 }
 
 QString
 File::what_source() const {
-    return root_->attribute("what/source")->value().string();
+    return root_->child_attribute("what/source")->value().string();
 }
 
 QString
