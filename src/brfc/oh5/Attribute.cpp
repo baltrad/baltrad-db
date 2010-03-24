@@ -11,7 +11,7 @@ Attribute::Attribute(const QString& name,
                      const Variant& value,
                      bool ignore_in_hash)
         : Node(name)
-        , value_(new Variant(value))
+        , value_(value)
         , ignore_in_hash_(ignore_in_hash) {
 }
 
@@ -37,7 +37,12 @@ Attribute::parent_group() const {
 
 void
 Attribute::value(const Variant& value) {
-    *value_ = value;
+    value_ = value;
+}
+
+bool
+Attribute::is_valid() const {
+    return not value_.is_null();
 }
 
 QString
@@ -53,7 +58,7 @@ Attribute::full_name() const {
 
 QString
 Attribute::to_string() const {
-    return path() + "=" + value_->to_string();
+    return path() + "=" + value_.to_string();
 }
 
 } // namespace oh5

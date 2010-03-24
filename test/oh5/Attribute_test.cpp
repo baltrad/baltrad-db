@@ -33,6 +33,13 @@ struct oh5_Attribute_test : public ::testing::Test {
     shared_ptr<Root> root;
 };
 
+TEST_F(oh5_Attribute_test, test_is_valid) {
+    shared_ptr<Attribute> empty = make_shared<Attribute>("empty");
+    EXPECT_FALSE(empty->is_valid());
+    empty->value(Variant(1));
+    EXPECT_TRUE(empty->is_valid());
+}
+
 TEST_F(oh5_Attribute_test, test_full_name) {
     EXPECT_EQ(a1->full_name(), "a1");
     root->add_child(a1);

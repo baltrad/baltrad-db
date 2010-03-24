@@ -1,11 +1,10 @@
 #ifndef BRFC_OH5_ATTRIBUTE_H
 #define BRFC_OH5_ATTRIBUTE_H
 
+#include <brfc/Variant.hpp>
 #include <brfc/oh5/Node.hpp>
 
 namespace brfc {
-
-class Variant;
 
 namespace oh5 {
 
@@ -37,12 +36,19 @@ class Attribute : public Node {
     /**
      * @brief attribute value
      */
-    const Variant& value() const { return *value_; }
-    
+    const Variant& value() const { return value_; }
+
     /**
      * @brief set attribute value
      */
     void value(const Variant& value);
+
+    /**
+     * @brief is the attribute valid
+     *
+     * attribute is considered valid if it has a value (Variant is not null)
+     */
+    bool is_valid() const;
 
     bool ignore_in_hash() const { return ignore_in_hash_; }
 
@@ -66,6 +72,10 @@ class Attribute : public Node {
     QString to_string() const;
 
   protected:
+    template<class T, class A1>
+    friend
+    shared_ptr<T> boost::make_shared(const A1&);
+
     template<class T, class A1, class A2> 
     friend 
     shared_ptr<T> boost::make_shared(const A1&, const A2&);
@@ -80,9 +90,9 @@ class Attribute : public Node {
      * @param value attribute value
      * @param ignore_in_hash should this attribute be ignored when hashing
      */
-    Attribute(const QString& name,
-              const Variant& value,
-              bool ignore_in_hash=false);
+    explicit Attribute(const QString& name,
+                       const Variant& value=Variant(),
+                       bool ignore_in_hash=false);
 
     /**
      * @return false
@@ -103,7 +113,7 @@ class Attribute : public Node {
     }
 
   private:
-    scoped_ptr<Variant> value_;
+    Variant value_;
     bool ignore_in_hash_;
 };
 
