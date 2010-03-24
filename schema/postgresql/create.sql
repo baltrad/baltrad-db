@@ -12,14 +12,6 @@ CREATE TABLE attributes (
 
 ;
 
-CREATE TABLE attribute_groups (
-	id SERIAL NOT NULL, 
-	name INTEGER NOT NULL, 
-	PRIMARY KEY (id)
-)
-
-;
-
 CREATE TABLE sources (
 	id SERIAL NOT NULL, 
 	node_id TEXT NOT NULL, 
@@ -149,11 +141,19 @@ CREATE TABLE source_radars (
 	wmo_code INTEGER, 
 	place TEXT, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(centre_id) REFERENCES source_centres (id), 
 	 FOREIGN KEY(id) REFERENCES sources (id), 
+	 UNIQUE (place), 
 	 UNIQUE (radar_site), 
-	 UNIQUE (wmo_code), 
-	 UNIQUE (place)
+	 FOREIGN KEY(centre_id) REFERENCES source_centres (id), 
+	 UNIQUE (wmo_code)
+)
+
+;
+
+CREATE TABLE attribute_groups (
+	id SERIAL NOT NULL, 
+	name INTEGER NOT NULL, 
+	PRIMARY KEY (id)
 )
 
 ;
@@ -342,17 +342,17 @@ INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (3
 INSERT INTO sources (id, node_id) VALUES (33, 'plleg');
 INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (33, 8, 'PL41', 12374, 'Legionowo');
 INSERT INTO sources (id, node_id) VALUES (34, 'plram');
-INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (34, 8, 'PL42', 12514, 'Ramza');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (34, 8, 'PL42', 12514, 'Ramża');
 INSERT INTO sources (id, node_id) VALUES (35, 'plpas');
 INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (35, 8, 'PL43', 12544, 'Pastewnik');
 INSERT INTO sources (id, node_id) VALUES (36, 'plrze');
-INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (36, 8, 'PL44', 12579, 'Rzeszow');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (36, 8, 'PL44', 12579, 'Rzeszów');
 INSERT INTO sources (id, node_id) VALUES (37, 'plpoz');
-INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (37, 8, 'PL45', 12331, 'Poznan');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (37, 8, 'PL45', 12331, 'Poznań');
 INSERT INTO sources (id, node_id) VALUES (38, 'plswi');
-INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (38, 8, 'PL46', 12220, 'Swidwin');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (38, 8, 'PL46', 12220, 'Świdwin');
 INSERT INTO sources (id, node_id) VALUES (39, 'plgda');
-INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (39, 8, 'PL47', 12151, 'Gdansk');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (39, 8, 'PL47', 12151, 'Gdańsk');
 INSERT INTO sources (id, node_id) VALUES (40, 'plbrz');
 INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (40, 8, 'PL48', 12568, 'Brzuchania');
 INSERT INTO sources (id, node_id) VALUES (41, 'sekir');

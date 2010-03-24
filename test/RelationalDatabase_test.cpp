@@ -42,6 +42,19 @@ TEST_P(RelationalDatabase_test, load_source_by_plc) {
     EXPECT_EQ("pl", radar->centre()->node_id());
 }
 
+TEST_P(RelationalDatabase_test, load_source_by_plc_unicode) {
+    shared_ptr<oh5::Source> src = db->load_source(QString::fromUtf8("PLC:Świdwin"));
+    EXPECT_TRUE(src);
+    shared_ptr<oh5::SourceRadar> radar =
+        dynamic_pointer_cast<oh5::SourceRadar>(src);
+    EXPECT_TRUE(src);
+    EXPECT_EQ(QString::fromUtf8("Świdwin"), radar->place());
+    EXPECT_EQ("PL46", radar->radar_site());
+    ASSERT_TRUE(radar->centre());
+    EXPECT_EQ("pl", radar->centre()->node_id());
+}
+
+
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(RelationalDatabase_test_p,
                         RelationalDatabase_test,
