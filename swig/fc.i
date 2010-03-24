@@ -77,11 +77,13 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.expr.Expression;
     import eu.baltrad.fc.expr.AttributeExpr;
+    import eu.baltrad.fc.expr.AttributeExprVector;
 %}
 
 %typemap(javaimports) brfc::Query, brfc::Query* %{
     import eu.baltrad.fc.expr.Expression;
     import eu.baltrad.fc.expr.AttributeExpr;
+    import eu.baltrad.fc.expr.AttributeExprVector;
 %}
 
 %typemap(javaimports) brfc::FileCatalog, brfc::FileCatalog* %{

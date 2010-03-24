@@ -56,6 +56,24 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
                         brfc::expr::Expression,
                         brfc::expr::Attribute);
 
+%typemap(javabody) std::vector<brfc::shared_ptr<brfc::expr::Attribute> > %{
+                   
+  private long swigCPtr;
+  protected boolean swigCMemOwn;
+
+  public $javaclassname(long cPtr, boolean cMemoryOwn) {
+    swigCMemOwn = cMemoryOwn;
+    swigCPtr = cPtr;
+  }
+
+  public static long getCPtr($javaclassname obj) {
+    return (obj == null) ? 0 : obj.swigCPtr;
+  }
+%}
+
+%template(AttributeExprVector) std::vector<brfc::shared_ptr<brfc::expr::Attribute> >;
+
+
 %typemap(javabody_derived) brfc::expr::Expression %{
   private long swigCPtr;
   private boolean swigCMemOwnDerived;
