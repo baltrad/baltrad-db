@@ -109,6 +109,12 @@ class QDate {
     int year() const;
     int month() const;
     int day() const;
+
+    %extend {
+        QString to_string(const QString& format) const {
+            return $self->toString(format);
+        }
+    }
 };
 
 
@@ -120,6 +126,12 @@ class QTime {
     int minute() const;
     int second() const;
     int msec() const;
+    
+    %extend {
+        QString to_string(const QString& format) const {
+            return $self->toString(format);
+        }
+    }
 };
 
 %include <QtCore/QDate>
