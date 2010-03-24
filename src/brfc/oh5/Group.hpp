@@ -20,8 +20,13 @@ class Group : public Node {
 
     /**
      * @{
+     * @brief access a child attribute
+     * @param name name of the attribute, can contain a group (e.g what/date)
      * @return pointer to Attribute or null if not found
-     *
+     * 
+     * The search for the attribute is performed among immediate children.
+     * If the name is prefixed with a group, the search is performed in
+     * the respective AttributeGroup.
      */
     shared_ptr<Attribute> child_attribute(const QString& name);
 
@@ -30,8 +35,50 @@ class Group : public Node {
     
     /**
      * @{
+     * @brief access a child attribute "in effect"
+     * @param name name of the attribute, can contain a group (e.g what/date)
+     * @return pointer to Attribute or null if not found
+     *
+     * This method seeks for an attribute "in effect" at this hierarchy
+     * level. The search is performed among immediate children (if prefixed
+     * with a group name, also in respective group). If no match is found at
+     * current level, the search is continued up the hierarchy until a match
+     * is found or root node is reached.
+     *
+     * So given a hierarchy:
+     *  - /
+     *    - what
+     *      - attr1
+     *      - attr2
+     *    - dataset1
+     *      - attr1
+     *      - data1
+     *        - what
+     *          - attr1
+     *          - attr2
+     *      - data2
+     * 
+     * following results would be obtained:
+     * 
+     * - search for attr1 @ data2 would return /dataset1/attr1
+     * - search for attr2 @ data2 would return null
+     * - search for what/attr1 @ data2 would return /what/attr1
+     * - search for what/attr1 @ data1 would return /dataset1/data1/what/attr1
+     * - and so on ...
+     * 
+     */
+    shared_ptr<Attribute> attribute(const QString& name);
+
+    shared_ptr<const Attribute> attribute(const QString& name) const;
+    ///@}
+    
+    /**
+     * @{
      * @brief access child group by name
+     * @param name name of the group
      * @return pointer to Group or null if not found
+     *
+     * The search for the group is performed among immediate children.
      */
     shared_ptr<Group> child_group_by_name(const QString& name);
 
