@@ -29,6 +29,13 @@ Group::attribute(const QString& name) {
 
 shared_ptr<const Attribute>
 Group::attribute(const QString& name) const {
+    shared_ptr<const Attribute> child = child_attribute(name);
+    if (child)
+        return child;
+    shared_ptr<const Group> pgroup =
+        dynamic_pointer_cast<const Group>(parent());
+    if (pgroup)
+        return pgroup->attribute(name);
     return shared_ptr<const Attribute>();
 }
 
