@@ -1,10 +1,10 @@
 #ifndef BRFC_OH5_FILE_LOADER_HPP
 #define BRFC_OH5_FILE_LOADER_HPP
 
-#include <QtCore/QStringList>
-
 #include <brfc/smart_ptr.hpp>
 #include <brfc/oh5/hlhdf.hpp>
+
+class QString;
 
 namespace brfc {
 namespace oh5 {
@@ -48,7 +48,6 @@ class FileLoader {
 
     const AttributeSpecs* specs_;
     shared_ptr<File> file_;
-    QStringList attributegroup_names_;
 };
 
 } // namespace oh5

@@ -22,11 +22,8 @@ namespace oh5 {
 
 FileLoader::FileLoader(const AttributeSpecs* specs)
         : specs_(specs)
-        , file_()
-        , attributegroup_names_() {
-    attributegroup_names_.push_back("what");
-    attributegroup_names_.push_back("where");
-    attributegroup_names_.push_back("how");
+        , file_() {
+
 }
 
 FileLoader::~FileLoader() {
