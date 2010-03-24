@@ -150,5 +150,17 @@ TEST_F(Expression_test, test_select) {
     EXPECT_EQ(bind(":lit_0"), Variant(1));
 }
 
+TEST_F(Expression_test, test_factory_or_) {
+    TablePtr t = Table::create("t");
+    ExpressionPtr e1 = t->column("c")->eq(xpr.integer(1));
+    ExpressionPtr e2 = t->column("c")->eq(xpr.integer(2));
+    ExpressionPtr e3 = xpr.or_(e1, e2);
+    QString expected("t.c = :lit_0 OR t.c = :lit_1");
+    compiler.compile(*e3);
+    EXPECT_EQ(expected, compiler.compiled());
+    EXPECT_EQ(bind(":lit_0"), Variant(1));
+    EXPECT_EQ(bind(":lit_1"), Variant(2));
+}
+
 } // namespace brfc
 

@@ -54,6 +54,8 @@ class SourceRadar : public Source {
         BRFC_ASSERT(centre_);
         return centre_->wmo_cccc();
     }
+
+    virtual QString to_string() const;
    
   private:
     int wmo_code_;

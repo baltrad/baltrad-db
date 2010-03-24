@@ -86,13 +86,6 @@ class Database : public boost::noncopyable {
         return do_query(query);
     }
 
-    /**
-     * @brief delete all files from database
-     */
-    void clean() {
-        do_clean();
-    }
-
   protected:
     virtual void do_begin() = 0;
     virtual void do_rollback() = 0;
@@ -105,8 +98,6 @@ class Database : public boost::noncopyable {
     virtual shared_ptr<oh5::Source> do_load_source(const QString& source) = 0;
 
     virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
-
-    virtual void do_clean() = 0;
 };
 
 } // namespace brfc

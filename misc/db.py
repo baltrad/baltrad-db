@@ -343,6 +343,7 @@ attribute_entries = [
 
 virtual_attributes = [
     ("path",    "string",   "files",   "path"),
+    ("file_id", "int",      "files",   "id"),
     ("src_WMO", "int",      "source_radars", "wmo_code"),
     ("src_RAD", "string",   "source_radars", "radar_site"),
     ("src_ORG", "int",      "source_centres", "originating_centre"),

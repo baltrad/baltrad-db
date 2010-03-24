@@ -87,8 +87,6 @@ class RelationalDatabase : public Database {
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
-    virtual void do_clean();
-
     QString dialect() const { return dialect_; }
   
   private:

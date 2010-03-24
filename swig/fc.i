@@ -67,8 +67,6 @@
 %ignore brfc::Variant::qstring;
 %ignore brfc::Variant::to_qvariant;
 
-%ignore brfc::Query::fetch;
-
 %rename(Date) QDate;
 %rename(Time) QTime;
 
@@ -78,10 +76,12 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.expr.Expression;
+    import eu.baltrad.fc.expr.AttributeExpr;
 %}
 
 %typemap(javaimports) brfc::Query, brfc::Query* %{
     import eu.baltrad.fc.expr.Expression;
+    import eu.baltrad.fc.expr.AttributeExpr;
 %}
 
 %typemap(javaimports) brfc::FileCatalog, brfc::FileCatalog* %{
@@ -108,6 +108,12 @@ class QDate {
     int year() const;
     int month() const;
     int day() const;
+
+    %extend {
+        QString to_string(const QString& format) const {
+            return $self->toString(format);
+        }
+    }
 };
 
 
@@ -119,6 +125,12 @@ class QTime {
     int minute() const;
     int second() const;
     int msec() const;
+    
+    %extend {
+        QString to_string(const QString& format) const {
+            return $self->toString(format);
+        }
+    }
 };
 
 %include <QtCore/QDate>

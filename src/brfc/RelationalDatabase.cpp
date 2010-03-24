@@ -332,6 +332,9 @@ RelationalDatabase::save(const QString& path, const oh5::File& f) {
 
     const MappingVector& special = mapper().specializations_on("files");
     BOOST_FOREACH(const Mapping& mapping, special) {
+        // XXX: get rid of this
+        if (mapping.attribute == "file_id") 
+            continue;
         columns.append(mapping.column);
     }
     BOOST_FOREACH(const QString& column, columns) {
@@ -349,7 +352,8 @@ RelationalDatabase::save(const QString& path, const oh5::File& f) {
         throw db_error("no Source associated with File");
 
     BOOST_FOREACH(const Mapping& mapping, special) {
-        if (mapping.attribute == "path")
+        // XXX: do something about it, we can't continue adding here
+        if (mapping.attribute == "path" || mapping.attribute == "file_id")
             continue;
         const QVariant& value = 
                 f.root()->attribute(mapping.attribute)->value().to_qvariant();
@@ -404,9 +408,11 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src) {
     if (not qry.exec()) 
         throw db_error(qry.lastError());
     if (qry.size() < 1) {
-        throw lookup_error("no source found");
+        throw lookup_error("no source found: " +
+                           src->to_string().toStdString());
     } else if (qry.size() > 1) {
-        throw lookup_error("multiple sources found");
+        throw lookup_error("multiple sources found: " +
+                           src->to_string().toStdString());
     }
     qry.first();
 
@@ -451,9 +457,11 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     if (not qry.exec()) 
         throw db_error(qry.lastError());
     if (qry.size() < 1) {
-        throw lookup_error("no source found");
+        throw lookup_error("no source found: " +
+                           src->to_string().toStdString());
     } else if (qry.size() > 1) {
-        throw lookup_error("multiple sources found");
+        throw lookup_error("multiple sources found: " +
+                           src->to_string().toStdString());
     }
     qry.first();
 
@@ -527,13 +535,6 @@ RelationalDatabase::do_remove_file(const QString& path) {
     query.bindValue(":path", path);
     if (!query.exec())
         throw db_error(query.lastError());
-}
-
-void
-RelationalDatabase::do_clean() {
-    BRFC_ASSERT(connection().isOpen());
-    QSqlQuery query(connection());
-    query.exec("DELETE FROM files");
 }
 
 }

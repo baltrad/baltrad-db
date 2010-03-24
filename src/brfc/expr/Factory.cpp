@@ -94,7 +94,7 @@ Factory::and_(ExpressionPtr lhs, ExpressionPtr rhs) const {
 
 BinaryOperatorPtr
 Factory::or_(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return rhs->or_(rhs);
+    return lhs->or_(rhs);
 }
 
 ParenthesesPtr

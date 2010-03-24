@@ -43,7 +43,7 @@ RealConverter::do_convert(HL_FormatSpecifier format,
             val = numeric_cast<double>(*reinterpret_cast<long double*>(data));
             break;
         default:
-            throw brfc_error("invalid format");
+            throw value_error("invalid format for 'real'");
     }
     return Variant(val);
 }
@@ -73,7 +73,7 @@ IntConverter::do_convert(HL_FormatSpecifier format,
             val = *reinterpret_cast<long long*>(data);
             break;
         default:
-            throw brfc_error("invalid format");
+            throw value_error("invalid format for 'integer'");
     }
     return Variant(val);
 }
@@ -89,7 +89,9 @@ IntConverter::do_convert(const Variant& value) const {
 
 Variant
 StringConverter::do_convert(HL_FormatSpecifier format,
-                            unsigned char* data) const {
+                           unsigned char* data) const {
+    if (format != HLHDF_STRING)
+        throw value_error("invalid format for 'string'");
     BRFC_ASSERT(format == HLHDF_STRING);
     QString s = QString::fromUtf8(reinterpret_cast<char*>(data));
     return Variant(s);
@@ -111,7 +113,8 @@ DateConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     const Variant& var = StringConverter::do_convert(format, data);
     QDate date =  QDate::fromString(var.string(), "yyyyMMdd");
-    BRFC_ASSERT(date.isValid());
+    if (not date.isValid())
+        throw value_error("invalid format for 'date'");
     return Variant(date);
 }
 
@@ -127,7 +130,8 @@ TimeConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     const Variant& var = StringConverter::do_convert(format, data);
     QTime time = QTime::fromString(var.string(), "hhmmss");
-    BRFC_ASSERT(time.isValid());
+    if (not time.isValid())
+        throw value_error("invalid format for 'time'");
     return Variant(time);
 }
 
@@ -149,7 +153,7 @@ BoolConverter::do_convert(HL_FormatSpecifier format,
     } else if (str == "False") {
         val = false;
     } else {
-        BRFC_ASSERT(false);
+        throw value_error("invalid format for 'bool'");
     }
     return Variant(val);
 }
