@@ -184,14 +184,7 @@ class File : public boost::noncopyable {
     File();
     
   private:
-    /**
-     * @brief figure out pathname from attributes
-     *
-     * pseudo-attribute \c path on root Group is set to a relative
-     * path where this File should be stored to.
-     */
-    void set_path_from_attributes();
-    
+
     shared_ptr<Root> root_;
     QString path_;
     shared_ptr<Source> source_;
