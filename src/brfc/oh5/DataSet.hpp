@@ -7,9 +7,9 @@ namespace brfc {
 namespace oh5 {
 
 /**
- * @brief ODIM_H5 dataset node
+ * @brief ODIM_H5 dataset group
  *
- * * can have Data or AttributeGroup or Quality as a child
+ * can have Data or AttributeGroup or Quality as a child
  */
 class DataSet : public Group {
   public:

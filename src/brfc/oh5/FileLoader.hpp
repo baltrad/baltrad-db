@@ -14,14 +14,33 @@ class File;
 class Group;
 class SplitPath;
 
+/**
+ * @brief load metadata from a file in filesystem
+ */
 class FileLoader {
   public:
-    FileLoader(const AttributeSpecs* specs);
+    /**
+     * @brief constructor
+     * @param specs used for converter lookups
+     */
+    explicit FileLoader(const AttributeSpecs* specs);
 
-    shared_ptr<File> load(const QString& path);
-
+    /**
+     * @brief desctructor
+     */
     ~FileLoader();
   
+    /**
+     * @brief load from filesystem
+     * @param path path in filesystem
+     * @return File pointer
+     * @throw fs_error if the file can not be opened
+     *
+     * ignored attributes (failing name or converter lookup) are stored
+     * as full attribute paths to ignored_attributes on File
+     */
+    shared_ptr<File> load(const QString& path);
+
   private:
     shared_ptr<Group> get_or_create_group(const SplitPath& path);
 

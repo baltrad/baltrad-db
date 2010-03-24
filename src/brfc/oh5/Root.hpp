@@ -18,6 +18,9 @@ class Root : public Group {
 
     using Group::file;
 
+    /**
+     * @brief associate with a file
+     */
     void file(shared_ptr<File> file) {
         file_ = file;
     }
@@ -39,8 +42,14 @@ class Root : public Group {
         return false;
     }
 
+    /**
+     * accepts Attribute, AttributeGroup and Dataset as children
+     */
     virtual bool do_accepts_child(const Node& node) const;
 
+    /**
+     * @return pointer to File or null if not associated
+     */
     virtual shared_ptr<const File> do_file() const {
         return file_.lock();
     }

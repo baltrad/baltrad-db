@@ -12,7 +12,7 @@ namespace oh5 {
 class Group;
 
 /**
- * @brief Attribute read from HDF5 file
+ * @brief ODIM_H5 attribute element
  */
 class Attribute : public Node {
   public:    
@@ -22,11 +22,17 @@ class Attribute : public Node {
     virtual ~Attribute();
     
     /**
-     * @brief return nearest Group
+     * @brief return nearest parent Group that is not AttributeGroup
+     * @return Group or null if not found
      *
      * if the attribute is in an AttributeGroup, bypass it
+     *
+     * @{
      */
     shared_ptr<const Group> parent_group() const;
+
+    shared_ptr<Group> parent_group();
+    /// @}
     
     /**
      * @brief attribute value
@@ -72,6 +78,7 @@ class Attribute : public Node {
      * @brief constructor
      * @param name name of the attribute
      * @param value attribute value
+     * @param ignore_in_hash should this attribute be ignored when hashing
      */
     Attribute(const QString& name,
               const Variant& value,
@@ -86,6 +93,11 @@ class Attribute : public Node {
         return false;
     }
 
+    /**
+     * @return true
+     *
+     * relies on the parent node to deny it
+     */
     virtual bool do_accepts_parent(const Node& node) const {
         return true;
     }

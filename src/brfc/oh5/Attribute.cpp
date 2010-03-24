@@ -19,6 +19,12 @@ Attribute::~Attribute() {
 
 }
 
+shared_ptr<Group>
+Attribute::parent_group() {
+    const Attribute* self = const_cast<const Attribute*>(this);
+    return const_pointer_cast<Group>(self->parent_group());
+}
+
 shared_ptr<const Group>
 Attribute::parent_group() const {
     shared_ptr<const AttributeGroup> parent_p =

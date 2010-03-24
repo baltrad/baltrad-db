@@ -7,7 +7,7 @@ namespace brfc {
 namespace oh5 {
 
 /**
- * @brief ODIM_H5 data node
+ * @brief ODIM_H5 quality group
  * * can have AttributeGroup as a child
  */
 class Quality : public Group {
