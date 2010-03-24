@@ -68,22 +68,23 @@ FileLoader::add_attribute_from_node(HL_Node* node) {
 
     SplitPath path(nodename);
 
-    const Converter* converter = 0;
-    const AttributeSpec* spec = 0;
+    shared_ptr<Attribute> attr =
+        make_shared<Attribute>(path.attribute_name());
+    
+    attr->ignore_in_hash(true);
     
     try {
-        spec = &specs_->get(path.full_attribute_name());
-        converter = &specs_->converter(path.full_attribute_name());
+        const AttributeSpec& spec =
+            specs_->get(path.full_attribute_name());
+        const Converter& converter =
+            specs_->converter(path.full_attribute_name());
+        attr->value(converter.convert(HLNode_getFormat(node), data));
+        attr->ignore_in_hash(spec.ignore_in_hash);
     } catch (const lookup_error& e) {
-        file_->ignored_attributes().push_back(nodename);
-        return;
+        // pass
     }
 
-    const Variant& value = converter->convert(HLNode_getFormat(node), data);
     shared_ptr<Group> group = get_or_create_group(path);
-    shared_ptr<Attribute> attr = make_shared<Attribute>(path.attribute_name(),
-                                                        value,
-                                                        spec->ignore_in_hash);
     group->add_child(attr);
 }
 

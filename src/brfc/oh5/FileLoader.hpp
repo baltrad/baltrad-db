@@ -36,8 +36,8 @@ class FileLoader {
      * @return File pointer
      * @throw fs_error if the file can not be opened
      *
-     * ignored attributes (failing name or converter lookup) are stored
-     * as full attribute paths to ignored_attributes on File
+     * attributes for which name and/or converter lookup fails, are stored
+     * with an empty Variant as a value (meaning they are invalid). 
      */
     shared_ptr<File> load(const QString& path);
 

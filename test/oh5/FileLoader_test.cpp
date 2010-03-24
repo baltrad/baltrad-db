@@ -70,6 +70,9 @@ TEST_F(oh5_FileLoader_test, load) {
     EXPECT_EQ(d_2000_01_02, root->attribute("date")->value());
     EXPECT_EQ(t_12_05_01, root->attribute("time")->value());
     EXPECT_EQ(d_2000_01_02, g->group("/what")->attribute("date")->value());
+
+    // nothing ignored
+    EXPECT_EQ(g->ignored_attributes().size(), 0);
 }
 
 TEST_F(oh5_FileLoader_test, ignored_attributes) {
@@ -86,9 +89,11 @@ TEST_F(oh5_FileLoader_test, ignored_attributes) {
     shared_ptr<File> g = File::from_filesystem(tempfile.path(), specs);
 
     shared_ptr<Root> root = g->root();
-    EXPECT_FALSE(root->attribute("ignore"));
-    EXPECT_FALSE(root->attribute("what/ignore"));
+    // still present in the structure
+    EXPECT_TRUE(root->attribute("ignore"));
+    EXPECT_TRUE(root->attribute("what/ignore"));
 
+    // accessible through ignored_attributes
     const File::StringVector& ignored = g->ignored_attributes();
     EXPECT_EQ(ignored.size(), (size_t)2);
     EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/ignore") != ignored.end());

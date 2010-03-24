@@ -26,10 +26,13 @@ namespace oh5 {
 
 File::File()
         : root_(make_shared<Root>())
-        , ignored_attributes_()
         , path_()
         , source_()
         , db_id_(0) {
+}
+
+File::~File() {
+
 }
 
 shared_ptr<File>
@@ -112,8 +115,23 @@ File::unique_identifier() const {
     return QString::fromAscii(hash.toHex());
 }
 
-File::~File() {
+File::StringVector
+File::ignored_attributes() const {
+    /* XXX: should rename this to ignored_attribute_paths()
+     * and create a method ignored_attributes returning a vector of
+     * attribute pointers
+     */
+    StringVector paths;
 
+    const Attribute* attr = 0;
+    BOOST_FOREACH(const Node& node, *root_) {
+        if ((attr = dynamic_cast<const Attribute*>(&node)) == 0)
+            continue;
+        if (not attr->is_valid())
+            paths.push_back(attr->path());
+    }
+    
+    return paths;
 }
 
 shared_ptr<Group>

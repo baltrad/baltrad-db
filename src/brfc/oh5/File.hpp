@@ -123,16 +123,8 @@ class File : public boost::noncopyable {
 
     /**
      * @brief get attributes ignored on loading
-     * @{
      */
-    const StringVector& ignored_attributes() const {
-        return ignored_attributes_;
-    }
-
-    StringVector& ignored_attributes() {
-        return ignored_attributes_;
-    }
-    ///@}
+    StringVector ignored_attributes() const;
 
     /**
      * @{
@@ -201,7 +193,6 @@ class File : public boost::noncopyable {
     void set_path_from_attributes();
     
     shared_ptr<Root> root_;
-    StringVector ignored_attributes_;
     QString path_;
     shared_ptr<Source> source_;
     mutable long long db_id_;
