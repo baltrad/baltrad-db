@@ -47,16 +47,52 @@ Variant::Variant(const QVariant& value)
     }
 }
 
+const QString&
+Variant::string() const {
+    return get<const QString&>();
+}
 
-QVariant
-Variant::to_qvariant() const {
-    if (type_ == NONE)
-        return QVariant();
-    return boost::apply_visitor(variant_to_qvariant(), value_);
+long long
+Variant::longlong() const {
+    return get<long long>();
+}
+
+double
+Variant::double_() const {
+    return get<double>();
+}
+
+bool
+Variant::bool_() const {
+    return get<bool>();
+}
+
+const QDate&
+Variant::date() const {
+    return get<const QDate&>();
+}
+
+const QTime&
+Variant::time() const {
+    return get<const QTime&>();
 }
 
 namespace {
 
+/**
+ * @brief visitor converting Variant to QVariant
+ */
+class variant_to_qvariant : public boost::static_visitor<QVariant> {
+  public:
+    template<typename T>
+    QVariant operator()(const T& value) const {
+        return QVariant(value);
+    }
+};
+
+/**
+ * @brief visitor converting Variant to QString
+ */
 class variant_to_string : public boost::static_visitor<QString> {
   public:
     QString operator()(const QString& value) const {
@@ -86,10 +122,30 @@ class variant_to_string : public boost::static_visitor<QString> {
 
 } // namespace anonymous
 
+QVariant
+Variant::to_qvariant() const {
+    if (type_ == NONE)
+        return QVariant();
+    return boost::apply_visitor(variant_to_qvariant(), value_);
+}
+
 QString
 Variant::to_string() const {
     return boost::apply_visitor(variant_to_string(), value_);
 }
+
+template<typename T>
+T Variant::get() const {
+    try {
+        return boost::get<T>(value_);
+    } catch (const boost::bad_get&) {
+        throw value_error("held variant (" +
+                          std::string(value_.type().name()) +
+                          ") is not of requested type (" +
+                          std::string(typeid(T).name()) + ")");
+    }
+}
+
 
 bool
 operator==(const Variant& lhs, const Variant& rhs) {

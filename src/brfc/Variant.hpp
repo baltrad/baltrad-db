@@ -29,59 +29,95 @@ class Variant {
         TIME
     };
 
+    /**
+     * @brief construct empty variant
+     */
     Variant()
             : type_(NONE)
             , value_() {
     }
 
+    /**
+     * @brief copy constructor
+     */
     Variant(const Variant& other)
             : type_(other.type_)
             , value_(other.value_) {
     }
 
-    Variant(const QVariant& other);
+    /**
+     * @brief implicit conversion from QVariant
+     */
+    Variant(const QVariant& value);
 
+    /**
+     * @brief construct string variant from char array
+     */
     explicit Variant(const char* value)
             : type_(STRING)
             , value_(QString::fromUtf8(value)) {
     }
 
+    /**
+     * @brief construct string variant from QString
+     */
     explicit Variant(const QString& value)
             : type_(STRING)
             , value_(value) {
     }
 
+    /**
+     * @brief construct longlong variant
+     */
     explicit Variant(int value)
             : type_(LONGLONG)
             , value_(static_cast<long long>(value)) {
     
     }
 
+    /**
+     * @brief construct longlong variant
+     */
     explicit Variant(long long value)
             : type_(LONGLONG)
             , value_(value) {
     }
 
+    /**
+     * @brief construct double variant
+     */
     explicit Variant(double value)
             : type_(DOUBLE)
             , value_(value) {
     }
 
+    /**
+     * @brief construct bool variant
+     */
     explicit Variant(bool value)
             : type_(BOOL)
             , value_(value) {
     }
 
+    /**
+     * @brief construct date variant
+     */
     explicit Variant(const QDate& value)
             : type_(DATE)
             , value_(value) {
     }
 
+    /**
+     * @brief construct time variant
+     */
     explicit Variant(const QTime& value)
             : type_(TIME)
             , value_(value) {
     }
 
+    /**
+     * @brief copy assignment
+     */
     Variant& operator=(const Variant& rhs) {
         if (this != &rhs) {
             type_ = rhs.type_;
@@ -100,48 +136,33 @@ class Variant {
     bool is_date() const { return type_ == DATE; }
     bool is_time() const { return type_ == TIME; }
 
-    const QString& string() const {
-        return get<const QString&>();
-    }
+    const QString& string() const;
 
-    long long longlong() const {
-        return get<long long>();
-    }
+    long long longlong() const;
 
-    double double_() const {
-        return get<double>();
-    }
+    double double_() const;
 
-    bool bool_() const {
-        return get<bool>();
-    }
+    bool bool_() const;
 
-    const QDate& date() const {
-        return get<const QDate&>();
-    }
+    const QDate& date() const;
 
-    const QTime& time() const {
-        return get<const QTime&>();
-    }
+    const QTime& time() const;
 
+    /**
+     * @brief convert to QVariant
+     */
     QVariant to_qvariant() const;
 
+    /**
+     * @brief convert to QString
+     */
     QString to_string() const;
 
   private:
     friend bool operator==(const Variant&, const Variant&);
 
     template<typename T>
-    T get() const {
-        try {
-            return boost::get<T>(value_);
-        } catch (const boost::bad_get&) {
-            throw value_error("held variant (" +
-                              std::string(value_.type().name()) +
-                              ") is not of requested type (" +
-                              std::string(typeid(T).name()) + ")");
-        }
-    }
+    T get() const;
 
     Type type_;
     typedef boost::variant<QString,
@@ -153,20 +174,19 @@ class Variant {
     ValueType value_;
 };
 
+/**
+ * @brief equality comparison
+ */
 bool operator==(const Variant& lhs, const Variant& rhs);
 
+
+/**
+ * @brief inequality comparison
+ */
 inline
 bool operator!=(const Variant& lhs, const Variant& rhs) {
     return not (lhs == rhs);
 }
-
-class variant_to_qvariant : public boost::static_visitor<QVariant> {
-  public:
-    template<typename T>
-    QVariant operator()(const T& value) const {
-        return QVariant(value);
-    }
-};
 
 } // namespace brfc
 

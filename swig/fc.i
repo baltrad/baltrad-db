@@ -61,11 +61,11 @@
 %ignore brfc::Variant::operator=;
 
 // ignore Variant members
-%ignore brfc::Variant::Variant;
+%ignore brfc::Variant::Variant(const char* value);
+%ignore brfc::Variant::Variant(const QVariant& value);
 %ignore brfc::operator=;
 %ignore brfc::Variant::qstring;
 %ignore brfc::Variant::to_qvariant;
-%ignore brfc::variant_to_qvariant;
 
 %ignore brfc::Query::fetch;
 
