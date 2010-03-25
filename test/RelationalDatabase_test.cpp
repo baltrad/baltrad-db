@@ -1,5 +1,11 @@
 #include <gtest/gtest.h>
 
+#include <QtCore/QDate>
+#include <QtCore/QTime>
+
+#include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/Root.hpp>
 #include <brfc/oh5/Source.hpp>
 #include <brfc/oh5/SourceCentre.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
@@ -52,6 +58,28 @@ TEST_P(RelationalDatabase_test, load_source_by_plc_unicode) {
     EXPECT_EQ("PL46", radar->radar_site());
     ASSERT_TRUE(radar->centre());
     EXPECT_EQ("pl", radar->centre()->node_id());
+}
+
+TEST_P(RelationalDatabase_test, save_file_with_invalid_attributes) {
+    shared_ptr<oh5::File> file =
+        oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), "PLC:Legionowo");
+    shared_ptr<oh5::Source> src = db->load_source(file->what_source());
+    file->source(src);
+    file->root()->add_child(make_shared<oh5::Attribute>("invalid"));
+
+    EXPECT_NO_THROW(db->save_file("/path", *file));
+}
+
+TEST_P(RelationalDatabase_test, attribute_groups_not_saved) {
+    shared_ptr<oh5::File> file =
+        oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), "PLC:Legionowo");
+    shared_ptr<oh5::Source> src = db->load_source(file->what_source());
+    file->source(src);
+    
+    ASSERT_NO_THROW(db->save_file("/path", *file));
+    
+    EXPECT_EQ(0, file->root()->child_group_by_name("what")->db_id());
+    EXPECT_NE(0, file->root()->db_id());
 }
 
 

@@ -124,10 +124,14 @@ class AttributeSaver {
     }
 
     void operator()(const oh5::Attribute& attr) {
+        // ignore invalid attributes (XXX: should be saved to separate table)
+        if (not attr.is_valid())
+            return;
+
         // ignore specialized attributes
         if (mapper_->is_specialized(attr.full_name()))
             return;
-
+        
         const Mapping& mapping = mapper_->mapping(attr.full_name());
 
         QSqlQuery& qry = query_by_table(mapping.table);
