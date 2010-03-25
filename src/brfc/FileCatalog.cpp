@@ -87,7 +87,7 @@ FileCatalog::catalog(const QString& path) {
     db_->begin();
     // try saving to database
     try {
-        long long id = db_->save_file(target, *f);
+        long long id = db_->save_file(*f);
         f->db_id(id);
     } catch (const db_error& e) {
         db_->rollback();

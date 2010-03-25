@@ -65,9 +65,10 @@ TEST_P(RelationalDatabase_test, save_file_with_invalid_attributes) {
         oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), "PLC:Legionowo");
     shared_ptr<oh5::Source> src = db->load_source(file->what_source());
     file->source(src);
+    file->path("/path");
     file->root()->add_child(make_shared<oh5::Attribute>("invalid"));
 
-    EXPECT_NO_THROW(db->save_file("/path", *file));
+    EXPECT_NO_THROW(db->save_file(*file));
 }
 
 TEST_P(RelationalDatabase_test, attribute_groups_not_saved) {
@@ -75,8 +76,9 @@ TEST_P(RelationalDatabase_test, attribute_groups_not_saved) {
         oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), "PLC:Legionowo");
     shared_ptr<oh5::Source> src = db->load_source(file->what_source());
     file->source(src);
+    file->path("/path");
     
-    ASSERT_NO_THROW(db->save_file("/path", *file));
+    ASSERT_NO_THROW(db->save_file(*file));
     
     EXPECT_EQ(0, file->root()->child_group_by_name("what")->db_id());
     EXPECT_NE(0, file->root()->db_id());

@@ -80,31 +80,36 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
         add_attribute(*td1, "dataset1/where/xsize", Variant(1));
         add_attribute(*td1, "dataset1/where/ysize", Variant(2));
         td1->source(db->load_source(src1));
+        td1->path("td1");
 
         add_attribute(*td2, "dataset1/where/xsize", Variant(2));
         add_attribute(*td2, "dataset1/where/ysize", Variant(2));
         td2->source(db->load_source(src2));
+        td2->path("td2");
 
         add_attribute(*td3, "dataset1/where/xsize", Variant(3));
         add_attribute(*td3, "dataset2/where/xsize", Variant(3));
         td3->source(db->load_source(src1));
+        td3->path("td3");
 
         add_attribute(*td4, "dataset1/where/xsize", Variant(6));
         add_attribute(*td4, "dataset1/where/ysize", Variant(4));
         add_attribute(*td4, "dataset2/where/ysize", Variant(5));
         td4->source(db->load_source(src2));
+        td4->path("td4");
 
         add_attribute(*td5, "dataset1/where/xsize", Variant(5));
         add_attribute(*td5, "dataset1/where/ysize", Variant(2));
         add_attribute(*td5, "dataset2/where/xsize", Variant(2));
         add_attribute(*td5, "dataset2/where/ysize", Variant(5));
         td5->source(db->load_source(src1));
+        td5->path("td5");
 
-        db->save_file("td1", *td1);
-        db->save_file("td2", *td2);
-        db->save_file("td3", *td3);
-        db->save_file("td4", *td4);
-        db->save_file("td5", *td5);
+        db->save_file(*td1);
+        db->save_file(*td2);
+        db->save_file(*td3);
+        db->save_file(*td4);
+        db->save_file(*td5);
     }
 
     virtual void TearDown() {

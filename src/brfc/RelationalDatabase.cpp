@@ -298,8 +298,8 @@ class SaveVisitor {
 };
 
 long long
-RelationalDatabase::do_save_file(const QString& path, const oh5::File& file) {
-    id_type file_id = save(path, file);
+RelationalDatabase::do_save_file(const oh5::File& file) {
+    id_type file_id = save(file);
     file.db_id(file_id.toLongLong());
 
     SaveVisitor visitor(this);
@@ -330,7 +330,7 @@ RelationalDatabase::do_query(const Query& query) {
 }
 
 RelationalDatabase::id_type
-RelationalDatabase::save(const QString& path, const oh5::File& f) {
+RelationalDatabase::save(const oh5::File& f) {
     QStringList columns, binds;
     columns.append("source_id");
     columns.append("unique_id");
@@ -365,7 +365,7 @@ RelationalDatabase::save(const QString& path, const oh5::File& f) {
         qry.bindValue(":" + mapping.column, value);
     }
 
-    qry.bindValue(":path", path);
+    qry.bindValue(":path", f.path());
     qry.bindValue(":unique_id", f.unique_identifier());
     qry.bindValue(":source_id", f.source()->db_id());
 

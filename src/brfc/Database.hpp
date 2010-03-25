@@ -68,8 +68,8 @@ class Database : public boost::noncopyable {
      * @brief save file to database
      * @return database id associated with the file
      */
-    long long save_file(const QString& path, const oh5::File& file) {
-        return do_save_file(path, file);
+    long long save_file(const oh5::File& file) {
+        return do_save_file(file);
     }
 
     /**
@@ -93,7 +93,7 @@ class Database : public boost::noncopyable {
     
     virtual bool do_has_file(const oh5::File& file) = 0;
     virtual void do_remove_file(const QString& path) = 0;
-    virtual long long do_save_file(const QString& path, const oh5::File& file) = 0;
+    virtual long long do_save_file(const oh5::File& file) = 0;
 
     virtual shared_ptr<oh5::Source> do_load_source(const QString& source) = 0;
 

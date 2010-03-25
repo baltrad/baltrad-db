@@ -23,7 +23,9 @@
 
 
 using testing::_;
+using testing::Eq;
 using testing::DefaultValue;
+using testing::Property;
 using testing::Return;
 using testing::Throw;
 
@@ -37,7 +39,7 @@ class MockDatabase : public Database {
     
     MOCK_METHOD1(do_has_file, bool(const oh5::File&));
     MOCK_METHOD1(do_remove_file, void(const QString&));
-    MOCK_METHOD2(do_save_file, long long(const QString&, const oh5::File&));
+    MOCK_METHOD1(do_save_file, long long(const oh5::File&));
     MOCK_METHOD1(do_load_source, shared_ptr<oh5::Source>(const QString&));
     MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
     MOCK_METHOD0(do_clean, void());  
@@ -95,7 +97,7 @@ TEST_F(FileCatalog_test, test_catalog) {
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return("test"));
-    EXPECT_CALL(*db, do_save_file(target, _))
+    EXPECT_CALL(*db, do_save_file(Property(&oh5::File::path, Eq(target))))
         .WillOnce(Return(1));
     EXPECT_CALL(*db, do_commit());
     
@@ -115,7 +117,7 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return("test"));
-    EXPECT_CALL(*db, do_save_file(target, _))
+    EXPECT_CALL(*db, do_save_file(Property(&oh5::File::path, Eq(target))))
         .WillOnce(Throw(db_error("")));
     EXPECT_CALL(*db, do_rollback());
     
@@ -131,7 +133,7 @@ TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return("test"));
-    EXPECT_CALL(*db, do_save_file(target, _))
+    EXPECT_CALL(*db, do_save_file(Property(&oh5::File::path, Eq(target))))
         .WillOnce(Return(1));
     EXPECT_CALL(*db, do_rollback());
 
@@ -142,6 +144,7 @@ TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
 }
 
 TEST_F(FileCatalog_test, test_double_import_throws) {
+    EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(true));
 
