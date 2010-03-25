@@ -2,12 +2,9 @@ Import("env")
 
 sources = [
     "exceptions.cpp",
-    "AttributeMapper.cpp",
     "DefaultFileNamer.cpp",
     "FileCatalog.cpp",
     "Query.cpp",
-    "RelationalDatabase.cpp",
-    "RelationalResultSet.cpp",
     "ResultSet.cpp",
     "Variant.cpp",
     "expr/AttrReplace.cpp",
@@ -37,6 +34,9 @@ sources = [
     "oh5/SplitPath.cpp",
     "oh5/SourceCentre.cpp",
     "oh5/SourceRadar.cpp",
+    "rdb/AttributeMapper.cpp",
+    "rdb/RelationalDatabase.cpp",
+    "rdb/RelationalResultSet.cpp",
     "test/TempDir.cpp",
     "test/TempH5File.cpp",
     "test/TestRDB.cpp",

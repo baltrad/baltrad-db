@@ -15,7 +15,7 @@ env.AppendUnique(CPPPATH=Dir("."))
 
 env.Depends([config_hpp, config_cpp], env.Value(env["test_db_dsns"]))
 
-sources = Glob("*.cpp") + Glob("oh5/*.cpp")
+sources = Glob("*.cpp") + Glob("oh5/*.cpp") + Glob("rdb/*.cpp")
 
 # remove -pedantic flag if using older g++
 cxxver = tuple(map(int, env["CXXVERSION"].split(".")))
