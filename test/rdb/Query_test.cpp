@@ -24,9 +24,10 @@
 #include <QtCore/QVariant>
 
 #include "config.hpp"
-#include "common.hpp"
+#include "../common.hpp"
 
 namespace brfc {
+namespace rdb {
 
 /**
  * test data for this fixture:
@@ -287,5 +288,6 @@ INSTANTIATE_TEST_CASE_P(RDB_Query_test_p,
                         ::testing::ValuesIn(test_dsns));
 #endif // BRFC_TEST_DSN_COUNT
 
+} // namespace rdb
 } // namespace brfc
 

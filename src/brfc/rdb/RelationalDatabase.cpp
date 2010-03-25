@@ -1,14 +1,16 @@
-#include <brfc/RelationalDatabase.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/AttributeMapper.hpp>
 #include <brfc/Query.hpp>
-#include <brfc/ResultSet.hpp>
-#include <brfc/RelationalResultSet.hpp>
 #include <brfc/Variant.hpp>
-
 #include <brfc/visit.hpp>
+
+#include <brfc/expr/Attribute.hpp>
+#include <brfc/expr/AttrReplace.hpp>
+#include <brfc/expr/Compiler.hpp>
+#include <brfc/expr/Expression.hpp>
+#include <brfc/expr/Select.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
@@ -18,12 +20,8 @@
 #include <brfc/oh5/SourceCentre.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
-
-#include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/AttrReplace.hpp>
-#include <brfc/expr/Compiler.hpp>
-#include <brfc/expr/Expression.hpp>
-#include <brfc/expr/Select.hpp>
+#include <brfc/rdb/AttributeMapper.hpp>
+#include <brfc/rdb/RelationalResultSet.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -38,6 +36,7 @@
 #include <map>
 
 namespace brfc {
+namespace rdb {
 
 namespace {
 
@@ -543,4 +542,5 @@ RelationalDatabase::do_remove_file(const QString& path) {
         throw db_error(query.lastError());
 }
 
-}
+} // namespace rdb
+} // namespace brfc

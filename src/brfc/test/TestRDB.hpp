@@ -1,7 +1,7 @@
 #ifndef BRFC_TEST_TEST_RDB_HPP
 #define BRFC_TEST_TEST_RDB_HPP
 
-#include <brfc/RelationalDatabase.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <QtCore/QDir>
 
@@ -15,7 +15,7 @@ namespace test {
  *
  * add methods for creating/dropping database schema in a relational database
  */
-class TestRDB : public RelationalDatabase {
+class TestRDB : public rdb::RelationalDatabase {
   public:
     /**
      * @brief constructor

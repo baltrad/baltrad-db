@@ -16,7 +16,6 @@ class QCoreApplication;
 
 namespace brfc {
 
-class AttributeMapper;
 class Variant;
 
 namespace oh5 {
@@ -28,6 +27,10 @@ class SourceCentre;
 class SourceRadar;
 
 }
+
+namespace rdb {
+
+class AttributeMapper;
 
 typedef std::map<QString, Variant> BindMap;
 typedef std::map<weak_ptr<void>, long long> IdCache;
@@ -121,7 +124,7 @@ class RelationalDatabase : public Database {
     static QCoreApplication* qapp_;
 };
 
-
-}
+} // namespace rdb
+} // namespace brfc
 
 #endif // BRFC_QT_SQL_DATABASE_H

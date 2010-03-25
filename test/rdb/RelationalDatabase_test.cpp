@@ -13,13 +13,14 @@
 #include <brfc/test/TestRDB.hpp>
 
 #include "config.hpp"
-#include "common.hpp"
+#include "../common.hpp"
 
 namespace brfc {
+namespace rdb {
 
-class RelationalDatabase_test : public testing::TestWithParam<const char*> {
+class rdb_RelationalDatabase_test : public testing::TestWithParam<const char*> {
   public:
-    RelationalDatabase_test()
+    rdb_RelationalDatabase_test()
             : db(TestRDBEnv::get_database(GetParam())) {
 
     }
@@ -36,7 +37,7 @@ class RelationalDatabase_test : public testing::TestWithParam<const char*> {
 };
 
 
-TEST_P(RelationalDatabase_test, load_source_by_plc) {
+TEST_P(rdb_RelationalDatabase_test, load_source_by_plc) {
     shared_ptr<oh5::Source> src = db->load_source("PLC:Legionowo");
     EXPECT_TRUE(src);
     shared_ptr<oh5::SourceRadar> radar =
@@ -48,7 +49,7 @@ TEST_P(RelationalDatabase_test, load_source_by_plc) {
     EXPECT_EQ("pl", radar->centre()->node_id());
 }
 
-TEST_P(RelationalDatabase_test, load_source_by_plc_unicode) {
+TEST_P(rdb_RelationalDatabase_test, load_source_by_plc_unicode) {
     shared_ptr<oh5::Source> src = db->load_source(QString::fromUtf8("PLC:Świdwin"));
     EXPECT_TRUE(src);
     shared_ptr<oh5::SourceRadar> radar =
@@ -60,7 +61,7 @@ TEST_P(RelationalDatabase_test, load_source_by_plc_unicode) {
     EXPECT_EQ("pl", radar->centre()->node_id());
 }
 
-TEST_P(RelationalDatabase_test, save_file_with_invalid_attributes) {
+TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
     shared_ptr<oh5::File> file =
         oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), "PLC:Legionowo");
     shared_ptr<oh5::Source> src = db->load_source(file->what_source());
@@ -71,7 +72,7 @@ TEST_P(RelationalDatabase_test, save_file_with_invalid_attributes) {
     EXPECT_NO_THROW(db->save_file(*file));
 }
 
-TEST_P(RelationalDatabase_test, attribute_groups_not_saved) {
+TEST_P(rdb_RelationalDatabase_test, attribute_groups_not_saved) {
     shared_ptr<oh5::File> file =
         oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), "PLC:Legionowo");
     shared_ptr<oh5::Source> src = db->load_source(file->what_source());
@@ -86,9 +87,10 @@ TEST_P(RelationalDatabase_test, attribute_groups_not_saved) {
 
 
 #if BRFC_TEST_DSN_COUNT >= 1
-INSTANTIATE_TEST_CASE_P(RelationalDatabase_test_p,
-                        RelationalDatabase_test,
+INSTANTIATE_TEST_CASE_P(rdb_RelationalDatabase_test_p,
+                        rdb_RelationalDatabase_test,
                         ::testing::ValuesIn(test_dsns));
 #endif // BRFC_TEST_DSN_COUNT
 
+} // namespace rdb
 } // namespace brfc

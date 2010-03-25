@@ -8,7 +8,11 @@
 
 namespace brfc {
 
+namespace rdb {
+
 class AttributeMapper;
+
+}
 
 namespace expr {
 
@@ -24,14 +28,14 @@ class AttrReplace : protected Visitor {
     /**
      * @brief replace attributes in a Select statement
      */
-    static void replace(SelectPtr select, const AttributeMapper* mapper);
+    static void replace(SelectPtr select, const rdb::AttributeMapper* mapper);
   
   protected:
     /**
      * @brief constructor
      * @param mapper AttributeMapper instance to fetch mappings from
      */
-    AttrReplace(SelectPtr select, const AttributeMapper* mapper);
+    AttrReplace(SelectPtr select, const rdb::AttributeMapper* mapper);
 
     /**
      * @brief visit an Alias element
@@ -76,7 +80,7 @@ class AttrReplace : protected Visitor {
     void join_data_objects();
 
   private:
-    const AttributeMapper* mapper_;
+    const rdb::AttributeMapper* mapper_;
     std::vector<ElementPtr> stack_;
     SelectPtr select_;
     JoinPtr from_;

@@ -4,7 +4,6 @@
 #include <brfc/Database.hpp>
 #include <brfc/DefaultFileNamer.hpp>
 #include <brfc/Query.hpp>
-#include <brfc/RelationalDatabase.hpp>
 #include <brfc/ResultSet.hpp>
 
 #include <brfc/expr/BinaryOperator.hpp>
@@ -15,6 +14,8 @@
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 
+#include <brfc/rdb/RelationalDatabase.hpp>
+
 #include <boost/foreach.hpp>
 
 #include <QtCore/QDir>
@@ -23,12 +24,13 @@ namespace brfc {
     
 FileCatalog::FileCatalog(const QString& dsn,
                          const QString& storage)
-        : db_(new RelationalDatabase(dsn))
+        : db_(new rdb::RelationalDatabase(dsn))
         , specs_()
         , namer_(new DefaultFileNamer())
         , storage_(storage) {
     check_storage();
-    RelationalDatabase* rdb = static_cast<RelationalDatabase*>(db_.get());
+    rdb::RelationalDatabase* rdb =
+        static_cast<rdb::RelationalDatabase*>(db_.get());
     specs_.reset(new oh5::AttributeSpecs(rdb->specs()));
 }
 

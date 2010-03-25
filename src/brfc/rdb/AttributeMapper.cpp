@@ -1,10 +1,11 @@
-#include <brfc/AttributeMapper.hpp>
+#include <brfc/rdb/AttributeMapper.hpp>
 
 #include <brfc/exceptions.hpp>
 
 #include <boost/foreach.hpp>
 
 namespace brfc {
+namespace rdb {
 
 AttributeMapper::AttributeMapper()
         : mappings_() {
@@ -68,4 +69,5 @@ AttributeMapper::mapping(const QString& attribute) const {
     return i->second;
 }
 
+} // namespace rdb
 } // namespace brfc

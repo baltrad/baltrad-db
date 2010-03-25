@@ -1,4 +1,4 @@
-#include <brfc/RelationalResultSet.hpp>
+#include <brfc/rdb/RelationalResultSet.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
@@ -7,6 +7,7 @@
 #include <QtSql/QSqlQuery>
 
 namespace brfc {
+namespace rdb {
 
 RelationalResultSet::RelationalResultSet(const QSqlQuery& query)
         : query_(new QSqlQuery(query)) {
@@ -41,4 +42,5 @@ RelationalResultSet::do_value_at(unsigned int pos) const {
     return Variant(var);
 }
 
+} // namespace rdb
 } // namespace brfc

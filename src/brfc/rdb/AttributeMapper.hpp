@@ -1,5 +1,5 @@
-#ifndef BRFC_ATTRIBUTE_MAPPER_HPP
-#define BRFC_ATTRIBUTE_MAPPER_HPP
+#ifndef BRFC_RDB_ATTRIBUTE_MAPPER_HPP
+#define BRFC_RDB_ATTRIBUTE_MAPPER_HPP
 
 #include <map>
 #include <vector>
@@ -7,6 +7,7 @@
 #include <QtCore/QString>
 
 namespace brfc {
+namespace rdb {
 
 /**
  * @brief Attribute mapping to database table/column
@@ -109,6 +110,7 @@ class AttributeMapper {
     MappingMap mappings_;
 };
 
+} // namespace rdb
 } // namespace brfc
 
-#endif //BRFC_ATTRIBUTE_MAPPER_HPP
+#endif //BRFC_RDB_ATTRIBUTE_MAPPER_HPP

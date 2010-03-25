@@ -1,7 +1,6 @@
 #include <brfc/expr/AttrReplace.hpp>
 
 #include <brfc/assert.hpp>
-#include <brfc/AttributeMapper.hpp>
 
 #include <brfc/expr/Alias.hpp>
 #include <brfc/expr/Attribute.hpp>
@@ -15,6 +14,8 @@
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Table.hpp>
 
+#include <brfc/rdb/AttributeMapper.hpp>
+
 #include <boost/foreach.hpp>
 #include <map>
 #include <algorithm>
@@ -23,7 +24,7 @@
 namespace brfc {
 namespace expr {
 
-AttrReplace::AttrReplace(SelectPtr select, const AttributeMapper* mapper)
+AttrReplace::AttrReplace(SelectPtr select, const rdb::AttributeMapper* mapper)
         : Visitor(Visitor::POST_ORDER)
         , mapper_(mapper)
         , stack_()
@@ -44,7 +45,7 @@ AttrReplace::AttrReplace(SelectPtr select, const AttributeMapper* mapper)
 }
 
 void
-AttrReplace::replace(SelectPtr select, const AttributeMapper* mapper) {
+AttrReplace::replace(SelectPtr select, const rdb::AttributeMapper* mapper) {
     AttrReplace rpl(select, mapper);
     rpl.replace_attributes();
     rpl.build_from_clause();
@@ -61,7 +62,7 @@ AttrReplace::do_visit(Attribute& attr) {
     QString name = attr.name();
 
     // query table and column where this value can be found
-    Mapping mapping = mapper_->mapping(name);
+    rdb::Mapping mapping = mapper_->mapping(name);
 
     SelectablePtr value_t;
 

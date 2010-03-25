@@ -10,6 +10,7 @@ class QTime;
 class QSqlQuery;
 
 namespace brfc {
+namespace rdb {
 
 /**
  * @brief results from RelationalDatabase
@@ -39,6 +40,7 @@ class RelationalResultSet : public ResultSet {
     boost::scoped_ptr<QSqlQuery> query_;
 };
 
+} // namespace rdb
 } // namespace brfc
 
 #endif // BRFC_RELATIONAL_RESULT_SET_HPP
