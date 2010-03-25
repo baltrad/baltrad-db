@@ -167,6 +167,34 @@ class AttributeSaver {
     QueryMap queries_;
 };
 
+class SaveVisitor {
+  public:
+    SaveVisitor(RelationalDatabase* db)
+            : save_attribute_(db)
+            , save_group_(db) {
+    }
+
+    typedef mpl::vector<const oh5::AttributeGroup,
+                        const oh5::Group,
+                        const oh5::Attribute> accepted_types;
+
+    void operator()(const oh5::AttributeGroup& group) {
+        // no-op
+    }
+
+    void operator()(const oh5::Group& group) {
+        save_group_(group);
+    }
+    
+    void operator()(const oh5::Attribute& attribute) {
+        save_attribute_(attribute);
+    }
+
+  private:
+    AttributeSaver save_attribute_;
+    GroupSaver save_group_;
+};
+
 } // namespace anonymous
 
 
@@ -269,33 +297,6 @@ RelationalDatabase::do_has_file(const oh5::File& file) {
     return query.next(); // got a result row
 }
 
-class SaveVisitor {
-  public:
-    SaveVisitor(RelationalDatabase* db)
-            : save_attribute_(db)
-            , save_group_(db) {
-    }
-
-    typedef mpl::vector<const oh5::AttributeGroup,
-                        const oh5::Group,
-                        const oh5::Attribute> accepted_types;
-
-    void operator()(const oh5::AttributeGroup& group) {
-        // no-op
-    }
-
-    void operator()(const oh5::Group& group) {
-        save_group_(group);
-    }
-    
-    void operator()(const oh5::Attribute& attribute) {
-        save_attribute_(attribute);
-    }
-
-  private:
-    AttributeSaver save_attribute_;
-    GroupSaver save_group_;
-};
 
 long long
 RelationalDatabase::do_save_file(const oh5::File& file) {
