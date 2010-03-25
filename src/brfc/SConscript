@@ -28,6 +28,7 @@ sources = [
     "oh5/File.cpp",
     "oh5/FileLoader.cpp",
     "oh5/DataGroup.cpp",
+    "oh5/DataSet.cpp",
     "oh5/DataSetGroup.cpp",
     "oh5/QualityGroup.cpp",
     "oh5/Node.cpp",

@@ -61,8 +61,8 @@ TEST_F(oh5_SplitPath_test, attribute) {
     EXPECT_EQ("Conventions", p.attribute());
 }
 
-//root::attributegroup::attribute
-TEST_F(oh5_SplitPath_test, attributegroup_attribute) {
+//root::attribute_G::attribute
+TEST_F(oh5_SplitPath_test, attributeG_attribute) {
     SplitPath p("/what/object");
     EXPECT_EQ("", p.dataset_group());
     EXPECT_EQ("", p.data_group());
@@ -71,8 +71,8 @@ TEST_F(oh5_SplitPath_test, attributegroup_attribute) {
     EXPECT_EQ("object", p.attribute());
 }
 
-//root::dataset::attributegroup::attribute
-TEST_F(oh5_SplitPath_test, dataset_attributegroup_attribute) {
+//root::dataset_G::attribute_G::attribute
+TEST_F(oh5_SplitPath_test, datasetG_attributeG_attribute) {
     SplitPath p("/dataset1/what/object");
     EXPECT_EQ("dataset1", p.dataset_group());
     EXPECT_EQ("", p.data_group());
@@ -81,8 +81,8 @@ TEST_F(oh5_SplitPath_test, dataset_attributegroup_attribute) {
     EXPECT_EQ("object", p.attribute());
 }
 
-//root::dataset::data::attributegroup::attribute
-TEST_F(oh5_SplitPath_test, dataset_data_attributegroup_attribute) {
+//root::dataset_G::data_G::attribute_G::attribute
+TEST_F(oh5_SplitPath_test, datasetG_dataG_attributeG_attribute) {
     SplitPath p("/dataset1/data1/what/object");
     EXPECT_EQ("dataset1", p.dataset_group());
     EXPECT_EQ("data1", p.data_group());
@@ -91,8 +91,8 @@ TEST_F(oh5_SplitPath_test, dataset_data_attributegroup_attribute) {
     EXPECT_EQ("object", p.attribute());
 }
 
-//root::dataset::quality::attributegroup::attribute
-TEST_F(oh5_SplitPath_test, dataset_quality_attributegroup_attribute) {
+//root::dataset_G::quality_G::attribute_G::attribute
+TEST_F(oh5_SplitPath_test, datasetG_qualityG_attributeG_attribute) {
     SplitPath p("/dataset1/quality1/what/object");
     EXPECT_EQ("dataset1", p.dataset_group());
     EXPECT_EQ("", p.data_group());
@@ -101,14 +101,25 @@ TEST_F(oh5_SplitPath_test, dataset_quality_attributegroup_attribute) {
     EXPECT_EQ("object", p.attribute());
 }
 
-//root::dataset::data::quality::attributegroup::attribute
-TEST_F(oh5_SplitPath_test, dataset_data_quality_attributegroup_attribute) {
+//root::dataset_G::data_G::quality_G::attribute_G::attribute
+TEST_F(oh5_SplitPath_test, datasetG_dataG_qualityG_attributeG_attribute) {
     SplitPath p("/dataset1/data1/quality1/what/object");
     EXPECT_EQ("dataset1", p.dataset_group());
     EXPECT_EQ("data1", p.data_group());
     EXPECT_EQ("quality1", p.quality_group());
     EXPECT_EQ("what", p.attribute_group());
     EXPECT_EQ("object", p.attribute());
+}
+
+//root::dataset_G::data_G::dataset::attribute
+TEST_F(oh5_SplitPath_test, datasetG_dataG_dataset_attribute) {
+    SplitPath p("/dataset1/data1/data/IMAGE_VERSION");
+    EXPECT_EQ("dataset1", p.dataset_group());
+    EXPECT_EQ("data1", p.data_group());
+    EXPECT_EQ("", p.quality_group());
+    EXPECT_EQ("", p.attribute_group());
+    EXPECT_EQ("data", p.dataset());
+    EXPECT_EQ("IMAGE_VERSION", p.attribute());
 }
 
 } // namespace oh5

@@ -33,6 +33,7 @@ struct SplitPath {
     QString quality_group() const { return quality_group_; }
     QString attribute_group() const { return attribute_group_; }
     QString attribute() const { return attribute_; }
+    QString dataset() const { return dataset_; }
 
   private:
     void split(const QString& path);
@@ -42,6 +43,7 @@ struct SplitPath {
     QString quality_group_;
     QString attribute_group_;
     QString attribute_;
+    QString dataset_;
 };
 
 } // namespace oh5

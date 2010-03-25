@@ -15,7 +15,8 @@ SplitPath::SplitPath(const QString& path)
         , data_group_()
         , quality_group_()
         , attribute_group_()
-        , attribute_() {
+        , attribute_()
+        , dataset_() {
 
     split(path);
 }
@@ -61,6 +62,8 @@ SplitPath::split(const QString& path) {
     BOOST_FOREACH(const QString& name, names) {
         if (name.startsWith("dataset")) {
             set_once(dataset_group_, name);
+        } else if (name == "data") {
+            set_once(dataset_, name);
         } else if (name.startsWith("data")) {
             set_once(data_group_, name);
         } else if (name.startsWith("quality")) {

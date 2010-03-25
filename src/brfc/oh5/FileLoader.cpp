@@ -68,6 +68,10 @@ FileLoader::add_attribute_from_node(HL_Node* node) {
 
     SplitPath path(nodename);
 
+    // XXX: don't load if attribute is attached to DataSet
+    if (path.dataset() != "")
+        return;
+
     shared_ptr<Attribute> attr =
         make_shared<Attribute>(path.attribute_name());
     
