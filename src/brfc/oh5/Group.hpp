@@ -101,7 +101,8 @@ class Group : public Node {
      * @brief constructor
      */
     Group(const QString& name)
-        : Node(name) {
+        : Node(name)
+        , db_id_(0) {
     }
 
     virtual bool do_accepts_child(const Node& node) const = 0;
