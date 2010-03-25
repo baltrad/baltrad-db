@@ -46,6 +46,7 @@ confdeps = env.ConfHas("#java-wrapper-confdeps", ["jni", "qt", "hlhdf"])
 env.Requires(lib, confdeps)
 
 env.Clean(lib, Dir(".").Dir("eu"))
+env.Clean(lib, Dir(".").Dir("classes"))
 
 java = env.Java(target="classes", source=["eu", "java"])
 jar = env.Jar(target="#lib/jbrfc.jar", source=["classes/eu"])
