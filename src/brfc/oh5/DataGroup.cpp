@@ -1,23 +1,23 @@
-#include <brfc/oh5/Data.hpp>
+#include <brfc/oh5/DataGroup.hpp>
 
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/Quality.hpp>
+#include <brfc/oh5/QualityGroup.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-Data::Data(const QString& name)
+DataGroup::DataGroup(const QString& name)
         : Group(name) {
 }
 
-Data::~Data() {
+DataGroup::~DataGroup() {
 
 }
 
 bool
-Data::do_accepts_child(const Node& node) const {
+DataGroup::do_accepts_child(const Node& node) const {
     if (dynamic_cast<const AttributeGroup*>(&node) != 0 or
-        dynamic_cast<const Quality*>(&node) != 0) {
+        dynamic_cast<const QualityGroup*>(&node) != 0) {
         return true;
     } else {
         return false;

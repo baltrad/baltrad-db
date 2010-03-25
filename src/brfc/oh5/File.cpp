@@ -18,14 +18,14 @@
 #include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/FileLoader.hpp>
-#include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
 
 namespace brfc {
 namespace oh5 {
 
 File::File()
-        : root_(make_shared<Root>())
+        : root_(make_shared<RootGroup>())
         , path_()
         , source_()
         , db_id_(0) {

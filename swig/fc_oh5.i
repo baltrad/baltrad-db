@@ -8,12 +8,12 @@
     #include <brfc/oh5/Attribute.hpp>
     #include <brfc/oh5/AttributeGroup.hpp>
     #include <brfc/oh5/AttributeSpecs.hpp>
-    #include <brfc/oh5/Data.hpp>
-    #include <brfc/oh5/DataSet.hpp>
+    #include <brfc/oh5/DataGroup.hpp>
+    #include <brfc/oh5/DataSetGroup.hpp>
     #include <brfc/oh5/File.hpp>
     #include <brfc/oh5/Group.hpp>
-    #include <brfc/oh5/Quality.hpp>
-    #include <brfc/oh5/Root.hpp>
+    #include <brfc/oh5/QualityGroup.hpp>
+    #include <brfc/oh5/RootGroup.hpp>
     #include <brfc/oh5/Source.hpp>
     #include <brfc/oh5/SourceCentre.hpp>
     #include <brfc/oh5/SourceRadar.hpp>
@@ -36,21 +36,21 @@ SWIG_SHARED_PTR_DERIVED(Node,
 SWIG_SHARED_PTR_DERIVED(Group,
                         brfc::oh5::Node,
                         brfc::oh5::Group);
-SWIG_SHARED_PTR_DERIVED(Root,
+SWIG_SHARED_PTR_DERIVED(RootGroup,
                         brfc::oh5::Group,
-                        brfc::oh5::Root);
+                        brfc::oh5::RootGroup);
 SWIG_SHARED_PTR_DERIVED(AttributeGroup,
                         brfc::oh5::Group,
                         brfc::oh5::AttributeGroup);
-SWIG_SHARED_PTR_DERIVED(DataSet,
+SWIG_SHARED_PTR_DERIVED(DataSetGroup,
                         brfc::oh5::Group,
-                        brfc::oh5::DataSet);
-SWIG_SHARED_PTR_DERIVED(Data,
+                        brfc::oh5::DataSetGroup);
+SWIG_SHARED_PTR_DERIVED(DataGroup,
                         brfc::oh5::Group,
-                        brfc::oh5::Data);
-SWIG_SHARED_PTR_DERIVED(Quality,
+                        brfc::oh5::DataGroup);
+SWIG_SHARED_PTR_DERIVED(QualityGroup,
                         brfc::oh5::Group,
-                        brfc::oh5::Quality);
+                        brfc::oh5::QualityGroup);
 
 
 SWIG_SHARED_PTR(Source, brfc::oh5::Source);
@@ -105,10 +105,10 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
 %include <brfc/oh5/Group.hpp>
 %include <brfc/oh5/AttributeGroup.hpp>
 %include <brfc/oh5/AttributeSpecs.hpp>
-%include <brfc/oh5/DataSet.hpp>
-%include <brfc/oh5/Data.hpp>
-%include <brfc/oh5/Quality.hpp>
-%include <brfc/oh5/Root.hpp>
+%include <brfc/oh5/DataSetGroup.hpp>
+%include <brfc/oh5/DataGroup.hpp>
+%include <brfc/oh5/QualityGroup.hpp>
+%include <brfc/oh5/RootGroup.hpp>
 %include <brfc/oh5/Attribute.hpp>
 %include <brfc/oh5/Source.hpp>
 %include <brfc/oh5/SourceCentre.hpp>

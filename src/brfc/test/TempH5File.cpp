@@ -12,7 +12,7 @@
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Converter.hpp>
 #include <brfc/oh5/File.hpp>
-#include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/RootGroup.hpp>
 
 namespace brfc {
 namespace test {
@@ -38,7 +38,7 @@ namespace {
 
 class GatherHLNodes {
   public:
-    typedef mpl::vector<const oh5::Root,
+    typedef mpl::vector<const oh5::RootGroup,
                         const oh5::Group,
                         const oh5::Attribute> accepted_types;
     
@@ -47,7 +47,7 @@ class GatherHLNodes {
 
     }
 
-    void operator()(const oh5::Root& root) {
+    void operator()(const oh5::RootGroup& root) {
         // pass, the file already has a root group by default
     }
 

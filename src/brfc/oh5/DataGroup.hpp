@@ -1,5 +1,5 @@
-#ifndef BRFC_OH5_DATA_HPP
-#define BRFC_OH5_DATA_HPP
+#ifndef BRFC_OH5_DATA_GROUP_HPP
+#define BRFC_OH5_DATA_GROUP_HPP
 
 #include <brfc/oh5/Group.hpp>
 
@@ -8,11 +8,12 @@ namespace oh5 {
 
 /**
  * @brief ODIM_H5 data group
- * * can have AttributeGroup or Quality as a child
+ *
+ * - can have AttributeGroup or QualityGroup as a child
  */
-class Data : public Group {
+class DataGroup : public Group {
   public:
-    virtual ~Data();
+    virtual ~DataGroup();
   
   protected:
     // allow make_shared access to constructor
@@ -23,7 +24,7 @@ class Data : public Group {
     /**
      * @brief constructor
      */
-    explicit Data(const QString& name);
+    explicit DataGroup(const QString& name);
     
     /**
      * @return true if node is AttributeGroup or Quality
@@ -35,4 +36,4 @@ class Data : public Group {
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_OH5_DATA_HPP
+#endif // BRFC_OH5_DATA_GROUP_HPP

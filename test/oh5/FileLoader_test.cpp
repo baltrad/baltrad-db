@@ -7,7 +7,7 @@
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/FileLoader.hpp>
-#include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/RootGroup.hpp>
 #include <brfc/test/TempH5File.hpp>
 
 #include <QtCore/QDate>
@@ -58,7 +58,7 @@ TEST_F(oh5_FileLoader_test, load) {
 
     shared_ptr<File> g = File::from_filesystem(tempfile.path(), specs);
     EXPECT_EQ(g->path(), tempfile.path());
-    shared_ptr<Root> root = g->root();
+    shared_ptr<RootGroup> root = g->root();
     EXPECT_EQ((size_t)3, root->children().size());
     EXPECT_TRUE(root->has_child_by_name("date"));
     EXPECT_TRUE(root->has_child_by_name("time"));
@@ -88,7 +88,7 @@ TEST_F(oh5_FileLoader_test, ignored_attributes) {
 
     shared_ptr<File> g = File::from_filesystem(tempfile.path(), specs);
 
-    shared_ptr<Root> root = g->root();
+    shared_ptr<RootGroup> root = g->root();
     // still present in the structure
     EXPECT_TRUE(root->child_attribute("ignore"));
     EXPECT_TRUE(root->child_attribute("what/ignore"));

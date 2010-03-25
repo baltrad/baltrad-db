@@ -9,11 +9,11 @@
 #include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/Converter.hpp>
-#include <brfc/oh5/Data.hpp>
-#include <brfc/oh5/DataSet.hpp>
+#include <brfc/oh5/DataGroup.hpp>
+#include <brfc/oh5/DataSetGroup.hpp>
 #include <brfc/oh5/File.hpp>
-#include <brfc/oh5/Quality.hpp>
-#include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/QualityGroup.hpp>
+#include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/SplitPath.hpp>
 
 namespace brfc {
@@ -49,12 +49,12 @@ shared_ptr<Group>
 FileLoader::get_or_create_group(const SplitPath& path) {
     shared_ptr<Group> group = file_->root();
 
-    if (path.dataset() != "")
-        group = get_or_create_child<DataSet>(*group, path.dataset());
-    if (path.data() != "")
-        group = get_or_create_child<Data>(*group, path.data());
-    if (path.quality() != "")
-        group = get_or_create_child<Quality>(*group, path.quality());
+    if (path.dataset_group() != "")
+        group = get_or_create_child<DataSetGroup>(*group, path.dataset_group());
+    if (path.data_group() != "")
+        group = get_or_create_child<DataGroup>(*group, path.data_group());
+    if (path.quality_group() != "")
+        group = get_or_create_child<QualityGroup>(*group, path.quality_group());
     if (path.attribute_group() != "")
         group = get_or_create_child<AttributeGroup>(*group, path.attribute_group());
 

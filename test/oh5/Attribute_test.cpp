@@ -5,10 +5,10 @@
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/Data.hpp>
-#include <brfc/oh5/DataSet.hpp>
-#include <brfc/oh5/Quality.hpp>
-#include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/DataGroup.hpp>
+#include <brfc/oh5/DataSetGroup.hpp>
+#include <brfc/oh5/QualityGroup.hpp>
+#include <brfc/oh5/RootGroup.hpp>
 
 #include "../common.hpp"
 
@@ -21,16 +21,16 @@ struct oh5_Attribute_test : public ::testing::Test {
             : a1(make_shared<Attribute>("a1", Variant(1)))
             , a2(make_shared<Attribute>("a2", Variant(2)))
             , what(make_shared<AttributeGroup>("what"))
-            , dataset1(make_shared<DataSet>("dataset1"))
-            , root(make_shared<Root>()) {
+            , dataset1(make_shared<DataSetGroup>("dataset1"))
+            , root(make_shared<RootGroup>()) {
 
     }
     
     shared_ptr<Attribute> a1;
     shared_ptr<Attribute> a2;
     shared_ptr<AttributeGroup> what;
-    shared_ptr<DataSet> dataset1;
-    shared_ptr<Root> root;
+    shared_ptr<DataSetGroup> dataset1;
+    shared_ptr<RootGroup> root;
 };
 
 TEST_F(oh5_Attribute_test, test_is_valid) {
@@ -66,23 +66,23 @@ TEST_F(oh5_Attribute_test, test_add_child_AttributeGroup) {
     EXPECT_THROW(a1->add_child(what), value_error);
 }
 
-TEST_F(oh5_Attribute_test, test_add_child_Data) {
-    shared_ptr<Data> data1 = make_shared<Data>("data1");
+TEST_F(oh5_Attribute_test, test_add_child_DataGroup) {
+    shared_ptr<DataGroup> data1 = make_shared<DataGroup>("data1");
     EXPECT_THROW(a1->add_child(data1), value_error);
 }
 
-TEST_F(oh5_Attribute_test, test_add_child_DataSet) {
-    shared_ptr<DataSet> dataset2 = make_shared<DataSet>("dataset2");
+TEST_F(oh5_Attribute_test, test_add_child_DataSetGroup) {
+    shared_ptr<DataSetGroup> dataset2 = make_shared<DataSetGroup>("dataset2");
     EXPECT_THROW(a1->add_child(dataset2), value_error);
 }
 
-TEST_F(oh5_Attribute_test, test_add_child_Quality) {
-    shared_ptr<Quality> a1 = make_shared<Quality>("a1");
+TEST_F(oh5_Attribute_test, test_add_child_QualityGroup) {
+    shared_ptr<QualityGroup> a1 = make_shared<QualityGroup>("a1");
     EXPECT_THROW(a1->add_child(a1), value_error);
 }
 
-TEST_F(oh5_Attribute_test, test_add_child_Root) {
-    shared_ptr<Root> root = make_shared<Root>();
+TEST_F(oh5_Attribute_test, test_add_child_RootGroup) {
+    shared_ptr<RootGroup> root = make_shared<RootGroup>();
     EXPECT_THROW(a1->add_child(root), value_error);
 }
 

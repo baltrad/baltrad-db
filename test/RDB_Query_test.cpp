@@ -10,8 +10,8 @@
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/DataSet.hpp>
-#include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/DataSetGroup.hpp>
+#include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/File.hpp>
 
 #include <brfc/test/TestRDB.hpp>
@@ -59,9 +59,9 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
         QStringList names = path.split("/");
 
         QString dsname = names.takeFirst();
-        shared_ptr<oh5::DataSet> ds = dynamic_pointer_cast<oh5::DataSet>(file.root()->child_by_name(dsname));
+        shared_ptr<oh5::DataSetGroup> ds = dynamic_pointer_cast<oh5::DataSetGroup>(file.root()->child_by_name(dsname));
         if (not ds) {
-            ds = make_shared<oh5::DataSet>(dsname);
+            ds = make_shared<oh5::DataSetGroup>(dsname);
             file.root()->add_child(ds);
         }
 

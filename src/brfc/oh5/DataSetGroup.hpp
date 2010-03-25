@@ -1,5 +1,5 @@
-#ifndef BRFC_OH5_DATA_SET_HPP
-#define BRFC_OH5_DATA_SET_HPP
+#ifndef BRFC_OH5_DATA_SET_GROUP_HPP
+#define BRFC_OH5_DATA_SET_GROUP_HPP
 
 #include <brfc/oh5/Group.hpp>
 
@@ -11,9 +11,9 @@ namespace oh5 {
  *
  * can have Data or AttributeGroup or Quality as a child
  */
-class DataSet : public Group {
+class DataSetGroup : public Group {
   public:
-    virtual ~DataSet();
+    virtual ~DataSetGroup();
 
   protected:
     // allow make_shared access to constructor
@@ -25,7 +25,7 @@ class DataSet : public Group {
     /**
      * @brief constructor
      */
-    explicit DataSet(const QString& name);
+    explicit DataSetGroup(const QString& name);
     
     /**
      * @return true if node is Data or AttributeGroup
@@ -37,4 +37,4 @@ class DataSet : public Group {
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_OH5_DATA_SET_HPP
+#endif // BRFC_OH5_DATA_SET_GROUP_HPP

@@ -1,5 +1,5 @@
-#ifndef BRFC_OH5_QUALITY_HPP
-#define BRFC_OH5_QUALITY_HPP
+#ifndef BRFC_OH5_QUALITY_GROUP_HPP
+#define BRFC_OH5_QUALITY_GROUP_HPP
 
 #include <brfc/oh5/Group.hpp>
 
@@ -8,11 +8,12 @@ namespace oh5 {
 
 /**
  * @brief ODIM_H5 quality group
- * * can have AttributeGroup as a child
+ *
+ * - can have AttributeGroup as a child
  */
-class Quality : public Group {
+class QualityGroup : public Group {
   public:
-    virtual ~Quality();
+    virtual ~QualityGroup();
   
   protected:
     // allow make_shared access to constructor
@@ -23,7 +24,7 @@ class Quality : public Group {
     /**
      * @brief constructor
      */
-    explicit Quality(const QString& name);
+    explicit QualityGroup(const QString& name);
     
     /**
      * @return true if node is AttributeGroup
@@ -35,4 +36,4 @@ class Quality : public Group {
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_OH5_QUALITY_HPP
+#endif // BRFC_OH5_QUALITY_GROUP_HPP

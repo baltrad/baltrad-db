@@ -28,18 +28,18 @@ struct SplitPath {
     QString group_path() const;
     ///@}
     
-    QString dataset() const { return dataset_; }
-    QString data() const { return data_; }
-    QString quality() const { return quality_; }
+    QString dataset_group() const { return dataset_group_; }
+    QString data_group() const { return data_group_; }
+    QString quality_group() const { return quality_group_; }
     QString attribute_group() const { return attribute_group_; }
     QString attribute() const { return attribute_; }
 
   private:
     void split(const QString& path);
 
-    QString dataset_;
-    QString data_;
-    QString quality_;
+    QString dataset_group_;
+    QString data_group_;
+    QString quality_group_;
     QString attribute_group_;
     QString attribute_;
 };

@@ -6,7 +6,7 @@
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
-#include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
 #include <QtCore/QDate>

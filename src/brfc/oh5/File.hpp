@@ -19,7 +19,7 @@ namespace oh5 {
 
 class AttributeSpecs;
 class Group;
-class Root;
+class RootGroup;
 class Source;
 
 /**
@@ -89,9 +89,9 @@ class File : public boost::noncopyable {
      * @brief get the root group
      * @{
      */
-    shared_ptr<const Root> root() const { return root_; }
+    shared_ptr<const RootGroup> root() const { return root_; }
 
-    shared_ptr<Root> root() { return root_; }
+    shared_ptr<RootGroup> root() { return root_; }
     ///@}
     
     /**
@@ -189,7 +189,7 @@ class File : public boost::noncopyable {
     
   private:
 
-    shared_ptr<Root> root_;
+    shared_ptr<RootGroup> root_;
     QString path_;
     shared_ptr<Source> source_;
     mutable long long db_id_;

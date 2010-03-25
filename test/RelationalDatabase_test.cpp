@@ -5,7 +5,7 @@
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/File.hpp>
-#include <brfc/oh5/Root.hpp>
+#include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
 #include <brfc/oh5/SourceCentre.hpp>
 #include <brfc/oh5/SourceRadar.hpp>

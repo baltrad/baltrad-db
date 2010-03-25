@@ -11,9 +11,9 @@ namespace brfc {
 namespace oh5 {
 
 SplitPath::SplitPath(const QString& path)
-        : dataset_()
-        , data_()
-        , quality_()
+        : dataset_group_()
+        , data_group_()
+        , quality_group_()
         , attribute_group_()
         , attribute_() {
 
@@ -32,12 +32,12 @@ SplitPath::full_attribute_name() const {
 QString
 SplitPath::group_path() const {
     QStringList names;
-    if (dataset_ != "")
-        names.append(dataset_);
-    if (data_ != "")
-        names.append(data_);
-    if (quality_ != "")
-        names.append(quality_);
+    if (dataset_group_ != "")
+        names.append(dataset_group_);
+    if (data_group_ != "")
+        names.append(data_group_);
+    if (quality_group_ != "")
+        names.append(quality_group_);
     if (attribute_group_ != "")
         names.append(attribute_group_);
     return QString("/") + names.join("/");
@@ -60,11 +60,11 @@ SplitPath::split(const QString& path) {
     QStringList names = path.split("/");
     BOOST_FOREACH(const QString& name, names) {
         if (name.startsWith("dataset")) {
-            set_once(dataset_, name);
+            set_once(dataset_group_, name);
         } else if (name.startsWith("data")) {
-            set_once(data_, name);
+            set_once(data_group_, name);
         } else if (name.startsWith("quality")) {
-            set_once(quality_, name);
+            set_once(quality_group_, name);
         } else if (name == "what" or name == "where" or name == "how") {
             set_once(attribute_group_, name);
         } else {

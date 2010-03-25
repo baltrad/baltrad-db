@@ -54,9 +54,9 @@ TEST_F(oh5_SplitPath_test, invalid_paths) {
 //root::attribute
 TEST_F(oh5_SplitPath_test, attribute) {
     SplitPath p("/Conventions");
-    EXPECT_EQ("", p.dataset());
-    EXPECT_EQ("", p.data());
-    EXPECT_EQ("", p.quality());
+    EXPECT_EQ("", p.dataset_group());
+    EXPECT_EQ("", p.data_group());
+    EXPECT_EQ("", p.quality_group());
     EXPECT_EQ("", p.attribute_group());
     EXPECT_EQ("Conventions", p.attribute());
 }
@@ -64,9 +64,9 @@ TEST_F(oh5_SplitPath_test, attribute) {
 //root::attributegroup::attribute
 TEST_F(oh5_SplitPath_test, attributegroup_attribute) {
     SplitPath p("/what/object");
-    EXPECT_EQ("", p.dataset());
-    EXPECT_EQ("", p.data());
-    EXPECT_EQ("", p.quality());
+    EXPECT_EQ("", p.dataset_group());
+    EXPECT_EQ("", p.data_group());
+    EXPECT_EQ("", p.quality_group());
     EXPECT_EQ("what", p.attribute_group());
     EXPECT_EQ("object", p.attribute());
 }
@@ -74,9 +74,9 @@ TEST_F(oh5_SplitPath_test, attributegroup_attribute) {
 //root::dataset::attributegroup::attribute
 TEST_F(oh5_SplitPath_test, dataset_attributegroup_attribute) {
     SplitPath p("/dataset1/what/object");
-    EXPECT_EQ("dataset1", p.dataset());
-    EXPECT_EQ("", p.data());
-    EXPECT_EQ("", p.quality());
+    EXPECT_EQ("dataset1", p.dataset_group());
+    EXPECT_EQ("", p.data_group());
+    EXPECT_EQ("", p.quality_group());
     EXPECT_EQ("what", p.attribute_group());
     EXPECT_EQ("object", p.attribute());
 }
@@ -84,9 +84,9 @@ TEST_F(oh5_SplitPath_test, dataset_attributegroup_attribute) {
 //root::dataset::data::attributegroup::attribute
 TEST_F(oh5_SplitPath_test, dataset_data_attributegroup_attribute) {
     SplitPath p("/dataset1/data1/what/object");
-    EXPECT_EQ("dataset1", p.dataset());
-    EXPECT_EQ("data1", p.data());
-    EXPECT_EQ("", p.quality());
+    EXPECT_EQ("dataset1", p.dataset_group());
+    EXPECT_EQ("data1", p.data_group());
+    EXPECT_EQ("", p.quality_group());
     EXPECT_EQ("what", p.attribute_group());
     EXPECT_EQ("object", p.attribute());
 }
@@ -94,9 +94,9 @@ TEST_F(oh5_SplitPath_test, dataset_data_attributegroup_attribute) {
 //root::dataset::quality::attributegroup::attribute
 TEST_F(oh5_SplitPath_test, dataset_quality_attributegroup_attribute) {
     SplitPath p("/dataset1/quality1/what/object");
-    EXPECT_EQ("dataset1", p.dataset());
-    EXPECT_EQ("", p.data());
-    EXPECT_EQ("quality1", p.quality());
+    EXPECT_EQ("dataset1", p.dataset_group());
+    EXPECT_EQ("", p.data_group());
+    EXPECT_EQ("quality1", p.quality_group());
     EXPECT_EQ("what", p.attribute_group());
     EXPECT_EQ("object", p.attribute());
 }
@@ -104,9 +104,9 @@ TEST_F(oh5_SplitPath_test, dataset_quality_attributegroup_attribute) {
 //root::dataset::data::quality::attributegroup::attribute
 TEST_F(oh5_SplitPath_test, dataset_data_quality_attributegroup_attribute) {
     SplitPath p("/dataset1/data1/quality1/what/object");
-    EXPECT_EQ("dataset1", p.dataset());
-    EXPECT_EQ("data1", p.data());
-    EXPECT_EQ("quality1", p.quality());
+    EXPECT_EQ("dataset1", p.dataset_group());
+    EXPECT_EQ("data1", p.data_group());
+    EXPECT_EQ("quality1", p.quality_group());
     EXPECT_EQ("what", p.attribute_group());
     EXPECT_EQ("object", p.attribute());
 }

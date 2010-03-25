@@ -1,5 +1,5 @@
-#ifndef BRFC_OH5_ROOT_HPP
-#define BRFC_OH5_ROOT_HPP
+#ifndef BRFC_OH5_ROOT_GROUP_HPP
+#define BRFC_OH5_ROOT_GROUP_HPP
 
 #include <brfc/oh5/Group.hpp>
 
@@ -12,9 +12,9 @@ namespace oh5 {
  * can have no parent
  * can have Attribute, AttributeGroup or DataSet as child
  */
-class Root : public Group {
+class RootGroup : public Group {
   public:
-    virtual ~Root();
+    virtual ~RootGroup();
 
     using Group::file;
 
@@ -33,7 +33,7 @@ class Root : public Group {
     /**
      * @brief constructor
      */
-    Root();
+    RootGroup();
 
     /**
      * @return false
@@ -61,4 +61,4 @@ class Root : public Group {
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_OH5_ROOT_HPP
+#endif // BRFC_OH5_ROOT_GROUP_HPP
