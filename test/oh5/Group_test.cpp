@@ -10,12 +10,29 @@
 namespace brfc {
 namespace oh5 {
 
-struct oh5_Group_test : public ::testing::Test {
-    oh5_Group_test()
-            : g(make_shared<Group>("g")) {
+class FakeGroup : public Group {
+  public:
+    FakeGroup(const QString& name)
+            : Group(name) {
     }
 
-    shared_ptr<Group> g;
+  protected:
+  /*
+    template<class T, class A1> 
+    friend 
+    shared_ptr<T> boost::make_shared(const A1& a1);
+*/
+    virtual bool do_accepts_child(const Node& child) const {
+        return true;
+    }
+};
+
+struct oh5_Group_test : public ::testing::Test {
+    oh5_Group_test()
+            : g(make_shared<FakeGroup>("g")) {
+    }
+
+    shared_ptr<FakeGroup> g;
 };
 
 TEST_F(oh5_Group_test, test_add_child_attribute) {
@@ -29,30 +46,74 @@ TEST_F(oh5_Group_test, test_add_child_attributegroup) {
 }
 
 TEST_F(oh5_Group_test, test_add_child_group) {
-    shared_ptr<Group> d = make_shared<Group>("d");
+    shared_ptr<FakeGroup> d = make_shared<FakeGroup>("d");
     EXPECT_NO_THROW(g->add_child(d));
 }
 
-TEST_F(oh5_Group_test, test_attribute_access) {
+TEST_F(oh5_Group_test, test_child_attribute_access) {
     shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
     g->add_child(what);
     shared_ptr<Attribute> a1 = make_shared<Attribute>("a1", Variant(1));
     what->add_child(a1);
 
-    EXPECT_EQ(g->attribute("what/a1"), a1);
-    EXPECT_FALSE(g->attribute("a1"));
-    EXPECT_FALSE(g->attribute("what"));
+    EXPECT_EQ(g->child_attribute("what/a1"), a1);
+    EXPECT_FALSE(g->child_attribute("a1"));
+    EXPECT_FALSE(g->child_attribute("what"));
 }
 
-TEST_F(oh5_Group_test, test_group_by_name) {
-    shared_ptr<Group> g2 = make_shared<Group>("g2");
+TEST_F(oh5_Group_test, test_child_group_by_name) {
+    shared_ptr<FakeGroup> g2 = make_shared<FakeGroup>("g2");
     g->add_child(g2);
     shared_ptr<AttributeGroup> ag = make_shared<AttributeGroup>("ag");
     g2->add_child(ag);
     
-    EXPECT_EQ(g->group_by_name("g2"), g2);
-    EXPECT_EQ(g2->group_by_name("ag"), ag);
-    EXPECT_FALSE(g->group_by_name("ag"));
+    EXPECT_EQ(g->child_group_by_name("g2"), g2);
+    EXPECT_EQ(g2->child_group_by_name("ag"), ag);
+    EXPECT_FALSE(g->child_group_by_name("ag"));
+}
+
+/*
+ - g
+   - what
+     - attr1
+     - attr2
+   - dataset1
+     - attr1
+     - data1
+       - what
+         - attr1
+         - attr2
+     - data2
+*/
+TEST_F(oh5_Group_test, test_attribute_access) {
+    shared_ptr<AttributeGroup> w = make_shared<AttributeGroup>("what");
+    shared_ptr<AttributeGroup> ds1_d1_w = make_shared<AttributeGroup>("what");
+
+    shared_ptr<FakeGroup> ds1 = make_shared<FakeGroup>("dataset1");
+    shared_ptr<FakeGroup> ds1_d1 = make_shared<FakeGroup>("data1");
+    shared_ptr<FakeGroup> ds1_d2 = make_shared<FakeGroup>("data2");
+
+    shared_ptr<Attribute> w_attr1 = make_shared<Attribute>("attr1");
+    shared_ptr<Attribute> w_attr2 = make_shared<Attribute>("attr2");
+    shared_ptr<Attribute> ds1_attr1 = make_shared<Attribute>("attr1");
+    shared_ptr<Attribute> ds1_d1_w_attr1 = make_shared<Attribute>("attr1");
+    shared_ptr<Attribute> ds1_d1_w_attr2 = make_shared<Attribute>("attr2");
+
+    g->add_child(w);
+    g->add_child(ds1);
+    w->add_child(w_attr1);
+    w->add_child(w_attr2);
+    ds1->add_child(ds1_d1);
+    ds1->add_child(ds1_d2);
+    ds1->add_child(ds1_attr1);
+    ds1_d1->add_child(ds1_d1_w);
+    ds1_d1_w->add_child(ds1_d1_w_attr1);
+    ds1_d1_w->add_child(ds1_d1_w_attr2);
+
+    EXPECT_EQ(ds1_attr1, ds1_d2->attribute("attr1"));
+    EXPECT_EQ(shared_ptr<Attribute>(), ds1_d2->attribute("attr2"));
+    EXPECT_EQ(w_attr1, ds1_d2->attribute("what/attr1"));
+    EXPECT_EQ(ds1_d1_w_attr1, ds1_d1->attribute("what/attr1"));
 }
 
 } // namespace oh5

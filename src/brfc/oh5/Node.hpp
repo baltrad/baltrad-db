@@ -19,6 +19,15 @@ class File;
 template<typename T>
 class NodeIterator;
 
+/**
+ * @brief ABC for all ODIM_H5 elements
+ *
+ * A node is a single element in the ODIM_H5 hirerchy. It has a name which
+ * is unique among the children of one parent.
+ *
+ * A node can be associated with one parent only, so reassociating a node is
+ * logically equivalent to moving it.
+ */
 class Node : public boost::noncopyable,
              public enable_shared_from_this<Node> {
   public:
@@ -26,21 +35,37 @@ class Node : public boost::noncopyable,
     typedef NodeIterator<Node> iterator;
     typedef NodeIterator<const Node> const_iterator;
 
+    /**
+     * @brief destructor
+     */
     virtual ~Node();
 
+    /**
+     * @{
+     */
     const QString& name() const { return name_; }
 
     void name(const QString& name);
-
+    ///@}
+    
+    /**
+     * @brief absolute path of this node
+     *
+     * path is the concatenation of all node names leading from root to
+     * this node, separated by "/".
+     */
     QString path() const;
 
+    /**
+     * @brief parent node
+     * @return pointer to a parent or null pointer if this node has no parent
+     */
     shared_ptr<Node> parent() const {
         return parent_.lock();
     }
 
     /**
      * @brief is this node the root node
-     *
      */
     bool is_root() const {
         return parent_.expired();
@@ -57,21 +82,42 @@ class Node : public boost::noncopyable,
 
     /**
      * @brief add a child node
-     * @throw duplicate_entry child with name exists
-     * @throw value_error child not accepted
+     * @throw duplicate_entry if a child with that name already exists
+     * @throw value_error if child is not accepted or null
      *
-     * @sa accepts_child
+     * First, a check for a null pointer is made, followed by a check for
+     * duplicate name. Then this node has a chance to deny a child and
+     * finally the child node has a change to deny the parent.
+     *
+     * If the child is previously associated with a parent node, it is
+     * removed from that parents children.
+     *
+     * @sa accepts_child, accepts_parent
      */
     void add_child(shared_ptr<Node> child);
 
+    /**
+     * @brief test for a child by name
+     */
     bool has_child_by_name(const QString& name) const;
 
+    /**
+     * @brief test for a child node
+     */
     bool has_child(const Node& node) const;
 
+    /**
+     * @brief remove a child node
+     * @throw lookup_error if child is not found
+     *
+     * on removing a node, its parent is set to null.
+     */
     void remove_child(Node& node);
     
     /**
      * @{
+     * @brief access child by name
+     * @return pointer to Node or null if not found.
      */
     shared_ptr<Node>
     child_by_name(const QString& name);
@@ -82,6 +128,8 @@ class Node : public boost::noncopyable,
     
     /**
      * @{
+     * @brief access child by path
+     * @return pointer to Node or null if not found.
      */
     shared_ptr<Node>
     child_by_path(const QString& path);
@@ -104,12 +152,16 @@ class Node : public boost::noncopyable,
         return do_accepts_parent(node);
     }
 
+    /**
+     * @brief access children
+     */
     const ChildVector& children() const {
         return children_;
     }
 
     /**
      * @brief file this node is associated with
+     * @return pointer to File or null if not associated with a file
      *
      * default implementation returns the file associated with root and
      * for root returns a null pointer.

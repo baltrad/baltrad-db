@@ -18,8 +18,8 @@ namespace brfc {
 namespace test {
 
 TempH5File::TempH5File()
-        : filename_(strdup("/tmp/brfctest_XXXXXX"), &free) {
-    int fd = mkstemp(filename_.get());
+        : path_(strdup("/tmp/brfctest_XXXXXX"), &free) {
+    int fd = mkstemp(path_.get());
     if (fd == -1)
         throw std::runtime_error("could not create temporary file");
     close(fd);
@@ -31,7 +31,7 @@ TempH5File::~TempH5File() {
 
 void
 TempH5File::unlink() {
-    ::unlink(filename_.get());
+    ::unlink(path_.get());
 }
 
 namespace {
@@ -102,11 +102,11 @@ class GatherHLNodes {
         }
     }
 
-    void write(const char* filename) {
+    void write(const char* path) {
         HL_Compression compression;
         HLCompression_init(&compression, CT_ZLIB);
         compression.level = 6;
-        if (HLNodeList_setFileName(nodes_.get(), filename) == 0)
+        if (HLNodeList_setFileName(nodes_.get(), path) == 0)
             throw std::runtime_error("could not set filename");
         if (HLNodeList_write(nodes_.get(), 0, &compression) == 0)
             throw std::runtime_error("could not write file");
@@ -120,8 +120,8 @@ class GatherHLNodes {
 
 
 QString
-TempH5File::filename() const {
-    return QString::fromUtf8(filename_.get());
+TempH5File::path() const {
+    return QString::fromUtf8(path_.get());
 }
 
 void
@@ -132,7 +132,7 @@ TempH5File::write(const oh5::File& file) {
         visit(node, node_gather);
     }
     
-    node_gather.write(filename_.get());
+    node_gather.write(path_.get());
 }
 
 } // namespace test

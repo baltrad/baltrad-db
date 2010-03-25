@@ -38,10 +38,10 @@ class TempH5File {
     
     void write(const oh5::File& f);
     
-    QString filename() const;
+    QString path() const;
 
   private:
-    shared_ptr<char> filename_;
+    shared_ptr<char> path_;
 };
 
 } // namepsace test

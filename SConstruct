@@ -235,7 +235,7 @@ testenv.AppendUnique(LIBPATH=["${gtest_lib_dir}"])
 
 for path in ("#lib", "${gtest_lib_dir}", "${hlhdf_lib_dir}", "${qt_lib_dir}"):
     abspath = env.Dir(path).abspath
-    if abspath not in ("/lib", "/usr/lib"):
+    if abspath not in ("/lib", "/usr/lib"): # default ld lookups
         testenv.AppendENVPath('LD_LIBRARY_PATH', abspath)
 
 SConscript("test/SConscript",

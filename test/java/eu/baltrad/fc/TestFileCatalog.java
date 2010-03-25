@@ -45,7 +45,7 @@ public class TestFileCatalog extends TestCase {
   }
 
   public void testImport() {
-    File f = fc.catalog(tempfile.filename());
+    File f = fc.catalog(tempfile.path());
     assertNotNull(f);
     assertTrue(f.db_id() > 0);
   }

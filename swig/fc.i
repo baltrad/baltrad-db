@@ -46,7 +46,6 @@
 %}
 
 %ignore brfc::AttributeMapper;
-%ignore brfc::oh5::AttributeSpecs;
 %ignore brfc::Database;
 %ignore brfc::FileCatalog::FileCatalog(shared_ptr<Database>,
                                        shared_ptr<oh5::AttributeSpecs>,
@@ -62,11 +61,11 @@
 %ignore brfc::Variant::operator=;
 
 // ignore Variant members
-%ignore brfc::Variant::Variant;
+%ignore brfc::Variant::Variant(const char* value);
+%ignore brfc::Variant::Variant(const QVariant& value);
 %ignore brfc::operator=;
 %ignore brfc::Variant::qstring;
 %ignore brfc::Variant::to_qvariant;
-%ignore brfc::variant_to_qvariant;
 
 %rename(Date) QDate;
 %rename(Time) QTime;
@@ -78,11 +77,13 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.expr.Expression;
     import eu.baltrad.fc.expr.AttributeExpr;
+    import eu.baltrad.fc.expr.AttributeExprVector;
 %}
 
 %typemap(javaimports) brfc::Query, brfc::Query* %{
     import eu.baltrad.fc.expr.Expression;
     import eu.baltrad.fc.expr.AttributeExpr;
+    import eu.baltrad.fc.expr.AttributeExprVector;
 %}
 
 %typemap(javaimports) brfc::FileCatalog, brfc::FileCatalog* %{

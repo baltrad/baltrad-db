@@ -10,6 +10,7 @@
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/Root.hpp>
 #include <brfc/oh5/File.hpp>
 
@@ -56,52 +57,47 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
 
     void add_attribute(oh5::File& file, const QString& path, const Variant& value) {
         QStringList names = path.split("/");
-        shared_ptr<oh5::Attribute> attr = make_shared<oh5::Attribute>(names.takeLast(), value);
-        QString attrgroup_name = names.takeLast();
-        shared_ptr<oh5::Group> group = file.root();
-        shared_ptr<oh5::Group> next_group;
-        BOOST_FOREACH(const QString& name, names) {
-            next_group = group->group_by_name(name);
-            if (not next_group) {
-                next_group = make_shared<oh5::Group>(name);
-                group->add_child(next_group);
-            }
-            group = next_group;
-        }
-        if (not group->has_child_by_name(attrgroup_name)) {
-            shared_ptr<oh5::AttributeGroup> attrgroup =
-                make_shared<oh5::AttributeGroup>(attrgroup_name);
-            group->add_child(attrgroup);
-            group = attrgroup;
-        } else {
-            group = dynamic_pointer_cast<oh5::Group>(group->child_by_name(attrgroup_name));
+
+        QString dsname = names.takeFirst();
+        shared_ptr<oh5::DataSet> ds = dynamic_pointer_cast<oh5::DataSet>(file.root()->child_by_name(dsname));
+        if (not ds) {
+            ds = make_shared<oh5::DataSet>(dsname);
+            file.root()->add_child(ds);
         }
 
+        QString groupname = names.takeFirst();
+        shared_ptr<oh5::AttributeGroup> group = dynamic_pointer_cast<oh5::AttributeGroup>(ds->child_by_name(groupname));
+        if (not group) {
+            group = make_shared<oh5::AttributeGroup>(groupname);
+            ds->add_child(group);
+        }
+
+        shared_ptr<oh5::Attribute> attr = make_shared<oh5::Attribute>(names.takeLast(), value);
         group->add_child(attr);
     }
 
     virtual void SetUp() {
-        add_attribute(*td1, "do1/where/xsize", Variant(1));
-        add_attribute(*td1, "do1/where/ysize", Variant(2));
+        add_attribute(*td1, "dataset1/where/xsize", Variant(1));
+        add_attribute(*td1, "dataset1/where/ysize", Variant(2));
         td1->source(db->load_source(src1));
 
-        add_attribute(*td2, "do1/where/xsize", Variant(2));
-        add_attribute(*td2, "do1/where/ysize", Variant(2));
+        add_attribute(*td2, "dataset1/where/xsize", Variant(2));
+        add_attribute(*td2, "dataset1/where/ysize", Variant(2));
         td2->source(db->load_source(src2));
 
-        add_attribute(*td3, "do1/where/xsize", Variant(3));
-        add_attribute(*td3, "do2/where/xsize", Variant(3));
+        add_attribute(*td3, "dataset1/where/xsize", Variant(3));
+        add_attribute(*td3, "dataset2/where/xsize", Variant(3));
         td3->source(db->load_source(src1));
 
-        add_attribute(*td4, "do1/where/xsize", Variant(6));
-        add_attribute(*td4, "do1/where/ysize", Variant(4));
-        add_attribute(*td4, "do2/where/ysize", Variant(5));
+        add_attribute(*td4, "dataset1/where/xsize", Variant(6));
+        add_attribute(*td4, "dataset1/where/ysize", Variant(4));
+        add_attribute(*td4, "dataset2/where/ysize", Variant(5));
         td4->source(db->load_source(src2));
 
-        add_attribute(*td5, "do1/where/xsize", Variant(5));
-        add_attribute(*td5, "do1/where/ysize", Variant(2));
-        add_attribute(*td5, "do2/where/xsize", Variant(2));
-        add_attribute(*td5, "do2/where/ysize", Variant(5));
+        add_attribute(*td5, "dataset1/where/xsize", Variant(5));
+        add_attribute(*td5, "dataset1/where/ysize", Variant(2));
+        add_attribute(*td5, "dataset2/where/xsize", Variant(2));
+        add_attribute(*td5, "dataset2/where/ysize", Variant(5));
         td5->source(db->load_source(src1));
 
         db->save_file("td1", *td1);

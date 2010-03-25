@@ -123,16 +123,8 @@ class File : public boost::noncopyable {
 
     /**
      * @brief get attributes ignored on loading
-     * @{
      */
-    const StringVector& ignored_attributes() const {
-        return ignored_attributes_;
-    }
-
-    StringVector& ignored_attributes() {
-        return ignored_attributes_;
-    }
-    ///@}
+    StringVector ignored_attributes() const;
 
     /**
      * @{
@@ -162,28 +154,32 @@ class File : public boost::noncopyable {
     /**
      * @brief access /what/object
      *
-     * equivalent to @c root().attribute("what/object").value().string()
+     * equivalent to
+     * @c root()->child_attribute("what/object")->value().string()
      */
     QString what_object() const;
 
     /**
      * @brief access /what/date
      *
-     * equivalent to @c root().attribute("what/date").value().date()
+     * equivalent to
+     * @c root()->child_attribute("what/date")->value().date()
      */
     QDate what_date() const;
 
     /**
      * @brief access /what/time
      *
-     * equivalent to @c root().attribute("what/time").value().time()
+     * equivalent to
+     * @c root()->child_attribute("what/time")->value().time()
      */
     QTime what_time() const;
 
     /**
      * @brief access /what/source
      *
-     * equivalent to @c root().attribute("what/source").value().string()
+     * equivalent to
+     * @c root()->child_attribute("what/source")->value().string()
      */
     QString what_source() const;
     ///@}
@@ -192,16 +188,8 @@ class File : public boost::noncopyable {
     File();
     
   private:
-    /**
-     * @brief figure out pathname from attributes
-     *
-     * pseudo-attribute \c path on root Group is set to a relative
-     * path where this File should be stored to.
-     */
-    void set_path_from_attributes();
-    
+
     shared_ptr<Root> root_;
-    StringVector ignored_attributes_;
     QString path_;
     shared_ptr<Source> source_;
     mutable long long db_id_;
