@@ -15,6 +15,25 @@ namespace oh5 {
 class FileNamer {
   public:
     /**
+     * @brief inject version information into a filename
+     *
+     * @return modified filename
+     *
+     * this method tries to do one of the following, in the specified order:
+     * - if filename contains a string '$VERSION$', it is replaced with the
+     *   version
+     * - if filename has one or more '.' in it, the last dot is taken to be
+     *   an extension separator and version is placed right before it,
+     *   prefixed with '_'
+     * - otherwise, version is put at the end of the string, prefixed with '_'
+     *
+     * The version inserted into the string is pre-padded with at most 6 zero
+     * digits.
+     */
+    static QString inject_version(const QString& filename,
+                                  unsigned int version);
+
+    /**
      * @brief name a File
      * @param file File to be named
      * @return the generated filename

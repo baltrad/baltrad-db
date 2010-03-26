@@ -4,6 +4,7 @@ sources = [
     "exceptions.cpp",
     "DefaultFileNamer.cpp",
     "FileCatalog.cpp",
+    "FileNamer.cpp",
     "Query.cpp",
     "ResultSet.cpp",
     "Variant.cpp",
