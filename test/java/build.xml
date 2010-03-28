@@ -10,6 +10,16 @@
     </sql>
   </target>
 
+  <target name="drop_postgresql_testdb">
+    <sql rdbms="postgres"
+         driver="org.postgresql.Driver"
+         url="${db.url}"
+         userid="${db.username}" 
+         password="${db.password}">
+      <transaction src="schema/postgresql/drop.sql" />
+    </sql>
+  </target>
+
   <target name="execute_tests" depends="create_postgresql_testdb">
     <mkdir dir="test/reports"/>
     <junit showoutput="true" printsummary="no">
@@ -21,5 +31,6 @@
       <test name="eu.baltrad.fc.TestTime" todir="test/reports" />
       <test name="eu.baltrad.fc.TestFileCatalog" todir="test/reports" />
     </junit>
+    <antcall target="drop_postgresql_testdb"/>
   </target>
 </project>
