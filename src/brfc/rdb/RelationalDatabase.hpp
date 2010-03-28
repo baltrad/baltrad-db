@@ -20,15 +20,14 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_QSQL_DATABASE_H
 #define BRFC_QSQL_DATABASE_H
 
-#include <brfc/Database.hpp>
-
 #include <string>
 #include <map>
 
 #include <QtCore/QString>
 #include <QtSql/QSqlDatabase>
 
-#include <boost/scoped_ptr.hpp>
+#include <brfc/smart_ptr.hpp>
+#include <brfc/Database.hpp>
 
 class QVariant;
 class QCoreApplication;
@@ -88,7 +87,7 @@ class RelationalDatabase : public Database {
     void populate_mapper_and_specs();
 
     QSqlDatabase& connection() {
-        return sql_;
+        return *sql_;
     }
 
     bool supports_returning() const {
@@ -136,9 +135,9 @@ class RelationalDatabase : public Database {
     
     QString qt_engine(const QString& engine) const;
 
-    QSqlDatabase sql_;
-    boost::scoped_ptr<AttributeMapper> mapper_;
-    boost::scoped_ptr<oh5::AttributeSpecs> specs_;
+    shared_ptr<QSqlDatabase> sql_;
+    scoped_ptr<AttributeMapper> mapper_;
+    scoped_ptr<oh5::AttributeSpecs> specs_;
     QString dialect_;
     bool supports_returning_;
     IdCache id_cache_;

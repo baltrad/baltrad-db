@@ -20,12 +20,14 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_RELATIONAL_RESULT_SET_HPP
 #define BRFC_RELATIONAL_RESULT_SET_HPP
 
-#include <boost/scoped_ptr.hpp>
+#include <QtSql/QSqlDatabase>
 
+#include <brfc/smart_ptr.hpp>
 #include <brfc/ResultSet.hpp>
 
 class QDate;
 class QTime;
+class QSqlDatabase;
 class QSqlQuery;
 
 namespace brfc {
@@ -41,7 +43,8 @@ class RelationalResultSet : public ResultSet {
      *
      * position is before first row.
      */
-    explicit RelationalResultSet(const QSqlQuery& query);
+    explicit RelationalResultSet(const QSqlQuery& query,
+                                 shared_ptr<QSqlDatabase> db);
     
     /**
      * @brief destructor
@@ -56,7 +59,8 @@ class RelationalResultSet : public ResultSet {
     Variant do_value_at(unsigned int pos) const;
   
   private:
-    boost::scoped_ptr<QSqlQuery> query_;
+    shared_ptr<QSqlDatabase> db_;
+    scoped_ptr<QSqlQuery> query_;
 };
 
 } // namespace rdb

@@ -213,6 +213,13 @@ class SaveVisitor {
     GroupSaver save_group_;
 };
 
+void
+QSqlDatabase_deleter(QSqlDatabase* db) {
+    db->close();
+    ::QSqlDatabase::removeDatabase(db->connectionName());
+    delete db;
+}
+
 } // namespace anonymous
 
 
@@ -237,18 +244,24 @@ RelationalDatabase::RelationalDatabase(const QString& dsn_)
         , supports_returning_(false) {
     init_qapp();
     QUrl dsn(dsn_);
-    QString name = QString("brfc-") + QString::number(connection_count_++);
-    sql_ = ::QSqlDatabase::addDatabase(qt_engine(dsn.scheme()), name);
-    sql_.setHostName(dsn.host());
-    sql_.setUserName(dsn.userName());
-    sql_.setPassword(dsn.password());
+
+    {
+        QString name = QString("brfc-") + QString::number(connection_count_++);
+        QString engine = qt_engine(dsn.scheme());
+        const QSqlDatabase& tmp = ::QSqlDatabase::addDatabase(engine, name);
+        sql_.reset(new QSqlDatabase(tmp), QSqlDatabase_deleter);
+    }
+
+    sql_->setHostName(dsn.host());
+    sql_->setUserName(dsn.userName());
+    sql_->setPassword(dsn.password());
     QString database = dsn.path();
     if (database.startsWith("/")) {
         database.remove(0, 1); // remove slash
     }
-    sql_.setDatabaseName(database);
-    if (!sql_.open())
-        throw db_error(sql_.lastError());
+    sql_->setDatabaseName(database);
+    if (!sql_->open())
+        throw db_error(sql_->lastError());
     dialect_ = dsn.scheme();
     if (dialect_ == "postgresql")
         supports_returning_ = true;
@@ -272,8 +285,6 @@ QCoreApplication* RelationalDatabase::qapp_ = 0;
 
 RelationalDatabase::~RelationalDatabase() {
     --instance_count_;
-    sql_.close();
-    ::QSqlDatabase::removeDatabase(sql_.connectionName());
     if (instance_count_ == 0) {
         delete qapp_;
         qapp_ = 0;
@@ -551,7 +562,7 @@ RelationalDatabase::query(const QString& query_str,
         query.bindValue(bind.first, bind.second.to_qvariant());
     }
     query.exec();
-    return shared_ptr<ResultSet>(new RelationalResultSet(query));
+    return shared_ptr<ResultSet>(new RelationalResultSet(query, sql_));
 }
 
 void

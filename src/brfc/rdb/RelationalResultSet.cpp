@@ -28,8 +28,10 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace rdb {
 
-RelationalResultSet::RelationalResultSet(const QSqlQuery& query)
-        : query_(new QSqlQuery(query)) {
+RelationalResultSet::RelationalResultSet(const QSqlQuery& query,
+                                         shared_ptr<QSqlDatabase> db)
+        : db_(db)
+        , query_(new QSqlQuery(query)) {
     query_->seek(-1);
 }
 

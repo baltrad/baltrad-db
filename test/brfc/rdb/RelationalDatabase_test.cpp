@@ -22,6 +22,8 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QDate>
 #include <QtCore/QTime>
 
+#include <brfc/ResultSet.hpp>
+
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
@@ -30,6 +32,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/SourceRadar.hpp>
 
 #include <brfc/test/TestRDB.hpp>
+#include <iostream>
 
 #include "config.hpp"
 #include "../common.hpp"
@@ -117,6 +120,15 @@ TEST_P(rdb_RelationalDatabase_test, next_filename_version) {
 
 TEST_P(rdb_RelationalDatabase_test, next_filename_version_nxfile) {
     EXPECT_EQ(0, db->next_filename_version("nxfile"));
+}
+
+TEST_P(rdb_RelationalDatabase_test, resultset_keeps_qsqldatabase_alive) {
+    shared_ptr<ResultSet> r;
+    {
+        RelationalDatabase db(GetParam());
+        r = db.query("SELECT 1", BindMap());
+    };
+    r->size();
 }
 
 
