@@ -238,8 +238,8 @@ for path in ("#lib", "${gtest_lib_dir}", "${hlhdf_lib_dir}", "${qt_lib_dir}"):
     if abspath not in ("/lib", "/usr/lib"): # default ld lookups
         testenv.AppendENVPath('LD_LIBRARY_PATH', abspath)
 
-SConscript("test/SConscript",
-           build_dir="build/test", duplicate=0,
+SConscript("test/brfc/SConscript",
+           build_dir="build/test/brfc", duplicate=0,
            exports={"env": testenv})
 
 jtestenv = env.Clone()
