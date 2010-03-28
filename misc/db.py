@@ -75,9 +75,9 @@ files = Table("files", meta,
     UniqueConstraint("proposed_filename", "filename_version"),
 )
 
-data_objects = Table("data_objects", meta,
+groups = Table("groups", meta,
     Column("id", Integer, primary_key=True),
-    Column("parent_id", Integer, ForeignKey("data_objects.id")),
+    Column("parent_id", Integer, ForeignKey("groups.id")),
     Column("name", Text, nullable=False),
     Column("product", Text),
     Column("startdate", Date),
@@ -106,61 +106,61 @@ attributes = Table("attributes", meta,
 attribute_values_int = Table("attribute_values_int", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
-    Column("data_object_id", Integer, nullable=False),
+    Column("group_id", Integer, nullable=False),
     Column("value", PGBigInteger, nullable=False),
-    ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
+    ForeignKeyConstraint(["group_id"], [groups.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id")
+    PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
 attribute_values_str = Table("attribute_values_str", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
-    Column("data_object_id", Integer, nullable=False),
+    Column("group_id", Integer, nullable=False),
     Column("value", Text, nullable=False),
-    ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
+    ForeignKeyConstraint(["group_id"], [groups.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id")
+    PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
 attribute_values_real = Table("attribute_values_real", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
-    Column("data_object_id", Integer, nullable=False),
+    Column("group_id", Integer, nullable=False),
     Column("value", Float, nullable=False),
-    ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
+    ForeignKeyConstraint(["group_id"], [groups.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id")
+    PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
 attribute_values_bool = Table("attribute_values_bool", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
-    Column("data_object_id", Integer, nullable=False),
+    Column("group_id", Integer, nullable=False),
     Column("value", Boolean, nullable=False),
-    ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
+    ForeignKeyConstraint(["group_id"], [groups.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id")
+    PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
 attribute_values_date = Table("attribute_values_date", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
-    Column("data_object_id", Integer, nullable=False),
+    Column("group_id", Integer, nullable=False),
     Column("value", Date, nullable=False),
-    ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
+    ForeignKeyConstraint(["group_id"], [groups.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id")
+    PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
 attribute_values_time = Table("attribute_values_time", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
-    Column("data_object_id", Integer, nullable=False),
+    Column("group_id", Integer, nullable=False),
     Column("value", Time, nullable=False),
-    ForeignKeyConstraint(["data_object_id"], [data_objects.c.id],
+    ForeignKeyConstraint(["group_id"], [groups.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "data_object_id")
+    PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
 default_storage = {
@@ -177,11 +177,11 @@ special_storage = {
     "object": ("files", "object"),
     "date": ("files", "n_date"),
     "time": ("files", "n_time"),
-    "product": ("data_objects", "product"),
-    "startdate": ("data_objects", "startdate"),
-    "starttime": ("data_objects", "starttime"),
-    "enddate": ("data_objects", "enddate"),
-    "endtime": ("data_objects", "endtime"),
+    "product": ("groups", "product"),
+    "startdate": ("groups", "startdate"),
+    "starttime": ("groups", "starttime"),
+    "enddate": ("groups", "enddate"),
+    "endtime": ("groups", "endtime"),
 }
 
 # name, group, type

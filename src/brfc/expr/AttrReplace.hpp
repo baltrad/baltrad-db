@@ -96,7 +96,7 @@ class AttrReplace : protected Visitor {
 
     void push(ElementPtr p);
 
-    void join_data_objects();
+    void join_groups();
 
   private:
     const rdb::AttributeMapper* mapper_;

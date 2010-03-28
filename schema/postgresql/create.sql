@@ -41,14 +41,14 @@ CREATE TABLE files (
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
 	 UNIQUE (unique_id), 
-	 FOREIGN KEY(source_id) REFERENCES sources (id), 
 	 UNIQUE (proposed_filename, filename_version), 
-	 UNIQUE (path)
+	 UNIQUE (path), 
+	 FOREIGN KEY(source_id) REFERENCES sources (id)
 )
 
 ;
 
-CREATE TABLE data_objects (
+CREATE TABLE groups (
 	id SERIAL NOT NULL, 
 	parent_id INTEGER, 
 	name TEXT NOT NULL, 
@@ -59,74 +59,74 @@ CREATE TABLE data_objects (
 	endtime TIME WITHOUT TIME ZONE, 
 	file_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(parent_id) REFERENCES data_objects (id), 
+	 FOREIGN KEY(parent_id) REFERENCES groups (id), 
 	 FOREIGN KEY(file_id) REFERENCES files (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE attribute_values_date (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value DATE NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE attribute_values_bool (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value BOOLEAN NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE attribute_values_time (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value TIME WITHOUT TIME ZONE NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id)
 )
 
 ;
 
 CREATE TABLE attribute_values_int (
 	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
 	value BIGINT NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
+	PRIMARY KEY (attribute_id, group_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE attribute_values_real (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value FLOAT(10) NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+	 FOREIGN KEY(group_id) REFERENCES groups (id) ON DELETE CASCADE
 )
 
 ;
 
 CREATE TABLE attribute_values_str (
 	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
 	value TEXT NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
+	PRIMARY KEY (attribute_id, group_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+	 FOREIGN KEY(group_id) REFERENCES groups (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE attribute_values_bool (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value BOOLEAN NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES groups (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE attribute_values_time (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value TIME WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES groups (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE attribute_values_real (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value FLOAT(10) NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES groups (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE attribute_values_date (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value DATE NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES groups (id) ON DELETE CASCADE
 )
 
 ;
@@ -137,10 +137,10 @@ CREATE TABLE source_centres (
 	country_code INTEGER NOT NULL, 
 	wmo_cccc VARCHAR(4) NOT NULL, 
 	PRIMARY KEY (id), 
-	 UNIQUE (originating_centre), 
 	 FOREIGN KEY(id) REFERENCES sources (id), 
 	 UNIQUE (country_code), 
-	 UNIQUE (wmo_cccc)
+	 UNIQUE (wmo_cccc), 
+	 UNIQUE (originating_centre)
 )
 
 ;
@@ -152,10 +152,10 @@ CREATE TABLE source_radars (
 	wmo_code INTEGER, 
 	place TEXT, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(id) REFERENCES sources (id), 
-	 UNIQUE (place), 
 	 UNIQUE (radar_site), 
+	 UNIQUE (place), 
 	 FOREIGN KEY(centre_id) REFERENCES source_centres (id), 
+	 FOREIGN KEY(id) REFERENCES sources (id), 
 	 UNIQUE (wmo_code)
 )
 
@@ -258,12 +258,12 @@ INSERT INTO attributes (id, name, converter, storage_table, storage_column, igno
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (96, 'how/PAC', 'real', 'attribute_values_real', 'value', False);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (97, 'how/S2N', 'real', 'attribute_values_real', 'value', False);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (98, 'how/polarization', 'string', 'attribute_values_str', 'value', False);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (99, 'what/product', 'string', 'data_objects', 'product', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (99, 'what/product', 'string', 'groups', 'product', False);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (100, 'what/quantity', 'string', 'attribute_values_str', 'value', False);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (101, 'what/startdate', 'date', 'data_objects', 'startdate', False);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (102, 'what/starttime', 'time', 'data_objects', 'starttime', False);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (103, 'what/enddate', 'date', 'data_objects', 'enddate', False);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (104, 'what/endtime', 'time', 'data_objects', 'endtime', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (101, 'what/startdate', 'date', 'groups', 'startdate', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (102, 'what/starttime', 'time', 'groups', 'starttime', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (103, 'what/enddate', 'date', 'groups', 'enddate', False);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (104, 'what/endtime', 'time', 'groups', 'endtime', False);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (105, 'what/gain', 'real', 'attribute_values_real', 'value', False);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (106, 'what/offset', 'real', 'attribute_values_real', 'value', False);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (107, 'what/nodata', 'real', 'attribute_values_real', 'value', False);

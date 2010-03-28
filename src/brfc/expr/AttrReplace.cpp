@@ -90,17 +90,17 @@ AttrReplace::do_visit(Attribute& attr) {
         QString alias = name.remove("/") + "_values";
         value_t = Table::create(mapping.table)->alias(alias);
         if (not from_->contains(value_t)) {
-            // try to join data_objects, they have appear earlier in the join
-            join_data_objects(); 
-            TablePtr dobj_t = Table::create("data_objects");
-            ExpressionPtr on = value_t->column("data_object_id")->eq(dobj_t->column("id"));
+            // try to join groups, they have to appear earlier in the join
+            join_groups(); 
+            TablePtr grp_t = Table::create("groups");
+            ExpressionPtr on = value_t->column("group_id")->eq(grp_t->column("id"));
             on = on->and_(value_t->column("attribute_id")->eq(Literal::create(Variant(mapping.id))));
             from_ = from_->join(value_t, on);
         }
     } else {
         value_t = Table::create(mapping.table);
-        if (value_t->name() == "data_objects") {
-            join_data_objects();
+        if (value_t->name() == "groups") {
+            join_groups();
         }
     }
     // replace the attribute with value column
@@ -109,13 +109,13 @@ AttrReplace::do_visit(Attribute& attr) {
 }
 
 void
-AttrReplace::join_data_objects() {
-    // join data_objects if not already joined
+AttrReplace::join_groups() {
+    // join groups if not already joined
     TablePtr files_t = Table::create("files");
-    TablePtr dobj_t = Table::create("data_objects");
-    if (not from_->contains(dobj_t)) {
-        ExpressionPtr on = dobj_t->column("file_id")->eq(files_t->column("id"));
-        from_ = from_->join(dobj_t, on);
+    TablePtr grp_t = Table::create("groups");
+    if (not from_->contains(grp_t)) {
+        ExpressionPtr on = grp_t->column("file_id")->eq(files_t->column("id"));
+        from_ = from_->join(grp_t, on);
     }
 }
 

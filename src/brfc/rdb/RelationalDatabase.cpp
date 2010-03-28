@@ -64,7 +64,7 @@ class GroupSaver {
     GroupSaver(RelationalDatabase* rdb)
             : rdb_(rdb)
             , qry_(rdb->connection())
-            , special_(rdb->mapper().specializations_on("data_objects")) {
+            , special_(rdb->mapper().specializations_on("groups")) {
         QStringList columns, binds; 
         columns.append("parent_id");
         columns.append("file_id");
@@ -75,7 +75,7 @@ class GroupSaver {
         BOOST_FOREACH(const QString& column, columns) {
             binds.append(":" + column);
         }
-        QString qrystr("INSERT INTO data_objects(" + columns.join(", ") +
+        QString qrystr("INSERT INTO groups(" + columns.join(", ") +
                        ") VALUES(" + binds.join(", ") + ")");
         if (rdb->supports_returning())
             qrystr += " RETURNING id";
@@ -153,10 +153,10 @@ class AttributeSaver {
         const Mapping& mapping = mapper_->mapping(attr.full_name());
 
         QSqlQuery& qry = query_by_table(mapping.table);
-        QVariant dobj_id;
+        QVariant grp_id;
         if (attr.parent_group())
-            dobj_id = attr.parent_group()->db_id();
-        qry.bindValue("data_object_id", dobj_id);
+            grp_id = attr.parent_group()->db_id();
+        qry.bindValue("group_id", grp_id);
         qry.bindValue("attribute_id", mapping.id);
         qry.bindValue("value", attr.value().to_qvariant());
 
@@ -172,8 +172,8 @@ class AttributeSaver {
         if (iter == queries_.end()) {
             QSqlQuery qry(rdb_->connection()); 
             qry.prepare("INSERT INTO " + table +
-                        "(data_object_id, attribute_id, value) " +
-                        "VALUES(:data_object_id, :attribute_id, :value)");
+                        "(group_id, attribute_id, value) " +
+                        "VALUES(:group_id, :attribute_id, :value)");
             QueryMap::value_type val(table, qry);
             iter = queries_.insert(val).first;
         }
