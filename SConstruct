@@ -2,7 +2,7 @@ import os
 import sys
 import urlparse
 
-
+sys.path.append("./misc")
 from build_helper import (CheckBoostVersion, CheckHlhdf, CheckQt,
                           CheckQtSqlDrivers, SplitResult)
 
@@ -68,7 +68,7 @@ vars.AddVariables(
 ##
 
 env = Environment(tools=["default", "doxygen", "swig", "textfile"],
-                  toolpath=["scons_tools"],
+                  toolpath=["misc/scons_tools"],
                   variables=vars,
                   CCFLAGS=["-pedantic", "-Wall", "-Wno-long-long"],
                   CPPPATH=["#src"],
