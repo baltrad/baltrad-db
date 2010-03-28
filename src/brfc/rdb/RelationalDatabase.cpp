@@ -298,8 +298,10 @@ RelationalDatabase::do_has_file(const oh5::File& file) {
 
 
 long long
-RelationalDatabase::do_save_file(const oh5::File& file) {
-    id_type file_id = save(file);
+RelationalDatabase::do_save_file(const oh5::File& file,
+                                 const QString& proposed_filename,
+                                 unsigned int filename_version) {
+    id_type file_id = save(file, proposed_filename, filename_version);
     file.db_id(file_id.toLongLong());
 
     SaveVisitor visitor(this);
@@ -309,6 +311,19 @@ RelationalDatabase::do_save_file(const oh5::File& file) {
     }
 
     return file_id.toLongLong();
+}
+
+unsigned int
+RelationalDatabase::do_next_filename_version(const QString& filename) {
+    QSqlQuery qry(connection());
+    qry.prepare("SELECT MAX(filename_version) + 1 "
+                "FROM files "
+                "WHERE filename = :filename");
+    qry.bindValue(":filename", filename);
+    if (!qry.exec())
+        throw db_error(qry.lastError());
+    qry.next();
+    return qry.value(0).toUInt();
 }
 
 shared_ptr<ResultSet>
@@ -330,7 +345,9 @@ RelationalDatabase::do_query(const Query& query) {
 }
 
 RelationalDatabase::id_type
-RelationalDatabase::save(const oh5::File& f) {
+RelationalDatabase::save(const oh5::File& f,
+                         const QString& proposed_filename,
+                         unsigned int filename_version) {
     QStringList columns, binds;
     columns.append("source_id");
     columns.append("unique_id");
@@ -348,7 +365,9 @@ RelationalDatabase::save(const oh5::File& f) {
 
     QSqlQuery qry(connection());
     QString qrystr("INSERT INTO files(" + columns.join(", ") +
-                   ") VALUES(" + binds.join(", ") + ")");
+                   ", proposed_filename, filename_version) "
+                   "VALUES(" + binds.join(", ") +
+                   ", :proposed_filename, :filename_version)");
     if (supports_returning())
         qrystr += " RETURNING id";
     qry.prepare(qrystr);
@@ -368,6 +387,8 @@ RelationalDatabase::save(const oh5::File& f) {
     qry.bindValue(":path", f.path());
     qry.bindValue(":unique_id", f.unique_identifier());
     qry.bindValue(":source_id", f.source()->db_id());
+    qry.bindValue(":proposed_filename", proposed_filename);
+    qry.bindValue(":filename_version", filename_version);
 
     if (not qry.exec())
         throw db_error(qry.lastError());

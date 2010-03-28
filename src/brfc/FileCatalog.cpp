@@ -77,19 +77,21 @@ FileCatalog::catalog(const QString& path) {
     if (is_cataloged(*f))
         throw duplicate_entry(path.toUtf8().constData());
     
-    QString target = namer_->name(*f);
+    QString proposed_name = namer_->name(*f);
 
-    if (QDir::isAbsolutePath(target))
+    if (QDir::isAbsolutePath(proposed_name))
         throw std::runtime_error("namer must not return absolute paths");
     
+    unsigned int name_version = db_->next_filename_version(proposed_name);
+    
+    QString target = FileNamer::inject_version(proposed_name, name_version);
     target = QDir::cleanPath(storage_.absoluteFilePath(target));
-
     f->path(target);
 
     db_->begin();
     // try saving to database
     try {
-        long long id = db_->save_file(*f);
+        long long id = db_->save_file(*f, proposed_name, name_version);
         f->db_id(id);
     } catch (const db_error& e) {
         db_->rollback();

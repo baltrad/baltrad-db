@@ -83,7 +83,11 @@ class RelationalDatabase : public Database {
     
     virtual bool do_has_file(const oh5::File& file);
     virtual void do_remove_file(const QString& path);
-    virtual long long do_save_file(const oh5::File& file);
+    virtual long long do_save_file(const oh5::File& file,
+                                   const QString& proposed_filename,
+                                   unsigned int filename_version);
+
+    virtual unsigned int do_next_filename_version(const QString& filename);
 
     virtual shared_ptr<oh5::Source> do_load_source(const QString& srcstr);
     
@@ -102,7 +106,9 @@ class RelationalDatabase : public Database {
     /**
      * @brief save file to database
      */
-    id_type save(const oh5::File& file);
+    id_type save(const oh5::File& file,
+                 const QString& proposed_filename,
+                 unsigned int filename_version);
 
     /**
      * @brief remove file from database

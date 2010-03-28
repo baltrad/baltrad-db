@@ -8,7 +8,7 @@ import StringIO as stringio
 
 from sqlalchemy import (MetaData, Table, Column, ForeignKey,
                         ForeignKeyConstraint, PrimaryKeyConstraint,
-                        create_engine)
+                        UniqueConstraint, create_engine)
 
 from sqlalchemy.types import (Text, Integer, Float, Date, Time,
                               Boolean, String)
@@ -47,11 +47,14 @@ files = Table("files", meta,
     Column("id", Integer, primary_key=True),
     Column("unique_id", Text, unique=True, nullable=False),
     Column("path", Text, unique=True, nullable=False),
+    Column("proposed_filename", Text, nullable=False),
+    Column("filename_version", Integer, nullable=False),
     Column("object", Text, nullable=False),
     Column("n_date", Date, nullable=False),
     Column("n_time", Time, nullable=False),
     Column("source_id", Integer, ForeignKey(sources.c.id),
-           nullable=False)
+           nullable=False),
+    UniqueConstraint("proposed_filename", "filename_version"),
 )
 
 data_objects = Table("data_objects", meta,

@@ -69,7 +69,7 @@ TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
     file->path("/path");
     file->root()->add_child(make_shared<oh5::Attribute>("invalid"));
 
-    EXPECT_NO_THROW(db->save_file(*file));
+    EXPECT_NO_THROW(db->save_file(*file, "test", 0));
 }
 
 TEST_P(rdb_RelationalDatabase_test, attribute_groups_not_saved) {
@@ -79,7 +79,7 @@ TEST_P(rdb_RelationalDatabase_test, attribute_groups_not_saved) {
     file->source(src);
     file->path("/path");
     
-    ASSERT_NO_THROW(db->save_file(*file));
+    ASSERT_NO_THROW(db->save_file(*file, "test", 0));
     
     EXPECT_EQ(0, file->root()->child_group_by_name("what")->db_id());
     EXPECT_NE(0, file->root()->db_id());

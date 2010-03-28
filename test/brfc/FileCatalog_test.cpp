@@ -39,7 +39,10 @@ class MockDatabase : public Database {
     
     MOCK_METHOD1(do_has_file, bool(const oh5::File&));
     MOCK_METHOD1(do_remove_file, void(const QString&));
-    MOCK_METHOD1(do_save_file, long long(const oh5::File&));
+    MOCK_METHOD3(do_save_file, long long(const oh5::File&,
+                                         const QString&,
+                                         unsigned int));
+    MOCK_METHOD1(do_next_filename_version, unsigned int(const QString&));
     MOCK_METHOD1(do_load_source, shared_ptr<oh5::Source>(const QString&));
     MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
     MOCK_METHOD0(do_clean, void());  
@@ -90,18 +93,22 @@ TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
 }
 
 TEST_F(FileCatalog_test, test_catalog) {
-    const QString& target = tempdir->path() + "/test";
+    const QString& target = tempdir->path() + "/test_000010";
     EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return("test"));
-    EXPECT_CALL(*db, do_save_file(Property(&oh5::File::path, Eq(target))))
+    EXPECT_CALL(*db, do_next_filename_version(Eq("test")))
+        .WillOnce(Return(10));
+    EXPECT_CALL(*db, do_save_file(Property(&oh5::File::path, Eq(target)),
+                                  Eq("test"),
+                                  Eq(10)))
         .WillOnce(Return(1));
     EXPECT_CALL(*db, do_commit());
     
-    // file is given the path returned by namer
+    // file is given the correct path
     shared_ptr<const oh5::File> f = fc.catalog(tempfile.path());
     EXPECT_EQ(f->path(), target);
     EXPECT_EQ(f->db_id(), 1);
@@ -110,14 +117,16 @@ TEST_F(FileCatalog_test, test_catalog) {
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
-    const QString& target = tempdir->path() + "/test";
+    const QString& target = tempdir->path() + "/test_000010";
     EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return("test"));
-    EXPECT_CALL(*db, do_save_file(Property(&oh5::File::path, Eq(target))))
+    EXPECT_CALL(*db, do_next_filename_version(Eq("test")))
+        .WillOnce(Return(10));
+    EXPECT_CALL(*db, do_save_file(_, _, _))
         .WillOnce(Throw(db_error("")));
     EXPECT_CALL(*db, do_rollback());
     
@@ -126,14 +135,16 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
-    const QString& target = tempdir->path() + "/test";
+    const QString& target = tempdir->path() + "/test_000010";
     EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
     EXPECT_CALL(*namer, do_name(_))
         .WillOnce(Return("test"));
-    EXPECT_CALL(*db, do_save_file(Property(&oh5::File::path, Eq(target))))
+    EXPECT_CALL(*db, do_next_filename_version(Eq("test")))
+        .WillOnce(Return(10));
+    EXPECT_CALL(*db, do_save_file(_, _, _))
         .WillOnce(Return(1));
     EXPECT_CALL(*db, do_rollback());
 

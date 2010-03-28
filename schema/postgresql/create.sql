@@ -1,4 +1,12 @@
 
+CREATE TABLE attribute_groups (
+	id SERIAL NOT NULL, 
+	name INTEGER NOT NULL, 
+	PRIMARY KEY (id)
+)
+
+;
+
 CREATE TABLE attributes (
 	id SERIAL NOT NULL, 
 	name TEXT NOT NULL, 
@@ -25,14 +33,17 @@ CREATE TABLE files (
 	id SERIAL NOT NULL, 
 	unique_id TEXT NOT NULL, 
 	path TEXT NOT NULL, 
+	proposed_filename TEXT NOT NULL, 
+	filename_version INTEGER NOT NULL, 
 	object TEXT NOT NULL, 
 	n_date DATE NOT NULL, 
 	n_time TIME WITHOUT TIME ZONE NOT NULL, 
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 UNIQUE (path), 
 	 UNIQUE (unique_id), 
-	 FOREIGN KEY(source_id) REFERENCES sources (id)
+	 FOREIGN KEY(source_id) REFERENCES sources (id), 
+	 UNIQUE (proposed_filename, filename_version), 
+	 UNIQUE (path)
 )
 
 ;
@@ -50,17 +61,6 @@ CREATE TABLE data_objects (
 	PRIMARY KEY (id), 
 	 FOREIGN KEY(parent_id) REFERENCES data_objects (id), 
 	 FOREIGN KEY(file_id) REFERENCES files (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE attribute_values_int (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value BIGINT NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
 )
 
 ;
@@ -92,16 +92,16 @@ CREATE TABLE attribute_values_time (
 	data_object_id INTEGER NOT NULL, 
 	value TIME WITHOUT TIME ZONE NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id)
 )
 
 ;
 
-CREATE TABLE attribute_values_str (
+CREATE TABLE attribute_values_int (
 	attribute_id INTEGER NOT NULL, 
 	data_object_id INTEGER NOT NULL, 
-	value TEXT NOT NULL, 
+	value BIGINT NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
 	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
@@ -120,16 +120,27 @@ CREATE TABLE attribute_values_real (
 
 ;
 
+CREATE TABLE attribute_values_str (
+	attribute_id INTEGER NOT NULL, 
+	data_object_id INTEGER NOT NULL, 
+	value TEXT NOT NULL, 
+	PRIMARY KEY (attribute_id, data_object_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
+	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+)
+
+;
+
 CREATE TABLE source_centres (
 	id INTEGER NOT NULL, 
 	originating_centre INTEGER NOT NULL, 
 	country_code INTEGER NOT NULL, 
 	wmo_cccc VARCHAR(4) NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(id) REFERENCES sources (id), 
-	 UNIQUE (wmo_cccc), 
 	 UNIQUE (originating_centre), 
-	 UNIQUE (country_code)
+	 FOREIGN KEY(id) REFERENCES sources (id), 
+	 UNIQUE (country_code), 
+	 UNIQUE (wmo_cccc)
 )
 
 ;
@@ -146,14 +157,6 @@ CREATE TABLE source_radars (
 	 UNIQUE (radar_site), 
 	 FOREIGN KEY(centre_id) REFERENCES source_centres (id), 
 	 UNIQUE (wmo_code)
-)
-
-;
-
-CREATE TABLE attribute_groups (
-	id SERIAL NOT NULL, 
-	name INTEGER NOT NULL, 
-	PRIMARY KEY (id)
 )
 
 ;

@@ -66,10 +66,24 @@ class Database : public boost::noncopyable {
     
     /**
      * @brief save file to database
+     * @param file the file to be saved
+     * @param proposed_filename filename proposed by a namer, a string for
+     *        which filename_version is valid.
+     * @param filename_version filename version associated with proposed
+     *        filename
      * @return database id associated with the file
      */
-    long long save_file(const oh5::File& file) {
-        return do_save_file(file);
+    long long save_file(const oh5::File& file,
+                        const QString& proposed_filename,
+                        unsigned int filename_version) {
+        return do_save_file(file, proposed_filename, filename_version);
+    }
+
+    /**
+     * @brief next version number for a filename
+     */
+    unsigned int next_filename_version(const QString& filename) {
+        return do_next_filename_version(filename);
     }
 
     /**
@@ -93,7 +107,11 @@ class Database : public boost::noncopyable {
     
     virtual bool do_has_file(const oh5::File& file) = 0;
     virtual void do_remove_file(const QString& path) = 0;
-    virtual long long do_save_file(const oh5::File& file) = 0;
+    virtual long long do_save_file(const oh5::File& file,
+                                   const QString& proposed_filename,
+                                   unsigned int filename_version) = 0;
+
+    virtual unsigned int do_next_filename_version(const QString& filename) = 0;
 
     virtual shared_ptr<oh5::Source> do_load_source(const QString& source) = 0;
 

@@ -106,11 +106,11 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
         td5->source(db->load_source(src1));
         td5->path("td5");
 
-        db->save_file(*td1);
-        db->save_file(*td2);
-        db->save_file(*td3);
-        db->save_file(*td4);
-        db->save_file(*td5);
+        db->save_file(*td1, "td1", 0);
+        db->save_file(*td2, "td2", 0);
+        db->save_file(*td3, "td3", 0);
+        db->save_file(*td4, "td4", 0);
+        db->save_file(*td5, "td5", 0);
     }
 
     virtual void TearDown() {

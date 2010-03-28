@@ -33,14 +33,17 @@ CREATE TABLE files (
 	id INTEGER NOT NULL, 
 	unique_id TEXT NOT NULL, 
 	path TEXT NOT NULL, 
+	proposed_filename TEXT NOT NULL, 
+	filename_version INTEGER NOT NULL, 
 	object TEXT NOT NULL, 
 	n_date DATE NOT NULL, 
 	n_time TIME NOT NULL, 
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 UNIQUE (unique_id), 
 	 UNIQUE (path), 
-	 FOREIGN KEY(source_id) REFERENCES sources (id)
+	 UNIQUE (unique_id), 
+	 FOREIGN KEY(source_id) REFERENCES sources (id), 
+	 UNIQUE (proposed_filename, filename_version)
 )
 
 ;
@@ -67,19 +70,8 @@ CREATE TABLE attribute_values_str (
 	data_object_id INTEGER NOT NULL, 
 	value TEXT NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE attribute_values_real (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value FLOAT NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id)
 )
 
 ;
@@ -88,6 +80,28 @@ CREATE TABLE attribute_values_int (
 	attribute_id INTEGER NOT NULL, 
 	data_object_id INTEGER NOT NULL, 
 	value INTEGER NOT NULL, 
+	PRIMARY KEY (attribute_id, data_object_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
+	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE attribute_values_bool (
+	attribute_id INTEGER NOT NULL, 
+	data_object_id INTEGER NOT NULL, 
+	value BOOLEAN NOT NULL, 
+	PRIMARY KEY (attribute_id, data_object_id), 
+	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(attribute_id) REFERENCES attributes (id)
+)
+
+;
+
+CREATE TABLE attribute_values_time (
+	attribute_id INTEGER NOT NULL, 
+	data_object_id INTEGER NOT NULL, 
+	value TIME NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
 	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
@@ -106,21 +120,10 @@ CREATE TABLE attribute_values_date (
 
 ;
 
-CREATE TABLE attribute_values_bool (
+CREATE TABLE attribute_values_real (
 	attribute_id INTEGER NOT NULL, 
 	data_object_id INTEGER NOT NULL, 
-	value BOOLEAN NOT NULL, 
-	PRIMARY KEY (attribute_id, data_object_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES attributes (id), 
-	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE attribute_values_time (
-	attribute_id INTEGER NOT NULL, 
-	data_object_id INTEGER NOT NULL, 
-	value TIME NOT NULL, 
+	value FLOAT NOT NULL, 
 	PRIMARY KEY (attribute_id, data_object_id), 
 	 FOREIGN KEY(data_object_id) REFERENCES data_objects (id) ON DELETE CASCADE, 
 	 FOREIGN KEY(attribute_id) REFERENCES attributes (id)
@@ -134,10 +137,10 @@ CREATE TABLE source_centres (
 	country_code INTEGER NOT NULL, 
 	wmo_cccc VARCHAR(4) NOT NULL, 
 	PRIMARY KEY (id), 
-	 UNIQUE (wmo_cccc), 
 	 FOREIGN KEY(id) REFERENCES sources (id), 
 	 UNIQUE (originating_centre), 
-	 UNIQUE (country_code)
+	 UNIQUE (country_code), 
+	 UNIQUE (wmo_cccc)
 )
 
 ;
@@ -149,11 +152,11 @@ CREATE TABLE source_radars (
 	wmo_code INTEGER, 
 	place TEXT, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(id) REFERENCES sources (id), 
 	 UNIQUE (place), 
+	 FOREIGN KEY(id) REFERENCES sources (id), 
+	 UNIQUE (wmo_code), 
 	 UNIQUE (radar_site), 
-	 FOREIGN KEY(centre_id) REFERENCES source_centres (id), 
-	 UNIQUE (wmo_code)
+	 FOREIGN KEY(centre_id) REFERENCES source_centres (id)
 )
 
 ;
@@ -268,12 +271,13 @@ INSERT INTO attributes (id, name, converter, storage_table, storage_column, igno
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (109, 'CLASS', 'string', 'attribute_values_str', 'value', False);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (110, 'IMAGE_VERSION', 'string', 'attribute_values_str', 'value', False);
 INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (111, 'path', 'string', 'files', 'path', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (112, 'src_WMO', 'int', 'source_radars', 'wmo_code', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (113, 'src_RAD', 'string', 'source_radars', 'radar_site', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (114, 'src_ORG', 'int', 'source_centres', 'originating_centre', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (115, 'src_CTY', 'int', 'source_centres', 'country_code', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (116, 'src_PLC', 'string', 'source_radars', 'place', True);
-INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (117, 'src_node', 'string', 'sources', 'node_id', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (112, 'file_id', 'int', 'files', 'id', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (113, 'src_WMO', 'int', 'source_radars', 'wmo_code', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (114, 'src_RAD', 'string', 'source_radars', 'radar_site', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (115, 'src_ORG', 'int', 'source_centres', 'originating_centre', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (116, 'src_CTY', 'int', 'source_centres', 'country_code', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (117, 'src_PLC', 'string', 'source_radars', 'place', True);
+INSERT INTO attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (118, 'src_node', 'string', 'sources', 'node_id', True);
 INSERT INTO sources (id, node_id) VALUES (1, 'nl');
 INSERT INTO source_centres (id, originating_centre, country_code, wmo_cccc) VALUES (1, 99, 632, 'EHDB');
 INSERT INTO sources (id, node_id) VALUES (2, 'dk');
@@ -341,17 +345,17 @@ INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (3
 INSERT INTO sources (id, node_id) VALUES (33, 'plleg');
 INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (33, 8, 'PL41', 12374, 'Legionowo');
 INSERT INTO sources (id, node_id) VALUES (34, 'plram');
-INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (34, 8, 'PL42', 12514, 'Ramza');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (34, 8, 'PL42', 12514, 'Ramża');
 INSERT INTO sources (id, node_id) VALUES (35, 'plpas');
 INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (35, 8, 'PL43', 12544, 'Pastewnik');
 INSERT INTO sources (id, node_id) VALUES (36, 'plrze');
-INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (36, 8, 'PL44', 12579, 'Rzeszow');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (36, 8, 'PL44', 12579, 'Rzeszów');
 INSERT INTO sources (id, node_id) VALUES (37, 'plpoz');
-INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (37, 8, 'PL45', 12331, 'Poznan');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (37, 8, 'PL45', 12331, 'Poznań');
 INSERT INTO sources (id, node_id) VALUES (38, 'plswi');
-INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (38, 8, 'PL46', 12220, 'Swidwin');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (38, 8, 'PL46', 12220, 'Świdwin');
 INSERT INTO sources (id, node_id) VALUES (39, 'plgda');
-INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (39, 8, 'PL47', 12151, 'Gdansk');
+INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (39, 8, 'PL47', 12151, 'Gdańsk');
 INSERT INTO sources (id, node_id) VALUES (40, 'plbrz');
 INSERT INTO source_radars (id, centre_id, radar_site, wmo_code, place) VALUES (40, 8, 'PL48', 12568, 'Brzuchania');
 INSERT INTO sources (id, node_id) VALUES (41, 'sekir');
