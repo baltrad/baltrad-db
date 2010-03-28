@@ -337,7 +337,7 @@ RelationalDatabase::do_next_filename_version(const QString& filename) {
     QSqlQuery qry(connection());
     qry.prepare("SELECT MAX(filename_version) + 1 "
                 "FROM files "
-                "WHERE filename = :filename");
+                "WHERE proposed_filename = :filename");
     qry.bindValue(":filename", filename);
     if (!qry.exec())
         throw db_error(qry.lastError());

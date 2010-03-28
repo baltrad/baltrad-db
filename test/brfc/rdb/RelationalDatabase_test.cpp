@@ -104,6 +104,21 @@ TEST_P(rdb_RelationalDatabase_test, attribute_groups_not_saved) {
     EXPECT_NE(0, file->root()->db_id());
 }
 
+TEST_P(rdb_RelationalDatabase_test, next_filename_version) {
+    shared_ptr<oh5::File> file =
+        oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), "PLC:Legionowo");
+    shared_ptr<oh5::Source> src = db->load_source(file->what_source());
+    file->source(src);
+    file->path("/path");
+
+    ASSERT_NO_THROW(db->save_file(*file, "test", 10));
+    EXPECT_EQ(11, db->next_filename_version("test"));
+}
+
+TEST_P(rdb_RelationalDatabase_test, next_filename_version_nxfile) {
+    EXPECT_EQ(0, db->next_filename_version("nxfile"));
+}
+
 
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(rdb_RelationalDatabase_test_p,
