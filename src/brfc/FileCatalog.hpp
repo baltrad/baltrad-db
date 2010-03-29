@@ -112,6 +112,18 @@ class FileCatalog {
      * @brief get a query object bound to owned database
      */
     Query query() const;
+    
+    /**
+     * @brief get a query object bound to owned database
+     *
+     * shorthand for
+     *
+     * @code
+     * Query q = fc.query();
+     * q.fetch(expr::Attribute::create("path"));
+     * @endcode
+     */
+    Query query_file_path() const;
 
     /**
      * @brief remove all files from this catalog

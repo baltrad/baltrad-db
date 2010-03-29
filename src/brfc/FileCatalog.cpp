@@ -157,4 +157,11 @@ FileCatalog::query() const {
     return Query(db_.get());
 }
 
+Query
+FileCatalog::query_file_path() const {
+    Query q(db_.get());
+    q.fetch(expr::Attribute::create("path"));
+    return q;
+}
+
 } // namespace brfc
