@@ -270,7 +270,8 @@ SConscript("swig/SConscript",
            build_dir="build/swig", duplicate=0,
            exports={"env": env.Clone()})
 
-env.Install("${install_root}/sql", "#schema/postgresql")
+env.Install("${install_root}/sql/postgresql",
+            ["#schema/postgresql/create.sql", "#schema/postgresql/drop.sql"])
 env.Alias("install", [env["install_root"]])
 
 run_gtest_tests = testenv.Command("run_gtest_tests", "#test/runner",
