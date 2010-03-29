@@ -23,12 +23,8 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Database.hpp>
 #include <brfc/DefaultFileNamer.hpp>
 #include <brfc/Query.hpp>
-#include <brfc/ResultSet.hpp>
 
-#include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/Factory.hpp>
-#include <brfc/expr/Literal.hpp>
 
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
@@ -139,16 +135,6 @@ FileCatalog::remove(const QString& path) {
         throw fs_error(err.toUtf8().constData());
     } else {
         db_->commit();
-    }
-}
-
-void
-FileCatalog::clear() {
-    Query q = query();
-    q.fetch(expr::Attribute::create("path"));
-    shared_ptr<ResultSet> r = q.execute();
-    while (r->next()) {
-        remove(r->string(0));
     }
 }
 

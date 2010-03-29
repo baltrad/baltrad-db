@@ -126,11 +126,6 @@ class FileCatalog {
     Query query_file_path() const;
 
     /**
-     * @brief remove all files from this catalog
-     */
-    void clear();
-    
-    /**
      * @brief bring this FileCatalog in sync with storage
      */
     //void sync();
