@@ -142,7 +142,6 @@ class RelationalDatabase : public Database {
     bool supports_returning_;
     IdCache id_cache_;
     static unsigned int connection_count_;
-    static unsigned int instance_count_;
     static int argc_;
     static const char* argv_[];
     static QCoreApplication* qapp_;

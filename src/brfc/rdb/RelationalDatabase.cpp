@@ -243,7 +243,10 @@ RelationalDatabase::RelationalDatabase(const QString& dsn_)
         , specs_(new oh5::AttributeSpecs())
         , dialect_()
         , supports_returning_(false) {
-    init_qapp();
+        
+    if (qapp_ == 0)
+        init_qapp();
+
     QUrl dsn(dsn_);
 
     {
@@ -267,29 +270,21 @@ RelationalDatabase::RelationalDatabase(const QString& dsn_)
     if (dialect_ == "postgresql")
         supports_returning_ = true;
     populate_mapper_and_specs();
-    if (instance_count_ == 0) {
-        init_qapp();
-    }
-    ++instance_count_;
 }
 
 void
 RelationalDatabase::init_qapp() {
+    // never gets destroyed
     qapp_ = new QCoreApplication(argc_, const_cast<char**>(argv_));
 }
 
 unsigned int RelationalDatabase::connection_count_ = 0;
-unsigned int RelationalDatabase::instance_count_ = 0;
 int RelationalDatabase::argc_ = 1;
 const char* RelationalDatabase::argv_[] = {"brfc"};
 QCoreApplication* RelationalDatabase::qapp_ = 0;
 
 RelationalDatabase::~RelationalDatabase() {
-    --instance_count_;
-    if (instance_count_ == 0) {
-        delete qapp_;
-        qapp_ = 0;
-    }
+
 }
 
 const oh5::AttributeSpecs&
