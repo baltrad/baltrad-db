@@ -215,9 +215,10 @@ class SaveVisitor {
 
 void
 QSqlDatabase_deleter(QSqlDatabase* db) {
+    const QString& name = db->connectionName();
     db->close();
-    ::QSqlDatabase::removeDatabase(db->connectionName());
     delete db;
+    ::QSqlDatabase::removeDatabase(name);
 }
 
 } // namespace anonymous
