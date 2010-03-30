@@ -43,6 +43,8 @@ class TestRDB : public rdb::RelationalDatabase {
      * @param schema_dir base directory for finding statements
      */
     TestRDB(const QString& dsn, const QString& schema_dir);
+
+    virtual ~TestRDB();
     
     /**
      * @brief execute create statements

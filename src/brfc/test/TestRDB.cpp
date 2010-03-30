@@ -38,6 +38,10 @@ TestRDB::TestRDB(const QString& dsn, const QString& schema_dir)
     schema_dir_.makeAbsolute();
 }
 
+TestRDB::~TestRDB() {
+
+}
+
 void
 TestRDB::create() {
     exec_queries_from(QString("create.sql"));
