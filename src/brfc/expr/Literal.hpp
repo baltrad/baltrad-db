@@ -28,8 +28,6 @@ namespace expr {
 
 /**
  * @brief a literal value
- *
- * @ingroup exposed_in_binds
  */
 class Literal : public Expression {
   public:

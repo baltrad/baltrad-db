@@ -43,7 +43,6 @@ class Source;
 
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
- * @ingroup exposed_in_binds
  */
 class File : public boost::noncopyable {
   public:

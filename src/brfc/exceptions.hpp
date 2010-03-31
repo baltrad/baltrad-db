@@ -35,7 +35,6 @@ namespace brfc {
  * @brief base class for all errors from this library
  *
  * equivalent exception in java bindings is @c FileCatalogError
- * @ingroup exposed_in_binds
  */
 class brfc_error : public std::runtime_error {
   public:
@@ -46,7 +45,6 @@ class brfc_error : public std::runtime_error {
 
 /**
  * @brief invalid value supplied
- * @ingroup exposed_in_binds
  */
 class value_error : public brfc_error {
   public:
@@ -59,7 +57,6 @@ class value_error : public brfc_error {
  * @brief object lookup failed
  *
  * equivalent exception in java bindings is @c LookupError
- * @ingroup exposed_in_binds
  */
 class lookup_error : public brfc_error {
   public:
@@ -72,7 +69,6 @@ class lookup_error : public brfc_error {
  * @brief entry already exists
  *
  * equivalent exception in java bindings is @c DuplicateEntry
- * @ingroup exposed_in_binds
  */
 class duplicate_entry : public brfc_error {
   public:
@@ -85,7 +81,6 @@ class duplicate_entry : public brfc_error {
  * @brief database query/connection failed
  *
  * equivalent exception in java bindings is @c DatabaseError
- * @ingroup exposed_in_binds
  */
 class db_error : public brfc_error {
   public:
@@ -103,7 +98,6 @@ class db_error : public brfc_error {
  * @brief filesystem related error
  *
  * equivalent exception in java bindings is @c FileSystemError
- * @ingroup exposed_in_binds
  */
 class fs_error : public brfc_error {
   public:

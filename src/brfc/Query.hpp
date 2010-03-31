@@ -31,8 +31,6 @@ class ResultSet;
 
 /**
  * @brief query against the database
- *
- * @ingroup exposed_in_binds
  */
 class Query {
   public:

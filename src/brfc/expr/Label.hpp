@@ -31,8 +31,6 @@ namespace expr {
  * @brief labeled expression
  *
  * table.column AS label
- *
- * @ingroup exposed_in_binds
  */
 class Label : public Expression {
   public:

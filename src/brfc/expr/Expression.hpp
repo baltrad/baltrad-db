@@ -30,7 +30,6 @@ namespace expr {
 
 /**
  * @brief ABC for expressions
- * @ingroup exposed_in_binds
  */
 class Expression : public Element {
   public:

@@ -40,12 +40,7 @@ namespace oh5 {
 }
 
 /**
- * @defgroup exposed_in_binds Exposed in bindings
- */
-
-/**
  * @brief indexes and stores ODIM_H5 File instances
- * @ingroup exposed_in_binds
  */
 class FileCatalog {
   public:

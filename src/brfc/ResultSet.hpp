@@ -32,7 +32,6 @@ class Variant;
 
 /**
  * @brief ABC for Query results
- * @ingroup exposed_in_binds
  */
 class ResultSet : public boost::noncopyable {
   public:

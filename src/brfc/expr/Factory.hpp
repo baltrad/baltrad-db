@@ -29,7 +29,6 @@ namespace expr {
 
 /**
  * @brief factory for constructing expression elements
- * @ingroup exposed_in_binds
  */
 class Factory {
   public:

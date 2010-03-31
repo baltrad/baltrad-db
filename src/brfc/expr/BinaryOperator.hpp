@@ -29,7 +29,6 @@ namespace expr {
 
 /**
  * @brief operator operating on two expressions
- * @ingroup exposed_in_binds
  */
 class BinaryOperator : public Expression {
   public:

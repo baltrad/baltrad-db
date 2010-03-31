@@ -28,8 +28,6 @@ namespace expr {
 
 /**
  * @brief surround expression in parentheses
- *
- * @ingroup exposed_in_binds
  */
 class Parentheses : public Expression {
   public:

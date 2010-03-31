@@ -30,7 +30,6 @@ namespace expr {
 
 /**
  * @brief placeholder for HDF5 attributes
- * @ingroup exposed_in_binds
  */
 class Attribute : public Expression {
   public:

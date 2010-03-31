@@ -1,55 +1,45 @@
 /**
-@page tutorial Tutorial
+@page manual Manual
 
 @section toc Table of Contents
-@li @ref intro
-@li @ref setup
-@li @ref importing
-@li @ref querying
-@li @ref removing
+<ul>
+  <li>@ref intro</li>
+  <li>@ref setup</li>
+  <li>@ref file_importing</li>
+  <ul>
+    <li>@ref file_loading</li>
+    <li>@ref file_naming</li>
+    <li>@ref file_uniqueness</li>
+  </ul>
+  <li>@ref querying</li>
+  <li>@ref removing</li>
+  <li>@ref java_bindings</li>
+  <li>@ref java_samples</li>
+</ul>
 
 @section intro Introduction
 
-This tutorial will give an overview of the implementation and intended
-usage of BALTRAD FileCatalog library. For reasons concerning linking from
-sample code-snippets to documentation, examples in this tutorial use C++
-syntax. Mapping to Java code should be quite straightforward. All
-@b relevant classes are made available under @c eu.baltrad.fc package,
-including those defined in brfc::expr namespace. Check @ref exposed_in_binds
-for a full list.
-
-There are a few naming differences though:
-
-@li brfc::expr::Factory is mapped to @c eu.baltrad.fc.ExpressionFactory
-@li brfc::expr::Attribute is mapped to @c eu.baltrad.fc.AttributeExpr
-@li brfc::brfc_error is mapped to @c eu.baltrad.fc.FileCatalogError
-@li brfc::fs_error is mapped to @c eu.baltrad.fc.FileSystemError
-@li brfc::db_error is mapped to @c eu.baltrad.fc.DatabaseError
-@li brfc::lookup_error is mapped to @c eu.baltrad.fc.LookupError
-@li brfc::duplicate_entry is mapped to @c eu.baltrad.fc.DuplicateEntry
-
-@note exception hierarchy still holds, only the names are different.
-
-Java samples, when provided, assume you have imported the classes from
-eu.baltrad.fc package.
+baltrad-db is a library for storing the metadata contained in ODIM_H5 files
+in a database and providing queries on the stored metadata.
 
 @section setup Setting Up
 
-The first thing you should do is create a brfc::FileCatalog instance,
-this is the main interface for interacting with the library. brfc::FileCatalog
-requires that you specify a database connection string and a filesystem
-directory where it will store imported files.
+The main class for interacting with the library is brfc::FileCatalog.
+It requires that you specify a database connection string and a filesystem
+directory where it will store imported files. The brfc::FileCatalog instance
+created this way uses a brfc::DefaultFileNamer instance for file naming and a
+brfc::oh5::AttributeSpecs instance from brfc::rdb::RelationalDatabase.
+This is a set of ODIM_H5 metadata attributes the library is aware of, any
+attribute encountered and not specified in this set is ignored.
 
 Connection string is specified as a URI, for details, refer to brfc::Database
 documentation.
 
-Long story short:
-
 @code
 // define database connection
-const std::string dsn("postgresql://baltrad:baltrad@localhost/baltrad");
+QString dsn("postgresql://baltrad:baltrad@localhost/baltrad");
 // define a path where FileCatalog will store files
-const std::string storage_dir("/tmp");
+QString storage_dir("/tmp");
 
 // create a FileCatalog instance, connecting it to database
 // and giving it a storage directory
@@ -62,35 +52,28 @@ try {
 }
 @endcode
 
-equivalent Java code would look like:
+@section file_importing Importing files
 
-@code
-String dsn("postgresql://baltrad:baltrad@localhost/baltrad");
-String storage_dir("/tmp");
+Importing a file requires feeding an absolute pathname to
+brfc::FileCatalog::catalog. This method, on success, returns a pointer
+to the brfc::oh5::File instance stored in the database. 
 
-try {
-    FileCatalog fc(dsn, storage_dir);
-} catch (DatabaseError e) {
-    // problem connecting to database
-} catch (FileSytemError e) {
-    // problem accessing storeage directory
-}
-@endcode
+The procedure for importing the file is as follows:
+@li the file is loaded from the filesystem (@ref file_loading)
+@li a unique identifier is determined (@ref file_uniqueness)
+@li a filename for the file is generated  (@ref file_naming)
+@li the metadata is stored in the database
+@li the file is copied to the storage directory
 
-On instantiation, FileCatalog connects to the database and loads attribute
-specifications (expr::AttributeSpec).
-
-@section importing Importing files
-
-Importing a file is simple, just feed an absolute pathname to
-brfc::FileCatalog::catalog and if successful, you'll get back a pointer
-to the File instance.
+The assigned path is accessible through brfc::oh5::File::path;
 
 @code
 brfc::FileCatalog fc(dsn, storage_dir);
 
+std::shared_ptr<File> file;
+
 try {
-    std::shared_ptr<File> stored_to = fc.catalog("/path/to/file.h5");
+    file = fc.catalog("/path/to/file.h5");
 } catch (const brfc::db_error& e) {
     // problem storing file in database
 } catch (const brfc::fs_error& e) {
@@ -98,44 +81,55 @@ try {
 } catch (const brfc::duplicate_entry& e) {
     // file already stored
 }
+
+// absolute path to the stored file
+file->path();
+
+// attributes ignored on loading
+file->ignored_attributes();
+
 @endcode
 
-On importing, HDF5 attributes (metadata) are read from file. Attributes that
-are recognized (have a matching brfc::AttributeSpec) are stored in database
-and are available for later querying. Attributes that are not valid, are
-silently ignored. Unfortunately there is currently no method for feedback on
-which attributes were ignored.
+@subsection file_loading Loading the file from filesystem
+
+On loading, HDF5 attributes (metadata) are read from file and their values
+are converted using a brfc::oh5::Converter. Attributes that are not recognised
+are left without a value. These attributes can be accessed through
+brfc::oh5::File::ignored_attributes.
 
 Group information is part of the attribute name, so @c /what/date is looked up
 and stored as @c what/date.
 
-Before storing the value, HDF5 data is converted using a brfc::Converter,
-also defined in brfc::AttributeSpec. Refer to @ref converter for types of
-conversion available/used.
+@subsection file_uniqueness Determining file uniqueness
+
+See brfc::oh5::File::unique_identifier for now.
+
+@subsection file_naming Naming the file
+
+First the brfc::FileNamer instance is asked to name the file. The database
+keeps track of all the proposed filenames and version numbers assigned to
+those. It is queried for a version number for this name and the result is
+injected into the filename to form a unique filename.
 
 @section querying Querying
 
-brfc::Query provides an interface to querying the database using attributes.
+brfc::Query provides an interface for querying the database using attributes.
 You'll probably want to query for files matching certain criteria on an
 attribute, so we'll focus on that. You can get hold of a brfc::Query instance
 using brfc::FileCatalog::query.
 
 For convenience, a factory for creating elements usable in a query is provided
 (brfc::expr::Factory).
-This is the only way you can create them when using Java bindings, so we'll also
-be using it exclusively in the samples.
 
 File pathname can be queried using a pseudo-attribute named "path", this is the
-file path relative to storage root.
+absolute path of the stored file.
 
 To get an attribute from database, you must mark it for fetching using
 brfc::Query::fetch.
 
 To actually run the query, brfc::Query::execute must be called. Granted that no
-hickups were encountered, you'll get back a brfc::ResultSet instance containing
-the values of the attributes you requested.
-
-So, armed with that knowledge, lets query for all files stored in the catalog:
+hickups were encountered, you'll get back a pointer to a brfc::ResultSet instance
+containing the values of the attributes you requested.
 
 @code
 // assuming we have a filecatalog instance
@@ -150,36 +144,12 @@ brfc::expr::AttributePtr path = xpr.attribute("path");
 // mark it for fetching
 q.fetch(path);
 // execute
-brfc::ResultSet r = q.execute();
+shared_ptr<brfc::ResultSet> r = q.execute();
 
 // loop through results
-while (r.next()) {
+while (r->next()) {
     // access the values
-    std::string path = r.string(0);
-}
-@endcode
-
-equivalent code in Java:
-
-@code
-// assuming we have a filecatalog instance
-FileCatalog fc;
-// create expression factory
-ExpressionFactory xpr;
-
-Query q = fc.query();
-
-// create "path" attribute
-AttributeExpr path = xpr.attribute("path");
-// mark it for fetching
-q.fetch(path);
-// execute
-ResultSet r = q.execute();
-
-// loop through results
-while (r.next()) {
-    // access the values
-    std::string path = r.string(0);
+    QString path = r->string(0);
 }
 @endcode
 
@@ -217,10 +187,7 @@ You could also use 'less than operator' straight from the attribute
 interface like this:
 
 @code
-//C++
 xpr.attribute("what/date")->lt(xpr.date(2009, 5, 15));
-//Java
-xpr.attribute("what/date").lt(xpr.date(2009, 5, 15));
 @endcode
 
 @note that when you use an attribute in a filter, that attribute @b MUST
@@ -287,6 +254,58 @@ while (r.next()) {
     } catch (const brfc::fs_error& e) {
         // removing from filesystem failed
     }
+}
+@endcode
+
+@section java_bindings Java bindings
+
+Mapping to Java code is quite straightforward. The main package name is
+@c eu.baltrad.fc, this is where namespace brfc is mapped to. All exposed
+subnamespaces map to subpackages (brfc::expr is @c eu.baltrad.fc.expr and
+so on).
+
+There are a few differences though:
+
+@li brfc::expr::Factory is mapped to @c eu.baltrad.fc.expr.ExpressionFactory
+@li brfc::expr::Attribute is mapped to @c eu.baltrad.fc.expr.AttributeExpr
+@li brfc::brfc_error is mapped to @c eu.baltrad.fc.FileCatalogError
+@li brfc::fs_error is mapped to @c eu.baltrad.fc.FileSystemError
+@li brfc::db_error is mapped to @c eu.baltrad.fc.DatabaseError
+@li brfc::lookup_error is mapped to @c eu.baltrad.fc.LookupError
+@li brfc::duplicate_entry is mapped to @c eu.baltrad.fc.DuplicateEntry
+
+
+@section java_samples Sample Java code
+
+Querying:
+
+@code
+// setting up
+String dsn("postgresql://baltrad:baltrad@localhost/baltrad");
+String storage_dir("/tmp");
+Filecatalog fc;
+
+try {
+    fc = new FileCatalog(dsn, storage_dir);
+} catch (DatabaseError e) {
+    // problem connecting to database
+} catch (FileSytemError e) {
+    // problem accessing storage directory
+}
+
+// querying
+ExpressionFactory xpr;
+
+Query q = fc.query_path();
+q.filter(xpr.attribute("src_node").eq(xpr.string("seang"));
+
+// execute
+ResultSet r = q.execute();
+
+// loop through results
+while (r.next()) {
+    // access the values
+    String path = r.string(0);
 }
 @endcode
 
