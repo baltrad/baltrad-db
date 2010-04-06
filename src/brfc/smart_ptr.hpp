@@ -43,6 +43,12 @@ using boost::const_pointer_cast;
 using boost::dynamic_pointer_cast;
 using boost::static_pointer_cast;
 
+/**
+ * @brief null deleter for shared_ptr
+ */
+void
+no_delete(void* ptr);
+
 }
 
 #endif // BRFC_SMART_PTR_HPP
