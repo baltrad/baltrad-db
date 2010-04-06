@@ -78,4 +78,17 @@ public class TestFileCatalog extends TestCase {
     }
   }
 
+  public void testCustomFileNamer() {
+    FileNamer namer = new IncrementalFileNamer(1);
+    assertEquals("1", namer.name(file));
+    assertEquals("2", namer.name(file));
+  }
+
+  public void testCustomFileNamerThroughFileCatalog() {
+    fc.file_namer(new IncrementalFileNamer(1));
+    File f = fc.catalog(tempfile.path());
+    assertNotNull(f);
+    assertEquals("invalid name", "1_000000", f.name());
+  }
+
 }

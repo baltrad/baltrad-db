@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-%module fc
+%module(directors="1") fc
 
 #define SWIG_SHARED_PTR_NAMESPACE brfc
 %include "common.i"
@@ -28,6 +28,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/exceptions.hpp>
     #include <brfc/smart_ptr.hpp>
     #include <brfc/FileCatalog.hpp>
+    #include <brfc/FileNamer.hpp>
     #include <brfc/Query.hpp>
     #include <brfc/ResultSet.hpp>
     #include <brfc/Database.hpp>
@@ -45,7 +46,13 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
     #include <QtCore/QTime>
     #include <QtCore/QDate>
-%} 
+%}
+
+%typemap("javapackage") brfc::oh5::File,
+                        brfc::oh5::File*,
+                        brfc::oh5::File& "eu.baltrad.fc.oh5";
+
+%feature("director") brfc::FileNamer;
 
 %typemap(javabody) QDate,
                    QTime,
@@ -68,8 +75,9 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::Database;
 %ignore brfc::FileCatalog::FileCatalog(shared_ptr<Database>,
                                        shared_ptr<oh5::AttributeSpecs>,
-                                       shared_ptr<FileNamer>,
+                                       shared_ptr<oh5::FileNamer>,
                                        const QString&);
+%ignore brfc::FileCatalog::namer(shared_ptr<oh5::FileNamer>);
 
 %ignore brfc::Query::Query;
 %ignore brfc::ResultSet::ResultSet;
@@ -97,6 +105,7 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
     import eu.baltrad.fc.expr.Expression;
     import eu.baltrad.fc.expr.AttributeExpr;
     import eu.baltrad.fc.expr.AttributeExprVector;
+    import eu.baltrad.fc.oh5.File;
 %}
 
 %typemap(javaimports) brfc::Query, brfc::Query* %{
@@ -109,6 +118,9 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
     import eu.baltrad.fc.oh5.File;
 %}
 
+%typemap(javaimports) brfc::FileNamer, brfc::FileNamer* %{
+    import eu.baltrad.fc.oh5.File;
+%}
 
 // Enable the JNI class to load the required native library.
 %pragma(java) jniclasscode=%{
@@ -159,6 +171,7 @@ class QTime {
 
 %include <brfc/ResultSet.hpp>
 %include <brfc/Database.hpp>
+%include <brfc/FileNamer.hpp>
 %include <brfc/FileCatalog.hpp>
 %include <brfc/Query.hpp>
 %include <brfc/Variant.hpp>

@@ -23,6 +23,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/Database.hpp>
 #include <brfc/FileCatalog.hpp>
+#include <brfc/FileNamer.hpp>
 #include <brfc/Query.hpp>
 
 #include <brfc/oh5/AttributeSpecs.hpp>

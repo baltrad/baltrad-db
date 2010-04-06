@@ -72,6 +72,16 @@ FileCatalog::check_storage() const {
         throw fs_error("storage does not exist");
 }
 
+void
+FileCatalog::file_namer(shared_ptr<FileNamer> namer) {
+    namer_.swap(namer);
+}
+
+void
+FileCatalog::file_namer(FileNamer* namer) {
+    file_namer(shared_ptr<FileNamer>(namer, no_delete));
+}
+
 bool
 FileCatalog::is_cataloged(const QString& path) const {
     shared_ptr<oh5::File> f = oh5::File::from_filesystem(path, *specs_);
