@@ -146,6 +146,7 @@ class File : public boost::noncopyable {
 
     /**
      * @{
+     * @brief absolute file path
      */
     const QString& path() const {
         return path_;
@@ -155,6 +156,11 @@ class File : public boost::noncopyable {
         path_ = path;
     }
     ///@}
+     
+    /**
+     * @brief filename part of the file path
+     */
+    QString name() const;
     
     /**
      * @{

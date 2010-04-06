@@ -122,5 +122,13 @@ TEST_F(oh5_File_test, open_nx_file) {
     EXPECT_THROW(File::from_filesystem("/path/to/nxfile", specs), fs_error);
 }
 
+TEST_F(oh5_File_test, test_name) {
+    EXPECT_EQ(f1->name(), "");
+    f1->path("/path/to/filename");
+    EXPECT_EQ(f1->name(), "filename");
+    f1->path("filename2");
+    EXPECT_EQ(f1->name(), "filename2");
+}
+
 } // namespace oh5
 } // namespace brfc

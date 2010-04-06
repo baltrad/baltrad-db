@@ -112,6 +112,11 @@ File::what_source() const {
 }
 
 QString
+File::name() const {
+    return path().section('/', -1);
+}
+
+QString
 File::unique_identifier() const {
     if (not source_) {
         //XXX: needs a better exception type
