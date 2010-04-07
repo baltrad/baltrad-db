@@ -20,6 +20,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/Query.hpp>
+#include <brfc/FileHasher.hpp>
 #include <brfc/ResultSet.hpp>
 
 #include <brfc/expr/Factory.hpp>
@@ -44,6 +45,10 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "config.hpp"
 #include "../common.hpp"
+#include "../MockHasher.hpp"
+
+using testing::Ref;
+using testing::Return;
 
 namespace brfc {
 namespace rdb {
@@ -61,9 +66,10 @@ namespace rdb {
  *   1 td5  SCAN 2002-02-01 12:00     5     2
  *                                    2     5
  */
-struct RDB_Query_test : public testing::TestWithParam<const char*> {
-    RDB_Query_test()
+struct rdb_Query_test : public testing::TestWithParam<const char*> {
+    rdb_Query_test()
             : xpr()
+            , hasher()
             , src1("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , src2("WMO:02666,RAD:SE51,PLC:Karlskrona")
             , db(TestRDBEnv::get_database(GetParam()))
@@ -97,26 +103,33 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
     }
 
     virtual void SetUp() {
+        db->file_hasher(&hasher);
+        ON_CALL(hasher, do_name()).WillByDefault(Return("mock"));
+
         add_attribute(*td1, "dataset1/where/xsize", Variant(1));
         add_attribute(*td1, "dataset1/where/ysize", Variant(2));
         td1->source(db->load_source(src1));
         td1->path("td1");
+        ON_CALL(hasher, do_hash(Ref(*td1))).WillByDefault(Return("td1"));
 
         add_attribute(*td2, "dataset1/where/xsize", Variant(2));
         add_attribute(*td2, "dataset1/where/ysize", Variant(2));
         td2->source(db->load_source(src2));
         td2->path("td2");
+        ON_CALL(hasher, do_hash(Ref(*td2))).WillByDefault(Return("td2"));
 
         add_attribute(*td3, "dataset1/where/xsize", Variant(3));
         add_attribute(*td3, "dataset2/where/xsize", Variant(3));
         td3->source(db->load_source(src1));
         td3->path("td3");
+        ON_CALL(hasher, do_hash(Ref(*td3))).WillByDefault(Return("td3"));
 
         add_attribute(*td4, "dataset1/where/xsize", Variant(6));
         add_attribute(*td4, "dataset1/where/ysize", Variant(4));
         add_attribute(*td4, "dataset2/where/ysize", Variant(5));
         td4->source(db->load_source(src2));
         td4->path("td4");
+        ON_CALL(hasher, do_hash(Ref(*td4))).WillByDefault(Return("td4"));
 
         add_attribute(*td5, "dataset1/where/xsize", Variant(5));
         add_attribute(*td5, "dataset1/where/ysize", Variant(2));
@@ -124,6 +137,7 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
         add_attribute(*td5, "dataset2/where/ysize", Variant(5));
         td5->source(db->load_source(src1));
         td5->path("td5");
+        ON_CALL(hasher, do_hash(Ref(*td5))).WillByDefault(Return("td5"));
 
         db->save_file(*td1, "td1", 0);
         db->save_file(*td2, "td2", 0);
@@ -133,17 +147,19 @@ struct RDB_Query_test : public testing::TestWithParam<const char*> {
     }
 
     virtual void TearDown() {
+        db->file_hasher(0);
         db->clean();
     }
     
     expr::Factory xpr;
+    ::testing::NiceMock<MockHasher> hasher;
     QString src1, src2;
     test::TestRDB* db;
     shared_ptr<oh5::File> td1, td2, td3, td4, td5;
     Query query;
 };
 
-TEST_P(RDB_Query_test, test_simple) {
+TEST_P(rdb_Query_test, test_simple) {
     shared_ptr<ResultSet> r = 
             query.fetch(xpr.attribute("path"))
                  .filter(xpr.attribute("where/xsize")->eq(xpr.integer(1)))
@@ -162,7 +178,7 @@ extract_strings_at(ResultSet& r, int pos) {
     return strings;
 }
 
-TEST_P(RDB_Query_test, test_list_all_files) {
+TEST_P(rdb_Query_test, test_list_all_files) {
     shared_ptr<ResultSet> r = query.fetch(xpr.attribute("path")).execute();
 
     EXPECT_EQ(r->size(), 5);
@@ -175,7 +191,7 @@ TEST_P(RDB_Query_test, test_list_all_files) {
     EXPECT_TRUE(v.contains("td5"));
 }
 
-TEST_P(RDB_Query_test, test_filter_by_object) {
+TEST_P(rdb_Query_test, test_filter_by_object) {
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
              .filter(xpr.attribute("what/object")->eq(xpr.string("PVOL")))
@@ -189,7 +205,7 @@ TEST_P(RDB_Query_test, test_filter_by_object) {
     EXPECT_TRUE(v.contains("td3"));
 }
 
-TEST_P(RDB_Query_test, test_fetch_xsize_filtering_by_xsize) {
+TEST_P(rdb_Query_test, test_fetch_xsize_filtering_by_xsize) {
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("where/xsize"))
              .filter(xpr.attribute("where/xsize")->eq(xpr.integer(2)))
@@ -197,7 +213,7 @@ TEST_P(RDB_Query_test, test_fetch_xsize_filtering_by_xsize) {
     EXPECT_EQ(r->size(), 2);
 }
 
-TEST_P(RDB_Query_test, test_filter_by_xsize_or_ysize) {
+TEST_P(rdb_Query_test, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
     shared_ptr<ResultSet> r =
@@ -213,7 +229,7 @@ TEST_P(RDB_Query_test, test_filter_by_xsize_or_ysize) {
     EXPECT_TRUE(v.contains("td5"));
 }
 
-TEST_P(RDB_Query_test, test_filter_by_xsize_distinct) {
+TEST_P(rdb_Query_test, test_filter_by_xsize_distinct) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     shared_ptr<ResultSet> r = 
         query.fetch(xpr.attribute("path"))
@@ -225,7 +241,7 @@ TEST_P(RDB_Query_test, test_filter_by_xsize_distinct) {
     EXPECT_EQ(r->string(0), "td3");
 }
 
-TEST_P(RDB_Query_test, test_select_by_wmo_code) {
+TEST_P(rdb_Query_test, test_select_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("src_WMO");
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
@@ -239,7 +255,7 @@ TEST_P(RDB_Query_test, test_select_by_wmo_code) {
     EXPECT_TRUE(v.contains("td4"));
 }
 
-TEST_P(RDB_Query_test, test_select_by_or_node) {
+TEST_P(rdb_Query_test, test_select_by_or_node) {
     expr::AttributePtr node = xpr.attribute("src_node");
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
@@ -254,7 +270,7 @@ TEST_P(RDB_Query_test, test_select_by_or_node) {
     EXPECT_TRUE(v.contains("td5"));
 }
 
-TEST_P(RDB_Query_test, test_select_by_and_node) {
+TEST_P(rdb_Query_test, test_select_by_and_node) {
     expr::AttributePtr node = xpr.attribute("src_node");
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
@@ -263,7 +279,7 @@ TEST_P(RDB_Query_test, test_select_by_and_node) {
     EXPECT_EQ(r->size(), 0);
 }
 
-TEST_P(RDB_Query_test, test_select_by_place) {
+TEST_P(rdb_Query_test, test_select_by_place) {
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
              .filter(xpr.attribute("src_PLC")->eq(xpr.string("Ängelholm")))
@@ -277,21 +293,22 @@ TEST_P(RDB_Query_test, test_select_by_place) {
     EXPECT_TRUE(v.contains("td5"));
 }
 
-TEST_P(RDB_Query_test, test_has_file) {
+TEST_P(rdb_Query_test, test_has_file) {
     bool result = false;
     ASSERT_NO_THROW(result = db->has_file(*td1));
     EXPECT_TRUE(result);
 }
 
-TEST_P(RDB_Query_test, test_has_nx_file) {
+TEST_P(rdb_Query_test, test_has_nx_file) {
     bool result = false;
     shared_ptr<oh5::File> td = oh5::File::minimal("PVOL", QDate(2000, 1, 10), QTime(12, 0), src1);
+    EXPECT_CALL(hasher, do_hash(Ref(*td))).WillOnce(Return("td"));
     td->source(db->load_source(src1));
     ASSERT_NO_THROW(result = db->has_file(*td));
     EXPECT_FALSE(result);
 }
 
-TEST_P(RDB_Query_test, test_query_file_id) {
+TEST_P(rdb_Query_test, test_query_file_id) {
     shared_ptr<ResultSet> r = 
         query.fetch(xpr.attribute("file_id"))
              .filter(xpr.attribute("path")->eq(xpr.string("td1")))
@@ -302,8 +319,8 @@ TEST_P(RDB_Query_test, test_query_file_id) {
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1
-INSTANTIATE_TEST_CASE_P(RDB_Query_test_p,
-                        RDB_Query_test,
+INSTANTIATE_TEST_CASE_P(rdb_Query_test_p,
+                        rdb_Query_test,
                         ::testing::ValuesIn(test_dsns));
 #endif // BRFC_TEST_DSN_COUNT
 

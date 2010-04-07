@@ -81,6 +81,9 @@ class AttributeSpecs {
 
     bool has(const QString& name) const;
 
+    /**
+     * @throw lookup_error if not found
+     */
     const AttributeSpec& get(const QString& name) const;
 
     /**

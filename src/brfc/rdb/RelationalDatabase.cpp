@@ -24,6 +24,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Query.hpp>
 #include <brfc/Variant.hpp>
 #include <brfc/visit.hpp>
+#include <brfc/FileHasher.hpp>
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/AttrReplace.hpp>
@@ -241,6 +242,7 @@ RelationalDatabase::RelationalDatabase(const QString& dsn_)
         : sql_()
         , mapper_(new AttributeMapper())
         , specs_(new oh5::AttributeSpecs())
+        , file_hasher_()
         , dialect_()
         , supports_returning_(false) {
         
@@ -298,6 +300,16 @@ RelationalDatabase::mapper() const {
 }
 
 void
+RelationalDatabase::file_hasher(shared_ptr<FileHasher> hasher) {
+    file_hasher_.swap(hasher);
+}
+
+void
+RelationalDatabase::file_hasher(FileHasher* hasher) {
+    file_hasher(shared_ptr<FileHasher>(hasher, no_delete));
+}
+
+void
 RelationalDatabase::do_begin() {
     connection().transaction();
 }
@@ -316,7 +328,7 @@ bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
     QSqlQuery query(connection());
     query.prepare("SELECT true FROM files WHERE unique_id = :unique_id");
-    query.bindValue(":unique_id", file.unique_identifier());
+    query.bindValue(":unique_id", file_hasher_->hash(file));
     if (!query.exec())
         throw db_error(query.lastError());
     return query.next(); // got a result row
@@ -411,7 +423,7 @@ RelationalDatabase::save(const oh5::File& f,
     }
 
     qry.bindValue(":path", f.path());
-    qry.bindValue(":unique_id", f.unique_identifier());
+    qry.bindValue(":unique_id", file_hasher_->hash(f));
     qry.bindValue(":source_id", f.source()->db_id());
     qry.bindValue(":proposed_filename", proposed_filename);
     qry.bindValue(":filename_version", filename_version);

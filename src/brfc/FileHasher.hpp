@@ -1,3 +1,4 @@
+/*
 Copyright 2010 Estonian Meteorological and Hydrological Institute
 
 This file is part of baltrad-db.
@@ -14,3 +15,50 @@ GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef BRFC_FILE_HASHER_HPP
+#define BRFC_FILE_HASHER_HPP
+
+#include <QtCore/QString>
+
+namespace brfc {
+
+namespace oh5 {
+
+class File;
+
+} // namespace oh5
+
+/**
+ * @brief ABC for hashing a oh5::File
+ *
+ * generated hash should uniquely identify the file
+ */
+class FileHasher {
+  public:
+    /**
+     * @brief name of this hasher
+     */
+    QString name() const {
+        return do_name();
+    }
+
+    /**
+     * @brief hash a file
+     */
+    QString hash(const oh5::File& file) {
+        return do_hash(file);
+    }
+
+    virtual ~FileHasher() { }
+
+  protected:
+    virtual QString do_name() const = 0;
+
+    virtual QString do_hash(const oh5::File& file) = 0;
+};
+
+} // namespace brfc
+
+#endif // BRFC_FILE_HASHER_HPP

@@ -32,6 +32,7 @@ namespace brfc {
     
 class Database;
 class FileNamer;
+class FileHasher;
 class Query;
 
 namespace oh5 {
@@ -62,18 +63,13 @@ class FileCatalog {
                 shared_ptr<FileNamer> namer,
                 const QString& storage);
     
-    /**
-     * @{
-     * @brief set file namer
-     */
     void file_namer(shared_ptr<FileNamer> namer);
 
     /**
      * @note caller retains namer ownership
      */
     void file_namer(FileNamer* namer);
-    ///@}
-
+    
     /**
      * @brief destructor
      */

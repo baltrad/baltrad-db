@@ -23,6 +23,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Database.hpp>
 #include <brfc/DefaultFileNamer.hpp>
 #include <brfc/Query.hpp>
+#include <brfc/SHA1AttributeHasher.hpp>
 
 #include <brfc/expr/Attribute.hpp>
 
@@ -47,6 +48,8 @@ FileCatalog::FileCatalog(const QString& dsn,
     rdb::RelationalDatabase* rdb =
         static_cast<rdb::RelationalDatabase*>(db_.get());
     specs_.reset(new oh5::AttributeSpecs(rdb->specs()));
+    shared_ptr<FileHasher> hasher(new SHA1AttributeHasher(&rdb->specs()));
+    rdb->file_hasher(hasher);
 }
 
 FileCatalog::FileCatalog(shared_ptr<Database> db,

@@ -27,11 +27,9 @@ namespace brfc {
 namespace oh5 {
 
 Attribute::Attribute(const QString& name,
-                     const Variant& value,
-                     bool ignore_in_hash)
+                     const Variant& value)
         : Node(name)
-        , value_(value)
-        , ignore_in_hash_(ignore_in_hash) {
+        , value_(value) {
 }
 
 Attribute::~Attribute() {

@@ -21,13 +21,9 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QByteArray>
 #include <QtCore/QDate>
-#include <QtCore/QFile>
 #include <QtCore/QString>
-#include <QtCore/QStringList>
 #include <QtCore/QTime>
-#include <QtCore/QCryptographicHash>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
@@ -74,15 +70,14 @@ File::minimal(const QString& object,
               const QString& version) {
     shared_ptr<File> f = create();
     f->root_->add_child(make_shared<Attribute>("Conventions",
-                                               Variant("ODIM_H5/V2_0"),
-                                               true));
+                                               Variant("ODIM_H5/V2_0")));
     shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
     f->root_->add_child(what);
     what->add_child(make_shared<Attribute>("object", Variant(object)));
     what->add_child(make_shared<Attribute>("version", Variant(version)));
     what->add_child(make_shared<Attribute>("date", Variant(date)));
     what->add_child(make_shared<Attribute>("time", Variant(time)));
-    what->add_child(make_shared<Attribute>("source", Variant(source), true));
+    what->add_child(make_shared<Attribute>("source", Variant(source)));
     return f;
 }
 
@@ -114,29 +109,6 @@ File::what_source() const {
 QString
 File::name() const {
     return path().section('/', -1);
-}
-
-QString
-File::unique_identifier() const {
-    if (not source_) {
-        //XXX: needs a better exception type
-        throw value_error("can't form unique_id: not associated with source");
-    }
-    
-    QStringList strs(source_->node_id());
-    const Attribute* attr = 0;
-    BOOST_FOREACH(const Node& node, *root_) {
-        attr = dynamic_cast<const Attribute*>(&node);
-        if (attr and not attr->ignore_in_hash()) {
-            strs.append(attr->to_string());
-        }
-    }
-    strs.sort(); // ensure same order
-
-    QByteArray bytes = strs.join("").toUtf8();
-    QByteArray hash = QCryptographicHash::hash(bytes,
-                                               QCryptographicHash::Sha1);
-    return QString::fromAscii(hash.toHex());
 }
 
 File::StringVector

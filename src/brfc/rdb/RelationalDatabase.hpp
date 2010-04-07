@@ -34,6 +34,7 @@ class QCoreApplication;
 
 namespace brfc {
 
+class FileHasher;
 class Variant;
 
 namespace oh5 {
@@ -94,13 +95,24 @@ class RelationalDatabase : public Database {
         return supports_returning_;
     }
 
+    void file_hasher(shared_ptr<FileHasher> hasher);
+    
+    /**
+     * @note caller retains hasher ownership
+     */
+    void file_hasher(FileHasher* hasher);
+
   protected:
     virtual void do_begin();
     virtual void do_rollback();
     virtual void do_commit();
-    
+
+    /**
+     * @brief check if file hash is unique in database
+     */
     virtual bool do_has_file(const oh5::File& file);
     virtual void do_remove_file(const QString& path);
+
     virtual long long do_save_file(const oh5::File& file,
                                    const QString& proposed_filename,
                                    unsigned int filename_version);
@@ -138,6 +150,7 @@ class RelationalDatabase : public Database {
     shared_ptr<QSqlDatabase> sql_;
     scoped_ptr<AttributeMapper> mapper_;
     scoped_ptr<oh5::AttributeSpecs> specs_;
+    shared_ptr<FileHasher> file_hasher_;
     QString dialect_;
     bool supports_returning_;
     IdCache id_cache_;

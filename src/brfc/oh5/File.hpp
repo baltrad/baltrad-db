@@ -128,18 +128,6 @@ class File : public boost::noncopyable {
     void source(shared_ptr<Source> src);
 
     /**
-     * @brief string that uniquely identifies the file content
-     *
-     * SHA-1 hash of concatenated string representation of all attributes
-     * not marked to be ignored in hashing plus node_id of the associated
-     * Source.
-     *
-     * @note changes to this algorithm most probably trigger the need to
-     *       re-evaluate all files in the database
-     */
-    QString unique_identifier() const;
-
-    /**
      * @brief get attributes ignored on loading
      */
     StringVector ignored_attributes() const;

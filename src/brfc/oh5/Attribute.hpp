@@ -69,12 +69,6 @@ class Attribute : public Node {
      */
     bool is_valid() const;
 
-    bool ignore_in_hash() const { return ignore_in_hash_; }
-
-    void ignore_in_hash(bool ignore_in_hash) {
-        ignore_in_hash_ = ignore_in_hash;
-    }
-
     /**
      * @brief full name of this attribute
      *
@@ -99,19 +93,13 @@ class Attribute : public Node {
     friend 
     shared_ptr<T> boost::make_shared(const A1&, const A2&);
 
-    template<class T, class A1, class A2, class A3> 
-    friend 
-    shared_ptr<T> boost::make_shared(const A1&, const A2&, const A3&);
-
     /**
      * @brief constructor
      * @param name name of the attribute
      * @param value attribute value
-     * @param ignore_in_hash should this attribute be ignored when hashing
      */
     explicit Attribute(const QString& name,
-                       const Variant& value=Variant(),
-                       bool ignore_in_hash=false);
+                       const Variant& value=Variant());
 
     /**
      * @return false
@@ -133,7 +121,6 @@ class Attribute : public Node {
 
   private:
     Variant value_;
-    bool ignore_in_hash_;
 };
 
 

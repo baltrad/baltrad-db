@@ -94,15 +94,10 @@ FileLoader::add_attribute_from_node(HL_Node* node) {
     shared_ptr<Attribute> attr =
         make_shared<Attribute>(path.attribute_name());
     
-    attr->ignore_in_hash(true);
-    
     try {
-        const AttributeSpec& spec =
-            specs_->get(path.full_attribute_name());
         const Converter& converter =
             specs_->converter(path.full_attribute_name());
         attr->value(converter.convert(HLNode_getFormat(node), data));
-        attr->ignore_in_hash(spec.ignore_in_hash);
     } catch (const lookup_error& e) {
         // pass
     }

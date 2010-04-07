@@ -18,10 +18,12 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include <QtCore/QDate>
 #include <QtCore/QTime>
 
+#include <brfc/FileHasher.hpp>
 #include <brfc/ResultSet.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -36,6 +38,11 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "config.hpp"
 #include "../common.hpp"
+#include "../MockHasher.hpp"
+
+using testing::_;
+using testing::Return;
+
 
 namespace brfc {
 namespace rdb {
@@ -43,19 +50,23 @@ namespace rdb {
 class rdb_RelationalDatabase_test : public testing::TestWithParam<const char*> {
   public:
     rdb_RelationalDatabase_test()
-            : db(TestRDBEnv::get_database(GetParam())) {
-
+            : db(TestRDBEnv::get_database(GetParam()))
+            , hasher() {
     }
 
     virtual void SetUp() {
-
+        db->file_hasher(&hasher);
+        ON_CALL(hasher, do_name()).WillByDefault(Return("mock"));
+        ON_CALL(hasher, do_hash(_)).WillByDefault(Return("hash"));
     }
 
     virtual void TearDown() {
         db->clean();
+        db->file_hasher(0);
     }
 
     test::TestRDB* db;
+    ::testing::NiceMock<MockHasher> hasher;
 };
 
 

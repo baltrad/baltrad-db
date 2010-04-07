@@ -25,6 +25,7 @@ sources = [
     "FileNamer.cpp",
     "Query.cpp",
     "ResultSet.cpp",
+    "SHA1AttributeHasher.cpp",
     "Variant.cpp",
     "expr/AttrReplace.cpp",
     "expr/Compiler.cpp",
