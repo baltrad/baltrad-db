@@ -35,7 +35,6 @@ sources = [
     "expr/Join.cpp",
     "expr/Select.cpp",
     "expr/Selectable.cpp",
-    "expr/Visitor.cpp",
     "oh5/hlhdf.cpp",
     "oh5/Attribute.cpp",
     "oh5/AttributeGroup.cpp",

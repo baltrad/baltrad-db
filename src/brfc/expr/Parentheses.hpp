@@ -21,7 +21,6 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_EXPR_PARENTHESES_HPP
 
 #include <brfc/expr/Expression.hpp>
-#include <brfc/expr/Visitor.hpp>
 
 namespace brfc {
 namespace expr {
@@ -47,10 +46,6 @@ class Parentheses : public Expression {
     Parentheses(ExpressionPtr expression)
             : Expression()
             , expression_(expression) {
-    }
-
-    virtual void do_accept(Visitor& visitor) {
-        return visitor.visit(*this);
     }
 
   private:

@@ -55,10 +55,6 @@ class Literal : public Expression {
             : value_(value) {
     }
 
-    virtual void do_accept(Visitor& visitor) {
-        visitor.visit(*this);
-    }
-
   private:
     Variant value_;
 };

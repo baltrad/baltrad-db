@@ -19,8 +19,6 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Join.hpp>
 
-#include <brfc/expr/Visitor.hpp>
-
 namespace brfc {
 namespace expr {
 
@@ -33,11 +31,6 @@ Join::Join(SelectablePtr from,
         , condition_(condition)
         , type_(type) {
 
-}
-
-void
-Join::do_accept(Visitor& visitor) {
-    visitor.visit(*this);
 }
 
 bool

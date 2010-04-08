@@ -44,10 +44,6 @@ class Table : public Selectable {
             : name_(name) {
     }
 
-    virtual void do_accept(Visitor& visitor) {
-        visitor.visit(*this);
-    }
-  
   private:
     QString name_;
 };

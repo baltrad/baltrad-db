@@ -80,8 +80,6 @@ class Join : public Selectable {
   protected:
     Join(SelectablePtr from, SelectablePtr to, ExpressionPtr condition, Type type);
 
-    virtual void do_accept(Visitor& visitor);
-
   private:
     SelectablePtr from_;
     SelectablePtr to_;

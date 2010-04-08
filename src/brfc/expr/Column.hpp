@@ -55,10 +55,6 @@ class Column : public Expression {
 
     }
 
-    virtual void do_accept(Visitor& visitor) {
-        visitor.visit(*this);
-    }
-
   private:
     SelectablePtr selectable_;
     QString name_;

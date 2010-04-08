@@ -97,8 +97,6 @@ class Select : public Selectable {
   protected:
     Select();
 
-    virtual void do_accept(Visitor& visitor); 
-
   private:
     std::vector<ExpressionPtr> what_;
     FromClausePtr from_;

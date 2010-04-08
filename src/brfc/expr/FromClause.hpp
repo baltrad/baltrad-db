@@ -48,8 +48,6 @@ class FromClause : public Element {
             : elements_() {
     }
 
-    virtual void do_accept(Visitor& visitor) { visitor.visit(*this); }
-
   private:
     std::vector<SelectablePtr> elements_;
 };

@@ -29,7 +29,6 @@ namespace brfc {
  */
 namespace expr {
 
-class Visitor;
 class Alias;
 class Attribute;
 class BinaryOperator;

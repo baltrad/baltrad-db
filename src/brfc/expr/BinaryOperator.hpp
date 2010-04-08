@@ -55,10 +55,6 @@ class BinaryOperator : public Expression {
             , rhs_(rhs) {
     }
 
-    virtual void do_accept(Visitor& visitor) {
-        visitor.visit(*this);
-    }
-
   private:
     QString op_;
     ExpressionPtr lhs_;

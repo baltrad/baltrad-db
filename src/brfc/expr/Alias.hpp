@@ -21,7 +21,6 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_EXPR_ALIAS_HPP
 
 #include <brfc/expr/Selectable.hpp>
-#include <brfc/expr/Visitor.hpp>
 
 namespace brfc {
 namespace expr {
@@ -58,10 +57,6 @@ class Alias : public Selectable {
           const QString& alias)
             : aliased_(aliased)
             , alias_(alias) {
-    }
-
-    virtual void do_accept(Visitor& visitor) {
-        visitor.visit(*this);
     }
 
   private:

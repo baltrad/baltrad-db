@@ -21,7 +21,6 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_EXPR_ATTRIBUTE_HPP
 
 #include <brfc/expr/Expression.hpp>
-#include <brfc/expr/Visitor.hpp>
 
 #include <QtCore/QString>
 
@@ -44,10 +43,6 @@ class Attribute : public Expression {
   protected:
     Attribute(const QString& name)
             : name_(name) {
-    }
-
-    virtual void do_accept(Visitor& visitor) {
-        visitor.visit(*this);
     }
 
   private:

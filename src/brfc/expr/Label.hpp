@@ -63,10 +63,6 @@ class Label : public Expression {
             , name_(name) {
     }
 
-    virtual void do_accept(Visitor& visitor) {
-        visitor.visit(*this);
-    }
-
   private:
     ExpressionPtr expression_;
     QString name_;
