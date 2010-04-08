@@ -30,24 +30,24 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
 /**
  * @brief compile elements to string form
  */
 class Compiler {
   public:
-    typedef mpl::vector<Alias,
-                        Attribute,
-                        BinaryOperator,
-                        Column,
-                        FromClause,
-                        Join,
-                        Label,
-                        Literal,
-                        Parentheses,
-                        Select,
-                        Table> accepted_types;
+    typedef mpl::vector<expr::Alias,
+                        expr::Attribute,
+                        expr::BinaryOperator,
+                        expr::Column,
+                        expr::FromClause,
+                        expr::Join,
+                        expr::Label,
+                        expr::Literal,
+                        expr::Parentheses,
+                        expr::Select,
+                        expr::Table> accepted_types;
 
     typedef std::map<QString, Variant> BindMap;
 
@@ -84,71 +84,71 @@ class Compiler {
      *
      * @post top of the stack contains alias or 'content AS alias'
      */
-    void operator()(Alias& expr);
+    void operator()(expr::Alias& expr);
 
     /**
      * @brief always throws
      *
      * @throw assert_error (attributes should be replaced before compiling)
      */
-    void operator()(Attribute& expr);
+    void operator()(expr::Attribute& expr);
 
     /**
      * @brief compile binary operator to string form
      *
      * @post stack contains lhs OP rhs
      */
-    void operator()(BinaryOperator& expr);
+    void operator()(expr::BinaryOperator& expr);
 
     /**
      * @brief compile column to string form
      * @post top of the stack contains compiled column
      */
-    void operator()(Column& expr);
+    void operator()(expr::Column& expr);
     
     /**
      * @brief compile from clause to string form
      * @post top of the stack contains FROM + selectables joined by ','
      */
-    void operator()(FromClause& expr);
+    void operator()(expr::FromClause& expr);
 
     /**
      * @brief compile Join to string form
      * @post top of the stack contains 
      *       '\<from\> JOIN \<to\> ON \<expression\>'
      */
-    void operator()(Join& join);
+    void operator()(expr::Join& join);
 
     /**
      * @brief compile Literal to string form
      * @post top of the stack contains literal binding key, binds contains
      *       a mapping of this key to value
      */
-    void operator()(Literal& expr);
+    void operator()(expr::Literal& expr);
     
     /**
      * @brief compile Label to string form
      * @post top of the stack contains labelled AS label
      */
-    void operator()(Label& label);
+    void operator()(expr::Label& label);
 
     /**
      * @brief surround the top of the stack with parentheses
      * @post stack contains (content)
      */
-    void operator()(Parentheses& expr);
+    void operator()(expr::Parentheses& expr);
 
     /**
      * @brief compile Select statement to string form
      * @post top of the stack contains compiled where clause
      */
-    void operator()(Select& select);
+    void operator()(expr::Select& select);
 
     /**
      * @brief compile Table to string form
      * @post top of the stack contains table name
      */
-    void operator()(Table& expr);
+    void operator()(expr::Table& expr);
 
   private:
     QString pop();

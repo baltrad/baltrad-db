@@ -20,7 +20,6 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/expr/Alias.hpp>
-#include <brfc/expr/Compiler.hpp>
 #include <brfc/expr/Column.hpp>
 #include <brfc/expr/Factory.hpp>
 #include <brfc/expr/FromClause.hpp>
@@ -32,6 +31,8 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Select.hpp>
 #include <brfc/Variant.hpp>
 
+#include <brfc/rdb/Compiler.hpp>
+
 #include "common.hpp"
 
 #include <QtCore/QString>
@@ -42,11 +43,11 @@ using namespace expr;
 
 struct Expression_test: public testing::Test {
     Variant bind(const QString& key) const {
-        Compiler::BindMap::const_iterator i = compiler.binds().find(key);
+        rdb::Compiler::BindMap::const_iterator i = compiler.binds().find(key);
         return i != compiler.binds().end() ? i->second : Variant();
     }
 
-    Compiler compiler;
+    rdb::Compiler compiler;
     Factory xpr;
 };
 

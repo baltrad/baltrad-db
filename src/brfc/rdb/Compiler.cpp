@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/expr/Compiler.hpp>
+#include <brfc/rdb/Compiler.hpp>
 
 #include <algorithm>
 
@@ -38,7 +38,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Table.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
 template<typename T>
 void
@@ -47,18 +47,18 @@ Compiler::compile(T& expr) {
 }
 
 // explicitly instantiate the template
-template void Compiler::compile(Alias& expr);
-template void Compiler::compile(Attribute& expr);
-template void Compiler::compile(BinaryOperator& expr);
-template void Compiler::compile(Column& expr);
-template void Compiler::compile(Expression& expr);
-template void Compiler::compile(FromClause& expr);
-template void Compiler::compile(Join& expr);
-template void Compiler::compile(Label& expr);
-template void Compiler::compile(Literal& expr);
-template void Compiler::compile(Parentheses& expr);
-template void Compiler::compile(Select& expr);
-template void Compiler::compile(Table& expr);
+template void Compiler::compile(expr::Alias& expr);
+template void Compiler::compile(expr::Attribute& expr);
+template void Compiler::compile(expr::BinaryOperator& expr);
+template void Compiler::compile(expr::Column& expr);
+template void Compiler::compile(expr::Expression& expr);
+template void Compiler::compile(expr::FromClause& expr);
+template void Compiler::compile(expr::Join& expr);
+template void Compiler::compile(expr::Label& expr);
+template void Compiler::compile(expr::Literal& expr);
+template void Compiler::compile(expr::Parentheses& expr);
+template void Compiler::compile(expr::Select& expr);
+template void Compiler::compile(expr::Table& expr);
 
 QString
 Compiler::pop() {
@@ -74,7 +74,7 @@ Compiler::push(const QString& top) {
 }
 
 void
-Compiler::operator()(BinaryOperator& expr) {
+Compiler::operator()(expr::BinaryOperator& expr) {
     visit(*expr.lhs(), *this);
     visit(*expr.rhs(), *this);
     const QString& rhs = pop();
@@ -83,13 +83,13 @@ Compiler::operator()(BinaryOperator& expr) {
 }
 
 void
-Compiler::operator()(Column& expr) {
+Compiler::operator()(expr::Column& expr) {
     visit(*expr.selectable(), *this);
     push(pop() + "." + expr.name());
 }
 
 void
-Compiler::operator()(Alias& expr) {
+Compiler::operator()(expr::Alias& expr) {
     if (in_from_clause_) {
         visit(*expr.aliased(), *this);
         push(pop() + " AS " + expr.alias());
@@ -100,12 +100,12 @@ Compiler::operator()(Alias& expr) {
 }
 
 void
-Compiler::operator()(Attribute& expr) {
+Compiler::operator()(expr::Attribute& expr) {
     BRFC_ASSERT(false); // attributes should be replaced at this point
 }
 
 void
-Compiler::operator()(Join& join) {
+Compiler::operator()(expr::Join& join) {
     in_from_clause_ = true;
     visit(*join.from(), *this);
     visit(*join.to(), *this);
@@ -119,10 +119,10 @@ Compiler::operator()(Join& join) {
 
     QString jointype;
     switch (join.type()) {
-        case Join::INNER:
+        case expr::Join::INNER:
             jointype = " JOIN ";
             break;
-        case Join::LEFT:
+        case expr::Join::LEFT:
             jointype = " LEFT JOIN ";
             break;
         default:
@@ -133,32 +133,32 @@ Compiler::operator()(Join& join) {
 }
 
 void
-Compiler::operator()(Literal& expr) {
+Compiler::operator()(expr::Literal& expr) {
     QString key = QString(":lit_") + QString::number(literal_count_++);
     push(key);
     binds_[key] = expr.value();
 }
 
 void
-Compiler::operator()(Label& label) {
+Compiler::operator()(expr::Label& label) {
     visit(*label.expression(), *this);
     push(pop() + " AS " + label.name());
 }
 
 void
-Compiler::operator()(Parentheses& expr) {
+Compiler::operator()(expr::Parentheses& expr) {
     visit(*expr.expression(), *this);
     push("(" + pop() + ")");
 }
 
 void
-Compiler::operator()(FromClause& from) {
+Compiler::operator()(expr::FromClause& from) {
     if (from.empty())
         return;
 
     in_from_clause_ = true;
 
-    BOOST_FOREACH(SelectablePtr element, from.elements()) {
+    BOOST_FOREACH(expr::SelectablePtr element, from.elements()) {
         visit(*element, *this);
     }
 
@@ -174,9 +174,9 @@ Compiler::operator()(FromClause& from) {
 }
 
 void
-Compiler::operator()(Select& select) {
+Compiler::operator()(expr::Select& select) {
 
-    BOOST_FOREACH(ExpressionPtr col, select.what()) {
+    BOOST_FOREACH(expr::ExpressionPtr col, select.what()) {
         visit(*col, *this);
     }
     
@@ -209,9 +209,9 @@ Compiler::operator()(Select& select) {
 }
 
 void
-Compiler::operator()(Table& expr) {
+Compiler::operator()(expr::Table& expr) {
     push(expr.name());
 }
 
-} // namespace expr
+} // namespace rdb
 } // namespace brfc
