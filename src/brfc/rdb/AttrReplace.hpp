@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_ATTR_REPLACE_HPP
-#define BRFC_EXPR_ATTR_REPLACE_HPP
+#ifndef BRFC_RDB_ATTR_REPLACE_HPP
+#define BRFC_RDB_ATTR_REPLACE_HPP
 
 #include <brfc/visit.hpp>
 #include <brfc/expr/fwd.hpp>
@@ -95,4 +95,4 @@ class AttrReplace {
 } // namespace rdb
 } // namespace brfc
 
-#endif // BRFC_EXPR_ATTR_REPLACE_HPP
+#endif // BRFC_RDB_ATTR_REPLACE_HPP

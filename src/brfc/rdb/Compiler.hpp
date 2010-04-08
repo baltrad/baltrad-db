@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_COMPILER_HPP
-#define BRFC_EXPR_COMPILER_HPP
+#ifndef BRFC_RDB_COMPILER_HPP
+#define BRFC_RDB_COMPILER_HPP
 
 #include <brfc/assert.hpp>
 #include <brfc/visit.hpp>
@@ -163,4 +163,4 @@ class Compiler {
 }
 }
 
-#endif // BRFC_EXPR_COMPILER_HPP
+#endif // BRFC_RDB_COMPILER_HPP
