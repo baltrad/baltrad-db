@@ -34,10 +34,8 @@ env.Depends([config_hpp, config_cpp], env.Value(env["test_db_dsns"]))
 
 sources = Glob("*.cpp") + Glob("oh5/*.cpp") + Glob("rdb/*.cpp")
 
-# remove -pedantic flag if using older g++
-cxxver = tuple(map(int, env["CXXVERSION"].split(".")))
-if cxxver < (4, 3, 0):
-    env["CCFLAGS"].remove("-pedantic")
+# remove -pedantic flag (errors in gmock headers)
+env["CCFLAGS"].remove("-pedantic")
 
 confdeps = env.ConfHas("#gtest-confdeps", ["gtest", "gmock", "hlhdf"])
 
