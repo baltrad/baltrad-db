@@ -20,8 +20,8 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_ATTR_REPLACE_HPP
 #define BRFC_EXPR_ATTR_REPLACE_HPP
 
+#include <brfc/visit.hpp>
 #include <brfc/expr/fwd.hpp>
-#include <brfc/expr/Visitor.hpp>
 
 #include <vector>
 
@@ -35,6 +35,7 @@ class AttributeMapper;
 
 namespace expr {
 
+
 /**
  * @brief replace expr::Attribute with expr::Column
  *
@@ -42,24 +43,20 @@ namespace expr {
  * collecting the unique tables/aliases. Since the Select has no from
  * clause, we determine a central table and join the remaining tables to it
  */
-class AttrReplace : protected Visitor {
+class AttrReplace {
   public:
+    typedef mpl::vector<
+                        Attribute,
+                        BinaryOperator,
+                        Label,
+                        Literal,
+                        Parentheses
+                        > accepted_types;
+
     /**
      * @brief replace attributes in a Select statement
      */
     static void replace(SelectPtr select, const rdb::AttributeMapper* mapper);
-  
-  protected:
-    /**
-     * @brief constructor
-     * @param mapper AttributeMapper instance to fetch mappings from
-     */
-    AttrReplace(SelectPtr select, const rdb::AttributeMapper* mapper);
-
-    /**
-     * @brief visit an Alias element
-     */
-    virtual void do_visit(Alias& alias);
 
     /**
      * @brief visit an Attribute element
@@ -68,25 +65,22 @@ class AttrReplace : protected Visitor {
      * if it's not a specialized column,
      * add a where clause to attribute names
      */
-    virtual void do_visit(Attribute& attr);
+    void operator()(Attribute& attr);
 
-    virtual void do_visit(Column& column);
+    void operator()(BinaryOperator& op);
 
-    virtual void do_visit(BinaryOperator& op);
+    void operator()(Label& label);
 
-    virtual void do_visit(Join& join);
+    void operator()(Literal& literal);
 
-    virtual void do_visit(Label& label);
+    void operator()(Parentheses& parentheses);
 
-    virtual void do_visit(Literal& literal);
-
-    virtual void do_visit(Parentheses& parentheses);
-
-    virtual void do_visit(Table& table);
-
-    virtual void do_visit(Select& select);
-
-    virtual void do_visit(FromClause& from);
+ protected: 
+    /**
+     * @brief constructor
+     * @param mapper AttributeMapper instance to fetch mappings from
+     */
+    AttrReplace(SelectPtr select, const rdb::AttributeMapper* mapper);
 
     void replace_attributes();
 

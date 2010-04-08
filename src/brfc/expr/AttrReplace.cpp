@@ -44,8 +44,7 @@ namespace brfc {
 namespace expr {
 
 AttrReplace::AttrReplace(SelectPtr select, const rdb::AttributeMapper* mapper)
-        : Visitor(Visitor::POST_ORDER)
-        , mapper_(mapper)
+        : mapper_(mapper)
         , stack_()
         , select_(select)
         , from_() {
@@ -71,13 +70,7 @@ AttrReplace::replace(SelectPtr select, const rdb::AttributeMapper* mapper) {
 }
 
 void
-AttrReplace::do_visit(Alias& alias) {
-    alias.aliased(static_pointer_cast<Selectable>(pop()));
-    push(alias.shared_from_this());
-}
-
-void
-AttrReplace::do_visit(Attribute& attr) {
+AttrReplace::operator()(Attribute& attr) {
     QString name = attr.name();
 
     // query table and column where this value can be found
@@ -105,7 +98,7 @@ AttrReplace::do_visit(Attribute& attr) {
     }
     // replace the attribute with value column
     ColumnPtr col = value_t->column(mapping.column);
-    col->accept(*this);
+    push(col);
 }
 
 void
@@ -120,75 +113,44 @@ AttrReplace::join_groups() {
 }
 
 void
-AttrReplace::do_visit(Column& column) {
-    column.selectable(static_pointer_cast<Selectable>(pop()));
-    push(column.shared_from_this());
-}
-
-void
-AttrReplace::do_visit(BinaryOperator& op) {
+AttrReplace::operator()(BinaryOperator& op) {
+    visit(*op.lhs(), *this);
+    visit(*op.rhs(), *this);
     op.rhs(static_pointer_cast<Expression>(pop()));
     op.lhs(static_pointer_cast<Expression>(pop()));
     push(op.shared_from_this());
 }
 
 void
-AttrReplace::do_visit(Join& join) {
-    join.condition(static_pointer_cast<Expression>(pop()));
-    join.to(static_pointer_cast<Selectable>(pop()));
-    join.from(static_pointer_cast<Selectable>(pop()));
-    push(join.shared_from_this());
-}
-
-void
-AttrReplace::do_visit(Label& label) {
+AttrReplace::operator()(Label& label) {
+    visit(*label.expression(), *this);
     label.expression(static_pointer_cast<Expression>(pop()));
     push(label.shared_from_this());
 }
 
 void
-AttrReplace::do_visit(Literal& literal) {
+AttrReplace::operator()(Literal& literal) {
     push(literal.shared_from_this());
 }
 
 void
-AttrReplace::do_visit(Parentheses& parentheses) {
+AttrReplace::operator()(Parentheses& parentheses) {
+    visit(*parentheses.expression(), *this);
     parentheses.expression(static_pointer_cast<Expression>(pop()));
     push(parentheses.shared_from_this());
 }
 
 void
-AttrReplace::do_visit(Table& table) {
-    push(table.shared_from_this());
-}
+AttrReplace::replace_attributes() {
+    if (select_->where()) {
+        visit(*select_->where(), *this);
+        select_->where(static_pointer_cast<Expression>(pop()));
+    } 
 
-void
-AttrReplace::do_visit(Select& select) {
-    if (select.where()) {
-        select.where(static_pointer_cast<Expression>(pop()));
-    }
-
-    select.from(static_pointer_cast<FromClause>(pop()));
-
-    BOOST_FOREACH(ExpressionPtr& p, select.what()) {
-        p->accept(*this);
+    BOOST_FOREACH(ExpressionPtr& p, select_->what()) {
+        visit(*p, *this);
         p = static_pointer_cast<Expression>(pop());
     }
-    
-    push(select.shared_from_this());
-}
-
-void
-AttrReplace::do_visit(FromClause& from) {
-    BOOST_REVERSE_FOREACH(SelectablePtr& p, from.elements()) {
-        p = static_pointer_cast<Selectable>(pop());
-    }
-    push(from.shared_from_this());
-}
-
-void
-AttrReplace::replace_attributes() {
-    visit(*select_);
 }
 
 void
