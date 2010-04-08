@@ -17,33 +17,28 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/expr/Selectable.hpp>
-#include <brfc/expr/Alias.hpp>
-#include <brfc/expr/Column.hpp>
-#include <brfc/expr/Join.hpp>
+#include <brfc/rdb/Select.hpp>
+
+#include <brfc/expr/Expression.hpp>
+#include <brfc/expr/BinaryOperator.hpp>
+
+#include <brfc/rdb/FromClause.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
-AliasPtr
-Selectable::alias(const QString& name) {
-    return Alias::create(this->shared_from_this(), name);
+Select::Select()
+        : what_()
+        , from_(FromClause::create())
+        , where_()
+        , distinct_(false) {
 }
 
-ColumnPtr
-Selectable::column(const QString& name) {
-    return Column::create(this->shared_from_this(), name);
+
+void
+Select::append_where(expr::ExpressionPtr expr) {
+    where_ = where_ ? where_->and_(expr) : expr;
 }
 
-JoinPtr
-Selectable::join(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition, Join::INNER);
-}
-
-JoinPtr
-Selectable::outerjoin(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition, Join::LEFT);
-}
-
-} // namespace expr
+} // namespace rdb
 } // namespace brfc

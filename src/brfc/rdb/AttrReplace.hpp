@@ -20,10 +20,11 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_RDB_ATTR_REPLACE_HPP
 #define BRFC_RDB_ATTR_REPLACE_HPP
 
+#include <vector>
+
 #include <brfc/visit.hpp>
 #include <brfc/expr/fwd.hpp>
-
-#include <vector>
+#include <brfc/rdb/fwd.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -48,7 +49,7 @@ class AttrReplace {
     /**
      * @brief replace attributes in a Select statement
      */
-    static void replace(expr::SelectPtr select,
+    static void replace(SelectPtr select,
                         const AttributeMapper* mapper);
 
     /**
@@ -73,7 +74,7 @@ class AttrReplace {
      * @brief constructor
      * @param mapper AttributeMapper instance to fetch mappings from
      */
-    AttrReplace(expr::SelectPtr select, const AttributeMapper* mapper);
+    AttrReplace(SelectPtr select, const AttributeMapper* mapper);
 
     void replace_attributes();
 
@@ -88,8 +89,8 @@ class AttrReplace {
   private:
     const AttributeMapper* mapper_;
     std::vector<expr::ElementPtr> stack_;
-    expr::SelectPtr select_;
-    expr::JoinPtr from_;
+    SelectPtr select_;
+    JoinPtr from_;
 };
 
 } // namespace rdb

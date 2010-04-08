@@ -19,17 +19,19 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/expr/Alias.hpp>
-#include <brfc/expr/Column.hpp>
-#include <brfc/expr/Factory.hpp>
-#include <brfc/expr/FromClause.hpp>
-#include <brfc/expr/Join.hpp>
-#include <brfc/expr/Literal.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
-#include <brfc/expr/Parentheses.hpp>
-#include <brfc/expr/Table.hpp>
-#include <brfc/expr/Select.hpp>
 #include <brfc/Variant.hpp>
+
+#include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/Factory.hpp>
+#include <brfc/expr/Literal.hpp>
+#include <brfc/expr/Parentheses.hpp>
+
+#include <brfc/rdb/Alias.hpp>
+#include <brfc/rdb/Column.hpp>
+#include <brfc/rdb/FromClause.hpp>
+#include <brfc/rdb/Join.hpp>
+#include <brfc/rdb/Select.hpp>
+#include <brfc/rdb/Table.hpp>
 
 #include "common.hpp"
 
@@ -51,6 +53,8 @@ TEST_F(Expression_test, test_utf_string_literal) {
 }
 
 TEST_F(Expression_test, test_join_contains) {
+    using namespace ::brfc::rdb;
+
     TablePtr t1 = Table::create("t1");
     TablePtr t2 = Table::create("t2");
     AliasPtr t2a = t2->alias("t2a");

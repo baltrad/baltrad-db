@@ -17,42 +17,34 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_FROM_CLAUSE_HPP
-#define BRFC_EXPR_FROM_CLAUSE_HPP
+#include <brfc/rdb/Selectable.hpp>
 
-#include <brfc/expr/fwd.hpp>
-#include <brfc/expr/Element.hpp>
-#include <vector>
+#include <brfc/rdb/Alias.hpp>
+#include <brfc/rdb/Column.hpp>
+#include <brfc/rdb/Join.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
-class FromClause : public Element {
-  public:
-    static FromClausePtr create() {
-        return FromClausePtr(new FromClause());
-    }
-
-    void add(SelectablePtr selectable);
-
-    bool has(SelectablePtr selectable) const;
-
-    std::vector<SelectablePtr>& elements() { return elements_; }
-
-    bool empty() const {
-        return elements_.empty();
-    }
-
-  protected:
-    FromClause()
-            : elements_() {
-    }
-
-  private:
-    std::vector<SelectablePtr> elements_;
-};
-
-}
+AliasPtr
+Selectable::alias(const QString& name) {
+    return Alias::create(this->shared_from_this(), name);
 }
 
-#endif // BRFC_EXPR_FROM_CLAUSE_HPP
+ColumnPtr
+Selectable::column(const QString& name) {
+    return Column::create(this->shared_from_this(), name);
+}
+
+JoinPtr
+Selectable::join(SelectablePtr rhs, expr::ExpressionPtr condition) {
+    return Join::create(this->shared_from_this(), rhs, condition, Join::INNER);
+}
+
+JoinPtr
+Selectable::outerjoin(SelectablePtr rhs, expr::ExpressionPtr condition) {
+    return Join::create(this->shared_from_this(), rhs, condition, Join::LEFT);
+}
+
+} // namespace rdb
+} // namespace brfc

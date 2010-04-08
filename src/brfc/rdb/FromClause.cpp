@@ -17,36 +17,35 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_SELECTABLE_HPP
-#define BRFC_EXPR_SELECTABLE_HPP
+#include <brfc/rdb/FromClause.hpp>
 
-#include <brfc/expr/fwd.hpp>
-#include <brfc/expr/Element.hpp>
+#include <boost/foreach.hpp>
 
-#include <QtCore/QString>
+#include <brfc/exceptions.hpp>
+
+#include <brfc/rdb/Selectable.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
-class Selectable : public Element {
-  public:
-    SelectablePtr shared_from_this() const {
-        return static_pointer_cast<Selectable>(
-                const_pointer_cast<Element>(Element::shared_from_this()));
+void
+FromClause::add(SelectablePtr selectable) {
+    if (has(selectable))
+        throw duplicate_entry("duplicate selectable");
+    elements_.push_back(selectable);
+}
+
+bool
+FromClause::has(SelectablePtr selectable) const {
+    // always accept unnamed
+    if (selectable->name() == "")
+        return false;
+    BOOST_FOREACH(SelectablePtr element, elements_) {
+        if (selectable->name() == element->name())
+            return true;
     }
-
-    virtual QString name() const = 0;
-
-    ColumnPtr column(const QString& name);
-
-    AliasPtr alias(const QString& name);
-
-    JoinPtr join(SelectablePtr rhs, ExpressionPtr condition);
-
-    JoinPtr outerjoin(SelectablePtr rhs, ExpressionPtr condition);
-};
-
-}
+    return false;
 }
 
-#endif // BRFC_EXPR_SELECTABLE_HPP
+} // namespace rdb
+} // namespace brfc

@@ -17,27 +17,38 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/expr/Select.hpp>
+#ifndef BRFC_RDB_TABLE_HPP
+#define BRFC_RDB_TABLE_HPP
 
-#include <brfc/expr/Expression.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
-#include <brfc/expr/FromClause.hpp>
+#include <brfc/rdb/Selectable.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
-Select::Select()
-        : what_()
-        , from_(FromClause::create())
-        , where_()
-        , distinct_(false) {
-}
+class Table : public Selectable {
+  public:
+    static TablePtr create(const QString& name) {
+        return TablePtr(new Table(name));
+    }
 
+    void name(const QString& name) {
+        name_ = name;
+    }
 
-void
-Select::append_where(ExpressionPtr expr) {
-    where_ = where_ ? where_->and_(expr) : expr;
-}
+    virtual QString name() const {
+        return name_;
+    }
 
-} // namespace expr
+  protected:
+    explicit Table(const QString& name)
+            : name_(name) {
+    }
+
+  private:
+    QString name_;
+};
+
+} // namespace rdb
 } // namespace brfc
+
+#endif // BRFC_RDB_TABLE_HPP

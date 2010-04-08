@@ -24,30 +24,47 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/visit.hpp>
 #include <brfc/Variant.hpp>
 
-#include <brfc/expr/fwd.hpp>
-
 #include <map>
 #include <vector>
 
 namespace brfc {
+
+namespace expr {
+
+class Attribute;
+class BinaryOperator;
+class Label;
+class Literal;
+class Parentheses;
+
+} // namespace expr
+
 namespace rdb {
+
+class Alias;
+class Column;
+class FromClause;
+class Join;
+class Select;
+class Table;
+
 
 /**
  * @brief compile elements to string form
  */
 class Compiler {
   public:
-    typedef mpl::vector<expr::Alias,
+    typedef mpl::vector<Alias,
+                        Column,
+                        FromClause,
+                        Join,
+                        Select,
+                        Table,
                         expr::Attribute,
                         expr::BinaryOperator,
-                        expr::Column,
-                        expr::FromClause,
-                        expr::Join,
                         expr::Label,
                         expr::Literal,
-                        expr::Parentheses,
-                        expr::Select,
-                        expr::Table> accepted_types;
+                        expr::Parentheses> accepted_types;
 
     typedef std::map<QString, Variant> BindMap;
 
@@ -84,7 +101,7 @@ class Compiler {
      *
      * @post top of the stack contains alias or 'content AS alias'
      */
-    void operator()(expr::Alias& expr);
+    void operator()(Alias& expr);
 
     /**
      * @brief always throws
@@ -104,20 +121,20 @@ class Compiler {
      * @brief compile column to string form
      * @post top of the stack contains compiled column
      */
-    void operator()(expr::Column& expr);
+    void operator()(Column& expr);
     
     /**
      * @brief compile from clause to string form
      * @post top of the stack contains FROM + selectables joined by ','
      */
-    void operator()(expr::FromClause& expr);
+    void operator()(FromClause& expr);
 
     /**
      * @brief compile Join to string form
      * @post top of the stack contains 
      *       '\<from\> JOIN \<to\> ON \<expression\>'
      */
-    void operator()(expr::Join& join);
+    void operator()(Join& join);
 
     /**
      * @brief compile Literal to string form
@@ -142,13 +159,13 @@ class Compiler {
      * @brief compile Select statement to string form
      * @post top of the stack contains compiled where clause
      */
-    void operator()(expr::Select& select);
+    void operator()(Select& select);
 
     /**
      * @brief compile Table to string form
      * @post top of the stack contains table name
      */
-    void operator()(expr::Table& expr);
+    void operator()(Table& expr);
 
   private:
     QString pop();

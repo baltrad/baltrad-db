@@ -17,13 +17,13 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_ALIAS_HPP
-#define BRFC_EXPR_ALIAS_HPP
+#ifndef BRFC_RDB_ALIAS_HPP
+#define BRFC_RDB_ALIAS_HPP
 
-#include <brfc/expr/Selectable.hpp>
+#include <brfc/rdb/Selectable.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
 class Alias : public Selectable {
   public:
@@ -64,7 +64,7 @@ class Alias : public Selectable {
     QString alias_;
 };
 
-}
-}
+} // namespace rdb
+} // namespace brfc
 
-#endif // BRFC_EXPR_ALIAS_HPP
+#endif // BRFC_RDB_ALIAS_HPP

@@ -17,14 +17,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/expr/Join.hpp>
+#include <brfc/rdb/Join.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
 Join::Join(SelectablePtr from,
            SelectablePtr to,
-           ExpressionPtr condition,
+           expr::ExpressionPtr condition,
            Type type)
         : from_(from)
         , to_(to)
@@ -52,5 +52,5 @@ Join::contains(SelectablePtr element) const {
     return contains;
 }
 
-} // namespace expr
+} // namespace rdb
 } // namespace brfc

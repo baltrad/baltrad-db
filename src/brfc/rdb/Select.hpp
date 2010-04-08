@@ -17,15 +17,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_SELECT_HPP
-#define BRFC_EXPR_SELECT_HPP
+#ifndef BRFC_RDB_SELECT_HPP
+#define BRFC_RDB_SELECT_HPP
 
-#include <brfc/expr/fwd.hpp>
-#include <brfc/expr/Selectable.hpp>
+#include <brfc/rdb/Selectable.hpp>
 #include <vector>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
 class Select : public Selectable {
   public:
@@ -35,7 +34,7 @@ class Select : public Selectable {
         return SelectPtr(new Select());
     }
 
-    void what(ExpressionPtr expr) {
+    void what(expr::ExpressionPtr expr) {
         what_.push_back(expr);
     }
 
@@ -58,16 +57,16 @@ class Select : public Selectable {
     /**
      * @brief append Expression to where clause
      */
-    void append_where(ExpressionPtr expr);
+    void append_where(expr::ExpressionPtr expr);
 
     /**
      * @brief set Expression as where clause
      */
-    void where(ExpressionPtr expr) {
+    void where(expr::ExpressionPtr expr) {
         where_ = expr;
     }
 
-    const std::vector<ExpressionPtr>& what() const {
+    const std::vector<expr::ExpressionPtr>& what() const {
         return what_;
     }
 
@@ -76,11 +75,11 @@ class Select : public Selectable {
     }
 
 
-    ExpressionPtr where() const {
+    expr::ExpressionPtr where() const {
         return where_;
     }
 
-    std::vector<ExpressionPtr>& what() {
+    std::vector<expr::ExpressionPtr>& what() {
         return what_;
     }
 
@@ -89,7 +88,7 @@ class Select : public Selectable {
     }
 
 
-    ExpressionPtr where() {
+    expr::ExpressionPtr where() {
         return where_;
     }
 
@@ -98,13 +97,13 @@ class Select : public Selectable {
     Select();
 
   private:
-    std::vector<ExpressionPtr> what_;
+    std::vector<expr::ExpressionPtr> what_;
     FromClausePtr from_;
-    ExpressionPtr where_;
+    expr::ExpressionPtr where_;
     bool distinct_;
 };
 
-}
-}
+} // namespace rdb
+} // namespace brfc
 
-#endif // BRFC_EXPR_SELECT_HPP
+#endif // BRFC_RDB_SELECT_HPP

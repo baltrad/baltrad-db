@@ -21,18 +21,20 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QString>
 
+
 #include <brfc/Variant.hpp>
 
-#include <brfc/expr/Alias.hpp>
-#include <brfc/expr/Column.hpp>
-#include <brfc/expr/Factory.hpp>
-#include <brfc/expr/FromClause.hpp>
-#include <brfc/expr/Join.hpp>
-#include <brfc/expr/Literal.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/Factory.hpp>
+#include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
-#include <brfc/expr/Table.hpp>
-#include <brfc/expr/Select.hpp>
+
+#include <brfc/rdb/Alias.hpp>
+#include <brfc/rdb/Column.hpp>
+#include <brfc/rdb/FromClause.hpp>
+#include <brfc/rdb/Join.hpp>
+#include <brfc/rdb/Select.hpp>
+#include <brfc/rdb/Table.hpp>
 
 #include <brfc/rdb/Compiler.hpp>
 

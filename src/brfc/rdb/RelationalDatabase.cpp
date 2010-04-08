@@ -28,7 +28,6 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/Expression.hpp>
-#include <brfc/expr/Select.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
@@ -42,6 +41,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/AttrReplace.hpp>
 #include <brfc/rdb/Compiler.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
+#include <brfc/rdb/Select.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -371,7 +371,7 @@ RelationalDatabase::do_next_filename_version(const QString& filename) {
 
 shared_ptr<ResultSet>
 RelationalDatabase::do_query(const Query& query) {
-    expr::SelectPtr select = expr::Select::create();
+    SelectPtr select = Select::create();
 
     BOOST_FOREACH(expr::AttributePtr expr, query.fetch()) {
         select->what(expr);

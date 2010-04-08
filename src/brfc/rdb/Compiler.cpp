@@ -25,17 +25,18 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QStringList>
 
-#include <brfc/expr/Alias.hpp>
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
-#include <brfc/expr/Column.hpp>
-#include <brfc/expr/FromClause.hpp>
-#include <brfc/expr/Join.hpp>
 #include <brfc/expr/Label.hpp>
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
-#include <brfc/expr/Select.hpp>
-#include <brfc/expr/Table.hpp>
+
+#include <brfc/rdb/Alias.hpp>
+#include <brfc/rdb/Column.hpp>
+#include <brfc/rdb/FromClause.hpp>
+#include <brfc/rdb/Join.hpp>
+#include <brfc/rdb/Select.hpp>
+#include <brfc/rdb/Table.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -47,18 +48,18 @@ Compiler::compile(T& expr) {
 }
 
 // explicitly instantiate the template
-template void Compiler::compile(expr::Alias& expr);
+template void Compiler::compile(Alias& expr);
+template void Compiler::compile(Column& expr);
+template void Compiler::compile(FromClause& expr);
+template void Compiler::compile(Join& expr);
+template void Compiler::compile(Select& expr);
+template void Compiler::compile(Table& expr);
 template void Compiler::compile(expr::Attribute& expr);
 template void Compiler::compile(expr::BinaryOperator& expr);
-template void Compiler::compile(expr::Column& expr);
 template void Compiler::compile(expr::Expression& expr);
-template void Compiler::compile(expr::FromClause& expr);
-template void Compiler::compile(expr::Join& expr);
 template void Compiler::compile(expr::Label& expr);
 template void Compiler::compile(expr::Literal& expr);
 template void Compiler::compile(expr::Parentheses& expr);
-template void Compiler::compile(expr::Select& expr);
-template void Compiler::compile(expr::Table& expr);
 
 QString
 Compiler::pop() {
@@ -83,13 +84,13 @@ Compiler::operator()(expr::BinaryOperator& expr) {
 }
 
 void
-Compiler::operator()(expr::Column& expr) {
+Compiler::operator()(Column& expr) {
     visit(*expr.selectable(), *this);
     push(pop() + "." + expr.name());
 }
 
 void
-Compiler::operator()(expr::Alias& expr) {
+Compiler::operator()(Alias& expr) {
     if (in_from_clause_) {
         visit(*expr.aliased(), *this);
         push(pop() + " AS " + expr.alias());
@@ -105,7 +106,7 @@ Compiler::operator()(expr::Attribute& expr) {
 }
 
 void
-Compiler::operator()(expr::Join& join) {
+Compiler::operator()(Join& join) {
     in_from_clause_ = true;
     visit(*join.from(), *this);
     visit(*join.to(), *this);
@@ -119,10 +120,10 @@ Compiler::operator()(expr::Join& join) {
 
     QString jointype;
     switch (join.type()) {
-        case expr::Join::INNER:
+        case Join::INNER:
             jointype = " JOIN ";
             break;
-        case expr::Join::LEFT:
+        case Join::LEFT:
             jointype = " LEFT JOIN ";
             break;
         default:
@@ -152,13 +153,13 @@ Compiler::operator()(expr::Parentheses& expr) {
 }
 
 void
-Compiler::operator()(expr::FromClause& from) {
+Compiler::operator()(FromClause& from) {
     if (from.empty())
         return;
 
     in_from_clause_ = true;
 
-    BOOST_FOREACH(expr::SelectablePtr element, from.elements()) {
+    BOOST_FOREACH(SelectablePtr element, from.elements()) {
         visit(*element, *this);
     }
 
@@ -174,7 +175,7 @@ Compiler::operator()(expr::FromClause& from) {
 }
 
 void
-Compiler::operator()(expr::Select& select) {
+Compiler::operator()(Select& select) {
 
     BOOST_FOREACH(expr::ExpressionPtr col, select.what()) {
         visit(*col, *this);
@@ -209,7 +210,7 @@ Compiler::operator()(expr::Select& select) {
 }
 
 void
-Compiler::operator()(expr::Table& expr) {
+Compiler::operator()(Table& expr) {
     push(expr.name());
 }
 
