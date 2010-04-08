@@ -318,6 +318,11 @@ TEST_P(rdb_Query_test, test_query_file_id) {
     EXPECT_EQ(r->integer(0), td1->db_id());
 }
 
+TEST_P(rdb_Query_test, test_duplicate_fetch_throws) {
+    query.fetch(xpr.attribute("path"));
+    EXPECT_THROW(query.fetch(xpr.attribute("path")), duplicate_entry);
+}
+
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(rdb_Query_test_p,
                         rdb_Query_test,

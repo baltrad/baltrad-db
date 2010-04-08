@@ -19,9 +19,13 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/Query.hpp>
 
+#include <boost/foreach.hpp>
+
+#include <brfc/exceptions.hpp>
 #include <brfc/Database.hpp>
 #include <brfc/ResultSet.hpp>
 
+#include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Expression.hpp>
 
@@ -54,6 +58,10 @@ Query::distinct(bool distinct) {
 
 Query&
 Query::fetch(expr::AttributePtr attribute) {
+    BOOST_FOREACH(expr::AttributePtr attr, fetch_) {
+        if (attr->name() == attribute->name())
+            throw duplicate_entry(attribute->name().toStdString());
+    }
     fetch_.push_back(attribute);
     return *this;
 }

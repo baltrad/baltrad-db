@@ -62,6 +62,7 @@ class Query {
     /**
      * @brief mark an attribute for fetching
      * @param attribute Attribute to fetch to ResultSet
+     * @throw duplicate_entry if the attribute is already marked
      * @return this Query (for chaining)
      *
      * attributes are returned in ResultSet in the same order as they
