@@ -26,15 +26,9 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 namespace brfc {
-
 namespace rdb {
 
 class AttributeMapper;
-
-}
-
-namespace expr {
-
 
 /**
  * @brief replace expr::Attribute with expr::Column
@@ -45,61 +39,60 @@ namespace expr {
  */
 class AttrReplace {
   public:
-    typedef mpl::vector<
-                        Attribute,
-                        BinaryOperator,
-                        Label,
-                        Literal,
-                        Parentheses
-                        > accepted_types;
+    typedef mpl::vector<expr::Attribute,
+                        expr::BinaryOperator,
+                        expr::Label,
+                        expr::Literal,
+                        expr::Parentheses> accepted_types;
 
     /**
      * @brief replace attributes in a Select statement
      */
-    static void replace(SelectPtr select, const rdb::AttributeMapper* mapper);
+    static void replace(expr::SelectPtr select,
+                        const AttributeMapper* mapper);
 
     /**
-     * @brief visit an Attribute element
+     * @brief visit an expr::Attribute element
      *
      * replace this attribute with a column
      * if it's not a specialized column,
      * add a where clause to attribute names
      */
-    void operator()(Attribute& attr);
+    void operator()(expr::Attribute& attr);
 
-    void operator()(BinaryOperator& op);
+    void operator()(expr::BinaryOperator& op);
 
-    void operator()(Label& label);
+    void operator()(expr::Label& label);
 
-    void operator()(Literal& literal);
+    void operator()(expr::Literal& literal);
 
-    void operator()(Parentheses& parentheses);
+    void operator()(expr::Parentheses& parentheses);
 
  protected: 
     /**
      * @brief constructor
      * @param mapper AttributeMapper instance to fetch mappings from
      */
-    AttrReplace(SelectPtr select, const rdb::AttributeMapper* mapper);
+    AttrReplace(expr::SelectPtr select, const AttributeMapper* mapper);
 
     void replace_attributes();
 
     void build_from_clause();
 
-    ElementPtr pop();
+    expr::ElementPtr pop();
 
-    void push(ElementPtr p);
+    void push(expr::ElementPtr p);
 
     void join_groups();
 
   private:
-    const rdb::AttributeMapper* mapper_;
-    std::vector<ElementPtr> stack_;
-    SelectPtr select_;
-    JoinPtr from_;
+    const AttributeMapper* mapper_;
+    std::vector<expr::ElementPtr> stack_;
+    expr::SelectPtr select_;
+    expr::JoinPtr from_;
 };
 
-} // namespace expr
+} // namespace rdb
 } // namespace brfc
 
 #endif // BRFC_EXPR_ATTR_REPLACE_HPP

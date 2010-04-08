@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/expr/AttrReplace.hpp>
+#include <brfc/rdb/AttrReplace.hpp>
 
 #include <brfc/assert.hpp>
 
@@ -41,9 +41,11 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <utility>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
-AttrReplace::AttrReplace(SelectPtr select, const rdb::AttributeMapper* mapper)
+using namespace ::brfc::expr;
+
+AttrReplace::AttrReplace(SelectPtr select, const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
         , select_(select)
@@ -63,7 +65,7 @@ AttrReplace::AttrReplace(SelectPtr select, const rdb::AttributeMapper* mapper)
 }
 
 void
-AttrReplace::replace(SelectPtr select, const rdb::AttributeMapper* mapper) {
+AttrReplace::replace(SelectPtr select, const AttributeMapper* mapper) {
     AttrReplace rpl(select, mapper);
     rpl.replace_attributes();
     rpl.build_from_clause();
@@ -74,7 +76,7 @@ AttrReplace::operator()(Attribute& attr) {
     QString name = attr.name();
 
     // query table and column where this value can be found
-    rdb::Mapping mapping = mapper_->mapping(name);
+    Mapping mapping = mapper_->mapping(name);
 
     SelectablePtr value_t;
 
@@ -175,6 +177,6 @@ AttrReplace::push(ElementPtr p) {
     stack_.push_back(p);
 }
 
-} // namespace expr
+} // namespace rdb
 } // namespace brfc
 
