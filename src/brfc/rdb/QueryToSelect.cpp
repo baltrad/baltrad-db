@@ -17,9 +17,12 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/AttrReplace.hpp>
+#include <brfc/rdb/QueryToSelect.hpp>
+
+#include <boost/foreach.hpp>
 
 #include <brfc/assert.hpp>
+#include <brfc/Query.hpp>
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/Parentheses.hpp>
@@ -35,17 +38,12 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/Select.hpp>
 #include <brfc/rdb/Table.hpp>
 
-#include <boost/foreach.hpp>
-#include <map>
-#include <algorithm>
-#include <utility>
-
 namespace brfc {
 namespace rdb {
 
 using namespace ::brfc::expr;
 
-AttrReplace::AttrReplace(SelectPtr select, const AttributeMapper* mapper)
+QueryToSelect::QueryToSelect(SelectPtr select, const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
         , select_(select)
@@ -64,15 +62,27 @@ AttrReplace::AttrReplace(SelectPtr select, const AttributeMapper* mapper)
     from_ = from_->outerjoin(src_centres_t, on);
 }
 
-void
-AttrReplace::replace(SelectPtr select, const AttributeMapper* mapper) {
-    AttrReplace rpl(select, mapper);
+SelectPtr
+QueryToSelect::transform(const Query& query,
+                         const AttributeMapper& mapper) {
+    SelectPtr select = Select::create();
+
+    BOOST_FOREACH(expr::AttributePtr expr, query.fetch()) {
+        select->what(expr);
+    }
+
+    select->where(query.filter());
+    select->distinct(query.distinct());
+
+
+    QueryToSelect rpl(select, &mapper);
     rpl.replace_attributes();
     rpl.build_from_clause();
+    return select;
 }
 
 void
-AttrReplace::operator()(Attribute& attr) {
+QueryToSelect::operator()(Attribute& attr) {
     QString name = attr.name();
 
     // query table and column where this value can be found
@@ -104,7 +114,7 @@ AttrReplace::operator()(Attribute& attr) {
 }
 
 void
-AttrReplace::join_groups() {
+QueryToSelect::join_groups() {
     // join groups if not already joined
     TablePtr files_t = Table::create("files");
     TablePtr grp_t = Table::create("groups");
@@ -115,7 +125,7 @@ AttrReplace::join_groups() {
 }
 
 void
-AttrReplace::operator()(BinaryOperator& op) {
+QueryToSelect::operator()(BinaryOperator& op) {
     visit(*op.lhs(), *this);
     visit(*op.rhs(), *this);
     op.rhs(static_pointer_cast<Expression>(pop()));
@@ -124,26 +134,26 @@ AttrReplace::operator()(BinaryOperator& op) {
 }
 
 void
-AttrReplace::operator()(Label& label) {
+QueryToSelect::operator()(Label& label) {
     visit(*label.expression(), *this);
     label.expression(static_pointer_cast<Expression>(pop()));
     push(label.shared_from_this());
 }
 
 void
-AttrReplace::operator()(Literal& literal) {
+QueryToSelect::operator()(Literal& literal) {
     push(literal.shared_from_this());
 }
 
 void
-AttrReplace::operator()(Parentheses& parentheses) {
+QueryToSelect::operator()(Parentheses& parentheses) {
     visit(*parentheses.expression(), *this);
     parentheses.expression(static_pointer_cast<Expression>(pop()));
     push(parentheses.shared_from_this());
 }
 
 void
-AttrReplace::replace_attributes() {
+QueryToSelect::replace_attributes() {
     if (select_->where()) {
         visit(*select_->where(), *this);
         select_->where(static_pointer_cast<Expression>(pop()));
@@ -156,14 +166,14 @@ AttrReplace::replace_attributes() {
 }
 
 void
-AttrReplace::build_from_clause() {
+QueryToSelect::build_from_clause() {
     FromClausePtr from_clause = FromClause::create();
     from_clause->add(from_);
     select_->from(from_clause);
 }
 
 ElementPtr
-AttrReplace::pop() {
+QueryToSelect::pop() {
     BRFC_ASSERT(!stack_.empty());
     ElementPtr p = stack_.back();
     stack_.pop_back();
@@ -172,7 +182,7 @@ AttrReplace::pop() {
 }
 
 void
-AttrReplace::push(ElementPtr p) {
+QueryToSelect::push(ElementPtr p) {
     BRFC_ASSERT(p);
     stack_.push_back(p);
 }

@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_ATTR_REPLACE_HPP
-#define BRFC_RDB_ATTR_REPLACE_HPP
+#ifndef BRFC_RDB_QUERY_TO_SELECT_HPP
+#define BRFC_RDD_QUERY_TO_SELECT_HPP
 
 #include <vector>
 
@@ -27,18 +27,21 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/fwd.hpp>
 
 namespace brfc {
+
+class Query;
+
 namespace rdb {
 
 class AttributeMapper;
 
 /**
- * @brief replace expr::Attribute with expr::Column
+ * @brief transform a Query to Select statement
  *
  * The strategy is to first replace all the attributes with columns,
  * collecting the unique tables/aliases. Since the Select has no from
  * clause, we determine a central table and join the remaining tables to it
  */
-class AttrReplace {
+class QueryToSelect {
   public:
     typedef mpl::vector<expr::Attribute,
                         expr::BinaryOperator,
@@ -47,10 +50,10 @@ class AttrReplace {
                         expr::Parentheses> accepted_types;
 
     /**
-     * @brief replace attributes in a Select statement
+     * @brief transform a Query to Select statement
      */
-    static void replace(SelectPtr select,
-                        const AttributeMapper* mapper);
+    static SelectPtr transform(const Query& query,
+                               const AttributeMapper& mapper);
 
     /**
      * @brief visit an expr::Attribute element
@@ -74,7 +77,7 @@ class AttrReplace {
      * @brief constructor
      * @param mapper AttributeMapper instance to fetch mappings from
      */
-    AttrReplace(SelectPtr select, const AttributeMapper* mapper);
+    QueryToSelect(SelectPtr select, const AttributeMapper* mapper);
 
     void replace_attributes();
 
@@ -96,4 +99,4 @@ class AttrReplace {
 } // namespace rdb
 } // namespace brfc
 
-#endif // BRFC_RDB_ATTR_REPLACE_HPP
+#endif // BRFC_RDB_QUERY_TO_SELECT_HPP

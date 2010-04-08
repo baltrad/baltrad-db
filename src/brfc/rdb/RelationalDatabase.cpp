@@ -38,7 +38,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/SourceRadar.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
-#include <brfc/rdb/AttrReplace.hpp>
+#include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/Compiler.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
 #include <brfc/rdb/Select.hpp>
@@ -371,16 +371,8 @@ RelationalDatabase::do_next_filename_version(const QString& filename) {
 
 shared_ptr<ResultSet>
 RelationalDatabase::do_query(const Query& query) {
-    SelectPtr select = Select::create();
+    SelectPtr select = QueryToSelect::transform(query, *mapper_.get());
 
-    BOOST_FOREACH(expr::AttributePtr expr, query.fetch()) {
-        select->what(expr);
-    }
-
-    select->where(query.filter());
-    select->distinct(query.distinct());
-
-    AttrReplace::replace(select, mapper_.get());
     Compiler compiler;
     compiler.compile(*select);
 
