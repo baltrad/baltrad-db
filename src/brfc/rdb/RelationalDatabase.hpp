@@ -81,7 +81,9 @@ class RelationalDatabase : public Database {
     shared_ptr<ResultSet> query(const QString& query,
                                 const BindMap& binds);
     
-    const oh5::AttributeSpecs& specs() const;
+    shared_ptr<const oh5::AttributeSpecs> specs() const;
+
+    shared_ptr<oh5::AttributeSpecs> specs();
 
     const AttributeMapper& mapper() const;
 
@@ -149,7 +151,7 @@ class RelationalDatabase : public Database {
 
     shared_ptr<QSqlDatabase> sql_;
     scoped_ptr<AttributeMapper> mapper_;
-    scoped_ptr<oh5::AttributeSpecs> specs_;
+    shared_ptr<oh5::AttributeSpecs> specs_;
     shared_ptr<FileHasher> file_hasher_;
     QString dialect_;
     bool supports_returning_;

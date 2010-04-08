@@ -33,7 +33,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-SHA1AttributeHasher::SHA1AttributeHasher(const oh5::AttributeSpecs* specs)
+SHA1AttributeHasher::SHA1AttributeHasher(
+    shared_ptr<const oh5::AttributeSpecs> specs)
         : specs_(specs) {
 }
 

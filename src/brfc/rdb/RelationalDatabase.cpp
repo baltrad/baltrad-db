@@ -289,9 +289,14 @@ RelationalDatabase::~RelationalDatabase() {
 
 }
 
-const oh5::AttributeSpecs&
+shared_ptr<const oh5::AttributeSpecs>
 RelationalDatabase::specs() const {
-    return *specs_;
+    return specs_;
+}
+
+shared_ptr<oh5::AttributeSpecs>
+RelationalDatabase::specs() {
+    return specs_;
 }
 
 const AttributeMapper&

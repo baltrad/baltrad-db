@@ -87,6 +87,9 @@ struct FileCatalog_test : public testing::Test {
                                          QDate(2000, 1, 1),
                                          QTime(12, 0),
                                          src_str)) {
+    }
+
+    virtual void SetUp() {
         tempfile.write(*minfile);
         specs->add(oh5::AttributeSpec("Conventions", "string"));
         specs->add(oh5::AttributeSpec("what/object", "string"));

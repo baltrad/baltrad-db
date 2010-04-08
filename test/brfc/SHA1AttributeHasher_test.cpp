@@ -36,7 +36,8 @@ namespace brfc {
 class SHA1AttributeHasher_test : public ::testing::Test {
   public:
     SHA1AttributeHasher_test()
-            : src(new oh5::SourceRadar())
+            : specs(new oh5::AttributeSpecs())
+            , src(new oh5::SourceRadar())
             , f1(oh5::File::minimal("pvol",
                                     QDate(2000, 1, 2),
                                     QTime(12, 5),
@@ -50,34 +51,29 @@ class SHA1AttributeHasher_test : public ::testing::Test {
                                     QDate(2000, 1, 2),
                                     QTime(12, 5),
                                     "WMO:02606")) 
-            , hasher(&specs) {
+            , hasher(specs) {
         
     }
 
-    static void SetUpTestCase() {
-        specs.add(oh5::AttributeSpec("Conventions", "string", true));
-        specs.add(oh5::AttributeSpec("what/object", "string", false));
-        specs.add(oh5::AttributeSpec("what/date", "date", false));
-        specs.add(oh5::AttributeSpec("what/time", "time", false));
-        specs.add(oh5::AttributeSpec("what/source", "string", true));
-        specs.add(oh5::AttributeSpec("what/version", "string", true));
-        specs.add(oh5::AttributeSpec("ignore", "string", true));
-        specs.add(oh5::AttributeSpec("attr", "string", false));
-    }
-
     virtual void SetUp() {
+        specs->add(oh5::AttributeSpec("Conventions", "string", true));
+        specs->add(oh5::AttributeSpec("what/object", "string", false));
+        specs->add(oh5::AttributeSpec("what/date", "date", false));
+        specs->add(oh5::AttributeSpec("what/time", "time", false));
+        specs->add(oh5::AttributeSpec("what/source", "string", true));
+        specs->add(oh5::AttributeSpec("what/version", "string", true));
+        specs->add(oh5::AttributeSpec("ignore", "string", true));
+        specs->add(oh5::AttributeSpec("attr", "string", false));
         f1->source(src);
         f2->source(src);
         f3->source(src);
     }
     
-    static oh5::AttributeSpecs specs;
+    shared_ptr<oh5::AttributeSpecs> specs;
     shared_ptr<oh5::SourceRadar> src;
     shared_ptr<oh5::File> f1, f2, f3;
     SHA1AttributeHasher hasher;
 };
-
-oh5::AttributeSpecs SHA1AttributeHasher_test::specs;
 
 TEST_F(SHA1AttributeHasher_test, hash_same_meta) {
     EXPECT_EQ(hasher.hash(*f1), hasher.hash(*f3));
