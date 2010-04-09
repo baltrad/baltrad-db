@@ -42,7 +42,7 @@ AttributeMapper rdb_AttributeMapper_test::mapper;
 
 TEST_F(rdb_AttributeMapper_test, specializations_on) {
     MappingVector v = mapper.specializations_on("table1");
-    ASSERT_EQ(v.size(), 2);
+    ASSERT_EQ(v.size(), (size_t)2);
     EXPECT_EQ(v.at(0).attribute, "attr1");
     EXPECT_EQ(v.at(1).attribute, "attr2");
 }

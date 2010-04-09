@@ -126,11 +126,11 @@ TEST_P(rdb_RelationalDatabase_test, next_filename_version) {
     file->path("/path");
 
     ASSERT_NO_THROW(db->save_file(*file, "test", 10));
-    EXPECT_EQ(11, db->next_filename_version("test"));
+    EXPECT_EQ((unsigned int)11, db->next_filename_version("test"));
 }
 
 TEST_P(rdb_RelationalDatabase_test, next_filename_version_nxfile) {
-    EXPECT_EQ(0, db->next_filename_version("nxfile"));
+    EXPECT_EQ((unsigned int)0, db->next_filename_version("nxfile"));
 }
 
 TEST_P(rdb_RelationalDatabase_test, resultset_keeps_qsqldatabase_alive) {

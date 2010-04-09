@@ -127,7 +127,7 @@ TEST_F(FileCatalog_test, test_catalog) {
         .WillOnce(Return(10));
     EXPECT_CALL(*db, do_save_file(Property(&oh5::File::path, Eq(target)),
                                   Eq("test"),
-                                  Eq(10)))
+                                  Eq((unsigned int)10)))
         .WillOnce(Return(1));
     EXPECT_CALL(*db, do_commit());
     

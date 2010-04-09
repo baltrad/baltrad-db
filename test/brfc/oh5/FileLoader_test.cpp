@@ -91,7 +91,7 @@ TEST_F(oh5_FileLoader_test, load) {
     EXPECT_EQ(d_2000_01_02, g->group("/what")->child_attribute("date")->value());
 
     // nothing ignored
-    EXPECT_EQ(g->ignored_attributes().size(), 0);
+    EXPECT_EQ((size_t)0, g->ignored_attributes().size());
 }
 
 TEST_F(oh5_FileLoader_test, ignored_attributes) {
