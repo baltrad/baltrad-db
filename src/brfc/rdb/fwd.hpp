@@ -17,36 +17,35 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_SELECTABLE_HPP
-#define BRFC_EXPR_SELECTABLE_HPP
+#ifndef BRFC_RDB_FWD_HPP
+#define BRFC_RDB_FWD_HPP
 
-#include <brfc/expr/fwd.hpp>
-#include <brfc/expr/Element.hpp>
-
-#include <QtCore/QString>
+#include <brfc/smart_ptr.hpp>
 
 namespace brfc {
-namespace expr {
 
-class Selectable : public Element {
-  public:
-    SelectablePtr shared_from_this() const {
-        return static_pointer_cast<Selectable>(
-                const_pointer_cast<Element>(Element::shared_from_this()));
-    }
+/**
+ * @brief relational database & SQL
+ */
+namespace rdb {
 
-    virtual QString name() const = 0;
+class Alias;
+class Column;
+class FromClause;
+class Join;
+class Selectable;
+class Select;
+class Table;
 
-    ColumnPtr column(const QString& name);
+typedef shared_ptr<Alias> AliasPtr;
+typedef shared_ptr<Column> ColumnPtr;
+typedef shared_ptr<FromClause> FromClausePtr;
+typedef shared_ptr<Join> JoinPtr;
+typedef shared_ptr<Selectable> SelectablePtr;
+typedef shared_ptr<Select> SelectPtr;
+typedef shared_ptr<Table> TablePtr;
 
-    AliasPtr alias(const QString& name);
+} // namespace rdb
+} // namespace brfc
 
-    JoinPtr join(SelectablePtr rhs, ExpressionPtr condition);
-
-    JoinPtr outerjoin(SelectablePtr rhs, ExpressionPtr condition);
-};
-
-}
-}
-
-#endif // BRFC_EXPR_SELECTABLE_HPP
+#endif // BRFC_RDB_FWD_HPP

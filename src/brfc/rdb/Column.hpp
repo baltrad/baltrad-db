@@ -17,18 +17,18 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_COLUMN_HPP
-#define BRFC_EXPR_COLUMN_HPP
+#ifndef BRFC_RDB_COLUMN_HPP
+#define BRFC_RDB_COLUMN_HPP
 
-#include <brfc/expr/fwd.hpp>
+#include <brfc/rdb/fwd.hpp>
 #include <brfc/expr/Expression.hpp>
 
 #include <QtCore/QString>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
-class Column : public Expression {
+class Column : public expr::Expression {
   public:
     static ColumnPtr create(SelectablePtr selectable,
                             const QString& name) {
@@ -55,16 +55,12 @@ class Column : public Expression {
 
     }
 
-    virtual void do_accept(Visitor& visitor) {
-        visitor.visit(*this);
-    }
-
   private:
     SelectablePtr selectable_;
     QString name_;
 };
 
-}
-}
+} // namespace rdb
+} // namespace brfc
 
-#endif // BRFC_EXPR_COLUMN_HPP
+#endif // BRFC_RDB_COLUMN_HPP

@@ -17,44 +17,40 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_FROM_CLAUSE_HPP
-#define BRFC_EXPR_FROM_CLAUSE_HPP
-
-#include <brfc/expr/fwd.hpp>
-#include <brfc/expr/Element.hpp>
-#include <vector>
+#include <brfc/rdb/Join.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
-class FromClause : public Element {
-  public:
-    static FromClausePtr create() {
-        return FromClausePtr(new FromClause());
-    }
-
-    void add(SelectablePtr selectable);
-
-    bool has(SelectablePtr selectable) const;
-
-    std::vector<SelectablePtr>& elements() { return elements_; }
-
-    bool empty() const {
-        return elements_.empty();
-    }
-
-  protected:
-    FromClause()
-            : elements_() {
-    }
-
-    virtual void do_accept(Visitor& visitor) { visitor.visit(*this); }
-
-  private:
-    std::vector<SelectablePtr> elements_;
-};
+Join::Join(SelectablePtr from,
+           SelectablePtr to,
+           expr::ExpressionPtr condition,
+           Type type)
+        : from_(from)
+        , to_(to)
+        , condition_(condition)
+        , type_(type) {
 
 }
+
+bool
+Join::contains(SelectablePtr element) const {
+    int contains = 0;
+
+    if (JoinPtr j = dynamic_pointer_cast<Join>(from_)) {
+        contains += j->contains(element);
+    } else {
+        contains += from_->name() == element->name();
+    }
+
+    if (JoinPtr j = dynamic_pointer_cast<Join>(to_)) {
+        contains += j->contains(element);
+    } else {
+        contains += to_->name() == element->name();
+    }
+
+    return contains;
 }
 
-#endif // BRFC_EXPR_FROM_CLAUSE_HPP
+} // namespace rdb
+} // namespace brfc

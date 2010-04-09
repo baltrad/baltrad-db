@@ -17,39 +17,50 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_ATTRIBUTE_HPP
-#define BRFC_EXPR_ATTRIBUTE_HPP
+#ifndef BRFC_RDB_FROM_CLAUSE_HPP
+#define BRFC_RDB_FROM_CLAUSE_HPP
 
-#include <brfc/expr/Expression.hpp>
+#include <vector>
 
-#include <QtCore/QString>
+#include <brfc/expr/Element.hpp>
+
+#include <brfc/rdb/fwd.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
-/**
- * @brief placeholder for HDF5 attributes
- */
-class Attribute : public Expression {
+class FromClause : public expr::Element {
   public:
-    static AttributePtr create(const QString& name) {
-        return AttributePtr(new Attribute(name));
+    static FromClausePtr create() {
+        return FromClausePtr(new FromClause());
     }
+    
+    /**
+     * @throw duplicate_entry if not unique
+     */
+    void add(SelectablePtr selectable);
+    
+    /**
+     * @return true if already has a selectable with same name
+     */
+    bool has(SelectablePtr selectable) const;
 
-    const QString& name() const {
-        return name_;
+    std::vector<SelectablePtr>& elements() { return elements_; }
+
+    bool empty() const {
+        return elements_.empty();
     }
 
   protected:
-    Attribute(const QString& name)
-            : name_(name) {
+    FromClause()
+            : elements_() {
     }
 
   private:
-    QString name_;
+    std::vector<SelectablePtr> elements_;
 };
 
-}
-}
+} // namespace rdb
+} // namespace brfc
 
-#endif // BRFC_EXPR_ATTRIBUTE_HPP
+#endif // BRFC_RDB_FROM_CLAUSE_HPP

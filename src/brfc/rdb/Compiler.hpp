@@ -17,33 +17,62 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_COMPILER_HPP
-#define BRFC_EXPR_COMPILER_HPP
+#ifndef BRFC_RDB_COMPILER_HPP
+#define BRFC_RDB_COMPILER_HPP
 
 #include <brfc/assert.hpp>
+#include <brfc/visit.hpp>
 #include <brfc/Variant.hpp>
-#include <brfc/expr/Visitor.hpp>
-
 
 #include <map>
-#include <string>
 #include <vector>
 
 namespace brfc {
+
 namespace expr {
+
+class Attribute;
+class BinaryOperator;
+class Label;
+class Literal;
+class Parentheses;
+
+} // namespace expr
+
+namespace rdb {
+
+class Alias;
+class Column;
+class FromClause;
+class Join;
+class Select;
+class Table;
+
 
 /**
  * @brief compile elements to string form
  */
-class Compiler : public Visitor {
+class Compiler {
   public:
+    typedef mpl::vector<Alias,
+                        Column,
+                        FromClause,
+                        Join,
+                        Select,
+                        Table,
+                        expr::Attribute,
+                        expr::BinaryOperator,
+                        expr::Label,
+                        expr::Literal,
+                        expr::Parentheses> accepted_types;
+
     typedef std::map<QString, Variant> BindMap;
 
     /**
      * @brief constructor
      */
     Compiler()
-            : Visitor(Visitor::POST_ORDER)
+            : in_from_clause_(false)
             , literal_count_(0)
             , binds_()
             , stack_() {
@@ -55,12 +84,8 @@ class Compiler : public Visitor {
      * @post stack contains compiled string, accessible through compiled()
      */
     template<typename T>
-    void compile(T& expr) {
-        BRFC_ASSERT(stack_.empty());
-        expr.accept(*this);
-        BRFC_ASSERT(stack_.size() == 1);
-    }
-    
+    void compile(T& expr);
+
     /**
      * @brief access literal bindings
      */
@@ -71,92 +96,82 @@ class Compiler : public Visitor {
      */
     const QString& compiled() const { return stack_.back(); }
 
-  protected:
     /**
      * @brief compile Alias to string form
      *
-     * @pre top of the stack contains aliased content
      * @post top of the stack contains alias or 'content AS alias'
      */
-    virtual void do_visit(Alias& expr);
+    void operator()(Alias& expr);
 
     /**
      * @brief always throws
      *
      * @throw assert_error (attributes should be replaced before compiling)
      */
-    virtual void do_visit(Attribute& expr);
+    void operator()(expr::Attribute& expr);
 
     /**
      * @brief compile binary operator to string form
      *
-     * @pre stack contains rhs and lhs
      * @post stack contains lhs OP rhs
      */
-    virtual void do_visit(BinaryOperator& expr);
+    void operator()(expr::BinaryOperator& expr);
 
     /**
      * @brief compile column to string form
-     * @pre top of the stack contains compiled Selectable
      * @post top of the stack contains compiled column
      */
-    virtual void do_visit(Column& expr);
+    void operator()(Column& expr);
     
     /**
      * @brief compile from clause to string form
-     * @pre stack size >= from clause element count
      * @post top of the stack contains FROM + selectables joined by ','
      */
-    virtual void do_visit(FromClause& expr);
+    void operator()(FromClause& expr);
 
     /**
      * @brief compile Join to string form
-     * @pre stack contains expression, to and from in string form
      * @post top of the stack contains 
      *       '\<from\> JOIN \<to\> ON \<expression\>'
      */
-    virtual void do_visit(Join& join);
+    void operator()(Join& join);
 
     /**
      * @brief compile Literal to string form
      * @post top of the stack contains literal binding key, binds contains
      *       a mapping of this key to value
      */
-    virtual void do_visit(Literal& expr);
+    void operator()(expr::Literal& expr);
     
     /**
      * @brief compile Label to string form
-     * @pre top of the stack contains labelled in string form
      * @post top of the stack contains labelled AS label
      */
-    virtual void do_visit(Label& label);
+    void operator()(expr::Label& label);
 
     /**
      * @brief surround the top of the stack with parentheses
-     * @pre top of the stack contains parentheses content
      * @post stack contains (content)
      */
-    virtual void do_visit(Parentheses& expr);
+    void operator()(expr::Parentheses& expr);
 
     /**
      * @brief compile Select statement to string form
-     * @pre stack contains compiled where clause, compiled from clause
-     *      and at least as much elements as there are elements in
-     *      result columns
      * @post top of the stack contains compiled where clause
      */
-    virtual void do_visit(Select& select);
+    void operator()(Select& select);
 
     /**
      * @brief compile Table to string form
      * @post top of the stack contains table name
      */
-    virtual void do_visit(Table& expr);
+    void operator()(Table& expr);
 
   private:
     QString pop();
     void push(const QString& str);
 
+    bool in_from_clause_;
     unsigned int literal_count_;
     BindMap binds_;
     std::vector<QString> stack_;
@@ -165,4 +180,4 @@ class Compiler : public Visitor {
 }
 }
 
-#endif // BRFC_EXPR_COMPILER_HPP
+#endif // BRFC_RDB_COMPILER_HPP

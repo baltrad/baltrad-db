@@ -27,10 +27,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileHasher.hpp>
 
 #include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/AttrReplace.hpp>
-#include <brfc/expr/Compiler.hpp>
 #include <brfc/expr/Expression.hpp>
-#include <brfc/expr/Select.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
@@ -41,7 +38,10 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/SourceRadar.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
+#include <brfc/rdb/QueryToSelect.hpp>
+#include <brfc/rdb/Compiler.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
+#include <brfc/rdb/Select.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -371,17 +371,9 @@ RelationalDatabase::do_next_filename_version(const QString& filename) {
 
 shared_ptr<ResultSet>
 RelationalDatabase::do_query(const Query& query) {
-    expr::SelectPtr select = expr::Select::create();
+    SelectPtr select = QueryToSelect::transform(query, *mapper_.get());
 
-    BOOST_FOREACH(expr::AttributePtr expr, query.fetch()) {
-        select->what(expr);
-    }
-
-    select->where(query.filter());
-    select->distinct(query.distinct());
-
-    expr::AttrReplace::replace(select, mapper_.get());
-    expr::Compiler compiler;
+    Compiler compiler;
     compiler.compile(*select);
 
     return this->query(compiler.compiled(), compiler.binds());

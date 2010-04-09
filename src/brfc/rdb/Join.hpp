@@ -17,14 +17,15 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_JOIN_HPP
-#define BRFC_EXPR_JOIN_HPP
+#ifndef BRFC_RDB_JOIN_HPP
+#define BRFC_RDB_JOIN_HPP
 
+#include <brfc/rdb/fwd.hpp>
 #include <brfc/expr/fwd.hpp>
-#include <brfc/expr/Selectable.hpp>
+#include <brfc/rdb/Selectable.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
 class Join : public Selectable {
   public:
@@ -36,7 +37,7 @@ class Join : public Selectable {
 
     static JoinPtr create(SelectablePtr from,
                           SelectablePtr to,
-                          ExpressionPtr condition,
+                          expr::ExpressionPtr condition,
                           Type type=INNER) {
         return JoinPtr(new Join(from, to, condition, type));
     }
@@ -59,11 +60,11 @@ class Join : public Selectable {
         to_ = to;
     }
 
-    ExpressionPtr condition() const {
+    expr::ExpressionPtr condition() const {
         return condition_;
     }
 
-    void condition(ExpressionPtr condition) {
+    void condition(expr::ExpressionPtr condition) {
         condition_ = condition;
     }
     
@@ -78,18 +79,19 @@ class Join : public Selectable {
     Type type() const { return type_; }
 
   protected:
-    Join(SelectablePtr from, SelectablePtr to, ExpressionPtr condition, Type type);
-
-    virtual void do_accept(Visitor& visitor);
+    Join(SelectablePtr from,
+        SelectablePtr to,
+        expr::ExpressionPtr condition,
+        Type type);
 
   private:
     SelectablePtr from_;
     SelectablePtr to_;
-    ExpressionPtr condition_;
+    expr::ExpressionPtr condition_;
     Type type_;
 };
 
-} // namespace expr
+} // namespace rdb
 } // namespace brfc
 
-#endif // BRFC_EXPR_JOIN_HPP
+#endif // BRFC_RDB_JOIN_HPP

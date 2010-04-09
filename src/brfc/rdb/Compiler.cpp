@@ -17,28 +17,49 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/expr/Compiler.hpp>
+#include <brfc/rdb/Compiler.hpp>
 
-#include <brfc/expr/Alias.hpp>
-#include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/Select.hpp>
-#include <brfc/expr/Visitor.hpp>
-#include <brfc/expr/Parentheses.hpp>
-#include <brfc/expr/FromClause.hpp>
-#include <brfc/expr/Join.hpp>
-#include <brfc/expr/Label.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
-#include <brfc/expr/Column.hpp>
-#include <brfc/expr/Literal.hpp>
-#include <brfc/expr/Table.hpp>
+#include <algorithm>
 
 #include <boost/foreach.hpp>
-#include <algorithm>
 
 #include <QtCore/QStringList>
 
+#include <brfc/expr/Attribute.hpp>
+#include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/Label.hpp>
+#include <brfc/expr/Literal.hpp>
+#include <brfc/expr/Parentheses.hpp>
+
+#include <brfc/rdb/Alias.hpp>
+#include <brfc/rdb/Column.hpp>
+#include <brfc/rdb/FromClause.hpp>
+#include <brfc/rdb/Join.hpp>
+#include <brfc/rdb/Select.hpp>
+#include <brfc/rdb/Table.hpp>
+
 namespace brfc {
-namespace expr {
+namespace rdb {
+
+template<typename T>
+void
+Compiler::compile(T& expr) {
+    visit(expr, *this);
+}
+
+// explicitly instantiate the template
+template void Compiler::compile(Alias& expr);
+template void Compiler::compile(Column& expr);
+template void Compiler::compile(FromClause& expr);
+template void Compiler::compile(Join& expr);
+template void Compiler::compile(Select& expr);
+template void Compiler::compile(Table& expr);
+template void Compiler::compile(expr::Attribute& expr);
+template void Compiler::compile(expr::BinaryOperator& expr);
+template void Compiler::compile(expr::Expression& expr);
+template void Compiler::compile(expr::Label& expr);
+template void Compiler::compile(expr::Literal& expr);
+template void Compiler::compile(expr::Parentheses& expr);
 
 QString
 Compiler::pop() {
@@ -53,37 +74,46 @@ Compiler::push(const QString& top) {
     stack_.push_back(top);
 }
 
-
 void
-Compiler::do_visit(BinaryOperator& expr) {
+Compiler::operator()(expr::BinaryOperator& expr) {
+    visit(*expr.lhs(), *this);
+    visit(*expr.rhs(), *this);
     const QString& rhs = pop();
     const QString& lhs = pop();
     push(lhs + " " + expr.op() + " " + rhs);
 }
 
 void
-Compiler::do_visit(Column& expr) {
+Compiler::operator()(Column& expr) {
+    visit(*expr.selectable(), *this);
     push(pop() + "." + expr.name());
 }
 
 void
-Compiler::do_visit(Alias& expr) {
-    if (in_from_clause) {
+Compiler::operator()(Alias& expr) {
+    if (in_from_clause_) {
+        visit(*expr.aliased(), *this);
         push(pop() + " AS " + expr.alias());
     } else {
-        pop(); // discard aliased content
+        // discard aliased content
         push(expr.alias()); // replace with an alias instead
     }
 }
 
 void
-Compiler::do_visit(Attribute& expr) {
+Compiler::operator()(expr::Attribute& expr) {
     BRFC_ASSERT(false); // attributes should be replaced at this point
-    push(expr.name());
 }
 
 void
-Compiler::do_visit(Join& join) {
+Compiler::operator()(Join& join) {
+    in_from_clause_ = true;
+    visit(*join.from(), *this);
+    visit(*join.to(), *this);
+    in_from_clause_ = false;
+    visit(*join.condition(), * this);
+    in_from_clause_ = true;
+
     QString condition = pop();
     QString to = pop();
     QString from = pop();
@@ -100,51 +130,62 @@ Compiler::do_visit(Join& join) {
             BRFC_ASSERT(false);
     }
 
-    in_from_clause = true;
-    join.to()->accept(*this);
-    to = pop();
-    join.from()->accept(*this);
-    from = pop();
-    in_from_clause = false;
-    join.condition()->accept(*this);
-    condition = pop();
-    in_from_clause = true;
-
     push(from + jointype + to + " ON " + condition);
 }
 
 void
-Compiler::do_visit(Literal& expr) {
+Compiler::operator()(expr::Literal& expr) {
     QString key = QString(":lit_") + QString::number(literal_count_++);
     push(key);
     binds_[key] = expr.value();
 }
 
 void
-Compiler::do_visit(Label& label) {
+Compiler::operator()(expr::Label& label) {
+    visit(*label.expression(), *this);
     push(pop() + " AS " + label.name());
 }
 
 void
-Compiler::do_visit(Parentheses& expr) {
+Compiler::operator()(expr::Parentheses& expr) {
+    visit(*expr.expression(), *this);
     push("(" + pop() + ")");
 }
 
 void
-Compiler::do_visit(FromClause& from) {
-    if (not from.empty()) {
-        QStringList from_clause_elements;
-        for (size_t i = 0; i < from.elements().size(); ++i) {
-            from_clause_elements.push_back(pop());
-        }
-        std::reverse(from_clause_elements.begin(), from_clause_elements.end());
-        QString from_clause = "\nFROM " + from_clause_elements.join(", ");
-        push(from_clause);
+Compiler::operator()(FromClause& from) {
+    if (from.empty())
+        return;
+
+    in_from_clause_ = true;
+
+    BOOST_FOREACH(SelectablePtr element, from.elements()) {
+        visit(*element, *this);
     }
+
+    QStringList from_clause_elements;
+    for (size_t i = 0; i < from.elements().size(); ++i) {
+        from_clause_elements.push_back(pop());
+    }
+    std::reverse(from_clause_elements.begin(), from_clause_elements.end());
+    QString from_clause = "\nFROM " + from_clause_elements.join(", ");
+    push(from_clause);
+
+    in_from_clause_ = false;
 }
 
 void
-Compiler::do_visit(Select& select) {
+Compiler::operator()(Select& select) {
+
+    BOOST_FOREACH(expr::ExpressionPtr col, select.what()) {
+        visit(*col, *this);
+    }
+    
+    visit(*select.from(), *this);
+
+    if (select.where())
+        visit(*select.where(), *this);
+
     QString where_clause;
     if (select.where())
         where_clause = "\nWHERE " + pop();
@@ -169,9 +210,9 @@ Compiler::do_visit(Select& select) {
 }
 
 void
-Compiler::do_visit(Table& expr) {
+Compiler::operator()(Table& expr) {
     push(expr.name());
 }
 
-} // namespace expr
+} // namespace rdb
 } // namespace brfc

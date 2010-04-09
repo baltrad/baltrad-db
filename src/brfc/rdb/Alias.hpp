@@ -17,42 +17,54 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_TABLE_HPP
-#define BRFC_EXPR_TABLE_HPP
+#ifndef BRFC_RDB_ALIAS_HPP
+#define BRFC_RDB_ALIAS_HPP
 
-#include <brfc/expr/Selectable.hpp>
+#include <brfc/rdb/Selectable.hpp>
 
 namespace brfc {
-namespace expr {
+namespace rdb {
 
-class Table : public Selectable {
+class Alias : public Selectable {
   public:
-    static TablePtr create(const QString& name) {
-        return TablePtr(new Table(name));
+    static AliasPtr create(SelectablePtr aliased,
+                           const QString& alias) {
+        return AliasPtr(new Alias(aliased, alias));
     }
 
-    void name(const QString& name) {
-        name_ = name;
+    void aliased(SelectablePtr aliased) {
+        aliased_ = aliased;
+    }
+
+    SelectablePtr aliased() const {
+        return aliased_;
+    }
+
+    void alias(const QString& alias) {
+        alias_ = alias;
+    }
+
+    const QString& alias() const {
+        return alias_;
     }
 
     virtual QString name() const {
-        return name_;
+        return alias_;
     }
 
   protected:
-    explicit Table(const QString& name)
-            : name_(name) {
+    Alias(SelectablePtr aliased,
+          const QString& alias)
+            : aliased_(aliased)
+            , alias_(alias) {
     }
 
-    virtual void do_accept(Visitor& visitor) {
-        visitor.visit(*this);
-    }
-  
   private:
-    QString name_;
+    SelectablePtr aliased_;
+    QString alias_;
 };
 
-}
-}
+} // namespace rdb
+} // namespace brfc
 
-#endif // BRFC_EXPR_TABLE_HPP
+#endif // BRFC_RDB_ALIAS_HPP
