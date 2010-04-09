@@ -55,7 +55,7 @@ TestRDB::drop() {
 
 void
 TestRDB::clean() {
-    connection().exec(QString("DELETE FROM files"));
+    connection().exec(QString("DELETE FROM bdb_files"));
 }
 
 QStringList

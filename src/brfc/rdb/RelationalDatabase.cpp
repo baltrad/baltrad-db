@@ -65,7 +65,7 @@ class GroupSaver {
     GroupSaver(RelationalDatabase* rdb)
             : rdb_(rdb)
             , qry_(rdb->connection())
-            , special_(rdb->mapper().specializations_on("groups")) {
+            , special_(rdb->mapper().specializations_on("bdb_groups")) {
         QStringList columns, binds; 
         columns.append("parent_id");
         columns.append("file_id");
@@ -76,7 +76,7 @@ class GroupSaver {
         BOOST_FOREACH(const QString& column, columns) {
             binds.append(":" + column);
         }
-        QString qrystr("INSERT INTO groups(" + columns.join(", ") +
+        QString qrystr("INSERT INTO bdb_groups(" + columns.join(", ") +
                        ") VALUES(" + binds.join(", ") + ")");
         if (rdb->supports_returning())
             qrystr += " RETURNING id";
@@ -332,7 +332,7 @@ RelationalDatabase::do_commit() {
 bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
     QSqlQuery query(connection());
-    query.prepare("SELECT true FROM files WHERE unique_id = :unique_id");
+    query.prepare("SELECT true FROM bdb_files WHERE unique_id = :unique_id");
     query.bindValue(":unique_id", file_hasher_->hash(file));
     if (!query.exec())
         throw db_error(query.lastError());
@@ -360,7 +360,7 @@ unsigned int
 RelationalDatabase::do_next_filename_version(const QString& filename) {
     QSqlQuery qry(connection());
     qry.prepare("SELECT MAX(filename_version) + 1 "
-                "FROM files "
+                "FROM bdb_files "
                 "WHERE proposed_filename = :filename");
     qry.bindValue(":filename", filename);
     if (!qry.exec())
@@ -387,7 +387,7 @@ RelationalDatabase::save(const oh5::File& f,
     columns.append("source_id");
     columns.append("unique_id");
 
-    const MappingVector& special = mapper().specializations_on("files");
+    const MappingVector& special = mapper().specializations_on("bdb_files");
     BOOST_FOREACH(const Mapping& mapping, special) {
         // XXX: get rid of this
         if (mapping.attribute == "file_id") 
@@ -399,7 +399,7 @@ RelationalDatabase::save(const oh5::File& f,
     }
 
     QSqlQuery qry(connection());
-    QString qrystr("INSERT INTO files(" + columns.join(", ") +
+    QString qrystr("INSERT INTO bdb_files(" + columns.join(", ") +
                    ", proposed_filename, filename_version) "
                    "VALUES(" + binds.join(", ") +
                    ", :proposed_filename, :filename_version)");
@@ -450,14 +450,14 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src) {
         binds.append(src->country_code());
     }
     if (src->db_id()) {
-        wcl.append("sources.id = ?");
+        wcl.append("bdb_sources.id = ?");
         binds.append(src->db_id());
     }
 
-    QString qstr = QString("SELECT sources.id, node_id, country_code, ") +
+    QString qstr = QString("SELECT bdb_sources.id, node_id, country_code, ") +
                    QString("originating_centre, wmo_cccc ") +
-                   QString("FROM source_centres ") +
-                   QString("JOIN sources ON sources.id = source_centres.id ") +
+                   QString("FROM bdb_source_centres ") +
+                   QString("JOIN bdb_sources ON bdb_sources.id = bdb_source_centres.id ") +
                    QString("WHERE ") + wcl.join(" OR ");
 
     QSqlQuery qry(connection());
@@ -503,10 +503,10 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
         binds.append(src->place());
     }
 
-    QString qstr = QString("SELECT sources.id, node_id, centre_id, ") +
+    QString qstr = QString("SELECT bdb_sources.id, node_id, centre_id, ") +
                    QString("wmo_code, radar_site, place ") +
-                   QString("FROM source_radars ") +
-                   QString("JOIN sources ON source_radars.id = sources.id ") +
+                   QString("FROM bdb_source_radars ") +
+                   QString("JOIN bdb_sources ON bdb_source_radars.id = bdb_sources.id ") +
                    QString("WHERE ") + wcl.join(" OR ");
     
     QSqlQuery qry(connection());
@@ -577,7 +577,7 @@ RelationalDatabase::populate_mapper_and_specs() {
     shared_ptr<ResultSet> r = query("SELECT id, name, converter, "
                                     "storage_table, storage_column, "
                                     "ignore_in_hash "
-                                    "FROM attributes", BindMap());
+                                    "FROM bdb_attributes", BindMap());
     while (r->next()) {
         mapper_->add(Mapping(r->integer(0), // id
                              r->string(1),  // name
@@ -592,7 +592,7 @@ RelationalDatabase::populate_mapper_and_specs() {
 void
 RelationalDatabase::do_remove_file(const QString& path) {
     QSqlQuery query(connection());
-    query.prepare("DELETE FROM files WHERE path = :path");
+    query.prepare("DELETE FROM bdb_files WHERE path = :path");
     query.bindValue(":path", path);
     if (!query.exec())
         throw db_error(query.lastError());

@@ -44,11 +44,11 @@ namespace rdb {
 QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
-        , files_t_(Table::create("files"))
-        , src_t_(Table::create("sources"))
-        , src_radars_t_(Table::create("source_radars"))
-        , src_centres_t_(Table::create("source_centres"))
-        , groups_t_(Table::create("groups"))
+        , files_t_(Table::create("bdb_files"))
+        , src_t_(Table::create("bdb_sources"))
+        , src_radars_t_(Table::create("bdb_source_radars"))
+        , src_centres_t_(Table::create("bdb_source_centres"))
+        , groups_t_(Table::create("bdb_groups"))
         , from_() {
     // always select from files and join sources
     from_ = files_t_->join(src_t_,
@@ -113,7 +113,7 @@ QueryToSelect::operator()(expr::Attribute& attr) {
                                                   xpr_.integer(mapping.id))));
         }
     } else {
-        if (value_t->name() == "groups") {
+        if (value_t->name() == "bdb_groups") {
             join_groups();
         }
     }

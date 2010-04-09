@@ -29,21 +29,38 @@ from sqlalchemy import (MetaData, Table, Column, ForeignKey,
                         UniqueConstraint, create_engine)
 
 from sqlalchemy.types import (Text, Integer, Float, Date, Time,
-                              Boolean, String)
+                              Boolean, String, TypeEngine, TypeDecorator)
 
-from sqlalchemy.databases.postgres import PGBigInteger
+from sqlalchemy.databases.postgres import PGBigInteger, PGDoublePrecision
 
 from sqlalchemy.sql import expression as sqlexpr
 
+class Int64(TypeDecorator):
+    impl = TypeEngine
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgres":
+            return PGBigInteger()
+        else:
+            return dialect.type_descriptor(Integer)
+
+class Double(TypeDecorator):
+    impl = TypeEngine
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgres":
+            return PGDoublePrecision()
+        else:
+            return dialect.type_descriptor(Float)
 
 meta = MetaData()
 
-sources = Table("sources", meta,
+sources = Table("bdb_sources", meta,
     Column("id", Integer, primary_key=True),
     Column("node_id", Text, nullable=False, unique=True),
 )
 
-source_centres = Table("source_centres", meta,
+source_centres = Table("bdb_source_centres", meta,
     Column("id", Integer, ForeignKey(sources.c.id),
            primary_key=True),
     Column("originating_centre", Integer, nullable=False, unique=True),
@@ -51,7 +68,7 @@ source_centres = Table("source_centres", meta,
     Column("wmo_cccc", String(4), nullable=False, unique=True)
 )
 
-source_radars = Table("source_radars", meta,
+source_radars = Table("bdb_source_radars", meta,
     Column("id", Integer, ForeignKey(sources.c.id),
            primary_key=True),
     Column("centre_id", Integer, ForeignKey(source_centres.c.id),
@@ -61,7 +78,7 @@ source_radars = Table("source_radars", meta,
     Column("place", Text, unique=True)
 )
 
-files = Table("files", meta,
+files = Table("bdb_files", meta,
     Column("id", Integer, primary_key=True),
     Column("unique_id", Text, unique=True, nullable=False),
     Column("path", Text, unique=True, nullable=False),
@@ -75,9 +92,9 @@ files = Table("files", meta,
     UniqueConstraint("proposed_filename", "filename_version"),
 )
 
-groups = Table("groups", meta,
+groups = Table("bdb_groups", meta,
     Column("id", Integer, primary_key=True),
-    Column("parent_id", Integer, ForeignKey("groups.id")),
+    Column("parent_id", Integer, ForeignKey("bdb_groups.id")),
     Column("name", Text, nullable=False),
     Column("product", Text),
     Column("startdate", Date),
@@ -89,12 +106,12 @@ groups = Table("groups", meta,
                          ondelete="CASCADE")
 )
 
-attribute_groups = Table("attribute_groups", meta,
+attribute_groups = Table("bdb_attribute_groups", meta,
     Column("id", Integer, primary_key=True),
     Column("name", Integer, nullable=False)
 )
 
-attributes = Table("attributes", meta,
+attributes = Table("bdb_attributes", meta,
     Column("id", Integer, primary_key=True),
     Column("name", Text, nullable=False, unique=True),
     Column("converter", Text, nullable=False),
@@ -103,17 +120,17 @@ attributes = Table("attributes", meta,
     Column("ignore_in_hash", Boolean, nullable=False, default=False)
 )
 
-attribute_values_int = Table("attribute_values_int", meta,
+attribute_values_int = Table("bdb_attribute_values_int", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
     Column("group_id", Integer, nullable=False),
-    Column("value", PGBigInteger, nullable=False),
+    Column("value", Int64, nullable=False),
     ForeignKeyConstraint(["group_id"], [groups.c.id],
                          ondelete="CASCADE"),
     PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
-attribute_values_str = Table("attribute_values_str", meta,
+attribute_values_str = Table("bdb_attribute_values_str", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
     Column("group_id", Integer, nullable=False),
@@ -123,17 +140,17 @@ attribute_values_str = Table("attribute_values_str", meta,
     PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
-attribute_values_real = Table("attribute_values_real", meta,
+attribute_values_real = Table("bdb_attribute_values_real", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
     Column("group_id", Integer, nullable=False),
-    Column("value", Float, nullable=False),
+    Column("value", Double, nullable=False),
     ForeignKeyConstraint(["group_id"], [groups.c.id],
                          ondelete="CASCADE"),
     PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
-attribute_values_bool = Table("attribute_values_bool", meta,
+attribute_values_bool = Table("bdb_attribute_values_bool", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
     Column("group_id", Integer, nullable=False),
@@ -143,7 +160,7 @@ attribute_values_bool = Table("attribute_values_bool", meta,
     PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
-attribute_values_date = Table("attribute_values_date", meta,
+attribute_values_date = Table("bdb_attribute_values_date", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
     Column("group_id", Integer, nullable=False),
@@ -153,7 +170,7 @@ attribute_values_date = Table("attribute_values_date", meta,
     PrimaryKeyConstraint("attribute_id", "group_id")
 )
 
-attribute_values_time = Table("attribute_values_time", meta,
+attribute_values_time = Table("bdb_attribute_values_time", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
     Column("group_id", Integer, nullable=False),
@@ -164,24 +181,24 @@ attribute_values_time = Table("attribute_values_time", meta,
 )
 
 default_storage = {
-    "string": ("attribute_values_str", "value"),
-    "int": ("attribute_values_int", "value"),
-    "real": ("attribute_values_real", "value"),
-    "sequence": ("attribute_values_str", "value"),
-    "bool": ("attribute_values_bool", "value"),
-    "date": ("attribute_values_date", "value"),
-    "time": ("attribute_values_time", "value")
+    "string":   attribute_values_str.c.value,
+    "int":      attribute_values_int.c.value,
+    "real":     attribute_values_real.c.value,
+    "sequence": attribute_values_str.c.value,
+    "bool":     attribute_values_bool.c.value,
+    "date":     attribute_values_date.c.value,
+    "time":     attribute_values_time.c.value,
 }
 
 special_storage = {
-    "object": ("files", "object"),
-    "date": ("files", "n_date"),
-    "time": ("files", "n_time"),
-    "product": ("groups", "product"),
-    "startdate": ("groups", "startdate"),
-    "starttime": ("groups", "starttime"),
-    "enddate": ("groups", "enddate"),
-    "endtime": ("groups", "endtime"),
+    "object":    files.c.object,
+    "date":      files.c.n_date,
+    "time":      files.c.n_time,
+    "product":   groups.c.product,
+    "startdate": groups.c.startdate,
+    "starttime": groups.c.starttime,
+    "enddate":   groups.c.enddate,
+    "endtime":   groups.c.endtime,
 }
 
 # name, group, type
@@ -363,14 +380,14 @@ attribute_entries = [
 ]
 
 virtual_attributes = [
-    ("path",    "string",   "files",   "path"),
-    ("file_id", "int",      "files",   "id"),
-    ("src_WMO", "int",      "source_radars", "wmo_code"),
-    ("src_RAD", "string",   "source_radars", "radar_site"),
-    ("src_ORG", "int",      "source_centres", "originating_centre"),
-    ("src_CTY", "int",      "source_centres", "country_code"),
-    ("src_PLC", "string",   "source_radars", "place"),
-    ("src_node", "string",  "sources", "node_id")
+    ("path",    "string",   files.c.path),
+    ("file_id", "int",      files.c.id),
+    ("src_WMO", "int",      source_radars.c.wmo_code),
+    ("src_RAD", "string",   source_radars.c.radar_site),
+    ("src_ORG", "int",      source_centres.c.originating_centre),
+    ("src_CTY", "int",      source_centres.c.country_code),
+    ("src_PLC", "string",   source_radars.c.place),
+    ("src_node", "string",  sources.c.node_id),
 ]
 
 ignored_in_hash = [
@@ -464,21 +481,21 @@ def populate_attributes_table(engine):
     q = attributes.insert()
 
     for (name, group, type) in attribute_entries:
-        table, column = special_storage.get(name, default_storage[type])
+        column = special_storage.get(name, default_storage[type])
         full_name = "/".join((group, name)) if group else name
         engine.execute(q,
                        name=full_name,
                        converter=type,
-                       storage_table=table,
-                       storage_column=column,
+                       storage_table=column.table.name,
+                       storage_column=column.name,
                        ignore_in_hash=full_name in ignored_in_hash)
     
-    for (name, type, table, column) in virtual_attributes:
+    for (name, type, column) in virtual_attributes:
         engine.execute(q,
                        name=name,
                        converter=type,
-                       storage_table=table,
-                       storage_column=column,
+                       storage_table=column.table.name,
+                       storage_column=column.name,
                        ignore_in_hash=True)
 
 def populate_sources_table(engine):

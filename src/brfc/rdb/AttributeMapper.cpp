@@ -61,7 +61,7 @@ AttributeMapper::has(const QString& attribute) const {
 
 bool
 AttributeMapper::is_specialized(const QString& attribute) const {
-    QString s = QString::fromUtf8("attribute_values");
+    QString s = QString::fromUtf8("bdb_attribute_values");
     return not mapping(attribute).table.startsWith(s);
 }
 
