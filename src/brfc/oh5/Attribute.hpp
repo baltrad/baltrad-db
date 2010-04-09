@@ -33,11 +33,19 @@ class Group;
  * @brief ODIM_H5 attribute element
  */
 class Attribute : public Node {
-  public:    
+  public:
     /**
      * @brief destructor
      */
     virtual ~Attribute();
+
+    shared_ptr<Attribute> shared_from_this() {
+        return static_pointer_cast<Attribute>(Node::shared_from_this());
+    }
+
+    shared_ptr<const Attribute> shared_from_this() const {
+        return static_pointer_cast<const Attribute>(Node::shared_from_this());
+    }
     
     /**
      * @brief return nearest parent Group that is not AttributeGroup

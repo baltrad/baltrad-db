@@ -91,7 +91,7 @@ TEST_F(oh5_FileLoader_test, load) {
     EXPECT_EQ(d_2000_01_02, g->group("/what")->child_attribute("date")->value());
 
     // nothing ignored
-    EXPECT_EQ((size_t)0, g->ignored_attributes().size());
+    EXPECT_EQ((size_t)0, g->invalid_attributes().size());
 }
 
 TEST_F(oh5_FileLoader_test, ignored_attributes) {
@@ -112,8 +112,8 @@ TEST_F(oh5_FileLoader_test, ignored_attributes) {
     EXPECT_TRUE(root->child_attribute("ignore"));
     EXPECT_TRUE(root->child_attribute("what/ignore"));
 
-    // accessible through ignored_attributes
-    const File::StringVector& ignored = g->ignored_attributes();
+    // but accessible through ignored_attributes
+    const File::StringVector& ignored = g->invalid_attribute_paths();
     EXPECT_EQ(ignored.size(), (size_t)2);
     EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/ignore") != ignored.end());
     EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/what/ignore") != ignored.end());

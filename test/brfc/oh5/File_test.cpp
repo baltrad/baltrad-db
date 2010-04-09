@@ -19,6 +19,8 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 
@@ -86,6 +88,22 @@ TEST_F(oh5_File_test, test_name) {
     EXPECT_EQ(f1->name(), "filename");
     f1->path("filename2");
     EXPECT_EQ(f1->name(), "filename2");
+}
+
+TEST_F(oh5_File_test, test_invalid_attributes) {
+    shared_ptr<Attribute> invalid = make_shared<Attribute>("invalid");
+    f1->root()->add_child(invalid);
+    File::AttributeVector v = f1->invalid_attributes();
+    EXPECT_EQ(v.size(), (size_t)1);
+    EXPECT_TRUE(std::find(v.begin(), v.end(), invalid) != v.end());
+}
+
+TEST_F(oh5_File_test, test_invalid_attribute_paths) {
+    shared_ptr<Attribute> invalid = make_shared<Attribute>("invalid");
+    f1->root()->add_child(invalid);
+    File::StringVector v = f1->invalid_attribute_paths();
+    EXPECT_EQ(v.size(), (size_t)1);
+    EXPECT_TRUE(std::find(v.begin(), v.end(), "/invalid") != v.end());
 }
 
 } // namespace oh5

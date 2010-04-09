@@ -36,6 +36,7 @@ namespace brfc {
 
 namespace oh5 {
 
+class Attribute;
 class AttributeSpecs;
 class Group;
 class RootGroup;
@@ -46,6 +47,8 @@ class Source;
  */
 class File : public boost::noncopyable {
   public:
+    typedef std::vector<shared_ptr<Attribute> > AttributeVector;
+    typedef std::vector<shared_ptr<const Attribute> > ConstAttributeVector;
     typedef std::vector<QString> StringVector;
 
     /**
@@ -128,9 +131,18 @@ class File : public boost::noncopyable {
     void source(shared_ptr<Source> src);
 
     /**
-     * @brief get attributes ignored on loading
+     * @brief get full paths of invalid attributes (have no value)
      */
-    StringVector ignored_attributes() const;
+    StringVector invalid_attribute_paths() const;
+    
+    /**
+     * @brief get invalid attributes attributes (have no value)
+     * @{
+     */
+    ConstAttributeVector invalid_attributes() const;
+
+    AttributeVector invalid_attributes();
+    //@}
 
     /**
      * @{

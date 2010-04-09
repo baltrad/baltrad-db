@@ -112,22 +112,44 @@ File::name() const {
 }
 
 File::StringVector
-File::ignored_attributes() const {
-    /* XXX: should rename this to ignored_attribute_paths()
-     * and create a method ignored_attributes returning a vector of
-     * attribute pointers
-     */
+File::invalid_attribute_paths() const {
     StringVector paths;
+    BOOST_FOREACH(shared_ptr<const Attribute> attr, invalid_attributes()) {
+        paths.push_back(attr->path());
+    }
+    return paths;
+}
+
+File::ConstAttributeVector
+File::invalid_attributes() const {
+    ConstAttributeVector attrs;
 
     const Attribute* attr = 0;
     BOOST_FOREACH(const Node& node, *root_) {
         if ((attr = dynamic_cast<const Attribute*>(&node)) == 0)
             continue;
         if (not attr->is_valid())
-            paths.push_back(attr->path());
+            attrs.push_back(attr->shared_from_this());
     }
     
-    return paths;
+    return attrs;
+}
+
+File::AttributeVector
+File::invalid_attributes() {
+    // implement through const
+    const File* self = const_cast<const File*>(this);
+
+    ConstAttributeVector const_attrs = self->invalid_attributes();
+
+    AttributeVector attrs;
+    attrs.reserve(const_attrs.size());
+
+    BOOST_FOREACH(shared_ptr<const Attribute> const_attr, const_attrs) {
+        attrs.push_back(const_pointer_cast<Attribute>(const_attr));
+    }
+
+    return attrs;
 }
 
 shared_ptr<Group>
