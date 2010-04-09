@@ -23,7 +23,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <brfc/visit.hpp>
-#include <brfc/expr/fwd.hpp>
+#include <brfc/expr/Factory.hpp>
 #include <brfc/rdb/fwd.hpp>
 
 namespace brfc {
@@ -36,10 +36,6 @@ class AttributeMapper;
 
 /**
  * @brief transform a Query to Select statement
- *
- * The strategy is to first replace all the attributes with columns,
- * collecting the unique tables/aliases. Since the Select has no from
- * clause, we determine a central table and join the remaining tables to it
  */
 class QueryToSelect {
   public:
@@ -48,22 +44,31 @@ class QueryToSelect {
                         expr::Label,
                         expr::Literal,
                         expr::Parentheses> accepted_types;
-
+    
     /**
      * @brief transform a Query to Select statement
+     *
+     * Attributes in Query.fetch() are visited and the results are stored
+     * in the "what" clause of the select statement. The Query.filter()
+     * expression is also visited and becomes the where clause for the
+     * select statement. From clause is formed during the visitation.
      */
     static SelectPtr transform(const Query& query,
                                const AttributeMapper& mapper);
-
+    
     /**
-     * @brief visit an expr::Attribute element
+     * @brief replace expr::Attribute with the mapped Column
+     * 
+     * Look up the table/column mapping for the attribute and replace the
+     * attribute with the column in the expression tree. For non-specialized
+     * attributes, the table is aliased based on the attribute name (this
+     * enables different attributes to be stored in a common table and still
+     * filter them without these filters interfering with eachother).
      *
-     * replace this attribute with a column
-     * if it's not a specialized column,
-     * add a where clause to attribute names
+     * The looked-up table (or table alias) is joined to the from clause.
      */
     void operator()(expr::Attribute& attr);
-
+    
     void operator()(expr::BinaryOperator& op);
 
     void operator()(expr::Label& label);
@@ -76,23 +81,25 @@ class QueryToSelect {
     /**
      * @brief constructor
      * @param mapper AttributeMapper instance to fetch mappings from
+     *
+     * Default from clause is a join from files to sources
      */
-    QueryToSelect(SelectPtr select, const AttributeMapper* mapper);
+    QueryToSelect(const AttributeMapper* mapper);
 
-    void replace_attributes();
+    expr::ExpressionPtr pop();
 
-    void build_from_clause();
+    void push(expr::ExpressionPtr p);
 
-    expr::ElementPtr pop();
-
-    void push(expr::ElementPtr p);
-
+    /**
+     * @brief join "groups" table if not already joined
+     */
     void join_groups();
 
   private:
     const AttributeMapper* mapper_;
-    std::vector<expr::ElementPtr> stack_;
-    SelectPtr select_;
+    expr::Factory xpr_;
+    std::vector<expr::ExpressionPtr> stack_;
+    TablePtr files_t_, src_t_, src_radars_t_, src_centres_t_, groups_t_;
     JoinPtr from_;
 };
 

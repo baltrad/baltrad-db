@@ -41,152 +41,138 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace rdb {
 
-using namespace ::brfc::expr;
-
-QueryToSelect::QueryToSelect(SelectPtr select, const AttributeMapper* mapper)
+QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
-        , select_(select)
+        , files_t_(Table::create("files"))
+        , src_t_(Table::create("sources"))
+        , src_radars_t_(Table::create("source_radars"))
+        , src_centres_t_(Table::create("source_centres"))
+        , groups_t_(Table::create("groups"))
         , from_() {
-    // always select from files and sources
-    TablePtr files_t = Table::create("files");
-    TablePtr src_t = Table::create("sources");
-    TablePtr src_radars_t = Table::create("source_radars");
-    TablePtr src_centres_t = Table::create("source_centres");
-    
-    ExpressionPtr on = files_t->column("source_id")->eq(src_t->column("id"));
-    from_ = files_t->join(src_t, on);
-    on = src_t->column("id")->eq(src_radars_t->column("id"));
-    from_ = from_->outerjoin(src_radars_t, on);
-    on = src_t->column("id")->eq(src_centres_t->column("id"));
-    from_ = from_->outerjoin(src_centres_t, on);
+    // always select from files and join sources
+    from_ = files_t_->join(src_t_,
+                           xpr_.eq(files_t_->column("source_id"),
+                                   src_t_->column("id")));
+    from_ = from_->outerjoin(src_radars_t_,
+                             xpr_.eq(src_t_->column("id"),
+                                     src_radars_t_->column("id")));
+    from_ = from_->outerjoin(src_centres_t_,
+                             xpr_.eq(src_t_->column("id"),
+                                     src_centres_t_->column("id")));
 }
 
 SelectPtr
 QueryToSelect::transform(const Query& query,
                          const AttributeMapper& mapper) {
+    QueryToSelect rpl(&mapper);
+
     SelectPtr select = Select::create();
-
-    BOOST_FOREACH(expr::AttributePtr expr, query.fetch()) {
-        select->what(expr);
-    }
-
-    select->where(query.filter());
     select->distinct(query.distinct());
 
+    // replace attributes with columns
+    BOOST_FOREACH(expr::AttributePtr expr, query.fetch()) {
+        visit(*expr, rpl);
+        select->what(rpl.pop());
+    }
 
-    QueryToSelect rpl(select, &mapper);
-    rpl.replace_attributes();
-    rpl.build_from_clause();
+    // replace attributes in where clause with columns
+    if (query.filter()) {
+        visit(*query.filter(), rpl);
+        select->where(rpl.pop());
+    } 
+    
+    // add the built join as from clause
+    select->from()->add(rpl.from_);
+
     return select;
 }
 
 void
-QueryToSelect::operator()(Attribute& attr) {
+QueryToSelect::operator()(expr::Attribute& attr) {
     QString name = attr.name();
 
     // query table and column where this value can be found
     Mapping mapping = mapper_->mapping(name);
-
-    SelectablePtr value_t;
-
+    SelectablePtr value_t = Table::create(mapping.table);
+    
     if (not mapper_->is_specialized(name)) {
+        // try to join groups, they have to appear earlier in the join
+        join_groups(); 
+
         // alias the table (this attribute is always searched on this table)
         QString alias = name.remove("/") + "_values";
-        value_t = Table::create(mapping.table)->alias(alias);
+        value_t = value_t->alias(alias);
+
+        // join this table-alias if not already joined
         if (not from_->contains(value_t)) {
-            // try to join groups, they have to appear earlier in the join
-            join_groups(); 
-            TablePtr grp_t = Table::create("groups");
-            ExpressionPtr on = value_t->column("group_id")->eq(grp_t->column("id"));
-            on = on->and_(value_t->column("attribute_id")->eq(Literal::create(Variant(mapping.id))));
-            from_ = from_->join(value_t, on);
+            from_ = from_->join(value_t,
+                                xpr_.and_(xpr_.eq(value_t->column("group_id"),
+                                                  groups_t_->column("id")),
+                                          xpr_.eq(value_t->column("attribute_id"),
+                                                  xpr_.integer(mapping.id))));
         }
     } else {
-        value_t = Table::create(mapping.table);
         if (value_t->name() == "groups") {
             join_groups();
         }
     }
     // replace the attribute with value column
-    ColumnPtr col = value_t->column(mapping.column);
-    push(col);
+    push(value_t->column(mapping.column));
 }
 
 void
 QueryToSelect::join_groups() {
     // join groups if not already joined
-    TablePtr files_t = Table::create("files");
-    TablePtr grp_t = Table::create("groups");
-    if (not from_->contains(grp_t)) {
-        ExpressionPtr on = grp_t->column("file_id")->eq(files_t->column("id"));
-        from_ = from_->join(grp_t, on);
+    if (not from_->contains(groups_t_)) {
+        from_ = from_->join(groups_t_,
+                            xpr_.eq(groups_t_->column("file_id"),
+                                    files_t_->column("id")));
     }
 }
 
 void
-QueryToSelect::operator()(BinaryOperator& op) {
+QueryToSelect::operator()(expr::BinaryOperator& op) {
     visit(*op.lhs(), *this);
     visit(*op.rhs(), *this);
-    op.rhs(static_pointer_cast<Expression>(pop()));
-    op.lhs(static_pointer_cast<Expression>(pop()));
+    op.rhs(pop());
+    op.lhs(pop());
     push(op.shared_from_this());
 }
 
 void
-QueryToSelect::operator()(Label& label) {
+QueryToSelect::operator()(expr::Label& label) {
     visit(*label.expression(), *this);
-    label.expression(static_pointer_cast<Expression>(pop()));
+    label.expression(pop());
     push(label.shared_from_this());
 }
 
 void
-QueryToSelect::operator()(Literal& literal) {
+QueryToSelect::operator()(expr::Literal& literal) {
     push(literal.shared_from_this());
 }
 
 void
-QueryToSelect::operator()(Parentheses& parentheses) {
+QueryToSelect::operator()(expr::Parentheses& parentheses) {
     visit(*parentheses.expression(), *this);
-    parentheses.expression(static_pointer_cast<Expression>(pop()));
+    parentheses.expression(pop());
     push(parentheses.shared_from_this());
 }
 
-void
-QueryToSelect::replace_attributes() {
-    if (select_->where()) {
-        visit(*select_->where(), *this);
-        select_->where(static_pointer_cast<Expression>(pop()));
-    } 
-
-    BOOST_FOREACH(ExpressionPtr& p, select_->what()) {
-        visit(*p, *this);
-        p = static_pointer_cast<Expression>(pop());
-    }
-}
-
-void
-QueryToSelect::build_from_clause() {
-    FromClausePtr from_clause = FromClause::create();
-    from_clause->add(from_);
-    select_->from(from_clause);
-}
-
-ElementPtr
+expr::ExpressionPtr
 QueryToSelect::pop() {
     BRFC_ASSERT(!stack_.empty());
-    ElementPtr p = stack_.back();
+    expr::ExpressionPtr p = stack_.back();
     stack_.pop_back();
     BRFC_ASSERT(p);
     return p;
 }
 
 void
-QueryToSelect::push(ElementPtr p) {
+QueryToSelect::push(expr::ExpressionPtr p) {
     BRFC_ASSERT(p);
     stack_.push_back(p);
 }
 
 } // namespace rdb
 } // namespace brfc
-
