@@ -400,9 +400,9 @@ RelationalDatabase::save(const oh5::File& f,
 
     QSqlQuery qry(connection());
     QString qrystr("INSERT INTO bdb_files(" + columns.join(", ") +
-                   ", proposed_filename, filename_version) "
+                   ", hash_type, proposed_filename, filename_version) "
                    "VALUES(" + binds.join(", ") +
-                   ", :proposed_filename, :filename_version)");
+                   ", :hash_type, :proposed_filename, :filename_version)");
     if (supports_returning())
         qrystr += " RETURNING id";
     qry.prepare(qrystr);
@@ -420,6 +420,7 @@ RelationalDatabase::save(const oh5::File& f,
     }
 
     qry.bindValue(":path", f.path());
+    qry.bindValue(":hash_type", file_hasher_->name());
     qry.bindValue(":unique_id", file_hasher_->hash(f));
     qry.bindValue(":source_id", f.source()->db_id());
     qry.bindValue(":proposed_filename", proposed_filename);

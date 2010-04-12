@@ -80,6 +80,7 @@ source_radars = Table("bdb_source_radars", meta,
 
 files = Table("bdb_files", meta,
     Column("id", Integer, primary_key=True),
+    Column("hash_type", Text, nullable=False),
     Column("unique_id", Text, unique=True, nullable=False),
     Column("path", Text, unique=True, nullable=False),
     Column("proposed_filename", Text, nullable=False),

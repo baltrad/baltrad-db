@@ -1,15 +1,15 @@
 
 DROP TABLE IF EXISTS bdb_attribute_values_date;
 
-DROP TABLE IF EXISTS bdb_attribute_values_str;
-
 DROP TABLE IF EXISTS bdb_attribute_values_bool;
 
 DROP TABLE IF EXISTS bdb_attribute_values_time;
 
-DROP TABLE IF EXISTS bdb_attribute_values_real;
-
 DROP TABLE IF EXISTS bdb_attribute_values_int;
+
+DROP TABLE IF EXISTS bdb_attribute_values_str;
+
+DROP TABLE IF EXISTS bdb_attribute_values_real;
 
 DROP TABLE IF EXISTS bdb_attributes;
 

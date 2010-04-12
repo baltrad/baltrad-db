@@ -10,6 +10,7 @@ CREATE TABLE bdb_sources (
 
 CREATE TABLE bdb_files (
 	id INTEGER NOT NULL, 
+	hash_type TEXT NOT NULL, 
 	unique_id TEXT NOT NULL, 
 	path TEXT NOT NULL, 
 	proposed_filename TEXT NOT NULL, 
@@ -20,9 +21,9 @@ CREATE TABLE bdb_files (
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
 	 UNIQUE (unique_id), 
-	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id), 
+	 UNIQUE (path), 
 	 UNIQUE (proposed_filename, filename_version), 
-	 UNIQUE (path)
+	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
 )
 
 ;
@@ -38,8 +39,8 @@ CREATE TABLE bdb_groups (
 	endtime TIME, 
 	file_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(parent_id) REFERENCES bdb_groups (id), 
-	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE
+	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(parent_id) REFERENCES bdb_groups (id)
 )
 
 ;
@@ -66,10 +67,10 @@ CREATE TABLE bdb_source_radars (
 	place TEXT, 
 	PRIMARY KEY (id), 
 	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
-	 UNIQUE (radar_site), 
 	 UNIQUE (wmo_code), 
 	 FOREIGN KEY(centre_id) REFERENCES bdb_source_centres (id), 
-	 UNIQUE (place)
+	 UNIQUE (place), 
+	 UNIQUE (radar_site)
 )
 
 ;
@@ -95,13 +96,13 @@ CREATE TABLE bdb_attributes (
 
 ;
 
-CREATE TABLE bdb_attribute_values_str (
+CREATE TABLE bdb_attribute_values_time (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
-	value TEXT NOT NULL, 
+	value TIME NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
 )
 
 ;
@@ -133,16 +134,16 @@ CREATE TABLE bdb_attribute_values_real (
 	group_id INTEGER NOT NULL, 
 	value FLOAT NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
 )
 
 ;
 
-CREATE TABLE bdb_attribute_values_time (
+CREATE TABLE bdb_attribute_values_str (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
-	value TIME NOT NULL, 
+	value TEXT NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
 	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
