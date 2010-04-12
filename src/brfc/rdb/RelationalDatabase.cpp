@@ -143,42 +143,63 @@ class AttributeSaver {
     }
 
     void operator()(const oh5::Attribute& attr) {
-        // ignore invalid attributes (XXX: should be saved to separate table)
-        if (not attr.is_valid())
-            return;
+        QSqlQuery* qry = 0;
+        if (not attr.is_valid()) {
+            qry = &invalid_attribute_query(attr);
+        } else if (mapper_->is_specialized(attr.full_name())) {
+            // ignore specialized attributes
+        } else {
+            qry = &valid_attribute_query(attr);
+        }
 
-        // ignore specialized attributes
-        if (mapper_->is_specialized(attr.full_name()))
-            return;
-        
+        if (qry != 0 and not qry->exec())
+            throw db_error(qry->lastError());
+    }
+
+  private:
+    typedef std::map<QString, QSqlQuery> QueryMap;
+
+    QSqlQuery& invalid_attribute_query(const oh5::Attribute& attr) {
+        QueryMap::iterator iter = queries_.find("bdb_invalid_attributes");
+        if (iter == queries_.end()) {
+            QSqlQuery qry(rdb_->connection());
+            qry.prepare("INSERT INTO bdb_invalid_attributes(name, group_id) "
+                        "VALUES (:name, :group_id)");
+            QueryMap::value_type val("bdb_invalid_attributes", qry);
+            iter = queries_.insert(val).first;
+        }
+        QSqlQuery& qry = iter->second;
+
+        qry.bindValue("name", attr.full_name());
+        QVariant grp_id;
+        if (attr.parent_group())
+            grp_id = attr.parent_group()->db_id();
+        qry.bindValue("group_id", grp_id);
+
+        return qry;
+    }
+
+    QSqlQuery& valid_attribute_query(const oh5::Attribute& attr) {
         const Mapping& mapping = mapper_->mapping(attr.full_name());
+        QueryMap::iterator iter = queries_.find(mapping.table);
+        if (iter == queries_.end()) {
+            QSqlQuery qry(rdb_->connection()); 
+            qry.prepare("INSERT INTO " + mapping.table +
+                        "(group_id, attribute_id, value) " +
+                        "VALUES(:group_id, :attribute_id, :value)");
+            QueryMap::value_type val(mapping.table, qry);
+            iter = queries_.insert(val).first;
+        }
+        QSqlQuery& qry = iter->second;
 
-        QSqlQuery& qry = query_by_table(mapping.table);
         QVariant grp_id;
         if (attr.parent_group())
             grp_id = attr.parent_group()->db_id();
         qry.bindValue("group_id", grp_id);
         qry.bindValue("attribute_id", mapping.id);
         qry.bindValue("value", attr.value().to_qvariant());
-
-        if (not qry.exec())
-            throw db_error(qry.lastError());
-    }
-
-  private:
-    typedef std::map<QString, QSqlQuery> QueryMap;
-
-    QSqlQuery& query_by_table(const QString& table) {
-        QueryMap::iterator iter = queries_.find(table);
-        if (iter == queries_.end()) {
-            QSqlQuery qry(rdb_->connection()); 
-            qry.prepare("INSERT INTO " + table +
-                        "(group_id, attribute_id, value) " +
-                        "VALUES(:group_id, :attribute_id, :value)");
-            QueryMap::value_type val(table, qry);
-            iter = queries_.insert(val).first;
-        }
-        return iter->second;
+        
+        return qry;
     }
 
     RelationalDatabase* rdb_;

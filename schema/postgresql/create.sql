@@ -1,4 +1,25 @@
 
+CREATE TABLE bdb_attribute_groups (
+	id SERIAL NOT NULL, 
+	name INTEGER NOT NULL, 
+	PRIMARY KEY (id)
+)
+
+;
+
+CREATE TABLE bdb_attributes (
+	id SERIAL NOT NULL, 
+	name TEXT NOT NULL, 
+	converter TEXT NOT NULL, 
+	storage_table TEXT NOT NULL, 
+	storage_column TEXT NOT NULL, 
+	ignore_in_hash BOOLEAN NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (name)
+)
+
+;
+
 CREATE TABLE bdb_sources (
 	id SERIAL NOT NULL, 
 	node_id TEXT NOT NULL, 
@@ -20,10 +41,10 @@ CREATE TABLE bdb_files (
 	n_time TIME WITHOUT TIME ZONE NOT NULL, 
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 UNIQUE (unique_id), 
-	 UNIQUE (proposed_filename, filename_version), 
 	 UNIQUE (path), 
-	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
+	 UNIQUE (unique_id), 
+	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id), 
+	 UNIQUE (proposed_filename, filename_version)
 )
 
 ;
@@ -41,57 +62,6 @@ CREATE TABLE bdb_groups (
 	PRIMARY KEY (id), 
 	 FOREIGN KEY(parent_id) REFERENCES bdb_groups (id), 
 	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_source_centres (
-	id INTEGER NOT NULL, 
-	originating_centre INTEGER NOT NULL, 
-	country_code INTEGER NOT NULL, 
-	wmo_cccc VARCHAR(4) NOT NULL, 
-	PRIMARY KEY (id), 
-	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
-	 UNIQUE (country_code), 
-	 UNIQUE (wmo_cccc), 
-	 UNIQUE (originating_centre)
-)
-
-;
-
-CREATE TABLE bdb_source_radars (
-	id INTEGER NOT NULL, 
-	centre_id INTEGER NOT NULL, 
-	radar_site TEXT, 
-	wmo_code INTEGER, 
-	place TEXT, 
-	PRIMARY KEY (id), 
-	 FOREIGN KEY(centre_id) REFERENCES bdb_source_centres (id), 
-	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
-	 UNIQUE (radar_site), 
-	 UNIQUE (wmo_code), 
-	 UNIQUE (place)
-)
-
-;
-
-CREATE TABLE bdb_attribute_groups (
-	id SERIAL NOT NULL, 
-	name INTEGER NOT NULL, 
-	PRIMARY KEY (id)
-)
-
-;
-
-CREATE TABLE bdb_attributes (
-	id SERIAL NOT NULL, 
-	name TEXT NOT NULL, 
-	converter TEXT NOT NULL, 
-	storage_table TEXT NOT NULL, 
-	storage_column TEXT NOT NULL, 
-	ignore_in_hash BOOLEAN NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (name)
 )
 
 ;
@@ -118,13 +88,24 @@ CREATE TABLE bdb_attribute_values_str (
 
 ;
 
+CREATE TABLE bdb_attribute_values_date (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value DATE NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
+)
+
+;
+
 CREATE TABLE bdb_attribute_values_int (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
 	value BIGINT NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
 )
 
 ;
@@ -151,13 +132,41 @@ CREATE TABLE bdb_attribute_values_bool (
 
 ;
 
-CREATE TABLE bdb_attribute_values_date (
-	attribute_id INTEGER NOT NULL, 
+CREATE TABLE bdb_invalid_attributes (
+	name TEXT NOT NULL, 
 	group_id INTEGER NOT NULL, 
-	value DATE NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	PRIMARY KEY (name, group_id), 
 	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE bdb_source_centres (
+	id INTEGER NOT NULL, 
+	originating_centre INTEGER NOT NULL, 
+	country_code INTEGER NOT NULL, 
+	wmo_cccc VARCHAR(4) NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (wmo_cccc), 
+	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
+	 UNIQUE (originating_centre), 
+	 UNIQUE (country_code)
+)
+
+;
+
+CREATE TABLE bdb_source_radars (
+	id INTEGER NOT NULL, 
+	centre_id INTEGER NOT NULL, 
+	radar_site TEXT, 
+	wmo_code INTEGER, 
+	place TEXT, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
+	 UNIQUE (radar_site), 
+	 FOREIGN KEY(centre_id) REFERENCES bdb_source_centres (id), 
+	 UNIQUE (wmo_code), 
+	 UNIQUE (place)
 )
 
 ;

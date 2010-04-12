@@ -121,6 +121,12 @@ attributes = Table("bdb_attributes", meta,
     Column("ignore_in_hash", Boolean, nullable=False, default=False)
 )
 
+invalid_attributes = Table("bdb_invalid_attributes", meta,
+    Column("name", Text, nullable=False),
+    Column("group_id", Integer, ForeignKey(groups.c.id, ondelete="CASCADE"),
+           nullable=False),
+    PrimaryKeyConstraint("name", "group_id"))
+
 attribute_values_int = Table("bdb_attribute_values_int", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),

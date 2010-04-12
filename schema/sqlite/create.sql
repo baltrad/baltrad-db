@@ -1,80 +1,4 @@
 
-CREATE TABLE bdb_sources (
-	id INTEGER NOT NULL, 
-	node_id TEXT NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (node_id)
-)
-
-;
-
-CREATE TABLE bdb_files (
-	id INTEGER NOT NULL, 
-	hash_type TEXT NOT NULL, 
-	unique_id TEXT NOT NULL, 
-	path TEXT NOT NULL, 
-	proposed_filename TEXT NOT NULL, 
-	filename_version INTEGER NOT NULL, 
-	object TEXT NOT NULL, 
-	n_date DATE NOT NULL, 
-	n_time TIME NOT NULL, 
-	source_id INTEGER NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (unique_id), 
-	 UNIQUE (path), 
-	 UNIQUE (proposed_filename, filename_version), 
-	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
-)
-
-;
-
-CREATE TABLE bdb_groups (
-	id INTEGER NOT NULL, 
-	parent_id INTEGER, 
-	name TEXT NOT NULL, 
-	product TEXT, 
-	startdate DATE, 
-	starttime TIME, 
-	enddate DATE, 
-	endtime TIME, 
-	file_id INTEGER NOT NULL, 
-	PRIMARY KEY (id), 
-	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(parent_id) REFERENCES bdb_groups (id)
-)
-
-;
-
-CREATE TABLE bdb_source_centres (
-	id INTEGER NOT NULL, 
-	originating_centre INTEGER NOT NULL, 
-	country_code INTEGER NOT NULL, 
-	wmo_cccc VARCHAR(4) NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (originating_centre), 
-	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
-	 UNIQUE (country_code), 
-	 UNIQUE (wmo_cccc)
-)
-
-;
-
-CREATE TABLE bdb_source_radars (
-	id INTEGER NOT NULL, 
-	centre_id INTEGER NOT NULL, 
-	radar_site TEXT, 
-	wmo_code INTEGER, 
-	place TEXT, 
-	PRIMARY KEY (id), 
-	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
-	 UNIQUE (wmo_code), 
-	 FOREIGN KEY(centre_id) REFERENCES bdb_source_centres (id), 
-	 UNIQUE (place), 
-	 UNIQUE (radar_site)
-)
-
-;
-
 CREATE TABLE bdb_attribute_groups (
 	id INTEGER NOT NULL, 
 	name INTEGER NOT NULL, 
@@ -96,10 +20,67 @@ CREATE TABLE bdb_attributes (
 
 ;
 
+CREATE TABLE bdb_sources (
+	id INTEGER NOT NULL, 
+	node_id TEXT NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (node_id)
+)
+
+;
+
+CREATE TABLE bdb_files (
+	id INTEGER NOT NULL, 
+	hash_type TEXT NOT NULL, 
+	unique_id TEXT NOT NULL, 
+	path TEXT NOT NULL, 
+	proposed_filename TEXT NOT NULL, 
+	filename_version INTEGER NOT NULL, 
+	object TEXT NOT NULL, 
+	n_date DATE NOT NULL, 
+	n_time TIME NOT NULL, 
+	source_id INTEGER NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (proposed_filename, filename_version), 
+	 UNIQUE (unique_id), 
+	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id), 
+	 UNIQUE (path)
+)
+
+;
+
+CREATE TABLE bdb_groups (
+	id INTEGER NOT NULL, 
+	parent_id INTEGER, 
+	name TEXT NOT NULL, 
+	product TEXT, 
+	startdate DATE, 
+	starttime TIME, 
+	enddate DATE, 
+	endtime TIME, 
+	file_id INTEGER NOT NULL, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(parent_id) REFERENCES bdb_groups (id), 
+	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE
+)
+
+;
+
 CREATE TABLE bdb_attribute_values_time (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
 	value TIME NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
+)
+
+;
+
+CREATE TABLE bdb_attribute_values_str (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value TEXT NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
 	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
@@ -107,12 +88,10 @@ CREATE TABLE bdb_attribute_values_time (
 
 ;
 
-CREATE TABLE bdb_attribute_values_date (
-	attribute_id INTEGER NOT NULL, 
+CREATE TABLE bdb_invalid_attributes (
+	name TEXT NOT NULL, 
 	group_id INTEGER NOT NULL, 
-	value DATE NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	PRIMARY KEY (name, group_id), 
 	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
 )
 
@@ -140,24 +119,54 @@ CREATE TABLE bdb_attribute_values_real (
 
 ;
 
-CREATE TABLE bdb_attribute_values_str (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value TEXT NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
 CREATE TABLE bdb_attribute_values_bool (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
 	value BOOLEAN NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
+)
+
+;
+
+CREATE TABLE bdb_attribute_values_date (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value DATE NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
+)
+
+;
+
+CREATE TABLE bdb_source_centres (
+	id INTEGER NOT NULL, 
+	originating_centre INTEGER NOT NULL, 
+	country_code INTEGER NOT NULL, 
+	wmo_cccc VARCHAR(4) NOT NULL, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
+	 UNIQUE (wmo_cccc), 
+	 UNIQUE (originating_centre), 
+	 UNIQUE (country_code)
+)
+
+;
+
+CREATE TABLE bdb_source_radars (
+	id INTEGER NOT NULL, 
+	centre_id INTEGER NOT NULL, 
+	radar_site TEXT, 
+	wmo_code INTEGER, 
+	place TEXT, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(centre_id) REFERENCES bdb_source_centres (id), 
+	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
+	 UNIQUE (radar_site), 
+	 UNIQUE (wmo_code), 
+	 UNIQUE (place)
 )
 
 ;
