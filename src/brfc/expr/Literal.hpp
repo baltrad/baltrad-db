@@ -35,17 +35,6 @@ class Literal : public Expression {
         return LiteralPtr(new Literal(value));
     }
 
-/*
-  XXX: this seems problematic, we need to be able to convert
-       any brfc::Variant to string for this to work, but this
-       is not implemented.
-
-       This method seems not to be used anywhere, so, remove?.
-
-    String string() const {
-        return value_.string();
-    }
-*/
     const Variant& value() const {
         return value_;
     }
