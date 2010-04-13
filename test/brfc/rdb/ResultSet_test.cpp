@@ -22,6 +22,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 
+#include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
 
 #include <brfc/test/TestRDB.hpp>

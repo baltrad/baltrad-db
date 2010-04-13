@@ -137,7 +137,7 @@ void
 Compiler::operator()(expr::Literal& expr) {
     QString key = QString(":lit_") + QString::number(literal_count_++);
     push(key);
-    binds_[key] = expr.value();
+    binds_.add(key, expr.value());
 }
 
 void

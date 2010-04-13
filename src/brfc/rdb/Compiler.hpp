@@ -24,7 +24,8 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/visit.hpp>
 #include <brfc/Variant.hpp>
 
-#include <map>
+#include <brfc/rdb/BindMap.hpp>
+
 #include <vector>
 
 namespace brfc {
@@ -65,8 +66,6 @@ class Compiler {
                         expr::Label,
                         expr::Literal,
                         expr::Parentheses> accepted_types;
-
-    typedef std::map<QString, Variant> BindMap;
 
     /**
      * @brief constructor

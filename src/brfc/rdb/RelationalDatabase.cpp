@@ -38,8 +38,9 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/SourceRadar.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
-#include <brfc/rdb/QueryToSelect.hpp>
+#include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/Compiler.hpp>
+#include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
 #include <brfc/rdb/Select.hpp>
 
@@ -586,7 +587,7 @@ RelationalDatabase::query(const QString& query_str,
     QSqlQuery query(connection());
     query.prepare(query_str);
     BOOST_FOREACH(const BindMap::value_type& bind, binds) {
-        query.bindValue(bind.first, bind.second.to_qvariant());
+        query.bindValue(bind.first, bind.second);
     }
     query.exec();
     return make_shared<RelationalResultSet>(query, sql_);

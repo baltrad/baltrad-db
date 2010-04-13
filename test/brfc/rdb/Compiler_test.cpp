@@ -36,6 +36,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/Select.hpp>
 #include <brfc/rdb/Table.hpp>
 
+#include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/Compiler.hpp>
 
 #include "../common.hpp"
@@ -46,9 +47,8 @@ namespace rdb {
 using namespace expr;
 
 struct rdb_Compiler_test: public testing::Test {
-    Variant bind(const QString& key) const {
-        Compiler::BindMap::const_iterator i = compiler.binds().find(key);
-        return i != compiler.binds().end() ? i->second : Variant();
+    const QVariant& bind(const QString& key) const {
+        return compiler.binds().get(key, QVariant());
     }
 
     Compiler compiler;
@@ -59,32 +59,32 @@ TEST_F(rdb_Compiler_test, test_simple) {
     ExpressionPtr expr = xpr.integer(1)->lt(xpr.integer(2));
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), ":lit_0 < :lit_1");
-    EXPECT_EQ(bind(":lit_0"), Variant(1));
-    EXPECT_EQ(bind(":lit_1"), Variant(2));
+    EXPECT_EQ(bind(":lit_0"), QVariant(1));
+    EXPECT_EQ(bind(":lit_1"), QVariant(2));
 }
 
 TEST_F(rdb_Compiler_test, test_between) {
     ExpressionPtr expr = xpr.integer(1)->between(xpr.integer(0), xpr.integer(2));
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), ":lit_0 >= :lit_1 AND :lit_2 <= :lit_3");
-    EXPECT_EQ(bind(":lit_0"), Variant(1));
-    EXPECT_EQ(bind(":lit_1"), Variant(0));
-    EXPECT_EQ(bind(":lit_2"), Variant(1));
-    EXPECT_EQ(bind(":lit_3"), Variant(2));
+    EXPECT_EQ(bind(":lit_0"), QVariant(1));
+    EXPECT_EQ(bind(":lit_1"), QVariant(0));
+    EXPECT_EQ(bind(":lit_2"), QVariant(1));
+    EXPECT_EQ(bind(":lit_3"), QVariant(2));
 }
 
 TEST_F(rdb_Compiler_test, test_string_literal) {
     LiteralPtr l = xpr.string("a string");
     compiler.compile(*l);
     EXPECT_EQ(compiler.compiled(), ":lit_0");
-    EXPECT_EQ(bind(":lit_0"), Variant("a string"));
+    EXPECT_EQ(bind(":lit_0"), QVariant("a string"));
 }
 
 TEST_F(rdb_Compiler_test, test_parentheses) {
     ExpressionPtr expr = xpr.integer(1)->parentheses();
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), "(:lit_0)");
-    EXPECT_EQ(bind(":lit_0"), Variant(1));
+    EXPECT_EQ(bind(":lit_0"), QVariant(1));
 }
 
 TEST_F(rdb_Compiler_test, test_column) {
@@ -153,7 +153,7 @@ TEST_F(rdb_Compiler_test, test_select) {
     QString expected("SELECT t1.c1, t1.c2, t2.c3\nFROM t1, t2\nWHERE t1.c1 < :lit_0");
     compiler.compile(*select);
     EXPECT_EQ(compiler.compiled(), expected);
-    EXPECT_EQ(bind(":lit_0"), Variant(1));
+    EXPECT_EQ(bind(":lit_0"), QVariant(1));
 }
 
 TEST_F(rdb_Compiler_test, test_factory_or_) {
@@ -164,8 +164,8 @@ TEST_F(rdb_Compiler_test, test_factory_or_) {
     QString expected("t.c = :lit_0 OR t.c = :lit_1");
     compiler.compile(*e3);
     EXPECT_EQ(expected, compiler.compiled());
-    EXPECT_EQ(bind(":lit_0"), Variant(1));
-    EXPECT_EQ(bind(":lit_1"), Variant(2));
+    EXPECT_EQ(bind(":lit_0"), QVariant(1));
+    EXPECT_EQ(bind(":lit_1"), QVariant(2));
 }
 
 } // namespace rdb

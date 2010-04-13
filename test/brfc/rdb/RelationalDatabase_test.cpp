@@ -32,6 +32,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/SourceCentre.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
+#include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
 
 #include <brfc/test/TestRDB.hpp>

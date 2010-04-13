@@ -50,9 +50,9 @@ class SourceRadar;
 namespace rdb {
 
 class AttributeMapper;
+class BindMap;
 class RelationalResultSet;
 
-typedef std::map<QString, Variant> BindMap;
 typedef std::map<weak_ptr<void>, long long> IdCache;
 
 /**
