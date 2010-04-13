@@ -104,6 +104,11 @@ class RelationalDatabase : public Database {
      * @note caller retains hasher ownership
      */
     void file_hasher(FileHasher* hasher);
+    
+    /**
+     * @brief calculate file hash using owned FileHasher
+     */
+    QString hash(const oh5::File& file);
 
   protected:
     virtual void do_begin();

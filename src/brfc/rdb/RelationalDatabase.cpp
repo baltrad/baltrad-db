@@ -336,6 +336,11 @@ RelationalDatabase::file_hasher(FileHasher* hasher) {
     file_hasher(shared_ptr<FileHasher>(hasher, no_delete));
 }
 
+QString
+RelationalDatabase::hash(const oh5::File& file) {
+    return file_hasher_->hash(file);
+}
+
 void
 RelationalDatabase::do_begin() {
     connection().transaction();
@@ -355,7 +360,7 @@ bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
     QSqlQuery query(connection());
     query.prepare("SELECT true FROM bdb_files WHERE unique_id = :unique_id");
-    query.bindValue(":unique_id", file_hasher_->hash(file));
+    query.bindValue(":unique_id", hash(file));
     if (!query.exec())
         throw db_error(query.lastError());
     return query.next(); // got a result row
@@ -443,7 +448,7 @@ RelationalDatabase::save(const oh5::File& f,
 
     qry.bindValue(":path", f.path());
     qry.bindValue(":hash_type", file_hasher_->name());
-    qry.bindValue(":unique_id", file_hasher_->hash(f));
+    qry.bindValue(":unique_id", hash(f));
     qry.bindValue(":source_id", f.source()->db_id());
     qry.bindValue(":proposed_filename", proposed_filename);
     qry.bindValue(":filename_version", filename_version);
