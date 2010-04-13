@@ -50,6 +50,7 @@ class SourceRadar;
 namespace rdb {
 
 class AttributeMapper;
+class RelationalResultSet;
 
 typedef std::map<QString, Variant> BindMap;
 typedef std::map<weak_ptr<void>, long long> IdCache;
@@ -78,8 +79,8 @@ class RelationalDatabase : public Database {
     /**
      * @brief execute a select query
      */
-    shared_ptr<ResultSet> query(const QString& query,
-                                const BindMap& binds);
+    shared_ptr<RelationalResultSet> query(const QString& query,
+                                          const BindMap& binds);
     
     shared_ptr<const oh5::AttributeSpecs> specs() const;
 

@@ -579,7 +579,7 @@ RelationalDatabase::do_load_source(const QString& srcstr) {
 
 }
 
-shared_ptr<ResultSet>
+shared_ptr<RelationalResultSet>
 RelationalDatabase::query(const QString& query_str,
                           const BindMap& binds) {
     BRFC_ASSERT(connection().isOpen());
@@ -589,7 +589,7 @@ RelationalDatabase::query(const QString& query_str,
         query.bindValue(bind.first, bind.second.to_qvariant());
     }
     query.exec();
-    return shared_ptr<ResultSet>(new RelationalResultSet(query, sql_));
+    return make_shared<RelationalResultSet>(query, sql_);
 }
 
 void
