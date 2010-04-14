@@ -67,7 +67,6 @@ only tests not dependent on database are compiled.
  $ scons test test_db_dsn=postgresql://baltrad:baltrad@localhost/baltrad
 
 
-
 == installing ==
 
 If all is in order, feel free to install the library:
