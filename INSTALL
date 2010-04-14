@@ -37,7 +37,6 @@ all boost libraries used are header only
  $ scons doc
 
 
-
 == building ==
 
 to get a list of available variables:
