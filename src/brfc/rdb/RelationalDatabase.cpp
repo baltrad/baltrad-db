@@ -97,9 +97,8 @@ class GroupSaver {
   private:
     void bind_plain(const oh5::Group& group) {
         QVariant file_id, parent_id;
-        if (group.parent()) {
-            shared_ptr<const oh5::Group> parent =
-                dynamic_pointer_cast<const oh5::Group>(group.parent());
+        shared_ptr<const oh5::Group> parent = group.parent<oh5::Group>();
+        if (parent) {
             parent_id = parent->db_id();
         }
         if (group.file())

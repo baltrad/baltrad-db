@@ -44,8 +44,7 @@ Attribute::parent_group() {
 
 shared_ptr<const Group>
 Attribute::parent_group() const {
-    shared_ptr<const AttributeGroup> parent_p =
-        dynamic_pointer_cast<const AttributeGroup>(parent());
+    shared_ptr<const AttributeGroup> parent_p = parent<AttributeGroup>();
     if (parent_p)
         return dynamic_pointer_cast<const Group>(parent_p->parent());
     else
@@ -64,8 +63,7 @@ Attribute::is_valid() const {
 
 QString
 Attribute::full_name() const {
-    shared_ptr<AttributeGroup> grp =
-        dynamic_pointer_cast<AttributeGroup>(parent());
+    shared_ptr<const AttributeGroup> grp = parent<AttributeGroup>();
     if (grp) {
         return grp->name() + "/" + name();
     } else {

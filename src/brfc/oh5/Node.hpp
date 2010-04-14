@@ -78,10 +78,34 @@ class Node : public boost::noncopyable,
     /**
      * @brief parent node
      * @return pointer to a parent or null pointer if this node has no parent
+     * @{
      */
-    shared_ptr<Node> parent() const {
+    shared_ptr<Node> parent() {
         return parent_.lock();
     }
+
+    shared_ptr<const Node> parent() const {
+        return parent_.lock();
+    }
+    ///@}
+    
+    /**
+     * @brief parent node of type T
+     * @tparam T type to test parent against
+     * @return pointer to a parent node of type T or null pointer if this
+     *         node has no parent or parent is not of type T
+     * @{
+     */
+    template<typename T>
+    shared_ptr<T> parent() {
+        return dynamic_pointer_cast<T>(parent_.lock());
+    }
+
+    template<typename T>
+    shared_ptr<const T> parent() const {
+        return dynamic_pointer_cast<const T>(parent_.lock());
+    }
+    ///@}
 
     /**
      * @brief is this node the root node
