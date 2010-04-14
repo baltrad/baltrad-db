@@ -69,7 +69,6 @@ only tests not dependent on database are compiled.
 
 
 
-
 == installing ==
 
 If all is in order, feel free to install the library:
