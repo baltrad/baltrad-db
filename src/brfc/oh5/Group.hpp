@@ -37,6 +37,14 @@ class Group : public Node {
      */
     virtual ~Group();
 
+    shared_ptr<Group> shared_from_this() {
+        return static_pointer_cast<Group>(Node::shared_from_this());
+    }
+
+    shared_ptr<const Group> shared_from_this() const {
+        return static_pointer_cast<const Group>(Node::shared_from_this());
+    }
+
     /**
      * @{
      * @brief access a child attribute
