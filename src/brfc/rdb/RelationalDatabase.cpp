@@ -40,7 +40,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/Compiler.hpp>
-#include <brfc/rdb/IdCache.hpp>
+#include <brfc/rdb/GroupIdCache.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
 #include <brfc/rdb/Select.hpp>
@@ -61,37 +61,6 @@ namespace brfc {
 namespace rdb {
 
 namespace {
-
-class GroupIdCache : public IdCache<oh5::Group, long long> {
-  public:
-    GroupIdCache(RelationalDatabase* rdb)
-            : IdCache<oh5::Group, long long>()
-            , rdb_(rdb) {
-    }
-
-  protected:
-    virtual OptionalId do_query(const oh5::Group& group) {
-        QString qry = "SELECT id FROM groups WHERE file_id = :file_id "
-                      "AND parent_id = :parent_id AND name = :name ";
-        BindMap binds;
-        binds.add(":file_id", rdb_->db_id(*group.file()));
-        shared_ptr<const oh5::Group> parent = group.parent<const oh5::Group>();
-
-        QVariant parent_id;
-        if (parent) {
-            GroupIdCache::OptionalId id = get(*parent);
-            if (id)
-                parent_id = id.get();
-        }
-        binds.add(":parent_id", parent_id);
-        binds.add(":name", group.name());
-        shared_ptr<ResultSet> r = rdb_->query(qry, binds);
-        return r->next() ? r->integer(0) : OptionalId();
-    }
-  
-  private:
-    RelationalDatabase* rdb_;
-};
 
 class GroupSaver {
   public:
