@@ -37,7 +37,7 @@ class SHA1AttributeHasher_test : public ::testing::Test {
   public:
     SHA1AttributeHasher_test()
             : specs(new oh5::AttributeSpecs())
-            , src(new oh5::SourceRadar())
+            , src(make_shared<oh5::SourceRadar>())
             , f1(oh5::File::minimal("pvol",
                                     QDate(2000, 1, 2),
                                     QTime(12, 5),

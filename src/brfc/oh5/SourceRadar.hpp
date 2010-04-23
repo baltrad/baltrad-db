@@ -29,13 +29,6 @@ namespace oh5 {
 
 class SourceRadar : public Source {
   public:
-    SourceRadar()
-            : wmo_code_(0)
-            , radar_site_("")
-            , place_("")
-            , centre_() {
-    }
-
     /**
      * @brief combined WMO block and station number
      */
@@ -75,6 +68,18 @@ class SourceRadar : public Source {
     }
 
     virtual QString to_string() const;
+  
+  protected:
+    template<class T> 
+    friend 
+    shared_ptr<T> boost::make_shared();
+
+    SourceRadar()
+            : wmo_code_(0)
+            , radar_site_("")
+            , place_("")
+            , centre_() {
+    }
    
   private:
     int wmo_code_;

@@ -60,21 +60,21 @@ TEST(oh5_Source_test, from_source_with_invalid_key) {
 }
 
 TEST(oh5_Source_test, radar_to_string) {
-    SourceRadar radar;
-    radar.wmo_code(2606);
-    EXPECT_EQ(radar.to_string(), "WMO:2606");
-    radar.radar_site("SE50");
-    EXPECT_EQ(radar.to_string(), "WMO:2606,RAD:SE50");
-    radar.place("Ängelholm");
-    EXPECT_EQ(radar.to_string(), "WMO:2606,RAD:SE50,PLC:Ängelholm");
+    shared_ptr<SourceRadar> radar = make_shared<SourceRadar>();
+    radar->wmo_code(2606);
+    EXPECT_EQ(radar->to_string(), "WMO:2606");
+    radar->radar_site("SE50");
+    EXPECT_EQ(radar->to_string(), "WMO:2606,RAD:SE50");
+    radar->place("Ängelholm");
+    EXPECT_EQ(radar->to_string(), "WMO:2606,RAD:SE50,PLC:Ängelholm");
 }
 
 TEST(oh5_Source_test, centre_to_string) {
-    SourceCentre centre;
-    centre.originating_centre(247);
-    EXPECT_EQ(centre.to_string(), "ORG:247");
-    centre.country_code(613);
-    EXPECT_EQ(centre.to_string(), "ORG:247,CTY:613");
+    shared_ptr<SourceCentre> centre = make_shared<SourceCentre>();
+    centre->originating_centre(247);
+    EXPECT_EQ(centre->to_string(), "ORG:247");
+    centre->country_code(613);
+    EXPECT_EQ(centre->to_string(), "ORG:247,CTY:613");
 }
 
 } // namespace oh5

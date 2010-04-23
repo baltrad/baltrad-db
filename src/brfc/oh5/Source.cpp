@@ -64,13 +64,13 @@ Source::from_source_attribute(const QString& source) {
         elems.contains("RAD") or
         elems.contains("PLC")) {
         
-        shared_ptr<SourceRadar> src(new SourceRadar());
+        shared_ptr<SourceRadar> src = make_shared<SourceRadar>();
         src->wmo_code(elems.value("WMO", "0").toInt());
         src->radar_site(elems.value("RAD", ""));
         src->place(elems.value("PLC", ""));
         return src;
     } else if (elems.contains("CTY") or elems.contains("ORG")) {
-        shared_ptr<SourceCentre> src(new SourceCentre());
+        shared_ptr<SourceCentre> src = make_shared<SourceCentre>();
         src->country_code(elems.value("CTY", "0").toInt());
         src->originating_centre(elems.value("ORG", "0").toInt());
         return src;

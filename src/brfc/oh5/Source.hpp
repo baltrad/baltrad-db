@@ -27,13 +27,8 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-class Source {
+class Source : public enable_shared_from_this<Source> {
   public:
-    explicit Source(long long db_id=0, const QString& node_id="")
-             : db_id_(db_id)
-             , node_id_(node_id) {
-    }
-
     virtual ~Source() { }
 
     /**
@@ -68,6 +63,12 @@ class Source {
     virtual QString wmo_cccc() const = 0;
 
     virtual QString to_string() const = 0;
+  
+  protected:
+    explicit Source(long long db_id=0, const QString& node_id="")
+             : db_id_(db_id)
+             , node_id_(node_id) {
+    }
 
   private:
     long long db_id_;

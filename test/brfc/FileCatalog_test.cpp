@@ -81,7 +81,7 @@ struct FileCatalog_test : public testing::Test {
             , specs(new oh5::AttributeSpecs())
             , fc(db, specs, namer, tempdir->path())
             , src_str("WMO:02606")
-            , default_src(new oh5::SourceRadar())
+            , default_src(make_shared<oh5::SourceRadar>())
             , tempfile()
             , minfile(oh5::File::minimal("PVOL",
                                          QDate(2000, 1, 1),

@@ -564,7 +564,7 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     SourceMap::iterator i = sources_.find(id);
 
     if (i == sources_.end()) {
-        shared_ptr<oh5::SourceCentre> centre(new oh5::SourceCentre());
+        shared_ptr<oh5::SourceCentre> centre = make_shared<oh5::SourceCentre>();
         centre->db_id(qry.value(2).toLongLong()); 
         centre = load_source_centre(centre);
 

@@ -27,15 +27,6 @@ namespace oh5 {
 
 class SourceCentre : public Source {
   public:
-    
-    SourceCentre()
-            : Source()
-            , originating_centre_(0)
-            , country_code_(0)
-            , wmo_cccc_() {
-
-    }
-
     /**
      * @brief originating centre
      */
@@ -64,6 +55,19 @@ class SourceCentre : public Source {
     }
 
     virtual QString to_string() const;
+  
+  protected:
+    template<class T> 
+    friend 
+    shared_ptr<T> boost::make_shared();
+
+    SourceCentre()
+            : Source()
+            , originating_centre_(0)
+            , country_code_(0)
+            , wmo_cccc_() {
+
+    }
 
   private:
     int originating_centre_;
