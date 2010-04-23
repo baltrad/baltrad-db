@@ -62,6 +62,7 @@ class MockDatabase : public Database {
     MOCK_METHOD3(do_save_file, long long(const oh5::File&,
                                          const QString&,
                                          unsigned int));
+    MOCK_METHOD1(do_db_id, long long(const oh5::File&));
     MOCK_METHOD1(do_next_filename_version, unsigned int(const QString&));
     MOCK_METHOD1(do_load_source, shared_ptr<oh5::Source>(const QString&));
     MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
@@ -134,7 +135,6 @@ TEST_F(FileCatalog_test, test_catalog) {
     // file is given the correct path
     shared_ptr<const oh5::File> f = fc.catalog(tempfile.path());
     EXPECT_EQ(f->path(), target);
-    EXPECT_EQ(f->db_id(), 1);
 
     EXPECT_TRUE(QFile::exists(target));
 }

@@ -40,6 +40,7 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/Compiler.hpp>
+#include <brfc/rdb/IdCache.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
 #include <brfc/rdb/Select.hpp>
@@ -61,10 +62,42 @@ namespace rdb {
 
 namespace {
 
+class GroupIdCache : public IdCache<oh5::Group, long long> {
+  public:
+    GroupIdCache(RelationalDatabase* rdb)
+            : IdCache<oh5::Group, long long>()
+            , rdb_(rdb) {
+    }
+
+  protected:
+    virtual OptionalId do_query(const oh5::Group& group) {
+        QString qry = "SELECT id FROM groups WHERE file_id = :file_id "
+                      "AND parent_id = :parent_id AND name = :name ";
+        BindMap binds;
+        binds.add(":file_id", rdb_->db_id(*group.file()));
+        shared_ptr<const oh5::Group> parent = group.parent<const oh5::Group>();
+
+        QVariant parent_id;
+        if (parent) {
+            GroupIdCache::OptionalId id = get(*parent);
+            if (id)
+                parent_id = id.get();
+        }
+        binds.add(":parent_id", parent_id);
+        binds.add(":name", group.name());
+        shared_ptr<ResultSet> r = rdb_->query(qry, binds);
+        return r->next() ? r->integer(0) : OptionalId();
+    }
+  
+  private:
+    RelationalDatabase* rdb_;
+};
+
 class GroupSaver {
   public:
-    GroupSaver(RelationalDatabase* rdb)
+    GroupSaver(RelationalDatabase* rdb, GroupIdCache* id_cache)
             : rdb_(rdb)
+            , id_cache_(id_cache)
             , qry_(rdb->connection())
             , special_(rdb->mapper().specializations_on("bdb_groups")) {
         QStringList columns, binds; 
@@ -91,20 +124,22 @@ class GroupSaver {
 
         if (not qry_.exec())
             throw db_error(qry_.lastError());
-        group.db_id(last_id());
+        id_cache_->set_cached(group.shared_from_this(), last_id());
     }
 
   private:
     void bind_plain(const oh5::Group& group) {
-        QVariant file_id, parent_id;
+        QVariant file_id;
+        GroupIdCache::OptionalId parent_id;
         shared_ptr<const oh5::Group> parent = group.parent<oh5::Group>();
         if (parent) {
-            parent_id = parent->db_id();
+            parent_id = id_cache_->get(*parent);
         }
         if (group.file())
-            file_id = group.file()->db_id();
+            file_id = rdb_->db_id(*group.file());
 
-        qry_.bindValue(":parent_id", parent_id);
+        qry_.bindValue(":parent_id", parent_id ? parent_id.get()
+                                               : QVariant());
         qry_.bindValue(":file_id", file_id);
         qry_.bindValue(":name", group.name());
     }
@@ -130,15 +165,17 @@ class GroupSaver {
     }
 
     RelationalDatabase* rdb_;
+    GroupIdCache* id_cache_;
     QSqlQuery qry_;
     MappingVector special_;
 };
 
 class AttributeSaver {
   public:
-    AttributeSaver(RelationalDatabase* rdb)
+    AttributeSaver(RelationalDatabase* rdb, GroupIdCache* group_id_cache)
             : rdb_(rdb)
             , mapper_(&rdb->mapper())
+            , group_id_cache_(group_id_cache)
             , queries_() {
     }
 
@@ -171,10 +208,10 @@ class AttributeSaver {
         QSqlQuery& qry = iter->second;
 
         qry.bindValue("name", attr.full_name());
-        QVariant grp_id;
+        GroupIdCache::OptionalId grp_id;
         if (attr.parent_group())
-            grp_id = attr.parent_group()->db_id();
-        qry.bindValue("group_id", grp_id);
+            grp_id = group_id_cache_->get(*attr.parent_group());
+        qry.bindValue("group_id", grp_id ? grp_id.get() : QVariant());
 
         return qry;
     }
@@ -192,10 +229,10 @@ class AttributeSaver {
         }
         QSqlQuery& qry = iter->second;
 
-        QVariant grp_id;
+        GroupIdCache::OptionalId grp_id;
         if (attr.parent_group())
-            grp_id = attr.parent_group()->db_id();
-        qry.bindValue("group_id", grp_id);
+            grp_id = group_id_cache_->get(*attr.parent_group());
+        qry.bindValue("group_id", grp_id ? grp_id.get() : QVariant());
         qry.bindValue("attribute_id", mapping.id);
         qry.bindValue("value", attr.value().to_qvariant());
         
@@ -204,14 +241,16 @@ class AttributeSaver {
 
     RelationalDatabase* rdb_;
     const AttributeMapper* mapper_;
+    GroupIdCache* group_id_cache_;
     QueryMap queries_;
 };
 
 class SaveVisitor {
   public:
     SaveVisitor(RelationalDatabase* db)
-            : save_attribute_(db)
-            , save_group_(db) {
+            : group_id_cache_(db)
+            , save_attribute_(db, &group_id_cache_)
+            , save_group_(db, &group_id_cache_) {
     }
 
     typedef mpl::vector<const oh5::AttributeGroup,
@@ -231,6 +270,7 @@ class SaveVisitor {
     }
 
   private:
+    GroupIdCache group_id_cache_;
     AttributeSaver save_attribute_;
     GroupSaver save_group_;
 };
@@ -371,7 +411,6 @@ RelationalDatabase::do_save_file(const oh5::File& file,
                                  const QString& proposed_filename,
                                  unsigned int filename_version) {
     id_type file_id = save(file, proposed_filename, filename_version);
-    file.db_id(file_id.toLongLong());
 
     SaveVisitor visitor(this);
     
@@ -448,7 +487,7 @@ RelationalDatabase::save(const oh5::File& f,
     qry.bindValue(":path", f.path());
     qry.bindValue(":hash_type", file_hasher_->name());
     qry.bindValue(":unique_id", hash(f));
-    qry.bindValue(":source_id", f.source()->db_id());
+    qry.bindValue(":source_id", db_id(*f.source()));
     qry.bindValue(":proposed_filename", proposed_filename);
     qry.bindValue(":filename_version", filename_version);
 
@@ -462,8 +501,31 @@ RelationalDatabase::save(const oh5::File& f,
     }
 }
 
+long long
+RelationalDatabase::do_db_id(const oh5::File& file) {
+    QString qry = "SELECT id FROM bdb_files WHERE unique_id = :unique_id";
+    BindMap binds;
+    binds.add(":unique_id", hash(file));
+    shared_ptr<ResultSet> r = query(qry, binds);
+    r->next();
+    return r->integer(0);
+}
+
+long long
+RelationalDatabase::db_id(const oh5::Source& src) {
+    QString qry = "SELECT id FROM bdb_sources WHERE node_id = :node_id";
+    BindMap binds;
+    binds.add(":node_id", src.node_id());
+    shared_ptr<ResultSet> r = query(qry, binds);
+    if (r->next())
+        return r->integer(0);
+    else
+        return 0;
+}
+
 shared_ptr<oh5::SourceCentre>
-RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src) {
+RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
+                                       long long id) {
     QStringList wcl;
     QList<QVariant> binds;
 
@@ -476,9 +538,9 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src) {
         wcl.append("country_code = ?");
         binds.append(src->country_code());
     }
-    if (src->db_id()) {
+    if (id) {
         wcl.append("bdb_sources.id = ?");
-        binds.append(src->db_id());
+        binds.append(id);
     }
 
     QString qstr = QString("SELECT bdb_sources.id, node_id, country_code, ") +
@@ -504,11 +566,10 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src) {
     }
     qry.first();
 
-    long long id = qry.value(0).toLongLong();
+    id = qry.value(0).toLongLong();
     SourceMap::iterator i = sources_.find(id);
 
     if (i == sources_.end()) {
-        src->db_id(qry.value(0).toLongLong());
         src->node_id(qry.value(1).toString());
         src->country_code(qry.value(2).toInt());
         src->originating_centre(qry.value(3).toInt());
@@ -565,11 +626,9 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
 
     if (i == sources_.end()) {
         shared_ptr<oh5::SourceCentre> centre = make_shared<oh5::SourceCentre>();
-        centre->db_id(qry.value(2).toLongLong()); 
-        centre = load_source_centre(centre);
+        centre = load_source_centre(centre, qry.value(2).toLongLong());
 
         src->centre(centre);
-        src->db_id(qry.value(0).toLongLong());
         src->node_id(qry.value(1).toString());
         src->wmo_code(qry.value(3).toInt());
         src->radar_site(qry.value(4).toString());

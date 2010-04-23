@@ -82,7 +82,7 @@ class Database : public boost::noncopyable {
     void remove_file(const QString& path) {
         do_remove_file(path);
     }
-    
+
     /**
      * @brief save file to database
      * @param file the file to be saved
@@ -98,6 +98,13 @@ class Database : public boost::noncopyable {
         return do_save_file(file, proposed_filename, filename_version);
     }
 
+    /**
+     * @brief get the database id of a file
+     */
+    long long db_id(const oh5::File& file) {
+        return do_db_id(file);
+    }
+    
     /**
      * @brief next version number for a filename
      */
@@ -129,6 +136,7 @@ class Database : public boost::noncopyable {
     virtual long long do_save_file(const oh5::File& file,
                                    const QString& proposed_filename,
                                    unsigned int filename_version) = 0;
+    virtual long long do_db_id(const oh5::File& file) = 0;
 
     virtual unsigned int do_next_filename_version(const QString& filename) = 0;
 

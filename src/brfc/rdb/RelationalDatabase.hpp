@@ -40,7 +40,7 @@ class Variant;
 namespace oh5 {
 
 class AttributeSpecs;
-class File;
+class Group;
 class Source;
 class SourceCentre;
 class SourceRadar;
@@ -52,8 +52,6 @@ namespace rdb {
 class AttributeMapper;
 class BindMap;
 class RelationalResultSet;
-
-typedef std::map<weak_ptr<void>, long long> IdCache;
 
 /**
  * @brief Database using QtSql
@@ -110,6 +108,8 @@ class RelationalDatabase : public Database {
      */
     QString hash(const oh5::File& file);
 
+    using Database::db_id;
+
   protected:
     virtual void do_begin();
     virtual void do_rollback();
@@ -124,6 +124,8 @@ class RelationalDatabase : public Database {
     virtual long long do_save_file(const oh5::File& file,
                                    const QString& proposed_filename,
                                    unsigned int filename_version);
+    
+    virtual long long do_db_id(const oh5::File& file);
 
     virtual unsigned int do_next_filename_version(const QString& filename);
 
@@ -147,7 +149,10 @@ class RelationalDatabase : public Database {
     load_source_radar(shared_ptr<oh5::SourceRadar> src);
 
     shared_ptr<oh5::SourceCentre>
-    load_source_centre(shared_ptr<oh5::SourceCentre> src);
+    load_source_centre(shared_ptr<oh5::SourceCentre> src,
+                       long long id=0);
+
+    long long db_id(const oh5::Source& source);
 
     /**
      * @brief save file to database
@@ -170,7 +175,6 @@ class RelationalDatabase : public Database {
     SourceMap sources_;
     QString dialect_;
     bool supports_returning_;
-    IdCache id_cache_;
     static unsigned int connection_count_;
     static int argc_;
     static const char* argv_[];

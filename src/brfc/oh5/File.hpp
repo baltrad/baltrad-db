@@ -45,7 +45,8 @@ class Source;
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
  */
-class File : public boost::noncopyable {
+class File : public boost::noncopyable,
+             public boost::enable_shared_from_this<File> {
   public:
     typedef std::vector<shared_ptr<Attribute> > AttributeVector;
     typedef std::vector<shared_ptr<const Attribute> > ConstAttributeVector;
@@ -163,14 +164,6 @@ class File : public boost::noncopyable {
     QString name() const;
     
     /**
-     * @{
-     */
-    long long db_id() const { return db_id_; }
-
-    void db_id(long long db_id) const { db_id_ = db_id; }
-    ///@}
-    
-    /**
      * @name mandatory attribute access shorthands
      * @{
      */
@@ -216,7 +209,6 @@ class File : public boost::noncopyable {
     shared_ptr<RootGroup> root_;
     QString path_;
     shared_ptr<Source> source_;
-    mutable long long db_id_;
 };
 
 } // namespace oh5

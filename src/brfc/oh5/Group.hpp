@@ -112,13 +112,6 @@ class Group : public Node {
     shared_ptr<const Group> child_group_by_name(const QString& name) const;
     ///@}
 
-    // XXX: this needs to go!
-    long long db_id() const { return db_id_; }
-
-    void db_id(long long db_id) const {
-        db_id_ = db_id;
-    }
-
   protected:
     template<class T, class A1> 
     friend 
@@ -128,16 +121,12 @@ class Group : public Node {
      * @brief constructor
      */
     Group(const QString& name)
-        : Node(name)
-        , db_id_(0) {
+        : Node(name) {
     }
 
     virtual bool do_accepts_child(const Node& node) const = 0;
 
     virtual bool do_accepts_parent(const Node& node) const;
-  
-  private:
-    mutable long long db_id_;
 };
 
 } // namespace oh5

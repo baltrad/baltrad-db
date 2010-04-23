@@ -40,10 +40,10 @@ namespace brfc {
 namespace oh5 {
 
 File::File()
-        : root_(make_shared<RootGroup>())
+        : enable_shared_from_this<File>()
+        , root_(make_shared<RootGroup>())
         , path_()
-        , source_()
-        , db_id_(0) {
+        , source_() {
 }
 
 File::~File() {

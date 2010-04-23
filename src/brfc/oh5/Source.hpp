@@ -46,14 +46,6 @@ class Source : public enable_shared_from_this<Source> {
      */
     static shared_ptr<Source> from_source_attribute(const QString& source);
 
-    long long db_id() const {
-        return db_id_;
-    }
-
-    void db_id(long long db_id) {
-        db_id_ = db_id;
-    }
-
     QString node_id() const { return node_id_; }
 
     void node_id(const QString& value) {
@@ -65,13 +57,11 @@ class Source : public enable_shared_from_this<Source> {
     virtual QString to_string() const = 0;
   
   protected:
-    explicit Source(long long db_id=0, const QString& node_id="")
-             : db_id_(db_id)
-             , node_id_(node_id) {
+    explicit Source(const QString& node_id="")
+             : node_id_(node_id) {
     }
 
   private:
-    long long db_id_;
     QString node_id_;
 };
 
