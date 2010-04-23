@@ -462,7 +462,7 @@ RelationalDatabase::save(const oh5::File& f,
     }
 }
 
-void
+shared_ptr<oh5::SourceCentre>
 RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src) {
     QStringList wcl;
     QList<QVariant> binds;
@@ -504,14 +504,21 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src) {
     }
     qry.first();
 
-    src->db_id(qry.value(0).toLongLong());
-    src->node_id(qry.value(1).toString());
-    src->country_code(qry.value(2).toInt());
-    src->originating_centre(qry.value(3).toInt());
-    src->wmo_cccc(qry.value(4).toString());
+    long long id = qry.value(0).toLongLong();
+    SourceMap::iterator i = sources_.find(id);
+
+    if (i == sources_.end()) {
+        src->db_id(qry.value(0).toLongLong());
+        src->node_id(qry.value(1).toString());
+        src->country_code(qry.value(2).toInt());
+        src->originating_centre(qry.value(3).toInt());
+        src->wmo_cccc(qry.value(4).toString());
+        i = sources_.insert(std::make_pair(id, src)).first;
+    }
+    return static_pointer_cast<oh5::SourceCentre>(i->second);
 }
 
-void
+shared_ptr<oh5::SourceRadar>
 RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     QStringList wcl;
     QList<QVariant> binds;
@@ -553,16 +560,24 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     }
     qry.first();
 
-    shared_ptr<oh5::SourceCentre> centre(new oh5::SourceCentre());
-    centre->db_id(qry.value(2).toLongLong()); 
-    load_source_centre(centre);
+    long long id = qry.value(0).toLongLong();
+    SourceMap::iterator i = sources_.find(id);
 
-    src->centre(centre);
-    src->db_id(qry.value(0).toLongLong());
-    src->node_id(qry.value(1).toString());
-    src->wmo_code(qry.value(3).toInt());
-    src->radar_site(qry.value(4).toString());
-    src->place(qry.value(5).toString());
+    if (i == sources_.end()) {
+        shared_ptr<oh5::SourceCentre> centre(new oh5::SourceCentre());
+        centre->db_id(qry.value(2).toLongLong()); 
+        centre = load_source_centre(centre);
+
+        src->centre(centre);
+        src->db_id(qry.value(0).toLongLong());
+        src->node_id(qry.value(1).toString());
+        src->wmo_code(qry.value(3).toInt());
+        src->radar_site(qry.value(4).toString());
+        src->place(qry.value(5).toString());
+        i = sources_.insert(std::make_pair(id, src)).first;
+    }
+
+    return static_pointer_cast<oh5::SourceRadar>(i->second);
 }
 
 shared_ptr<oh5::Source>
@@ -573,11 +588,9 @@ RelationalDatabase::do_load_source(const QString& srcstr) {
     shared_ptr<oh5::SourceCentre> centre;
 
     if (radar = dynamic_pointer_cast<oh5::SourceRadar>(src)) {
-        load_source_radar(radar);
-        return radar;
+        return load_source_radar(radar);
     } else if (centre = dynamic_pointer_cast<oh5::SourceCentre>(src)) {
-        load_source_centre(centre);
-        return centre;
+        return load_source_centre(centre);
     } else {
         throw lookup_error(srcstr.toUtf8().constData());
     }

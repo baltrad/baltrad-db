@@ -96,6 +96,32 @@ TEST_P(rdb_RelationalDatabase_test, load_source_by_plc_unicode) {
     EXPECT_EQ("pl", radar->centre()->node_id());
 }
 
+TEST_P(rdb_RelationalDatabase_test, load_same_source) {
+    shared_ptr<oh5::SourceRadar> src1 =
+        dynamic_pointer_cast<oh5::SourceRadar>(db->load_source("PLC:Legionowo"));
+    shared_ptr<oh5::SourceRadar> src2 =
+        dynamic_pointer_cast<oh5::SourceRadar>(db->load_source("PLC:Legionowo"));
+    ASSERT_TRUE(src1);
+    ASSERT_TRUE(src2);
+    EXPECT_EQ(src1, src2);
+    EXPECT_TRUE(src1->centre());
+    EXPECT_TRUE(src2->centre());
+    EXPECT_EQ(src1->centre(), src2->centre());
+}
+
+TEST_P(rdb_RelationalDatabase_test, load_radars_with_same_centre) {
+    shared_ptr<oh5::SourceRadar> src1 =
+        dynamic_pointer_cast<oh5::SourceRadar>(db->load_source("PLC:Legionowo"));
+    shared_ptr<oh5::SourceRadar> src2 =
+        dynamic_pointer_cast<oh5::SourceRadar>(db->load_source("PLC:Pastewnik"));
+    ASSERT_TRUE(src1);
+    ASSERT_TRUE(src2);
+    EXPECT_NE(src1, src2);
+    EXPECT_TRUE(src1->centre());
+    EXPECT_TRUE(src2->centre());
+    EXPECT_EQ(src1->centre(), src2->centre());
+}
+
 TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
     shared_ptr<oh5::File> file =
         oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), "PLC:Legionowo");

@@ -134,12 +134,20 @@ class RelationalDatabase : public Database {
     QString dialect() const { return dialect_; }
   
   private:
+    /**
+     * @brief map source id's to source instances
+     */
+    typedef std::map<long long, shared_ptr<oh5::Source> > SourceMap;
+
     void init();
 
     void init_qapp();
 
-    void load_source_radar(shared_ptr<oh5::SourceRadar> src);
-    void load_source_centre(shared_ptr<oh5::SourceCentre> src);
+    shared_ptr<oh5::SourceRadar>
+    load_source_radar(shared_ptr<oh5::SourceRadar> src);
+
+    shared_ptr<oh5::SourceCentre>
+    load_source_centre(shared_ptr<oh5::SourceCentre> src);
 
     /**
      * @brief save file to database
@@ -159,6 +167,7 @@ class RelationalDatabase : public Database {
     scoped_ptr<AttributeMapper> mapper_;
     shared_ptr<oh5::AttributeSpecs> specs_;
     shared_ptr<FileHasher> file_hasher_;
+    SourceMap sources_;
     QString dialect_;
     bool supports_returning_;
     IdCache id_cache_;
