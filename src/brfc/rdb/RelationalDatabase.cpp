@@ -22,18 +22,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/Query.hpp>
-#include <brfc/Variant.hpp>
-#include <brfc/visit.hpp>
 #include <brfc/FileHasher.hpp>
 
-#include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/Expression.hpp>
-
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
-#include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/SourceCentre.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
@@ -43,7 +35,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
 #include <brfc/rdb/SaveFile.hpp>
-#include <brfc/rdb/Select.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -53,9 +44,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QVariant>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
-#include <QtSql/QSqlRecord>
-
-#include <map>
 
 namespace brfc {
 namespace rdb {
