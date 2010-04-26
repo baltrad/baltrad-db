@@ -140,9 +140,9 @@ class File : public boost::noncopyable,
      * @brief get invalid attributes attributes (have no value)
      * @{
      */
-    ConstAttributeVector invalid_attributes() const;
-
     AttributeVector invalid_attributes();
+
+    ConstAttributeVector invalid_attributes() const;
     //@}
 
     /**

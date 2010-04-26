@@ -80,7 +80,10 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
                         brfc::oh5::Source,
                         brfc::oh5::SourceRadar);
 
+SWIG_SHARED_PTR(AttributeSpecs, brfc::oh5::AttributeSpecs);
+
 %template(NodeVector) std::vector<brfc::shared_ptr<brfc::oh5::Node> >;
+%template(AttributeVector) std::vector<brfc::shared_ptr<brfc::oh5::Attribute> >;
 
 %typemap(javaimports) brfc::oh5::File,
                       brfc::oh5::File* %{
@@ -101,7 +104,8 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
 %}
 
 // make constructors for SWIG_SHARED_PTR public
-%typemap(javabody) brfc::oh5::File,
+%typemap(javabody) brfc::oh5::AttributeSpecs,
+                   brfc::oh5::File,
                    brfc::oh5::Source %{
   private long swigCPtr;
   private boolean swigCMemOwnBase;

@@ -62,18 +62,22 @@ class FileCatalog {
                 shared_ptr<oh5::AttributeSpecs> specs,
                 shared_ptr<FileNamer> namer,
                 const QString& storage);
-    
+
+    /**
+     * @brief destructor
+     */
+    ~FileCatalog();
+ 
     void file_namer(shared_ptr<FileNamer> namer);
 
     /**
      * @note caller retains namer ownership
      */
     void file_namer(FileNamer* namer);
-    
-    /**
-     * @brief destructor
-     */
-    ~FileCatalog();
+
+    shared_ptr<Database> database() {
+        return db_;
+    }
 
     /**
      * @brief has file been imported to this catalog
