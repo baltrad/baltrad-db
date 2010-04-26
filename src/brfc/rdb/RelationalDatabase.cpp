@@ -40,9 +40,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/Compiler.hpp>
-#include <brfc/rdb/GroupIdCache.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
+#include <brfc/rdb/SaveFile.hpp>
 #include <brfc/rdb/Select.hpp>
 
 #include <boost/foreach.hpp>
@@ -61,188 +61,6 @@ namespace brfc {
 namespace rdb {
 
 namespace {
-
-class GroupSaver {
-  public:
-    GroupSaver(RelationalDatabase* rdb, GroupIdCache* id_cache)
-            : rdb_(rdb)
-            , id_cache_(id_cache)
-            , qry_(rdb->connection())
-            , special_(rdb->mapper().specializations_on("bdb_groups")) {
-        QStringList columns, binds; 
-        columns.append("parent_id");
-        columns.append("file_id");
-        columns.append("name");
-        BOOST_FOREACH(const Mapping& mapping, special_) {
-            columns.append(mapping.column);
-        }
-        BOOST_FOREACH(const QString& column, columns) {
-            binds.append(":" + column);
-        }
-        QString qrystr("INSERT INTO bdb_groups(" + columns.join(", ") +
-                       ") VALUES(" + binds.join(", ") + ")");
-        if (rdb->supports_returning())
-            qrystr += " RETURNING id";
-        if (not qry_.prepare(qrystr))
-            throw db_error(qry_.lastError());
-    }
-    
-    void operator()(const oh5::Group& group) {
-        bind_plain(group);
-        bind_specializations(group);
-
-        if (not qry_.exec())
-            throw db_error(qry_.lastError());
-        id_cache_->set_cached(group.shared_from_this(), last_id());
-    }
-
-  private:
-    void bind_plain(const oh5::Group& group) {
-        QVariant file_id;
-        GroupIdCache::OptionalId parent_id;
-        shared_ptr<const oh5::Group> parent = group.parent<oh5::Group>();
-        if (parent) {
-            parent_id = id_cache_->get(*parent);
-        }
-        if (group.file())
-            file_id = rdb_->db_id(*group.file());
-
-        qry_.bindValue(":parent_id", parent_id ? parent_id.get()
-                                               : QVariant());
-        qry_.bindValue(":file_id", file_id);
-        qry_.bindValue(":name", group.name());
-    }
-
-    void bind_specializations(const oh5::Group& group) {
-        BOOST_FOREACH(const Mapping& mapping, special_) {
-            QVariant val;
-            shared_ptr<const oh5::Attribute> attr =
-                group.child_attribute(mapping.attribute);
-            if (attr)
-                val = attr->value().to_qvariant();
-            qry_.bindValue(":" + mapping.column, val);
-        }
-    }
-
-    long long last_id() {
-        if (rdb_->supports_returning()) {
-            qry_.first();
-            return qry_.value(0).toLongLong();
-        } else {
-            return qry_.lastInsertId().toLongLong();
-        }
-    }
-
-    RelationalDatabase* rdb_;
-    GroupIdCache* id_cache_;
-    QSqlQuery qry_;
-    MappingVector special_;
-};
-
-class AttributeSaver {
-  public:
-    AttributeSaver(RelationalDatabase* rdb, GroupIdCache* group_id_cache)
-            : rdb_(rdb)
-            , mapper_(&rdb->mapper())
-            , group_id_cache_(group_id_cache)
-            , queries_() {
-    }
-
-    void operator()(const oh5::Attribute& attr) {
-        QSqlQuery* qry = 0;
-        if (not attr.is_valid()) {
-            qry = &invalid_attribute_query(attr);
-        } else if (mapper_->is_specialized(attr.full_name())) {
-            // ignore specialized attributes
-        } else {
-            qry = &valid_attribute_query(attr);
-        }
-
-        if (qry != 0 and not qry->exec())
-            throw db_error(qry->lastError());
-    }
-
-  private:
-    typedef std::map<QString, QSqlQuery> QueryMap;
-
-    QSqlQuery& invalid_attribute_query(const oh5::Attribute& attr) {
-        QueryMap::iterator iter = queries_.find("bdb_invalid_attributes");
-        if (iter == queries_.end()) {
-            QSqlQuery qry(rdb_->connection());
-            qry.prepare("INSERT INTO bdb_invalid_attributes(name, group_id) "
-                        "VALUES (:name, :group_id)");
-            QueryMap::value_type val("bdb_invalid_attributes", qry);
-            iter = queries_.insert(val).first;
-        }
-        QSqlQuery& qry = iter->second;
-
-        qry.bindValue("name", attr.full_name());
-        GroupIdCache::OptionalId grp_id;
-        if (attr.parent_group())
-            grp_id = group_id_cache_->get(*attr.parent_group());
-        qry.bindValue("group_id", grp_id ? grp_id.get() : QVariant());
-
-        return qry;
-    }
-
-    QSqlQuery& valid_attribute_query(const oh5::Attribute& attr) {
-        const Mapping& mapping = mapper_->mapping(attr.full_name());
-        QueryMap::iterator iter = queries_.find(mapping.table);
-        if (iter == queries_.end()) {
-            QSqlQuery qry(rdb_->connection()); 
-            qry.prepare("INSERT INTO " + mapping.table +
-                        "(group_id, attribute_id, value) " +
-                        "VALUES(:group_id, :attribute_id, :value)");
-            QueryMap::value_type val(mapping.table, qry);
-            iter = queries_.insert(val).first;
-        }
-        QSqlQuery& qry = iter->second;
-
-        GroupIdCache::OptionalId grp_id;
-        if (attr.parent_group())
-            grp_id = group_id_cache_->get(*attr.parent_group());
-        qry.bindValue("group_id", grp_id ? grp_id.get() : QVariant());
-        qry.bindValue("attribute_id", mapping.id);
-        qry.bindValue("value", attr.value().to_qvariant());
-        
-        return qry;
-    }
-
-    RelationalDatabase* rdb_;
-    const AttributeMapper* mapper_;
-    GroupIdCache* group_id_cache_;
-    QueryMap queries_;
-};
-
-class SaveVisitor {
-  public:
-    SaveVisitor(RelationalDatabase* db)
-            : group_id_cache_(db)
-            , save_attribute_(db, &group_id_cache_)
-            , save_group_(db, &group_id_cache_) {
-    }
-
-    typedef mpl::vector<const oh5::AttributeGroup,
-                        const oh5::Group,
-                        const oh5::Attribute> accepted_types;
-
-    void operator()(const oh5::AttributeGroup& group) {
-        // no-op
-    }
-
-    void operator()(const oh5::Group& group) {
-        save_group_(group);
-    }
-    
-    void operator()(const oh5::Attribute& attribute) {
-        save_attribute_(attribute);
-    }
-
-  private:
-    GroupIdCache group_id_cache_;
-    AttributeSaver save_attribute_;
-    GroupSaver save_group_;
-};
 
 void
 QSqlDatabase_deleter(QSqlDatabase* db) {
@@ -344,11 +162,6 @@ RelationalDatabase::file_hasher(FileHasher* hasher) {
     file_hasher(shared_ptr<FileHasher>(hasher, no_delete));
 }
 
-QString
-RelationalDatabase::hash(const oh5::File& file) {
-    return file_hasher_->hash(file);
-}
-
 void
 RelationalDatabase::do_begin() {
     connection().transaction();
@@ -368,7 +181,7 @@ bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
     QSqlQuery query(connection());
     query.prepare("SELECT true FROM bdb_files WHERE unique_id = :unique_id");
-    query.bindValue(":unique_id", hash(file));
+    query.bindValue(":unique_id", file_hasher().hash(file));
     if (!query.exec())
         throw db_error(query.lastError());
     return query.next(); // got a result row
@@ -379,15 +192,8 @@ long long
 RelationalDatabase::do_save_file(const oh5::File& file,
                                  const QString& proposed_filename,
                                  unsigned int filename_version) {
-    id_type file_id = save(file, proposed_filename, filename_version);
-
-    SaveVisitor visitor(this);
-    
-    BOOST_FOREACH(const oh5::Node& node, *file.root()) {
-        visit(node, visitor);
-    }
-
-    return file_id.toLongLong();
+    SaveFile save(this);
+    return save(file, proposed_filename, filename_version);
 }
 
 unsigned int
@@ -413,68 +219,12 @@ RelationalDatabase::do_query(const Query& query) {
     return this->query(compiler.compiled(), compiler.binds());
 }
 
-RelationalDatabase::id_type
-RelationalDatabase::save(const oh5::File& f,
-                         const QString& proposed_filename,
-                         unsigned int filename_version) {
-    QStringList columns, binds;
-    columns.append("source_id");
-    columns.append("unique_id");
-
-    const MappingVector& special = mapper().specializations_on("bdb_files");
-    BOOST_FOREACH(const Mapping& mapping, special) {
-        // XXX: get rid of this
-        if (mapping.attribute == "file_id") 
-            continue;
-        columns.append(mapping.column);
-    }
-    BOOST_FOREACH(const QString& column, columns) {
-        binds.append(":" + column);
-    }
-
-    QSqlQuery qry(connection());
-    QString qrystr("INSERT INTO bdb_files(" + columns.join(", ") +
-                   ", hash_type, proposed_filename, filename_version) "
-                   "VALUES(" + binds.join(", ") +
-                   ", :hash_type, :proposed_filename, :filename_version)");
-    if (supports_returning())
-        qrystr += " RETURNING id";
-    qry.prepare(qrystr);
-
-    if (not f.source())
-        throw db_error("no Source associated with File");
-
-    BOOST_FOREACH(const Mapping& mapping, special) {
-        // XXX: do something about it, we can't continue adding here
-        if (mapping.attribute == "path" || mapping.attribute == "file_id")
-            continue;
-        const QVariant& value = 
-                f.root()->child_attribute(mapping.attribute)->value().to_qvariant();
-        qry.bindValue(":" + mapping.column, value);
-    }
-
-    qry.bindValue(":path", f.path());
-    qry.bindValue(":hash_type", file_hasher_->name());
-    qry.bindValue(":unique_id", hash(f));
-    qry.bindValue(":source_id", db_id(*f.source()));
-    qry.bindValue(":proposed_filename", proposed_filename);
-    qry.bindValue(":filename_version", filename_version);
-
-    if (not qry.exec())
-        throw db_error(qry.lastError());
-    if (supports_returning()) {
-        qry.first();
-        return qry.value(0);
-    } else {
-        return qry.lastInsertId();
-    }
-}
 
 long long
 RelationalDatabase::do_db_id(const oh5::File& file) {
     QString qry = "SELECT id FROM bdb_files WHERE unique_id = :unique_id";
     BindMap binds;
-    binds.add(":unique_id", hash(file));
+    binds.add(":unique_id", file_hasher().hash(file));
     shared_ptr<ResultSet> r = query(qry, binds);
     r->next();
     return r->integer(0);

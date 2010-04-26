@@ -102,13 +102,12 @@ class RelationalDatabase : public Database {
      * @note caller retains hasher ownership
      */
     void file_hasher(FileHasher* hasher);
-    
-    /**
-     * @brief calculate file hash using owned FileHasher
-     */
-    QString hash(const oh5::File& file);
 
+    FileHasher& file_hasher() { return *file_hasher_; }
+    
     using Database::db_id;
+
+    long long db_id(const oh5::Source& source);
 
   protected:
     virtual void do_begin();
@@ -151,8 +150,6 @@ class RelationalDatabase : public Database {
     shared_ptr<oh5::SourceCentre>
     load_source_centre(shared_ptr<oh5::SourceCentre> src,
                        long long id=0);
-
-    long long db_id(const oh5::Source& source);
 
     /**
      * @brief save file to database
