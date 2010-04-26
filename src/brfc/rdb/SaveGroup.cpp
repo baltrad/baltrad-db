@@ -44,7 +44,7 @@ SaveGroup::SaveGroup(RelationalDatabase* rdb,
         throw db_error(qry_.lastError());
 }
 
-void
+voi
 SaveGroup::operator()(const oh5::Group& group) {
     bind_plain(group);
     bind_specializations(group);
