@@ -74,6 +74,12 @@ TEST_F(rdb_BindMap_test, test_get_with_default) {
     EXPECT_EQ(default_, result);
 }
 
+TEST_F(rdb_BindMap_test, test_size) {
+    EXPECT_EQ((size_t)0, binds.size());
+    binds.add(":bind", Variant());
+    EXPECT_EQ((size_t)1, binds.size());
+}
+
 } // namespace rdb
 } // namespace brfc
 

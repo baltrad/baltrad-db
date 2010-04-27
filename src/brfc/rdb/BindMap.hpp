@@ -62,6 +62,10 @@ class BindMap {
      */
     const QVariant& get(const QString& name, const QVariant& default_) const;
 
+    size_t size() const {
+        return binds_.size();
+    }
+
     iterator begin() {
         return binds_.begin();
     }
