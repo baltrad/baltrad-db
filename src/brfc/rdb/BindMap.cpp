@@ -31,6 +31,19 @@ BindMap::BindMap()
 
 }
 
+BindMap::BindMap(const BindMap& other)
+        : binds_(other.binds_) {
+
+}
+
+BindMap&
+BindMap::operator=(const BindMap& rhs) {
+    if (this != &rhs) {
+        binds_ = rhs.binds_;
+    }
+    return *this;
+}
+
 void
 BindMap::add(const QString& name, const QVariant& value) {
     const map::value_type& pair = std::make_pair(name_to_placeholder(name),
@@ -72,6 +85,11 @@ BindMap::name_to_placeholder(const QString& name) const {
     if (not placeholder.startsWith(':'))
         placeholder.prepend(':');
     return placeholder;
+}
+
+bool
+BindMap::remove(const QString& name) {
+    return binds_.erase(name_to_placeholder(name));
 }
 
 } // namespace rdb

@@ -36,6 +36,10 @@ class BindMap {
 
     BindMap();
 
+    BindMap(const BindMap& other);
+
+    BindMap& operator=(const BindMap& rhs);
+
     /**
      * @throw duplicate_entry if bind already exists
      */
@@ -81,6 +85,11 @@ class BindMap {
     const_iterator end() const {
         return binds_.end();
     }
+
+    /**
+     * @brief remove a bind
+     */
+    bool remove(const QString& name);
 
   private:
     QString name_to_placeholder(const QString& name) const;

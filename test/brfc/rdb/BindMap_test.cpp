@@ -80,6 +80,38 @@ TEST_F(rdb_BindMap_test, test_size) {
     EXPECT_EQ((size_t)1, binds.size());
 }
 
+TEST_F(rdb_BindMap_test, test_copy) {
+    QVariant val(1);
+    binds.add(":bind", val);
+
+    BindMap copy1(binds);
+    EXPECT_EQ(binds.size(), copy1.size());
+    EXPECT_EQ(val, copy1.get(":bind", QVariant()));
+
+    BindMap copy2;
+    copy2 = binds;
+    EXPECT_EQ(binds.size(), copy2.size());
+    EXPECT_EQ(val, copy2.get(":bind", QVariant()));
+
+    binds = binds;
+    EXPECT_EQ((size_t)1, binds.size());
+    EXPECT_EQ(val, binds.get(":bind", QVariant()));
+}
+
+TEST_F(rdb_BindMap_test, test_remove) {
+    QVariant val(1);
+    binds.add(":bind1", val);
+    binds.add(":bind2", val);
+    
+    EXPECT_FALSE(binds.remove(":nxbind"));
+
+    EXPECT_TRUE(binds.remove(":bind1"));
+    EXPECT_TRUE(binds.remove("bind2"));
+    EXPECT_EQ(binds.size(), (size_t)0);
+    EXPECT_FALSE(binds.has(":bind1"));
+    EXPECT_FALSE(binds.has(":bind2"));
+}
+
 } // namespace rdb
 } // namespace brfc
 
