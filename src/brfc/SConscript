@@ -50,6 +50,7 @@ sources = [
     "rdb/AttributeMapper.cpp",
     "rdb/BindMap.cpp",
     "rdb/Compiler.cpp",
+    "rdb/Connection.cpp",
     "rdb/FromClause.cpp",
     "rdb/GroupIdCache.cpp",
     "rdb/SaveAttribute.cpp",
