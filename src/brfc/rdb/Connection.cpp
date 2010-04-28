@@ -29,6 +29,27 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace rdb {
 
+void
+Connection::begin() {
+    if (in_transaction())
+        throw db_error("transaction already active");
+    do_begin();
+}
+
+void
+Connection::rollback() {
+    if (not in_transaction())
+        throw db_error("no active transaction");
+    do_rollback();
+}
+
+void
+Connection::commit() {
+    if (not in_transaction())
+        throw db_error("no active transaction");
+    do_commit();
+}
+
 shared_ptr<ResultSet>
 Connection::execute(const QString& query, const BindMap& binds) {
     QString qry(query);

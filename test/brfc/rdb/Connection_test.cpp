@@ -60,7 +60,7 @@ class MockConnection : public Connection {
     MOCK_METHOD0(do_commit, void());
     MOCK_METHOD0(do_rollback, void());
     MOCK_METHOD1(do_execute, shared_ptr<ResultSet>(const QString&));
-    MOCK_METHOD0(in_transaction, bool());
+    MOCK_METHOD0(do_in_transaction, bool());
 };
 
 class rdb_Connection_test : public testing::Test {
@@ -74,8 +74,10 @@ class rdb_Connection_test : public testing::Test {
 
 TEST_F(rdb_Connection_test, test_no_transaction_execute) {
     QString query("query");
-    EXPECT_CALL(conn, in_transaction())
-        .WillOnce(Return(false));
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillOnce(Return(false))  // execute()
+        .WillOnce(Return(false))  // begin()
+        .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_begin());
     EXPECT_CALL(conn, do_execute(query))
         .WillOnce(Return(make_shared<FakeResultSet>()));
@@ -86,8 +88,10 @@ TEST_F(rdb_Connection_test, test_no_transaction_execute) {
 
 TEST_F(rdb_Connection_test, test_no_transaction_excute_throws) {
     QString query("query");
-    EXPECT_CALL(conn, in_transaction())
-        .WillOnce(Return(false));
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillOnce(Return(false)) // execute()
+        .WillOnce(Return(false)) // being()
+        .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_begin());
     EXPECT_CALL(conn, do_execute(query))
         .WillOnce(Throw(std::runtime_error("")));
@@ -98,8 +102,8 @@ TEST_F(rdb_Connection_test, test_no_transaction_excute_throws) {
 
 TEST_F(rdb_Connection_test, test_in_transaction_execute) {
     QString query("query");
-    EXPECT_CALL(conn, in_transaction())
-        .WillOnce(Return(true));
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(query))
         .WillOnce(Return(make_shared<FakeResultSet>()));
     
@@ -108,8 +112,8 @@ TEST_F(rdb_Connection_test, test_in_transaction_execute) {
 
 TEST_F(rdb_Connection_test, test_in_transaction_execute_throws) {
     QString query("query");
-    EXPECT_CALL(conn, in_transaction())
-        .WillOnce(Return(true));
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(query))
         .WillOnce(Throw(std::runtime_error("")));
     
@@ -187,6 +191,51 @@ TEST_F(rdb_Connection_test, test_variant_to_string_time) {
 
 TEST_F(rdb_Connection_test, test_variant_to_string_null) {
     EXPECT_EQ("NULL", conn.variant_to_string(Variant()));
+}
+
+TEST_F(rdb_Connection_test, test_begin) {
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillOnce(Return(false));
+    EXPECT_CALL(conn, do_begin());
+
+    EXPECT_NO_THROW(conn.begin());
+}
+
+TEST_F(rdb_Connection_test, test_begin_in_transaction) {
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillOnce(Return(true));
+
+    EXPECT_THROW(conn.begin(), db_error);
+}
+
+TEST_F(rdb_Connection_test, test_rollback_in_transaction) {
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillOnce(Return(true));
+    EXPECT_CALL(conn, do_rollback());
+
+    EXPECT_NO_THROW(conn.rollback());
+}
+
+TEST_F(rdb_Connection_test, test_rollback_no_transaction) {
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillOnce(Return(false));
+
+    EXPECT_THROW(conn.rollback(), db_error);
+}
+
+TEST_F(rdb_Connection_test, test_commit_in_transaction) {
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillOnce(Return(true));
+    EXPECT_CALL(conn, do_commit());
+
+    EXPECT_NO_THROW(conn.commit());
+}
+
+TEST_F(rdb_Connection_test, test_commit_no_transaction) {
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillOnce(Return(false));
+
+    EXPECT_THROW(conn.commit(), db_error);
 }
 
 } // namespace rdb

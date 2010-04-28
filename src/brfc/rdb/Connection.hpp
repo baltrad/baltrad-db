@@ -43,29 +43,32 @@ class Connection {
 
     /**
      * @brief start a transaction
-     * 
+     * @throw db_error if a transaction is already active
      * @sa do_begin
      */
-    void begin() {
-        do_begin();
-    }
-    
+    void begin();    
+
     /**
      * @brief rollback current transaction
-     *
+     * @throw db_error if no active transaction
      * @sa do_rollback
      */
-    void rollback() {
-        do_rollback();
-    }
-    
+    void rollback();    
+
     /**
      * @brief commit current transaction
-     *
+     * @throw db_error if no active transaction
      * @sa do_commit
      */
-    void commit() {
-        do_commit();
+    void commit();    
+
+    /**
+     * @brief test for active transaction
+     * @return true if there is a transaction
+     * @sa do_in_transaction
+     */
+    bool in_transaction() {
+        return do_in_transaction();
     }
 
     /**
@@ -110,7 +113,7 @@ class Connection {
     /**
      * @return true if there is an ongoing transaction
      */
-    virtual bool in_transaction() = 0;
+    virtual bool do_in_transaction() = 0;
     
     /**
      * @brief default implementation
