@@ -17,44 +17,28 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/ResultSet.hpp>
+#ifndef BRFC_MOCK_RESULT_SET_HPP
+#define BRFC_MOCK_RESULT_SET_HPP
 
-#include <QtCore/QDate>
-#include <QtCore/QTime>
-
-#include <brfc/exceptions.hpp>
-#include <brfc/Variant.hpp>
+#include <gmock/gmock.h>
 
 namespace brfc {
 
-QString
-ResultSet::string(unsigned int pos) const {
-    return do_string(pos);
-}
+class MockResultSet : public ResultSet {
+  public:
+    MOCK_METHOD0(do_next, bool());
+    MOCK_METHOD1(do_seek, bool(int));
+    MOCK_METHOD0(do_size, int());
 
-long long
-ResultSet::integer(unsigned int pos) const {
-    return do_integer(pos);
-}
+    MOCK_CONST_METHOD1(do_string, QString(unsigned int));
+    MOCK_CONST_METHOD1(do_integer, long long(unsigned int));
+    MOCK_CONST_METHOD1(do_real, double(unsigned int));
+    MOCK_CONST_METHOD1(do_boolean, bool(unsigned int));
+    MOCK_CONST_METHOD1(do_date, QDate(unsigned int));
+    MOCK_CONST_METHOD1(do_time, QTime(unsigned int));
 
-double
-ResultSet::real(unsigned int pos) const {
-    return do_real(pos);
-}
-
-bool
-ResultSet::boolean(unsigned int pos) const {
-    return do_boolean(pos);
-}
-
-QDate
-ResultSet::date(unsigned int pos) const {
-    return do_date(pos);
-}
-
-QTime
-ResultSet::time(unsigned int pos) const {
-    return do_time(pos);
-}
+};
 
 } // namespace brfc
+
+#endif // BRFC_MOCK_RESULT_SET_HPP

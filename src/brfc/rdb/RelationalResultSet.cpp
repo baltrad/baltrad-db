@@ -55,12 +55,42 @@ RelationalResultSet::do_size() {
 }
 
 Variant
-RelationalResultSet::do_value_at(unsigned int pos) const {
+RelationalResultSet::value_at(unsigned int pos) const {
     const QVariant& var = query_->value(pos);
     if (not var.isValid()) {
         throw lookup_error("invalid position");
     }
     return Variant(var);
+}
+
+QString
+RelationalResultSet::do_string(unsigned int pos) const {
+    return value_at(pos).string();
+}
+
+long long
+RelationalResultSet::do_integer(unsigned int pos) const {
+    return value_at(pos).longlong();
+}
+
+double
+RelationalResultSet::do_real(unsigned int pos) const {
+    return value_at(pos).double_();
+}
+
+bool
+RelationalResultSet::do_boolean(unsigned int pos) const {
+    return value_at(pos).bool_();
+}
+
+QDate
+RelationalResultSet::do_date(unsigned int pos) const {
+    return value_at(pos).date();
+}
+
+QTime
+RelationalResultSet::do_time(unsigned int pos) const {
+    return value_at(pos).time();
 }
 
 } // namespace rdb

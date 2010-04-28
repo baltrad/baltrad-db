@@ -102,11 +102,6 @@ class ResultSet : public boost::noncopyable {
      * @brief get time value at \c pos
      */
     QTime time(unsigned int pos) const;
-
-    /**
-     * @brief get value at \c pos as Variant
-     */
-    Variant value(unsigned int pos) const;
     //@}
   
   protected:
@@ -114,8 +109,12 @@ class ResultSet : public boost::noncopyable {
     virtual bool do_seek(int idx) = 0;
     virtual int do_size() = 0;
     
-    Variant value_at(unsigned int pos) const;
-    virtual Variant do_value_at(unsigned int pos) const = 0;
+    virtual QString do_string(unsigned int pos) const = 0;
+    virtual long long do_integer(unsigned int pos) const = 0;
+    virtual double do_real(unsigned int pos) const = 0;
+    virtual bool do_boolean(unsigned int pos) const = 0;
+    virtual QDate do_date(unsigned int pos) const = 0;
+    virtual QTime do_time(unsigned int pos) const = 0;
 };
 
 }

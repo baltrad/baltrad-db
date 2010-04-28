@@ -27,32 +27,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/Connection.hpp>
 
 #include "../common.hpp"
+#include "../MockResultSet.hpp"
 
 using testing::Return;
 using testing::Throw;
 
 namespace brfc {
 namespace rdb {
-
-class FakeResultSet : public ResultSet {
-  protected:
-    virtual bool do_next() {
-        return false;
-    }
-
-    virtual bool do_seek(int idx) {
-        return false;
-    }
-
-    virtual int do_size() {
-        return 0;
-    }
-    
-    virtual Variant do_value_at(unsigned int pos) const {
-        return Variant();
-    }
-
-};
 
 class MockConnection : public Connection {
   public:
@@ -80,7 +61,7 @@ TEST_F(rdb_Connection_test, test_no_transaction_execute) {
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_begin());
     EXPECT_CALL(conn, do_execute(query))
-        .WillOnce(Return(make_shared<FakeResultSet>()));
+        .WillOnce(Return(make_shared<MockResultSet>()));
     EXPECT_CALL(conn, do_commit());
 
     conn.execute(query);
@@ -105,7 +86,7 @@ TEST_F(rdb_Connection_test, test_in_transaction_execute) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(query))
-        .WillOnce(Return(make_shared<FakeResultSet>()));
+        .WillOnce(Return(make_shared<MockResultSet>()));
     
     conn.execute(query);
 }

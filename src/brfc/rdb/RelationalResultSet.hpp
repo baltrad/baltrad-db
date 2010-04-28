@@ -56,8 +56,15 @@ class RelationalResultSet : public ResultSet {
     virtual bool do_seek(int idx);
     virtual int do_size();
 
-    Variant do_value_at(unsigned int pos) const;
-  
+    Variant value_at(unsigned int post) const;
+
+    virtual QString do_string(unsigned int pos) const;
+    virtual long long do_integer(unsigned int pos) const;
+    virtual double do_real(unsigned int pos) const;
+    virtual bool do_boolean(unsigned int pos) const;
+    virtual QDate do_date(unsigned int pos) const;
+    virtual QTime do_time(unsigned int pos) const;
+
   private:
     shared_ptr<QSqlDatabase> db_;
     scoped_ptr<QSqlQuery> query_;
