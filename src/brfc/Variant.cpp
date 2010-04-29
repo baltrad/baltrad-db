@@ -41,7 +41,9 @@ Variant::Variant(const QVariant& value)
             value_ = value.toString();
             break;
         case QVariant::Int:
+        case QVariant::UInt:
         case QVariant::LongLong:
+        case QVariant::ULongLong:
             type_ = LONGLONG;
             value_ = value.toLongLong();
             break;
