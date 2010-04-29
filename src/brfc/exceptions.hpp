@@ -23,8 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <stdexcept>
 #include <string>
 
-class QSqlError;
-
 namespace brfc {
 
 /**
@@ -84,11 +82,6 @@ class duplicate_entry : public brfc_error {
  */
 class db_error : public brfc_error {
   public:
-    /** 
-     * @brief construct from QSqlError
-     */ 
-    explicit db_error(const QSqlError& error);
-
     explicit db_error(const std::string& what)
             : brfc_error(what) {
     }

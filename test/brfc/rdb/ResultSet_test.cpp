@@ -20,10 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/ResultSet.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/rdb/BindMap.hpp>
-#include <brfc/rdb/RelationalResultSet.hpp>
 
 #include <brfc/test/TestRDB.hpp>
 

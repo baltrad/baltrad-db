@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QFile>
 #include <QtCore/QStringList>
 #include <QtCore/QTextStream>
-#include <QtSql/QSqlQuery>
 
 #include <brfc/rdb/Connection.hpp>
 

@@ -21,7 +21,7 @@ import urlparse
 
 sys.path.append("./misc")
 from build_helper import (CheckBoostVersion, CheckHlhdf, CheckQt,
-                          CheckQtSqlDrivers, SplitResult)
+                          SplitResult)
 
 EnsureSConsVersion(1, 2)
 
@@ -142,7 +142,6 @@ class Config(object):
        "CheckBoostVersion": CheckBoostVersion,
        "CheckHlhdf": CheckHlhdf,
        "CheckQt": CheckQt,
-       "CheckQtSqlDrivers": CheckQtSqlDrivers,
     }
 
     def __init__(self, env):
@@ -157,8 +156,6 @@ class Config(object):
         cfg.env.AppendENVPath("LD_LIBRARY_PATH",
                               env.Dir(env["qt_lib_dir"]).abspath)
         self.qt = cfg.CheckQt()
-        self.qtsql = cfg.CheckLibWithHeader("QtSql", "QtSql/QSqlDatabase", "c++")
-        self.qtsql_drivers = cfg.CheckQtSqlDrivers()
 
         self.pqxx = cfg.CheckLibWithHeader("pqxx", "pqxx/pqxx", "c++")
 
@@ -204,16 +201,9 @@ class Config(object):
         return 0 not in rets
     
     def has_sql_dialect(self, dialect):
-        db_driver_map = {
-            "sqlite": "QSQLITE",
-            "postgresql": "QPSQL",
-        }
-        try:
-            driver = db_driver_map[dialect]
-        except KeyError:
-            return False
-        else:
-            return driver in self.qtsql_drivers
+        if dialect == "postgresql" and self.pqxx:
+            return True
+        return False
 
 conf = Config(confenv)
 conf.check()

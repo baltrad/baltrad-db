@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 
 #include <QtCore/QString>
-#include <QtSql/QSqlDatabase>
 
 #include <brfc/smart_ptr.hpp>
 #include <brfc/Database.hpp>
@@ -53,7 +52,7 @@ class BindMap;
 class Connection;
 
 /**
- * @brief Database using QtSql
+ * @brief Relational database backend
  */
 class RelationalDatabase : public Database {
   public:

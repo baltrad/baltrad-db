@@ -19,12 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <QtSql/QSqlError>
-
 namespace brfc {
-
-db_error::db_error(const QSqlError& error)
-        : brfc_error(error.text().toStdString()) {
-}
 
 } // namespace brfc

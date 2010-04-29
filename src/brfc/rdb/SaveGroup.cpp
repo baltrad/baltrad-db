@@ -24,9 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 
-#include <QtSql/QSqlError>
-
-
 #include <brfc/exceptions.hpp>
 #include <brfc/ResultSet.hpp>
 

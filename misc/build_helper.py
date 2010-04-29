@@ -70,26 +70,6 @@ def CheckQt(ctx):
     ctx.SetLIBS(oldlibs)
     return result
 
-def CheckQtSqlDrivers(ctx):
-    src = (
-        "#include <QtSql/QSqlDatabase>",
-        "#include <QtCore/QCoreApplication>",
-        "#include <QtCore/QStringList>",
-        "#include <iostream>",
-        "int main(int argc, char** argv) {",
-        "   QCoreApplication app(argc, argv);",
-        "   QStringList drivers = QSqlDatabase::drivers();",
-        "   std::cout << drivers.join(\" \").toStdString();",
-        "   return 0;",
-        "}\n"
-    )
-    ctx.Message("Checking for available QtSql drivers... ")
-    oldlibs = ctx.AppendLIBS(["QtSql"])
-    result, drivers = ctx.TryRun("\n".join(src), ".cpp")
-    ctx.Result(drivers)
-    ctx.SetLIBS(oldlibs)
-    return drivers.split(" ")
-
 # from python2.5
 class BaseResult(tuple):
     """Base class for the parsed result objects.

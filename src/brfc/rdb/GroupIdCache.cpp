@@ -19,11 +19,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/GroupIdCache.hpp>
 
+#include <brfc/ResultSet.hpp>
+
 #include <brfc/oh5/Group.hpp>
 
 #include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
-#include <brfc/rdb/RelationalResultSet.hpp>
 
 namespace brfc {
 namespace rdb {

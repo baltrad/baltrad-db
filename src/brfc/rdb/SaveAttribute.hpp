@@ -61,7 +61,7 @@ class SaveAttribute {
 
   private:
     /**
-     * @brief map table name to a QSqlQuery
+     * @brief map table name to a SqlQuery
      */
     typedef std::map<QString, SqlQuery> QueryMap;
 

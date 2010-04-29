@@ -48,19 +48,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace rdb {
 
-namespace {
-
-void
-QSqlDatabase_deleter(QSqlDatabase* db) {
-    const QString& name = db->connectionName();
-    db->close();
-    delete db;
-    ::QSqlDatabase::removeDatabase(name);
-}
-
-} // namespace anonymous
-
-
 RelationalDatabase::RelationalDatabase(const QString& dsn_)
         : conn_()
         , mapper_(new AttributeMapper())
