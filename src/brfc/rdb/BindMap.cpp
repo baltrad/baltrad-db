@@ -45,16 +45,11 @@ BindMap::operator=(const BindMap& rhs) {
 }
 
 void
-BindMap::add(const QString& name, const QVariant& value) {
+BindMap::add(const QString& name, const Variant& value) {
     const map::value_type& pair = std::make_pair(name_to_placeholder(name),
                                                  value);
     if (not binds_.insert(pair).second)
         throw duplicate_entry(name.toStdString());
-}
-
-void
-BindMap::add(const QString& name, const Variant& value) {
-    add(name, value.to_qvariant());
 }
 
 bool
@@ -62,7 +57,7 @@ BindMap::has(const QString& name) const {
     return binds_.find(name_to_placeholder(name)) != binds_.end();
 }
 
-const QVariant&
+const Variant&
 BindMap::get(const QString& name) const {
     map::const_iterator iter = binds_.find(name_to_placeholder(name));
     if (iter == binds_.end())
@@ -70,8 +65,8 @@ BindMap::get(const QString& name) const {
     return iter->second;
 }
 
-const QVariant&
-BindMap::get(const QString& name, const QVariant& default_) const {
+const Variant&
+BindMap::get(const QString& name, const Variant& default_) const {
     try {
         return get(name);
     } catch (const lookup_error&) {

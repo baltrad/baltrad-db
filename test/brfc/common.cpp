@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QDate>
 #include <QtCore/QString>
 #include <QtCore/QTime>
-#include <QtCore/QVariant>
 
 #include "config.hpp"
 
@@ -66,11 +65,6 @@ TestRDBEnv::DatabaseMap TestRDBEnv::databases_;
 
 } // namespace brfc
 
-std::ostream& operator<<(std::ostream& out, const QVariant& value) {
-    out << value.toString().toStdString();
-    return out;
-}
-
 std::ostream& operator<<(std::ostream& out, const QString& value) {
     out << value.toStdString();
     return out;
@@ -87,6 +81,6 @@ std::ostream& operator<<(std::ostream& out, const QTime& value) {
 }
 
 std::ostream& operator<<(std::ostream& out, const brfc::Variant& value) {
-    out << value.to_qvariant().toString().toStdString();
+    out << value.to_string().toStdString();
     return out;
 }

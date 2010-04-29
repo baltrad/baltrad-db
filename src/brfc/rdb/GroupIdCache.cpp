@@ -40,17 +40,17 @@ GroupIdCache::do_query(const oh5::Group& group) {
     QString qry = "SELECT id FROM groups WHERE file_id = :file_id "
                   "AND parent_id = :parent_id AND name = :name ";
     BindMap binds;
-    binds.add(":file_id", rdb_->db_id(*group.file()));
+    binds.add(":file_id", Variant(rdb_->db_id(*group.file())));
     shared_ptr<const oh5::Group> parent = group.parent<const oh5::Group>();
 
-    QVariant parent_id;
+    Variant parent_id;
     if (parent) {
         OptionalId id = get(*parent);
         if (id)
-            parent_id = id.get();
+            parent_id = Variant(id.get());
     }
     binds.add(":parent_id", parent_id);
-    binds.add(":name", group.name());
+    binds.add(":name", Variant(group.name()));
     shared_ptr<ResultSet> r = rdb_->query(qry, binds);
     return r->next() ? r->integer(0) : OptionalId();
 }

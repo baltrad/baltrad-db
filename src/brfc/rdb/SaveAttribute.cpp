@@ -69,8 +69,9 @@ SaveAttribute::invalid_attribute_query(const oh5::Attribute& attr) {
     if (attr.parent_group())
         grp_id = group_id_cache_->get(*attr.parent_group());
 
-    qry.binds().add("name", attr.full_name());
-    qry.binds().add("group_id", grp_id ? grp_id.get() : QVariant());
+    qry.binds().add("name", Variant(attr.full_name()));
+    qry.binds().add("group_id", grp_id ? Variant(grp_id.get())
+                                       : Variant());
 
     return qry;
 }
@@ -93,9 +94,10 @@ SaveAttribute::valid_attribute_query(const oh5::Attribute& attr) {
         grp_id = group_id_cache_->get(*attr.parent_group());
     
     qry.binds().clear();
-    qry.binds().add(":group_id", grp_id ? grp_id.get() : QVariant());
-    qry.binds().add(":attribute_id", mapping.id);
-    qry.binds().add(":value", attr.value().to_qvariant());
+    qry.binds().add(":group_id", grp_id ? Variant(grp_id.get())
+                                        : Variant());
+    qry.binds().add(":attribute_id", Variant(mapping.id));
+    qry.binds().add(":value", attr.value());
     
     return qry;
 }

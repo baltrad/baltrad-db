@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 class QDate;
 class QString;
 class QTime;
-class QVariant;
 
 namespace brfc {
 
@@ -57,9 +56,6 @@ class TestRDBEnv : public ::testing::Environment {
 };
 
 } // namespace brfc
-
-std::ostream&
-operator<<(std::ostream& out, const QVariant& value);
 
 std::ostream&
 operator<<(std::ostream& out, const QString& value);

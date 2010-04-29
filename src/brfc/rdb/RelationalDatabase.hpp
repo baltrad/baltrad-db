@@ -28,8 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/smart_ptr.hpp>
 #include <brfc/Database.hpp>
 
-class QVariant;
-
 namespace brfc {
 
 class FileHasher;
@@ -56,7 +54,7 @@ class Connection;
  */
 class RelationalDatabase : public Database {
   public:
-    typedef QVariant id_type;
+    typedef Variant id_type;
 
     /**
      * @brief constructor

@@ -24,15 +24,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <boost/variant.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 #include <QtCore/QString>
-#include <QtCore/QVariant>
 #include <QtCore/QDate>
 #include <QtCore/QTime>
 
 #include <string>
-
-class QVariant;
 
 namespace brfc {
 
@@ -65,11 +63,6 @@ class Variant {
     }
 
     /**
-     * @brief implicit conversion from QVariant
-     */
-    Variant(const QVariant& value);
-
-    /**
      * @brief construct string variant from char array
      */
     explicit Variant(const char* value)
@@ -97,9 +90,26 @@ class Variant {
     /**
      * @brief construct longlong variant
      */
+    explicit Variant(unsigned int value)
+            : type_(LONGLONG)
+            , value_(static_cast<long long>(value)) {
+    
+    }
+
+    /**
+     * @brief construct longlong variant
+     */
     explicit Variant(long long value)
             : type_(LONGLONG)
             , value_(value) {
+    }
+
+    /**
+     * @brief construct longlong variant
+     */
+    explicit Variant(unsigned long long value)
+            : type_(LONGLONG)
+            , value_(boost::numeric_cast<long long>(value)) {
     }
 
     /**
@@ -166,11 +176,6 @@ class Variant {
     const QDate& date() const;
 
     const QTime& time() const;
-
-    /**
-     * @brief convert to QVariant
-     */
-    QVariant to_qvariant() const;
 
     /**
      * @brief convert to QString

@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <QtCore/QStringList>
-#include <QtCore/QVariant>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/ResultSet.hpp>
@@ -75,30 +74,28 @@ SaveGroup::operator()(const oh5::Group& group) {
 
 void
 SaveGroup::bind_plain(const oh5::Group& group) {
-    QVariant file_id;
+    Variant file_id;
     GroupIdCache::OptionalId parent_id;
     shared_ptr<const oh5::Group> parent = group.parent<oh5::Group>();
     if (parent) {
         parent_id = id_cache_->get(*parent);
     }
     if (group.file())
-        file_id = rdb_->db_id(*group.file());
+        file_id = Variant(rdb_->db_id(*group.file()));
 
-    qry_.binds().add(":parent_id", parent_id ? parent_id.get()
-                                           : QVariant());
+    qry_.binds().add(":parent_id", parent_id ? Variant(parent_id.get())
+                                             : Variant());
     qry_.binds().add(":file_id", file_id);
-    qry_.binds().add(":name", group.name());
+    qry_.binds().add(":name", Variant(group.name()));
 }
 
 void
 SaveGroup::bind_specializations(const oh5::Group& group) {
     BOOST_FOREACH(const Mapping& mapping, special_) {
-        QVariant val;
         shared_ptr<const oh5::Attribute> attr =
             group.child_attribute(mapping.attribute);
-        if (attr)
-            val = attr->value().to_qvariant();
-        qry_.binds().add(":" + mapping.column, val);
+        qry_.binds().add(":" + mapping.column, attr ? attr->value()
+                                                    : Variant());
     }
 }
 

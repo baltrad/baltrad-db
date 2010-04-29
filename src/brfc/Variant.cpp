@@ -19,54 +19,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/Variant.hpp>
 
-#include <QtCore/QVariant>
-
 #include <utility>
 
 namespace brfc {
-
-namespace {
-
-
-} // namespace anonymous
-
-Variant::Variant(const QVariant& value)
-        : type_(NONE)
-        , value_() {
-    switch (value.type()) {
-        case QVariant::Invalid:
-            break;
-        case QVariant::String:
-            type_ = STRING;
-            value_ = value.toString();
-            break;
-        case QVariant::Int:
-        case QVariant::UInt:
-        case QVariant::LongLong:
-        case QVariant::ULongLong:
-            type_ = LONGLONG;
-            value_ = value.toLongLong();
-            break;
-        case QVariant::Double:
-            type_ = DOUBLE;
-            value_ = value.toDouble();
-            break;
-        case QVariant::Bool:
-            type_ = BOOL;
-            value_ = value.toBool();
-            break;
-        case QVariant::Date:
-            type_ = DATE;
-            value_ = value.toDate();
-            break;
-        case QVariant::Time:
-            type_ = TIME;
-            value_ = value.toTime();
-            break;
-        default:
-            throw value_error("invalid value type held in QVariant");
-    }
-}
 
 const QString&
 Variant::string() const {
@@ -101,17 +56,6 @@ Variant::time() const {
 namespace {
 
 /**
- * @brief visitor converting Variant to QVariant
- */
-class variant_to_qvariant : public boost::static_visitor<QVariant> {
-  public:
-    template<typename T>
-    QVariant operator()(const T& value) const {
-        return QVariant(value);
-    }
-};
-
-/**
  * @brief visitor converting Variant to QString
  */
 class variant_to_string : public boost::static_visitor<QString> {
@@ -142,13 +86,6 @@ class variant_to_string : public boost::static_visitor<QString> {
 };
 
 } // namespace anonymous
-
-QVariant
-Variant::to_qvariant() const {
-    if (type_ == NONE)
-        return QVariant();
-    return boost::apply_visitor(variant_to_qvariant(), value_);
-}
 
 QString
 Variant::to_string() const {

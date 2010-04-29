@@ -22,14 +22,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <map>
 #include <brfc/Variant.hpp>
-#include <QtCore/QVariant>
 
 namespace brfc {
 namespace rdb {
 
 class BindMap {
   public:
-    typedef std::map<QString, QVariant> map;
+    typedef std::map<QString, Variant> map;
     typedef map::iterator iterator;
     typedef map::const_iterator const_iterator;
     typedef map::value_type value_type;
@@ -39,11 +38,6 @@ class BindMap {
     BindMap(const BindMap& other);
 
     BindMap& operator=(const BindMap& rhs);
-
-    /**
-     * @throw duplicate_entry if bind already exists
-     */
-    void add(const QString& name, const QVariant& value);
 
     /**
      * @throw duplicate_entry if bind already exists
@@ -58,13 +52,13 @@ class BindMap {
     /**
      * @throw lookup_error if bind not found
      */
-    const QVariant& get(const QString& name) const;
+    const Variant& get(const QString& name) const;
     
     /**
      * @brief get bind value
      * @return the value or default_ if bind not found
      */
-    const QVariant& get(const QString& name, const QVariant& default_) const;
+    const Variant& get(const QString& name, const Variant& default_) const;
 
     size_t size() const {
         return binds_.size();

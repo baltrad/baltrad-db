@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <QtCore/QStringList>
-#include <QtCore/QVariant>
 
 #include <brfc/FileHasher.hpp>
 #include <brfc/ResultSet.hpp>
@@ -90,17 +89,17 @@ SaveFile::operator()(const oh5::File& file,
         // XXX: do something about it, we can't continue adding here
         if (mapping.attribute == "path" || mapping.attribute == "file_id")
             continue;
-        const QVariant& value = 
-                file.root()->child_attribute(mapping.attribute)->value().to_qvariant();
+        const Variant& value = 
+                file.root()->child_attribute(mapping.attribute)->value();
         qry.binds().add(":" + mapping.column, value);
     }
 
-    qry.binds().add(":path", file.path());
-    qry.binds().add(":hash_type", rdb_->file_hasher().name());
-    qry.binds().add(":unique_id", rdb_->file_hasher().hash(file));
-    qry.binds().add(":source_id", rdb_->db_id(*file.source()));
-    qry.binds().add(":proposed_filename", proposed_filename);
-    qry.binds().add(":filename_version", filename_version);
+    qry.binds().add(":path", Variant(file.path()));
+    qry.binds().add(":hash_type", Variant(rdb_->file_hasher().name()));
+    qry.binds().add(":unique_id", Variant(rdb_->file_hasher().hash(file)));
+    qry.binds().add(":source_id", Variant(rdb_->db_id(*file.source())));
+    qry.binds().add(":proposed_filename", Variant(proposed_filename));
+    qry.binds().add(":filename_version", Variant(filename_version));
 
     shared_ptr<ResultSet> result = rdb_->connection().execute(qry);
 

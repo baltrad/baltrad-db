@@ -41,7 +41,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QStringList>
 #include <QtCore/QUrl>
-#include <QtCore/QVariant>
 
 #include <iostream>
 
@@ -112,7 +111,7 @@ bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
     QString qry("SELECT true FROM bdb_files WHERE unique_id = :unique_id");
     BindMap binds;
-    binds.add(":unique_id", file_hasher().hash(file));
+    binds.add(":unique_id", Variant(file_hasher().hash(file)));
     shared_ptr<ResultSet> result = connection().execute(qry, binds);
     return result->size() > 0;
 }
@@ -131,7 +130,7 @@ RelationalDatabase::do_next_filename_version(const QString& filename) {
                 "FROM bdb_files "
                 "WHERE proposed_filename = :filename");
     BindMap binds;
-    binds.add(":filename", filename);
+    binds.add(":filename", Variant(filename));
     shared_ptr<ResultSet> result = connection().execute(qry, binds);
     result->next();
     if (result->is_null(0)) {
@@ -156,7 +155,7 @@ long long
 RelationalDatabase::do_db_id(const oh5::File& file) {
     QString qry("SELECT id FROM bdb_files WHERE unique_id = :unique_id");
     BindMap binds;
-    binds.add(":unique_id", file_hasher().hash(file));
+    binds.add(":unique_id", Variant(file_hasher().hash(file)));
     shared_ptr<ResultSet> r = query(qry, binds);
     r->next();
     return r->integer(0);
@@ -166,7 +165,7 @@ long long
 RelationalDatabase::db_id(const oh5::Source& src) {
     QString qry("SELECT id FROM bdb_sources WHERE node_id = :node_id");
     BindMap binds;
-    binds.add(":node_id", src.node_id());
+    binds.add(":node_id", Variant(src.node_id()));
     shared_ptr<ResultSet> r = query(qry, binds);
     if (r->next())
         return r->integer(0);
@@ -232,7 +231,7 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     // wmo_code or radar_site is required for radar sources
     if (src->wmo_code()) {
         wcl.append("wmo_code = :wmo_code");
-        binds.add(":wmo_code", src->wmo_code());
+        binds.add(":wmo_code", Variant(src->wmo_code()));
     }
     if (src->radar_site() != "") {
         wcl.append("radar_site = :radar_site");
@@ -240,7 +239,7 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     }
     if (src->place() != "") {
         wcl.append("place = :place");
-        binds.add(":place", src->place());
+        binds.add(":place", Variant(src->place()));
     }
 
     QString qstr = QString("SELECT bdb_sources.id, node_id, centre_id, ") +
@@ -324,7 +323,7 @@ void
 RelationalDatabase::do_remove_file(const QString& path) {
     QString qry("DELETE FROM bdb_files WHERE path = :path");
     BindMap binds;
-    binds.add(":path", path);
+    binds.add(":path", Variant(path));
     connection().execute(qry, binds);
 }
 

@@ -41,7 +41,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QDate>
 #include <QtCore/QStringList>
 #include <QtCore/QTime>
-#include <QtCore/QVariant>
 
 #include "config.hpp"
 #include "../common.hpp"

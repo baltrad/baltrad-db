@@ -68,33 +68,6 @@ TEST(Variant_test, string) {
     EXPECT_THROW(v.longlong(), value_error);
 }
 
-TEST(Variant_test, from_invalid_qvariant) {
-    QVariant qv;
-    Variant v(qv);
-    EXPECT_EQ(v.type(), Variant::NONE);
-    EXPECT_TRUE(v.is_null());
-}
-
-TEST(Variant_test, from_int_qvariant) {
-    Variant v(QVariant(1));
-    EXPECT_EQ(v.type(), Variant::LONGLONG);
-    EXPECT_EQ(v.longlong(), 1);
-}
-
-TEST(Variant_test, null_to_qvariant) {
-    Variant v;
-    QVariant qv = v.to_qvariant();
-    EXPECT_EQ(qv.type(), QVariant::Invalid);
-    EXPECT_TRUE(qv.isNull());
-}
-
-TEST(Variant_test, longlong_to_qvariant) {
-    Variant v(1);
-    QVariant qv = v.to_qvariant();
-    EXPECT_EQ(qv.type(), QVariant::LongLong);
-    EXPECT_EQ(qv.toLongLong(), 1);
-}
-
 TEST(Variant_test, from_string_literal) {
     Variant v("asd");
     EXPECT_EQ(v.type(), Variant::STRING);
