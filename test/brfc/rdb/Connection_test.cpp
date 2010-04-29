@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include "../common.hpp"
 #include "../MockResultSet.hpp"
+#include "MockConnection.hpp"
 
 using testing::Return;
 using testing::Throw;
@@ -36,15 +37,6 @@ using testing::_;
 
 namespace brfc {
 namespace rdb {
-
-class MockConnection : public Connection {
-  public:
-    MOCK_METHOD0(do_begin, void());
-    MOCK_METHOD0(do_commit, void());
-    MOCK_METHOD0(do_rollback, void());
-    MOCK_METHOD1(do_execute, shared_ptr<ResultSet>(const QString&));
-    MOCK_METHOD0(do_in_transaction, bool());
-};
 
 class rdb_Connection_test : public testing::Test {
   public:
@@ -101,78 +93,6 @@ TEST_F(rdb_Connection_test, test_in_transaction_execute_throws) {
         .WillOnce(Throw(std::runtime_error("")));
     
     EXPECT_THROW(conn.execute(stmt), db_error);
-}
-
-TEST_F(rdb_Connection_test, test_replace_binds_missing_binds) {
-    QString stmt(":bind1 :bind2");
-    BindMap binds;
-    binds.add(":bind1", Variant());
-
-    EXPECT_THROW(conn.replace_binds(stmt, binds), value_error);
-}
-
-TEST_F(rdb_Connection_test, test_replace_binds_excessive_binds) {
-    QString stmt(":bind1");
-    BindMap binds;
-    binds.add(":bind1", Variant());
-    binds.add(":bind2", Variant());
-
-    EXPECT_THROW(conn.replace_binds(stmt, binds), value_error);
-}
-
-TEST_F(rdb_Connection_test, test_replace_binds_find_simple_placeholders) {
-    QString stmt(":bind1 asd :bind2 qwe");
-    BindMap binds;
-    binds.add(":bind1", Variant(1));
-    binds.add(":bind2", Variant(2));
-
-    QString result;
-    EXPECT_NO_THROW(result = conn.replace_binds(stmt, binds));
-    EXPECT_EQ("1 asd 2 qwe", result);
-}
-
-TEST_F(rdb_Connection_test, test_replace_binds_find_complex_placeholders) {
-    QString stmt("(:bind1), :bind2, :bind_3+");
-    BindMap binds;
-    binds.add(":bind1", Variant(1));
-    binds.add(":bind2", Variant(2));
-    binds.add(":bind_3", Variant(3));
-    
-    QString result;
-    EXPECT_NO_THROW(result = conn.replace_binds(stmt, binds));
-    EXPECT_EQ("(1), 2, 3+", result);
-}
-
-TEST_F(rdb_Connection_test, test_replace_binds_large_replacement) {
-    // replacement text is longer than placeholder
-    QString stmt(":bind1");
-    BindMap binds;
-    binds.add(":bind1", Variant(1234567));
-    
-    QString result;
-    EXPECT_NO_THROW(result = conn.replace_binds(stmt, binds));
-    EXPECT_EQ("1234567", result);
-}
-
-TEST_F(rdb_Connection_test, test_replace_binds_replacement_with_colon) {
-    QString stmt(":bind1 texttext :bind2 texttext :bind3");
-    BindMap binds;
-    binds.add(":bind1", Variant(":a:b:c:d:e:"));
-    binds.add(":bind2", Variant("a:b:c:d:e"));
-    binds.add(":bind3", Variant(":a:b:c:d:e:"));
-
-    QString result;
-    EXPECT_NO_THROW(result = conn.replace_binds(stmt, binds));
-    EXPECT_EQ("':a:b:c:d:e:' texttext 'a:b:c:d:e' texttext ':a:b:c:d:e:'", result);
-}
-
-TEST_F(rdb_Connection_test, test_replace_binds_escaped_placeholder_marker) {
-    QString stmt("\\:notabind");
-    BindMap binds;
-
-    QString result;
-    EXPECT_NO_THROW(result = conn.replace_binds(stmt, binds));
-    EXPECT_EQ(result, "\\:notabind");
 }
 
 TEST_F(rdb_Connection_test, test_variant_to_string_string) {

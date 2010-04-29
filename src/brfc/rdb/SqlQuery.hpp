@@ -21,15 +21,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_RDB_SQL_QUERY_HPP
 
 #include <QtCore/QString>
+#include <QtCore/QRegExp>
 
 #include <brfc/rdb/BindMap.hpp>
+#include <brfc/rdb/Connection.hpp>
 
 namespace brfc {
 namespace rdb {
 
+class Connection;
+
 class SqlQuery {
   public:
-    explicit SqlQuery(const QString& statement,
+    explicit SqlQuery(const QString& statement="",
                       const BindMap& binds=BindMap())
             : statement_(statement)
             , binds_(binds) {
@@ -59,6 +63,13 @@ class SqlQuery {
         return statement_;
     }
 
+    /**
+     * @brief replace bind placeholders in the SQL statement
+     * @param connection database connection the replacement is done for
+     * @throw value_error if not all binds consumed or available
+     */
+    QString replace_binds(const Connection& connection) const;
+    
   private:
     QString statement_;
     BindMap binds_;

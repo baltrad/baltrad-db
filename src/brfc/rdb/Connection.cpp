@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/Connection.hpp>
 
 #include <QtCore/QString>
-#include <QtCore/QRegExp>
 
 #include <brfc/exceptions.hpp>
 
@@ -51,11 +50,13 @@ Connection::commit() {
 }
 
 shared_ptr<ResultSet>
-Connection::execute(const QString& statement_, const BindMap& binds) {
-    QString statement(statement_);
-    if (binds.size() > 0) {
-        statement = replace_binds(statement, binds);
-    }
+Connection::execute(const QString& statement, const BindMap& binds) {
+    return execute(SqlQuery(statement, binds));    
+}
+
+shared_ptr<ResultSet>
+Connection::execute(const SqlQuery& query) {
+    QString statement = query.replace_binds(*this);
     shared_ptr<ResultSet> result;
     if (not in_transaction()) {
         try {
@@ -76,42 +77,8 @@ Connection::execute(const QString& statement_, const BindMap& binds) {
     return result;
 }
 
-shared_ptr<ResultSet>
-Connection::execute(const SqlQuery& query) {
-    return execute(query.statement(), query.binds());
-}
-
 QString
-Connection::replace_binds(const QString& statement_, const BindMap& binds) {
-    QRegExp bind_re(":[a-zA-Z0-9_]+");
-    QString statement(statement_), bind_str;
-    int pos = 0, ppos = 0;
-    size_t replace_count = 0;
-    while (bind_re.indexIn(statement, pos) != -1) {
-        ppos = bind_re.pos() ? bind_re.pos() - 1 : 0;
-        if (statement.at(ppos) == '\\') {
-            pos = bind_re.pos() + bind_re.matchedLength();
-            continue;
-        }
-        try {
-            bind_str = variant_to_string(binds.get(bind_re.cap()));
-        } catch (const lookup_error&) {
-            throw value_error("missing value for bind placeholder " +
-                              bind_re.cap().toStdString());
-        }
-        statement.replace(bind_re.pos(), bind_re.matchedLength(), bind_str);
-        pos = bind_re.pos() + bind_str.length();
-        ++replace_count;
-    }
-
-    // XXX: should there be a flag to omit this test?
-    if (replace_count != binds.size())
-        throw value_error("not all binds consumed");
-    return statement;
-}
-
-QString
-Connection::do_variant_to_string(const Variant& value) {
+Connection::do_variant_to_string(const Variant& value) const {
     switch (value.type()) {
         case Variant::NONE:
             return "NULL";

@@ -61,6 +61,7 @@ sources = [
     "rdb/PostgresResultSet.cpp",
     "rdb/QueryToSelect.cpp",
     "rdb/RelationalDatabase.cpp",
+    "rdb/SqlQuery.cpp",
     "rdb/Select.cpp",
     "rdb/Selectable.cpp",
     "test/TempDir.cpp",

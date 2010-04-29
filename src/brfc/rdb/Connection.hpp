@@ -79,13 +79,21 @@ class Connection {
     }
 
     /**
-     * @brief execute an SQL statement
-     * @param statement statment to execute
+     * @brief execute a statement
+     *
+     * @param query statment to execute
      * @param binds binds to replace into the statement
+     * 
+     * equivalent to:
+     * @code execute(SqlQuery(statement, binds)); @endcode
+     */
+    shared_ptr<ResultSet> execute(const QString& statement,
+                                  const BindMap& binds=BindMap());
+    
+    /**
+     * @brief execute an SQL query
      *
-     * If binds are present, they are replaced using replace_binds().
-     *
-     * The actual statement (with bind placeholders replaced with values) is
+     * The actual statement (returned by SqlQuery::replace_binds(*this)) is
      * executed using do_execute().
      *
      * If no transaction is in progress, executes the statement in a "private"
@@ -94,27 +102,12 @@ class Connection {
      *
      * @sa do_execute
      */
-    shared_ptr<ResultSet> execute(const QString& statement,
-                                  const BindMap& binds=BindMap());
-    
-    /**
-     * @brief execute a query
-     * 
-     * equivalent to:
-     * @code execute(query.statement(), query.binds()); @endcode
-     */
     shared_ptr<ResultSet> execute(const SqlQuery& query);
 
     /**
-     * @brief replace bind placeholders in an SQL statement
-     * @throw value_error if not all binds consumed or available
-     */
-    QString replace_binds(const QString& statement, const BindMap& binds);
-    
-    /**
      * @sa do_variant_to_string
      */
-    QString variant_to_string(const Variant& value) {
+    QString variant_to_string(const Variant& value) const {
         return do_variant_to_string(value);
     }
 
@@ -149,7 +142,7 @@ class Connection {
      * - none as NULL
      * - string surrounded by apostrophes (')
      */
-    virtual QString do_variant_to_string(const Variant& value);
+    virtual QString do_variant_to_string(const Variant& value) const;
 };
 
 } // namespace rdb
