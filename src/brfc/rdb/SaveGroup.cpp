@@ -26,14 +26,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtSql/QSqlError>
 
+
 #include <brfc/exceptions.hpp>
+#include <brfc/ResultSet.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Group.hpp>
 
 #include <brfc/rdb/GroupIdCache.hpp>
+#include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
-#include <brfc/rdb/RelationalResultSet.hpp>
 
 
 namespace brfc {
@@ -43,7 +45,7 @@ SaveGroup::SaveGroup(RelationalDatabase* rdb,
                      GroupIdCache* id_cache)
         : rdb_(rdb)
         , id_cache_(id_cache)
-        , qry_(rdb->connection())
+        , qry_("")
         , special_(rdb->mapper().specializations_on("bdb_groups")) {
     QStringList columns, binds; 
     columns.append("parent_id");
@@ -59,18 +61,18 @@ SaveGroup::SaveGroup(RelationalDatabase* rdb,
                    ") VALUES(" + binds.join(", ") + ")");
     if (rdb->supports_returning())
         qrystr += " RETURNING id";
-    if (not qry_.prepare(qrystr))
-        throw db_error(qry_.lastError());
+    qry_.statement(qrystr);
 }
 
 void
 SaveGroup::operator()(const oh5::Group& group) {
+    qry_.binds().clear();
     bind_plain(group);
     bind_specializations(group);
 
-    if (not qry_.exec())
-        throw db_error(qry_.lastError());
-    id_cache_->set_cached(group.shared_from_this(), last_id());
+    shared_ptr<ResultSet> result = rdb_->connection().execute(qry_);
+
+    id_cache_->set_cached(group.shared_from_this(), last_id(*result));
 }
 
 
@@ -85,10 +87,10 @@ SaveGroup::bind_plain(const oh5::Group& group) {
     if (group.file())
         file_id = rdb_->db_id(*group.file());
 
-    qry_.bindValue(":parent_id", parent_id ? parent_id.get()
+    qry_.binds().add(":parent_id", parent_id ? parent_id.get()
                                            : QVariant());
-    qry_.bindValue(":file_id", file_id);
-    qry_.bindValue(":name", group.name());
+    qry_.binds().add(":file_id", file_id);
+    qry_.binds().add(":name", group.name());
 }
 
 void
@@ -99,17 +101,17 @@ SaveGroup::bind_specializations(const oh5::Group& group) {
             group.child_attribute(mapping.attribute);
         if (attr)
             val = attr->value().to_qvariant();
-        qry_.bindValue(":" + mapping.column, val);
+        qry_.binds().add(":" + mapping.column, val);
     }
 }
 
 long long
-SaveGroup::last_id() {
-    if (rdb_->supports_returning()) {
-        qry_.first();
-        return qry_.value(0).toLongLong();
+SaveGroup::last_id(ResultSet& result) {
+    if (rdb_->supports_returning() and result.next()) {
+        return result.integer(0);
     } else {
-        return qry_.lastInsertId().toLongLong();
+        // XXX: last insert id!
+        return 0;
     }
 }
 

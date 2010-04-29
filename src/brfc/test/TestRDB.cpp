@@ -25,7 +25,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QStringList>
 #include <QtCore/QTextStream>
 #include <QtSql/QSqlQuery>
-#include <QtSql/QSqlError>
+
+#include <brfc/rdb/Connection.hpp>
 
 #include <brfc/exceptions.hpp>
 
@@ -55,7 +56,7 @@ TestRDB::drop() {
 
 void
 TestRDB::clean() {
-    connection().exec(QString("DELETE FROM bdb_files"));
+    connection().execute(QString("DELETE FROM bdb_files"));
 }
 
 QStringList
@@ -75,14 +76,15 @@ void
 TestRDB::exec_queries_from(const QString& file) {
     const QStringList& queries = load_queries(file);
     begin();
-    QSqlQuery query(connection());
-    BOOST_FOREACH(const QString& stmt, queries) {
-        if (not query.exec(stmt)) {
-            rollback();
-            throw db_error(query.lastError().text().toStdString()); 
+    try {
+        BOOST_FOREACH(const QString& stmt, queries) {
+            connection().execute(stmt);
         }
+        commit();
+    } catch (...) {
+        rollback();
+        throw;
     }
-    commit();
 }
 
 } // namespace test

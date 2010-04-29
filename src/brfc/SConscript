@@ -57,6 +57,8 @@ sources = [
     "rdb/SaveGroup.cpp",
     "rdb/SaveFile.cpp",
     "rdb/Join.cpp",
+    "rdb/PostgresConnection.cpp",
+    "rdb/PostgresResultSet.cpp",
     "rdb/QueryToSelect.cpp",
     "rdb/RelationalDatabase.cpp",
     "rdb/RelationalResultSet.cpp",
@@ -74,7 +76,7 @@ confdeps = env.ConfHas("#shared-library-confdeps",
 objects = env.SharedObject(sources)
 env.Requires(objects, confdeps)
 
-lib = env.SharedLibrary("#lib/brfc", objects, LIBS=["hdf5", "hlhdf", "QtSql"])
+lib = env.SharedLibrary("#lib/brfc", objects, LIBS=["hdf5", "hlhdf", "QtSql", "pqxx"])
 
 env.Alias("shared-library", lib)
 

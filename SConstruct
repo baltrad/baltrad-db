@@ -41,6 +41,12 @@ vars.AddVariables(
                  "${qt_dir}/lib", PathVariable.PathIsDir),
     PathVariable("qt_include_dir", "Qt4 include directory",
                  "${qt_dir}/include", PathVariable.PathIsDir),
+    PathVariable("pqxx_dir", "libpqxx install root",
+                 "/usr", PathVariable.PathIsDir),
+    PathVariable("pqxx_lib_dir", "libpqxx libraries directory",
+                 "${pqxx_dir}/lib", PathVariable.PathIsDir),
+    PathVariable("pqxx_include_dir", "libpqxx include directory",
+                 "${pqxx_dir}/include", PathVariable.PathIsDir),
     PathVariable("hdf5_dir", "HDF5 install root",
                  "/usr", PathVariable.PathIsDir),
     PathVariable("hdf5_lib_dir", "HDF5 libraries directory",
@@ -153,6 +159,8 @@ class Config(object):
         self.qt = cfg.CheckQt()
         self.qtsql = cfg.CheckLibWithHeader("QtSql", "QtSql/QSqlDatabase", "c++")
         self.qtsql_drivers = cfg.CheckQtSqlDrivers()
+
+        self.pqxx = cfg.CheckLibWithHeader("pqxx", "pqxx/pqxx", "c++")
 
         cfg.env.AppendUnique(CPPPATH=env["hdf5_include_dir"],
                              LIBPATH=env["hdf5_lib_dir"])

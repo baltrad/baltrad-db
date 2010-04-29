@@ -26,6 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <QtSql/QSqlError>
 
 #include <brfc/FileHasher.hpp>
+#include <brfc/ResultSet.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
@@ -33,6 +34,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/RootGroup.hpp>
 
 #include <brfc/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/Connection.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -73,14 +75,14 @@ SaveFile::operator()(const oh5::File& file,
         binds.append(":" + column);
     }
 
-    QSqlQuery qry(rdb_->connection());
-    QString qrystr("INSERT INTO bdb_files(" + columns.join(", ") +
-                   ", hash_type, proposed_filename, filename_version) "
-                   "VALUES(" + binds.join(", ") +
-                   ", :hash_type, :proposed_filename, :filename_version)");
+    QString stmt("INSERT INTO bdb_files(" + columns.join(", ") +
+                 ", hash_type, proposed_filename, filename_version) "
+                 "VALUES(" + binds.join(", ") +
+                 ", :hash_type, :proposed_filename, :filename_version)");
     if (rdb_->supports_returning())
-        qrystr += " RETURNING id";
-    qry.prepare(qrystr);
+        stmt += " RETURNING id";
+
+    SqlQuery qry(stmt);
 
     if (not file.source())
         throw db_error("no Source associated with File");
@@ -91,28 +93,27 @@ SaveFile::operator()(const oh5::File& file,
             continue;
         const QVariant& value = 
                 file.root()->child_attribute(mapping.attribute)->value().to_qvariant();
-        qry.bindValue(":" + mapping.column, value);
+        qry.binds().add(":" + mapping.column, value);
     }
 
-    qry.bindValue(":path", file.path());
-    qry.bindValue(":hash_type", rdb_->file_hasher().name());
-    qry.bindValue(":unique_id", rdb_->file_hasher().hash(file));
-    qry.bindValue(":source_id", rdb_->db_id(*file.source()));
-    qry.bindValue(":proposed_filename", proposed_filename);
-    qry.bindValue(":filename_version", filename_version);
+    qry.binds().add(":path", file.path());
+    qry.binds().add(":hash_type", rdb_->file_hasher().name());
+    qry.binds().add(":unique_id", rdb_->file_hasher().hash(file));
+    qry.binds().add(":source_id", rdb_->db_id(*file.source()));
+    qry.binds().add(":proposed_filename", proposed_filename);
+    qry.binds().add(":filename_version", filename_version);
 
-    if (not qry.exec())
-        throw db_error(qry.lastError());
+    shared_ptr<ResultSet> result = rdb_->connection().execute(qry);
 
     BOOST_FOREACH(const oh5::Node& node, *file.root()) {
         visit(node, *this);
     }
 
-    if (rdb_->supports_returning()) {
-        qry.first();
-        return qry.value(0).toLongLong();
+    if (rdb_->supports_returning() and result->next()) {
+        return result->integer(0);
     } else {
-        return qry.lastInsertId().toLongLong();
+        // XXX: last insert id!
+        return 0;
     }
 }
 

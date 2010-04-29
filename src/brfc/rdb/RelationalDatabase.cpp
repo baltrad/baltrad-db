@@ -21,8 +21,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/Query.hpp>
 #include <brfc/FileHasher.hpp>
+#include <brfc/Query.hpp>
+#include <brfc/ResultSet.hpp>
 
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
@@ -32,18 +33,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/Compiler.hpp>
+#include <brfc/rdb/PostgresConnection.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
-#include <brfc/rdb/RelationalResultSet.hpp>
 #include <brfc/rdb/SaveFile.hpp>
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QCoreApplication>
 #include <QtCore/QStringList>
 #include <QtCore/QUrl>
 #include <QtCore/QVariant>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlQuery>
+
+#include <iostream>
 
 namespace brfc {
 namespace rdb {
@@ -61,65 +61,21 @@ QSqlDatabase_deleter(QSqlDatabase* db) {
 } // namespace anonymous
 
 
-QString
-RelationalDatabase::qt_engine(const QString& dialect) const {
-    if (dialect == "postgresql") {
-        return "QPSQL";
-    } else if (dialect == "sqlite") {
-        return "QSQLITE";
-    } else {
-        QString err = QString::fromUtf8("unsupported dialect: ") +
-                      dialect;
-        throw db_error(err.toUtf8().constData());
-    }
-}
-
 RelationalDatabase::RelationalDatabase(const QString& dsn_)
-        : sql_()
+        : conn_()
         , mapper_(new AttributeMapper())
         , specs_(new oh5::AttributeSpecs())
-        , file_hasher_()
-        , dialect_()
-        , supports_returning_(false) {
-        
-    if (qapp_ == 0)
-        init_qapp();
+        , file_hasher_() {
 
     QUrl dsn(dsn_);
-
-    {
-        QString name = QString("brfc-") + QString::number(connection_count_++);
-        QString engine = qt_engine(dsn.scheme());
-        const QSqlDatabase& tmp = ::QSqlDatabase::addDatabase(engine, name);
-        sql_.reset(new QSqlDatabase(tmp), QSqlDatabase_deleter);
-    }
-
-    sql_->setHostName(dsn.host());
-    sql_->setUserName(dsn.userName());
-    sql_->setPassword(dsn.password());
-    QString database = dsn.path();
-    if (database.startsWith("/")) {
-        database.remove(0, 1); // remove slash
-    }
-    sql_->setDatabaseName(database);
-    if (!sql_->open())
-        throw db_error(sql_->lastError());
-    dialect_ = dsn.scheme();
-    if (dialect_ == "postgresql")
-        supports_returning_ = true;
-    populate_mapper_and_specs();
+    
+    conn_.reset(new PostgresConnection(dsn));
 }
 
-void
-RelationalDatabase::init_qapp() {
-    // never gets destroyed
-    qapp_ = new QCoreApplication(argc_, const_cast<char**>(argv_));
+bool
+RelationalDatabase::supports_returning() const {
+    return conn_->has_feature(Connection::RETURNING);
 }
-
-unsigned int RelationalDatabase::connection_count_ = 0;
-int RelationalDatabase::argc_ = 1;
-const char* RelationalDatabase::argv_[] = {"brfc"};
-QCoreApplication* RelationalDatabase::qapp_ = 0;
 
 RelationalDatabase::~RelationalDatabase() {
 
@@ -152,7 +108,7 @@ RelationalDatabase::file_hasher(FileHasher* hasher) {
 
 void
 RelationalDatabase::do_begin() {
-    connection().transaction();
+    connection().begin();
 }
 
 void
@@ -167,14 +123,12 @@ RelationalDatabase::do_commit() {
 
 bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
-    QSqlQuery query(connection());
-    query.prepare("SELECT true FROM bdb_files WHERE unique_id = :unique_id");
-    query.bindValue(":unique_id", file_hasher().hash(file));
-    if (!query.exec())
-        throw db_error(query.lastError());
-    return query.next(); // got a result row
+    QString qry("SELECT true FROM bdb_files WHERE unique_id = :unique_id");
+    BindMap binds;
+    binds.add(":unique_id", file_hasher().hash(file));
+    shared_ptr<ResultSet> result = connection().execute(qry, binds);
+    return result->size() > 0;
 }
-
 
 long long
 RelationalDatabase::do_save_file(const oh5::File& file,
@@ -186,15 +140,18 @@ RelationalDatabase::do_save_file(const oh5::File& file,
 
 unsigned int
 RelationalDatabase::do_next_filename_version(const QString& filename) {
-    QSqlQuery qry(connection());
-    qry.prepare("SELECT MAX(filename_version) + 1 "
+    QString qry("SELECT MAX(filename_version) + 1 "
                 "FROM bdb_files "
                 "WHERE proposed_filename = :filename");
-    qry.bindValue(":filename", filename);
-    if (!qry.exec())
-        throw db_error(qry.lastError());
-    qry.next();
-    return qry.value(0).toUInt();
+    BindMap binds;
+    binds.add(":filename", filename);
+    shared_ptr<ResultSet> result = connection().execute(qry, binds);
+    result->next();
+    if (result->is_null(0)) {
+        return 0;
+    } else {
+        return static_cast<unsigned int>(result->integer(0));
+    }
 }
 
 shared_ptr<ResultSet>
@@ -210,7 +167,7 @@ RelationalDatabase::do_query(const Query& query) {
 
 long long
 RelationalDatabase::do_db_id(const oh5::File& file) {
-    QString qry = "SELECT id FROM bdb_files WHERE unique_id = :unique_id";
+    QString qry("SELECT id FROM bdb_files WHERE unique_id = :unique_id");
     BindMap binds;
     binds.add(":unique_id", file_hasher().hash(file));
     shared_ptr<ResultSet> r = query(qry, binds);
@@ -220,7 +177,7 @@ RelationalDatabase::do_db_id(const oh5::File& file) {
 
 long long
 RelationalDatabase::db_id(const oh5::Source& src) {
-    QString qry = "SELECT id FROM bdb_sources WHERE node_id = :node_id";
+    QString qry("SELECT id FROM bdb_sources WHERE node_id = :node_id");
     BindMap binds;
     binds.add(":node_id", src.node_id());
     shared_ptr<ResultSet> r = query(qry, binds);
@@ -234,20 +191,20 @@ shared_ptr<oh5::SourceCentre>
 RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
                                        long long id) {
     QStringList wcl;
-    QList<QVariant> binds;
+    BindMap binds;
 
     // originating_centre or country_code is required for org. sources
     if (src->originating_centre()) {
-        wcl.append("originating_centre = ?");
-        binds.append(src->originating_centre());
+        wcl.append("originating_centre = :org_centre");
+        binds.add(":org_centre", Variant(src->originating_centre()));
     }
     if (src->country_code()) {
-        wcl.append("country_code = ?");
-        binds.append(src->country_code());
+        wcl.append("country_code = :country_code");
+        binds.add(":country_code", Variant(src->country_code()));
     }
     if (id) {
-        wcl.append("bdb_sources.id = ?");
-        binds.append(id);
+        wcl.append("bdb_sources.id = :id");
+        binds.add(":id", Variant(id));
     }
 
     QString qstr = QString("SELECT bdb_sources.id, node_id, country_code, ") +
@@ -255,32 +212,26 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
                    QString("FROM bdb_source_centres ") +
                    QString("JOIN bdb_sources ON bdb_sources.id = bdb_source_centres.id ") +
                    QString("WHERE ") + wcl.join(" OR ");
-
-    QSqlQuery qry(connection());
-    qry.prepare(qstr);
-    BOOST_FOREACH(const QVariant& bind, binds) {
-        qry.addBindValue(bind);
-    }
-
-    if (not qry.exec()) 
-        throw db_error(qry.lastError());
-    if (qry.size() < 1) {
+    
+    shared_ptr<ResultSet> result = connection().execute(qstr, binds);
+    
+    if (result->size() < 1) {
         throw lookup_error("no source found: " +
                            src->to_string().toStdString());
-    } else if (qry.size() > 1) {
+    } else if (result->size() > 1) {
         throw lookup_error("multiple sources found: " +
                            src->to_string().toStdString());
     }
-    qry.first();
+    result->next();
 
-    id = qry.value(0).toLongLong();
+    id = result->integer(0);
     SourceMap::iterator i = sources_.find(id);
 
     if (i == sources_.end()) {
-        src->node_id(qry.value(1).toString());
-        src->country_code(qry.value(2).toInt());
-        src->originating_centre(qry.value(3).toInt());
-        src->wmo_cccc(qry.value(4).toString());
+        src->node_id(result->string(1));
+        src->country_code(result->integer(2));
+        src->originating_centre(result->integer(3));
+        src->wmo_cccc(result->string(4));
         i = sources_.insert(std::make_pair(id, src)).first;
     }
     return static_pointer_cast<oh5::SourceCentre>(i->second);
@@ -289,20 +240,20 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
 shared_ptr<oh5::SourceRadar>
 RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     QStringList wcl;
-    QList<QVariant> binds;
+    BindMap binds;
 
     // wmo_code or radar_site is required for radar sources
     if (src->wmo_code()) {
-        wcl.append("wmo_code = ?");
-        binds.append(src->wmo_code());
+        wcl.append("wmo_code = :wmo_code");
+        binds.add(":wmo_code", src->wmo_code());
     }
     if (src->radar_site() != "") {
-        wcl.append("radar_site = ?");
-        binds.append(src->radar_site());
+        wcl.append("radar_site = :radar_site");
+        binds.add(":radar_site", Variant(src->radar_site()));
     }
     if (src->place() != "") {
-        wcl.append("place = ?");
-        binds.append(src->place());
+        wcl.append("place = :place");
+        binds.add(":place", src->place());
     }
 
     QString qstr = QString("SELECT bdb_sources.id, node_id, centre_id, ") +
@@ -310,36 +261,30 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
                    QString("FROM bdb_source_radars ") +
                    QString("JOIN bdb_sources ON bdb_source_radars.id = bdb_sources.id ") +
                    QString("WHERE ") + wcl.join(" OR ");
-    
-    QSqlQuery qry(connection());
-    qry.prepare(qstr);
-    BOOST_FOREACH(const QVariant& bind, binds) {
-        qry.addBindValue(bind);
-    }
+    shared_ptr<ResultSet> result = connection().execute(qstr, binds);
 
-    if (not qry.exec()) 
-        throw db_error(qry.lastError());
-    if (qry.size() < 1) {
+    if (result->size() < 1) {
         throw lookup_error("no source found: " +
                            src->to_string().toStdString());
-    } else if (qry.size() > 1) {
+    } else if (result->size() > 1) {
         throw lookup_error("multiple sources found: " +
                            src->to_string().toStdString());
     }
-    qry.first();
+    
+    result->next();
 
-    long long id = qry.value(0).toLongLong();
+    long long id = result->integer(0);
     SourceMap::iterator i = sources_.find(id);
 
     if (i == sources_.end()) {
         shared_ptr<oh5::SourceCentre> centre = make_shared<oh5::SourceCentre>();
-        centre = load_source_centre(centre, qry.value(2).toLongLong());
+        centre = load_source_centre(centre, result->integer(2));
 
         src->centre(centre);
-        src->node_id(qry.value(1).toString());
-        src->wmo_code(qry.value(3).toInt());
-        src->radar_site(qry.value(4).toString());
-        src->place(qry.value(5).toString());
+        src->node_id(result->string(1));
+        src->wmo_code(result->integer(3));
+        src->radar_site(result->string(4));
+        src->place(result->string(5));
         i = sources_.insert(std::make_pair(id, src)).first;
     }
 
@@ -363,17 +308,10 @@ RelationalDatabase::do_load_source(const QString& srcstr) {
 
 }
 
-shared_ptr<RelationalResultSet>
+shared_ptr<ResultSet>
 RelationalDatabase::query(const QString& query_str,
                           const BindMap& binds) {
-    BRFC_ASSERT(connection().isOpen());
-    QSqlQuery query(connection());
-    query.prepare(query_str);
-    BOOST_FOREACH(const BindMap::value_type& bind, binds) {
-        query.bindValue(bind.first, bind.second);
-    }
-    query.exec();
-    return make_shared<RelationalResultSet>(query, sql_);
+    return connection().execute(query_str, binds);
 }
 
 void
@@ -397,11 +335,10 @@ RelationalDatabase::populate_mapper_and_specs() {
 
 void
 RelationalDatabase::do_remove_file(const QString& path) {
-    QSqlQuery query(connection());
-    query.prepare("DELETE FROM bdb_files WHERE path = :path");
-    query.bindValue(":path", path);
-    if (!query.exec())
-        throw db_error(query.lastError());
+    QString qry("DELETE FROM bdb_files WHERE path = :path");
+    BindMap binds;
+    binds.add(":path", path);
+    connection().execute(qry, binds);
 }
 
 } // namespace rdb

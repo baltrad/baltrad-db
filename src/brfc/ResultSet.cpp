@@ -27,6 +27,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+bool
+ResultSet::is_null(unsigned int pos) const {
+    return do_is_null(pos);
+}
+
 QString
 ResultSet::string(unsigned int pos) const {
     return do_string(pos);

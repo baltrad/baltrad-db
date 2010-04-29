@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_QSQL_DATABASE_H
-#define BRFC_QSQL_DATABASE_H
+#ifndef BRFC_RDB_RELATIONAL_DATABASE_HPP
+#define BRFC_RDB_RELATIONAL_DATABASE_HPP
 
 #include <string>
 #include <map>
@@ -30,7 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Database.hpp>
 
 class QVariant;
-class QCoreApplication;
 
 namespace brfc {
 
@@ -51,7 +50,7 @@ namespace rdb {
 
 class AttributeMapper;
 class BindMap;
-class RelationalResultSet;
+class Connection;
 
 /**
  * @brief Database using QtSql
@@ -77,8 +76,8 @@ class RelationalDatabase : public Database {
     /**
      * @brief execute a select query
      */
-    shared_ptr<RelationalResultSet> query(const QString& query,
-                                          const BindMap& binds);
+    shared_ptr<ResultSet> query(const QString& query,
+                                const BindMap& binds);
     
     shared_ptr<const oh5::AttributeSpecs> specs() const;
 
@@ -88,13 +87,11 @@ class RelationalDatabase : public Database {
 
     void populate_mapper_and_specs();
 
-    QSqlDatabase& connection() {
-        return *sql_;
+    Connection& connection() {
+        return *conn_;
     }
 
-    bool supports_returning() const {
-        return supports_returning_;
-    }
+    bool supports_returning() const;
 
     void file_hasher(shared_ptr<FileHasher> hasher);
     
@@ -132,8 +129,8 @@ class RelationalDatabase : public Database {
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
-    QString dialect() const { return dialect_; }
-  
+    QString dialect() const { return "postgresql"; }
+
   private:
     /**
      * @brief map source id's to source instances
@@ -165,20 +162,14 @@ class RelationalDatabase : public Database {
     
     QString qt_engine(const QString& engine) const;
 
-    shared_ptr<QSqlDatabase> sql_;
+    shared_ptr<Connection> conn_;
     scoped_ptr<AttributeMapper> mapper_;
     shared_ptr<oh5::AttributeSpecs> specs_;
     shared_ptr<FileHasher> file_hasher_;
     SourceMap sources_;
-    QString dialect_;
-    bool supports_returning_;
-    static unsigned int connection_count_;
-    static int argc_;
-    static const char* argv_[];
-    static QCoreApplication* qapp_;
 };
 
 } // namespace rdb
 } // namespace brfc
 
-#endif // BRFC_QT_SQL_DATABASE_H
+#endif // BRFC_RDB_RELATIONAL_DATABASE_HPP

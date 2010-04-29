@@ -20,11 +20,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_RDB_SAVE_GROUP_HPP
 #define BRFC_RDB_SAVE_GROUP_HPP
 
-#include <QtSql/QSqlQuery>
-
 #include <brfc/rdb/AttributeMapper.hpp>
+#include <brfc/rdb/SqlQuery.hpp>
 
 namespace brfc {
+
+class ResultSet;
 
 namespace oh5 {
 
@@ -80,11 +81,11 @@ class SaveGroup {
     /**
      * @brief id of the last insert
      */
-    long long last_id();
+    long long last_id(ResultSet& result);
 
     RelationalDatabase* rdb_;
     GroupIdCache* id_cache_;
-    QSqlQuery qry_;
+    SqlQuery qry_;
     MappingVector special_;
 };
 

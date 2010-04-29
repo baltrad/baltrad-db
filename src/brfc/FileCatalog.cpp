@@ -47,6 +47,7 @@ FileCatalog::FileCatalog(const QString& dsn,
     check_storage();
     rdb::RelationalDatabase* rdb =
         static_cast<rdb::RelationalDatabase*>(db_.get());
+    rdb->populate_mapper_and_specs();
     specs_ = rdb->specs();
     shared_ptr<FileHasher> hasher(new SHA1AttributeHasher(specs_));
     rdb->file_hasher(hasher);

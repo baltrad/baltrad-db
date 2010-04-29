@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <map>
 
-#include <QtSql/QSqlQuery>
+#include <brfc/rdb/SqlQuery.hpp> 
 
 namespace brfc {
 
@@ -63,11 +63,11 @@ class SaveAttribute {
     /**
      * @brief map table name to a QSqlQuery
      */
-    typedef std::map<QString, QSqlQuery> QueryMap;
+    typedef std::map<QString, SqlQuery> QueryMap;
 
-    QSqlQuery& invalid_attribute_query(const oh5::Attribute& attr);
+    SqlQuery& invalid_attribute_query(const oh5::Attribute& attr);
    
-    QSqlQuery& valid_attribute_query(const oh5::Attribute& attr);
+    SqlQuery& valid_attribute_query(const oh5::Attribute& attr);
 
     RelationalDatabase* rdb_;
     const AttributeMapper* mapper_;

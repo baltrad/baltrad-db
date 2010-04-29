@@ -89,7 +89,7 @@ TEST_P(rdb_ResultSet_test, date) {
 TEST_P(rdb_ResultSet_test, time) {
     shared_ptr<ResultSet> r = db->query("SELECT TIME '12:00:05'", BindMap());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(r->time(0), QTime(12, 0, 5));
+    EXPECT_EQ(QTime(12, 0, 5), r->time(0));
 }
 
 TEST_P(rdb_ResultSet_test, invalid_column) {
@@ -106,4 +106,3 @@ INSTANTIATE_TEST_CASE_P(rdb_ResultSet_test_p,
 
 } // namepsace rdb
 } // namespace brfc
-
