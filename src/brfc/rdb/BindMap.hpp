@@ -90,6 +90,10 @@ class BindMap {
      * @brief remove a bind
      */
     bool remove(const QString& name);
+    
+    void clear() {
+        binds_.clear();
+    }
 
   private:
     QString name_to_placeholder(const QString& name) const;

@@ -112,6 +112,17 @@ TEST_F(rdb_BindMap_test, test_remove) {
     EXPECT_FALSE(binds.has(":bind2"));
 }
 
+TEST_F(rdb_BindMap_test, test_clear) {
+    QVariant val(1);
+    binds.add(":bind1", val);
+    binds.add(":bind2", val);
+
+    binds.clear();
+    EXPECT_EQ(binds.size(), (size_t)0);
+    EXPECT_FALSE(binds.has(":bind1"));
+    EXPECT_FALSE(binds.has(":bind2"));
+}
+
 } // namespace rdb
 } // namespace brfc
 
