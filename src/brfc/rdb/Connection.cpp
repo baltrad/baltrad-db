@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <iostream>
+#include <brfc/rdb/SqlQuery.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -51,40 +51,45 @@ Connection::commit() {
 }
 
 shared_ptr<ResultSet>
-Connection::execute(const QString& query, const BindMap& binds) {
-    QString qry(query);
+Connection::execute(const QString& statement_, const BindMap& binds) {
+    QString statement(statement_);
     if (binds.size() > 0) {
-        qry = replace_binds(query, binds);
+        statement = replace_binds(statement, binds);
     }
     shared_ptr<ResultSet> result;
     if (not in_transaction()) {
         try {
             begin();
-            result = do_execute(query);
+            result = do_execute(statement);
             commit();
-        } catch (...) {
+        } catch (const std::runtime_error& e) {
             rollback();
-            throw db_error("");
+            throw db_error(e.what());
         }
     } else {
         try {
-            result = do_execute(query);
-        } catch (...) {
-            throw db_error("");
+            result = do_execute(statement);
+        } catch (const std::runtime_error& e) {
+            throw db_error(e.what());
         }
     }
     return result;
 }
 
+shared_ptr<ResultSet>
+Connection::execute(const SqlQuery& query) {
+    return execute(query.statement(), query.binds());
+}
+
 QString
-Connection::replace_binds(const QString& query_, const BindMap& binds) {
+Connection::replace_binds(const QString& statement_, const BindMap& binds) {
     QRegExp bind_re(":[a-zA-Z0-9_]+");
-    QString query(query_), bind_str;
+    QString statement(statement_), bind_str;
     int pos = 0, ppos = 0;
     size_t replace_count = 0;
-    while (bind_re.indexIn(query, pos) != -1) {
+    while (bind_re.indexIn(statement, pos) != -1) {
         ppos = bind_re.pos() ? bind_re.pos() - 1 : 0;
-        if (query.at(ppos) == '\\') {
+        if (statement.at(ppos) == '\\') {
             pos = bind_re.pos() + bind_re.matchedLength();
             continue;
         }
@@ -94,16 +99,15 @@ Connection::replace_binds(const QString& query_, const BindMap& binds) {
             throw value_error("missing value for bind placeholder " +
                               bind_re.cap().toStdString());
         }
-        query.replace(bind_re.pos(), bind_re.matchedLength(), bind_str);
-        pos += bind_str.length();
+        statement.replace(bind_re.pos(), bind_re.matchedLength(), bind_str);
+        pos = bind_re.pos() + bind_str.length();
         ++replace_count;
     }
 
     // XXX: should there be a flag to omit this test?
     if (replace_count != binds.size())
         throw value_error("not all binds consumed");
-
-    return query;
+    return statement;
 }
 
 QString

@@ -25,12 +25,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/ResultSet.hpp>
 #include <brfc/Variant.hpp>
 #include <brfc/rdb/Connection.hpp>
+#include <brfc/rdb/SqlQuery.hpp>
 
 #include "../common.hpp"
 #include "../MockResultSet.hpp"
 
 using testing::Return;
 using testing::Throw;
+using testing::_;
 
 namespace brfc {
 namespace rdb {
@@ -54,99 +56,122 @@ class rdb_Connection_test : public testing::Test {
 };
 
 TEST_F(rdb_Connection_test, test_no_transaction_execute) {
-    QString query("query");
+    QString stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false))  // execute()
         .WillOnce(Return(false))  // begin()
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_begin());
-    EXPECT_CALL(conn, do_execute(query))
+    EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Return(make_shared<MockResultSet>()));
     EXPECT_CALL(conn, do_commit());
 
-    conn.execute(query);
+    conn.execute(stmt);
 }
 
 TEST_F(rdb_Connection_test, test_no_transaction_excute_throws) {
-    QString query("query");
+    QString stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false)) // execute()
         .WillOnce(Return(false)) // being()
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_begin());
-    EXPECT_CALL(conn, do_execute(query))
+    EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Throw(std::runtime_error("")));
     EXPECT_CALL(conn, do_rollback());
 
-    EXPECT_THROW(conn.execute(query), db_error);
+    EXPECT_THROW(conn.execute(stmt), db_error);
 }
 
 TEST_F(rdb_Connection_test, test_in_transaction_execute) {
-    QString query("query");
+    QString stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(conn, do_execute(query))
+    EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Return(make_shared<MockResultSet>()));
     
-    conn.execute(query);
+    conn.execute(stmt);
 }
 
 TEST_F(rdb_Connection_test, test_in_transaction_execute_throws) {
-    QString query("query");
+    QString stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(conn, do_execute(query))
+    EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Throw(std::runtime_error("")));
     
-    EXPECT_THROW(conn.execute(query), db_error);
+    EXPECT_THROW(conn.execute(stmt), db_error);
 }
 
 TEST_F(rdb_Connection_test, test_replace_binds_missing_binds) {
-    QString query(":bind1 :bind2");
+    QString stmt(":bind1 :bind2");
     BindMap binds;
     binds.add(":bind1", Variant());
 
-    EXPECT_THROW(conn.replace_binds(query, binds), value_error);
+    EXPECT_THROW(conn.replace_binds(stmt, binds), value_error);
 }
 
 TEST_F(rdb_Connection_test, test_replace_binds_excessive_binds) {
-    QString query(":bind1");
+    QString stmt(":bind1");
     BindMap binds;
     binds.add(":bind1", Variant());
     binds.add(":bind2", Variant());
 
-    EXPECT_THROW(conn.replace_binds(query, binds), value_error);
+    EXPECT_THROW(conn.replace_binds(stmt, binds), value_error);
 }
 
 TEST_F(rdb_Connection_test, test_replace_binds_find_simple_placeholders) {
-    QString query(":bind1 asd :bind2 qwe");
+    QString stmt(":bind1 asd :bind2 qwe");
     BindMap binds;
     binds.add(":bind1", Variant(1));
     binds.add(":bind2", Variant(2));
 
     QString result;
-    EXPECT_NO_THROW(result = conn.replace_binds(query, binds));
+    EXPECT_NO_THROW(result = conn.replace_binds(stmt, binds));
     EXPECT_EQ("1 asd 2 qwe", result);
 }
 
 TEST_F(rdb_Connection_test, test_replace_binds_find_complex_placeholders) {
-    QString query("(:bind1), :bind2, :bind_3+");
+    QString stmt("(:bind1), :bind2, :bind_3+");
     BindMap binds;
     binds.add(":bind1", Variant(1));
     binds.add(":bind2", Variant(2));
     binds.add(":bind_3", Variant(3));
     
     QString result;
-    EXPECT_NO_THROW(result = conn.replace_binds(query, binds));
+    EXPECT_NO_THROW(result = conn.replace_binds(stmt, binds));
     EXPECT_EQ("(1), 2, 3+", result);
 }
 
+TEST_F(rdb_Connection_test, test_replace_binds_large_replacement) {
+    // replacement text is longer than placeholder
+    QString stmt(":bind1");
+    BindMap binds;
+    binds.add(":bind1", Variant(1234567));
+    
+    QString result;
+    EXPECT_NO_THROW(result = conn.replace_binds(stmt, binds));
+    EXPECT_EQ("1234567", result);
+}
+
+TEST_F(rdb_Connection_test, test_replace_binds_replacement_with_colon) {
+    QString stmt(":bind1 texttext :bind2 texttext :bind3");
+    BindMap binds;
+    binds.add(":bind1", Variant(":a:b:c:d:e:"));
+    binds.add(":bind2", Variant("a:b:c:d:e"));
+    binds.add(":bind3", Variant(":a:b:c:d:e:"));
+
+    QString result;
+    EXPECT_NO_THROW(result = conn.replace_binds(stmt, binds));
+    EXPECT_EQ("':a:b:c:d:e:' texttext 'a:b:c:d:e' texttext ':a:b:c:d:e:'", result);
+}
+
 TEST_F(rdb_Connection_test, test_replace_binds_escaped_placeholder_marker) {
-    QString query("\\:notabind");
+    QString stmt("\\:notabind");
     BindMap binds;
 
     QString result;
-    EXPECT_NO_THROW(result = conn.replace_binds(query, binds));
+    EXPECT_NO_THROW(result = conn.replace_binds(stmt, binds));
     EXPECT_EQ(result, "\\:notabind");
 }
 
@@ -217,6 +242,35 @@ TEST_F(rdb_Connection_test, test_commit_no_transaction) {
         .WillOnce(Return(false));
 
     EXPECT_THROW(conn.commit(), db_error);
+}
+
+TEST_F(rdb_Connection_test, test_execute_sqlquery) {
+    QString stmt("query");
+    BindMap binds;
+    SqlQuery query(stmt, binds);
+
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(conn, do_execute(stmt))
+        .WillOnce(Return(make_shared<MockResultSet>()));
+    
+    conn.execute(query);
+}
+
+TEST_F(rdb_Connection_test, test_execute_replaces_binds) {
+    QString stmt(":bind");
+    BindMap binds;
+    binds.add(":bind", Variant(1));
+
+    ON_CALL(conn, do_execute(_))
+        .WillByDefault(Return(shared_ptr<ResultSet>()));
+
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(conn, do_execute(QString("1")))
+        .WillOnce(Return(shared_ptr<ResultSet>()));
+    
+    conn.execute(stmt, binds);
 }
 
 } // namespace rdb

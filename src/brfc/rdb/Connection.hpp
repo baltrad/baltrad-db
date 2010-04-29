@@ -32,11 +32,18 @@ class ResultSet;
 
 namespace rdb {
 
+class SqlQuery;
+
 /**
  * @brief ABC for database connections
  */
 class Connection {
   public:
+    enum Feature {
+        RETURNING = 1,
+        LAST_INSERT_ID = 2
+    };
+
     virtual ~Connection() {
 
     }
@@ -72,29 +79,37 @@ class Connection {
     }
 
     /**
-     * @brief execute a query
-     * @param query the query string
-     * @param binds binds to replace into the query string
+     * @brief execute an SQL statement
+     * @param statement statment to execute
+     * @param binds binds to replace into the statement
      *
      * If binds are present, they are replaced using replace_binds().
      *
-     * The actual query (with bind placeholders replaced with values) is
+     * The actual statement (with bind placeholders replaced with values) is
      * executed using do_execute().
      *
-     * If no transaction is in progress, executes the query in a "private"
-     * transaction, otherwise the query executed as part of the ongoing
+     * If no transaction is in progress, executes the statement in a "private"
+     * transaction, otherwise the statement executed as part of the ongoing
      * transaction.
      *
      * @sa do_execute
      */
-    shared_ptr<ResultSet> execute(const QString& query,
+    shared_ptr<ResultSet> execute(const QString& statement,
                                   const BindMap& binds=BindMap());
     
     /**
-     * @brief replace bind placeholders in query string
+     * @brief execute a query
+     * 
+     * equivalent to:
+     * @code execute(query.statement(), query.binds()); @endcode
+     */
+    shared_ptr<ResultSet> execute(const SqlQuery& query);
+
+    /**
+     * @brief replace bind placeholders in an SQL statement
      * @throw value_error if not all binds consumed or available
      */
-    QString replace_binds(const QString& query, const BindMap& binds);
+    QString replace_binds(const QString& statement, const BindMap& binds);
     
     /**
      * @sa do_variant_to_string
@@ -103,17 +118,28 @@ class Connection {
         return do_variant_to_string(value);
     }
 
+    bool has_feature(Feature feature) const {
+        return do_has_feature(feature);
+    }
+
   protected:
     virtual void do_begin() = 0;
     virtual void do_commit() = 0;
     virtual void do_rollback() = 0;
 
-    virtual shared_ptr<ResultSet> do_execute(const QString& query) = 0;
+    virtual shared_ptr<ResultSet> do_execute(const QString& statement) = 0;
     
     /**
      * @return true if there is an ongoing transaction
      */
     virtual bool do_in_transaction() = 0;
+    
+    /**
+     * @return false
+     */
+    virtual bool do_has_feature(Feature /*feature*/) const {
+        return false;
+    }
     
     /**
      * @brief default implementation
