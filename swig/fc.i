@@ -139,6 +139,11 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
   }
 %}
 
+%rename(add_days) QDate::addDays;
+%rename(add_months) QDate::addMonths;
+%rename(add_years) QDate::addYears;
+%rename(current_date) QDate::current_date;
+
 class QDate {
   public:
     QDate(int year, int month, int day);
@@ -147,6 +152,12 @@ class QDate {
     int month() const;
     int day() const;
 
+    QDate QDate::addDays(int ndays) const;
+    QDate QDate::addMonths(int nmonths) const;
+    QDate QDate::addYears(int nyears) const;
+    
+    static QDate QDate::currentDate();
+    
     %extend {
         QString to_string(const QString& format) const {
             return $self->toString(format);
@@ -154,6 +165,8 @@ class QDate {
     }
 };
 
+%rename(add_secs) QTime::addSecs;
+%rename(current_time) QTime::currentTime;
 
 class QTime {
   public:
@@ -163,7 +176,11 @@ class QTime {
     int minute() const;
     int second() const;
     int msec() const;
-    
+
+    QTime QTime::addSecs(int s) const;
+
+    static QTime QTime::currentTime();
+
     %extend {
         QString to_string(const QString& format) const {
             return $self->toString(format);
