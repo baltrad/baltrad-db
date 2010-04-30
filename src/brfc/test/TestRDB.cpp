@@ -35,7 +35,8 @@ namespace test {
 TestRDB::TestRDB(const QString& dsn, const QString& schema_dir)
         : RelationalDatabase(dsn)
         , schema_dir_(schema_dir) {
-    schema_dir_.makeAbsolute();
+    if (not schema_dir_.is_absolute())
+        throw value_error("schema dir must be absolute");
 }
 
 TestRDB::~TestRDB() {
@@ -60,7 +61,7 @@ TestRDB::clean() {
 
 QStringList
 TestRDB::load_queries(const QString& filename) {
-    QString path = schema_dir_.path() + QString("/") + dialect() + QString("/") + filename;
+    QString path = schema_dir_.join(dialect()).join(filename).string();
     QFile file(path);
     if (not file.open(QIODevice::ReadOnly)) {
         throw fs_error("could not open file: " + path.toStdString());

@@ -23,7 +23,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/smart_ptr.hpp>
 
 #include <QtCore/QString>
-#include <QtCore/QDir>
+
+#include <brfc/Path.hpp>
 
 /**
  * @brief main namespace
@@ -145,7 +146,7 @@ class FileCatalog {
     shared_ptr<Database> db_;
     shared_ptr<oh5::AttributeSpecs> specs_;
     shared_ptr<FileNamer> namer_;
-    QDir storage_;
+    Path storage_;
 };
 
 }

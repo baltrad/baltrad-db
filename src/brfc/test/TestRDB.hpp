@@ -20,9 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_TEST_TEST_RDB_HPP
 #define BRFC_TEST_TEST_RDB_HPP
 
-#include <brfc/rdb/RelationalDatabase.hpp>
+#include <brfc/Path.hpp>
 
-#include <QtCore/QDir>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 class QStringList;
 
@@ -65,7 +65,7 @@ class TestRDB : public rdb::RelationalDatabase {
     QStringList load_queries(const QString& filename);
     void exec_queries_from(const QString& filename);
 
-    QDir schema_dir_;
+    Path schema_dir_;
 };
 
 } // namespace test

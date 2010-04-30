@@ -19,6 +19,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/FileCatalog.hpp>
 
+#include <boost/foreach.hpp>
+
+#include <QtCore/QFile>
+
 #include <brfc/exceptions.hpp>
 #include <brfc/Database.hpp>
 #include <brfc/DefaultFileNamer.hpp>
@@ -31,10 +35,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/File.hpp>
 
 #include <brfc/rdb/RelationalDatabase.hpp>
-
-#include <boost/foreach.hpp>
-
-#include <QtCore/QDir>
 
 namespace brfc {
     
@@ -70,7 +70,7 @@ FileCatalog::~FileCatalog() {
 
 void
 FileCatalog::check_storage() const {
-    if (not storage_.isAbsolute())
+    if (not storage_.is_absolute())
         throw fs_error("storage must be an absolute path");
     if (not storage_.exists())
         throw fs_error("storage does not exist");
@@ -108,13 +108,13 @@ FileCatalog::catalog(const QString& path) {
     
     QString proposed_name = namer_->name(*f);
 
-    if (QDir::isAbsolutePath(proposed_name))
+    if (Path(proposed_name).is_absolute())
         throw std::runtime_error("namer must not return absolute paths");
     
     unsigned int name_version = db_->next_filename_version(proposed_name);
     
     QString target = FileNamer::inject_version(proposed_name, name_version);
-    target = QDir::cleanPath(storage_.absoluteFilePath(target));
+    target = storage_.join(target).string();
     f->path(target);
 
     db_->begin();

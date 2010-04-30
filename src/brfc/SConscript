@@ -23,6 +23,7 @@ sources = [
     "DefaultFileNamer.cpp",
     "FileCatalog.cpp",
     "FileNamer.cpp",
+    "Path.cpp",
     "Query.cpp",
     "ResultSet.cpp",
     "SHA1AttributeHasher.cpp",
