@@ -29,7 +29,23 @@ namespace brfc {
 namespace rdb {
 
 void
+Connection::open() {
+    if (is_open())
+        throw db_error("connection already open");
+    do_open();
+}
+
+void
+Connection::close() {
+    if (not is_open())
+        throw db_error("connection already closed");
+    do_close();
+}
+
+void
 Connection::begin() {
+    if (not is_open())
+        throw db_error("no open connection");
     if (in_transaction())
         throw db_error("transaction already active");
     do_begin();
@@ -37,6 +53,8 @@ Connection::begin() {
 
 void
 Connection::rollback() {
+    if (not is_open())
+        throw db_error("no open connection");
     if (not in_transaction())
         throw db_error("no active transaction");
     do_rollback();
@@ -44,6 +62,8 @@ Connection::rollback() {
 
 void
 Connection::commit() {
+    if (not is_open())
+        throw db_error("no open connection");
     if (not in_transaction())
         throw db_error("no active transaction");
     do_commit();

@@ -1,7 +1,5 @@
 #include <brfc/rdb/PostgresConnection.hpp>
 
-#include <QtCore/QUrl>
-
 #include <brfc/exceptions.hpp>
 
 #include <brfc/rdb/PostgresResultSet.hpp>
@@ -12,30 +10,47 @@ namespace rdb {
 
 
 PostgresConnection::PostgresConnection(const QUrl& url)
-        : conn_(url_to_pg(url).toStdString())
+        : url_(url)
+        , conn_()
         , transaction_() {
+}
+
+PostgresConnection::~PostgresConnection() {
+
+}
+
+void
+PostgresConnection::do_open() {
+    conn_.reset(new pqxx::connection(url_to_pg(url_).toStdString()));
+    conn_->set_client_encoding("utf8");
+    conn_->set_variable("datestyle", "ISO");
+}
+
+bool
+PostgresConnection::do_is_open() const {
+    if (conn_ and conn_->is_open())
+        return true;
+    return false;
+}
+
+void
+PostgresConnection::do_close() {
+    conn_.reset();
 }
 
 void
 PostgresConnection::do_begin() {
-    if (transaction_) {
-        throw db_error("already in a transaction");
-    }
-    transaction_.reset(new pqxx::transaction<>(conn_));
+    transaction_.reset(new pqxx::transaction<>(*conn_));
 }
 
 void
 PostgresConnection::do_commit() {
-    if (not transaction_)
-        throw db_error("no active transaction");
     transaction_->commit();
     transaction_.reset();
 }
 
 void
 PostgresConnection::do_rollback() {
-    if (not transaction_)
-        throw db_error("no active transaction");
     transaction_.reset();
 }
 

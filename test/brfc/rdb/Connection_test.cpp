@@ -44,7 +44,12 @@ class rdb_Connection_test : public testing::Test {
         : conn() {
     }
 
-    MockConnection conn;
+    void SetUp() {
+        ON_CALL(conn, do_is_open())
+            .WillByDefault(Return(true));
+    }
+
+    ::testing::NiceMock<MockConnection> conn;
 };
 
 TEST_F(rdb_Connection_test, test_no_transaction_execute) {
@@ -120,6 +125,8 @@ TEST_F(rdb_Connection_test, test_variant_to_string_null) {
 }
 
 TEST_F(rdb_Connection_test, test_begin) {
+    EXPECT_CALL(conn, do_is_open())
+        .WillOnce(Return(true));
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false));
     EXPECT_CALL(conn, do_begin());
@@ -131,6 +138,13 @@ TEST_F(rdb_Connection_test, test_begin_in_transaction) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(true));
 
+    EXPECT_THROW(conn.begin(), db_error);
+}
+
+TEST_F(rdb_Connection_test, test_begin_on_closed_connection) {
+    EXPECT_CALL(conn, do_is_open())
+        .WillOnce(Return(false));
+    
     EXPECT_THROW(conn.begin(), db_error);
 }
 
@@ -149,6 +163,13 @@ TEST_F(rdb_Connection_test, test_rollback_no_transaction) {
     EXPECT_THROW(conn.rollback(), db_error);
 }
 
+TEST_F(rdb_Connection_test, test_rollback_on_closed_connection) {
+    EXPECT_CALL(conn, do_is_open())
+        .WillOnce(Return(false));
+    
+    EXPECT_THROW(conn.rollback(), db_error);
+}
+
 TEST_F(rdb_Connection_test, test_commit_in_transaction) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(true));
@@ -161,6 +182,13 @@ TEST_F(rdb_Connection_test, test_commit_no_transaction) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false));
 
+    EXPECT_THROW(conn.commit(), db_error);
+}
+
+TEST_F(rdb_Connection_test, test_commit_on_closed_connection) {
+    EXPECT_CALL(conn, do_is_open())
+        .WillOnce(Return(false));
+    
     EXPECT_THROW(conn.commit(), db_error);
 }
 

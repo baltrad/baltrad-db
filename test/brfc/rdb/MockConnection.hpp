@@ -31,11 +31,16 @@ namespace rdb {
 
 class MockConnection : public Connection {
   public:
+    MOCK_METHOD0(do_open, void());
+    MOCK_CONST_METHOD0(do_is_open, bool());
+    MOCK_METHOD0(do_close, void());
+
     MOCK_METHOD0(do_begin, void());
     MOCK_METHOD0(do_commit, void());
     MOCK_METHOD0(do_rollback, void());
+
     MOCK_METHOD1(do_execute, shared_ptr<ResultSet>(const QString&));
-    MOCK_METHOD0(do_in_transaction, bool());
+    MOCK_CONST_METHOD0(do_in_transaction, bool());
 };
 
 } // namespace rdb

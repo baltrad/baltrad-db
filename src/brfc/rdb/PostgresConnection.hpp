@@ -7,26 +7,32 @@
 #include <pqxx/connection>
 #include <pqxx/transaction>
 
+#include <QtCore/QUrl>
+
 class QString;
 class QUrl;
 
 namespace brfc {
 namespace rdb {
 
-class BindMap;
-
 class PostgresConnection : public Connection {
   public:
-    PostgresConnection(const QUrl& url);
+    explicit PostgresConnection(const QUrl& url);
+
+    virtual ~PostgresConnection();
 
     static QString url_to_pg(const QUrl& url);
   
   protected:
+    virtual void do_open();
+    virtual void do_close();
+    virtual bool do_is_open() const;
+
     virtual void do_begin();
     virtual void do_rollback();
     virtual void do_commit();
 
-    virtual bool do_in_transaction() {
+    virtual bool do_in_transaction() const {
         return transaction_.get() != 0;
     }
 
@@ -35,7 +41,8 @@ class PostgresConnection : public Connection {
     virtual bool do_has_feature(Feature feature) const;
 
   private:
-    pqxx::connection conn_;
+    QUrl url_;
+    scoped_ptr<pqxx::connection> conn_;
     scoped_ptr<pqxx::transaction<> > transaction_;
 };
 

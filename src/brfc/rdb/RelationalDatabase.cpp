@@ -56,6 +56,7 @@ RelationalDatabase::RelationalDatabase(const QString& dsn_)
     QUrl dsn(dsn_);
     
     conn_.reset(new PostgresConnection(dsn));
+    conn_->open();
 }
 
 bool

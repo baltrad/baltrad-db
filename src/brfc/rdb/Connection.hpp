@@ -47,34 +47,66 @@ class Connection {
     virtual ~Connection() {
 
     }
+    
+    /**
+     * @brief open the connection
+     * @throw db_error if connection is already open
+     * @sa do_open
+     */
+    void open();
+    
+    /**
+     * @brief test for open connection
+     * @sa do_is_open
+     */
+    bool is_open() const {
+        return do_is_open();
+    }
+    
+    /**
+     * @brief close the connection
+     * @throw db_error if connection is not open
+     * @sa do_close
+     */
+    void close();
 
     /**
      * @brief start a transaction
-     * @throw db_error if a transaction is already active
+     * @throw db_error if no conenction open or a transaction is already
+     *        active
+     *
+     * a check for open connection and no active transaction is made prior
+     * to forwading the call to do_begin()
      * @sa do_begin
      */
     void begin();    
 
     /**
      * @brief rollback current transaction
-     * @throw db_error if no active transaction
+     * @throw db_error if no connection open or no active transaction
+     *
+     * a check for open connection and active transaction is made prior
+     * to forwading the call to do_rollback()
      * @sa do_rollback
      */
     void rollback();    
 
     /**
      * @brief commit current transaction
-     * @throw db_error if no active transaction
+     * @throw db_error if no connection open or no active transaction
+     *
+     * a check for open connection and active transaction is made prior
+     * to forwading the call to do_commit()
      * @sa do_commit
      */
-    void commit();    
+    void commit();
 
     /**
      * @brief test for active transaction
      * @return true if there is a transaction
      * @sa do_in_transaction
      */
-    bool in_transaction() {
+    bool in_transaction() const {
         return do_in_transaction();
     }
 
@@ -116,6 +148,10 @@ class Connection {
     }
 
   protected:
+    virtual void do_open() = 0;
+    virtual void do_close() = 0;
+    virtual bool do_is_open() const = 0;
+
     virtual void do_begin() = 0;
     virtual void do_commit() = 0;
     virtual void do_rollback() = 0;
@@ -125,7 +161,7 @@ class Connection {
     /**
      * @return true if there is an ongoing transaction
      */
-    virtual bool do_in_transaction() = 0;
+    virtual bool do_in_transaction() const = 0;
     
     /**
      * @return false
