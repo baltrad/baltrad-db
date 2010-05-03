@@ -33,6 +33,18 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/expr/Literal.hpp>
 %}
 
+// Enable the JNI class to load the required native library.
+%pragma(java) jniclasscode=%{
+  static {
+    try {
+        System.loadLibrary("brfc_java");
+    } catch (UnsatisfiedLinkError e) {
+        System.err.println("brfc_java native code library failed to load.\n" + e);
+        System.exit(1);
+    }
+  }
+%}
+
 %ignore brfc::expr::Visitor;
 %ignore brfc::expr::Compiler;
 %ignore brfc::expr::Select;
