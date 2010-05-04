@@ -127,7 +127,7 @@ class DateConverter : public StringConverter {
 };
 
 /**
- * @brief Conversion from HLHDF_STRING to QTime
+ * @brief Conversion from HLHDF_STRING to Time
  */
 class TimeConverter : public StringConverter {
   protected:

@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Query.hpp>
 #include <brfc/FileHasher.hpp>
 #include <brfc/ResultSet.hpp>
+#include <brfc/Time.hpp>
 
 #include <brfc/expr/Factory.hpp>
 #include <brfc/expr/Attribute.hpp>
@@ -40,7 +41,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QDate>
 #include <QtCore/QStringList>
-#include <QtCore/QTime>
 
 #include "config.hpp"
 #include "../common.hpp"
@@ -72,11 +72,11 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
             , src1("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , src2("WMO:02666,RAD:SE51,PLC:Karlskrona")
             , db(TestRDBEnv::get_database(GetParam()))
-            , td1(oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 0), src1))
-            , td2(oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 1), src2))
-            , td3(oh5::File::minimal("PVOL", QDate(2000, 1, 1), QTime(12, 2), src1))
-            , td4(oh5::File::minimal("CVOL", QDate(2001, 1, 1), QTime(12, 0), src2))
-            , td5(oh5::File::minimal("SCAN", QDate(2002, 2, 1), QTime(12, 0), src1))
+            , td1(oh5::File::minimal("PVOL", QDate(2000, 1, 1), Time(12, 0), src1))
+            , td2(oh5::File::minimal("PVOL", QDate(2000, 1, 1), Time(12, 1), src2))
+            , td3(oh5::File::minimal("PVOL", QDate(2000, 1, 1), Time(12, 2), src1))
+            , td4(oh5::File::minimal("CVOL", QDate(2001, 1, 1), Time(12, 0), src2))
+            , td5(oh5::File::minimal("SCAN", QDate(2002, 2, 1), Time(12, 0), src1))
             , query(db) {
     }
 
@@ -300,7 +300,7 @@ TEST_P(rdb_Query_test, test_has_file) {
 
 TEST_P(rdb_Query_test, test_has_nx_file) {
     bool result = false;
-    shared_ptr<oh5::File> td = oh5::File::minimal("PVOL", QDate(2000, 1, 10), QTime(12, 0), src1);
+    shared_ptr<oh5::File> td = oh5::File::minimal("PVOL", QDate(2000, 1, 10), Time(12, 0), src1);
     EXPECT_CALL(hasher, do_hash(Ref(*td))).WillOnce(Return("td"));
     td->source(db->load_source(src1));
     ASSERT_NO_THROW(result = db->has_file(*td));

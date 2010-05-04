@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -30,7 +31,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/RootGroup.hpp>
 
 #include <QtCore/QDate>
-#include <QtCore/QTime>
 
 #include "../common.hpp"
 
@@ -42,7 +42,7 @@ struct oh5_File_test : public testing::Test {
             : specs()
             , f1(File::minimal("pvol",
                                QDate(2000, 1, 2),
-                               QTime(12, 5),
+                               Time(12, 5),
                                "WMO:02606")) {
     }
 
@@ -74,7 +74,7 @@ TEST_F(oh5_File_test, root) {
 TEST_F(oh5_File_test, required_attribute_shortcuts) {
     EXPECT_EQ(f1->what_object(), "pvol");
     EXPECT_EQ(f1->what_date(), QDate(2000, 1, 2));
-    EXPECT_EQ(f1->what_time(), QTime(12, 5));
+    EXPECT_EQ(f1->what_time(), Time(12, 5));
     EXPECT_EQ(f1->what_source(), "WMO:02606");
 }
 

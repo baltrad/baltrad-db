@@ -27,6 +27,7 @@ sources = [
     "Query.cpp",
     "ResultSet.cpp",
     "SHA1AttributeHasher.cpp",
+    "Time.cpp",
     "Variant.cpp",
     "expr/Expression.cpp",
     "expr/Factory.cpp",

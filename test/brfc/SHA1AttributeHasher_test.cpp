@@ -40,16 +40,16 @@ class SHA1AttributeHasher_test : public ::testing::Test {
             , src(make_shared<oh5::SourceRadar>())
             , f1(oh5::File::minimal("pvol",
                                     QDate(2000, 1, 2),
-                                    QTime(12, 5),
+                                    Time(12, 5),
                                     "WMO:02606"))
             , f2(oh5::File::minimal("pvol",
                                     QDate(2001, 1, 2),
-                                    QTime(12, 5),
+                                    Time(12, 5),
                                     "WMO:02606"))
             // same as f1
             , f3(oh5::File::minimal("pvol",
                                     QDate(2000, 1, 2),
-                                    QTime(12, 5),
+                                    Time(12, 5),
                                     "WMO:02606")) 
             , hasher(specs) {
         

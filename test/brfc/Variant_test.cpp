@@ -112,5 +112,5 @@ TEST(Variant_test, date_to_string) {
 }
 
 TEST(Variant_test, time_to_string) {
-    EXPECT_EQ(Variant(QTime(12, 34, 56)).to_string(), "123456");
+    EXPECT_EQ(Variant(Time(12, 34, 56)).to_string(), "123456");
 }

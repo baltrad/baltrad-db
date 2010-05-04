@@ -1,0 +1,114 @@
+/*
+Copyright 2010 Estonian Meteorological and Hydrological Institute
+
+This file is part of baltrad-db.
+
+baltrad-db is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+baltrad-db is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include <ctime>
+
+#include <gtest/gtest.h>
+
+#include <QtCore/QString>
+
+#include <brfc/exceptions.hpp>
+#include <brfc/Time.hpp>
+
+#include "common.hpp"
+
+namespace brfc {
+
+TEST(Time_test, test_construct_invalid_time) {
+    EXPECT_THROW(Time(24, 0), value_error);
+    EXPECT_THROW(Time(0, 60), value_error);
+    EXPECT_THROW(Time(0, 0, 60), value_error);
+    EXPECT_THROW(Time(0, 0, 0, 1000), value_error);
+}
+
+TEST(Time_test, test_accessors) {
+    Time t(12, 5, 6, 7);
+    EXPECT_EQ(12, t.hour());
+    EXPECT_EQ(5, t.minute());
+    EXPECT_EQ(6, t.second());
+    EXPECT_EQ(7, t.msec());
+}
+
+TEST(Time_test, test_eq) {
+    Time t1(12, 0);
+    EXPECT_TRUE(t1 == t1);
+    EXPECT_FALSE(t1 != t1);
+
+    Time t2(12, 0, 0, 1);
+    EXPECT_FALSE(t1 == t2);
+    EXPECT_TRUE(t1 != t2);
+}
+
+TEST(Time_test, test_add_hours) {
+    Time t(12, 0);
+    EXPECT_EQ(Time(13, 0), t.add_hours(1));
+    EXPECT_EQ(Time(1, 0), t.add_hours(13));
+    EXPECT_EQ(t, t.add_hours(24));
+    EXPECT_EQ(t, t.add_hours(-24));
+    EXPECT_EQ(Time(13, 0), t.add_hours(49));
+    EXPECT_EQ(Time(11, 0), t.add_hours(-49));
+}
+
+TEST(Time_test, test_add_minutes) {
+    Time t(12, 0);
+    EXPECT_EQ(Time(12, 35), t.add_minutes(35));
+    EXPECT_EQ(Time(11, 35), t.add_minutes(-25));
+    EXPECT_EQ(t, t.add_minutes(1440));
+    EXPECT_EQ(t, t.add_minutes(-1440));
+    EXPECT_EQ(Time(14, 0), t.add_minutes(3000));
+    EXPECT_EQ(Time(10, 0), t.add_minutes(-3000));
+}
+
+TEST(Time_test, test_add_seconds) {
+    Time t(12, 0);
+    EXPECT_EQ(Time(12, 1, 30), t.add_seconds(90));
+    EXPECT_EQ(Time(11, 58, 30), t.add_seconds(-90));
+    EXPECT_EQ(t, t.add_seconds(86400));
+    EXPECT_EQ(t, t.add_seconds(-86400));
+    EXPECT_EQ(Time(12, 1, 59), t.add_seconds(172919));
+    EXPECT_EQ(Time(11, 58, 1), t.add_seconds(-172919));
+}
+
+TEST(Time_test, test_add_msecs) {
+    Time t(12, 0);
+    EXPECT_EQ(Time(12, 1, 0, 1), t.add_msecs(60001));
+    EXPECT_EQ(Time(11, 59, 59, 999), t.add_msecs(-1));
+    EXPECT_EQ(t, t.add_msecs(86400000));
+    EXPECT_EQ(t, t.add_msecs(-86400000));
+    EXPECT_EQ(Time(12, 1, 59, 1), t.add_msecs(172919001));
+    EXPECT_EQ(Time(11, 58, 0, 999), t.add_msecs(-172919001));
+}
+
+TEST(Time_test, test_from_string) {
+    EXPECT_EQ(Time(12, 13, 14, 15),
+              Time::from_string("12:13:14.015", "hh:mm:ss.zzz"));
+    EXPECT_EQ(Time(12, 13, 14, 15),
+              Time::from_string("121314015", "hhmmsszzz"));
+    EXPECT_THROW(Time::from_string("11:22:33", "hh:mm:ss.zzz"), value_error);
+}
+
+TEST(Time_test, test_to_string) {
+    EXPECT_EQ("12:13:14.015",
+              Time(12, 13, 14, 15).to_string("hh:mm:ss.zzz"));
+    EXPECT_EQ("121314015",
+              Time(12, 13, 14 ,15).to_string("hhmmsszzz"));
+}
+
+
+} // namespace brfc

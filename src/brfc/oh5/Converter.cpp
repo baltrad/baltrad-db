@@ -25,10 +25,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/numeric/conversion/cast.hpp>
 
 #include <QtCore/QDate>
-#include <QtCore/QTime>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
 namespace brfc {
@@ -148,16 +148,14 @@ Variant
 TimeConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     const Variant& var = StringConverter::do_convert(format, data);
-    QTime time = QTime::fromString(var.string(), "hhmmss");
-    if (not time.isValid())
-        throw value_error("invalid format for 'time'");
+    Time time = Time::from_string(var.string(), "hhmmss");
     return Variant(time);
 }
 
 HL_Data
 TimeConverter::do_convert(const Variant& value) const {
     BRFC_ASSERT(value.type() == Variant::TIME);
-    Variant var(value.time().toString("hhmmss"));
+    Variant var(value.time().to_string("hhmmss"));
     return StringConverter::do_convert(var);
 }
 

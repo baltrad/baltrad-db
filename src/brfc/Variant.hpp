@@ -20,17 +20,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_VARIANT_HPP
 #define BRFC_VARIANT_HPP
 
-#include <brfc/smart_ptr.hpp>
-#include <brfc/exceptions.hpp>
+#include <string>
 
 #include <boost/variant.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
 #include <QtCore/QString>
 #include <QtCore/QDate>
-#include <QtCore/QTime>
 
-#include <string>
+#include <brfc/smart_ptr.hpp>
+#include <brfc/exceptions.hpp>
+#include <brfc/Time.hpp>
 
 namespace brfc {
 
@@ -139,7 +139,7 @@ class Variant {
     /**
      * @brief construct time variant
      */
-    explicit Variant(const QTime& value)
+    explicit Variant(const Time& value)
             : type_(TIME)
             , value_(value) {
     }
@@ -175,7 +175,7 @@ class Variant {
 
     const QDate& date() const;
 
-    const QTime& time() const;
+    const Time& time() const;
 
     /**
      * @brief convert to QString
@@ -194,7 +194,7 @@ class Variant {
                            double,
                            bool,
                            QDate,
-                           QTime> ValueType;
+                           Time> ValueType;
     ValueType value_;
 };
 

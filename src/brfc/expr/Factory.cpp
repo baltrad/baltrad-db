@@ -19,12 +19,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Factory.hpp>
 
+#include <brfc/Time.hpp>
+
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/Expression.hpp>
 #include <brfc/expr/Literal.hpp>
 
 #include <QtCore/QDate>
-#include <QtCore/QTime>
 
 namespace brfc {
 namespace expr {
@@ -61,7 +62,7 @@ Factory::date(int year, int month, int day) const {
 
 LiteralPtr
 Factory::time(int hour, int minute, int second) const {
-    return Literal::create(Variant(QTime(hour, minute, second)));
+    return Literal::create(Variant(Time(hour, minute, second)));
 }
 
 LiteralPtr

@@ -21,6 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/ResultSet.hpp>
+#include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/rdb/BindMap.hpp>
@@ -29,7 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QDate>
 #include <QtCore/QString>
-#include <QtCore/QTime>
 
 #include "config.hpp"
 #include "../common.hpp"
@@ -89,7 +89,7 @@ TEST_P(rdb_ResultSet_test, date) {
 TEST_P(rdb_ResultSet_test, time) {
     shared_ptr<ResultSet> r = db->query("SELECT TIME '12:00:05'", BindMap());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(QTime(12, 0, 5), r->time(0));
+    EXPECT_EQ(Time(12, 0, 5), r->time(0));
 }
 
 TEST_P(rdb_ResultSet_test, invalid_column) {

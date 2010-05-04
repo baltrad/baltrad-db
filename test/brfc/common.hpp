@@ -27,11 +27,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 class QDate;
 class QString;
-class QTime;
 
 namespace brfc {
 
 class Variant;
+class Time;
 
 namespace test {
 
@@ -64,7 +64,7 @@ std::ostream&
 operator<<(std::ostream& out, const QDate& value);
 
 std::ostream&
-operator<<(std::ostream& out, const QTime& value);
+operator<<(std::ostream& out, const brfc::Time& value);
 
 std::ostream&
 operator<<(std::ostream& out, const brfc::Variant& value);

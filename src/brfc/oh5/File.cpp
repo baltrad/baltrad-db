@@ -23,10 +23,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QDate>
 #include <QtCore/QString>
-#include <QtCore/QTime>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -65,7 +65,7 @@ File::from_filesystem(const QString& path, const AttributeSpecs& specs) {
 shared_ptr<File>
 File::minimal(const QString& object,
               const QDate& date,
-              const QTime& time,
+              const Time& time,
               const QString& source,
               const QString& version) {
     shared_ptr<File> f = create();
@@ -96,7 +96,7 @@ File::what_date() const {
     return root_->child_attribute("what/date")->value().date();
 }
 
-QTime
+Time
 File::what_time() const {
     return root_->child_attribute("what/time")->value().time();
 }

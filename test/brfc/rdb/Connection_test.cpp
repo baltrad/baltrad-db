@@ -117,7 +117,7 @@ TEST_F(rdb_Connection_test, test_variant_to_string_date) {
 }
 
 TEST_F(rdb_Connection_test, test_variant_to_string_time) {
-    EXPECT_EQ("'13:05:59.001'", conn.variant_to_string(Variant(QTime(13, 5, 59, 1))));
+    EXPECT_EQ("'13:05:59.001'", conn.variant_to_string(Variant(Time(13, 5, 59, 1))));
 }
 
 TEST_F(rdb_Connection_test, test_variant_to_string_null) {

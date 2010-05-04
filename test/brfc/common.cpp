@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include "common.hpp"
 
+#include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 #include <brfc/test/TestRDB.hpp>
 
@@ -28,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QDate>
 #include <QtCore/QString>
-#include <QtCore/QTime>
 
 #include "config.hpp"
 
@@ -75,8 +75,12 @@ std::ostream& operator<<(std::ostream& out, const QDate& value) {
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const QTime& value) {
-    out << value.toString().toStdString();
+std::ostream& operator<<(std::ostream& out, const brfc::Time& value) {
+    out << "Time("
+        << value.hour() << ", "
+        << value.minute() << ", "
+        << value.second() << ", "
+        << value.msec() << ")";
     return out;
 }
 

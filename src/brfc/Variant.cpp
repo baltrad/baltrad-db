@@ -48,9 +48,9 @@ Variant::date() const {
     return get<const QDate&>();
 }
 
-const QTime&
+const Time&
 Variant::time() const {
-    return get<const QTime&>();
+    return get<const Time&>();
 }
 
 namespace {
@@ -80,8 +80,8 @@ class variant_to_string : public boost::static_visitor<QString> {
         return value.toString("yyyyMMdd");
     }
 
-    QString operator()(const QTime& value) const {
-        return value.toString("hhmmss");
+    QString operator()(const Time& value) const {
+        return value.to_string("hhmmss");
     }
 };
 

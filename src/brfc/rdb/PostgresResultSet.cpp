@@ -85,14 +85,14 @@ PostgresResultSet::do_date(unsigned int pos) const {
     return QDate::fromString(str, Qt::ISODate);
 }
 
-QTime
+Time
 PostgresResultSet::do_time(unsigned int pos) const {
     QString str = QString::fromUtf8(result_.at(row_).at(pos).c_str());
-    QTime time = QTime::fromString(str, "hh:mm:ss.zzz");
-    if (not time.isValid()) {
-        time = QTime::fromString(str, "h:mm:ss");
+    try {
+        return Time::from_string(str, "hh:mm:ss.zzz");
+    } catch (value_error) {
+        return Time::from_string(str, "hh:mm:ss");
     }
-    return time;
 }
 
 } // namespace rdb

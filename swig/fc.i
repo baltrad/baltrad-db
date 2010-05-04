@@ -32,6 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/Query.hpp>
     #include <brfc/ResultSet.hpp>
     #include <brfc/Database.hpp>
+    #include <brfc/Time.hpp>
     #include <brfc/Variant.hpp>
     
     #include <brfc/expr/fwd.hpp>
@@ -44,7 +45,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/expr/BinaryOperator.hpp>
     #include <brfc/expr/Literal.hpp>
 
-    #include <QtCore/QTime>
     #include <QtCore/QDate>
 %}
 
@@ -55,7 +55,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %feature("director") brfc::FileNamer;
 
 %typemap(javabody) QDate,
-                   QTime,
+                   brfc::Time,
                    brfc::Variant,
                    std::vector<QString> %{
   private long swigCPtr;
@@ -93,7 +93,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::Variant::to_qvariant;
 
 %rename(Date) QDate;
-%rename(Time) QTime;
 
 SWIG_SHARED_PTR(Database, brfc::Database);
 SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
@@ -154,31 +153,14 @@ class QDate {
     }
 };
 
-
-class QTime {
-  public:
-    QTime(int hour, int minute, int second=0, int ms=0);
-
-    int hour() const;
-    int minute() const;
-    int second() const;
-    int msec() const;
-    
-    %extend {
-        QString to_string(const QString& format) const {
-            return $self->toString(format);
-        }
-    }
-};
-
 %include <QtCore/QDate>
-%include <QtCore/QTime>
 
 %include <brfc/ResultSet.hpp>
 %include <brfc/Database.hpp>
 %include <brfc/FileNamer.hpp>
 %include <brfc/FileCatalog.hpp>
 %include <brfc/Query.hpp>
+%include <brfc/Time.hpp>
 %include <brfc/Variant.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:

@@ -20,9 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/ResultSet.hpp>
 
 #include <QtCore/QDate>
-#include <QtCore/QTime>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
 namespace brfc {
@@ -57,7 +57,7 @@ ResultSet::date(unsigned int pos) const {
     return do_date(pos);
 }
 
-QTime
+Time
 ResultSet::time(unsigned int pos) const {
     return do_time(pos);
 }

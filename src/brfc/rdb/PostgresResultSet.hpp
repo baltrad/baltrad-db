@@ -43,7 +43,7 @@ class PostgresResultSet : public ResultSet {
     virtual double do_real(unsigned int pos) const;
     virtual bool do_boolean(unsigned int pos) const;
     virtual QDate do_date(unsigned int pos) const;
-    virtual QTime do_time(unsigned int pos) const;
+    virtual Time do_time(unsigned int pos) const;
 
   private:
     pqxx::result result_;
