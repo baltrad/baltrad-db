@@ -113,7 +113,7 @@ class StringConverter : public Converter {
 };
 
 /**
- * @brief Conversion from HLHDF_STRING to QDate
+ * @brief Conversion from HLHDF_STRING to Date
  */
 class DateConverter : public StringConverter {
   protected:

@@ -108,7 +108,7 @@ TEST(Variant_test, bool_to_string) {
 }
 
 TEST(Variant_test, date_to_string) {
-    EXPECT_EQ(Variant(QDate(2000, 11, 12)).to_string(), "20001112");
+    EXPECT_EQ(Variant(Date(2000, 11, 12)).to_string(), "20001112");
 }
 
 TEST(Variant_test, time_to_string) {

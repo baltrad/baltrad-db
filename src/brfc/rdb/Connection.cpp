@@ -111,7 +111,7 @@ Connection::do_variant_to_string(const Variant& value) const {
         case Variant::BOOL:
             return value.to_string().toLower();
         case Variant::DATE:
-            return "'" + value.date().toString("yyyy-MM-dd") + "'";
+            return "'" + value.date().to_string("yyyy-MM-dd") + "'";
         case Variant::TIME:
             return "'" + value.time().to_string("HH:mm:ss.zzz") + "'";
         default:

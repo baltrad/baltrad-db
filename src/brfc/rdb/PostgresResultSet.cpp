@@ -79,10 +79,10 @@ PostgresResultSet::do_boolean(unsigned int pos) const {
     return val;
 }
 
-QDate
+Date
 PostgresResultSet::do_date(unsigned int pos) const {
     QString str = QString::fromUtf8(result_.at(row_).at(pos).c_str());
-    return QDate::fromString(str, Qt::ISODate);
+    return Date::from_string(str, "yyyy-MM-dd");
 }
 
 Time

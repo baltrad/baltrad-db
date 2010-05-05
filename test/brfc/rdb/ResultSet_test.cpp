@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/Date.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
@@ -28,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test/TestRDB.hpp>
 
-#include <QtCore/QDate>
 #include <QtCore/QString>
 
 #include "config.hpp"
@@ -83,7 +83,7 @@ TEST_P(rdb_ResultSet_test, boolean) {
 TEST_P(rdb_ResultSet_test, date) {
     shared_ptr<ResultSet> r = db->query("SELECT DATE '2001-01-02'", BindMap());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(r->date(0), QDate(2001, 1, 2));
+    EXPECT_EQ(r->date(0), Date(2001, 1, 2));
 }
 
 TEST_P(rdb_ResultSet_test, time) {

@@ -29,10 +29,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QString>
 
-class QDate;
-
 namespace brfc {
 
+class Date;
 class Time;
 
 namespace oh5 {
@@ -85,7 +84,7 @@ class File : public boost::noncopyable,
      */
     static shared_ptr<File>
     minimal(const QString& object,
-            const QDate& date,
+            const Date& date,
             const Time& time,
             const QString& source,
             const QString& version=QString::fromUtf8("H5rad 2.0"));
@@ -183,7 +182,7 @@ class File : public boost::noncopyable,
      * equivalent to
      * @c root()->child_attribute("what/date")->value().date()
      */
-    QDate what_date() const;
+    Date what_date() const;
 
     /**
      * @brief access /what/time

@@ -23,10 +23,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/noncopyable.hpp>
 
 class QString;
-class QDate;
 
 namespace brfc {
 
+class Date;
 class Time;
 class Variant;
 
@@ -98,7 +98,7 @@ class ResultSet : public boost::noncopyable {
     /**
      * @brief get date value at \c pos
      */
-    QDate date(unsigned int pos) const;
+    Date date(unsigned int pos) const;
 
     /**
      * @brief get time value at \c pos
@@ -117,7 +117,7 @@ class ResultSet : public boost::noncopyable {
     virtual long long do_integer(unsigned int pos) const = 0;
     virtual double do_real(unsigned int pos) const = 0;
     virtual bool do_boolean(unsigned int pos) const = 0;
-    virtual QDate do_date(unsigned int pos) const = 0;
+    virtual Date do_date(unsigned int pos) const = 0;
     virtual Time do_time(unsigned int pos) const = 0;
 
 };

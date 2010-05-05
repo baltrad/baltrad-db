@@ -36,7 +36,7 @@ class MockResultSet : public ResultSet {
     MOCK_CONST_METHOD1(do_integer, long long(unsigned int));
     MOCK_CONST_METHOD1(do_real, double(unsigned int));
     MOCK_CONST_METHOD1(do_boolean, bool(unsigned int));
-    MOCK_CONST_METHOD1(do_date, QDate(unsigned int));
+    MOCK_CONST_METHOD1(do_date, Date(unsigned int));
     MOCK_CONST_METHOD1(do_time, Time(unsigned int));
 
 };

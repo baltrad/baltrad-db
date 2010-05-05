@@ -20,8 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <QtCore/QDate>
-
+#include <brfc/Date.hpp>
 #include <brfc/FileHasher.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/Time.hpp>
@@ -124,7 +123,7 @@ TEST_P(rdb_RelationalDatabase_test, load_radars_with_same_centre) {
 
 TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
     shared_ptr<oh5::File> file =
-        oh5::File::minimal("PVOL", QDate(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+        oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     shared_ptr<oh5::Source> src = db->load_source(file->what_source());
     file->source(src);
     file->path("/path");
@@ -135,7 +134,7 @@ TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
 
 TEST_P(rdb_RelationalDatabase_test, attribute_groups_not_saved) {
     shared_ptr<oh5::File> file =
-        oh5::File::minimal("PVOL", QDate(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+        oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     shared_ptr<oh5::Source> src = db->load_source(file->what_source());
     file->source(src);
     file->path("/path");
@@ -150,7 +149,7 @@ TEST_P(rdb_RelationalDatabase_test, attribute_groups_not_saved) {
 
 TEST_P(rdb_RelationalDatabase_test, next_filename_version) {
     shared_ptr<oh5::File> file =
-        oh5::File::minimal("PVOL", QDate(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+        oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     shared_ptr<oh5::Source> src = db->load_source(file->what_source());
     file->source(src);
     file->path("/path");

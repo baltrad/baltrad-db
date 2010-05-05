@@ -39,16 +39,16 @@ class SHA1AttributeHasher_test : public ::testing::Test {
             : specs(new oh5::AttributeSpecs())
             , src(make_shared<oh5::SourceRadar>())
             , f1(oh5::File::minimal("pvol",
-                                    QDate(2000, 1, 2),
+                                    Date(2000, 1, 2),
                                     Time(12, 5),
                                     "WMO:02606"))
             , f2(oh5::File::minimal("pvol",
-                                    QDate(2001, 1, 2),
+                                    Date(2001, 1, 2),
                                     Time(12, 5),
                                     "WMO:02606"))
             // same as f1
             , f3(oh5::File::minimal("pvol",
-                                    QDate(2000, 1, 2),
+                                    Date(2000, 1, 2),
                                     Time(12, 5),
                                     "WMO:02606")) 
             , hasher(specs) {

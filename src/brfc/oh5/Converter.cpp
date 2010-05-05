@@ -24,10 +24,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/numeric/conversion/cast.hpp>
 
-#include <QtCore/QDate>
-
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
@@ -131,16 +130,14 @@ Variant
 DateConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     const Variant& var = StringConverter::do_convert(format, data);
-    QDate date =  QDate::fromString(var.string(), "yyyyMMdd");
-    if (not date.isValid())
-        throw value_error("invalid format for 'date'");
+    Date date =  Date::from_string(var.string(), "yyyyMMdd");
     return Variant(date);
 }
 
 HL_Data
 DateConverter::do_convert(const Variant& value) const {
     BRFC_ASSERT(value.type() == Variant::DATE);
-    Variant var(value.date().toString("yyyyMMdd"));
+    Variant var(value.date().to_string("yyyyMMdd"));
     return StringConverter::do_convert(var);
 }
 

@@ -37,7 +37,7 @@ DefaultFileNamer::do_name(const oh5::File& f) const {
     name.append("_C_");
     name.append(f.source()->wmo_cccc());
     name.append("_");
-    name.append(f.what_date().toString("yyyyMMdd"));
+    name.append(f.what_date().to_string("yyyyMMdd"));
     name.append(f.what_time().to_string("hhmmss"));
     name.append("_");
     name.append(f.source()->node_id());

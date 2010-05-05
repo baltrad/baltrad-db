@@ -20,6 +20,7 @@ Import("env")
 sources = [
     "exceptions.cpp",
     "smart_ptr.cpp",
+    "Date.cpp",
     "DefaultFileNamer.cpp",
     "FileCatalog.cpp",
     "FileNamer.cpp",

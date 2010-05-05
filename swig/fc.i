@@ -32,6 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/Query.hpp>
     #include <brfc/ResultSet.hpp>
     #include <brfc/Database.hpp>
+    #include <brfc/Date.hpp>
     #include <brfc/Time.hpp>
     #include <brfc/Variant.hpp>
     
@@ -44,8 +45,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/expr/Label.hpp>
     #include <brfc/expr/BinaryOperator.hpp>
     #include <brfc/expr/Literal.hpp>
-
-    #include <QtCore/QDate>
 %}
 
 %typemap("javapackage") brfc::oh5::File,
@@ -54,7 +53,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %feature("director") brfc::FileNamer;
 
-%typemap(javabody) QDate,
+%typemap(javabody) brfc::Date,
                    brfc::Time,
                    brfc::Variant,
                    std::vector<QString> %{
@@ -91,8 +90,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::operator=;
 %ignore brfc::Variant::qstring;
 %ignore brfc::Variant::to_qvariant;
-
-%rename(Date) QDate;
 
 SWIG_SHARED_PTR(Database, brfc::Database);
 SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
@@ -138,28 +135,12 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
   }
 %}
 
-class QDate {
-  public:
-    QDate(int year, int month, int day);
-
-    int year() const;
-    int month() const;
-    int day() const;
-
-    %extend {
-        QString to_string(const QString& format) const {
-            return $self->toString(format);
-        }
-    }
-};
-
-%include <QtCore/QDate>
-
 %include <brfc/ResultSet.hpp>
 %include <brfc/Database.hpp>
 %include <brfc/FileNamer.hpp>
 %include <brfc/FileCatalog.hpp>
 %include <brfc/Query.hpp>
+%include <brfc/Date.hpp>
 %include <brfc/Time.hpp>
 %include <brfc/Variant.hpp>
 

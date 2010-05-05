@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include "common.hpp"
 
+#include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 #include <brfc/test/TestRDB.hpp>
@@ -27,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 
-#include <QtCore/QDate>
 #include <QtCore/QString>
 
 #include "config.hpp"
@@ -70,10 +70,14 @@ std::ostream& operator<<(std::ostream& out, const QString& value) {
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const QDate& value) {
-    out << value.toString().toStdString();
+std::ostream& operator<<(std::ostream& out, const brfc::Date& value) {
+    out << "Date("
+        << value.year() << ", "
+        << value.month() << ", "
+        << value.day() << ")";
     return out;
 }
+
 
 std::ostream& operator<<(std::ostream& out, const brfc::Time& value) {
     out << "Time("

@@ -21,11 +21,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QDate>
 #include <QtCore/QString>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
@@ -64,7 +64,7 @@ File::from_filesystem(const QString& path, const AttributeSpecs& specs) {
 
 shared_ptr<File>
 File::minimal(const QString& object,
-              const QDate& date,
+              const Date& date,
               const Time& time,
               const QString& source,
               const QString& version) {
@@ -91,7 +91,7 @@ File::what_object() const {
     return root_->child_attribute("what/object")->value().string();
 }
 
-QDate
+Date
 File::what_date() const {
     return root_->child_attribute("what/date")->value().date();
 }

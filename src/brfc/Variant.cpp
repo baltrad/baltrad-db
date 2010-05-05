@@ -43,9 +43,9 @@ Variant::bool_() const {
     return get<bool>();
 }
 
-const QDate&
+const Date&
 Variant::date() const {
-    return get<const QDate&>();
+    return get<const Date&>();
 }
 
 const Time&
@@ -76,8 +76,8 @@ class variant_to_string : public boost::static_visitor<QString> {
         return value ? "True" : "False";
     }
 
-    QString operator()(const QDate& value) const {
-        return value.toString("yyyyMMdd");
+    QString operator()(const Date& value) const {
+        return value.to_string("yyyyMMdd");
     }
 
     QString operator()(const Time& value) const {

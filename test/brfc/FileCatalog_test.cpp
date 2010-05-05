@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Database.hpp>
+#include <brfc/Date.hpp>
 #include <brfc/FileCatalog.hpp>
 #include <brfc/FileNamer.hpp>
 #include <brfc/Query.hpp>
@@ -35,7 +36,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test/TempH5File.hpp>
 #include <brfc/test/TempDir.hpp>
 
-#include <QtCore/QDate>
 #include <QtCore/QFile>
 
 #include "common.hpp"
@@ -84,7 +84,7 @@ struct FileCatalog_test : public testing::Test {
             , default_src(make_shared<oh5::SourceRadar>())
             , tempfile()
             , minfile(oh5::File::minimal("PVOL",
-                                         QDate(2000, 1, 1),
+                                         Date(2000, 1, 1),
                                          Time(12, 0),
                                          src_str)) {
     }

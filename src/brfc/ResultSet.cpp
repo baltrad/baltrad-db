@@ -19,9 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/ResultSet.hpp>
 
-#include <QtCore/QDate>
-
 #include <brfc/exceptions.hpp>
+#include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
@@ -52,7 +51,7 @@ ResultSet::boolean(unsigned int pos) const {
     return do_boolean(pos);
 }
 
-QDate
+Date
 ResultSet::date(unsigned int pos) const {
     return do_date(pos);
 }

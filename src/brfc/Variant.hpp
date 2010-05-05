@@ -26,10 +26,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/numeric/conversion/cast.hpp>
 
 #include <QtCore/QString>
-#include <QtCore/QDate>
 
-#include <brfc/smart_ptr.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/smart_ptr.hpp>
+#include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 
 namespace brfc {
@@ -131,7 +131,7 @@ class Variant {
     /**
      * @brief construct date variant
      */
-    explicit Variant(const QDate& value)
+    explicit Variant(const Date& value)
             : type_(DATE)
             , value_(value) {
     }
@@ -173,7 +173,7 @@ class Variant {
 
     bool bool_() const;
 
-    const QDate& date() const;
+    const Date& date() const;
 
     const Time& time() const;
 
@@ -193,7 +193,7 @@ class Variant {
                            long long,
                            double,
                            bool,
-                           QDate,
+                           Date,
                            Time> ValueType;
     ValueType value_;
 };

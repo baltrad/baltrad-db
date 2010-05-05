@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
@@ -29,8 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/FileLoader.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/test/TempH5File.hpp>
-
-#include <QtCore/QDate>
 
 #include "../common.hpp"
 
@@ -43,7 +42,7 @@ class oh5_FileLoader_test : public ::testing::Test {
             : tempfile()
             , specs()
             , t_12_05_01(Time(12, 5, 1))
-            , d_2000_01_02(QDate(2000, 1, 2)) {
+            , d_2000_01_02(Date(2000, 1, 2)) {
     }
 
     virtual void SetUp() {
