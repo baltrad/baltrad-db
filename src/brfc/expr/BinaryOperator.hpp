@@ -20,9 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_BINARY_OPERATOR_HPP
 #define BRFC_EXPR_BINARY_OPERATOR_HPP
 
-#include <brfc/expr/Expression.hpp>
+#include <brfc/String.hpp>
 
-#include <QtCore/QString>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace expr {
@@ -32,7 +32,7 @@ namespace expr {
  */
 class BinaryOperator : public Expression {
   public:
-    static BinaryOperatorPtr create(const QString& op,
+    static BinaryOperatorPtr create(const String& op,
                                     ExpressionPtr lhs,
                                     ExpressionPtr rhs) {
         return BinaryOperatorPtr(new BinaryOperator(op, lhs, rhs));
@@ -43,10 +43,10 @@ class BinaryOperator : public Expression {
 
     ExpressionPtr lhs() const { return lhs_; }
     ExpressionPtr rhs() const { return rhs_; }
-    const QString& op() const { return op_; }
+    const String& op() const { return op_; }
 
   protected:
-    BinaryOperator(const QString& op,
+    BinaryOperator(const String& op,
                    ExpressionPtr lhs,
                    ExpressionPtr rhs)
             : Expression()
@@ -56,7 +56,7 @@ class BinaryOperator : public Expression {
     }
 
   private:
-    QString op_;
+    String op_;
     ExpressionPtr lhs_;
     ExpressionPtr rhs_;
 };

@@ -42,7 +42,7 @@ class Join : public Selectable {
         return JoinPtr(new Join(from, to, condition, type));
     }
 
-    virtual QString name() const { return ""; }
+    virtual String name() const { return ""; }
 
     SelectablePtr from() const {
         return from_;

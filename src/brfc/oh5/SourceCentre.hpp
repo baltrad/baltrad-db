@@ -48,13 +48,13 @@ class SourceCentre : public Source {
     /**
      * @brief WMO CCCC from Volume C1
      */
-    virtual QString wmo_cccc() const { return wmo_cccc_; }
+    virtual String wmo_cccc() const { return wmo_cccc_; }
 
-    void wmo_cccc(const QString& value) {
+    void wmo_cccc(const String& value) {
         wmo_cccc_ = value;
     }
 
-    virtual QString to_string() const;
+    virtual String to_string() const;
   
   protected:
     template<class T> 
@@ -72,7 +72,7 @@ class SourceCentre : public Source {
   private:
     int originating_centre_;
     int country_code_;
-    QString wmo_cccc_;
+    String wmo_cccc_;
 };
 
 } // namespace oh5

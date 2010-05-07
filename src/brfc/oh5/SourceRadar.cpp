@@ -19,16 +19,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/SourceRadar.hpp>
 
-#include <QtCore/QStringList>
+#include <brfc/StringList.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-QString
+String
 SourceRadar::to_string() const {
-    QStringList elems;
+    StringList elems;
     if (wmo_code_ != 0)
-        elems.append("WMO:" + QString::number(wmo_code_));
+        elems.append("WMO:" + String::number(wmo_code_));
     if (radar_site_ != "")
         elems.append("RAD:" + radar_site_);
     if (place_ != "")

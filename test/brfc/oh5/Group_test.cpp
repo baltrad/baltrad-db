@@ -31,7 +31,7 @@ namespace oh5 {
 
 class FakeGroup : public Group {
   public:
-    FakeGroup(const QString& name)
+    FakeGroup(const String& name)
             : Group(name) {
     }
 

@@ -60,7 +60,7 @@ TEST(Variant_test, copy_assign) {
 }
 
 TEST(Variant_test, string) {
-    QString val = QString::fromUtf8("öäõxyz");
+    String val = String::from_utf8("öäõxyz");
     Variant v(val);
     EXPECT_EQ(v.type(), Variant::STRING);
     EXPECT_EQ(v.string(), val);

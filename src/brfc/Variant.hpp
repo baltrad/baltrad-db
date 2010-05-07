@@ -20,16 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_VARIANT_HPP
 #define BRFC_VARIANT_HPP
 
-#include <string>
-
 #include <boost/variant.hpp>
 #include <boost/numeric/conversion/cast.hpp>
-
-#include <QtCore/QString>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/smart_ptr.hpp>
 #include <brfc/Date.hpp>
+#include <brfc/String.hpp>
 #include <brfc/Time.hpp>
 
 namespace brfc {
@@ -67,13 +64,13 @@ class Variant {
      */
     explicit Variant(const char* value)
             : type_(STRING)
-            , value_(QString::fromUtf8(value)) {
+            , value_(String::from_utf8(value)) {
     }
 
     /**
-     * @brief construct string variant from QString
+     * @brief construct string variant from String
      */
-    explicit Variant(const QString& value)
+    explicit Variant(const String& value)
             : type_(STRING)
             , value_(value) {
     }
@@ -165,7 +162,7 @@ class Variant {
     bool is_date() const { return type_ == DATE; }
     bool is_time() const { return type_ == TIME; }
 
-    const QString& string() const;
+    const String& string() const;
 
     long long longlong() const;
 
@@ -178,9 +175,9 @@ class Variant {
     const Time& time() const;
 
     /**
-     * @brief convert to QString
+     * @brief convert to String
      */
-    QString to_string() const;
+    String to_string() const;
 
   private:
     friend bool operator==(const Variant&, const Variant&);
@@ -189,7 +186,7 @@ class Variant {
     T get() const;
 
     Type type_;
-    typedef boost::variant<QString,
+    typedef boost::variant<String,
                            long long,
                            double,
                            bool,

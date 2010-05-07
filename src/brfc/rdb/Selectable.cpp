@@ -27,12 +27,12 @@ namespace brfc {
 namespace rdb {
 
 AliasPtr
-Selectable::alias(const QString& name) {
+Selectable::alias(const String& name) {
     return Alias::create(this->shared_from_this(), name);
 }
 
 ColumnPtr
-Selectable::column(const QString& name) {
+Selectable::column(const String& name) {
     return Column::create(this->shared_from_this(), name);
 }
 

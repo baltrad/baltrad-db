@@ -27,6 +27,8 @@ sources = [
     "Path.cpp",
     "Query.cpp",
     "ResultSet.cpp",
+    "String.cpp",
+    "StringList.cpp",
     "SHA1AttributeHasher.cpp",
     "Time.cpp",
     "Variant.cpp",

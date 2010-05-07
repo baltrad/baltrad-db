@@ -19,10 +19,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <boost/foreach.hpp>
+
 #include <brfc/Date.hpp>
 #include <brfc/FileHasher.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
+#include <brfc/StringList.hpp>
 #include <brfc/Time.hpp>
 
 #include <brfc/expr/Factory.hpp>
@@ -37,10 +40,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/File.hpp>
 
 #include <brfc/test/TestRDB.hpp>
-
-#include <boost/foreach.hpp>
-
-#include <QtCore/QStringList>
 
 #include "config.hpp"
 #include "../common.hpp"
@@ -80,24 +79,24 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
             , query(db) {
     }
 
-    void add_attribute(oh5::File& file, const QString& path, const Variant& value) {
-        QStringList names = path.split("/");
+    void add_attribute(oh5::File& file, const String& path, const Variant& value) {
+        StringList names = path.split("/");
 
-        QString dsname = names.takeFirst();
+        String dsname = names.take_first();
         shared_ptr<oh5::DataSetGroup> ds = dynamic_pointer_cast<oh5::DataSetGroup>(file.root()->child_by_name(dsname));
         if (not ds) {
             ds = make_shared<oh5::DataSetGroup>(dsname);
             file.root()->add_child(ds);
         }
 
-        QString groupname = names.takeFirst();
+        String groupname = names.take_first();
         shared_ptr<oh5::AttributeGroup> group = dynamic_pointer_cast<oh5::AttributeGroup>(ds->child_by_name(groupname));
         if (not group) {
             group = make_shared<oh5::AttributeGroup>(groupname);
             ds->add_child(group);
         }
 
-        shared_ptr<oh5::Attribute> attr = make_shared<oh5::Attribute>(names.takeLast(), value);
+        shared_ptr<oh5::Attribute> attr = make_shared<oh5::Attribute>(names.take_last(), value);
         group->add_child(attr);
     }
 
@@ -152,7 +151,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
     
     expr::Factory xpr;
     ::testing::NiceMock<MockHasher> hasher;
-    QString src1, src2;
+    String src1, src2;
     test::TestRDB* db;
     shared_ptr<oh5::File> td1, td2, td3, td4, td5;
     Query query;
@@ -168,9 +167,9 @@ TEST_P(rdb_Query_test, test_simple) {
     ASSERT_TRUE(not r->next());
 }
 
-QStringList
+StringList
 extract_strings_at(ResultSet& r, int pos) {
-    QStringList strings;
+    StringList strings;
     while (r.next()) {
         strings.append(r.string(pos));
     }
@@ -181,7 +180,7 @@ TEST_P(rdb_Query_test, test_list_all_files) {
     shared_ptr<ResultSet> r = query.fetch(xpr.attribute("path")).execute();
 
     EXPECT_EQ(r->size(), 5);
-    const QStringList& v = extract_strings_at(*r, 0);
+    const StringList& v = extract_strings_at(*r, 0);
 
     EXPECT_TRUE(v.contains("td1"));
     EXPECT_TRUE(v.contains("td2"));
@@ -197,7 +196,7 @@ TEST_P(rdb_Query_test, test_filter_by_object) {
              .execute();
 
     EXPECT_EQ(r->size(), 3);
-    const QStringList& v = extract_strings_at(*r, 0);
+    const StringList& v = extract_strings_at(*r, 0);
 
     EXPECT_TRUE(v.contains("td1"));
     EXPECT_TRUE(v.contains("td2"));
@@ -221,7 +220,7 @@ TEST_P(rdb_Query_test, test_filter_by_xsize_or_ysize) {
              .execute();
 
     EXPECT_EQ(r->size(), 3);
-    const QStringList& v = extract_strings_at(*r, 0);
+    const StringList& v = extract_strings_at(*r, 0);
 
     EXPECT_TRUE(v.contains("td1"));
     EXPECT_TRUE(v.contains("td2"));
@@ -248,7 +247,7 @@ TEST_P(rdb_Query_test, test_select_by_wmo_code) {
              .execute();
 
     EXPECT_EQ(r->size(), 2);
-    const QStringList& v = extract_strings_at(*r, 0);
+    const StringList& v = extract_strings_at(*r, 0);
 
     EXPECT_TRUE(v.contains("td2"));
     EXPECT_TRUE(v.contains("td4"));
@@ -261,7 +260,7 @@ TEST_P(rdb_Query_test, test_select_by_or_node) {
              .filter(node->eq(xpr.string("seang"))->or_(node->eq(xpr.string("sekkr"))))
              .execute();
     EXPECT_EQ(r->size(), 5);
-    const QStringList& v = extract_strings_at(*r, 0);
+    const StringList& v = extract_strings_at(*r, 0);
     EXPECT_TRUE(v.contains("td1"));
     EXPECT_TRUE(v.contains("td2"));
     EXPECT_TRUE(v.contains("td3"));
@@ -285,7 +284,7 @@ TEST_P(rdb_Query_test, test_select_by_place) {
              .execute();
 
     EXPECT_EQ(r->size(), 3);
-    const QStringList& v = extract_strings_at(*r, 0);
+    const StringList& v = extract_strings_at(*r, 0);
 
     EXPECT_TRUE(v.contains("td1"));
     EXPECT_TRUE(v.contains("td3"));

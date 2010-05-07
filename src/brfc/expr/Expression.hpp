@@ -23,9 +23,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/fwd.hpp>
 #include <brfc/expr/Element.hpp>
 
-class QString;
-
 namespace brfc {
+
+class String;
+
 namespace expr {
 
 /**
@@ -101,7 +102,7 @@ class Expression : public Element {
     /**
      * @brief label this expression
      */
-    LabelPtr label(const QString& label) const;
+    LabelPtr label(const String& label) const;
 
   protected:
     Expression()

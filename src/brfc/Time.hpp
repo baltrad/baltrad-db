@@ -20,9 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_TIME_HPP
 #define BRFC_TIME_HPP
 
-class QString;
-
 namespace brfc {
+
+class String;
 
 /**
  * @brief naive time implementation
@@ -133,13 +133,13 @@ class Time {
      *
      * @throw value_error if a valid time can not be parsed
      */
-    static Time from_string(const QString& str, const QString& format);
+    static Time from_string(const String& str, const String& format);
 
     /**
      * @brief format time to string
      *
      */
-    QString to_string(const QString& format) const;
+    String to_string(const String& format) const;
 
   private:
     explicit Time(unsigned int msec);

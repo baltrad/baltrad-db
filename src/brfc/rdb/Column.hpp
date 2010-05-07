@@ -20,10 +20,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_RDB_COLUMN_HPP
 #define BRFC_RDB_COLUMN_HPP
 
-#include <brfc/rdb/fwd.hpp>
+#include <brfc/String.hpp>
+
 #include <brfc/expr/Expression.hpp>
 
-#include <QtCore/QString>
+#include <brfc/rdb/fwd.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -31,7 +32,7 @@ namespace rdb {
 class Column : public expr::Expression {
   public:
     static ColumnPtr create(SelectablePtr selectable,
-                            const QString& name) {
+                            const String& name) {
         return ColumnPtr(new Column(selectable, name));
     }
 
@@ -41,15 +42,15 @@ class Column : public expr::Expression {
 
     SelectablePtr selectable() const { return selectable_; }
 
-    void name(const QString& name) {
+    void name(const String& name) {
         name_ = name;
     }
 
-    const QString& name() const { return name_; }
+    const String& name() const { return name_; }
 
   protected:
     Column(SelectablePtr selectable,
-           const QString& name)
+           const String& name)
             : selectable_(selectable)
             , name_(name) {
 
@@ -57,7 +58,7 @@ class Column : public expr::Expression {
 
   private:
     SelectablePtr selectable_;
-    QString name_;
+    String name_;
 };
 
 } // namespace rdb

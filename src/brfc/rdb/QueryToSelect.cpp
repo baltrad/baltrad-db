@@ -90,7 +90,7 @@ QueryToSelect::transform(const Query& query,
 
 void
 QueryToSelect::operator()(expr::Attribute& attr) {
-    QString name = attr.name();
+    String name = attr.name();
 
     // query table and column where this value can be found
     Mapping mapping = mapper_->mapping(name);
@@ -101,7 +101,7 @@ QueryToSelect::operator()(expr::Attribute& attr) {
         join_groups(); 
 
         // alias the table (this attribute is always searched on this table)
-        QString alias = name.remove("/") + "_values";
+        String alias = name.remove("/") + "_values";
         value_t = value_t->alias(alias);
 
         // join this table-alias if not already joined

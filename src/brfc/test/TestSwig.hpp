@@ -21,7 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_TEST_SWIG_HPP
 
 #include <string>
-#include <QtCore/QString>
+
+#include <brfc/String.hpp>
 
 namespace brfc {
 namespace test {
@@ -29,19 +30,19 @@ namespace test {
 class TestSwig {
   public:
     std::string
-    qstring_to_string(QString str);
+    qstring_to_string(String str);
 
     std::string
-    qstringconstref_to_string(const QString& str);
+    qstringconstref_to_string(const String& str);
 
-    QString
+    String
     string_to_qstring(const std::string& str);
 
-    const QString&
+    const String&
     string_to_qstringconstref(const std::string& str);
 
   private:
-    QString for_constref_;
+    String for_constref_;
 };
 
 } // namespace test

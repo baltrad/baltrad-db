@@ -93,7 +93,7 @@ class Compiler {
     /**
      * @brief access to compiled string
      */
-    const QString& compiled() const { return stack_.back(); }
+    const String& compiled() const { return stack_.back(); }
 
     /**
      * @brief compile Alias to string form
@@ -167,13 +167,13 @@ class Compiler {
     void operator()(Table& expr);
 
   private:
-    QString pop();
-    void push(const QString& str);
+    String pop();
+    void push(const String& str);
 
     bool in_from_clause_;
     unsigned int literal_count_;
     BindMap binds_;
-    std::vector<QString> stack_;
+    std::vector<String> stack_;
 };
 
 }

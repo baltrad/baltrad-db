@@ -32,7 +32,7 @@ class MockResultSet : public ResultSet {
 
     MOCK_CONST_METHOD1(do_is_null, bool(unsigned int));
 
-    MOCK_CONST_METHOD1(do_string, QString(unsigned int));
+    MOCK_CONST_METHOD1(do_string, String(unsigned int));
     MOCK_CONST_METHOD1(do_integer, long long(unsigned int));
     MOCK_CONST_METHOD1(do_real, double(unsigned int));
     MOCK_CONST_METHOD1(do_boolean, bool(unsigned int));

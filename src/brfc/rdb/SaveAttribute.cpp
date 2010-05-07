@@ -57,7 +57,7 @@ SqlQuery&
 SaveAttribute::invalid_attribute_query(const oh5::Attribute& attr) {
     QueryMap::iterator iter = queries_.find("bdb_invalid_attributes");
     if (iter == queries_.end()) {
-        QString stmt("INSERT INTO bdb_invalid_attributes(name, group_id) "
+        String stmt("INSERT INTO bdb_invalid_attributes(name, group_id) "
                      "VALUES (:name, :group_id)");
         SqlQuery qry(stmt);
         QueryMap::value_type val("bdb_invalid_attributes", qry);

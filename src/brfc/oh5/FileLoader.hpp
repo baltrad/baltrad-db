@@ -23,9 +23,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/smart_ptr.hpp>
 #include <brfc/oh5/hlhdf.hpp>
 
-class QString;
-
 namespace brfc {
+
+class String;
+
 namespace oh5 {
 
 class AttributeSpecs;
@@ -58,7 +59,7 @@ class FileLoader {
      * attributes for which name and/or converter lookup fails, are stored
      * with an empty Variant as a value (meaning they are invalid). 
      */
-    shared_ptr<File> load(const QString& path);
+    shared_ptr<File> load(const String& path);
 
   private:
     shared_ptr<Group> get_or_create_group(const SplitPath& path);

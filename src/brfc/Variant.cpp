@@ -23,9 +23,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-const QString&
+const String&
 Variant::string() const {
-    return get<const QString&>();
+    return get<const String&>();
 }
 
 long long
@@ -56,38 +56,38 @@ Variant::time() const {
 namespace {
 
 /**
- * @brief visitor converting Variant to QString
+ * @brief visitor converting Variant to String
  */
-class variant_to_string : public boost::static_visitor<QString> {
+class variant_to_string : public boost::static_visitor<String> {
   public:
-    QString operator()(const QString& value) const {
+    String operator()(const String& value) const {
         return value;
     }
 
-    QString operator()(long long value) const {
-        return QString::number(value);
+    String operator()(long long value) const {
+        return String::number(value);
     }
 
-    QString operator()(double value) const {
-        return QString::number(value);
+    String operator()(double value) const {
+        return String::number(value);
     }
 
-    QString operator()(bool value) const {
+    String operator()(bool value) const {
         return value ? "True" : "False";
     }
 
-    QString operator()(const Date& value) const {
+    String operator()(const Date& value) const {
         return value.to_string("yyyyMMdd");
     }
 
-    QString operator()(const Time& value) const {
+    String operator()(const Time& value) const {
         return value.to_string("hhmmss");
     }
 };
 
 } // namespace anonymous
 
-QString
+String
 Variant::to_string() const {
     return boost::apply_visitor(variant_to_string(), value_);
 }

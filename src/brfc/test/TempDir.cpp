@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <QtCore/QString>
+#include <brfc/String.hpp>
 
 namespace brfc {
 namespace test {
@@ -51,9 +51,9 @@ TempDir::unlink() {
     rmdir_recurse(path_.get());
 }
 
-QString
+String
 TempDir::path() const {
-    return QString::fromUtf8(path_.get());
+    return String::from_utf8(path_.get());
 }
 
 void

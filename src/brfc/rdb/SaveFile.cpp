@@ -21,10 +21,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QStringList>
-
 #include <brfc/FileHasher.hpp>
 #include <brfc/ResultSet.hpp>
+#include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
@@ -56,9 +55,9 @@ SaveFile::operator()(const oh5::Attribute& attribute) {
 
 long long
 SaveFile::operator()(const oh5::File& file,
-                     const QString& proposed_filename,
+                     const String& proposed_filename,
                      unsigned int filename_version) {
-    QStringList columns, binds;
+    StringList columns, binds;
     columns.append("source_id");
     columns.append("unique_id");
 
@@ -69,11 +68,11 @@ SaveFile::operator()(const oh5::File& file,
             continue;
         columns.append(mapping.column);
     }
-    BOOST_FOREACH(const QString& column, columns) {
+    BOOST_FOREACH(const String& column, columns) {
         binds.append(":" + column);
     }
 
-    QString stmt("INSERT INTO bdb_files(" + columns.join(", ") +
+    String stmt("INSERT INTO bdb_files(" + columns.join(", ") +
                  ", hash_type, proposed_filename, filename_version) "
                  "VALUES(" + binds.join(", ") +
                  ", :hash_type, :proposed_filename, :filename_version)");

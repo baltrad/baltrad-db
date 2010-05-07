@@ -44,7 +44,7 @@ class SHA1AttributeHasher : public FileHasher {
     /**
      * @return "sha1_attribute"
      */
-    virtual QString do_name() const;
+    virtual String do_name() const;
 
     /**
      * @brief generate the hash
@@ -56,7 +56,7 @@ class SHA1AttributeHasher : public FileHasher {
      * @note changes to this algorithm most probably trigger the need to
      *       re-evaluate all files in the database hashed using this hasher.
      */
-    virtual QString do_hash(const oh5::File& file);
+    virtual String do_hash(const oh5::File& file);
   
   private:
     shared_ptr<const oh5::AttributeSpecs> specs_;

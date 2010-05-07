@@ -55,9 +55,9 @@ class Group : public Node {
      * If the name is prefixed with a group, the search is performed in
      * the respective AttributeGroup.
      */
-    shared_ptr<Attribute> child_attribute(const QString& name);
+    shared_ptr<Attribute> child_attribute(const String& name);
 
-    shared_ptr<const Attribute> child_attribute(const QString& name) const;
+    shared_ptr<const Attribute> child_attribute(const String& name) const;
     ///@}
     
     /**
@@ -94,9 +94,9 @@ class Group : public Node {
      * - and so on ...
      * 
      */
-    shared_ptr<Attribute> attribute(const QString& name);
+    shared_ptr<Attribute> attribute(const String& name);
 
-    shared_ptr<const Attribute> attribute(const QString& name) const;
+    shared_ptr<const Attribute> attribute(const String& name) const;
     ///@}
     
     /**
@@ -107,9 +107,9 @@ class Group : public Node {
      *
      * The search for the group is performed among immediate children.
      */
-    shared_ptr<Group> child_group_by_name(const QString& name);
+    shared_ptr<Group> child_group_by_name(const String& name);
 
-    shared_ptr<const Group> child_group_by_name(const QString& name) const;
+    shared_ptr<const Group> child_group_by_name(const String& name) const;
     ///@}
 
   protected:
@@ -120,7 +120,7 @@ class Group : public Node {
     /**
      * @brief constructor
      */
-    Group(const QString& name)
+    Group(const String& name)
         : Node(name) {
     }
 

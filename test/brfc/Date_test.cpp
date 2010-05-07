@@ -19,9 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <QtCore/QString>
-
 #include <brfc/exceptions.hpp>
+#include <brfc/String.hpp>
 #include <brfc/Date.hpp>
 
 #include "common.hpp"

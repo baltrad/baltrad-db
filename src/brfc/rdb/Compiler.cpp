@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QStringList>
+#include <brfc/StringList.hpp>
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
@@ -61,16 +61,16 @@ template void Compiler::compile(expr::Label& expr);
 template void Compiler::compile(expr::Literal& expr);
 template void Compiler::compile(expr::Parentheses& expr);
 
-QString
+String
 Compiler::pop() {
     BRFC_ASSERT(!stack_.empty());
-    QString top = stack_.back();
+    String top = stack_.back();
     stack_.pop_back();
     return top;
 }
 
 void
-Compiler::push(const QString& top) {
+Compiler::push(const String& top) {
     stack_.push_back(top);
 }
 
@@ -78,8 +78,8 @@ void
 Compiler::operator()(expr::BinaryOperator& expr) {
     visit(*expr.lhs(), *this);
     visit(*expr.rhs(), *this);
-    const QString& rhs = pop();
-    const QString& lhs = pop();
+    const String& rhs = pop();
+    const String& lhs = pop();
     push(lhs + " " + expr.op() + " " + rhs);
 }
 
@@ -114,11 +114,11 @@ Compiler::operator()(Join& join) {
     visit(*join.condition(), * this);
     in_from_clause_ = true;
 
-    QString condition = pop();
-    QString to = pop();
-    QString from = pop();
+    String condition = pop();
+    String to = pop();
+    String from = pop();
 
-    QString jointype;
+    String jointype;
     switch (join.type()) {
         case Join::INNER:
             jointype = " JOIN ";
@@ -135,7 +135,7 @@ Compiler::operator()(Join& join) {
 
 void
 Compiler::operator()(expr::Literal& expr) {
-    QString key = QString(":lit_") + QString::number(literal_count_++);
+    String key = String(":lit_") + String::number(literal_count_++);
     push(key);
     binds_.add(key, expr.value());
 }
@@ -163,12 +163,12 @@ Compiler::operator()(FromClause& from) {
         visit(*element, *this);
     }
 
-    QStringList from_clause_elements;
+    StringList from_clause_elements;
     for (size_t i = 0; i < from.elements().size(); ++i) {
         from_clause_elements.push_back(pop());
     }
     std::reverse(from_clause_elements.begin(), from_clause_elements.end());
-    QString from_clause = "\nFROM " + from_clause_elements.join(", ");
+    String from_clause = "\nFROM " + from_clause_elements.join(", ");
     push(from_clause);
 
     in_from_clause_ = false;
@@ -186,26 +186,26 @@ Compiler::operator()(Select& select) {
     if (select.where())
         visit(*select.where(), *this);
 
-    QString where_clause;
+    String where_clause;
     if (select.where())
         where_clause = "\nWHERE " + pop();
-    QString from_clause;
+    String from_clause;
     if (!select.from()->empty())
         from_clause = pop();
     
-    QStringList result_column_elm;
+    StringList result_column_elm;
     for (size_t i = 0; i < select.what().size(); ++i) {
         result_column_elm.push_back(pop());
     }
     std::reverse(result_column_elm.begin(), result_column_elm.end());
-    QString result_columns = result_column_elm.join(", ");
+    String result_columns = result_column_elm.join(", ");
 
-    QString distinct = select.distinct() ? "DISTINCT " : "";
+    String distinct = select.distinct() ? "DISTINCT " : "";
     // SELECT columns FROM from_obj WHERE where_clause
-    QString clause = "SELECT " + distinct
-                               + result_columns
-                               + from_clause
-                               + where_clause;
+    String clause = "SELECT " + distinct
+                              + result_columns
+                              + from_clause
+                              + where_clause;
     push(clause);
 }
 

@@ -31,7 +31,7 @@ ResultSet::is_null(unsigned int pos) const {
     return do_is_null(pos);
 }
 
-QString
+String
 ResultSet::string(unsigned int pos) const {
     return do_string(pos);
 }

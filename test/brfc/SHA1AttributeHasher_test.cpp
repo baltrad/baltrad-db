@@ -84,11 +84,11 @@ TEST_F(SHA1AttributeHasher_test, hash_different_meta) {
 }
 
 TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
-    QString hash1 = hasher.hash(*f1);
+    String hash1 = hasher.hash(*f1);
     f1->root()->add_child(make_shared<oh5::Attribute>("ignore", Variant("val")));
-    QString hash2 = hasher.hash(*f1);
+    String hash2 = hasher.hash(*f1);
     f1->root()->attribute("ignore")->value(Variant("val2"));
-    QString hash3 = hasher.hash(*f1);
+    String hash3 = hasher.hash(*f1);
 
     EXPECT_EQ(hash1, hash2);
     EXPECT_EQ(hash1, hash3);
@@ -96,11 +96,11 @@ TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
 }
 
 TEST_F(SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
-    QString hash1 = hasher.hash(*f1);
+    String hash1 = hasher.hash(*f1);
     f1->root()->add_child(make_shared<oh5::Attribute>("attr", Variant("val")));
-    QString hash2 = hasher.hash(*f1);
+    String hash2 = hasher.hash(*f1);
     f1->root()->attribute("attr")->value(Variant("val2"));
-    QString hash3 = hasher.hash(*f1);
+    String hash3 = hasher.hash(*f1);
 
     EXPECT_NE(hash1, hash2);
     EXPECT_NE(hash1, hash3);

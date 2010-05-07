@@ -28,9 +28,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-QString Path::sep_("/");
+String Path::sep_("/");
 
-Path::Path(const QString& path)
+Path::Path(const String& path)
         : path_(path) {
 
 }
@@ -38,34 +38,34 @@ Path::Path(const QString& path)
 bool
 Path::exists() const {
     struct stat st;
-    if (lstat(path_.toUtf8().constData(), &st) == 0) {
+    if (lstat(path_.to_utf8().c_str(), &st) == 0) {
         return true;
     } else if (errno == ENOENT or errno == ENOTDIR) {
         return false;
     } else {
-        throw fs_error(strerror(errno) + path_.toStdString());
+        throw fs_error(strerror(errno) + path_.to_std_string());
     }
 }
 
 bool
 Path::is_absolute() const {
-    return path_.startsWith(sep_);
+    return path_.starts_with(sep_);
 }
 
 bool
 Path::is_dir() const {
     struct stat st;
-    if (lstat(path_.toUtf8().constData(), &st) == 0) {
+    if (lstat(path_.to_utf8().c_str(), &st) == 0) {
         return S_ISDIR(st.st_mode);
     } else if (errno == ENOENT or errno == ENOTDIR) {
         return false;
     } else {
-        throw fs_error(strerror(errno) + path_.toStdString());
+        throw fs_error(strerror(errno) + path_.to_std_string());
     }
 }
 
 Path
-Path::join(const QString& path) const {
+Path::join(const String& path) const {
     return Path(path_ + sep_ + path);
 }
 

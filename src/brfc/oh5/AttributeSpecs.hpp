@@ -20,11 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_ATTRIBUTE_SPECS_HPP
 #define BRFC_OH5_ATTRIBUTE_SPECS_HPP
 
-#include <brfc/smart_ptr.hpp>
-
 #include <map>
 
-#include <QtCore/QString>
+#include <brfc/smart_ptr.hpp>
+#include <brfc/String.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -32,16 +31,16 @@ namespace oh5 {
 class Converter;
 
 struct AttributeSpec {
-    AttributeSpec(const QString& name_,
-                  const QString& type_,
+    AttributeSpec(const String& name_,
+                  const String& type_,
                   bool ignore_in_hash_=false)
             : name(name_)
             , type(type_)
             , ignore_in_hash(ignore_in_hash_) {
     }
 
-    QString name; ///< name of the Attribute
-    QString type; ///< type name of the attribute type
+    String name; ///< name of the Attribute
+    String type; ///< type name of the attribute type
     bool ignore_in_hash; ///< ignore this attribute when hashing metadata
 };
 
@@ -79,12 +78,12 @@ class AttributeSpecs {
      */
     void add(const AttributeSpec& spec);
 
-    bool has(const QString& name) const;
+    bool has(const String& name) const;
 
     /**
      * @throw lookup_error if not found
      */
-    const AttributeSpec& get(const QString& name) const;
+    const AttributeSpec& get(const String& name) const;
 
     /**
      * @brief get Converter
@@ -92,13 +91,13 @@ class AttributeSpecs {
      * @return Converter for the Attribute
      * @throw lookup_error if not found
      */
-    const Converter& converter(const QString& name) const;
+    const Converter& converter(const String& name) const;
 
     void clear() { specs_.clear(); }
 
   private:
-    typedef std::map<QString, AttributeSpec> AttributeSpecMap;
-    typedef std::map<QString, shared_ptr<Converter> > ConverterMap;
+    typedef std::map<String, AttributeSpec> AttributeSpecMap;
+    typedef std::map<String, shared_ptr<Converter> > ConverterMap;
 
     AttributeSpecMap specs_;
     ConverterMap converters_;

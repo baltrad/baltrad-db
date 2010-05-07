@@ -43,7 +43,7 @@ class DataGroup : public Group {
     /**
      * @brief constructor
      */
-    explicit DataGroup(const QString& name);
+    explicit DataGroup(const String& name);
     
     /**
      * @return true if node is AttributeGroup or Quality

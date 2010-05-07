@@ -21,7 +21,7 @@ PostgresConnection::~PostgresConnection() {
 
 void
 PostgresConnection::do_open() {
-    conn_.reset(new pqxx::connection(url_to_pg(url_).toStdString()));
+    conn_.reset(new pqxx::connection(url_to_pg(url_).to_std_string()));
     conn_->set_client_encoding("utf8");
     conn_->set_variable("datestyle", "ISO");
 }
@@ -55,10 +55,10 @@ PostgresConnection::do_rollback() {
 }
 
 shared_ptr<ResultSet>
-PostgresConnection::do_execute(const QString& query) {
+PostgresConnection::do_execute(const String& query) {
     shared_ptr<ResultSet> result;
     try {
-        pqxx::result pg_result = transaction_->exec(query.toUtf8().constData());
+        pqxx::result pg_result = transaction_->exec(query.to_utf8());
         result = make_shared<PostgresResultSet>(pg_result);
     } catch (const std::runtime_error& e) {
         throw db_error(e.what());
@@ -67,9 +67,9 @@ PostgresConnection::do_execute(const QString& query) {
     return result;
 }
 
-QString
+String
 PostgresConnection::url_to_pg(const QUrl& url) {
-    QString pgargs;
+    String pgargs;
     if (url.host() != "")
         pgargs += " host=" + url.host();
     if (url.userName() != "")
@@ -77,9 +77,9 @@ PostgresConnection::url_to_pg(const QUrl& url) {
     if (url.password() != "")
         pgargs += " password=" + url.password();
     if (url.port() != -1)
-        pgargs += " port=" + QString::number(url.port());
-    QString database = url.path();
-    if (database.startsWith("/")) {
+        pgargs += " port=" + String::number(url.port());
+    String database = url.path();
+    if (database.starts_with("/")) {
         database.remove(0, 1); // remove slash
     }
     if (database != "")

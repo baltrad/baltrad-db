@@ -19,11 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Expression.hpp>
 
+#include <brfc/String.hpp>
+
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Label.hpp>
 #include <brfc/expr/Parentheses.hpp>
-
-#include <QtCore/QString>
 
 namespace brfc {
 namespace expr {
@@ -82,7 +82,7 @@ Expression::parentheses() const {
 }
 
 LabelPtr
-Expression::label(const QString& label) const {
+Expression::label(const String& label) const {
     return Label::create(this->shared_from_this(), label);
 }
 

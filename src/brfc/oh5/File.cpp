@@ -21,8 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QString>
-
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
@@ -58,16 +56,16 @@ File::create() {
 }
 
 shared_ptr<File>
-File::from_filesystem(const QString& path, const AttributeSpecs& specs) {
+File::from_filesystem(const String& path, const AttributeSpecs& specs) {
     return FileLoader(&specs).load(path);
 }
 
 shared_ptr<File>
-File::minimal(const QString& object,
+File::minimal(const String& object,
               const Date& date,
               const Time& time,
-              const QString& source,
-              const QString& version) {
+              const String& source,
+              const String& version) {
     shared_ptr<File> f = create();
     f->root_->add_child(make_shared<Attribute>("Conventions",
                                                Variant("ODIM_H5/V2_0")));
@@ -86,7 +84,7 @@ File::source(shared_ptr<Source> source) {
     source_ = source;
 }
 
-QString
+String
 File::what_object() const {
     return root_->child_attribute("what/object")->value().string();
 }
@@ -101,14 +99,14 @@ File::what_time() const {
     return root_->child_attribute("what/time")->value().time();
 }
 
-QString
+String
 File::what_source() const {
     return root_->child_attribute("what/source")->value().string();
 }
 
-QString
+String
 File::name() const {
-    return path().section('/', -1);
+    return path().section("/", -1);
 }
 
 File::StringVector
@@ -153,15 +151,15 @@ File::invalid_attributes() {
 }
 
 shared_ptr<Group>
-File::group(const QString& path) {
+File::group(const String& path) {
     const File* self = const_cast<const File*>(this);
     return const_pointer_cast<Group>(self->group(path));
 }
 
 shared_ptr<const Group>
-File::group(const QString& path) const {
-    QString path_copy = path;
-    if (path_copy.startsWith("/"))
+File::group(const String& path) const {
+    String path_copy = path;
+    if (path_copy.starts_with("/"))
         path_copy.remove(0, 1);
     if (path_copy == "")
         return root_;

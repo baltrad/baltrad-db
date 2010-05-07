@@ -22,9 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/smart_ptr.hpp>
 
-#include <QtCore/QString>
-
 #include <brfc/Path.hpp>
+#include <brfc/String.hpp>
 
 /**
  * @brief main namespace
@@ -57,12 +56,12 @@ class FileCatalog {
      * on creating a FileCatalog instance, owned AttributeSpecs is filled
      * from Database
      */
-    FileCatalog(const QString& dsn, const QString& storage);
+    FileCatalog(const String& dsn, const String& storage);
 
     FileCatalog(shared_ptr<Database> db,
                 shared_ptr<oh5::AttributeSpecs> specs,
                 shared_ptr<FileNamer> namer,
-                const QString& storage);
+                const String& storage);
 
     /**
      * @brief destructor
@@ -93,7 +92,7 @@ class FileCatalog {
      *
      * @sa File::unique_identifier
      */
-    bool is_cataloged(const QString& path) const;
+    bool is_cataloged(const String& path) const;
     
     /**
      * @brief import file to catalog
@@ -106,7 +105,7 @@ class FileCatalog {
      *
      * on import file is physically copied to a new location
      */
-    shared_ptr<const oh5::File> catalog(const QString& path);
+    shared_ptr<const oh5::File> catalog(const String& path);
     
     /**
      * @brief remove file from catalog
@@ -114,7 +113,7 @@ class FileCatalog {
      * @throw db_error if removing file entry from database fails
      * @throw fs_error if removing file entry from filesystem fails
      */
-    void remove(const QString& path);
+    void remove(const String& path);
 
     /**
      * @brief get a query object bound to owned database

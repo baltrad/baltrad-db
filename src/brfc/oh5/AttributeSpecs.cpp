@@ -50,32 +50,32 @@ AttributeSpecs::~AttributeSpecs() {
 void
 AttributeSpecs::add(const AttributeSpec& spec) {
     if (has(spec.name))
-        throw duplicate_entry(spec.name.toUtf8().constData());
+        throw duplicate_entry(spec.name.to_utf8());
     ConverterMap::const_iterator iter = converters_.find(spec.type);
     if (iter == converters_.end())
-        throw lookup_error(spec.type.toUtf8().constData());
+        throw lookup_error(spec.type.to_utf8());
     specs_.insert(std::make_pair(spec.name, spec));
 }
 
 bool
-AttributeSpecs::has(const QString& name) const {
+AttributeSpecs::has(const String& name) const {
     AttributeSpecMap::const_iterator iter = specs_.find(name);
     return iter != specs_.end();
 }
 
 const AttributeSpec&
-AttributeSpecs::get(const QString& name) const {
+AttributeSpecs::get(const String& name) const {
     AttributeSpecMap::const_iterator iter = specs_.find(name);
     if (iter == specs_.end())
-        throw lookup_error(name.toUtf8().constData());
+        throw lookup_error(name.to_utf8());
     return iter->second;
 }
 
 const Converter&
-AttributeSpecs::converter(const QString& name) const {
+AttributeSpecs::converter(const String& name) const {
     AttributeSpecMap::const_iterator iter = specs_.find(name);
     if (iter == specs_.end())
-        throw lookup_error(name.toUtf8().constData());
+        throw lookup_error(name.to_utf8());
     ConverterMap::const_iterator i = converters_.find(iter->second.type);
     return *(i->second);
 }

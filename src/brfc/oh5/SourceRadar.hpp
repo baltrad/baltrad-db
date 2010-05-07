@@ -41,18 +41,18 @@ class SourceRadar : public Source {
     /**
      * @brief radar site as indexed in the OPERA database
      */
-    const QString& radar_site() const { return radar_site_; }
+    const String& radar_site() const { return radar_site_; }
 
-    void radar_site(const QString& value) {
+    void radar_site(const String& value) {
         radar_site_ = value;
     }
 
     /**
      * @brief place according to ODIM 2.0 spec, table 9
      */
-    const QString& place() const { return place_; }
+    const String& place() const { return place_; }
 
-    void place(const QString& value) {
+    void place(const String& value) {
         place_ = value;
     }
 
@@ -62,12 +62,12 @@ class SourceRadar : public Source {
         centre_= value;
     }
 
-    virtual QString wmo_cccc() const {
+    virtual String wmo_cccc() const {
         BRFC_ASSERT(centre_);
         return centre_->wmo_cccc();
     }
 
-    virtual QString to_string() const;
+    virtual String to_string() const;
   
   protected:
     template<class T> 
@@ -83,8 +83,8 @@ class SourceRadar : public Source {
    
   private:
     int wmo_code_;
-    QString radar_site_;
-    QString place_;
+    String radar_site_;
+    String place_;
     shared_ptr<SourceCentre> centre_;
 };
 

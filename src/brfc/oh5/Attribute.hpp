@@ -83,14 +83,14 @@ class Attribute : public Node {
      * if the attribute is in an AttributeGroup, return the name with
      * group name prepended.
      */
-    QString full_name() const;
+    String full_name() const;
     
     /**
      * @brief string representation of this attribute
      *
      * /path/to/attribute=value
      */
-    QString to_string() const;
+    String to_string() const;
 
   protected:
     template<class T, class A1>
@@ -106,7 +106,7 @@ class Attribute : public Node {
      * @param name name of the attribute
      * @param value attribute value
      */
-    explicit Attribute(const QString& name,
+    explicit Attribute(const String& name,
                        const Variant& value=Variant());
 
     /**

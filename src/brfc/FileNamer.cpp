@@ -21,15 +21,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-QString
-FileNamer::inject_version(const QString& filename,
+String
+FileNamer::inject_version(const String& filename,
                           unsigned int version) {
-    QString vstring = QString::number(version).rightJustified(6, '0');
-    QString newname(filename);
+    String vstring = String::number(version).right_justified(6, '0');
+    String newname(filename);
     if (filename.contains("$VERSION$")) {
         newname.replace("$VERSION$", vstring);
     } else if (filename.contains(".")) {
-        int last_dot_pos = newname.lastIndexOf('.');
+        int last_dot_pos = newname.last_index_of(".");
         newname.insert(last_dot_pos, "_" + vstring);
     } else {
         newname.append("_" + vstring);

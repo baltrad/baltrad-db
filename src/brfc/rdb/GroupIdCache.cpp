@@ -37,7 +37,7 @@ GroupIdCache::GroupIdCache(RelationalDatabase* rdb)
 
 GroupIdCache::OptionalId
 GroupIdCache::do_query(const oh5::Group& group) {
-    QString qry = "SELECT id FROM groups WHERE file_id = :file_id "
+    String qry = "SELECT id FROM groups WHERE file_id = :file_id "
                   "AND parent_id = :parent_id AND name = :name ";
     BindMap binds;
     binds.add(":file_id", Variant(rdb_->db_id(*group.file())));

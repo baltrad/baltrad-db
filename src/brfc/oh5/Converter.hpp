@@ -100,7 +100,7 @@ class Converter {
  * @{
  */
 /**
- * @brief Conversion from HLHDF_STRING to QString
+ * @brief Conversion from HLHDF_STRING to String
  *
  * the string is assumed to be encoded in UTF-8
  */
@@ -177,7 +177,7 @@ class BoolConverter : public StringConverter {
 };
 
 /**
- * @brief Conversion from HLHDF_STRING to QString
+ * @brief Conversion from HLHDF_STRING to String
  * 
  * a sequence in ODIM_H5 files is a string of scalar values separated by
  * commas

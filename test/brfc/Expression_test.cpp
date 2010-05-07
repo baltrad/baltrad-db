@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <brfc/String.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/expr/BinaryOperator.hpp>
@@ -35,8 +36,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include "common.hpp"
 
-#include <QtCore/QString>
-
 namespace brfc {
 namespace expr {
 
@@ -48,7 +47,7 @@ class Expression_test: public testing::Test {
 
 TEST_F(Expression_test, test_utf_string_literal) {
     LiteralPtr lit = xpr.string("öäü");
-    QString s = lit->value().string();
+    String s = lit->value().string();
     EXPECT_EQ(s.length(), 3);
 }
 

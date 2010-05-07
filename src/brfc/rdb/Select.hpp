@@ -28,7 +28,7 @@ namespace rdb {
 
 class Select : public Selectable {
   public:
-    virtual QString name() const { return ""; }
+    virtual String name() const { return ""; }
 
     static SelectPtr create() {
         return SelectPtr(new Select());

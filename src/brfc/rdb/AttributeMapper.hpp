@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <vector>
 
-#include <QtCore/QString>
+#include <brfc/String.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -33,9 +33,9 @@ namespace rdb {
  */
 struct Mapping {
     Mapping(int id_,
-            const QString& attribute_,
-            const QString& table_,
-            const QString& column_)
+            const String& attribute_,
+            const String& table_,
+            const String& column_)
             : id(id_)
             , attribute(attribute_)
             , table(table_)
@@ -43,9 +43,9 @@ struct Mapping {
     }
     
     int id; ///< unique id
-    QString attribute; ///< Attribute name
-    QString table; ///< table where the value is stored
-    QString column; ///< column in the table where value is stored
+    String attribute; ///< Attribute name
+    String table; ///< table where the value is stored
+    String column; ///< column in the table where value is stored
 };
 
 /**
@@ -94,7 +94,7 @@ class AttributeMapper {
      *
      * attribute is specialized if it is stored outside the default table
      */
-    bool is_specialized(const QString& attribute) const;
+    bool is_specialized(const String& attribute) const;
     
     /**
      * @brief get specializations on table
@@ -103,14 +103,14 @@ class AttributeMapper {
                in the table
      */
     MappingVector
-    specializations_on(const QString& table) const;
+    specializations_on(const String& table) const;
 
     /**
      * @brief is mapper aware of Attribute
      * @param attribute Attribute name
      * @return true if found
      */
-    bool has(const QString& attribute) const; 
+    bool has(const String& attribute) const; 
 
     /**
      * @brief get Mapping
@@ -119,12 +119,12 @@ class AttributeMapper {
      * @throw lookup_error if not found
      */
     Mapping
-    mapping(const QString& attribute) const;
+    mapping(const String& attribute) const;
 
     void clear() { mappings_.clear(); }
     
   private:
-    typedef std::map<QString, Mapping> MappingMap;
+    typedef std::map<String, Mapping> MappingMap;
 
     MappingMap mappings_;
 };

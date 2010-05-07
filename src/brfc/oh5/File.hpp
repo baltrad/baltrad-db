@@ -20,14 +20,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_FILE_H
 #define BRFC_FILE_H
 
-#include <string>
 #include <vector>
 
 #include <boost/noncopyable.hpp>
 
 #include <brfc/smart_ptr.hpp>
-
-#include <QtCore/QString>
+#include <brfc/String.hpp>
 
 namespace brfc {
 
@@ -50,7 +48,7 @@ class File : public boost::noncopyable,
   public:
     typedef std::vector<shared_ptr<Attribute> > AttributeVector;
     typedef std::vector<shared_ptr<const Attribute> > ConstAttributeVector;
-    typedef std::vector<QString> StringVector;
+    typedef std::vector<String> StringVector;
 
     /**
      * @brief construct an empty File
@@ -69,7 +67,7 @@ class File : public boost::noncopyable,
      * and accessible through ignored_attributes();
      */
     static shared_ptr<File>
-    from_filesystem(const QString& path, const AttributeSpecs& specs);
+    from_filesystem(const String& path, const AttributeSpecs& specs);
     
     /**
      * @brief construct with mandatory attributes present
@@ -83,11 +81,11 @@ class File : public boost::noncopyable,
      * correctly formed.
      */
     static shared_ptr<File>
-    minimal(const QString& object,
+    minimal(const String& object,
             const Date& date,
             const Time& time,
-            const QString& source,
-            const QString& version=QString::fromUtf8("H5rad 2.0"));
+            const String& source,
+            const String& version=String("H5rad 2.0"));
 
     /**
      * @brief destructor
@@ -102,9 +100,9 @@ class File : public boost::noncopyable,
      * group("path/to/group")
      * @{
      */
-    shared_ptr<const Group> group(const QString& path) const;
+    shared_ptr<const Group> group(const String& path) const;
 
-    shared_ptr<Group> group(const QString& path);
+    shared_ptr<Group> group(const String& path);
     ///@}
     
     /**
@@ -149,11 +147,11 @@ class File : public boost::noncopyable,
      * @{
      * @brief absolute file path
      */
-    const QString& path() const {
+    const String& path() const {
         return path_;
     }
 
-    void path(const QString& path) {
+    void path(const String& path) {
         path_ = path;
     }
     ///@}
@@ -161,7 +159,7 @@ class File : public boost::noncopyable,
     /**
      * @brief filename part of the file path
      */
-    QString name() const;
+    String name() const;
     
     /**
      * @name mandatory attribute access shorthands
@@ -174,7 +172,7 @@ class File : public boost::noncopyable,
      * equivalent to
      * @c root()->child_attribute("what/object")->value().string()
      */
-    QString what_object() const;
+    String what_object() const;
 
     /**
      * @brief access /what/date
@@ -198,7 +196,7 @@ class File : public boost::noncopyable,
      * equivalent to
      * @c root()->child_attribute("what/source")->value().string()
      */
-    QString what_source() const;
+    String what_source() const;
     ///@}
 
   protected:
@@ -207,7 +205,7 @@ class File : public boost::noncopyable,
   private:
 
     shared_ptr<RootGroup> root_;
-    QString path_;
+    String path_;
     shared_ptr<Source> source_;
 };
 

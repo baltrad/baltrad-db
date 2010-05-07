@@ -22,16 +22,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/smart_ptr.hpp>
 
-class QString;
-
 namespace brfc {
+
+class String;
+
 namespace test {
 
 class TempDir {
   public:
     TempDir();
     ~TempDir();
-    QString path() const;
+    String path() const;
 
     void unlink();
 

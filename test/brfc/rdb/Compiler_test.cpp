@@ -19,8 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <QtCore/QString>
-
+#include <brfc/String.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/expr/BinaryOperator.hpp>
@@ -45,7 +44,7 @@ namespace rdb {
 using namespace expr;
 
 struct rdb_Compiler_test: public testing::Test {
-    const Variant& bind(const QString& key) const {
+    const Variant& bind(const String& key) const {
         return compiler.binds().get(key, Variant());
     }
 
@@ -148,7 +147,7 @@ TEST_F(rdb_Compiler_test, test_select) {
     select->what(column2);
     select->what(column3);
     select->where(column->lt(xpr.integer(1)));
-    QString expected("SELECT t1.c1, t1.c2, t2.c3\nFROM t1, t2\nWHERE t1.c1 < :lit_0");
+    String expected("SELECT t1.c1, t1.c2, t2.c3\nFROM t1, t2\nWHERE t1.c1 < :lit_0");
     compiler.compile(*select);
     EXPECT_EQ(compiler.compiled(), expected);
     EXPECT_EQ(bind(":lit_0"), Variant(1));
@@ -159,7 +158,7 @@ TEST_F(rdb_Compiler_test, test_factory_or_) {
     ExpressionPtr e1 = t->column("c")->eq(xpr.integer(1));
     ExpressionPtr e2 = t->column("c")->eq(xpr.integer(2));
     ExpressionPtr e3 = xpr.or_(e1, e2);
-    QString expected("t.c = :lit_0 OR t.c = :lit_1");
+    String expected("t.c = :lit_0 OR t.c = :lit_1");
     compiler.compile(*e3);
     EXPECT_EQ(expected, compiler.compiled());
     EXPECT_EQ(bind(":lit_0"), Variant(1));

@@ -19,30 +19,33 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/SqlQuery.hpp>
 
+#include <brfc/String.hpp>
+#include <brfc/RegExp.hpp>
+
 namespace brfc {
 namespace rdb {
 
-QString
+String
 SqlQuery::replace_binds(const Connection& connection) const {
     if (binds_.size() == 0)
         return statement_;
-    QRegExp bind_re(":[a-zA-Z0-9_]+");
-    QString statement(statement_), bind_str;
+    RegExp bind_re(":[a-zA-Z0-9_]+");
+    String statement(statement_), bind_str;
     int pos = 0, ppos = 0;
     size_t replace_count = 0;
-    while (bind_re.indexIn(statement, pos) != -1) {
+    while (bind_re.index_in(statement, pos) != -1) {
         ppos = bind_re.pos() ? bind_re.pos() - 1 : 0;
-        if (statement.at(ppos) == '\\') {
-            pos = bind_re.pos() + bind_re.matchedLength();
+        if (statement.char_at(ppos) == '\\') {
+            pos = bind_re.pos() + bind_re.matched_length();
             continue;
         }
         try {
             bind_str = connection.variant_to_string(binds_.get(bind_re.cap()));
         } catch (const lookup_error&) {
             throw value_error("missing value for bind placeholder " +
-                              bind_re.cap().toStdString());
+                              bind_re.cap().to_std_string());
         }
-        statement.replace(bind_re.pos(), bind_re.matchedLength(), bind_str);
+        statement.replace(bind_re.pos(), bind_re.matched_length(), bind_str);
         pos = bind_re.pos() + bind_str.length();
         ++replace_count;
     }

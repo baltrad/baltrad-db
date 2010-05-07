@@ -21,11 +21,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QStringList>
 #include <QtCore/QMap>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/StringList.hpp>
+
 #include <brfc/oh5/SourceCentre.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
@@ -34,19 +35,19 @@ namespace oh5 {
 
 namespace {
 
-typedef QMap<QString, QString> ElementMap;
+typedef QMap<String, String> ElementMap;
     
 ElementMap
-parse_source(const QString& source) {
+parse_source(const String& source) {
     ElementMap map;
-    QStringList elems = source.split(",");
+    StringList elems = source.split(",");
     try {
         BRFC_ASSERT(elems.size() != 0);
-        BOOST_FOREACH(const QString& elem, elems) {
-            QStringList kv = elem.split(":");
+        BOOST_FOREACH(const String& elem, elems) {
+            StringList kv = elem.split(":");
             BRFC_ASSERT(kv.size() == 2);
-            BRFC_ASSERT(kv[0].length() > 0);
-            BRFC_ASSERT(kv[1].length() > 0);
+            BRFC_ASSERT(kv.at(0).length() > 0);
+            BRFC_ASSERT(kv.at(1).length() > 0);
             map[kv.at(0)] = kv.at(1);
         }
     } catch (const assertion_error& e) {
@@ -58,21 +59,21 @@ parse_source(const QString& source) {
 } // namespace anonymous
 
 shared_ptr<Source>
-Source::from_source_attribute(const QString& source) {
+Source::from_source_attribute(const String& source) {
     const ElementMap& elems = parse_source(source);
     if (elems.contains("WMO") or
         elems.contains("RAD") or
         elems.contains("PLC")) {
         
         shared_ptr<SourceRadar> src = make_shared<SourceRadar>();
-        src->wmo_code(elems.value("WMO", "0").toInt());
+        src->wmo_code(elems.value("WMO", "0").to_int());
         src->radar_site(elems.value("RAD", ""));
         src->place(elems.value("PLC", ""));
         return src;
     } else if (elems.contains("CTY") or elems.contains("ORG")) {
         shared_ptr<SourceCentre> src = make_shared<SourceCentre>();
-        src->country_code(elems.value("CTY", "0").toInt());
-        src->originating_centre(elems.value("ORG", "0").toInt());
+        src->country_code(elems.value("CTY", "0").to_int());
+        src->originating_centre(elems.value("ORG", "0").to_int());
         return src;
     } else {
         throw value_error("no fields in source to determine type");

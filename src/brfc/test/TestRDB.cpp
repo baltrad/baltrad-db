@@ -22,8 +22,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <QtCore/QFile>
-#include <QtCore/QStringList>
 #include <QtCore/QTextStream>
+
+#include <brfc/StringList.hpp>
 
 #include <brfc/rdb/Connection.hpp>
 
@@ -32,7 +33,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace test {
 
-TestRDB::TestRDB(const QString& dsn, const QString& schema_dir)
+TestRDB::TestRDB(const String& dsn, const String& schema_dir)
         : RelationalDatabase(dsn)
         , schema_dir_(schema_dir) {
     if (not schema_dir_.is_absolute())
@@ -45,39 +46,40 @@ TestRDB::~TestRDB() {
 
 void
 TestRDB::create() {
-    exec_queries_from(QString("create.sql"));
+    exec_queries_from(String("create.sql"));
     populate_mapper_and_specs();
 }
 
 void
 TestRDB::drop() {
-    exec_queries_from(QString("drop.sql"));
+    exec_queries_from(String("drop.sql"));
 }
 
 void
 TestRDB::clean() {
-    connection().execute(QString("DELETE FROM bdb_files"));
+    connection().execute(String("DELETE FROM bdb_files"));
 }
 
-QStringList
-TestRDB::load_queries(const QString& filename) {
-    QString path = schema_dir_.join(dialect()).join(filename).string();
-    QFile file(path);
+StringList
+TestRDB::load_queries(const String& filename) {
+    String path = schema_dir_.join(dialect()).join(filename).string();
+    QString qpath = QString::fromUtf8(path.to_utf8().c_str());
+    QFile file(qpath);
     if (not file.open(QIODevice::ReadOnly)) {
-        throw fs_error("could not open file: " + path.toStdString());
+        throw fs_error("could not open file: " + path.to_std_string());
     }
     QTextStream stream(&file);
     stream.setCodec("UTF-8");
-    const QString content = stream.readAll();
-    return content.split(";\n", QString::SkipEmptyParts);
+    String content(stream.readAll());
+    return content.split(";\n", String::SKIP_EMPTY_PARTS);
 }
 
 void
-TestRDB::exec_queries_from(const QString& file) {
-    const QStringList& queries = load_queries(file);
+TestRDB::exec_queries_from(const String& file) {
+    const StringList& queries = load_queries(file);
     begin();
     try {
-        BOOST_FOREACH(const QString& stmt, queries) {
+        BOOST_FOREACH(const String& stmt, queries) {
             connection().execute(stmt);
         }
         commit();

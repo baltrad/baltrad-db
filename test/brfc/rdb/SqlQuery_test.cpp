@@ -59,7 +59,7 @@ TEST_F(rdb_SqlQuery_test, test_replace_binds_find_simple_placeholders) {
     query.binds().add(":bind1", Variant(1));
     query.binds().add(":bind2", Variant(2));
 
-    QString result;
+    String result;
     EXPECT_NO_THROW(result = query.replace_binds(conn));
     EXPECT_EQ("1 asd 2 qwe", result);
 }
@@ -70,7 +70,7 @@ TEST_F(rdb_SqlQuery_test, test_replace_binds_find_complex_placeholders) {
     query.binds().add(":bind2", Variant(2));
     query.binds().add(":bind_3", Variant(3));
     
-    QString result;
+    String result;
     EXPECT_NO_THROW(result = query.replace_binds(conn));
     EXPECT_EQ("(1), 2, 3+", result);
 }
@@ -80,7 +80,7 @@ TEST_F(rdb_SqlQuery_test, test_replace_binds_large_replacement) {
     query.statement(":bind1");
     query.binds().add(":bind1", Variant(1234567));
     
-    QString result;
+    String result;
     EXPECT_NO_THROW(result = query.replace_binds(conn));
     EXPECT_EQ("1234567", result);
 }
@@ -91,7 +91,7 @@ TEST_F(rdb_SqlQuery_test, test_replace_binds_replacement_with_colon) {
     query.binds().add(":bind2", Variant("a:b:c:d:e"));
     query.binds().add(":bind3", Variant(":a:b:c:d:e:"));
 
-    QString result;
+    String result;
     EXPECT_NO_THROW(result = query.replace_binds(conn));
     EXPECT_EQ("':a:b:c:d:e:' texttext 'a:b:c:d:e' texttext ':a:b:c:d:e:'", result);
 }
@@ -99,7 +99,7 @@ TEST_F(rdb_SqlQuery_test, test_replace_binds_replacement_with_colon) {
 TEST_F(rdb_SqlQuery_test, test_replace_binds_escaped_placeholder_marker) {
     query.statement("\\:notabind");
 
-    QString result;
+    String result;
     EXPECT_NO_THROW(result = query.replace_binds(conn));
     EXPECT_EQ(result, "\\:notabind");
 }

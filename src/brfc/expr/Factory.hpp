@@ -20,9 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_FACTORY_HPP
 #define BRFC_EXPR_FACTORY_HPP
 
-#include <brfc/expr/fwd.hpp>
+#include <brfc/String.hpp>
 
-#include <QtCore/QString>
+#include <brfc/expr/fwd.hpp>
 
 namespace brfc {
 namespace expr {
@@ -35,13 +35,13 @@ class Factory {
     /**
      * @brief construct expr::Attribute
      */
-    AttributePtr attribute(const QString& name) const;
+    AttributePtr attribute(const String& name) const;
 
     /**
      * @brief construct expr::Literal containing a string
      * @{
      */
-    LiteralPtr string(const QString& value) const;
+    LiteralPtr string(const String& value) const;
     LiteralPtr string(const char* value) const;
 
     /**

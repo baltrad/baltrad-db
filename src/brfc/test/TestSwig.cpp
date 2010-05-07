@@ -23,23 +23,23 @@ namespace brfc {
 namespace test {
 
 std::string
-TestSwig::qstring_to_string(QString str) {
-    return std::string(str.toUtf8().constData());
+TestSwig::qstring_to_string(String str) {
+    return str.to_utf8();
 }
 
 std::string
-TestSwig::qstringconstref_to_string(const QString& str) {
-    return std::string(str.toUtf8().constData());
+TestSwig::qstringconstref_to_string(const String& str) {
+    return str.to_utf8();
 }
 
-QString
+String
 TestSwig::string_to_qstring(const std::string& str) {
-    return QString::fromUtf8(str.c_str());
+    return String(str);
 }
 
-const QString&
+const String&
 TestSwig::string_to_qstringconstref(const std::string& str) {
-    for_constref_ = QString::fromUtf8(str.c_str());
+    for_constref_ = String(str);
     return for_constref_;
 }
 

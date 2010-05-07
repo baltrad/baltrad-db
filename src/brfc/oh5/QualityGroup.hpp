@@ -43,7 +43,7 @@ class QualityGroup : public Group {
     /**
      * @brief constructor
      */
-    explicit QualityGroup(const QString& name);
+    explicit QualityGroup(const String& name);
     
     /**
      * @return true if node is AttributeGroup

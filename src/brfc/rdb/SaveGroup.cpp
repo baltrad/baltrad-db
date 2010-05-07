@@ -21,10 +21,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QStringList>
-
 #include <brfc/exceptions.hpp>
 #include <brfc/ResultSet.hpp>
+#include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Group.hpp>
@@ -43,17 +42,17 @@ SaveGroup::SaveGroup(RelationalDatabase* rdb,
         , id_cache_(id_cache)
         , qry_("")
         , special_(rdb->mapper().specializations_on("bdb_groups")) {
-    QStringList columns, binds; 
+    StringList columns, binds; 
     columns.append("parent_id");
     columns.append("file_id");
     columns.append("name");
     BOOST_FOREACH(const Mapping& mapping, special_) {
         columns.append(mapping.column);
     }
-    BOOST_FOREACH(const QString& column, columns) {
+    BOOST_FOREACH(const String& column, columns) {
         binds.append(":" + column);
     }
-    QString qrystr("INSERT INTO bdb_groups(" + columns.join(", ") +
+    String qrystr("INSERT INTO bdb_groups(" + columns.join(", ") +
                    ") VALUES(" + binds.join(", ") + ")");
     if (rdb->supports_returning())
         qrystr += " RETURNING id";

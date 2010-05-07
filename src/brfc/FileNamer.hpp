@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_FILE_NAMER_HPP
 #define BRFC_FILE_NAMER_HPP
 
-#include <QtCore/QString>
+#include <brfc/String.hpp>
 
 namespace brfc {
 
@@ -49,7 +49,7 @@ class FileNamer {
      * The version inserted into the string is pre-padded with at most 6 zero
      * digits.
      */
-    static QString inject_version(const QString& filename,
+    static String inject_version(const String& filename,
                                   unsigned int version);
 
     /**
@@ -59,7 +59,7 @@ class FileNamer {
      *
      * @sa do_name
      */
-    QString name(const oh5::File& file) const {
+    String name(const oh5::File& file) const {
         return do_name(file);
     }
 
@@ -69,7 +69,7 @@ class FileNamer {
     virtual ~FileNamer() { }
 
   protected:
-    virtual QString do_name(const oh5::File& file) const = 0;
+    virtual String do_name(const oh5::File& file) const = 0;
 };
 
 } // namespace brfc

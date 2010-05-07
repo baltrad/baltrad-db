@@ -17,29 +17,46 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/QualityGroup.hpp>
+#include <brfc/StringList.hpp>
 
-#include <brfc/oh5/AttributeGroup.hpp>
+#include <boost/foreach.hpp>
+
+#include <brfc/exceptions.hpp>
 
 namespace brfc {
-namespace oh5 {
 
-QualityGroup::QualityGroup(const String& name)
-        : Group(name) {
-}
-
-QualityGroup::~QualityGroup() {
-
+const String&
+StringList::at(int i) const {
+    const_iterator iter = begin();
+    while (i > 0) {
+        iter++;
+        i--;
+    }
+    if (iter == end())
+        throw value_error("index out of bounds");
+    return *iter;
 }
 
 bool
-QualityGroup::do_accepts_child(const Node& node) const {
-    if (dynamic_cast<const AttributeGroup*>(&node) != 0) {
-        return true;
-    } else {
-        return false;
+StringList::contains(const String& str) const {
+    BOOST_FOREACH(const String& entry, list_) {
+        if (entry == str)
+            return true;
     }
+    return false;
 }
 
-} // namespace oh5
+String
+StringList::join(const String& sep) const {
+    String concat;
+    BOOST_FOREACH(const String& entry, list_) {
+        concat += entry;
+        concat += sep;
+    }
+    
+    if (list_.size() > 0)
+        concat.remove(concat.length() - sep.length(), sep.length());
+    return concat;
+}
+
 } // namespace brfc

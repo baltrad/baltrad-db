@@ -23,10 +23,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/smart_ptr.hpp>
 #include <brfc/oh5/hlhdf.hpp>
 
-class QString;
-
 namespace brfc {
 
+class String;
 class Variant;
 
 namespace oh5 {
@@ -57,7 +56,7 @@ class TempH5File {
     
     void write(const oh5::File& f);
     
-    QString path() const;
+    String path() const;
 
   private:
     shared_ptr<char> path_;

@@ -20,9 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_ATTRIBUTE_HPP
 #define BRFC_EXPR_ATTRIBUTE_HPP
 
-#include <brfc/expr/Expression.hpp>
+#include <brfc/String.hpp>
 
-#include <QtCore/QString>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace expr {
@@ -32,21 +32,21 @@ namespace expr {
  */
 class Attribute : public Expression {
   public:
-    static AttributePtr create(const QString& name) {
+    static AttributePtr create(const String& name) {
         return AttributePtr(new Attribute(name));
     }
 
-    const QString& name() const {
+    const String& name() const {
         return name_;
     }
 
   protected:
-    Attribute(const QString& name)
+    Attribute(const String& name)
             : name_(name) {
     }
 
   private:
-    QString name_;
+    String name_;
 };
 
 }

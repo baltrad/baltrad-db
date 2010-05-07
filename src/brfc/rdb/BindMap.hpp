@@ -28,7 +28,7 @@ namespace rdb {
 
 class BindMap {
   public:
-    typedef std::map<QString, Variant> map;
+    typedef std::map<String, Variant> map;
     typedef map::iterator iterator;
     typedef map::const_iterator const_iterator;
     typedef map::value_type value_type;
@@ -42,23 +42,23 @@ class BindMap {
     /**
      * @throw duplicate_entry if bind already exists
      */
-    void add(const QString& name, const Variant& value);
+    void add(const String& name, const Variant& value);
     
     /**
      * @return true if bind exists
      */
-    bool has(const QString& name) const;
+    bool has(const String& name) const;
     
     /**
      * @throw lookup_error if bind not found
      */
-    const Variant& get(const QString& name) const;
+    const Variant& get(const String& name) const;
     
     /**
      * @brief get bind value
      * @return the value or default_ if bind not found
      */
-    const Variant& get(const QString& name, const Variant& default_) const;
+    const Variant& get(const String& name, const Variant& default_) const;
 
     size_t size() const {
         return binds_.size();
@@ -83,14 +83,14 @@ class BindMap {
     /**
      * @brief remove a bind
      */
-    bool remove(const QString& name);
+    bool remove(const String& name);
     
     void clear() {
         binds_.clear();
     }
 
   private:
-    QString name_to_placeholder(const QString& name) const;
+    String name_to_placeholder(const String& name) const;
 
     map binds_;
 };

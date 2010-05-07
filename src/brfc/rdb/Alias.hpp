@@ -28,7 +28,7 @@ namespace rdb {
 class Alias : public Selectable {
   public:
     static AliasPtr create(SelectablePtr aliased,
-                           const QString& alias) {
+                           const String& alias) {
         return AliasPtr(new Alias(aliased, alias));
     }
 
@@ -40,28 +40,28 @@ class Alias : public Selectable {
         return aliased_;
     }
 
-    void alias(const QString& alias) {
+    void alias(const String& alias) {
         alias_ = alias;
     }
 
-    const QString& alias() const {
+    const String& alias() const {
         return alias_;
     }
 
-    virtual QString name() const {
+    virtual String name() const {
         return alias_;
     }
 
   protected:
     Alias(SelectablePtr aliased,
-          const QString& alias)
+          const String& alias)
             : aliased_(aliased)
             , alias_(alias) {
     }
 
   private:
     SelectablePtr aliased_;
-    QString alias_;
+    String alias_;
 };
 
 } // namespace rdb

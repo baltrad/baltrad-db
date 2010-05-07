@@ -53,9 +53,9 @@ PostgresResultSet::do_is_null(unsigned int pos) const {
     return result_.at(row_).at(pos).is_null();
 }
 
-QString
+String
 PostgresResultSet::do_string(unsigned int pos) const {
-    return QString::fromUtf8(result_.at(row_).at(pos).c_str());
+    return String::from_utf8(result_.at(row_).at(pos).c_str());
 }
 
 long long
@@ -81,13 +81,13 @@ PostgresResultSet::do_boolean(unsigned int pos) const {
 
 Date
 PostgresResultSet::do_date(unsigned int pos) const {
-    QString str = QString::fromUtf8(result_.at(row_).at(pos).c_str());
+    String str = String::from_utf8(result_.at(row_).at(pos).c_str());
     return Date::from_string(str, "yyyy-MM-dd");
 }
 
 Time
 PostgresResultSet::do_time(unsigned int pos) const {
-    QString str = QString::fromUtf8(result_.at(row_).at(pos).c_str());
+    String str = String::from_utf8(result_.at(row_).at(pos).c_str());
     try {
         return Time::from_string(str, "hh:mm:ss.zzz");
     } catch (value_error) {

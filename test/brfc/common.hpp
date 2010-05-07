@@ -25,8 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-class QString;
-
 namespace brfc {
 
 class Date;
@@ -56,9 +54,6 @@ class TestRDBEnv : public ::testing::Environment {
 };
 
 } // namespace brfc
-
-std::ostream&
-operator<<(std::ostream& out, const QString& value);
 
 std::ostream&
 operator<<(std::ostream& out, const brfc::Date& value);

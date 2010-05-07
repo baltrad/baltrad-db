@@ -20,11 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_SPLIT_PATH_HPP
 #define BRFC_OH5_SPLIT_PATH_HPP
 
-#include <QtCore/QString>
-
-class QStringList;
+#include <brfc/String.hpp>
 
 namespace brfc {
+
 namespace oh5 {
 
 /**
@@ -36,33 +35,33 @@ namespace oh5 {
  *  \li path to data object
  */
 struct SplitPath {
-    explicit SplitPath(const QString& path);
+    explicit SplitPath(const String& path);
     
     /**
      * @name DEPRECATED
      * @{
      */
-    QString attribute_name() const { return attribute_; }
-    QString full_attribute_name() const;
-    QString group_path() const;
+    String attribute_name() const { return attribute_; }
+    String full_attribute_name() const;
+    String group_path() const;
     ///@}
     
-    QString dataset_group() const { return dataset_group_; }
-    QString data_group() const { return data_group_; }
-    QString quality_group() const { return quality_group_; }
-    QString attribute_group() const { return attribute_group_; }
-    QString attribute() const { return attribute_; }
-    QString dataset() const { return dataset_; }
+    String dataset_group() const { return dataset_group_; }
+    String data_group() const { return data_group_; }
+    String quality_group() const { return quality_group_; }
+    String attribute_group() const { return attribute_group_; }
+    String attribute() const { return attribute_; }
+    String dataset() const { return dataset_; }
 
   private:
-    void split(const QString& path);
+    void split(const String& path);
 
-    QString dataset_group_;
-    QString data_group_;
-    QString quality_group_;
-    QString attribute_group_;
-    QString attribute_;
-    QString dataset_;
+    String dataset_group_;
+    String data_group_;
+    String quality_group_;
+    String attribute_group_;
+    String attribute_;
+    String dataset_;
 };
 
 } // namespace oh5

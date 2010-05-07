@@ -17,37 +17,37 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_OH5_ATTRIBUTE_GROUP_HPP
-#define BRFC_OH5_ATTRIBUTE_GROUP_HPP
+#include <QtCore/QRegExp>
 
-#include <brfc/oh5/Group.hpp>
+#include <brfc/String.hpp>
 
 namespace brfc {
-namespace oh5 {
 
-/**
- * @brief a Group that contains only Attributes
- */
-class AttributeGroup : public Group {
-  protected:
-    template<class T, class A1> 
-    friend 
-    shared_ptr<T> boost::make_shared(const A1& a1);
+class RegExp {
+  public:
+    RegExp(const String& pattern)
+            : re_(QString::fromUtf8(pattern.to_utf8().c_str())) {
 
-    /**
-     * @brief constructor
-     *
-     * use make_shared<Node> to call
-     */
-    AttributeGroup(const String& name)
-        : Group(name) {
     }
 
-    virtual bool do_accepts_child(const Node& node) const;
+    int index_in(const String& str, int pos) {
+        return re_.indexIn(QString::fromUtf8(str.to_utf8().c_str()), pos);
+    }
 
+    int matched_length() const {
+        return re_.matchedLength();
+    }
+
+    String cap() const {
+        return re_.cap();
+    }
+
+    int pos() const {
+        return re_.pos();
+    }
+
+  private:
+    QRegExp re_;
 };
 
-} // namespace oh5
 } // namespace brfc
-
-#endif // BRFC_OH5_ATTRIBUTE_GROUP_HPP

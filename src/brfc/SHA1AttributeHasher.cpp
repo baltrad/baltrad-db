@@ -23,7 +23,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QByteArray>
 #include <QtCore/QCryptographicHash>
-#include <QtCore/QStringList>
+
+#include <brfc/StringList.hpp>
 
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/Attribute.hpp>
@@ -42,19 +43,19 @@ SHA1AttributeHasher::~SHA1AttributeHasher() {
 
 }
 
-QString
+String
 SHA1AttributeHasher::do_name() const {
     return "sha1_attribute";
 }
 
-QString
+String
 SHA1AttributeHasher::do_hash(const oh5::File& file) {
     if (not file.source()) {
         //XXX: needs a better exception type
         throw value_error("can't form unique_id: not associated with source");
     }
     
-    QStringList strs(file.source()->node_id());
+    StringList strs(file.source()->node_id());
 
     const oh5::Attribute* attr = 0;
     const oh5::AttributeSpec* spec = 0;
@@ -71,10 +72,10 @@ SHA1AttributeHasher::do_hash(const oh5::File& file) {
     }
     strs.sort(); // ensure same order
 
-    QByteArray bytes = strs.join("").toUtf8();
+    QByteArray bytes(strs.join("").to_utf8().c_str());
     QByteArray hash = QCryptographicHash::hash(bytes,
                                                QCryptographicHash::Sha1);
-    return QString::fromAscii(hash.toHex());
+    return String(hash.toHex().constData());
 }
 
 } // namespace brfc

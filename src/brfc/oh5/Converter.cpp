@@ -111,7 +111,7 @@ StringConverter::do_convert(HL_FormatSpecifier format,
     if (format != HLHDF_STRING)
         throw value_error("invalid format for 'string'");
     BRFC_ASSERT(format == HLHDF_STRING);
-    QString s = QString::fromUtf8(reinterpret_cast<char*>(data));
+    String s = String::from_utf8(reinterpret_cast<char*>(data));
     return Variant(s);
 }
 
@@ -119,10 +119,10 @@ HL_Data
 StringConverter::do_convert(const Variant& value) const {
     BRFC_ASSERT(value.type() == Variant::STRING);
     
-    QByteArray v = value.string().toUtf8();
+    std::string v = value.string().to_utf8();
     return HL_Data(v.size() + 1, "string",
                    reinterpret_cast<unsigned char*>(
-                         const_cast<char*>(v.constData())));
+                         const_cast<char*>(v.c_str())));
 }
 
 
@@ -160,7 +160,7 @@ Variant
 BoolConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     const Variant& var = StringConverter::do_convert(format, data);
-    const QString& str = var.string();
+    const String& str = var.string();
     bool val = false;
     if (str == "True") {
         val = true;
@@ -176,7 +176,7 @@ HL_Data
 BoolConverter::do_convert(const Variant& value) const {
     BRFC_ASSERT(value.type() == Variant::BOOL);
 
-    QString bool_str;
+    String bool_str;
     if (value.bool_()) {
         bool_str = "False";
     } else {

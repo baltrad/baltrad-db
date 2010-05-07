@@ -50,23 +50,23 @@ AttributeMapper::~AttributeMapper() {
 void
 AttributeMapper::add(const Mapping& mapping) {
     if (has(mapping.attribute))
-        throw duplicate_entry(mapping.attribute.toUtf8().constData());
+        throw duplicate_entry(mapping.attribute.to_utf8());
     mappings_.insert(std::make_pair(mapping.attribute, mapping));
 }
 
 bool
-AttributeMapper::has(const QString& attribute) const {
+AttributeMapper::has(const String& attribute) const {
     return mappings_.find(attribute) != mappings_.end();
 }
 
 bool
-AttributeMapper::is_specialized(const QString& attribute) const {
-    QString s = QString::fromUtf8("bdb_attribute_values");
-    return not mapping(attribute).table.startsWith(s);
+AttributeMapper::is_specialized(const String& attribute) const {
+    String s = String::from_utf8("bdb_attribute_values");
+    return not mapping(attribute).table.starts_with(s);
 }
 
 MappingVector
-AttributeMapper::specializations_on(const QString& table) const {
+AttributeMapper::specializations_on(const String& table) const {
     MappingVector vec;
     BOOST_FOREACH(const MappingMap::value_type& entry, mappings_) {
         const Mapping& mapping = entry.second;
@@ -78,12 +78,11 @@ AttributeMapper::specializations_on(const QString& table) const {
 }
 
 Mapping
-AttributeMapper::mapping(const QString& attribute) const {
+AttributeMapper::mapping(const String& attribute) const {
     MappingMap::const_iterator i = mappings_.find(attribute);
     if (i == mappings_.end()) {
-        QString err = QString::fromUtf8("no mapping for attribute:") + 
-                      attribute;
-        throw lookup_error(err.toUtf8().constData());
+        String err = String("no mapping for attribute:") + attribute;
+        throw lookup_error(err.to_utf8());
     }
     return i->second;
 }

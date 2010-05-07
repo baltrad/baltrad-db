@@ -38,7 +38,7 @@ class PostgresResultSet : public ResultSet {
 
     virtual bool do_is_null(unsigned int pos) const;
     
-    virtual QString do_string(unsigned int pos) const;
+    virtual String do_string(unsigned int pos) const;
     virtual long long do_integer(unsigned int pos) const;
     virtual double do_real(unsigned int pos) const;
     virtual bool do_boolean(unsigned int pos) const;

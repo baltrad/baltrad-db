@@ -18,22 +18,22 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <boost/foreach.hpp>
+
 #include <gtest/gtest.h>
-#include <QtCore/QStringList>
 
 #include "../common.hpp"
 
 #include <brfc/exceptions.hpp>
-#include <brfc/oh5/Node.hpp>
+#include <brfc/StringList.hpp>
 
-#include <iostream>
+#include <brfc/oh5/Node.hpp>
 
 namespace brfc {
 namespace oh5 {
 
 class FakeNode : public Node {
   public:
-    FakeNode(const QString& name)
+    FakeNode(const String& name)
             : Node(name) {
     }
   
@@ -135,7 +135,7 @@ TEST_F(oh5_Node_test, iterator_end) {
 TEST_F(oh5_Node_test, iterate_tree) {
     a->add_child(f);
 
-    QStringList names;
+    StringList names;
     BOOST_FOREACH(Node& node, *a) {
         names.append(node.name());
     }

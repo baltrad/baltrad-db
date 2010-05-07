@@ -44,7 +44,7 @@ class DataSetGroup : public Group {
     /**
      * @brief constructor
      */
-    explicit DataSetGroup(const QString& name);
+    explicit DataSetGroup(const String& name);
     
     /**
      * @return true if node is Data or AttributeGroup

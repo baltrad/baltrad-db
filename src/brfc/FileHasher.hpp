@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_FILE_HASHER_HPP
 #define BRFC_FILE_HASHER_HPP
 
-#include <QtCore/QString>
+#include <brfc/String.hpp>
 
 namespace brfc {
 
@@ -40,23 +40,23 @@ class FileHasher {
     /**
      * @brief name of this hasher
      */
-    QString name() const {
+    String name() const {
         return do_name();
     }
 
     /**
      * @brief hash a file
      */
-    QString hash(const oh5::File& file) {
+    String hash(const oh5::File& file) {
         return do_hash(file);
     }
 
     virtual ~FileHasher() { }
 
   protected:
-    virtual QString do_name() const = 0;
+    virtual String do_name() const = 0;
 
-    virtual QString do_hash(const oh5::File& file) = 0;
+    virtual String do_hash(const oh5::File& file) = 0;
 };
 
 } // namespace brfc

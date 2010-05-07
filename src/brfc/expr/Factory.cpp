@@ -30,12 +30,12 @@ namespace brfc {
 namespace expr {
 
 AttributePtr
-Factory::attribute(const QString& name) const {
+Factory::attribute(const String& name) const {
     return Attribute::create(name);
 }
 
 LiteralPtr
-Factory::string(const QString& value) const {
+Factory::string(const String& value) const {
     return Literal::create(Variant(value));
 }
 

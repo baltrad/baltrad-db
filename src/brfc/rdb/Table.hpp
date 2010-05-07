@@ -27,25 +27,25 @@ namespace rdb {
 
 class Table : public Selectable {
   public:
-    static TablePtr create(const QString& name) {
+    static TablePtr create(const String& name) {
         return TablePtr(new Table(name));
     }
 
-    void name(const QString& name) {
+    void name(const String& name) {
         name_ = name;
     }
 
-    virtual QString name() const {
+    virtual String name() const {
         return name_;
     }
 
   protected:
-    explicit Table(const QString& name)
+    explicit Table(const String& name)
             : name_(name) {
     }
 
   private:
-    QString name_;
+    String name_;
 };
 
 } // namespace rdb

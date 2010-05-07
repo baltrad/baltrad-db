@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-DataSetGroup::DataSetGroup(const QString& name)
+DataSetGroup::DataSetGroup(const String& name)
         : Group(name) {
 }
 

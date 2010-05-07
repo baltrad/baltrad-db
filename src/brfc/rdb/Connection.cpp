@@ -19,9 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/Connection.hpp>
 
-#include <QtCore/QString>
-
 #include <brfc/exceptions.hpp>
+#include <brfc/String.hpp>
 
 #include <brfc/rdb/SqlQuery.hpp>
 
@@ -70,13 +69,13 @@ Connection::commit() {
 }
 
 shared_ptr<ResultSet>
-Connection::execute(const QString& statement, const BindMap& binds) {
+Connection::execute(const String& statement, const BindMap& binds) {
     return execute(SqlQuery(statement, binds));    
 }
 
 shared_ptr<ResultSet>
 Connection::execute(const SqlQuery& query) {
-    QString statement = query.replace_binds(*this);
+    String statement = query.replace_binds(*this);
     shared_ptr<ResultSet> result;
     if (not in_transaction()) {
         try {
@@ -97,7 +96,7 @@ Connection::execute(const SqlQuery& query) {
     return result;
 }
 
-QString
+String
 Connection::do_variant_to_string(const Variant& value) const {
     switch (value.type()) {
         case Variant::NONE:
@@ -109,13 +108,13 @@ Connection::do_variant_to_string(const Variant& value) const {
         case Variant::DOUBLE:
             return value.to_string();
         case Variant::BOOL:
-            return value.to_string().toLower();
+            return value.to_string().to_lower();
         case Variant::DATE:
             return "'" + value.date().to_string("yyyy-MM-dd") + "'";
         case Variant::TIME:
             return "'" + value.time().to_string("HH:mm:ss.zzz") + "'";
         default:
-            throw value_error(value.to_string().toStdString());
+            throw value_error(value.to_string().to_std_string());
     }
 }
 

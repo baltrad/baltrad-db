@@ -20,9 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_LABEL_HPP
 #define BRFC_EXPR_LABEL_HPP
 
-#include <brfc/expr/Expression.hpp>
+#include <brfc/String.hpp>
 
-#include <QtCore/QString>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace expr {
@@ -34,15 +34,15 @@ namespace expr {
  */
 class Label : public Expression {
   public:
-    static LabelPtr create(ExpressionPtr expression, const QString& name) {
+    static LabelPtr create(ExpressionPtr expression, const String& name) {
         return LabelPtr(new Label(expression, name));
     }
 
-    void name(const QString& name) {
+    void name(const String& name) {
         name_ = name;
     }
 
-    const QString& name() const {
+    const String& name() const {
         return name_;
     }
 
@@ -58,14 +58,14 @@ class Label : public Expression {
     }
 
   protected:
-    explicit Label(ExpressionPtr expression, const QString& name)
+    explicit Label(ExpressionPtr expression, const String& name)
             : expression_(expression)
             , name_(name) {
     }
 
   private:
     ExpressionPtr expression_;
-    QString name_;
+    String name_;
 };
 
 }

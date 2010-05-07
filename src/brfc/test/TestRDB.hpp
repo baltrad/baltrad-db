@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/RelationalDatabase.hpp>
 
-class QStringList;
+class StringList;
 
 namespace brfc {
 namespace test {
@@ -42,7 +42,7 @@ class TestRDB : public rdb::RelationalDatabase {
      * @param dsn database sdn
      * @param schema_dir base directory for finding statements
      */
-    TestRDB(const QString& dsn, const QString& schema_dir);
+    TestRDB(const String& dsn, const String& schema_dir);
 
     virtual ~TestRDB();
     
@@ -62,8 +62,8 @@ class TestRDB : public rdb::RelationalDatabase {
     void clean();
 
   private:
-    QStringList load_queries(const QString& filename);
-    void exec_queries_from(const QString& filename);
+    StringList load_queries(const String& filename);
+    void exec_queries_from(const String& filename);
 
     Path schema_dir_;
 };

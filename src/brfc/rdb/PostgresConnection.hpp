@@ -9,7 +9,7 @@
 
 #include <QtCore/QUrl>
 
-class QString;
+class String;
 class QUrl;
 
 namespace brfc {
@@ -21,7 +21,7 @@ class PostgresConnection : public Connection {
 
     virtual ~PostgresConnection();
 
-    static QString url_to_pg(const QUrl& url);
+    static String url_to_pg(const QUrl& url);
   
   protected:
     virtual void do_open();
@@ -36,7 +36,7 @@ class PostgresConnection : public Connection {
         return transaction_.get() != 0;
     }
 
-    virtual shared_ptr<ResultSet> do_execute(const QString& query);
+    virtual shared_ptr<ResultSet> do_execute(const String& query);
 
     virtual bool do_has_feature(Feature feature) const;
 

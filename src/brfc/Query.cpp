@@ -60,7 +60,7 @@ Query&
 Query::fetch(expr::AttributePtr attribute) {
     BOOST_FOREACH(expr::AttributePtr attr, fetch_) {
         if (attr->name() == attribute->name())
-            throw duplicate_entry(attribute->name().toStdString());
+            throw duplicate_entry(attribute->name().to_std_string());
     }
     fetch_.push_back(attribute);
     return *this;

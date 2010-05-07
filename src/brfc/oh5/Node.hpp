@@ -26,9 +26,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
-#include <QtCore/QString>
-
 #include <brfc/smart_ptr.hpp>
+#include <brfc/String.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -62,9 +61,9 @@ class Node : public boost::noncopyable,
     /**
      * @{
      */
-    const QString& name() const { return name_; }
+    const String& name() const { return name_; }
 
-    void name(const QString& name);
+    void name(const String& name);
     ///@}
     
     /**
@@ -73,7 +72,7 @@ class Node : public boost::noncopyable,
      * path is the concatenation of all node names leading from root to
      * this node, separated by "/".
      */
-    QString path() const;
+    String path() const;
 
     /**
      * @brief parent node
@@ -142,7 +141,7 @@ class Node : public boost::noncopyable,
     /**
      * @brief test for a child by name
      */
-    bool has_child_by_name(const QString& name) const;
+    bool has_child_by_name(const String& name) const;
 
     /**
      * @brief test for a child node
@@ -163,10 +162,10 @@ class Node : public boost::noncopyable,
      * @return pointer to Node or null if not found.
      */
     shared_ptr<Node>
-    child_by_name(const QString& name);
+    child_by_name(const String& name);
 
     shared_ptr<const Node>
-    child_by_name(const QString& name) const;
+    child_by_name(const String& name) const;
     ///@}
     
     /**
@@ -175,10 +174,10 @@ class Node : public boost::noncopyable,
      * @return pointer to Node or null if not found.
      */
     shared_ptr<Node>
-    child_by_path(const QString& path);
+    child_by_path(const String& path);
 
     shared_ptr<const Node>
-    child_by_path(const QString& path) const;
+    child_by_path(const String& path) const;
     ///@}
 
     /**
@@ -243,7 +242,7 @@ class Node : public boost::noncopyable,
      *
      * use make_shared<Node> to call
      */
-    Node(const QString& name);
+    Node(const String& name);
 
     void parent(shared_ptr<Node> node);
     
@@ -257,7 +256,7 @@ class Node : public boost::noncopyable,
     friend class NodeIterator<Node>;
     friend class NodeIterator<const Node>;
 
-    QString name_;
+    String name_;
     weak_ptr<Node> parent_;
     ChildVector children_;
 

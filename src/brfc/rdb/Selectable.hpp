@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_RDB_SELECTABLE_HPP
 #define BRFC_RDB_SELECTABLE_HPP
 
-#include <QtCore/QString>
+#include <brfc/String.hpp>
 
 #include <brfc/expr/fwd.hpp>
 #include <brfc/expr/Element.hpp>
@@ -37,11 +37,11 @@ class Selectable : public expr::Element {
                 const_pointer_cast<Element>(Element::shared_from_this()));
     }
 
-    virtual QString name() const = 0;
+    virtual String name() const = 0;
 
-    ColumnPtr column(const QString& name);
+    ColumnPtr column(const String& name);
 
-    AliasPtr alias(const QString& name);
+    AliasPtr alias(const String& name);
 
     JoinPtr join(SelectablePtr rhs, expr::ExpressionPtr condition);
 

@@ -30,9 +30,9 @@ namespace brfc {
 DefaultFileNamer::DefaultFileNamer() {
 }
 
-QString
+String
 DefaultFileNamer::do_name(const oh5::File& f) const {
-    QString name = QString("Z_");
+    String name = String("Z_");
     name.append(f.what_object());
     name.append("_C_");
     name.append(f.source()->wmo_cccc());

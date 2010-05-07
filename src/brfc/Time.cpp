@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QTime>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/String.hpp>
 
 namespace {
     enum {
@@ -149,17 +150,19 @@ Time::add_msecs(int msecs) const {
 }
 
 Time
-Time::from_string(const QString& str, const QString& format) {
-    QTime t = QTime::fromString(str, format);
+Time::from_string(const String& str, const String& format) {
+    QString qstr = QString::fromUtf8(str.to_utf8().c_str());
+    QString qformat = QString::fromUtf8(format.to_utf8().c_str());
+    QTime t = QTime::fromString(qstr, qformat);
     if (not t.isValid())
         throw value_error("could not parse time from string");
     return Time(t.hour(), t.minute(), t.second(), t.msec());
 }
 
-QString
-Time::to_string(const QString& format) const {
-    QTime t(hour(), minute(), second(), msec());
-    return t.toString(format); 
+String
+Time::to_string(const String& format) const {
+    QString qformat = QString::fromUtf8(format.to_utf8().c_str());
+    return QTime(hour(), minute(), second(), msec()).toString(qformat);
 }
 
 } // namespace brfc

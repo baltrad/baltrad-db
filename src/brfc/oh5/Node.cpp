@@ -23,15 +23,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QStringList>
-
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/StringList.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-Node::Node(const QString& name)
+Node::Node(const String& name)
         : boost::noncopyable()
         , enable_shared_from_this<Node>()
         , name_(name)
@@ -45,7 +44,7 @@ Node::~Node() {
 }
 
 void
-Node::name(const QString& name) {
+Node::name(const String& name) {
     shared_ptr<Node> p = parent_.lock();
     if (p and p->has_child_by_name(name)) {
        throw duplicate_entry("changing name results in duplicate child");
@@ -53,9 +52,9 @@ Node::name(const QString& name) {
     name_ = name;
 }
 
-QString
+String
 Node::path() const {
-    QStringList names;
+    StringList names;
     const Node* node = this;
     while (node != 0) {
         names.push_front(node->name());
@@ -79,7 +78,7 @@ Node::add_child(shared_ptr<Node> node) {
     if (not node) {
         throw value_error("null pointer");
     } else if (has_child_by_name(node->name())) {
-        throw duplicate_entry(node->name().toUtf8().constData());
+        throw duplicate_entry(node->name().to_utf8());
     } else if (not accepts_child(*node)) {
         throw value_error("node not accepted as child");
     } else if (not node->accepts_parent(*this)) {
@@ -118,7 +117,7 @@ Node::has_child(const Node& node) const {
 }
 
 bool
-Node::has_child_by_name(const QString& name) const {
+Node::has_child_by_name(const String& name) const {
     BOOST_FOREACH(shared_ptr<Node> node, children_) {
         if (node->name() == name) {
             return true;
@@ -128,13 +127,13 @@ Node::has_child_by_name(const QString& name) const {
 }
 
 shared_ptr<Node>
-Node::child_by_name(const QString& name) {
+Node::child_by_name(const String& name) {
     const Node* self = const_cast<const Node*>(this);
     return const_pointer_cast<Node>(self->child_by_name(name));
 }
 
 shared_ptr<const Node>
-Node::child_by_name(const QString& name) const {
+Node::child_by_name(const String& name) const {
     BOOST_FOREACH(shared_ptr<Node> node, children_) {
         if (node->name() == name) {
             return node;
@@ -144,16 +143,16 @@ Node::child_by_name(const QString& name) const {
 }
 
 shared_ptr<Node>
-Node::child_by_path(const QString& path) {
+Node::child_by_path(const String& path) {
     const Node* self = const_cast<const Node*>(this);
     return const_pointer_cast<Node>(self->child_by_path(path));
 }
 
 shared_ptr<const Node>
-Node::child_by_path(const QString& path) const {
-    QStringList names = path.split("/");
+Node::child_by_path(const String& path) const {
+    StringList names = path.split("/");
     shared_ptr<const Node> cur = shared_from_this();
-    BOOST_FOREACH(const QString& name, names) {
+    BOOST_FOREACH(const String& name, names) {
         cur = cur->child_by_name(name);
         if (not cur)
             break;

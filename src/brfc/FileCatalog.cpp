@@ -38,8 +38,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
     
-FileCatalog::FileCatalog(const QString& dsn,
-                         const QString& storage)
+FileCatalog::FileCatalog(const String& dsn,
+                         const String& storage)
         : db_(new rdb::RelationalDatabase(dsn))
         , specs_()
         , namer_(new DefaultFileNamer())
@@ -56,7 +56,7 @@ FileCatalog::FileCatalog(const QString& dsn,
 FileCatalog::FileCatalog(shared_ptr<Database> db,
                          shared_ptr<oh5::AttributeSpecs> specs,
                          shared_ptr<FileNamer> namer,
-                         const QString& storage)
+                         const String& storage)
         : db_(db)
         , specs_(specs)
         , namer_(namer)
@@ -87,7 +87,7 @@ FileCatalog::file_namer(FileNamer* namer) {
 }
 
 bool
-FileCatalog::is_cataloged(const QString& path) const {
+FileCatalog::is_cataloged(const String& path) const {
     shared_ptr<oh5::File> f = oh5::File::from_filesystem(path, *specs_);
     return is_cataloged(*f);
 }
@@ -98,22 +98,22 @@ FileCatalog::is_cataloged(const oh5::File& f) const {
 }
 
 shared_ptr<const oh5::File>
-FileCatalog::catalog(const QString& path) {
+FileCatalog::catalog(const String& path) {
     shared_ptr<oh5::File> f = oh5::File::from_filesystem(path, *specs_);
     
     f->source(db_->load_source(f->what_source()));
 
     if (is_cataloged(*f))
-        throw duplicate_entry(path.toUtf8().constData());
+        throw duplicate_entry(path.to_utf8());
     
-    QString proposed_name = namer_->name(*f);
+    String proposed_name = namer_->name(*f);
 
     if (Path(proposed_name).is_absolute())
         throw std::runtime_error("namer must not return absolute paths");
     
     unsigned int name_version = db_->next_filename_version(proposed_name);
     
-    QString target = FileNamer::inject_version(proposed_name, name_version);
+    String target = FileNamer::inject_version(proposed_name, name_version);
     target = storage_.join(target).string();
     f->path(target);
 
@@ -125,12 +125,14 @@ FileCatalog::catalog(const QString& path) {
         db_->rollback();
         throw;
     }
+    QString qpath = QString::fromUtf8(path.to_utf8().c_str());
+    QString qtarget = QString::fromUtf8(target.to_utf8().c_str());
     // database save OK, try copying to new location
-    if (not QFile::copy(path, target)) {
+    if (not QFile::copy(qpath, qtarget)) {
         db_->rollback();
-        QString err = QString::fromUtf8("could not copy ") + path +
-                      QString::fromUtf8(" to ") + target;
-        throw fs_error(err.toUtf8().constData());
+        String err = String("could not copy ") + path +
+                     String(" to ") + target;
+        throw fs_error(err.to_utf8());
     } else {
         db_->commit();
     }
@@ -138,14 +140,15 @@ FileCatalog::catalog(const QString& path) {
 }
 
 void
-FileCatalog::remove(const QString& path) {
+FileCatalog::remove(const String& path) {
     db_->begin();
     db_->remove_file(path);
+    QString qpath = QString::fromUtf8(path.to_utf8().c_str());
     //XXX: what about when it exists in db but not in fs?
-    if (not QFile::remove(path)) {
+    if (not QFile::remove(qpath)) {
         db_->rollback();
-        QString err = QString::fromUtf8("could not remove ") + path;
-        throw fs_error(err.toUtf8().constData());
+        String err = String("could not remove ") + path;
+        throw fs_error(err.to_utf8());
     } else {
         db_->commit();
     }

@@ -53,7 +53,7 @@ namespace {
 
 template<typename T>
 shared_ptr<Group>
-get_or_create_child(Group& group, const QString& name) {
+get_or_create_child(Group& group, const String& name) {
     shared_ptr<Group> child = group.child_group_by_name(name);
     if (not child) {
         child = make_shared<T>(name);
@@ -82,7 +82,7 @@ FileLoader::get_or_create_group(const SplitPath& path) {
 
 void
 FileLoader::add_attribute_from_node(HL_Node* node) {
-    QString nodename = QString::fromUtf8(HLNode_getName(node));
+    String nodename = String::from_utf8(HLNode_getName(node));
     unsigned char* data = HLNode_getData(node);
 
     SplitPath path(nodename);
@@ -107,13 +107,13 @@ FileLoader::add_attribute_from_node(HL_Node* node) {
 }
 
 shared_ptr<File>
-FileLoader::load(const QString& path) {
+FileLoader::load(const String& path) {
     init_hlhdflib();
-    QByteArray pathbytes = path.toUtf8();
-    HL_NodeList* nodes = HLNodeList_read(pathbytes.constData());
+    std::string path_str = path.to_utf8();
+    HL_NodeList* nodes = HLNodeList_read(path_str.c_str());
     if (nodes == 0) {
         throw fs_error("could not open file: " +
-                       std::string(pathbytes.constData()));
+                       std::string(path_str.c_str()));
     }
     HLNodeList_selectMetadataNodes(nodes);
     HLNodeList_fetchMarkedNodes(nodes);

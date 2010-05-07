@@ -45,28 +45,28 @@ BindMap::operator=(const BindMap& rhs) {
 }
 
 void
-BindMap::add(const QString& name, const Variant& value) {
+BindMap::add(const String& name, const Variant& value) {
     const map::value_type& pair = std::make_pair(name_to_placeholder(name),
                                                  value);
     if (not binds_.insert(pair).second)
-        throw duplicate_entry(name.toStdString());
+        throw duplicate_entry(name.to_std_string());
 }
 
 bool
-BindMap::has(const QString& name) const {
+BindMap::has(const String& name) const {
     return binds_.find(name_to_placeholder(name)) != binds_.end();
 }
 
 const Variant&
-BindMap::get(const QString& name) const {
+BindMap::get(const String& name) const {
     map::const_iterator iter = binds_.find(name_to_placeholder(name));
     if (iter == binds_.end())
-        throw lookup_error(name.toStdString());
+        throw lookup_error(name.to_std_string());
     return iter->second;
 }
 
 const Variant&
-BindMap::get(const QString& name, const Variant& default_) const {
+BindMap::get(const String& name, const Variant& default_) const {
     try {
         return get(name);
     } catch (const lookup_error&) {
@@ -74,16 +74,16 @@ BindMap::get(const QString& name, const Variant& default_) const {
     }
 }
 
-QString
-BindMap::name_to_placeholder(const QString& name) const {
-    QString placeholder(name);
-    if (not placeholder.startsWith(':'))
-        placeholder.prepend(':');
+String
+BindMap::name_to_placeholder(const String& name) const {
+    String placeholder(name);
+    if (not placeholder.starts_with(":"))
+        placeholder.prepend(":");
     return placeholder;
 }
 
 bool
-BindMap::remove(const QString& name) {
+BindMap::remove(const String& name) {
     return binds_.erase(name_to_placeholder(name));
 }
 

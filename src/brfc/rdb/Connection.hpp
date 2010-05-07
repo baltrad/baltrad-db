@@ -24,11 +24,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/BindMap.hpp>
 
-class QString;
-
 namespace brfc {
 
 class ResultSet;
+class String;
 
 namespace rdb {
 
@@ -119,7 +118,7 @@ class Connection {
      * equivalent to:
      * @code execute(SqlQuery(statement, binds)); @endcode
      */
-    shared_ptr<ResultSet> execute(const QString& statement,
+    shared_ptr<ResultSet> execute(const String& statement,
                                   const BindMap& binds=BindMap());
     
     /**
@@ -139,7 +138,7 @@ class Connection {
     /**
      * @sa do_variant_to_string
      */
-    QString variant_to_string(const Variant& value) const {
+    String variant_to_string(const Variant& value) const {
         return do_variant_to_string(value);
     }
 
@@ -156,7 +155,7 @@ class Connection {
     virtual void do_commit() = 0;
     virtual void do_rollback() = 0;
 
-    virtual shared_ptr<ResultSet> do_execute(const QString& statement) = 0;
+    virtual shared_ptr<ResultSet> do_execute(const String& statement) = 0;
     
     /**
      * @return true if there is an ongoing transaction
@@ -178,7 +177,7 @@ class Connection {
      * - none as NULL
      * - string surrounded by apostrophes (')
      */
-    virtual QString do_variant_to_string(const Variant& value) const;
+    virtual String do_variant_to_string(const Variant& value) const;
 };
 
 } // namespace rdb

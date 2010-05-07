@@ -63,7 +63,7 @@ class SaveAttribute {
     /**
      * @brief map table name to a SqlQuery
      */
-    typedef std::map<QString, SqlQuery> QueryMap;
+    typedef std::map<String, SqlQuery> QueryMap;
 
     SqlQuery& invalid_attribute_query(const oh5::Attribute& attr);
    

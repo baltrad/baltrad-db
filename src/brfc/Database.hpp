@@ -24,12 +24,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/smart_ptr.hpp>
 
-class QString;
-
 namespace brfc {
 
-class ResultSet;
 class Query;
+class String;
+class ResultSet;
 
 namespace oh5 {
 
@@ -79,7 +78,7 @@ class Database : public boost::noncopyable {
     /**
      * @brief remove file from database
      */
-    void remove_file(const QString& path) {
+    void remove_file(const String& path) {
         do_remove_file(path);
     }
 
@@ -93,7 +92,7 @@ class Database : public boost::noncopyable {
      * @return database id associated with the file
      */
     long long save_file(const oh5::File& file,
-                        const QString& proposed_filename,
+                        const String& proposed_filename,
                         unsigned int filename_version) {
         return do_save_file(file, proposed_filename, filename_version);
     }
@@ -108,14 +107,14 @@ class Database : public boost::noncopyable {
     /**
      * @brief next version number for a filename
      */
-    unsigned int next_filename_version(const QString& filename) {
+    unsigned int next_filename_version(const String& filename) {
         return do_next_filename_version(filename);
     }
 
     /**
      * @brief load source from DB by contents of /what/source
      */
-    shared_ptr<oh5::Source> load_source(const QString& source) {
+    shared_ptr<oh5::Source> load_source(const String& source) {
         return do_load_source(source);
     }
     
@@ -132,15 +131,15 @@ class Database : public boost::noncopyable {
     virtual void do_commit() = 0;
     
     virtual bool do_has_file(const oh5::File& file) = 0;
-    virtual void do_remove_file(const QString& path) = 0;
+    virtual void do_remove_file(const String& path) = 0;
     virtual long long do_save_file(const oh5::File& file,
-                                   const QString& proposed_filename,
+                                   const String& proposed_filename,
                                    unsigned int filename_version) = 0;
     virtual long long do_db_id(const oh5::File& file) = 0;
 
-    virtual unsigned int do_next_filename_version(const QString& filename) = 0;
+    virtual unsigned int do_next_filename_version(const String& filename) = 0;
 
-    virtual shared_ptr<oh5::Source> do_load_source(const QString& source) = 0;
+    virtual shared_ptr<oh5::Source> do_load_source(const String& source) = 0;
 
     virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
 };

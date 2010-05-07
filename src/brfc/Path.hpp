@@ -20,29 +20,33 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_PATH_HPP
 #define BRFC_PATH_HPP
 
-#include <QtCore/QString>
+#include <brfc/String.hpp>
 
 namespace brfc {
 
 class Path {
   public:
-    explicit Path(const QString& path);
+    explicit Path(const String& path);
 
     bool exists() const;
+
+    static bool exists(const String& path) {
+        return Path(path).exists();
+    }
     
     bool is_absolute() const;
 
     bool is_dir() const;
 
-    Path join(const QString& path) const;
+    Path join(const String& path) const;
 
-    const QString& string() const {
+    const String& string() const {
         return path_;
     }
 
   private:
-    QString path_;
-    static QString sep_;
+    String path_;
+    static String sep_;
 };
 
 } // namespace brfc

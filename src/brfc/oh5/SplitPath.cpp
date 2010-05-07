@@ -21,15 +21,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QStringList>
-
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
+#include <brfc/StringList.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-SplitPath::SplitPath(const QString& path)
+SplitPath::SplitPath(const String& path)
         : dataset_group_()
         , data_group_()
         , quality_group_()
@@ -40,18 +39,18 @@ SplitPath::SplitPath(const QString& path)
     split(path);
 }
 
-QString
+String
 SplitPath::full_attribute_name() const {
     if (attribute_group_ != "") {
-        return attribute_group_ + QString("/") + attribute_;
+        return attribute_group_ + String("/") + attribute_;
     } else {
         return attribute_;
     }
 }
 
-QString
+String
 SplitPath::group_path() const {
-    QStringList names;
+    StringList names;
     if (dataset_group_ != "")
         names.append(dataset_group_);
     if (data_group_ != "")
@@ -60,12 +59,12 @@ SplitPath::group_path() const {
         names.append(quality_group_);
     if (attribute_group_ != "")
         names.append(attribute_group_);
-    return QString("/") + names.join("/");
+    return String("/") + names.join("/");
 }
 
 namespace {
 
-void set_once(QString& holder, const QString& value) {
+void set_once(String& holder, const String& value) {
     if (holder != "")
         throw value_error("duplicate set");
     holder = value;
@@ -74,18 +73,18 @@ void set_once(QString& holder, const QString& value) {
 } // namespace anonymous
 
 void
-SplitPath::split(const QString& path) {
+SplitPath::split(const String& path) {
     // this is a very naive way to do it
     
-    QStringList names = path.split("/");
-    BOOST_FOREACH(const QString& name, names) {
-        if (name.startsWith("dataset")) {
+    StringList names = path.split("/");
+    BOOST_FOREACH(const String& name, names) {
+        if (name.starts_with("dataset")) {
             set_once(dataset_group_, name);
         } else if (name == "data") {
             set_once(dataset_, name);
-        } else if (name.startsWith("data")) {
+        } else if (name.starts_with("data")) {
             set_once(data_group_, name);
-        } else if (name.startsWith("quality")) {
+        } else if (name.starts_with("quality")) {
             set_once(quality_group_, name);
         } else if (name == "what" or name == "where" or name == "how") {
             set_once(attribute_group_, name);

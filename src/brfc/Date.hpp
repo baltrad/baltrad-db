@@ -20,9 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DATE_HPP
 #define BRFC_DATE_HPP
 
-class QString;
-
 namespace brfc {
+
+class String;
 
 /**
  * @brief date in a proleptic Gregorian calendar
@@ -102,9 +102,9 @@ class Date {
         return not (*this == rhs);
     }
 
-    static Date from_string(const QString& str, const QString& format);
+    static Date from_string(const String& str, const String& format);
 
-    QString to_string(const QString& format) const;
+    String to_string(const String& format) const;
 
   private:
     explicit Date(unsigned int jdn);

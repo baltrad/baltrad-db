@@ -20,13 +20,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_RDB_RELATIONAL_DATABASE_HPP
 #define BRFC_RDB_RELATIONAL_DATABASE_HPP
 
-#include <string>
 #include <map>
-
-#include <QtCore/QString>
 
 #include <brfc/smart_ptr.hpp>
 #include <brfc/Database.hpp>
+#include <brfc/String.hpp>
+
 
 namespace brfc {
 
@@ -63,7 +62,7 @@ class RelationalDatabase : public Database {
      *
      * the only engine currently supported is 'postgresql'
      */
-    explicit RelationalDatabase(const QString& dsn);
+    explicit RelationalDatabase(const String& dsn);
     
     /**
      * @brief destructor
@@ -73,7 +72,7 @@ class RelationalDatabase : public Database {
     /**
      * @brief execute a select query
      */
-    shared_ptr<ResultSet> query(const QString& query,
+    shared_ptr<ResultSet> query(const String& query,
                                 const BindMap& binds);
     
     shared_ptr<const oh5::AttributeSpecs> specs() const;
@@ -112,21 +111,21 @@ class RelationalDatabase : public Database {
      * @brief check if file hash is unique in database
      */
     virtual bool do_has_file(const oh5::File& file);
-    virtual void do_remove_file(const QString& path);
+    virtual void do_remove_file(const String& path);
 
     virtual long long do_save_file(const oh5::File& file,
-                                   const QString& proposed_filename,
+                                   const String& proposed_filename,
                                    unsigned int filename_version);
     
     virtual long long do_db_id(const oh5::File& file);
 
-    virtual unsigned int do_next_filename_version(const QString& filename);
+    virtual unsigned int do_next_filename_version(const String& filename);
 
-    virtual shared_ptr<oh5::Source> do_load_source(const QString& srcstr);
+    virtual shared_ptr<oh5::Source> do_load_source(const String& srcstr);
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
-    QString dialect() const { return "postgresql"; }
+    String dialect() const { return "postgresql"; }
 
   private:
     /**
@@ -149,15 +148,15 @@ class RelationalDatabase : public Database {
      * @brief save file to database
      */
     id_type save(const oh5::File& file,
-                 const QString& proposed_filename,
+                 const String& proposed_filename,
                  unsigned int filename_version);
 
     /**
      * @brief remove file from database
      */
-    void remove_file(const QString& path);
+    void remove_file(const String& path);
     
-    QString qt_engine(const QString& engine) const;
+    String qt_engine(const String& engine) const;
 
     shared_ptr<Connection> conn_;
     scoped_ptr<AttributeMapper> mapper_;

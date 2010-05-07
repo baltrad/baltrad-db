@@ -71,10 +71,10 @@ class GatherHLNodes {
     }
 
     void operator()(const oh5::Group& group) {
-        const QString& path = group.path();
+        const String& path = group.path();
 
         // create node
-        HL_Node* node = HLNode_newGroup(path.toAscii().constData());
+        HL_Node* node = HLNode_newGroup(path.to_utf8().c_str());
         if (node == 0)
             throw std::runtime_error("could not create group node");
         
@@ -84,10 +84,10 @@ class GatherHLNodes {
     }
 
     void operator()(const oh5::Attribute& attr) {
-        const QString& path = attr.path();
+        const String& path = attr.path();
 
         // create node
-        HL_Node* node = HLNode_newAttribute(path.toAscii().constData());
+        HL_Node* node = HLNode_newAttribute(path.to_utf8().c_str());
         if (node == 0)
             throw std::runtime_error("could not create attribute node");
         
@@ -138,9 +138,9 @@ class GatherHLNodes {
 } // namespace anonymous
 
 
-QString
+String
 TempH5File::path() const {
-    return QString::fromUtf8(path_.get());
+    return String::from_utf8(path_.get());
 }
 
 void

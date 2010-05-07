@@ -19,18 +19,18 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/SourceCentre.hpp>
 
-#include <QtCore/QStringList>
+#include <brfc/StringList.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-QString
+String
 SourceCentre::to_string() const {
-    QStringList elems;
+    StringList elems;
     if (originating_centre_ != 0)
-        elems.append("ORG:" + QString::number(originating_centre_));
+        elems.append("ORG:" + String::number(originating_centre_));
     if (country_code_ != 0)
-        elems.append("CTY:" + QString::number(country_code_));
+        elems.append("CTY:" + String::number(country_code_));
     return elems.join(",");
 }
 

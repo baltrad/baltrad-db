@@ -29,8 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test/TestRDB.hpp>
 
-#include <QtCore/QString>
-
 #include "config.hpp"
 #include "../common.hpp"
 

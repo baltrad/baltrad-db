@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/FileCatalog.hpp>
 #include <brfc/FileNamer.hpp>
+#include <brfc/Path.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/Time.hpp>
 
@@ -57,20 +58,20 @@ class MockDatabase : public Database {
     MOCK_METHOD0(do_commit, void());
     
     MOCK_METHOD1(do_has_file, bool(const oh5::File&));
-    MOCK_METHOD1(do_remove_file, void(const QString&));
+    MOCK_METHOD1(do_remove_file, void(const String&));
     MOCK_METHOD3(do_save_file, long long(const oh5::File&,
-                                         const QString&,
+                                         const String&,
                                          unsigned int));
     MOCK_METHOD1(do_db_id, long long(const oh5::File&));
-    MOCK_METHOD1(do_next_filename_version, unsigned int(const QString&));
-    MOCK_METHOD1(do_load_source, shared_ptr<oh5::Source>(const QString&));
+    MOCK_METHOD1(do_next_filename_version, unsigned int(const String&));
+    MOCK_METHOD1(do_load_source, shared_ptr<oh5::Source>(const String&));
     MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
     MOCK_METHOD0(do_clean, void());  
 };
 
 class MockNamer : public FileNamer {
   public:
-    MOCK_CONST_METHOD1(do_name, QString(const oh5::File&));
+    MOCK_CONST_METHOD1(do_name, String(const oh5::File&));
 };
 
 struct FileCatalog_test : public testing::Test {
@@ -105,7 +106,7 @@ struct FileCatalog_test : public testing::Test {
     shared_ptr<MockNamer> namer;
     shared_ptr<oh5::AttributeSpecs> specs;
     FileCatalog fc;
-    QString src_str;
+    String src_str;
     shared_ptr<oh5::Source> default_src;
     test::TempH5File tempfile;
     shared_ptr<oh5::File> minfile;
@@ -116,7 +117,7 @@ TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
 }
 
 TEST_F(FileCatalog_test, test_catalog) {
-    const QString& target = tempdir->path() + "/test_000010";
+    const String& target = tempdir->path() + "/test_000010";
     EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
@@ -135,11 +136,11 @@ TEST_F(FileCatalog_test, test_catalog) {
     shared_ptr<const oh5::File> f = fc.catalog(tempfile.path());
     EXPECT_EQ(f->path(), target);
 
-    EXPECT_TRUE(QFile::exists(target));
+    EXPECT_TRUE(Path::exists(target));
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
-    const QString& target = tempdir->path() + "/test_000010";
+    const String& target = tempdir->path() + "/test_000010";
     EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
@@ -153,11 +154,11 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
     EXPECT_CALL(*db, do_rollback());
     
     EXPECT_THROW(fc.catalog(tempfile.path()), db_error);
-    EXPECT_FALSE(QFile::exists(target));
+    EXPECT_FALSE(Path::exists(target));
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
-    const QString& target = tempdir->path() + "/test_000010";
+    const String& target = tempdir->path() + "/test_000010";
     EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
@@ -173,7 +174,7 @@ TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
     tempdir.reset(); // tempdir removed
 
     EXPECT_THROW(fc.catalog(tempfile.path()), fs_error);
-    EXPECT_FALSE(QFile::exists(target));
+    EXPECT_FALSE(Path::exists(target));
 }
 
 TEST_F(FileCatalog_test, test_double_import_throws) {
@@ -196,8 +197,9 @@ TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {
-    const QString& target = tempdir->path() + "/testfile";
-    QFile f(target);
+    const String& target = tempdir->path() + "/testfile";
+    QString qtarget = QString::fromUtf8(target.to_utf8().c_str());
+    QFile f(qtarget);
     ASSERT_TRUE(f.open(QIODevice::WriteOnly));
     f.close();
 
@@ -207,12 +209,12 @@ TEST_F(FileCatalog_test, test_remove_existing_file) {
 
     EXPECT_NO_THROW(fc.remove(target));
 
-    EXPECT_FALSE(QFile::exists(target));
+    EXPECT_FALSE(Path::exists(target));
 }
 
 TEST_F(FileCatalog_test, test_removing_nx_file) {
     EXPECT_CALL(*db, do_begin());
-    EXPECT_CALL(*db, do_remove_file(QString("/path/to/nxfile")));
+    EXPECT_CALL(*db, do_remove_file(String("/path/to/nxfile")));
     EXPECT_CALL(*db, do_rollback());
 
     EXPECT_THROW(fc.remove("/path/to/nxfile"), fs_error);

@@ -25,9 +25,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/lexical_cast.hpp>
 
 #include <QtCore/QDate>
-#include <QtCore/QString>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/String.hpp>
 
 namespace brfc {
 
@@ -172,16 +172,19 @@ Date::add_days(int days) const {
 }
 
 Date
-Date::from_string(const QString& str, const QString& format) {
-    QDate d = QDate::fromString(str, format);
+Date::from_string(const String& str, const String& format) {
+    QString qstr = QString::fromUtf8(str.to_utf8().c_str());
+    QString qformat = QString::fromUtf8(format.to_utf8().c_str());
+    QDate d = QDate::fromString(qstr, qformat);
     if (not d.isValid())
         throw value_error("could not parse date from string");
     return Date(d.year(), d.month(), d.day());
 }
 
-QString
-Date::to_string(const QString& format) const {
-    return QDate(year(), month(), day()).toString(format);
+String
+Date::to_string(const String& format) const {
+    QString qformat = QString::fromUtf8(format.to_utf8().c_str());
+    return QDate(year(), month(), day()).toString(qformat);
 }
 
 } // namespace brfc

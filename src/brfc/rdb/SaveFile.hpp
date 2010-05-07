@@ -90,7 +90,7 @@ class SaveFile {
      * @return database id of the saved file
      */
     long long operator()(const oh5::File& file,
-                         const QString& proposed_filename,
+                         const String& proposed_filename,
                          unsigned int filename_version);
 
   private:

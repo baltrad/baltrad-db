@@ -39,7 +39,7 @@ class MockConnection : public Connection {
     MOCK_METHOD0(do_commit, void());
     MOCK_METHOD0(do_rollback, void());
 
-    MOCK_METHOD1(do_execute, shared_ptr<ResultSet>(const QString&));
+    MOCK_METHOD1(do_execute, shared_ptr<ResultSet>(const String&));
     MOCK_CONST_METHOD0(do_in_transaction, bool());
 };
 

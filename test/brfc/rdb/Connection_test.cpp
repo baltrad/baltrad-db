@@ -20,8 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <QtCore/QString>
-
 #include <brfc/ResultSet.hpp>
 #include <brfc/Variant.hpp>
 #include <brfc/rdb/Connection.hpp>
@@ -53,7 +51,7 @@ class rdb_Connection_test : public testing::Test {
 };
 
 TEST_F(rdb_Connection_test, test_no_transaction_execute) {
-    QString stmt("query");
+    String stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false))  // execute()
         .WillOnce(Return(false))  // begin()
@@ -67,7 +65,7 @@ TEST_F(rdb_Connection_test, test_no_transaction_execute) {
 }
 
 TEST_F(rdb_Connection_test, test_no_transaction_excute_throws) {
-    QString stmt("query");
+    String stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false)) // execute()
         .WillOnce(Return(false)) // being()
@@ -81,7 +79,7 @@ TEST_F(rdb_Connection_test, test_no_transaction_excute_throws) {
 }
 
 TEST_F(rdb_Connection_test, test_in_transaction_execute) {
-    QString stmt("query");
+    String stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
@@ -91,7 +89,7 @@ TEST_F(rdb_Connection_test, test_in_transaction_execute) {
 }
 
 TEST_F(rdb_Connection_test, test_in_transaction_execute_throws) {
-    QString stmt("query");
+    String stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
@@ -193,7 +191,7 @@ TEST_F(rdb_Connection_test, test_commit_on_closed_connection) {
 }
 
 TEST_F(rdb_Connection_test, test_execute_sqlquery) {
-    QString stmt("query");
+    String stmt("query");
     BindMap binds;
     SqlQuery query(stmt, binds);
 
@@ -206,7 +204,7 @@ TEST_F(rdb_Connection_test, test_execute_sqlquery) {
 }
 
 TEST_F(rdb_Connection_test, test_execute_replaces_binds) {
-    QString stmt(":bind");
+    String stmt(":bind");
     BindMap binds;
     binds.add(":bind", Variant(1));
 
@@ -215,7 +213,7 @@ TEST_F(rdb_Connection_test, test_execute_replaces_binds) {
 
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(conn, do_execute(QString("1")))
+    EXPECT_CALL(conn, do_execute(String("1")))
         .WillOnce(Return(shared_ptr<ResultSet>()));
     
     conn.execute(stmt, binds);
