@@ -19,105 +19,103 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 
 %{
-#include <QtCore/QString>
+#include <brfc/String.hpp>
 %}
 
-%naturalvar QString;
-
-class QString;
+%naturalvar brfc::String;
 
 /**
- * QString
+ * brfc::String
  */
 
 /* JNI C type */
-%typemap(jni) QString "jstring"
+%typemap(jni) brfc::String "jstring"
 /* Java intermediary type */
-%typemap(jtype) QString "String"
+%typemap(jtype) brfc::String "String"
 /* Java type */
-%typemap(jstype) QString "String"
+%typemap(jstype) brfc::String "String"
 /* director arguments from jtype to jstype */
-%typemap(javadirectorin) QString "$jniinput"
+%typemap(javadirectorin) brfc::String "$jniinput"
 /* director return value from jstype to jtype */
-%typemap(javadirectorout) QString "$javacall"
+%typemap(javadirectorout) brfc::String "$javacall"
 
 /* from Java to C++ */
-%typemap(in) QString
+%typemap(in) brfc::String
 %{
     if (!$input) {
         SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException,
-                                "null QString");
+                                "null brfc::String");
         return $null;
     } 
     const jchar* $1_pstr = jenv->GetStringChars($input, 0);
     if (!$1_pstr) return $null;
-    $1.setUtf16($1_pstr, jenv->GetStringLength($input));
+    $1.set_utf16($1_pstr, jenv->GetStringLength($input));
     jenv->ReleaseStringChars($input, $1_pstr);
 %}
 
 /* director return value from JNI type to C++ type */
-%typemap(directorout) QString
+%typemap(directorout) brfc::String
 %{
     if (!$input) {
         SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException,
-                                "null QString");
+                                "null brfc::String");
         return $null;
     } 
     const jchar* $1_pstr = jenv->GetStringChars($input, 0);
     if (!$1_pstr) return $null;
-    $result.setUtf16($1_pstr, jenv->GetStringLength($input));
+    $result.set_utf16($1_pstr, jenv->GetStringLength($input));
     jenv->ReleaseStringChars($input, $1_pstr);
 %}
 
 /* director arguments from C++ type to JNI type */
-%typemap(directorin, descriptor="Ljava/lang/String;") QString 
+%typemap(directorin, descriptor="Ljava/lang/String;") brfc::String 
 %{
-    $input = jenv->NewString((const jchar*)$1.unicode(), (jsize)$1.length());
+    $input = jenv->NewString((const jchar*)$1.utf16(), (jsize)$1.length());
 %}
 
 /* from C++ to Java */
-%typemap(out) QString
+%typemap(out) brfc::String
 %{
-    $result = jenv->NewString((const jchar*)$1.unicode(), (jsize)$1.length());
+    $result = jenv->NewString((const jchar*)$1.utf16(), (jsize)$1.length());
 %}
 
 /* arguments from jstype to jtype */
-%typemap(javain) QString "$javainput"
+%typemap(javain) brfc::String "$javainput"
 
 /* return value from jtype to jstype */
-%typemap(javaout) QString {
+%typemap(javaout) brfc::String {
     return $jnicall;
 }
 
 /**
- * const QString&
+ * const brfc::String&
  */
-%typemap(jni) const QString& "jstring"
-%typemap(jtype) const QString& "String"
-%typemap(jstype) const QString& "String"
+%typemap(jni) const brfc::String& "jstring"
+%typemap(jtype) const brfc::String& "String"
+%typemap(jstype) const brfc::String& "String"
 
 /* from Java to C++ */
-%typemap(in) const QString&
+%typemap(in) const brfc::String&
 %{
     if (!$input) {
         SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException,
-                                "null QString");
+                                "null brfc::String");
         return $null;
     }
     const jchar *$1_pstr = jenv->GetStringChars($input, 0); 
     if (!$1_pstr) return $null;
-    QString $1_qstr = QString::fromUtf16($1_pstr, jenv->GetStringLength($input));
+    brfc::String $1_qstr = brfc::String::from_utf16($1_pstr, jenv->GetStringLength($input));
     $1 = &$1_qstr;
     jenv->ReleaseStringChars($input, $1_pstr);
 %}
 
 /* from C++ to Java */
-%typemap(out) const QString& 
-%{ $result = jenv->NewString((const jchar*)$1->unicode(), (jsize)$1->length()); %}
+%typemap(out) const brfc::String& 
+%{ $result = jenv->NewString((const jchar*)$1->utf16(), (jsize)$1->length()); %}
 
-%typemap(javain) const QString& "$javainput"
+%typemap(javain) const brfc::String& "$javainput"
 
-%typemap(javaout) const QString& {
+%typemap(javaout) const brfc::String& {
     return $jnicall;
 }
 

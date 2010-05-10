@@ -56,7 +56,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %typemap(javabody) brfc::Date,
                    brfc::Time,
                    brfc::Variant,
-                   std::vector<QString> %{
+                   std::vector<brfc::String> %{
   private long swigCPtr;
   protected boolean swigCMemOwn;
 
@@ -73,7 +73,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::FileCatalog::FileCatalog(shared_ptr<Database>,
                                        shared_ptr<oh5::AttributeSpecs>,
                                        shared_ptr<FileNamer>,
-                                       const QString&);
+                                       const String&);
 %ignore brfc::FileCatalog::file_namer(shared_ptr<FileNamer>);
 
 %ignore brfc::Query::Query;
@@ -94,7 +94,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 SWIG_SHARED_PTR(Database, brfc::Database);
 SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 
-%template(StringVector) std::vector<QString>;
+%template(StringVector) std::vector<brfc::String>;
 
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.expr.Expression;
