@@ -32,6 +32,9 @@ class StringList;
 
 class String {
   public:
+    /**
+     * @brief UTF-16 code unit
+     */
     typedef unsigned short uchar;
     
     enum SplitPolicy {
@@ -85,6 +88,16 @@ class String {
     const uchar* unicode() const {
         return utf16();
     }
+    
+    /**
+     * @brief set from UTF-16 array
+     */
+    String& set_utf16(const uchar* unicode, int length);
+
+    /**
+     * @brief construct from UTF-16 array
+     */
+    static String from_utf16(const uchar* unicode, int length);
 
     const uchar* utf16() const;
 

@@ -74,6 +74,19 @@ String::utf16() const {
     return value_.utf16();
 }
 
+String
+String::from_utf16(const String::uchar* unicode, int length) {
+    String s;
+    s.set_utf16(unicode, length);
+    return s;
+}
+
+String&
+String::set_utf16(const String::uchar* unicode, int length) {
+    value_.setUtf16(unicode, length);
+    return *this;
+}
+
 namespace {
 
 template<typename T>

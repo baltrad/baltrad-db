@@ -84,6 +84,12 @@ TEST_F(String_test, test_from_to_utf8) {
     EXPECT_EQ(unicode, String(unicode.to_utf8()));
 }
 
+TEST_F(String_test, test_from_to_utf16) {
+    EXPECT_EQ(empty, String::from_utf16(empty.utf16(), empty.length()));
+    EXPECT_EQ(ascii, String::from_utf16(ascii.utf16(), ascii.length()));
+    EXPECT_EQ(unicode, String::from_utf16(unicode.utf16(), unicode.length()));
+}
+
 TEST_F(String_test, test_number_long_long) {
     long long pos = 9223372036854775807LL;
     long long neg = -9223372036854775807LL;
