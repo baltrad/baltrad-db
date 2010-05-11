@@ -29,4 +29,53 @@ public class TestDate extends TestCase {
     Date d = new Date(2000, 05, 01);
     assertEquals(d.to_string("yyyyMMdd"), "20000501");
   }
+
+  public void test_add_days_positive() {
+    Date d = new Date(2000, 1, 1);
+    Date nd = d.add_days(1);
+    assertEquals(nd.year(), 2000);
+    assertEquals(nd.month(), 1);
+    assertEquals(nd.day(), 2);
+  }
+
+  public void test_add_days_negative() {
+    Date d = new Date(2000, 1, 1);
+    Date nd = d.add_days(-1);
+    assertEquals(nd.year(), 1999);
+    assertEquals(nd.month(), 12);
+    assertEquals(nd.day(), 31);
+  }
+
+  public void test_add_months_positive() {
+    Date d = new Date(2000, 1, 1);
+    Date nd = d.add_months(1);
+    assertEquals(nd.year(), 2000);
+    assertEquals(nd.month(), 2);
+    assertEquals(nd.day(), 1);
+  }
+  
+  public void test_add_months_negative() {
+    Date d = new Date(2000, 1, 1);
+    Date nd = d.add_months(-1);
+    assertEquals(nd.year(), 1999);
+    assertEquals(nd.month(), 12);
+    assertEquals(nd.day(), 1);
+  }
+
+  public void test_add_years_positive() {
+    Date d = new Date(2000, 1, 1);
+    Date nd = d.add_years(1);
+    assertEquals(nd.year(), 2001);
+    assertEquals(nd.month(), 1);
+    assertEquals(nd.day(), 1);
+  }
+
+  public void test_add_years_negative() {
+    Date d = new Date(2000, 1, 1);
+    Date nd = d.add_years(-1);
+    assertEquals(nd.year(), 1999);
+    assertEquals(nd.month(), 1);
+    assertEquals(nd.day(), 1);
+  }
+
 }

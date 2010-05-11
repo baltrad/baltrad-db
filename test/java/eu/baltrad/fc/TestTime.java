@@ -29,4 +29,20 @@ public class TestTime extends TestCase {
     Time t = new Time(12, 00, 01);
     assertEquals(t.to_string("hhmmss"), "120001");
   }
+
+  public void test_add_secs_positive() {
+    Time t = new Time(0, 0, 1);
+    Time nt = t.add_secs(60);
+    assertEquals(nt.hour(), 0);
+    assertEquals(nt.minute(), 1);
+    assertEquals(nt.second(), 1);
+  }
+
+  public void test_add_secs_negatvie() {
+    Time t = new Time(0, 0, 1);
+    Time nt = t.add_secs(-60);
+    assertEquals(nt.hour(), 23);
+    assertEquals(nt.minute(), 59);
+    assertEquals(nt.second(), 1);
+  }
 }
