@@ -1,27 +1,25 @@
 #ifndef BRFC_RDB_POSTGRES_CONNECTION_HPP
 #define BRFC_RDB_POSTGRES_CONNECTION_HPP
 
-#include <brfc/smart_ptr.hpp>
-#include <brfc/rdb/Connection.hpp>
-
 #include <pqxx/connection>
 #include <pqxx/transaction>
 
-#include <QtCore/QUrl>
+#include <brfc/smart_ptr.hpp>
+#include <brfc/Url.hpp>
+#include <brfc/rdb/Connection.hpp>
 
 class String;
-class QUrl;
 
 namespace brfc {
 namespace rdb {
 
 class PostgresConnection : public Connection {
   public:
-    explicit PostgresConnection(const QUrl& url);
+    explicit PostgresConnection(const Url& url);
 
     virtual ~PostgresConnection();
 
-    static String url_to_pg(const QUrl& url);
+    static String url_to_pg(const Url& url);
   
   protected:
     virtual void do_open();
@@ -41,7 +39,7 @@ class PostgresConnection : public Connection {
     virtual bool do_has_feature(Feature feature) const;
 
   private:
-    QUrl url_;
+    Url url_;
     scoped_ptr<pqxx::connection> conn_;
     scoped_ptr<pqxx::transaction<> > transaction_;
 };

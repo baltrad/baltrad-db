@@ -7,9 +7,7 @@
 namespace brfc {
 namespace rdb {
 
-
-
-PostgresConnection::PostgresConnection(const QUrl& url)
+PostgresConnection::PostgresConnection(const Url& url)
         : url_(url)
         , conn_()
         , transaction_() {
@@ -68,17 +66,17 @@ PostgresConnection::do_execute(const String& query) {
 }
 
 String
-PostgresConnection::url_to_pg(const QUrl& url) {
+PostgresConnection::url_to_pg(const Url& url) {
     String pgargs;
     if (url.host() != "")
-        pgargs += " host=" + String::from_utf16(url.host().utf16());
-    if (url.userName() != "")
-        pgargs += " user=" + String::from_utf16(url.userName().utf16());
+        pgargs += " host=" + url.host();
+    if (url.user_name() != "")
+        pgargs += " user=" + url.user_name();
     if (url.password() != "")
-        pgargs += " password=" + String::from_utf16(url.password().utf16());
-    if (url.port() != -1)
+        pgargs += " password=" + url.password();
+    if (url.port())
         pgargs += " port=" + String::number(url.port());
-    String database = String::from_utf16(url.path().utf16());
+    String database = url.path();
     if (database.starts_with("/")) {
         database.remove(0, 1); // remove slash
     }

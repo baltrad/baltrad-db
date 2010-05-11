@@ -32,6 +32,7 @@ sources = [
     "SHA1.cpp",
     "SHA1AttributeHasher.cpp",
     "Time.cpp",
+    "Url.cpp",
     "Variant.cpp",
     "expr/Expression.cpp",
     "expr/Factory.cpp",

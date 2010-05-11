@@ -21,14 +21,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QUrl>
-
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/FileHasher.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/StringList.hpp>
+#include <brfc/Url.hpp>
 
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
@@ -51,7 +50,7 @@ RelationalDatabase::RelationalDatabase(const String& dsn_)
         , specs_(new oh5::AttributeSpecs())
         , file_hasher_() {
 
-    QUrl dsn(QString::fromUtf8(dsn_.to_utf8().c_str()));
+    Url dsn(dsn_);
     
     conn_.reset(new PostgresConnection(dsn));
     conn_->open();
