@@ -75,6 +75,11 @@ class SHA1AttributeHasher_test : public ::testing::Test {
     SHA1AttributeHasher hasher;
 };
 
+TEST_F(SHA1AttributeHasher_test, check_concrete_digests) {
+    EXPECT_EQ("0833a94578041a8177afb30ee1e7ac0a660be043", hasher.hash(*f1));
+    EXPECT_EQ("91176508177e2acc5638faec441a925a268700ae", hasher.hash(*f2));
+}
+
 TEST_F(SHA1AttributeHasher_test, hash_same_meta) {
     EXPECT_EQ(hasher.hash(*f1), hasher.hash(*f3));
 }
