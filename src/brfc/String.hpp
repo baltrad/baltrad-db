@@ -123,7 +123,11 @@ class String {
     static String number(double num);
 
     int length() const;
-
+    
+    /**
+     * @brief split to substrings using @a sep as substring separator
+     * @throw value_error if sep is empty
+     */
     StringList split(const String& sep,
                      SplitPolicy split=KEEP_EMPTY_PARTS) const;
 
@@ -206,6 +210,15 @@ class String {
      * @throw value_error if @a pos is invalid
      */
     uchar char_at(int pos) const;
+    
+    /**
+     * @brief extract a substring starting from @a pos with a span of @a len
+     * @param pos starting position
+     * @param len number of characters in the substring,
+     *        if -1 (the default) all characters to the end of the string
+     * @throw value_error if pos is outside of string
+     */
+    String substr(int pos, int length=-1) const;
 
     String to_lower() const;
 

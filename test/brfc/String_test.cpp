@@ -110,26 +110,46 @@ TEST_F(String_test, test_number_double) {
     EXPECT_EQ("-1.234567", String::number(neg));
 }
 
-TEST_F(String_test, test_split) {
+TEST_F(String_test, test_split_normal) {
     StringList elms = String("a,bb,ccc").split(",");
-    EXPECT_EQ(3, elms.size());
+    ASSERT_EQ(3, elms.size());
     EXPECT_EQ("a", elms.at(0));
     EXPECT_EQ("bb", elms.at(1));
     EXPECT_EQ("ccc", elms.at(2));
+}
 
-    elms = String("a,bb,,ccc,").split(",", String::KEEP_EMPTY_PARTS);
-    EXPECT_EQ(5, elms.size());
+TEST_F(String_test, test_split_with_keep_empty) {
+    StringList elms = String("a,bb,,ccc,").split(",", String::KEEP_EMPTY_PARTS);
+    ASSERT_EQ(5, elms.size());
     EXPECT_EQ("a", elms.at(0));
     EXPECT_EQ("bb", elms.at(1));
     EXPECT_EQ("", elms.at(2));
     EXPECT_EQ("ccc", elms.at(3));
     EXPECT_EQ("", elms.at(4));
+}
 
-    elms = String("a,bb,,ccc,").split(",", String::SKIP_EMPTY_PARTS);
-    EXPECT_EQ(3, elms.size());
+TEST_F(String_test, test_split_with_skip_empty) {
+    StringList elms = String("a,bb,,ccc,").split(",", String::SKIP_EMPTY_PARTS);
+    ASSERT_EQ(3, elms.size());
     EXPECT_EQ("a", elms.at(0));
     EXPECT_EQ("bb", elms.at(1));
     EXPECT_EQ("ccc", elms.at(2));
+}
+
+TEST_F(String_test, test_split_with_sep_only_and_keep_empty) {
+    StringList elms = String("/").split("/", String::KEEP_EMPTY_PARTS);
+    ASSERT_EQ(2, elms.size());
+    EXPECT_EQ("", elms.at(0));
+    EXPECT_EQ("", elms.at(1));
+}
+
+TEST_F(String_test, test_split_with_sep_only_and_skip_empty) {
+    StringList elms = String("/").split("/", String::SKIP_EMPTY_PARTS);
+    EXPECT_EQ(0, elms.size());
+}
+
+TEST_F(String_test, tes_split_with_empty_sep) {
+    EXPECT_THROW(String("asd").split(""), value_error);
 }
 
 TEST_F(String_test, test_stringlist_join) {
@@ -262,6 +282,18 @@ TEST_F(String_test, test_char_at) {
     EXPECT_EQ('w', qwe.char_at(1));
     EXPECT_THROW(qwe.char_at(3), value_error);
     EXPECT_THROW(qwe.char_at(-1), value_error);
+}
+
+TEST_F(String_test, test_substr) {
+    String str("white rabbit");
+    EXPECT_EQ("te rabbit", str.substr(3));
+    EXPECT_EQ("te rabbit", str.substr(3, -1));
+    EXPECT_EQ("te ra", str.substr(3, 5));
+    EXPECT_EQ("te rabbit", str.substr(3, 100));
+    EXPECT_EQ("t", str.substr(11));
+    EXPECT_EQ("", str.substr(0, 0));
+    EXPECT_THROW(str.substr(-1), value_error);
+    EXPECT_THROW(str.substr(100), value_error);
 }
 
 TEST_F(String_test, test_to_lower) {

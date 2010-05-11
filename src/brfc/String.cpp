@@ -168,18 +168,20 @@ String::length() const {
 
 StringList
 String::split(const String& sep,
-              String::SplitPolicy split) const {
+              String::SplitPolicy policy) const {
+    if (sep.length() == 0)
+        throw value_error("empty separator");
     StringList list;
-    int pos = 0, ppos = 0;
-    while (pos > -1 and pos <= value_.length()) {
-        ppos = pos;
-        pos = index_of(sep, pos);
-        if (pos == -1)
-            pos = length();
-        UnicodeString substr(value_, ppos, pos - ppos);
-        if (not substr.isEmpty() or split == KEEP_EMPTY_PARTS)
-            list.append(substr);
-        pos += sep.length();
+    int start = 0, end = 0;
+    while ((end = index_of(sep, start)) != -1) {
+        if (start != end or policy == KEEP_EMPTY_PARTS)
+            list.append(substr(start, end - start));
+        start = end + sep.length();
+    }
+    if (start != length())
+        list.append(substr(start));
+    else if (policy == KEEP_EMPTY_PARTS) {
+        list.append("");
     }
     return list;
 }
@@ -303,6 +305,15 @@ String::char_at(int pos) const {
     if (pos < 0 or pos >= length())
         throw value_error("invalid string index");
     return value_.charAt(pos);
+}
+
+String
+String::substr(int pos, int len) const {
+    if (pos < 0 or pos >= length())
+        throw value_error("invalid string index");
+    if (len == -1)
+        len = length();
+    return UnicodeString(value_, pos, len);
 }
 
 String
