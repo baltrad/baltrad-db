@@ -21,9 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <QtCore/QByteArray>
-#include <QtCore/QCryptographicHash>
-
+#include <brfc/SHA1.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/AttributeSpecs.hpp>
@@ -71,11 +69,17 @@ SHA1AttributeHasher::do_hash(const oh5::File& file) {
         }
     }
     strs.sort(); // ensure same order
+    
+    CSHA1 sha1;
 
-    QByteArray bytes(strs.join("").to_utf8().c_str());
-    QByteArray hash = QCryptographicHash::hash(bytes,
-                                               QCryptographicHash::Sha1);
-    return String(hash.toHex().constData());
+    std::string utf8 = strs.join("").to_utf8();
+    std::string hash;
+
+    sha1.Update((unsigned char*)utf8.c_str(), utf8.length());
+    sha1.Final();
+    sha1.ReportHashStl(hash, CSHA1::REPORT_HEX_SHORT);
+
+    return String(hash).to_lower();
 }
 
 } // namespace brfc

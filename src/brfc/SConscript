@@ -29,6 +29,7 @@ sources = [
     "ResultSet.cpp",
     "String.cpp",
     "StringList.cpp",
+    "SHA1.cpp",
     "SHA1AttributeHasher.cpp",
     "Time.cpp",
     "Variant.cpp",
