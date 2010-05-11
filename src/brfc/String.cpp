@@ -24,9 +24,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
-#include <QtCore/QStringList>
+#include <unicode/ucnv.h>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/smart_ptr.hpp>
 #include <brfc/StringList.hpp>
 
 namespace brfc {
@@ -37,16 +38,16 @@ String::String()
 }
 
 String::String(const char* value)
-        : value_(QString::fromUtf8(value)) {
+        : value_(value, "UTF-8") {
 
 }
 
 String::String(const std::string& value)
-        : value_(QString::fromUtf8(value.c_str())) {
+        : value_(value.c_str(), "UTF-8") {
 
 }
 
-String::String(const QString& value)
+String::String(const UnicodeString& value)
         : value_(value) {
 
 }
@@ -64,26 +65,66 @@ String::operator=(const String& rhs) {
     return *this;
 }
 
+namespace {
+
+class UConv {
+  public:
+    UConv(const char* codepage)
+            : err_(U_ZERO_ERROR)
+            , conv_(0) {
+        conv_ = ucnv_open(codepage, &err_);
+        if (err_)
+            throw std::runtime_error("could not create converter");
+    }
+
+    int max_bytes_for_string(const String& str) {
+        return UCNV_GET_MAX_BYTES_FOR_STRING(str.length(),
+                                             ucnv_getMaxCharSize(conv_));
+    }
+
+    std::string from_utf16(const String& str) {
+        int max_bytes = max_bytes_for_string(str);
+        auto_ptr<char> buf(new char[max_bytes]);
+        ucnv_fromUChars(conv_,
+                        buf.get(), max_bytes,
+                        str.utf16(), str.length(),
+                        &err_); 
+        return std::string(buf.get());
+    }
+
+    ~UConv() {
+        ucnv_close(conv_);
+    }
+
+  private:
+    UErrorCode err_;
+    UConverter* conv_;
+};
+
+}
+
 std::string
 String::to_utf8() const {
-    return std::string(value_.toUtf8().constData());
+    return UConv("UTF-8").from_utf16(*this);
 }
 
 const String::uchar*
 String::utf16() const {
-    return value_.utf16();
+    String* that = const_cast<String*>(this);
+    return that->value_.getTerminatedBuffer();
 }
 
 String
 String::from_utf16(const String::uchar* unicode, int length) {
-    String s;
-    s.set_utf16(unicode, length);
-    return s;
+    if (length == -1)
+        return UnicodeString(unicode);
+    else
+        return UnicodeString(unicode, length);
 }
 
 String&
 String::set_utf16(const String::uchar* unicode, int length) {
-    value_.setUtf16(unicode, length);
+    value_.setTo(unicode, length);
     return *this;
 }
 
@@ -129,10 +170,16 @@ StringList
 String::split(const String& sep,
               String::SplitPolicy split) const {
     StringList list;
-    BOOST_FOREACH(const QString& qstr, value_.split(sep.value_)) {
-        if (split == SKIP_EMPTY_PARTS and qstr.isEmpty())
-            continue;
-        list.append(qstr);
+    int pos = 0, ppos = 0;
+    while (pos > -1 and pos <= value_.length()) {
+        ppos = pos;
+        pos = index_of(sep, pos);
+        if (pos == -1)
+            pos = length();
+        UnicodeString substr(value_, ppos, pos - ppos);
+        if (not substr.isEmpty() or split == KEEP_EMPTY_PARTS)
+            list.append(substr);
+        pos += sep.length();
     }
     return list;
 }
@@ -145,7 +192,9 @@ String::append(const String& str) {
 
 String&
 String::prepend(const String& str) {
-    value_.prepend(str.value_);
+    UnicodeString newstr(str.value_);
+    newstr.append(value_);
+    value_ = newstr;
     return *this;
 }
 
@@ -161,7 +210,7 @@ String::insert(int pos, const String& str) {
 
 String&
 String::remove(const String& str) {
-    value_.remove(str.value_);
+    value_.findAndReplace(str.value_, UnicodeString());
     return *this;
 }
 
@@ -178,7 +227,7 @@ String::remove(int pos, int n) {
 String&
 String::replace(const String& before, const String& after) {
     if (not before.value_.isEmpty())
-        value_.replace(before.value_, after.value_);
+        value_.findAndReplace(before.value_, after.value_);
     return *this;
 }
 
@@ -194,29 +243,50 @@ String::replace(int pos, int n, const String& after) {
 
 int
 String::last_index_of(const String& str, int from) const {
-    return value_.lastIndexOf(str.value_, from);
+    if (from < 0) {
+        from += length();
+    }
+    return value_.lastIndexOf(str.value_, 0, from + str.length());
+}
+
+int
+String::index_of(const String& str, int from) const {
+    return value_.indexOf(str.value_, from);
 }
 
 bool
 String::contains(const String& str) const {
-    return value_.contains(str.value_);
+    if (str.length() == 0)
+        return true; // all strigns contain empty string
+    return index_of(str, 0) >= 0;
 }
 
 bool
 String::starts_with(const String& str) const {
-    if (str == "")
-        return false;
     return value_.startsWith(str.value_);
 }
 
 String
 String::right_justified(int width, String::uchar ch) const {
-    return String(value_.rightJustified(width, ch));
+    String str(value_);
+    str.value_.padLeading(width, ch);
+    return str;
 }
 
 String
 String::section(const String& sep, int start, int end) const {
-    return value_.section(sep.value_, start, end);
+    StringList strings = split(sep);
+
+    if (start < 0)
+        start += strings.size();
+    if (end < 0)
+        end += strings.size();
+
+    StringList found;
+    for (int i = start; i <= end; ++i) {
+        found.append(strings.at(i));        
+    }
+    return found.join(sep);
 }
 
 int
@@ -232,12 +302,14 @@ String::uchar
 String::char_at(int pos) const {
     if (pos < 0 or pos >= length())
         throw value_error("invalid string index");
-    return value_.at(0).unicode();
+    return value_.charAt(pos);
 }
 
 String
 String::to_lower() const {
-    return value_.toLower();
+    String str(value_);
+    str.value_.toLower();
+    return str;
 }
 
 bool

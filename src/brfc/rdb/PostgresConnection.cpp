@@ -71,14 +71,14 @@ String
 PostgresConnection::url_to_pg(const QUrl& url) {
     String pgargs;
     if (url.host() != "")
-        pgargs += " host=" + url.host();
+        pgargs += " host=" + String::from_utf16(url.host().utf16());
     if (url.userName() != "")
-        pgargs += " user=" + url.userName();
+        pgargs += " user=" + String::from_utf16(url.userName().utf16());
     if (url.password() != "")
-        pgargs += " password=" + url.password();
+        pgargs += " password=" + String::from_utf16(url.password().utf16());
     if (url.port() != -1)
         pgargs += " port=" + String::number(url.port());
-    String database = url.path();
+    String database = String::from_utf16(url.path().utf16());
     if (database.starts_with("/")) {
         database.remove(0, 1); // remove slash
     }

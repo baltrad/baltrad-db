@@ -81,7 +81,7 @@ confdeps = env.ConfHas("#shared-library-confdeps",
 objects = env.SharedObject(sources)
 env.Requires(objects, confdeps)
 
-lib = env.SharedLibrary("#lib/brfc", objects, LIBS=["hdf5", "hlhdf", "QtSql", "pqxx"])
+lib = env.SharedLibrary("#lib/brfc", objects, LIBS=["hdf5", "hlhdf", "QtCore", "icuuc", "pqxx"])
 
 env.Alias("shared-library", lib)
 

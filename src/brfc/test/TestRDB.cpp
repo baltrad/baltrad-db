@@ -70,7 +70,7 @@ TestRDB::load_queries(const String& filename) {
     }
     QTextStream stream(&file);
     stream.setCodec("UTF-8");
-    String content(stream.readAll());
+    String content = String::from_utf16(stream.readAll().utf16());
     return content.split(";\n", String::SKIP_EMPTY_PARTS);
 }
 

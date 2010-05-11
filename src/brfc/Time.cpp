@@ -151,8 +151,8 @@ Time::add_msecs(int msecs) const {
 
 Time
 Time::from_string(const String& str, const String& format) {
-    QString qstr = QString::fromUtf8(str.to_utf8().c_str());
-    QString qformat = QString::fromUtf8(format.to_utf8().c_str());
+    QString qstr = QString::fromUtf16(str.utf16());
+    QString qformat = QString::fromUtf16(format.utf16());
     QTime t = QTime::fromString(qstr, qformat);
     if (not t.isValid())
         throw value_error("could not parse time from string");
@@ -161,8 +161,9 @@ Time::from_string(const String& str, const String& format) {
 
 String
 Time::to_string(const String& format) const {
-    QString qformat = QString::fromUtf8(format.to_utf8().c_str());
-    return QTime(hour(), minute(), second(), msec()).toString(qformat);
+    QString qformat = QString::fromUtf16(format.utf16());
+    QString qstr = QTime(hour(), minute(), second(), msec()).toString(qformat);
+    return String::from_utf16(qstr.utf16());
 }
 
 } // namespace brfc

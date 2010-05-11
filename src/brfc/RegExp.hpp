@@ -26,12 +26,12 @@ namespace brfc {
 class RegExp {
   public:
     RegExp(const String& pattern)
-            : re_(QString::fromUtf8(pattern.to_utf8().c_str())) {
+            : re_(QString::fromUtf16(pattern.utf16())) {
 
     }
 
     int index_in(const String& str, int pos) {
-        return re_.indexIn(QString::fromUtf8(str.to_utf8().c_str()), pos);
+        return re_.indexIn(QString::fromUtf16(str.utf16()), pos);
     }
 
     int matched_length() const {
@@ -39,7 +39,7 @@ class RegExp {
     }
 
     String cap() const {
-        return re_.cap();
+        return String::from_utf16(re_.cap().utf16());
     }
 
     int pos() const {

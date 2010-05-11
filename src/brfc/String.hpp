@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <iosfwd>
 
-#include <QtCore/QString>
+#include <unicode/unistr.h>
 
 namespace brfc {
 
@@ -57,11 +57,8 @@ class String {
      */
     String(const std::string& value);
 
-    /**
-     * @brief construct from QString
-     */
-    String(const QString& value);
-    
+    String(const UnicodeString& value);
+
     /**
      * @brief copy constructor
      */
@@ -96,9 +93,18 @@ class String {
 
     /**
      * @brief construct from UTF-16 array
+     * @param unicode array of UTF-16 code points
+     * @param length number of unicode characters to copy.
+     *        If -1 (the default), @a unicode must be NULL-terminated
      */
-    static String from_utf16(const uchar* unicode, int length);
+    static String from_utf16(const uchar* unicode, int length=-1);
 
+    /**
+     * @brief access UTF-16 code points
+     * @return NULL-terminated array of UTF-16 code points
+     *
+     * @note the result remains valid until the string is modified.
+     */
     const uchar* utf16() const;
 
     std::string to_utf8() const;
@@ -164,13 +170,21 @@ class String {
 
     /**
      * @brief find last index of substring @a str in this string
-     * @return the index position or -1 if not found
-     *
      * @param from position to search from, defaults to end of the string
+     * @return the index position or -1 if not found
      *
      * @note from marks the last index that can be returned!
      */
     int last_index_of(const String& str, int from=-1) const;
+    
+    /**
+     * @brief find first index of substring @a str in this string
+     * @param from position to search from, defaults to the beginning of
+     *        the string
+     * @return the index position or -1 if not found
+     *
+     */
+    int index_of(const String& str, int from=0) const;
     
     /**
      * @brief test if this string contains substring @a str
@@ -213,7 +227,7 @@ class String {
     }
 
   private:
-    QString value_;
+    UnicodeString value_;
 };
 
 String operator+(const char* s1, const String& s2);

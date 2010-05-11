@@ -173,8 +173,8 @@ Date::add_days(int days) const {
 
 Date
 Date::from_string(const String& str, const String& format) {
-    QString qstr = QString::fromUtf8(str.to_utf8().c_str());
-    QString qformat = QString::fromUtf8(format.to_utf8().c_str());
+    QString qstr = QString::fromUtf16(str.utf16());
+    QString qformat = QString::fromUtf16(format.utf16());
     QDate d = QDate::fromString(qstr, qformat);
     if (not d.isValid())
         throw value_error("could not parse date from string");
@@ -183,8 +183,9 @@ Date::from_string(const String& str, const String& format) {
 
 String
 Date::to_string(const String& format) const {
-    QString qformat = QString::fromUtf8(format.to_utf8().c_str());
-    return QDate(year(), month(), day()).toString(qformat);
+    QString qformat = QString::fromUtf16(format.utf16());
+    QString qstr = QDate(year(), month(), day()).toString(qformat);
+    return String::from_utf16(qstr.utf16());
 }
 
 } // namespace brfc

@@ -85,6 +85,10 @@ TEST_F(String_test, test_from_to_utf8) {
 }
 
 TEST_F(String_test, test_from_to_utf16) {
+    EXPECT_EQ(empty, String::from_utf16(empty.utf16()));
+    EXPECT_EQ(ascii, String::from_utf16(ascii.utf16()));
+    EXPECT_EQ(unicode, String::from_utf16(unicode.utf16()));
+
     EXPECT_EQ(empty, String::from_utf16(empty.utf16(), empty.length()));
     EXPECT_EQ(ascii, String::from_utf16(ascii.utf16(), ascii.length()));
     EXPECT_EQ(unicode, String::from_utf16(unicode.utf16(), unicode.length()));
@@ -217,14 +221,15 @@ TEST_F(String_test, test_contains) {
     EXPECT_TRUE(s.contains(""));
     EXPECT_TRUE(String().contains(""));
     EXPECT_FALSE(s.contains("its"));
+    EXPECT_TRUE(String("asd").contains("d"));
 }
 
 TEST_F(String_test, test_starts_with) {
     String s("white rabbit");
     EXPECT_TRUE(s.starts_with("wh"));
     EXPECT_FALSE(s.starts_with("hi"));
-    EXPECT_FALSE(s.starts_with(""));
-    EXPECT_FALSE(String().starts_with(""));
+    EXPECT_TRUE(s.starts_with(""));
+    EXPECT_TRUE(String().starts_with(""));
 }
 
 TEST_F(String_test, test_right_justified) {
@@ -252,9 +257,11 @@ TEST_F(String_test, test_to_int) {
 }
 
 TEST_F(String_test, test_char_at) {
-    EXPECT_EQ('q', String("qwe").char_at(0));
-    EXPECT_THROW(String("qwe").char_at(3), value_error);
-    EXPECT_THROW(String("qwe").char_at(-1), value_error);
+    String qwe("qwe");
+    EXPECT_EQ('q', qwe.char_at(0));
+    EXPECT_EQ('w', qwe.char_at(1));
+    EXPECT_THROW(qwe.char_at(3), value_error);
+    EXPECT_THROW(qwe.char_at(-1), value_error);
 }
 
 TEST_F(String_test, test_to_lower) {
