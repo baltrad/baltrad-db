@@ -93,15 +93,15 @@ class String {
 
     /**
      * @brief construct from UTF-16 array
-     * @param unicode array of UTF-16 code points
+     * @param unicode array of UTF-16 code units
      * @param length number of unicode characters to copy.
      *        If -1 (the default), @a unicode must be NULL-terminated
      */
     static String from_utf16(const uchar* unicode, int length=-1);
 
     /**
-     * @brief access UTF-16 code points
-     * @return NULL-terminated array of UTF-16 code points
+     * @brief access UTF-16 code units
+     * @return NULL-terminated array of UTF-16 code units
      *
      * @note the result remains valid until the string is modified.
      */
@@ -135,6 +135,11 @@ class String {
      * @brief add string @a str to the end of this string
      */
     String& append(const String& str);
+
+    /**
+     * @brief add UTF-16 code unit @a ch to the end of this string
+     */
+    String& append(uchar ch);
     
     /**
      * @brief prefix this string with string @a str
@@ -236,6 +241,11 @@ class String {
 
     String& operator+=(const String& rhs) {
         value_ += rhs.value_;
+        return *this;
+    }
+
+    String& operator+=(uchar ch) {
+        value_ += ch;
         return *this;
     }
 

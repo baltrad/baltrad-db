@@ -171,6 +171,7 @@ TEST_F(String_test, test_stringlist_contains) {
 TEST_F(String_test, test_append) {
     EXPECT_EQ("asdqwe", String("asd").append("qwe"));
     EXPECT_EQ("asd", String("asd").append(""));
+    EXPECT_EQ("asdq", String("asd").append('q'));
 }
 
 TEST_F(String_test, test_prepend) {
@@ -303,6 +304,12 @@ TEST_F(String_test, test_to_lower) {
 TEST_F(String_test, test_operator_plus) {
     EXPECT_EQ("qweasd", String("qwe") + "asd");
     EXPECT_EQ("qweasd", "qwe" + String("asd"));
+}
+
+TEST_F(String_test, test_operator_append) {
+    EXPECT_EQ("asdqwe", String("asd") += "qwe");
+    EXPECT_EQ("asd", String("asd") += "");
+    EXPECT_EQ("asdq", String("asd") += 'q');
 }
 
 } // namespace brfc

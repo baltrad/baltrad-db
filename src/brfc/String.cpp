@@ -193,6 +193,12 @@ String::append(const String& str) {
 }
 
 String&
+String::append(String::uchar ch) {
+    value_.append(ch);
+    return *this;
+}
+
+String&
 String::prepend(const String& str) {
     UnicodeString newstr(str.value_);
     newstr.append(value_);
