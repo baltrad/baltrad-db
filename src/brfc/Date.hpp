@@ -33,7 +33,7 @@ class Date {
      * @brief construct from year, month, day values
      * @throw value_error if the resulting date is not valid
      */
-    Date(int year, unsigned int month, unsigned int day);
+    Date(int year, int month, int day);
     
     /**
      * @brief copy constructor
@@ -61,8 +61,8 @@ class Date {
     }
 
     int year() const;
-    unsigned int month() const;
-    unsigned int day() const;
+    int month() const;
+    int day() const;
 
     Date add_years(int years) const;
     Date add_months(int months) const;
@@ -87,7 +87,7 @@ class Date {
     /**
      * @brief number of days in a month of a year
      */
-    static unsigned int days_in_month(int year, int month);
+    static int days_in_month(int year, int month);
     
     /**
      * @brief check if a year is leap year

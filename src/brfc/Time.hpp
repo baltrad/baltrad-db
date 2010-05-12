@@ -32,10 +32,10 @@ class Time {
     /**
      * @brief construct from specified hour/minute/second/millisecond values
      */
-    Time(unsigned int hour,
-         unsigned int minute,
-         unsigned int second=0,
-         unsigned int msec=0);
+    Time(int hour,
+         int minute,
+         int second=0,
+         int msec=0);
     
     /**
      * @brief copy constructor
@@ -64,22 +64,22 @@ class Time {
     /**
      * @brief hour (0 - 23)
      */
-    unsigned int hour() const;
+    int hour() const;
     
     /**
      * @brief minute (0 - 59)
      */
-    unsigned int minute() const;
+    int minute() const;
 
     /**
      * @brief second (0 - 59)
      */
-    unsigned int second() const;
+    int second() const;
 
     /**
      * @brief millisecond (0 - 999)
      */
-    unsigned int msec() const;
+    int msec() const;
     ///@}
     
     /**

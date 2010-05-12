@@ -31,17 +31,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-static unsigned int _days_in_months[] = {
+static int _days_in_months[] = {
     31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };
 
-Date::Date(int year, unsigned int month, unsigned int day)
+Date::Date(int year, int month, int day)
         : jdn_(jdn_from_date(year, month, day)) {
     if (year < 1)
         throw value_error("year out of range");
-    if (month == 0 or month > 12)
+    if (month <= 0 or month > 12)
         throw value_error("month out of range");
-    if (day == 0 or day > _days_in_months[month - 1])
+    if (day <= 0 or day > _days_in_months[month - 1])
         throw value_error("day out of range");
     if (not is_leap_year(year) and month == 2 and day > 28)
         throw value_error("day out of range");
@@ -84,7 +84,7 @@ Date::is_leap_year(int year) {
     return ((year % 4) == 0 and (year % 100) != 0) or (year % 400) == 0;
 }
 
-unsigned int
+int
 Date::days_in_month(int year, int month) {
     if (month < 1 or month > 12)
         throw value_error("month out of range: "
@@ -113,14 +113,14 @@ Date::year() const {
     return year;
 }
 
-unsigned int
+int
 Date::month() const {
     int year, month, day;
     date_from_jdn(jdn_, year, month, day);
     return month;
 }
 
-unsigned int
+int
 Date::day() const {
     int year, month, day;
     date_from_jdn(jdn_, year, month, day);

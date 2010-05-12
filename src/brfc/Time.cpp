@@ -44,22 +44,22 @@ namespace {
 
 namespace brfc {
 
-Time::Time(unsigned int hour,
-           unsigned int minute,
-           unsigned int second,
-           unsigned int msec)
+Time::Time(int hour,
+           int minute,
+           int second,
+           int msec)
         : msec_(0) {
     msec_ = hour * MSECS_IN_HOUR +
             minute * MSECS_IN_MIN +
             second * MSECS_IN_SEC +
             msec;
-    if (hour >= HOURS_IN_DAY)
+    if (hour < 0 or hour >= HOURS_IN_DAY)
         throw value_error("hour value out of range");
-    if (minute >= MINS_IN_HOUR)
+    if (minute < 0 or minute >= MINS_IN_HOUR)
         throw value_error("minute value out of range");
-    if (second >= SECS_IN_MIN)
+    if (second < 0 or second >= SECS_IN_MIN)
         throw value_error("second value out of range");
-    if (msec >= MSECS_IN_SEC)
+    if (msec < 0 or msec >= MSECS_IN_SEC)
         throw value_error("msec value out of range");
     if (msec_ >= MSECS_IN_DAY)
         throw value_error("time value out of range");
@@ -105,22 +105,22 @@ Time::utc_now() {
     return Time(tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec / 1000);
 }
 
-unsigned int
+int
 Time::hour() const {
     return msec_ / MSECS_IN_HOUR;
 }
 
-unsigned int
+int
 Time::minute() const {
     return (msec_ % MSECS_IN_HOUR) / MSECS_IN_MIN;
 }
 
-unsigned int
+int
 Time::second() const {
     return (msec_ / MSECS_IN_SEC) % SECS_IN_MIN;
 }
 
-unsigned int
+int
 Time::msec() const {
     return msec_ % MSECS_IN_SEC;
 }
