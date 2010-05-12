@@ -63,6 +63,21 @@ class Date {
     int year() const;
     int month() const;
     int day() const;
+    
+    /**
+     * @throw value_error if resulting date would be invalid
+     */
+    void year(int year);
+
+    /**
+     * @throw value_error if resulting date would be invalid
+     */
+    void month(int month);
+
+    /**
+     * @throw value_error if resulting date would be invalid
+     */
+    void day(int day);
 
     Date add_years(int years) const;
     Date add_months(int months) const;

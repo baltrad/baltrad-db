@@ -82,6 +82,54 @@ TEST(Date_test, test_accessors) {
     EXPECT_EQ(15, d.day());
 }
 
+TEST(Date_test, test_set_year) {
+    Date d(2000, 2, 15);
+    d.year(500);
+    EXPECT_EQ(500, d.year());
+    EXPECT_EQ(2, d.month());
+    EXPECT_EQ(15, d.day());
+
+    d.year(2500);
+    EXPECT_EQ(2500, d.year());
+    EXPECT_EQ(2, d.month());
+    EXPECT_EQ(15, d.day());
+    
+    EXPECT_THROW(Date(2000, 2, 29).year(2001), value_error);
+}
+
+TEST(Date_test, test_set_month) {
+    Date d(2000, 2, 15);
+    d.month(12);
+    EXPECT_EQ(2000, d.year());
+    EXPECT_EQ(12, d.month());
+    EXPECT_EQ(15, d.day());
+
+    d.month(1);
+    EXPECT_EQ(2000, d.year());
+    EXPECT_EQ(1, d.month());
+    EXPECT_EQ(15, d.day());
+    
+    EXPECT_THROW(d.month(0), value_error);
+    EXPECT_THROW(d.month(13), value_error);
+    EXPECT_THROW(Date(2000, 1, 31).month(2), value_error);
+}
+
+TEST(Date_test, test_set_day) {
+    Date d(2000, 2, 15);
+    d.day(29);
+    EXPECT_EQ(2000, d.year());
+    EXPECT_EQ(2, d.month());
+    EXPECT_EQ(29, d.day());
+
+    d.day(1);
+    EXPECT_EQ(2000, d.year());
+    EXPECT_EQ(2, d.month());
+    EXPECT_EQ(1, d.day());
+    
+    EXPECT_THROW(d.day(0), value_error);
+    EXPECT_THROW(Date(2000, 2, 29).day(30), value_error);
+}
+
 TEST(Date_test, test_eq) {
     Date d1(2000, 2, 1);
     EXPECT_TRUE(d1 == d1);

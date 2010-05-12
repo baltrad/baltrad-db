@@ -127,6 +127,33 @@ Date::day() const {
     return day;
 }
 
+void
+Date::year(int year) {
+    int _, month, day;
+    date_from_jdn(jdn_, _, month, day);
+    if (days_in_month(year, month) < day)
+        throw value_error("setting year would result in invalid date");
+    jdn_ = jdn_from_date(year, month, day);
+}
+
+void
+Date::month(int month) {
+    int year, _, day;
+    date_from_jdn(jdn_, year, _, day);
+    if (days_in_month(year, month) < day)
+        throw value_error("setting month would result in invalid date");
+    jdn_ = jdn_from_date(year, month, day);
+}
+
+void
+Date::day(int day) {
+    int year, month, _;
+    date_from_jdn(jdn_, year, month, _);
+    if (day < 1 or days_in_month(year, month) < day)
+        throw value_error("setting month would result in invalid date");
+    jdn_ = jdn_from_date(year, month, day);
+}
+
 Date
 Date::add_years(int years) const {
     int year, month, day;
