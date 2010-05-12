@@ -125,6 +125,34 @@ Time::msec() const {
     return msec_ % MSECS_IN_SEC;
 }
 
+void
+Time::hour(int _hour) {
+    if (_hour < 0 or _hour >= HOURS_IN_DAY)
+        throw value_error("invalid hour");
+    msec_ = msec_ - (hour() * MSECS_IN_HOUR) + (_hour * MSECS_IN_HOUR);
+}
+
+void
+Time::minute(int _minute) {
+    if (_minute < 0 or _minute >= MINS_IN_HOUR)
+        throw value_error("invalid minute");
+    msec_ = msec_ - (minute() * MSECS_IN_MIN) + (_minute * MSECS_IN_MIN);
+}
+
+void
+Time::second(int _second) {
+    if (_second < 0 or _second >= SECS_IN_MIN)
+        throw value_error("invalid second");
+    msec_ = msec_ - (second() * MSECS_IN_SEC) + (_second * MSECS_IN_SEC);
+}
+
+void
+Time::msec(int _msec) {
+    if (_msec < 0 or _msec >= MSECS_IN_SEC)
+        throw value_error("invalid msec");
+    msec_ = msec_ - msec() + _msec;
+}
+
 Time
 Time::add_hours(int hours) const {
     return add_msecs(hours * MSECS_IN_HOUR);

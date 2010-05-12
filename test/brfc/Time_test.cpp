@@ -44,6 +44,78 @@ TEST(Time_test, test_accessors) {
     EXPECT_EQ(7, t.msec());
 }
 
+TEST(Time_test, test_set_hour) {
+    Time t(12, 5, 6, 7);
+    t.hour(15);
+    EXPECT_EQ(15, t.hour());
+    EXPECT_EQ(5, t.minute());
+    EXPECT_EQ(6, t.second());
+    EXPECT_EQ(7, t.msec());
+
+    t.hour(1);
+    EXPECT_EQ(1, t.hour());
+    EXPECT_EQ(5, t.minute());
+    EXPECT_EQ(6, t.second());
+    EXPECT_EQ(7, t.msec());
+
+    EXPECT_THROW(t.hour(-1), value_error);
+    EXPECT_THROW(t.hour(24), value_error);
+}
+
+TEST(Time_test, test_set_minute) {
+    Time t(12, 5, 6, 7);
+    t.minute(58);
+    EXPECT_EQ(12, t.hour());
+    EXPECT_EQ(58, t.minute());
+    EXPECT_EQ(6, t.second());
+    EXPECT_EQ(7, t.msec());
+
+    t.minute(1);
+    EXPECT_EQ(12, t.hour());
+    EXPECT_EQ(1, t.minute());
+    EXPECT_EQ(6, t.second());
+    EXPECT_EQ(7, t.msec());
+
+    EXPECT_THROW(t.minute(-1), value_error);
+    EXPECT_THROW(t.minute(60), value_error);
+}
+
+TEST(Time_test, test_set_second) {
+    Time t(12, 5, 6, 7);
+    t.second(58);
+    EXPECT_EQ(12, t.hour());
+    EXPECT_EQ(5, t.minute());
+    EXPECT_EQ(58, t.second());
+    EXPECT_EQ(7, t.msec());
+
+    t.second(1);
+    EXPECT_EQ(12, t.hour());
+    EXPECT_EQ(5, t.minute());
+    EXPECT_EQ(1, t.second());
+    EXPECT_EQ(7, t.msec());
+
+    EXPECT_THROW(t.second(-1), value_error);
+    EXPECT_THROW(t.second(60), value_error);
+}
+
+TEST(Time_test, test_set_msec) {
+    Time t(12, 5, 6, 7);
+    t.msec(586);
+    EXPECT_EQ(12, t.hour());
+    EXPECT_EQ(5, t.minute());
+    EXPECT_EQ(6, t.second());
+    EXPECT_EQ(586, t.msec());
+
+    t.msec(1);
+    EXPECT_EQ(12, t.hour());
+    EXPECT_EQ(5, t.minute());
+    EXPECT_EQ(6, t.second());
+    EXPECT_EQ(1, t.msec());
+
+    EXPECT_THROW(t.msec(-1), value_error);
+    EXPECT_THROW(t.msec(1000), value_error);
+}
+
 TEST(Time_test, test_eq) {
     Time t1(12, 0);
     EXPECT_TRUE(t1 == t1);

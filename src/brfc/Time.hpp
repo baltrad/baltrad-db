@@ -83,6 +83,16 @@ class Time {
     ///@}
     
     /**
+     * @name mutators
+     * @{
+     */
+    void hour(int hour);
+    void minute(int minute);
+    void second(int second);
+    void msec(int msec);
+    ///@}
+
+    /**
      * @name addition
      * @{
      */
