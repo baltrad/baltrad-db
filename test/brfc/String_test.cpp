@@ -243,6 +243,9 @@ TEST_F(String_test, test_contains) {
     EXPECT_TRUE(String().contains(""));
     EXPECT_FALSE(s.contains("its"));
     EXPECT_TRUE(String("asd").contains("d"));
+    EXPECT_TRUE(String("asd").contains('a'));
+    EXPECT_FALSE(String("asd").contains('q'));
+
 }
 
 TEST_F(String_test, test_starts_with) {

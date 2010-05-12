@@ -270,6 +270,11 @@ String::contains(const String& str) const {
 }
 
 bool
+String::contains(String::uchar ch) const {
+    return value_.indexOf(ch) >= 0;
+}
+
+bool
 String::starts_with(const String& str) const {
     return value_.startsWith(str.value_);
 }

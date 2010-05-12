@@ -199,6 +199,11 @@ class String {
      * @brief test if this string contains substring @a str
      */
     bool contains(const String& str) const;
+
+    /**
+     * @brief test if this string contains UTF-16 code unit @a ch
+     */
+    bool contains(uchar ch) const;
     
     /**
      * @brief test if this string starts with substrign @a str
