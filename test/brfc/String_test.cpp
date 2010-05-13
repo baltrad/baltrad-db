@@ -256,6 +256,14 @@ TEST_F(String_test, test_starts_with) {
     EXPECT_TRUE(String().starts_with(""));
 }
 
+TEST_F(String_test, test_ends_with) {
+    String s("white rabbit");
+    EXPECT_TRUE(s.ends_with("it"));
+    EXPECT_FALSE(s.ends_with("bi"));
+    EXPECT_TRUE(s.ends_with(""));
+    EXPECT_TRUE(String().ends_with(""));
+}
+
 TEST_F(String_test, test_right_justified) {
     EXPECT_EQ("00001", String("1").right_justified(5, '0'));
     EXPECT_EQ("11111", String("11111").right_justified(5, '0'));

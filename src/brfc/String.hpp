@@ -206,10 +206,15 @@ class String {
     bool contains(uchar ch) const;
     
     /**
-     * @brief test if this string starts with substrign @a str
+     * @brief test if this string starts with substring @a str
      */
     bool starts_with(const String& str) const;
-    
+
+    /**
+     * @brief test if this string ends with substring @a str
+     */
+    bool ends_with(const String& str) const;
+
     String right_justified(int width, uchar ch) const;
 
     String section(const String& sep, int start, int end=-1) const;

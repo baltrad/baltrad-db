@@ -279,6 +279,11 @@ String::starts_with(const String& str) const {
     return value_.startsWith(str.value_);
 }
 
+bool
+String::ends_with(const String& str) const {
+    return value_.endsWith(str.value_);
+}
+
 String
 String::right_justified(int width, String::uchar ch) const {
     String str(value_);
