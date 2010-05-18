@@ -17,37 +17,41 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <QtCore/QRegExp>
-
 #include <brfc/String.hpp>
+
+#include <unicode/regex.h>
 
 namespace brfc {
 
 class RegExp {
   public:
-    RegExp(const String& pattern)
-            : re_(QString::fromUtf16(pattern.utf16())) {
+    explicit RegExp(const String& pattern);
+    
+    /**
+     * @return position of the last match or -1 if no match
+     */
+    int index_in(const String& str, int pos=0);    
 
-    }
+    /**
+     * @return length of the last match or -1 if no match
+     */
+    int matched_length() const;    
 
-    int index_in(const String& str, int pos) {
-        return re_.indexIn(QString::fromUtf16(str.utf16()), pos);
-    }
+    /**
+     * @return text of the entire match
+     */
+    String cap() const;    
 
-    int matched_length() const {
-        return re_.matchedLength();
-    }
-
-    String cap() const {
-        return String::from_utf16(re_.cap().utf16());
-    }
-
-    int pos() const {
-        return re_.pos();
-    }
+    /**
+     * @return position of the last match or -1 if no match
+     */
+    int pos() const;
 
   private:
-    QRegExp re_;
+    mutable UErrorCode uerr_;
+    bool matches_;
+    UnicodeString input_;
+    RegexMatcher re_;
 };
 
 } // namespace brfc
