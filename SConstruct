@@ -52,6 +52,12 @@ vars.AddVariables(
                  "${hlhdf_dir}/lib", PathVariable.PathIsDir),
     PathVariable("hlhdf_include_dir", "HLHDF include directory",
                  "${hlhdf_dir}/include", PathVariable.PathIsDir),
+    PathVariable("icu_dir", "ICU install root",
+                 "/usr", PathVariable.PathIsDir),
+    PathVariable("icu_lib_dir", "ICU libraries directory",
+                 "${icu_dir}/lib", PathVariable.PathIsDir),
+    PathVariable("icu_include_dir", "ICU include directory",
+                 "${icu_dir}/include", PathVariable.PathIsDir),
     PathVariable("jdk_dir", "JDK install root",
                  "/usr/lib/jvm/java-6-openjdk", PathVariable.PathIsDir),
     PathVariable("jdk_lib_dir", "JDK libraries directory",
@@ -119,9 +125,13 @@ else:
 
 env.AppendUnique(CPPPATH=["${hdf5_include_dir}",
                           "${hlhdf_include_dir}",
+                          "${pqxx_include_dir}",
+                          "${icu_include_dir}",
                           "${boost_include_dir}"])
 env.AppendUnique(LIBPATH=["${hdf5_lib_dir}",
                           "${hlhdf_lib_dir}",
+                          "${pqxx_lib_dir}",
+                          "${icu_lib_dir}",
                           "${boost_lib_dir}"])
 
 ##
@@ -140,7 +150,9 @@ class Config(object):
     
     def check(self):
         cfg = self.cfg
-
+        
+        cfg.env.AppendUnique(CPPPATH="${pqxx_include_dir}",
+                             LIBPATH="${pqxx_lib_dir}")
         self.pqxx = cfg.CheckLibWithHeader("pqxx", "pqxx/pqxx", "c++")
 
         cfg.env.AppendUnique(CPPPATH=env["hdf5_include_dir"],
@@ -150,6 +162,11 @@ class Config(object):
         cfg.env.AppendUnique(CPPPATH=env["hlhdf_include_dir"],
                              LIBPATH=env["hlhdf_lib_dir"])
         self.hlhdf = cfg.CheckHlhdf()
+        
+        cfg.env.AppendUnique(CPPPATH="${icu_include_dir}",
+                             LIBPATH="${icu_lib_dir}")
+        self.icu_uc = cfg.CheckLibWithHeader("icuuc", "unicode/unistr.h", "c++")
+        self.icu_tu = cfg.CheckLibWithHeader("icutu", "unicode/regex.h", "c++")
 
         cfg.env.AppendUnique(CPPPATH=env["boost_include_dir"])
         self.boost = 0 not in [cfg.CheckBoostVersion("1.38"),
