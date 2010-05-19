@@ -116,6 +116,13 @@ class Time {
      * @note time wraps at midnight
      */
     Time add_seconds(int seconds) const;
+    
+    /**
+     * @brief alias for add_seconds
+     */
+    Time add_secs(int seconds) const {
+        return add_seconds(seconds);
+    }
 
     /**
      * @brief get a new time with milliseconds before/after held time
