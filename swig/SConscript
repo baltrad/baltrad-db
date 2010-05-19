@@ -58,7 +58,7 @@ lib = env.SharedLibrary("#lib/brfc_java",
                         [fc, fc_expr, fc_oh5, fc_test],
                         LIBS=["brfc"])
 
-confdeps = env.ConfHas("#java-wrapper-confdeps", ["jni", "qt", "hlhdf"])
+confdeps = env.ConfHas("#java-wrapper-confdeps", ["jni", "hlhdf"])
 
 env.Requires(lib, confdeps)
 

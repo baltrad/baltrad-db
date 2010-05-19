@@ -53,23 +53,6 @@ def CheckHlhdf(ctx):
 
     return result
 
-def CheckQt(ctx):
-    src = (
-        "#include <QtCore/QtGlobal>",
-        "int main(int argc, char** argv) {",
-        "    if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))",
-        "        return 0;",
-        "    else",
-        "        return 1;",
-        "}"
-    )
-    ctx.Message("Checking for Qt >= 4.5... ")
-    oldlibs = ctx.AppendLIBS(["QtCore"])
-    result, _ = ctx.TryRun("\n".join(src), ".cpp")
-    ctx.Result(result)
-    ctx.SetLIBS(oldlibs)
-    return result
-
 # from python2.5
 class BaseResult(tuple):
     """Base class for the parsed result objects.

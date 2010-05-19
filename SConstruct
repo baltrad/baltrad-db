@@ -20,8 +20,7 @@ import sys
 import urlparse
 
 sys.path.append("./misc")
-from build_helper import (CheckBoostVersion, CheckHlhdf, CheckQt,
-                          SplitResult)
+from build_helper import (CheckBoostVersion, CheckHlhdf, SplitResult)
 
 EnsureSConsVersion(1, 2)
 
@@ -35,12 +34,6 @@ vars = Variables("variables.cache")
 vars.AddVariables(
     PathVariable("prefix", "installation prefix",
                  "/usr/local", PathVariable.PathIsDir),
-    PathVariable("qt_dir", "Qt4 install root",
-                 "/usr", PathVariable.PathIsDir),
-    PathVariable("qt_lib_dir", "Qt4 libraries directory",
-                 "${qt_dir}/lib", PathVariable.PathIsDir),
-    PathVariable("qt_include_dir", "Qt4 include directory",
-                 "${qt_dir}/include", PathVariable.PathIsDir),
     PathVariable("pqxx_dir", "libpqxx install root",
                  "/usr", PathVariable.PathIsDir),
     PathVariable("pqxx_lib_dir", "libpqxx libraries directory",
@@ -124,12 +117,10 @@ if env["debug"]:
 else:
     env.AppendUnique(CCFLAGS=["-O2", "-fno-strict-aliasing"])
 
-env.AppendUnique(CPPPATH=["${qt_include_dir}",
-                          "${hdf5_include_dir}",
+env.AppendUnique(CPPPATH=["${hdf5_include_dir}",
                           "${hlhdf_include_dir}",
                           "${boost_include_dir}"])
-env.AppendUnique(LIBPATH=["${qt_lib_dir}",
-                          "${hdf5_lib_dir}",
+env.AppendUnique(LIBPATH=["${hdf5_lib_dir}",
                           "${hlhdf_lib_dir}",
                           "${boost_lib_dir}"])
 
@@ -141,7 +132,6 @@ class Config(object):
     _custom_tests = {
        "CheckBoostVersion": CheckBoostVersion,
        "CheckHlhdf": CheckHlhdf,
-       "CheckQt": CheckQt,
     }
 
     def __init__(self, env):
@@ -150,12 +140,6 @@ class Config(object):
     
     def check(self):
         cfg = self.cfg
-
-        cfg.env.AppendUnique(CPPPATH=env["qt_include_dir"],
-                             LIBPATH=env["qt_lib_dir"])
-        cfg.env.AppendENVPath("LD_LIBRARY_PATH",
-                              env.Dir(env["qt_lib_dir"]).abspath)
-        self.qt = cfg.CheckQt()
 
         self.pqxx = cfg.CheckLibWithHeader("pqxx", "pqxx/pqxx", "c++")
 
@@ -248,7 +232,7 @@ testenv = env.Clone()
 testenv.AppendUnique(CPPPATH=["${gtest_include_dir}"])
 testenv.AppendUnique(LIBPATH=["${gtest_lib_dir}"])
 
-for path in ("#lib", "${gtest_lib_dir}", "${hlhdf_lib_dir}", "${qt_lib_dir}", "${boost_lib_dir}"):
+for path in ("#lib", "${gtest_lib_dir}", "${hlhdf_lib_dir}", "${boost_lib_dir}"):
     abspath = env.Dir(path).abspath
     if abspath not in ("/lib", "/usr/lib"): # default ld lookups
         testenv.AppendENVPath('LD_LIBRARY_PATH', abspath)
