@@ -19,9 +19,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Source.hpp>
 
-#include <boost/foreach.hpp>
+#include <map>
 
-#include <QtCore/QMap>
+#include <boost/foreach.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
@@ -35,7 +35,7 @@ namespace oh5 {
 
 namespace {
 
-typedef QMap<String, String> ElementMap;
+typedef std::map<String, String> ElementMap;
     
 ElementMap
 parse_source(const String& source) {
@@ -56,24 +56,39 @@ parse_source(const String& source) {
     return map;
 }
 
+const String&
+get_default(const ElementMap& map,
+            const String& key,
+            const String& default_) {
+    ElementMap::const_iterator i = map.find(key);
+    return i != map.end() ? i->second
+                          : default_;
+}
+
+bool
+contains(const ElementMap& map, const String& key) {
+    return map.find(key) != map.end();
+}
+
+
 } // namespace anonymous
 
 shared_ptr<Source>
 Source::from_source_attribute(const String& source) {
     const ElementMap& elems = parse_source(source);
-    if (elems.contains("WMO") or
-        elems.contains("RAD") or
-        elems.contains("PLC")) {
+    if (contains(elems, "WMO") or
+        contains(elems, "RAD") or
+        contains(elems, "PLC")) {
         
         shared_ptr<SourceRadar> src = make_shared<SourceRadar>();
-        src->wmo_code(elems.value("WMO", "0").to_int());
-        src->radar_site(elems.value("RAD", ""));
-        src->place(elems.value("PLC", ""));
+        src->wmo_code(get_default(elems, "WMO", "0").to_int());
+        src->radar_site(get_default(elems, "RAD", ""));
+        src->place(get_default(elems, "PLC", ""));
         return src;
-    } else if (elems.contains("CTY") or elems.contains("ORG")) {
+    } else if (contains(elems, "CTY") or contains(elems, "ORG")) {
         shared_ptr<SourceCentre> src = make_shared<SourceCentre>();
-        src->country_code(elems.value("CTY", "0").to_int());
-        src->originating_centre(elems.value("ORG", "0").to_int());
+        src->country_code(get_default(elems, "CTY", "0").to_int());
+        src->originating_centre(get_default(elems, "ORG", "0").to_int());
         return src;
     } else {
         throw value_error("no fields in source to determine type");
