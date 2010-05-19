@@ -49,7 +49,8 @@ class FileCatalog {
      * @param dsn database connection string (using URL-like syntax)
      * @param storage absolute path to storage root
      *
-     * @throw db_error if dsn is invalid or DB could not be opened
+     * @throw db_error if DB could not be opened
+     * @throw value_error if dsn is invalid
      * @throw fs_error if storage path does not exist
      *
      * on creating a FileCatalog instance, owned AttributeSpecs is filled

@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/Url.hpp>
 
 namespace brfc {
@@ -31,6 +32,10 @@ TEST(Url_test, test_complete_url) {
     EXPECT_EQ("example.com", url.host());
     EXPECT_EQ(1234, url.port());
     EXPECT_EQ("/path/to/resource", url.path());
+}
+
+TEST(Url_test, test_invalid_url_throws) {
+    EXPECT_THROW(Url("invalid_url"), value_error);
 }
 
 } // namespace brfc

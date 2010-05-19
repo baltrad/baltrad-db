@@ -114,7 +114,7 @@ struct FileCatalog_test : public testing::Test {
 };
 
 TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
-    EXPECT_THROW(FileCatalog("invalid_dsn", tempdir->path()), db_error);
+    EXPECT_THROW(FileCatalog("invalid_dsn", tempdir->path()), value_error);
 }
 
 TEST_F(FileCatalog_test, test_catalog) {
