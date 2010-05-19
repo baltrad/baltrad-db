@@ -36,9 +36,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/oh5/Source.hpp>
     #include <brfc/oh5/SourceCentre.hpp>
     #include <brfc/oh5/SourceRadar.hpp>
-
-    #include <QtCore/QDate>
-    #include <QtCore/QTime>
 %}
 
 // Enable the JNI class to load the required native library.
