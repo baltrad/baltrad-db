@@ -20,8 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_TEST_TEST_RDB_HPP
 #define BRFC_TEST_TEST_RDB_HPP
 
-#include <brfc/Path.hpp>
-
 #include <brfc/rdb/RelationalDatabase.hpp>
 
 class StringList;
@@ -65,7 +63,7 @@ class TestRDB : public rdb::RelationalDatabase {
     StringList load_queries(const String& filename);
     void exec_queries_from(const String& filename);
 
-    Path schema_dir_;
+    std::string schema_dir_;
 };
 
 } // namespace test

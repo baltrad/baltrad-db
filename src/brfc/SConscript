@@ -25,7 +25,6 @@ sources = [
     "DefaultFileNamer.cpp",
     "FileCatalog.cpp",
     "FileNamer.cpp",
-    "Path.cpp",
     "Query.cpp",
     "RegExp.cpp",
     "ResultSet.cpp",
@@ -85,7 +84,7 @@ confdeps = env.ConfHas("#shared-library-confdeps",
 objects = env.SharedObject(sources)
 env.Requires(objects, confdeps)
 
-lib = env.SharedLibrary("#lib/brfc", objects, LIBS=["hdf5", "hlhdf", "QtCore", "icuuc", "icutu", "pqxx"])
+lib = env.SharedLibrary("#lib/brfc", objects, LIBS=["hdf5", "hlhdf", "QtCore", "icuuc", "icutu", "pqxx", "boost_system", "boost_filesystem"])
 
 env.Alias("shared-library", lib)
 

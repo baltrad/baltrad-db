@@ -44,6 +44,6 @@ env.Requires(objects, confdeps)
 env.Depends(objects, [config_hpp])
 
 runner = env.Program("#test/runner", objects,
-            LIBS=["gtest", "gmock", "brfc", "hlhdf"])
+            LIBS=["gtest", "gmock", "brfc", "boost_filesystem", "boost_system"])
 
 # vim:filetype=python:et:ts=4:sw=4:

@@ -20,12 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <boost/filesystem.hpp>
+
 #include <brfc/exceptions.hpp>
 #include <brfc/Database.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/FileCatalog.hpp>
 #include <brfc/FileNamer.hpp>
-#include <brfc/Path.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/Time.hpp>
 
@@ -37,8 +38,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test/TempH5File.hpp>
 #include <brfc/test/TempDir.hpp>
 
-#include <QtCore/QFile>
-
 #include "common.hpp"
 
 
@@ -48,6 +47,8 @@ using testing::DefaultValue;
 using testing::Property;
 using testing::Return;
 using testing::Throw;
+
+namespace fs = boost::filesystem;
 
 namespace brfc {
 
@@ -136,7 +137,7 @@ TEST_F(FileCatalog_test, test_catalog) {
     shared_ptr<const oh5::File> f = fc.catalog(tempfile.path());
     EXPECT_EQ(f->path(), target);
 
-    EXPECT_TRUE(Path::exists(target));
+    EXPECT_TRUE(fs::exists(target.to_utf8()));
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
@@ -154,7 +155,7 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
     EXPECT_CALL(*db, do_rollback());
     
     EXPECT_THROW(fc.catalog(tempfile.path()), db_error);
-    EXPECT_FALSE(Path::exists(target));
+    EXPECT_FALSE(fs::exists(target.to_utf8()));
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
@@ -174,7 +175,7 @@ TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
     tempdir.reset(); // tempdir removed
 
     EXPECT_THROW(fc.catalog(tempfile.path()), fs_error);
-    EXPECT_FALSE(Path::exists(target));
+    EXPECT_FALSE(fs::exists(target.to_utf8()));
 }
 
 TEST_F(FileCatalog_test, test_double_import_throws) {
@@ -197,11 +198,7 @@ TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {
-    const String& target = tempdir->path() + "/testfile";
-    QString qtarget = QString::fromUtf8(target.to_utf8().c_str());
-    QFile f(qtarget);
-    ASSERT_TRUE(f.open(QIODevice::WriteOnly));
-    f.close();
+    const String& target = tempfile.path();
 
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_remove_file(target));
@@ -209,7 +206,7 @@ TEST_F(FileCatalog_test, test_remove_existing_file) {
 
     EXPECT_NO_THROW(fc.remove(target));
 
-    EXPECT_FALSE(Path::exists(target));
+    EXPECT_FALSE(fs::exists(target.to_utf8()));
 }
 
 TEST_F(FileCatalog_test, test_removing_nx_file) {

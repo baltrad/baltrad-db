@@ -19,9 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/FileCatalog.hpp>
 
+#include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
-
-#include <QtCore/QFile>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Database.hpp>
@@ -35,6 +34,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/File.hpp>
 
 #include <brfc/rdb/RelationalDatabase.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace brfc {
     
@@ -70,10 +71,14 @@ FileCatalog::~FileCatalog() {
 
 void
 FileCatalog::check_storage() const {
-    if (not storage_.is_absolute())
-        throw fs_error("storage must be an absolute path");
-    if (not storage_.exists())
-        throw fs_error("storage does not exist");
+    std::string path_utf8 = storage_.to_utf8();
+    fs::path fs_path = fs::path(path_utf8);
+    if (not fs_path.is_complete())
+        throw fs_error("storage '" + path_utf8 + "' is not a complete path");
+    if (not fs::exists(fs_path))
+        throw fs_error("storage '" + path_utf8 + "' does not exist");
+    if (not fs::is_directory(fs_path))
+        throw fs_error("storage '" + path_utf8 + "' is not a directory");
 }
 
 void
@@ -100,22 +105,26 @@ FileCatalog::is_cataloged(const oh5::File& f) const {
 shared_ptr<const oh5::File>
 FileCatalog::catalog(const String& path) {
     shared_ptr<oh5::File> f = oh5::File::from_filesystem(path, *specs_);
+
+    std::string path_utf8 = path.to_utf8();
+    fs::path fs_path(path_utf8);
     
     f->source(db_->load_source(f->what_source()));
 
     if (is_cataloged(*f))
-        throw duplicate_entry(path.to_utf8());
+        throw duplicate_entry(path_utf8);
     
     String proposed_name = namer_->name(*f);
-
-    if (Path(proposed_name).is_absolute())
+    
+    // move to FileNamer::name
+    if (fs::path(proposed_name.to_utf8()).is_complete())
         throw std::runtime_error("namer must not return absolute paths");
     
     unsigned int name_version = db_->next_filename_version(proposed_name);
     
     String target = FileNamer::inject_version(proposed_name, name_version);
-    target = storage_.join(target).string();
-    f->path(target);
+    fs::path fs_target = fs::path(storage_.to_utf8()) / target.to_utf8();
+    f->path(fs_target.string());
 
     db_->begin();
     // try saving to database
@@ -125,16 +134,14 @@ FileCatalog::catalog(const String& path) {
         db_->rollback();
         throw;
     }
-    QString qpath = QString::fromUtf8(path.to_utf8().c_str());
-    QString qtarget = QString::fromUtf8(target.to_utf8().c_str());
+
     // database save OK, try copying to new location
-    if (not QFile::copy(qpath, qtarget)) {
-        db_->rollback();
-        String err = String("could not copy ") + path +
-                     String(" to ") + target;
-        throw fs_error(err.to_utf8());
-    } else {
+    try {
+        fs::copy_file(fs_path, fs_target);
         db_->commit();
+    } catch (const fs::filesystem_error& e) {
+        db_->rollback();
+        throw fs_error(e.what());
     }
     return f;
 }
@@ -143,14 +150,19 @@ void
 FileCatalog::remove(const String& path) {
     db_->begin();
     db_->remove_file(path);
-    QString qpath = QString::fromUtf8(path.to_utf8().c_str());
-    //XXX: what about when it exists in db but not in fs?
-    if (not QFile::remove(qpath)) {
-        db_->rollback();
-        String err = String("could not remove ") + path;
-        throw fs_error(err.to_utf8());
-    } else {
+
+    std::string path_utf8 = path.to_utf8();
+
+    try {
+        if (not fs::remove(fs::path(path_utf8)))
+            throw fs_error("file '" + path_utf8 + "' does not exist");
         db_->commit();
+    } catch (fs::filesystem_error& e) {
+        db_->rollback();
+        throw fs_error(e.what());
+    } catch (fs_error) {
+        db_->rollback();
+        throw;
     }
 }
 

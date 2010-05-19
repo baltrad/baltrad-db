@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/smart_ptr.hpp>
 
-#include <brfc/Path.hpp>
 #include <brfc/String.hpp>
 
 /**
@@ -145,7 +144,7 @@ class FileCatalog {
     shared_ptr<Database> db_;
     shared_ptr<oh5::AttributeSpecs> specs_;
     shared_ptr<FileNamer> namer_;
-    Path storage_;
+    String storage_;
 };
 
 }

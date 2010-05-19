@@ -19,25 +19,26 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test/TestRDB.hpp>
 
+#include <fstream>
+
+#include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 
-#include <QtCore/QFile>
-#include <QtCore/QTextStream>
-
+#include <brfc/exceptions.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/rdb/Connection.hpp>
 
-#include <brfc/exceptions.hpp>
+namespace fs = boost::filesystem;
 
 namespace brfc {
 namespace test {
 
 TestRDB::TestRDB(const String& dsn, const String& schema_dir)
         : RelationalDatabase(dsn)
-        , schema_dir_(schema_dir) {
-    if (not schema_dir_.is_absolute())
-        throw value_error("schema dir must be absolute");
+        , schema_dir_(schema_dir.to_utf8()) {
+    if (not fs::path(schema_dir_).is_complete())
+        throw value_error("schema dir must be a complete path");
 }
 
 TestRDB::~TestRDB() {
@@ -62,15 +63,21 @@ TestRDB::clean() {
 
 StringList
 TestRDB::load_queries(const String& filename) {
-    String path = schema_dir_.join(dialect()).join(filename).string();
-    QString qpath = QString::fromUtf8(path.to_utf8().c_str());
-    QFile file(qpath);
-    if (not file.open(QIODevice::ReadOnly)) {
-        throw fs_error("could not open file: " + path.to_std_string());
+    fs::path qf_path = fs::path(schema_dir_)
+                       / dialect().to_utf8()
+                       / filename.to_utf8();
+    
+    std::ifstream ifs(qf_path.string().c_str(), std::ios::binary);
+    std::filebuf* rdbuf = ifs.rdbuf();
+    
+    char ch;
+    std::string str;
+    while ((ch = rdbuf->sbumpc()) != EOF) {
+        str += ch;
     }
-    QTextStream stream(&file);
-    stream.setCodec("UTF-8");
-    String content = String::from_utf16(stream.readAll().utf16());
+    ifs.close();
+
+    String content = String::from_utf8(str);
     return content.split(";\n", String::SKIP_EMPTY_PARTS);
 }
 
