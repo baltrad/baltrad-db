@@ -78,15 +78,18 @@ sources = [
     "test/TestSwig.cpp",
 ]
 
-confdeps = env.ConfHas("#shared-library-confdeps",
-                       ["hlhdf", "boost"])
-
 objects = env.SharedObject(sources)
-env.Requires(objects, confdeps)
 
-lib = env.SharedLibrary("#lib/brfc", objects, LIBS=["hdf5", "hlhdf", "icuuc", "icutu", "pqxx", "boost_system", "boost_filesystem"])
-
-env.Alias("shared-library", lib)
+lib = env.SharedLibrary("#lib/brfc", objects,
+                        LIBS=[
+                            "boost_filesystem",
+                            "hlhdf",
+                            "icuuc",
+                            "icutu",
+                            "pqxx"
+                        ])
+                              
+env.Alias("build-shared-library", lib)
 
 env.Install("${install_root}/lib", lib)
 

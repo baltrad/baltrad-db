@@ -15,7 +15,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-Import("env")
+Import("env", "conf")
+
+if not conf.has_test_deps():
+    print "Test dependencies not met, skipping test/brfc/SConstruct"
+    Return()
+
+env.AppendUnique(CPPPATH=["${gtest_include_dir}"])
+env.AppendUnique(LIBPATH=["${gtest_lib_dir}"])
+env.AppendENVPath("LD_LIBRARY_PATH", env.Dir("${gtest_lib_dir}").abspath)
 
 def strlit(var):
     return "\"%s\"" % var
@@ -37,13 +45,19 @@ sources = Glob("*.cpp") + Glob("oh5/*.cpp") + Glob("rdb/*.cpp")
 # remove -pedantic flag (errors in gmock headers)
 env["CCFLAGS"].remove("-pedantic")
 
-confdeps = env.ConfHas("#gtest-confdeps", ["gtest", "gmock", "hlhdf"])
-
 objects = env.SharedObject(sources)
-env.Requires(objects, confdeps)
 env.Depends(objects, [config_hpp])
 
 runner = env.Program("#test/runner", objects,
-            LIBS=["gtest", "gmock", "brfc", "boost_filesystem", "boost_system"])
+            LIBS=["gtest", "gmock", "brfc", "boost_filesystem"],
+            RPATH=env["ENV"]["LD_LIBRARY_PATH"])
+env.Alias("build-gtest-tests", runner)
+
+
+run_gtest_tests = env.Command("run_gtest_tests", "#test/runner",
+                              "$SOURCE "
+                              "--gtest_output=xml:test/reports/gtest.xml")
+env.Alias("run-gtest-tests", run_gtest_tests)
+
 
 # vim:filetype=python:et:ts=4:sw=4:

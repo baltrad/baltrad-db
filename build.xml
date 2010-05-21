@@ -1,0 +1,74 @@
+<project name="baltrad-db" basedir=".">
+
+<!-- NOTE: not all dependencies are set up here and are instead
+           handled by SCons, which drives the build.
+-->
+
+  <target name="build" depends="compile">
+    <jar jarfile="lib/jbrfc.jar"
+         basedir="build/swig/classes" />
+  </target>
+
+  <target name="compile">
+    <mkdir dir="build/swig/classes" />
+    <javac srcdir="build/swig/eu"
+    	   destdir="build/swig/classes" />
+    <javac srcdir="swig/java/eu"
+           destdir="build/swig/classes" />
+  </target>
+
+  <target name="build-tests" depends="compile-tests">
+    <jar jarfile="lib/jbrfc_test.jar"
+         basedir="build/test/classes" />
+  </target> 
+
+  <target name="compile-tests" depends="build">
+    <mkdir dir="build/test/classes" />
+    <javac srcdir="test/java/eu"
+           destdir="build/test/classes">
+      <classpath location="lib/jbrfc.jar"/>
+      <classpath location="deplib/junit4.jar"/>
+    </javac>
+  </target>
+
+  <target name="create-postgresql-testdb">
+    <sql rdbms="postgres"
+         driver="org.postgresql.Driver"
+         url="${db.url}"
+         userid="${db.username}" 
+         password="${db.password}">
+      <classpath location="deplib/postgresql-8.4-701.jdbc4.jar" />
+      <transaction src="schema/postgresql/drop.sql" />
+      <transaction src="schema/postgresql/create.sql" />
+    </sql>
+  </target>
+
+  <target name="drop-postgresql-testdb">
+    <sql rdbms="postgres"
+         driver="org.postgresql.Driver"
+         url="${db.url}"
+         userid="${db.username}" 
+         password="${db.password}">
+      <classpath location="deplib/postgresql-8.4-701.jdbc4.jar" />
+      <transaction src="schema/postgresql/drop.sql" />
+    </sql>
+  </target>
+
+  <target name="execute-tests" depends="create-postgresql-testdb">
+    <mkdir dir="test/reports"/>
+    <junit showoutput="true" printsummary="no">
+      <classpath location="deplib/junit4.jar" />
+      <classpath location="lib/jbrfc.jar" />
+      <classpath location="lib/jbrfc_test.jar" />
+      <sysproperty key="db.test_db_dsn" value="${db.test_db_dsn}"/>
+      <sysproperty key="db.test_db_schema_dir" value="${db.test_db_schema_dir}"/>
+      <formatter type="xml" />
+      <test name="eu.baltrad.fc.TestQString" todir="test/reports" />
+      <test name="eu.baltrad.fc.TestDate" todir="test/reports" />
+      <test name="eu.baltrad.fc.TestTime" todir="test/reports" />
+      <test name="eu.baltrad.fc.TestFileCatalog" todir="test/reports" />
+    </junit>
+    <antcall target="drop-postgresql-testdb"/>
+  </target>
+
+</project>

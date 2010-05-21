@@ -15,13 +15,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-Import("env")
+Import("env", "conf")
 
 env.AppendUnique(CPPPATH=["${jdk_include_dir}", "${jdk_include_dir}/linux"])
-
-#Execute(Delete(env.Dir(".").Dir("eu")))
-#Execute(Mkdir(env.Dir(".").Dir("eu/baltrad/fc")))
-#Execute(Delete(env.Dir(".").Dir("classes")))
 
 build_dir = env.Dir(".").get_abspath()
 
@@ -32,8 +28,6 @@ env["JAVACLASSPATH"] = build_dir
 env.Append(SWIGPATH=env["CPPPATH"])
 
 fc_env = env.Clone()
-Execute(Mkdir(env.Dir(".").Dir("eu/baltrad/fc/").get_abspath()))
-Execute(Touch(env.Dir(".").File("eu/baltrad/fc/fcJNI.java").get_abspath()))
 
 fc_env.Append(SWIGFLAGS="-c++ -java -package eu.baltrad.fc".split())
 fc_env.Append(SWIGOUTDIR=build_dir + "/eu/baltrad/fc")
@@ -58,17 +52,14 @@ lib = env.SharedLibrary("#lib/brfc_java",
                         [fc, fc_expr, fc_oh5, fc_test],
                         LIBS=["brfc"])
 
-confdeps = env.ConfHas("#java-wrapper-confdeps", ["jni", "hlhdf"])
-
-env.Requires(lib, confdeps)
-
 env.Clean(lib, Dir(".").Dir("eu"))
 env.Clean(lib, Dir(".").Dir("classes"))
 
-java = env.Java(target="classes", source=["eu", "java"])
-jar = env.Jar(target="#lib/jbrfc.jar", source=["classes/eu"])
+jar = env.Command("#lib/jbrfc.jar", [fc, fc_expr, fc_oh5, fc_test],
+                  "${ant_executable} "
+                  "-f build.xml build")
 
-env.Alias("java-wrapper", [lib, java, jar])
+env.Alias("build-java-wrapper", [lib, jar])
 
 env.Install("${install_root}/lib", lib)
 env.Install("${install_root}/java", jar)

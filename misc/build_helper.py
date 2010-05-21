@@ -15,6 +15,16 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import sys
+
+# XXX: this is not a nice way to access it
+_mod_vars = sys.modules["SCons.Variables"]
+
+Variables = _mod_vars.Variables
+BoolVariable = _mod_vars.BoolVariable
+PathVariable = _mod_vars.PathVariable
+
 def CheckBoostVersion(ctx, version):
     ctx.Message("Checking for Boost version >= %s... " % version)
 
@@ -46,12 +56,186 @@ def CheckHlhdf(ctx):
         "int main() { return 0; }"
     )
     ctx.Message("Checking for HLHDF... ")
-    oldlibs = ctx.AppendLIBS(["hlhdf", "hdf5"])
+    oldlibs = ctx.AppendLIBS(["hlhdf"])
     result = ctx.TryLink("\n".join(src), ".c")
     ctx.Result(result)
     ctx.SetLIBS(oldlibs)
 
     return result
+
+def CheckAnt(ctx):
+    ctx.Message("Checking for ant... ")
+    result = ctx.env.WhereIs("ant")
+    ctx.Result(result)
+    return result
+
+class Config(object):
+    _custom_tests = {
+       "CheckBoostVersion": CheckBoostVersion,
+       "CheckHlhdf": CheckHlhdf,
+       "CheckAnt": CheckAnt
+    }
+
+    def __init__(self, env, cache=".configvars.cache"):
+        self.env = env.Clone()
+        self.cfg = self.env.Configure(custom_tests=self._custom_tests,
+                                      clean=False, help=False)
+        self.cache = cache
+
+        self.vars = Variables(cache)
+
+        self.vars.AddVariables(
+            BoolVariable("have_pqxx", "found pqxx library", False),
+            BoolVariable("have_hlhdf", "found hlhdf library", False),
+            BoolVariable("have_icu", "found icu library", False),
+            BoolVariable("have_pqxx", "found pqxx library", False),
+            BoolVariable("have_boost", "found boost library", False),
+            BoolVariable("have_gtest", "found gtest library", False),
+            BoolVariable("have_gmock", "found gmock library", False),
+            BoolVariable("have_jni", "found jni library", False),
+            PathVariable("ant_executable", "location of ant executable",
+                         "", PathVariable.PathAccept)
+        )
+
+        self.vars.Update(self.env)
+        self._ld_library_path = env["ENV"].get("LD_LIBRARY_PATH", "")
+
+
+    def _cleanenv(self):
+        self.env["LIBS"] = []
+        self.env["CPPPATH"] = []
+        self.env["LIBPATH"] = []
+        self.env["ENV"]["LD_LIBRARY_PATH"] = self._ld_library_path
+
+    def _wrap_check(self, act, *args, **kw):
+        return lambda : act(*args, **kw)
+    
+    def _conf_one(self, var, check, clean=True):
+        ret = check()
+        if clean:
+            self._cleanenv();
+        self.env[var] = ret
+    
+    def configure(self):
+        # XXX: hack to force rebuilding of all conf checks
+        sys.modules["SCons.SConf"].SetCacheMode("force")
+
+        cfg = self.cfg
+        env = self.env
+        
+        env.AppendUnique(CPPPATH="${pqxx_include_dir}",
+                         LIBPATH="${pqxx_lib_dir}")
+        env.AppendENVPath("LD_LIBRARY_PATH",
+                          env.Dir("${pqxx_lib_dir}").abspath)
+        self._conf_one("have_pqxx",
+                       self._wrap_check(cfg.CheckLibWithHeader,
+                                        "pqxx", "pqxx/pqxx", "c++"))
+
+        env.AppendUnique(CPPPATH="${hlhdf_include_dir}",
+                         LIBPATH="${hlhdf_lib_dir}")
+        env.AppendENVPath("LD_LIBRARY_PATH",
+                          env.Dir("${hlhdf_lib_dir}").abspath)
+        self._conf_one("have_hlhdf",
+                       self._wrap_check(cfg.CheckHlhdf))
+
+        env.AppendUnique(CPPPATH="${icu_include_dir}",
+                         LIBPATH="${icu_lib_dir}")
+        env.AppendENVPath("LD_LIBRARY_PATH",
+                          env.Dir("${icu_lib_dir}").abspath)
+        self._conf_one("have_icu", self._wrap_check(self._check_icu))
+
+        env.AppendUnique(CPPPATH="${boost_include_dir}",
+                         LIBPATH="${boost_lib_dir}")
+        env.AppendENVPath("LD_LIBRARY_PATH",
+                          env.Dir("${boost_lib_dir}").abspath)
+        self._conf_one("have_boost", self._wrap_check(self._check_boost))
+       
+        env.AppendUnique(CPPPATH="${gtest_include_dir}",
+                         LIBPATH="${gtest_lib_dir}")
+        env.AppendENVPath("LD_LIBRARY_PATH",
+                          env.Dir("${gtest_lib_dir}").abspath)
+        self._conf_one("have_gtest",
+                       self._wrap_check(cfg.CheckLibWithHeader,
+                                        "gtest", "gtest/gtest.h", "c++"),
+                       clean=False)
+        self._conf_one("have_gmock",
+                       self._wrap_check(cfg.CheckLibWithHeader,
+                                        "gmock", "gmock/gmock.h", "c++"))
+        
+        env.AppendUnique(CPPPATH=["${jdk_include_dir}",
+                                  "${jdk_include_dir}/linux"],
+                         LIBPATH="${jdk_lib_dir}")
+        env.AppendENVPath("LD_LIBRARY_PATH",
+                          env.Dir("${jdk_lib_dir}").abspath)
+        self._conf_one("have_jni",
+                       self._wrap_check(cfg.CheckHeader, "jni.h"))
+
+        self._conf_one("ant_executable", cfg.CheckAnt)
+        
+        cfg.Finish()
+    
+    def _check_boost(self):
+        rets = []
+        rets.append(self.cfg.CheckBoostVersion("1.38"))
+
+        headers = (
+            "enable_shared_from_this.hpp",
+            "foreach.hpp",
+            "lexical_cast.hpp",
+            "noncopyable.hpp",
+            "scoped_ptr.hpp",
+            "shared_ptr.hpp",
+            "variant.hpp",
+            "iterator/iterator_facade.hpp",
+            "numeric/conversion/cast.hpp",
+        )
+
+        for header in headers:
+            rets.append(self.cfg.CheckCXXHeader("/".join(("boost", header))))
+
+        rets.append(self.cfg.CheckLibWithHeader("boost_filesystem",
+                                                "boost/filesystem.hpp",
+                                                "c++"))
+
+        return False not in map(bool, rets)
+ 
+    def _check_icu(self):
+        rets = []
+
+        rets.append(self.cfg.CheckLibWithHeader("icuuc",
+                                                "unicode/unistr.h",
+                                                "c++"))
+        rets.append(self.cfg.CheckLibWithHeader("icutu",
+                                                "unicode/regex.h",
+                                                "c++"))
+
+        return False not in map(bool, rets)
+    
+    def save(self):
+        self.vars.Save(self.cache, self.env)
+
+    def is_configured(self):
+        return os.path.exists(self.cache)
+    
+    def has_minimal_deps(self):
+        env = self.env
+        return False not in map(bool, (env["have_boost"],
+                                       env["have_icu"],
+                                       env["have_pqxx"],
+                                       env["have_hlhdf"]))
+    
+    def has_java_deps(self):
+        env = self.env
+        return False not in map(bool, (env["have_jni"],))
+    
+    def has_test_deps(self):
+        return bool(self.env["have_gtest"])
+    
+    def has_sql_dialect(self, dialect):
+        if dialect == "postgresql" and self.env["have_pqxx"]:
+            return True
+        return False
+
 
 # from python2.5
 class BaseResult(tuple):

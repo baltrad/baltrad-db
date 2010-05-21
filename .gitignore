@@ -5,7 +5,7 @@ test/runner
 test/reports
 *.pyc
 .*.swp
-variables.cache
+.*.cache
 .sconsign.dblite
 .sconf_temp/
 config.log

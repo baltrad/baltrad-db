@@ -20,7 +20,7 @@ import sys
 import urlparse
 
 sys.path.append("./misc")
-from build_helper import (CheckBoostVersion, CheckHlhdf, SplitResult)
+from build_helper import (Config, SplitResult)
 
 EnsureSConsVersion(1, 2)
 
@@ -29,7 +29,7 @@ def convert_test_db_dsns(value):
     dsns = [dsn for dsn in dsns if dsn.strip()]
     return dsns
 
-vars = Variables("variables.cache")
+vars = Variables(".vars.cache")
 
 vars.AddVariables(
     PathVariable("prefix", "installation prefix",
@@ -40,12 +40,6 @@ vars.AddVariables(
                  "${pqxx_dir}/lib", PathVariable.PathIsDir),
     PathVariable("pqxx_include_dir", "libpqxx include directory",
                  "${pqxx_dir}/include", PathVariable.PathIsDir),
-    PathVariable("hdf5_dir", "HDF5 install root",
-                 "/usr", PathVariable.PathIsDir),
-    PathVariable("hdf5_lib_dir", "HDF5 libraries directory",
-                 "${hdf5_dir}/lib", PathVariable.PathIsDir),
-    PathVariable("hdf5_include_dir", "HDF5 include directory",
-                 "${hdf5_dir}/include", PathVariable.PathIsDir),
     PathVariable("hlhdf_dir", "HLHDF install root",
                  "/usr", PathVariable.PathIsDir),
     PathVariable("hlhdf_lib_dir", "HLHDF libraries directory",
@@ -76,8 +70,10 @@ vars.AddVariables(
                  "${gtest_dir}/lib", PathVariable.PathIsDir),
     PathVariable("gtest_include_dir", "googletest include directory",
                  "${gtest_dir}/include", PathVariable.PathIsDir),
-    PathVariable("ant_dir", "directory where ant libraries are found",
-                 "/usr/share/java", PathVariable.PathIsDir),
+    PathVariable("ant_dir", "directory of ant installation",
+                 "/usr", PathVariable.PathIsDir),
+    PathVariable("ant_executable", "Ant executable",
+                 "${ant_dir}/bin/ant", PathVariable.PathIsFile),
     BoolVariable("debug", "generate debug code", False),
     BoolVariable("build_java", "build java bindings", True),
     PathVariable("install_root", "installation directory",
@@ -86,25 +82,14 @@ vars.AddVariables(
 )
 
 ##
-# set up default environment
+# create default environment
 ##
 
 env = Environment(tools=["default", "doxygen", "swig", "textfile"],
                   toolpath=["misc/scons_tools"],
                   variables=vars,
-                  CCFLAGS=["-pedantic", "-Wall", "-Wno-long-long"],
-                  CPPPATH=["#src"],
-                  LIBPATH=["#lib"],
-                  ENV={"PATH": os.environ["PATH"]})
-confenv = env.Clone()
-confenv["CCFLAGS"].remove("-pedantic")
+                  ENV=os.environ)
 
-env.Default(env.Alias("shared-library"))
-
-if env["build_java"]:
-    env.Default(env.Alias("java-wrapper"))
-
-env["version"] = "devel"
 
 if vars.UnknownVariables():
     print "unknown variables:"
@@ -112,120 +97,106 @@ if vars.UnknownVariables():
         print " ", key, "=", value
     Exit(1)
 
-vars.Save("variables.cache", env)
+def my_format(env, key, help, default, actual, aliases):
+    fmt = "  %s:\n      %s\n      value: %s\n"
+    return fmt % (key, help, actual)
+vars.FormatVariableHelpText = my_format
 
-env["test_db_dsns"] = convert_test_db_dsns(env["test_db_dsns"])
-
+Help("VARIABLES:\n")
 Help(vars.GenerateHelpText(env))
+Help("""
+TARGETS:
+  configure
+      configure the build environment and check for dependencies
+  doc
+      generate Doxygen documentation to doc/
+      (can be called unconfigured)
+  build-shared-library
+      build shared library to lib/brfc.so
+  build-java-wrapper
+      build Java wrapper to lib/jbrfc.so, lib/libbrfc_java.so and jbrfc.jar
+  build-gtest-tests
+      build test/runner (tests written in C++)
+  run-gtest-tests
+      execute test/runner with xml output to test/reports/gtest.xml
+  build-java-tests
+      build tests written in Java
+  run-java-tests
+      execute tests written in Java
+  run-all-tests
+      execute both C++ and Java tests
+  install
+      install built libraries
+  distclean
+      clean all files (more than `scons -c`)
+""")
+
+##
+# configure
+##
+conf = Config(env)
+
+env.Action("#configure", None) #dummy target
+if "configure" in COMMAND_LINE_TARGETS:
+    # variables are saved here because configuration
+    # validity depends upon them
+    vars.Save(".vars.cache", env)
+
+    conf.configure()
+
+    if conf.has_minimal_deps():
+        conf.save()
+    else:
+        print "\nMinimal dependencies not met. Fix and reconfigure."
+    Exit() # don't proceed to build default targets
+
+
+if GetOption("clean"):
+    pass # clean may pass unconfigured
+elif len(COMMAND_LINE_TARGETS) == 1 and "doc" in COMMAND_LINE_TARGETS:
+    pass # doc may pass unconfigured
+elif not conf.is_configured():
+    print "\nHave no configuration, run 'scons configure'"
+    Exit()
+elif not conf.has_minimal_deps():
+    print "\nMinimal dependencies not met. Reconfigure"
+    Exit()
+
+
+##
+# set up default environment for building
+#
+env.AppendUnique(CCFLAGS=["-pedantic", "-Wall", "-Wno-long-long"])
 
 if env["debug"]:
     env.AppendUnique(CCFLAGS=["-g", "-fno-inline-functions"])
 else:
     env.AppendUnique(CCFLAGS=["-O2", "-fno-strict-aliasing"])
 
-env.AppendUnique(CPPPATH=["${hdf5_include_dir}",
+env.AppendUnique(CPPPATH=["#src",
                           "${hlhdf_include_dir}",
                           "${pqxx_include_dir}",
                           "${icu_include_dir}",
                           "${boost_include_dir}"])
-env.AppendUnique(LIBPATH=["${hdf5_lib_dir}",
-                          "${hlhdf_lib_dir}",
-                          "${pqxx_lib_dir}",
-                          "${icu_lib_dir}",
-                          "${boost_lib_dir}"])
 
-##
-# configure
-##
+libdirs = [
+    "#lib",
+    "${hlhdf_lib_dir}",
+    "${pqxx_lib_dir}",
+    "${icu_lib_dir}",
+    "${boost_lib_dir}"
+]
 
-class Config(object):
-    _custom_tests = {
-       "CheckBoostVersion": CheckBoostVersion,
-       "CheckHlhdf": CheckHlhdf,
-    }
+env.AppendUnique(LIBPATH=libdirs)
 
-    def __init__(self, env):
-        self.cfg = env.Configure(custom_tests=self._custom_tests,
-                                 clean=False, help=False)
-    
-    def check(self):
-        cfg = self.cfg
-        
-        cfg.env.AppendUnique(CPPPATH="${pqxx_include_dir}",
-                             LIBPATH="${pqxx_lib_dir}")
-        self.pqxx = cfg.CheckLibWithHeader("pqxx", "pqxx/pqxx", "c++")
+for path in libdirs:
+    abspath = env.Dir(path).abspath
+    if abspath not in ("/lib", "/usr/lib"): # default ld lookups
+        env.AppendENVPath("LD_LIBRARY_PATH", abspath)
 
-        cfg.env.AppendUnique(CPPPATH=env["hdf5_include_dir"],
-                             LIBPATH=env["hdf5_lib_dir"])
-        self.hdf5 = cfg.CheckLibWithHeader("hdf5", "hdf5.h", "c++")
+env["version"] = "devel"
 
-        cfg.env.AppendUnique(CPPPATH=env["hlhdf_include_dir"],
-                             LIBPATH=env["hlhdf_lib_dir"])
-        self.hlhdf = cfg.CheckHlhdf()
-        
-        cfg.env.AppendUnique(CPPPATH="${icu_include_dir}",
-                             LIBPATH="${icu_lib_dir}")
-        self.icu_uc = cfg.CheckLibWithHeader("icuuc", "unicode/unistr.h", "c++")
-        self.icu_tu = cfg.CheckLibWithHeader("icutu", "unicode/regex.h", "c++")
-
-        cfg.env.AppendUnique(CPPPATH=env["boost_include_dir"])
-        self.boost = 0 not in [cfg.CheckBoostVersion("1.38"),
-                               self._check_boost_headers()]
-
-        cfg.env.AppendUnique(CPPPATH="${gtest_include_dir}",
-                             LIBPATH="${gtest_lib_dir}")
-        self.gtest = cfg.CheckLibWithHeader("gtest", "gtest/gtest.h", "c++")
-        self.gmock = cfg.CheckLibWithHeader("gmock", "gmock/gmock.h", "c++")
-
-        cfg.env.AppendUnique(CPPPATH=["${jdk_include_dir}",
-                                       "${jdk_include_dir}/linux"],
-                              LIBPATH="${jdk_lib_dir}")
-        self.jni = cfg.CheckCHeader("jni.h")
-        cfg.Finish()
-   
-    def _check_boost_headers(self):
-        headers = (
-            "enable_shared_from_this.hpp",
-            "foreach.hpp",
-            "lexical_cast.hpp",
-            "noncopyable.hpp",
-            "scoped_ptr.hpp",
-            "shared_ptr.hpp",
-            "variant.hpp",
-            "iterator/iterator_facade.hpp",
-            "numeric/conversion/cast.hpp",
-        )
-
-        rets = []
-        for header in headers:
-            rets.append(self.cfg.CheckCXXHeader("/".join(("boost", header))))
-        return 0 not in rets
-    
-    def has_sql_dialect(self, dialect):
-        if dialect == "postgresql" and self.pqxx:
-            return True
-        return False
-
-conf = Config(confenv)
-conf.check()
-
-
-def conf_obj(value):
-    return Value(getattr(conf, value))
-
-def conf_has(target, source, env):
-    if not isinstance(source, list):
-        source = [source]
-    missing = []
-    for src in source:
-        if not src.value:
-            missing.append(str(src))
-    if missing:
-        print >> sys.stderr, "missing dependencies: %s" % " ".join(missing)
-        return 1
-
-env.Append(BUILDERS={"ConfHas": env.Builder(action=conf_has, source_factory=conf_obj)})
-
+env["test_db_dsns"] = convert_test_db_dsns(env["test_db_dsns"])
 
 # remove dsns with unavailable driver
 for dsn in env["test_db_dsns"]:
@@ -238,45 +209,59 @@ for dsn in env["test_db_dsns"]:
 # set up targets
 ##
 
+# set default target to 'build-shared-library' and 'build-java-wrapper'
+env.Default(env.Alias("shared-library"))
+if env["build_java"]:
+    env.Default(env.Alias("java-wrapper"))
+
+# add 'doc' target
 doc = env.Doxygen("doc/Doxyfile")
 env.Alias("doc", doc)
 
-SConscript("src/brfc/SConscript",
-           build_dir="build/brfc", duplicate=0,
-           exports={"env": env.Clone()})
+# add 'distclean' target
+env.Clean("distclean", ["#.sconsign.dblite"
+                        "#/.sconf_temp",
+                        "#config.log",
+                        "#test/reports",
+                        "#.configvars.cache",
+                        ".vars.cache",
+                        "#build"])
 
-testenv = env.Clone()
-testenv.AppendUnique(CPPPATH=["${gtest_include_dir}"])
-testenv.AppendUnique(LIBPATH=["${gtest_lib_dir}"])
+# add 'build-shared-library' target
+SConscript(
+    "src/brfc/SConscript",
+    build_dir="build/brfc", duplicate=0,
+    exports={
+        "env": env.Clone(),
+        "conf": conf,
+    }
+)
 
-for path in ("#lib", "${gtest_lib_dir}", "${hlhdf_lib_dir}", "${boost_lib_dir}"):
-    abspath = env.Dir(path).abspath
-    if abspath not in ("/lib", "/usr/lib"): # default ld lookups
-        testenv.AppendENVPath('LD_LIBRARY_PATH', abspath)
+# add 'build-gtest' target
+SConscript(
+    "test/brfc/SConscript",
+    build_dir="build/test/brfc", duplicate=0,
+    exports={
+        "env": env.Clone(),
+        "conf": conf
+    }
+)
 
-SConscript("test/brfc/SConscript",
-           build_dir="build/test/brfc", duplicate=0,
-           exports={"env": testenv})
+# add 'build-java-wrapper' target
+SConscript(
+    "swig/SConscript",
+    build_dir="build/swig", duplicate=0,
+    exports={
+        "env": env.Clone(),
+        "conf": conf
+    }
+)
 
-jtestenv = env.Clone()
-SConscript("test/java/SConscript",
-           build_dir="build/test/java", duplicate=0,
-           exports={"env": jtestenv})
-
-
-
-SConscript("swig/SConscript",
-           build_dir="build/swig", duplicate=0,
-           exports={"env": env.Clone()})
-
-env.Install("${install_root}/sql/postgresql",
-            ["#schema/postgresql/create.sql", "#schema/postgresql/drop.sql"])
-env.Alias("install", [env["install_root"]])
-
-run_gtest_tests = testenv.Command("run_gtest_tests", "#test/runner",
-                                  "$SOURCE "
-                                  "--gtest_output=xml:test/reports/gtest.xml")
-env.Alias("test", run_gtest_tests)
+# add 'build-java-tests' target
+cmd = env.Command("#lib/jbrfc_test.jar", ["build-java-wrapper"],
+                  "${ant_executable} "
+                  "-f build.xml build-tests")
+env.Alias("build-java-tests", cmd)
 
 urlparse.uses_netloc.append("postgresql")
 
@@ -284,6 +269,7 @@ def ant_testdb_properties():
     # pick out postgresql dsn if present
     for dsn in env["test_db_dsns"]:
         url = SplitResult(*urlparse.urlsplit(dsn))
+        print url
         if url.scheme != "postgresql":
             continue
         jdbcurl = "".join(["jdbc:", url.scheme, "://", url.hostname, url.path])
@@ -294,13 +280,22 @@ def ant_testdb_properties():
                 "-Ddb.test_db_schema_dir=%s" % env.Dir("#schema").abspath]
     return []
 
-run_java_tests = testenv.Command("run_java_tests", "#lib/jbrfc_test.jar",
-    "ant "
-    "-lib ./lib -lib ./deplib -lib ${ant_dir} " +
-    " ".join(ant_testdb_properties()) + 
-    " -f test/java/build.xml")
+# add 'execute-java-tests' target
+cmd = env.Command("#run-java-tests", ["build-java-tests"],
+                  "${ant_executable} " +
+                  " ".join(ant_testdb_properties()) +
+                  " -f build.xml execute-tests")
 
-env.Alias("hudsontest", [run_gtest_tests, run_java_tests])
+#
 
+# add sql schema as 'install' target
+env.Install("${install_root}/sql/postgresql",
+            ["#schema/postgresql/create.sql", "#schema/postgresql/drop.sql"])
+
+# alias install for everything going under ${install_root}
+env.Alias("install", [env["install_root"]])
+
+ 
+env.Alias("run-all-tests", ["run-gtest-tests", "run-java-tests"])
 
 # vim:filetype=python:et:ts=4:sw=4:
