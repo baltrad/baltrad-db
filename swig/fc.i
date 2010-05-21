@@ -82,12 +82,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::ResultSet::operator=;
 %rename(boolean_) brfc::ResultSet::boolean;
 
-%ignore brfc::Variant::operator=;
+// uses int references
+%ignore brfc::Date::date_from_jdn;
 
 // ignore Variant members
 %ignore brfc::Variant::Variant(const char* value);
 %ignore brfc::Variant::Variant(const QVariant& value);
-%ignore brfc::operator=;
+%ignore brfc::Variant::operator=;
 %ignore brfc::Variant::qstring;
 %ignore brfc::Variant::to_qvariant;
 
