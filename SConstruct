@@ -210,9 +210,9 @@ for dsn in env["test_db_dsns"]:
 ##
 
 # set default target to 'build-shared-library' and 'build-java-wrapper'
-env.Default(env.Alias("shared-library"))
+env.Default(env.Alias("build-shared-library"))
 if env["build_java"]:
-    env.Default(env.Alias("java-wrapper"))
+    env.Default(env.Alias("build-java-wrapper"))
 
 # add 'doc' target
 doc = env.Doxygen("doc/Doxyfile")
@@ -269,7 +269,6 @@ def ant_testdb_properties():
     # pick out postgresql dsn if present
     for dsn in env["test_db_dsns"]:
         url = SplitResult(*urlparse.urlsplit(dsn))
-        print url
         if url.scheme != "postgresql":
             continue
         jdbcurl = "".join(["jdbc:", url.scheme, "://", url.hostname, url.path])
