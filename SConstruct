@@ -153,6 +153,9 @@ if "configure" in COMMAND_LINE_TARGETS:
 
 if GetOption("clean"):
     pass # clean may pass unconfigured
+if GetOption("help"):
+    print sys.modules["SCons.Script"].help_text
+    Exit()
 elif len(COMMAND_LINE_TARGETS) == 1 and "doc" in COMMAND_LINE_TARGETS:
     pass # doc may pass unconfigured
 elif not conf.is_configured():
