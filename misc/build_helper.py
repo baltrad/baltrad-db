@@ -63,9 +63,9 @@ def CheckHlhdf(ctx):
 
     return result
 
-def CheckAnt(ctx):
-    ctx.Message("Checking for ant... ")
-    result = ctx.env.WhereIs("ant")
+def CheckAnt(ctx, executable):
+    ctx.Message("Checking for ant executable... ")
+    result = os.path.exists(executable)
     ctx.Result(result)
     return result
 
@@ -93,7 +93,7 @@ class Config(object):
             BoolVariable("have_gtest", "found gtest library", False),
             BoolVariable("have_gmock", "found gmock library", False),
             BoolVariable("have_jni", "found jni library", False),
-            PathVariable("ant_executable", "location of ant executable",
+            PathVariable("have_ant_executable", "found ant executable",
                          "", PathVariable.PathAccept)
         )
 
@@ -170,7 +170,9 @@ class Config(object):
         self._conf_one("have_jni",
                        self._wrap_check(cfg.CheckHeader, "jni.h"))
 
-        self._conf_one("ant_executable", cfg.CheckAnt)
+        self._conf_one("ant_executable",
+                       self._wrap_check(cfg.CheckAnt,
+                                        env.File("${ant_executable}").abspath))
         
         cfg.Finish()
     
@@ -226,7 +228,8 @@ class Config(object):
     
     def has_java_deps(self):
         env = self.env
-        return False not in map(bool, (env["have_jni"],))
+        return False not in map(bool, (env["have_jni"],
+                                       env["have_ant_executable"]))
     
     def has_test_deps(self):
         return bool(self.env["have_gtest"])

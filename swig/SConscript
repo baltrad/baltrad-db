@@ -17,6 +17,13 @@
 
 Import("env", "conf")
 
+if not conf.has_java_deps():
+    if "build-java-wrapper" in map(str, BUILD_TARGETS):
+        print "dependencies not met for required target 'build-java-wrapper'"
+        Exit(1)
+    else:
+        print "skipping 'swig/SConscript', dependencies not met"
+
 env.AppendUnique(CPPPATH=["${jdk_include_dir}", "${jdk_include_dir}/linux"])
 
 build_dir = env.Dir(".").get_abspath()
