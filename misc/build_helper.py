@@ -170,7 +170,7 @@ class Config(object):
         self._conf_one("have_jni",
                        self._wrap_check(cfg.CheckHeader, "jni.h"))
 
-        self._conf_one("ant_executable",
+        self._conf_one("have_ant_executable",
                        self._wrap_check(cfg.CheckAnt,
                                         env.File("${ant_executable}").abspath))
         
