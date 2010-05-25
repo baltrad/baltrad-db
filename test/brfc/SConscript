@@ -49,8 +49,7 @@ objects = env.SharedObject(sources)
 env.Depends(objects, [config_hpp])
 
 runner = env.Program("#test/runner", objects,
-            LIBS=["gtest", "gmock", "brfc", "boost_filesystem"],
-            RPATH=env["ENV"]["LD_LIBRARY_PATH"])
+            LIBS=["gtest", "gmock", "brfc", "boost_filesystem"])
 env.Alias("build-gtest-tests", runner)
 
 
