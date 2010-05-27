@@ -192,10 +192,14 @@ libdirs = [
 
 env.AppendUnique(LIBPATH=libdirs)
 
+ld_path = env["ENV"].get("LD_LIBRARY_PATH", "").split(":")
+ld_path = [os.path.abspath(path) for path in ld_path if path]
 for path in libdirs:
     abspath = env.Dir(path).abspath
-    if abspath not in ("/lib", "/usr/lib"): # default ld lookups
-        env.AppendENVPath("LD_LIBRARY_PATH", abspath)
+    if abspath not in ("/lib", "/usr/lib") and abspath not in ld_path:
+        ld_path.append(abspath)
+
+env["ENV"]["LD_LIBRARY_PATH"] = ":".join(ld_path)
 
 env["version"] = "devel"
 

@@ -17,13 +17,21 @@
 
 Import("env", "conf")
 
+import os.path
+
 if not conf.has_test_deps():
     print "Test dependencies not met, skipping test/brfc/SConstruct"
     Return()
 
 env.AppendUnique(CPPPATH=["${gtest_include_dir}"])
 env.AppendUnique(LIBPATH=["${gtest_lib_dir}"])
-env.AppendENVPath("LD_LIBRARY_PATH", env.Dir("${gtest_lib_dir}").abspath)
+
+ld_path = env["ENV"].get("LD_LIBRARY_PATH", "").split(":")
+ld_path = [os.path.abspath(path) for path in ld_path if path]
+abspath = env.Dir("${gtest_lib_dir}").abspath
+if abspath not in ("/lib", "/usr/lib") and abspath not in ld_path:
+    ld_path.append(abspath)
+env["ENV"]["LD_LIBRARY_PATH"] = ":".join(ld_path)
 
 def strlit(var):
     return "\"%s\"" % var
