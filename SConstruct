@@ -160,7 +160,7 @@ elif len(COMMAND_LINE_TARGETS) == 1 and "doc" in COMMAND_LINE_TARGETS:
     pass # doc may pass unconfigured
 elif not conf.is_configured():
     print "\nHave no configuration, run 'scons configure'"
-    Exit()
+    #Exit()
 elif not conf.has_minimal_deps():
     print "\nMinimal dependencies not met. Reconfigure"
     Exit()
@@ -183,17 +183,18 @@ env.AppendUnique(CPPPATH=["#src",
                           "${boost_include_dir}"])
 
 libdirs = [
-    "#lib",
     "${hlhdf_lib_dir}",
     "${pqxx_lib_dir}",
     "${icu_lib_dir}",
     "${boost_lib_dir}"
 ]
 
+env.AppendUnique(LIBPATH="#lib")
 env.AppendUnique(LIBPATH=libdirs)
 
 ld_path = env["ENV"].get("LD_LIBRARY_PATH", "").split(":")
 ld_path = [os.path.abspath(path) for path in ld_path if path]
+ld_path.insert(0, env.Dir("#lib").abspath)
 for path in libdirs:
     abspath = env.Dir(path).abspath
     if abspath not in ("/lib", "/usr/lib") and abspath not in ld_path:
