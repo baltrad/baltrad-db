@@ -86,6 +86,7 @@ class Config(object):
 
         self.vars.AddVariables(
             BoolVariable("have_pqxx", "found pqxx library", False),
+            BoolVariable("have_hdf5", "found HDF5 library", False),
             BoolVariable("have_hlhdf", "found hlhdf library", False),
             BoolVariable("have_icu", "found icu library", False),
             BoolVariable("have_pqxx", "found pqxx library", False),
