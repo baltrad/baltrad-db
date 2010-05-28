@@ -46,6 +46,12 @@ vars.AddVariables(
                  "${hlhdf_dir}/lib", PathVariable.PathIsDir),
     PathVariable("hlhdf_include_dir", "HLHDF include directory",
                  "${hlhdf_dir}/include", PathVariable.PathIsDir),
+    PathVariable("hdf5_dir", "HDF5 install root",
+                 "/usr", PathVariable.PathIsDir),
+    PathVariable("hdf5_lib_dir", "HDF5 libraries directory",
+                 "${hdf5_dir}/lib", PathVariable.PathIsDir),
+    PathVariable("hdf5_include_dir", "HDF5 include directory",
+                 "${hdf5_dir}/include", PathVariable.PathIsDir),
     PathVariable("icu_dir", "ICU install root",
                  "/usr", PathVariable.PathIsDir),
     PathVariable("icu_lib_dir", "ICU libraries directory",
@@ -178,12 +184,14 @@ else:
 
 env.AppendUnique(CPPPATH=["#src",
                           "${hlhdf_include_dir}",
+                          "${hdf5_include_dir}",
                           "${pqxx_include_dir}",
                           "${icu_include_dir}",
                           "${boost_include_dir}"])
 
 libdirs = [
     "${hlhdf_lib_dir}",
+    "${hdf5_lib_dir}",
     "${pqxx_lib_dir}",
     "${icu_lib_dir}",
     "${boost_lib_dir}"

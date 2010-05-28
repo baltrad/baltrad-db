@@ -131,6 +131,14 @@ class Config(object):
                        self._wrap_check(cfg.CheckLibWithHeader,
                                         "pqxx", "pqxx/pqxx", "c++"))
 
+        env.AppendUnique(CPPPATH="${hdf5_include_dir}",
+                         LIBPATH="${hdf5_lib_dir}")
+        env.AppendENVPath("LD_LIBRARY_PATH",
+                          env.Dir("${hdf5_lib_dir}").abspath)
+        self._conf_one("have_hdf5",
+                       self._wrap_check(cfg.CheckLibWithHeader,
+                                        "hdf5", "hdf5.h", "c"))
+
         env.AppendUnique(CPPPATH="${hlhdf_include_dir}",
                          LIBPATH="${hlhdf_lib_dir}")
         env.AppendENVPath("LD_LIBRARY_PATH",
@@ -224,7 +232,8 @@ class Config(object):
         return False not in map(bool, (env["have_boost"],
                                        env["have_icu"],
                                        env["have_pqxx"],
-                                       env["have_hlhdf"]))
+                                       env["have_hlhdf"],
+                                       env["have_hdf5"]))
     
     def has_java_deps(self):
         env = self.env
