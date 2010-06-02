@@ -17,13 +17,16 @@
 
 import optparse
 import os
-import urlparse
+import sys
 
 import Build
 import Configure
 import Options
 import Scripting
 import Utils
+
+sys.path.append("./misc")
+from build_helper import urlsplit
 
 APPNAME = "baltrad-db"
 VERSION = "devel"
@@ -435,12 +438,10 @@ def _build_java_tests(bld):
     bld.add_manual_dependency(jbrfc_test,
                               bld.path.find_resource("build.xml"))
     
-urlparse.uses_netloc.append("postgresql")
-
 def _ant_testdb_properties(dsns):
     # pick out postgresql dsn if present
     for dsn in dsns:
-        url = urlparse.urlsplit(dsn)
+        url = urlsplit(dsn)
         if url.scheme != "postgresql":
             continue
         jdbc_url = "".join(["jdbc:", url.scheme, "://", url.hostname, url.path])
