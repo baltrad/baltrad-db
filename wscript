@@ -141,6 +141,7 @@ def configure(conf):
         includes=env.pqxx_inc_dir,
         libpath=env.pqxx_lib_dir,
         uselib_store="PQXX",
+        mandatory=True,
     )
 
     # check for hdf5
@@ -151,6 +152,7 @@ def configure(conf):
         includes=env.hdf5_inc_dir,
         libpath=env.hdf5_lib_dir,
         uselib_store="HDF5",
+        mandatory=True,
     )
     
     # check for libhlhdf
@@ -162,16 +164,18 @@ def configure(conf):
         libpath=env.hlhdf_lib_dir,
         uselib_store="HLHDF",
         uselib="HDF5",
+        mandatory=True,
     )
     
     # check for libicu
     _lib_path_opts_to_env(env, "icu")
     conf.check_cxx(
         header_name=["unicode/unistr.h", "unicode/regex.h"],
-        lib=["icuuc", "icutu"],
+        lib=["icui18n", "icuuc", "icutu"],
         includes=env.icu_inc_dir,
         libpath=env.icu_lib_dir,
         uselib_store="ICU",
+        mandatory=True,
     )
     
     # check for boost
@@ -182,6 +186,7 @@ def configure(conf):
         includes=env.boost_inc_dir,
         libpath=env.boost_lib_dir,
         uselib_store="BOOST_SYSTEM",
+        mandatory=True,
     )
 
     conf.check_cxx(
@@ -191,6 +196,7 @@ def configure(conf):
         includes=env.boost_inc_dir,
         libpath=env.boost_lib_dir,
         uselib_store="BOOST_FILESYSTEM",
+        mandatory=True,
     )
 
     boost_headers = (
@@ -210,6 +216,7 @@ def configure(conf):
             header_name="boost/" + header,
             includes=env.boost_inc_dir,
             uselib_store="BOOST",
+            mandatory=True,
         )
     
     if env.build_java:
@@ -217,8 +224,12 @@ def configure(conf):
         _lib_path_opts_to_env(env, "jdk")
         conf.check_cc(
             header_name="jni.h",
-            includes=env.jdk_inc_dir,
-            uselib_storage="JNI"
+            includes=[
+                env.jdk_inc_dir,
+                os.path.join(env.jdk_inc_dir, "linux")
+            ],
+            uselib_storage="JNI",
+            mandatory=True,
         )
 
     if env.test:    
@@ -230,6 +241,7 @@ def configure(conf):
             includes=env.gtest_inc_dir,
             libpath=env.gtest_lib_dir,
             uselib_store="GTEST",
+            mandatory=True,
         )
         
         # check for gmock
@@ -241,6 +253,7 @@ def configure(conf):
             includes=env.gmock_inc_dir,
             libpath=env.gmock_lib_dir,
             uselib_store="GMOCK",
+            mandatory=True,
         )
     
     # default flags for all variants
@@ -370,11 +383,11 @@ def _build_java_wrapper(bld):
         swig_targets.append(target)
 
         bld(
-            features="cxx",
+            features="cxx cshlib",
             source="swig/" + filename,
             swig_flags="-c++ -java -outdir %s -package %s" % (outdir, package),
             includes="src",
-            uselib="HLHDF BOOST JNI.H",
+            uselib="ICU HLHDF BOOST JNI.H",
             target=target,
         )
         
@@ -385,7 +398,7 @@ def _build_java_wrapper(bld):
         target="brfc_java",
         add_objects=swig_targets,
         includes="src",
-        uselib="BOOST JNI.H",
+        uselib="ICU BOOST JNI.H",
         uselib_local="brfc",
         install_path="${install_root}/lib",
     )
@@ -464,6 +477,7 @@ def _run_tests(bld):
     ld_path = [os.path.abspath(path) for path in ld_path if path]
     ld_path.insert(0, bdir)
 
+
     libs = [
        "BOOST_SYSTEM", "BOOST_FILESYSTEM",
        "GMOCK", "GTEST",
@@ -479,7 +493,7 @@ def _run_tests(bld):
             ld_path.append(libpath)
     
     if not env["env"]:
-        env.env = {}
+        env.env = os.environ.copy()
     env.env["LD_LIBRARY_PATH"] = ":".join(ld_path)
      
     bld.add_group("run_gtest_tests")
