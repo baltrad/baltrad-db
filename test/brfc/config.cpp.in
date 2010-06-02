@@ -21,11 +21,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-const char* test_schema_dir = %test_schema_dir%;
+const char* test_schema_dir = @test_schema_dir@;
 
 #if BRFC_TEST_DSN_COUNT >= 1
-const char* test_dsns[%test_dsn_count%] = {
-    %test_dsns%
+const char* test_dsns[@test_dsn_count@] = {
+    @test_dsns@
 };
 #else
 const char* test_dsns[1] = {""};

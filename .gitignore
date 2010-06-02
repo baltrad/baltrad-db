@@ -1,11 +1,7 @@
 build/
 doc/html
-lib/
-test/runner
 test/reports
 *.pyc
 .*.swp
-.*.cache
-.sconsign.dblite
-.sconf_temp/
-config.log
+.lock*
+.waf-*

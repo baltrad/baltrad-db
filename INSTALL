@@ -6,18 +6,18 @@ lower version numbers in some cases (i.e boost dependencies
 are probably of version 1.37). 
 
 for building:
-* scons                         1.0
+* python 2.4+
 
 library dependencies:
 * HLHDF library                 0.7.7
-* boost::filesystem		1.38
+* boost::filesystem             1.38
 * boost::iterator               1.38
 * boost::lexical_cast           1.38
 * boost::smart_ptr              1.38
 * boost::utility                1.38
 * boost::variant                1.38
-* libpqxx			2.6.x
-* libicu			3.6
+* libpqxx                       2.6.x
+* libicu                        3.6
 
 additional test dependencies:
 * gtest                         1.4.0
@@ -32,44 +32,54 @@ documentation generation dependencies:
 
 == generating documentation ==
 
- $ scons doc
+ If you have doxygen installed, the following command generates the
+ documentation under ./doc
+
+ $ ./waf doc
 
 
 == building ==
 
-to get a list of available variables:
+first step is to configure the build system. You get a list of available
+configuration variables with
 
- $ scons --help
+ $ ./waf --help
 
 You should probably specify installation prefix (the default is '/usr/local')
 and paths for any libraries you have installed somewhere other than '/usr'.
 
-Specified variables are cached in 'variables.cache' in distribution's root
-directory.
+The default configuration builds baltrad-db library, swig wrappers for java
+and unit tests.
 
-The default is to build with no debugging symbols and to generate java
-bindings.
+Just to give an example:
 
-just to give an example, the following is equivalent to default build:
-
- $ scons prefix=/usr/local debug=no build_java=yes
-
+ $ ./waf configure --build_java=yes \
+                   --prefix=/opt \
+                   --hlhdf_dir=/opt/hlhdflib \
+                   --boost_dir=/opt/boost1.40 \
+                   --jdk_dir=/usr/lib/jvm/java-6-openjdk \
+                   --ant=/opt/ant/bin/ant \
+                   --swig=/opt/swig/bin/swig \
+                   --test=yes \
+                   --test_db_dsn=postgresql://baltrad:baltrad@localhost/baltrad \
+ $ ./waf build
 
 
 == running unit tests ==
 
-You can build unit test runner and run it, using target 'test'. To be able
-to run all tests, you should define 'test_db_dsn' variable. If you don't,
-only tests not dependent on database are compiled.
- 
- $ scons test test_db_dsn=postgresql://baltrad:baltrad@localhost/baltrad
+unit tests are run when the build system is configured with '--test=true'.
+If building java wrappers is enabled, unit tests written in java are also
+executed. To be able to run all tests, you should add database dsns with
+'--test_db_dsn='
+
+unit tests are executed at the end of the build step.
 
 
 == installing ==
 
 If all is in order, feel free to install the library:
 
- $ scons install
+ $ ./waf install
 
 To actually be of any use, you should also create a database. Table creation
 statements can be found in schema/postgresql/create.sql. Just feed the file
