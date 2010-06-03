@@ -111,6 +111,21 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::Variant::operator=;
 %ignore brfc::Variant::qstring;
 %ignore brfc::Variant::to_qvariant;
+// deprecated
+%ignore brfc::Variant::is_long;
+%ignore brfc::Variant::longlong;
+
+%typemap(javacode) brfc::Variant %{
+  @Deprecated
+  public boolean is_long() {
+    return fcJNI.Variant_is_int64(swigCPtr, this);
+  }
+    
+  @Deprecated
+  public long longlong() {
+    return fcJNI.Variant_int64_(swigCPtr, this);
+  }
+%}
 
 SWIG_SHARED_PTR(Database, brfc::Database);
 SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);

@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/variant.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
+#include <brfc/deprecate.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/smart_ptr.hpp>
 #include <brfc/Date.hpp>
@@ -154,17 +155,29 @@ class Variant {
 
     Type type() const { return type_; }
 
-    bool is_null() const { return type_ == NONE; }
-    bool is_string() const { return type_ == STRING; }
-    bool is_long() const { return type_ == LONGLONG; }
-    bool is_double() const { return type_ == DOUBLE; }
-    bool is_bool() const { return type_ == BOOL; }
-    bool is_date() const { return type_ == DATE; }
-    bool is_time() const { return type_ == TIME; }
+    bool is_null() const;
+    bool is_string() const;
+
+    /**
+     * @deprecated use is_int64()
+     */
+    DEPRECATED(bool is_long() const);
+
+    bool is_int64() const;
+
+    bool is_double() const;
+    bool is_bool() const;
+    bool is_date() const;
+    bool is_time() const;
 
     const String& string() const;
+    
+    /**
+     * @deprecated use int64_()
+     */
+    DEPRECATED(long long longlong() const);
 
-    long long longlong() const;
+    long long int64_() const;
 
     double double_() const;
 
