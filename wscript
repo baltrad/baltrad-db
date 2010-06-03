@@ -21,6 +21,7 @@ import sys
 
 import Build
 import Configure
+import Environment
 import Options
 import Scripting
 import Utils
@@ -89,11 +90,11 @@ def set_options(opt):
     grp.add_option("--build_java", action="callback",
                    callback=_store_bool, type="string", nargs=1,
                    default=True, metavar="BOOL",
-                   help="build java wrappers (default: %default)")
-    grp.add_option("--test", action="callback",
+                   help="build java wrappers [default: %default]")
+    grp.add_option("--build_tests", action="callback",
                    callback=_store_bool, type="string", nargs=1,
                    default=True, metavar="BOOL",
-                   help="build & run tests")
+                   help="build tests [default: %default]")
     grp.add_option("--test_db_dsn", action="append",
                    dest="test_db_dsns", metavar="DSN",
                    default=[],
@@ -127,7 +128,7 @@ def configure(conf):
     env = conf.env
 
     env.build_java = Options.options.build_java
-    env.test = Options.options.test
+    env.build_tests = Options.options.build_tests
     
     if env.build_java:
         conf.check_tool("ant", tooldir="misc/waf_tools")
@@ -232,7 +233,7 @@ def configure(conf):
             mandatory=True,
         )
 
-    if env.test:    
+    if env.build_tests:    
         # check for gtest
         _lib_path_opts_to_env(env, "gtest")
         conf.check_cxx(
@@ -285,14 +286,31 @@ def build(bld):
     if env.build_java:
         _build_java_wrapper(bld)
 
-    if env.test and not bld.is_install:
+    if env.build_tests:
         _build_gtest_tests(bld)
         if env.build_java:
             _build_java_tests(bld)
-        _run_tests(bld)
-    
+
     bld.install_files("${install_root}/sql/postgresql",
                       bld.path.ant_glob("schema/postgresql/*.sql"))
+
+def test(ctx):
+    bld = Build.BuildContext()
+    proj = Environment.Environment(Options.lockfile)
+    bld.load_dirs(proj['srcdir'], proj['blddir'])
+    bld.load_envs()
+
+    bld.add_subdirs([os.path.split(Utils.g_module.root_path)[0]])
+    
+    if not bld.env.build_tests:
+        Utils.pprint("RED", "tests are not set to be built, "
+                            "(re-)configure with '--build_tests=yes'")
+        sys.exit(1)
+    
+    # add test running targets
+    _run_tests(bld)
+    
+    bld.compile()  
 
 def _build_shared_library(bld):
     bld.add_group("build_shared_library")
@@ -383,7 +401,7 @@ def _build_java_wrapper(bld):
         swig_targets.append(target)
 
         bld(
-            features="cxx cshlib",
+            features="cxx",
             source="swig/" + filename,
             swig_flags="-c++ -java -outdir %s -package %s" % (outdir, package),
             includes="src",
@@ -392,7 +410,7 @@ def _build_java_wrapper(bld):
             # build shared objects (these flags are platform/compiler specific)
             # -fPIC -DPIC is for gcc on Linux
             cxxflags="-fPIC",
-            defines="-DPIC",
+            defines="PIC",
         )
         
     bld.add_group("link_java_wrapper")

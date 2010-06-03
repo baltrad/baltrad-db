@@ -54,25 +54,31 @@ and unit tests.
 Just to give an example:
 
  $ ./waf configure --build_java=yes \
+                   --build_tests=yes \
                    --prefix=/opt \
                    --hlhdf_dir=/opt/hlhdflib \
                    --boost_dir=/opt/boost1.40 \
                    --jdk_dir=/usr/lib/jvm/java-6-openjdk \
                    --ant=/opt/ant/bin/ant \
                    --swig=/opt/swig/bin/swig \
-                   --test=yes \
-                   --test_db_dsn=postgresql://baltrad:baltrad@localhost/baltrad \
+                   --test_db_dsn=postgresql://baltrad:baltrad@localhost/baltrad 
  $ ./waf build
 
 
 == running unit tests ==
 
-unit tests are run when the build system is configured with '--test=true'.
-If building java wrappers is enabled, unit tests written in java are also
-executed. To be able to run all tests, you should add database dsns with
-'--test_db_dsn='
+unit tests can be run with:
 
-unit tests are executed at the end of the build step.
+$ ./waf test
+
+The build system has to be configured with '--build_tests=true'. If building
+java wrappers is enabled, unit tests written in java are also executed.
+To be able to run all tests, you should also define at least one database dsn
+with '--test_db_dsn='.
+
+Running tests rebuilds all targets not up-to-date and is essentially
+equivalent to a build step, with the addition that unit tests are run
+in the end.
 
 
 == installing ==
