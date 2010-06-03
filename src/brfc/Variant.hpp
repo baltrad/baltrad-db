@@ -37,7 +37,8 @@ class Variant {
     enum Type {
         NONE,
         STRING,
-        LONGLONG,
+        INT64,
+        LONGLONG = INT64, // XXX: deprecated
         DOUBLE,
         BOOL,
         DATE,
@@ -80,7 +81,7 @@ class Variant {
      * @brief construct longlong variant
      */
     explicit Variant(int value)
-            : type_(LONGLONG)
+            : type_(INT64)
             , value_(static_cast<long long>(value)) {
     
     }
@@ -89,7 +90,7 @@ class Variant {
      * @brief construct longlong variant
      */
     explicit Variant(unsigned int value)
-            : type_(LONGLONG)
+            : type_(INT64)
             , value_(static_cast<long long>(value)) {
     
     }
@@ -98,7 +99,7 @@ class Variant {
      * @brief construct longlong variant
      */
     explicit Variant(long long value)
-            : type_(LONGLONG)
+            : type_(INT64)
             , value_(value) {
     }
 
@@ -106,7 +107,7 @@ class Variant {
      * @brief construct longlong variant
      */
     explicit Variant(unsigned long long value)
-            : type_(LONGLONG)
+            : type_(INT64)
             , value_(boost::numeric_cast<long long>(value)) {
     }
 

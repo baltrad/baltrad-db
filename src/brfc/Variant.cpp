@@ -26,7 +26,7 @@ namespace brfc {
 bool Variant::is_null() const { return type_ == NONE; }
 bool Variant::is_string() const { return type_ == STRING; }
 bool Variant::is_long() const { return is_int64(); }
-bool Variant::is_int64() const { return type_ == LONGLONG; }
+bool Variant::is_int64() const { return type_ == INT64; }
 bool Variant::is_double() const { return type_ == DOUBLE; }
 bool Variant::is_bool() const { return type_ == BOOL; }
 bool Variant::is_date() const { return type_ == DATE; }

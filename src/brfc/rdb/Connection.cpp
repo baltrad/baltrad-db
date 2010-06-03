@@ -104,7 +104,7 @@ Connection::do_variant_to_string(const Variant& value) const {
         case Variant::STRING:
             // XXX: escape!!!
             return "'" + value.string() + "'";
-        case Variant::LONGLONG:
+        case Variant::INT64:
         case Variant::DOUBLE:
             return value.to_string();
         case Variant::BOOL:

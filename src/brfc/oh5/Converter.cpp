@@ -98,7 +98,7 @@ IntConverter::do_convert(HL_FormatSpecifier format,
 
 HL_Data
 IntConverter::do_convert(const Variant& value) const {
-    BRFC_ASSERT(value.type() == Variant::LONGLONG);
+    BRFC_ASSERT(value.type() == Variant::INT64);
     
     long long v = value.int64_();
     return HL_Data(sizeof(long long), "llong",
