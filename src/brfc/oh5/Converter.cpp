@@ -100,7 +100,7 @@ HL_Data
 IntConverter::do_convert(const Variant& value) const {
     BRFC_ASSERT(value.type() == Variant::LONGLONG);
     
-    long long v = value.longlong();
+    long long v = value.int64_();
     return HL_Data(sizeof(long long), "llong",
                    reinterpret_cast<unsigned char*>(&v));
 }

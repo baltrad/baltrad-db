@@ -31,13 +31,13 @@ TEST(Variant_test, null) {
     EXPECT_TRUE(v.is_null());
     EXPECT_EQ(v.type(), Variant::NONE);
     EXPECT_FALSE(v.is_string());
-    EXPECT_THROW(v.longlong(), value_error);
+    EXPECT_THROW(v.int64_(), value_error);
 }
 
-TEST(Variant_test, longlong) {
+TEST(Variant_test, int64_) {
     Variant v(10); // accepts integers
     EXPECT_FALSE(v.is_null());
-    EXPECT_EQ(v.longlong(), 10);
+    EXPECT_EQ(v.int64_(), 10);
     EXPECT_EQ(v.type(), Variant::LONGLONG);
     EXPECT_THROW(v.string(), value_error);
 }
@@ -47,7 +47,7 @@ TEST(Variant_test, copy_ctor) {
     Variant v2 = v1;
     EXPECT_FALSE(v2.is_null());
     EXPECT_EQ(v2.type(), v1.type());
-    EXPECT_EQ(v2.longlong(), v1.longlong());
+    EXPECT_EQ(v2.int64_(), v1.int64_());
 }
 
 TEST(Variant_test, copy_assign) {
@@ -56,7 +56,7 @@ TEST(Variant_test, copy_assign) {
     v2 = v1;
     EXPECT_FALSE(v2.is_null());
     EXPECT_EQ(v2.type(), v1.type());
-    EXPECT_EQ(v2.longlong(), v1.longlong());
+    EXPECT_EQ(v2.int64_(), v1.int64_());
 }
 
 TEST(Variant_test, string) {
@@ -65,7 +65,7 @@ TEST(Variant_test, string) {
     EXPECT_EQ(v.type(), Variant::STRING);
     EXPECT_EQ(v.string(), val);
     EXPECT_FALSE(v.is_null());
-    EXPECT_THROW(v.longlong(), value_error);
+    EXPECT_THROW(v.int64_(), value_error);
 }
 
 TEST(Variant_test, from_string_literal) {
