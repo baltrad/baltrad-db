@@ -299,7 +299,7 @@ def _build_shared_library(bld):
 
     sources = sorted(bld.path.ant_glob("src/brfc/**/*.cpp").split(" "))
     bld(
-        features="cxx cshlib",
+        features="cxx",
         source=sources,
         target="brfc",
         includes="src",
@@ -310,6 +310,10 @@ def _build_shared_library(bld):
             "PQXX",
         ],
         install_path="${install_root}/lib",
+        # build shared objects (these flags are platform/compiler specific)
+        # -fPIC -DPIC is for gcc on Linux
+        cxxflags="-fPIC",
+        defines="-DPIC",
     )
 
 def _strlit(var):
