@@ -47,7 +47,7 @@
   </target>
 
   <target name="execute-database-tests" depends="create-postgresql-testdb" unless="db.test_db_dsn">
-    <mkdir dir="test/reports"/>
+    <mkdir dir="${waf.builddir}/test/reports"/>
     <junit showoutput="true" printsummary="no">
       <classpath location="deplib/junit4.jar" />
       <classpath location="${waf.builddir}/jbrfc.jar" />
@@ -55,21 +55,21 @@
       <sysproperty key="db.test_db_dsn" value="${db.test_db_dsn}"/>
       <sysproperty key="db.test_db_schema_dir" value="${db.test_db_schema_dir}"/>
       <formatter type="xml" />
-      <test name="eu.baltrad.fc.TestFileCatalog" todir="test/reports" />
+      <test name="eu.baltrad.fc.TestFileCatalog" todir="${waf.builddir}/test/reports" />
     </junit>
     <antcall target="drop-postgresql-testdb"/>
   </target>
 
   <target name="execute-simple-tests">
-    <mkdir dir="test/reports"/>
+    <mkdir dir="${waf.builddir}/test/reports"/>
     <junit showoutput="true" printsummary="no">
       <classpath location="deplib/junit4.jar" />
       <classpath location="${waf.builddir}/jbrfc.jar" />
       <classpath location="${waf.builddir}/jbrfc_test.jar" />
       <formatter type="xml" />
-      <test name="eu.baltrad.fc.TestQString" todir="test/reports" />
-      <test name="eu.baltrad.fc.TestDate" todir="test/reports" />
-      <test name="eu.baltrad.fc.TestTime" todir="test/reports" />
+      <test name="eu.baltrad.fc.TestQString" todir="${waf.builddir}/test/reports" />
+      <test name="eu.baltrad.fc.TestDate" todir="${waf.builddir}/test/reports" />
+      <test name="eu.baltrad.fc.TestTime" todir="${waf.builddir}/test/reports" />
     </junit>
   </target>
 </project>
