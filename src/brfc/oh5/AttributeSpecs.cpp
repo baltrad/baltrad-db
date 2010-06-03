@@ -29,7 +29,7 @@ AttributeSpecs::AttributeSpecs()
          : specs_()
          , converters_() {
     converters_["int"] = shared_ptr<Converter>(new Int64Converter());
-    converters_["real"] = shared_ptr<Converter>(new RealConverter());
+    converters_["real"] = shared_ptr<Converter>(new DoubleConverter());
     converters_["string"] = shared_ptr<Converter>(new StringConverter());
     converters_["date"] = shared_ptr<Converter>(new DateConverter());
     converters_["time"] = shared_ptr<Converter>(new TimeConverter());

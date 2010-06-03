@@ -45,7 +45,7 @@ Converter::convert(const Variant& value) const {
 }
 
 Variant
-RealConverter::do_convert(HL_FormatSpecifier format,
+DoubleConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     using boost::numeric_cast;
     double val;
@@ -67,7 +67,7 @@ RealConverter::do_convert(HL_FormatSpecifier format,
 }
 
 HL_Data
-RealConverter::do_convert(const Variant& value) const {
+DoubleConverter::do_convert(const Variant& value) const {
     BRFC_ASSERT(value.type() == Variant::DOUBLE);
 
     double v = value.double_();

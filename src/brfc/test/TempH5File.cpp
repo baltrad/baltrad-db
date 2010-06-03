@@ -105,7 +105,7 @@ class GatherHLNodes {
     convert(const Variant& value) {
         switch (value.type()) {
             case Variant::DOUBLE:
-                return oh5::RealConverter().convert(value);
+                return oh5::DoubleConverter().convert(value);
             case Variant::INT64:
                 return oh5::Int64Converter().convert(value);
             case Variant::STRING:

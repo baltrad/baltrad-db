@@ -152,9 +152,9 @@ class Int64Converter : public Converter {
 };
 
 /**
- * @brief Conversion from HLHDF floating point formats to QDouble
+ * @brief Conversion from HLHDF floating point formats to double
  */
-class RealConverter : public Converter {
+class DoubleConverter : public Converter {
   protected:
     virtual Variant do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
