@@ -52,7 +52,7 @@ GroupIdCache::do_query(const oh5::Group& group) {
     binds.add(":parent_id", parent_id);
     binds.add(":name", Variant(group.name()));
     shared_ptr<ResultSet> r = rdb_->query(qry, binds);
-    return r->next() ? r->integer(0) : OptionalId();
+    return r->next() ? r->int64_(0) : OptionalId();
 }
 
 } // namespace rdb

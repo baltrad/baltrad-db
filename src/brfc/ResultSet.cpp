@@ -38,17 +38,32 @@ ResultSet::string(unsigned int pos) const {
 
 long long
 ResultSet::integer(unsigned int pos) const {
-    return do_integer(pos);
+    return do_int64(pos);
+}
+
+long long
+ResultSet::int64_(unsigned int pos) const {
+    return do_int64(pos);
 }
 
 double
 ResultSet::real(unsigned int pos) const {
-    return do_real(pos);
+    return do_double(pos);
+}
+
+double
+ResultSet::double_(unsigned int pos) const {
+    return do_double(pos);
 }
 
 bool
 ResultSet::boolean(unsigned int pos) const {
-    return do_boolean(pos);
+    return do_bool(pos);
+}
+
+bool
+ResultSet::bool_(unsigned int pos) const {
+    return do_bool(pos);
 }
 
 Date

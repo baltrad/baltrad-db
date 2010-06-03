@@ -54,16 +54,16 @@ TEST_P(rdb_ResultSet_test, next) {
     EXPECT_TRUE(not r->next());
 }
 
-TEST_P(rdb_ResultSet_test, integer) {
+TEST_P(rdb_ResultSet_test, int64) {
     shared_ptr<ResultSet> r = db->query("SELECT 1", BindMap());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(r->integer(0), 1);
+    EXPECT_EQ(r->int64_(0), 1);
 }
 
-TEST_P(rdb_ResultSet_test, real) {
+TEST_P(rdb_ResultSet_test, double_) {
     shared_ptr<ResultSet> r = db->query("SELECT 1.1::real", BindMap());
     ASSERT_TRUE(r->next());
-    EXPECT_NEAR(r->real(0), 1.1, 0.00001);
+    EXPECT_NEAR(r->double_(0), 1.1, 0.00001);
 }
 
 TEST_P(rdb_ResultSet_test, string) {
@@ -72,10 +72,10 @@ TEST_P(rdb_ResultSet_test, string) {
     EXPECT_EQ(r->string(0), "bla");
 }
 
-TEST_P(rdb_ResultSet_test, boolean) {
+TEST_P(rdb_ResultSet_test, bool_) {
     shared_ptr<ResultSet> r = db->query("SELECT true", BindMap());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(r->boolean(0), true);
+    EXPECT_EQ(r->bool_(0), true);
 }
 
 TEST_P(rdb_ResultSet_test, date) {
@@ -93,7 +93,7 @@ TEST_P(rdb_ResultSet_test, time) {
 TEST_P(rdb_ResultSet_test, invalid_column) {
     shared_ptr<ResultSet> r = db->query("SELECT 1", BindMap());
     ASSERT_TRUE(r->next());
-    EXPECT_THROW(r->integer(1), lookup_error);
+    EXPECT_THROW(r->int64_(1), lookup_error);
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1

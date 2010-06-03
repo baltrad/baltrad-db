@@ -74,17 +74,17 @@ PostgresResultSet::do_string(unsigned int pos) const {
 }
 
 long long
-PostgresResultSet::do_integer(unsigned int pos) const {
+PostgresResultSet::do_int64(unsigned int pos) const {
     return get_result_at<long long>(result_, row_, pos);
 }
 
 double
-PostgresResultSet::do_real(unsigned int pos) const {
+PostgresResultSet::do_double(unsigned int pos) const {
     return get_result_at<double>(result_, row_, pos);
 }
 
 bool
-PostgresResultSet::do_boolean(unsigned int pos) const {
+PostgresResultSet::do_bool(unsigned int pos) const {
     return get_result_at<bool>(result_, row_, pos);
 }
 

@@ -101,7 +101,7 @@ SaveGroup::bind_specializations(const oh5::Group& group) {
 long long
 SaveGroup::last_id(ResultSet& result) {
     if (rdb_->supports_returning() and result.next()) {
-        return result.integer(0);
+        return result.int64_(0);
     } else {
         // XXX: last insert id!
         return 0;

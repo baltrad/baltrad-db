@@ -313,7 +313,7 @@ TEST_P(rdb_Query_test, test_query_file_id) {
              .execute();
     EXPECT_EQ(r->size(), 1);
     r->next();
-    EXPECT_NE(r->integer(0), 0);
+    EXPECT_NE(r->int64_(0), 0);
 }
 
 TEST_P(rdb_Query_test, test_duplicate_fetch_throws) {

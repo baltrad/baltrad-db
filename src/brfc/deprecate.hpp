@@ -17,30 +17,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_MOCK_RESULT_SET_HPP
-#define BRFC_MOCK_RESULT_SET_HPP
+#ifndef BRFC_DEPRECATE_HPP
+#define BRFC_DEPRECATE_HPP
 
-#include <gmock/gmock.h>
+#ifdef __GNUC__
+#define DEPRECATED(func) func __attribute__ ((deprecated))
+#else
+#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
+#define DEPRECATED(func) func
+#endif
 
-namespace brfc {
-
-class MockResultSet : public ResultSet {
-  public:
-    MOCK_METHOD0(do_next, bool());
-    MOCK_METHOD1(do_seek, bool(int));
-    MOCK_METHOD0(do_size, int());
-
-    MOCK_CONST_METHOD1(do_is_null, bool(unsigned int));
-
-    MOCK_CONST_METHOD1(do_string, String(unsigned int));
-    MOCK_CONST_METHOD1(do_int64, long long(unsigned int));
-    MOCK_CONST_METHOD1(do_double, double(unsigned int));
-    MOCK_CONST_METHOD1(do_bool, bool(unsigned int));
-    MOCK_CONST_METHOD1(do_date, Date(unsigned int));
-    MOCK_CONST_METHOD1(do_time, Time(unsigned int));
-
-};
-
-} // namespace brfc
-
-#endif // BRFC_MOCK_RESULT_SET_HPP
+#endif // BRFC_DEPRECATE_HPP

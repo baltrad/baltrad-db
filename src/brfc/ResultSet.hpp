@@ -22,6 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/noncopyable.hpp>
 
+#include <brfc/deprecate.hpp>
+
 namespace brfc {
 
 class Date;
@@ -68,6 +70,9 @@ class ResultSet : public boost::noncopyable {
     }
     //@}
     
+    /**
+     * @brief test if value at \c pos is NULL
+     */
     bool is_null(unsigned int pos) const;
     
     /**
@@ -81,18 +86,33 @@ class ResultSet : public boost::noncopyable {
 
     /**
      * @brief get integer value at \c pos
+     * @deprecated use int64_()
      */
-    long long integer(unsigned int pos) const;
+    DEPRECATED(long long integer(unsigned int pos) const);
+    
+    /**
+     * @brief get a 64-bit integer value at \c pos
+     */
+    long long int64_(unsigned int pos) const;
 
     /**
-     * @brief get real value at \c pos
+     * @brief get a double precision floating-point value at \c pos
+     * @deprecated use double_()
      */
-    double real(unsigned int pos) const;
+    DEPRECATED(double real(unsigned int pos) const);
+    
+    /**
+     * @brief get a double precision floating-point value at \c pos
+     */
+    double double_(unsigned int pos) const;
 
     /**
      * @brief get boolean value at \c pos
+     * @deprecated use bool_()
      */
-    bool boolean(unsigned int pos) const;
+    DEPRECATED(bool boolean(unsigned int pos) const);
+
+    bool bool_(unsigned int pos) const;
 
     /**
      * @brief get date value at \c pos
@@ -113,9 +133,9 @@ class ResultSet : public boost::noncopyable {
     virtual bool do_is_null(unsigned int pos) const = 0;
     
     virtual String do_string(unsigned int pos) const = 0;
-    virtual long long do_integer(unsigned int pos) const = 0;
-    virtual double do_real(unsigned int pos) const = 0;
-    virtual bool do_boolean(unsigned int pos) const = 0;
+    virtual long long do_int64(unsigned int pos) const = 0;
+    virtual double do_double(unsigned int pos) const = 0;
+    virtual bool do_bool(unsigned int pos) const = 0;
     virtual Date do_date(unsigned int pos) const = 0;
     virtual Time do_time(unsigned int pos) const = 0;
 

@@ -35,6 +35,8 @@ namespace boost {
     class noncopyable {};
 }
 
+#define DEPRECATED(func) func
+
 %exception {
     try {
         $action

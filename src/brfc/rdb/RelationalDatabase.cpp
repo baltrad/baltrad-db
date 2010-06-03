@@ -134,7 +134,7 @@ RelationalDatabase::do_next_filename_version(const String& filename) {
     if (result->is_null(0)) {
         return 0;
     } else {
-        return static_cast<unsigned int>(result->integer(0));
+        return static_cast<unsigned int>(result->int64_(0));
     }
 }
 
@@ -156,7 +156,7 @@ RelationalDatabase::do_db_id(const oh5::File& file) {
     binds.add(":unique_id", Variant(file_hasher().hash(file)));
     shared_ptr<ResultSet> r = query(qry, binds);
     r->next();
-    return r->integer(0);
+    return r->int64_(0);
 }
 
 long long
@@ -166,7 +166,7 @@ RelationalDatabase::db_id(const oh5::Source& src) {
     binds.add(":node_id", Variant(src.node_id()));
     shared_ptr<ResultSet> r = query(qry, binds);
     if (r->next())
-        return r->integer(0);
+        return r->int64_(0);
     else
         return 0;
 }
@@ -208,13 +208,13 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
     }
     result->next();
 
-    id = result->integer(0);
+    id = result->int64_(0);
     SourceMap::iterator i = sources_.find(id);
 
     if (i == sources_.end()) {
         src->node_id(result->string(1));
-        src->country_code(result->integer(2));
-        src->originating_centre(result->integer(3));
+        src->country_code(result->int64_(2));
+        src->originating_centre(result->int64_(3));
         src->wmo_cccc(result->string(4));
         i = sources_.insert(std::make_pair(id, src)).first;
     }
@@ -257,16 +257,16 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     
     result->next();
 
-    long long id = result->integer(0);
+    long long id = result->int64_(0);
     SourceMap::iterator i = sources_.find(id);
 
     if (i == sources_.end()) {
         shared_ptr<oh5::SourceCentre> centre = make_shared<oh5::SourceCentre>();
-        centre = load_source_centre(centre, result->integer(2));
+        centre = load_source_centre(centre, result->int64_(2));
 
         src->centre(centre);
         src->node_id(result->string(1));
-        src->wmo_code(result->integer(3));
+        src->wmo_code(result->int64_(3));
         src->radar_site(result->string(4));
         src->place(result->string(5));
         i = sources_.insert(std::make_pair(id, src)).first;
@@ -307,13 +307,13 @@ RelationalDatabase::populate_mapper_and_specs() {
                                     "ignore_in_hash "
                                     "FROM bdb_attributes", BindMap());
     while (r->next()) {
-        mapper_->add(Mapping(r->integer(0), // id
+        mapper_->add(Mapping(r->int64_(0), // id
                              r->string(1),  // name
                              r->string(3),  // table
                              r->string(4))); // column
         specs_->add(oh5::AttributeSpec(r->string(1), // name
                                        r->string(2), // typename
-                                       r->boolean(5))); // ignored in hash
+                                       r->bool_(5))); // ignored in hash
     }
 }
 

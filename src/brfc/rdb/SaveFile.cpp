@@ -107,7 +107,7 @@ SaveFile::operator()(const oh5::File& file,
     }
 
     if (rdb_->supports_returning() and result->next()) {
-        return result->integer(0);
+        return result->int64_(0);
     } else {
         // XXX: last insert id!
         return 0;
