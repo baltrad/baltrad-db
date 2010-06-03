@@ -28,7 +28,7 @@ namespace oh5 {
 AttributeSpecs::AttributeSpecs()
          : specs_()
          , converters_() {
-    converters_["int"] = shared_ptr<Converter>(new IntConverter());
+    converters_["int"] = shared_ptr<Converter>(new Int64Converter());
     converters_["real"] = shared_ptr<Converter>(new RealConverter());
     converters_["string"] = shared_ptr<Converter>(new StringConverter());
     converters_["date"] = shared_ptr<Converter>(new DateConverter());

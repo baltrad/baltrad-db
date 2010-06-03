@@ -76,7 +76,7 @@ RealConverter::do_convert(const Variant& value) const {
 }
 
 Variant
-IntConverter::do_convert(HL_FormatSpecifier format,
+Int64Converter::do_convert(HL_FormatSpecifier format,
                          unsigned char* data) const {
     using boost::numeric_cast;
     long long val;
@@ -97,7 +97,7 @@ IntConverter::do_convert(HL_FormatSpecifier format,
 }
 
 HL_Data
-IntConverter::do_convert(const Variant& value) const {
+Int64Converter::do_convert(const Variant& value) const {
     BRFC_ASSERT(value.type() == Variant::INT64);
     
     long long v = value.int64_();

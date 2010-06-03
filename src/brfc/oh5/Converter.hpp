@@ -141,9 +141,9 @@ class TimeConverter : public StringConverter {
 };
 
 /**
- * @brief Conversion from HLHDF integer formats to QLongLong
+ * @brief Conversion from HLHDF integer formats to 64-bit integer
  */
-class IntConverter : public Converter {
+class Int64Converter : public Converter {
   protected:
     virtual Variant do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;

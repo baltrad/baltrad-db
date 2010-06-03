@@ -107,7 +107,7 @@ class GatherHLNodes {
             case Variant::DOUBLE:
                 return oh5::RealConverter().convert(value);
             case Variant::INT64:
-                return oh5::IntConverter().convert(value);
+                return oh5::Int64Converter().convert(value);
             case Variant::STRING:
                 return oh5::StringConverter().convert(value);
             case Variant::DATE:
