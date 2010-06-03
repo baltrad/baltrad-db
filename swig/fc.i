@@ -107,10 +107,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 // ignore Variant members
 %ignore brfc::Variant::Variant(const char* value);
-%ignore brfc::Variant::Variant(const QVariant& value);
 %ignore brfc::Variant::operator=;
-%ignore brfc::Variant::qstring;
-%ignore brfc::Variant::to_qvariant;
 // deprecated
 %ignore brfc::Variant::is_long;
 %ignore brfc::Variant::longlong;
