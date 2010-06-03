@@ -285,7 +285,7 @@ def build(bld):
     if env.build_java:
         _build_java_wrapper(bld)
 
-    if env.test:
+    if env.test and not bld.is_install:
         _build_gtest_tests(bld)
         if env.build_java:
             _build_java_tests(bld)
