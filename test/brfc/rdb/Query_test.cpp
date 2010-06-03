@@ -160,7 +160,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
 TEST_P(rdb_Query_test, test_simple) {
     shared_ptr<ResultSet> r = 
             query.fetch(xpr.attribute("path"))
-                 .filter(xpr.attribute("where/xsize")->eq(xpr.integer(1)))
+                 .filter(xpr.attribute("where/xsize")->eq(xpr.int64_(1)))
                  .execute();
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->string(0), "td1");
@@ -206,7 +206,7 @@ TEST_P(rdb_Query_test, test_filter_by_object) {
 TEST_P(rdb_Query_test, test_fetch_xsize_filtering_by_xsize) {
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("where/xsize"))
-             .filter(xpr.attribute("where/xsize")->eq(xpr.integer(2)))
+             .filter(xpr.attribute("where/xsize")->eq(xpr.int64_(2)))
              .execute();
     EXPECT_EQ(r->size(), 2);
 }
@@ -216,7 +216,7 @@ TEST_P(rdb_Query_test, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
-             .filter(xsize->eq(xpr.integer(1))->or_(ysize->eq(xpr.integer(2))))
+             .filter(xsize->eq(xpr.int64_(1))->or_(ysize->eq(xpr.int64_(2))))
              .execute();
 
     EXPECT_EQ(r->size(), 3);
@@ -232,7 +232,7 @@ TEST_P(rdb_Query_test, test_filter_by_xsize_distinct) {
     shared_ptr<ResultSet> r = 
         query.fetch(xpr.attribute("path"))
              .distinct(true)
-             .filter(xsize->eq(xpr.integer(3)))
+             .filter(xsize->eq(xpr.int64_(3)))
              .execute();
     EXPECT_EQ(r->size(), 1);
     ASSERT_TRUE(r->next());
@@ -243,7 +243,7 @@ TEST_P(rdb_Query_test, test_select_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("src_WMO");
     shared_ptr<ResultSet> r =
         query.fetch(xpr.attribute("path"))
-             .filter(wmo_code->eq(xpr.integer(2666)))
+             .filter(wmo_code->eq(xpr.int64_(2666)))
              .execute();
 
     EXPECT_EQ(r->size(), 2);

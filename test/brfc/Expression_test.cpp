@@ -58,7 +58,7 @@ TEST_F(Expression_test, test_join_contains) {
     TablePtr t2 = Table::create("t2");
     AliasPtr t2a = t2->alias("t2a");
     TablePtr t3 = Table::create("t3");
-    JoinPtr j = t1->join(t2a, xpr.integer(1))->join(t3, xpr.integer(1));
+    JoinPtr j = t1->join(t2a, xpr.int64_(1))->join(t3, xpr.int64_(1));
     EXPECT_TRUE(j->contains(t1));
     EXPECT_TRUE(not j->contains(t2));
     EXPECT_TRUE(j->contains(t2a));

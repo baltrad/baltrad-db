@@ -110,7 +110,7 @@ QueryToSelect::operator()(expr::Attribute& attr) {
                                 xpr_.and_(xpr_.eq(value_t->column("group_id"),
                                                   groups_t_->column("id")),
                                           xpr_.eq(value_t->column("attribute_id"),
-                                                  xpr_.integer(mapping.id))));
+                                                  xpr_.int64_(mapping.id))));
         }
     } else {
         if (value_t->name() == "bdb_groups") {

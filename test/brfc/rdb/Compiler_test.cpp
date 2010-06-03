@@ -53,7 +53,7 @@ struct rdb_Compiler_test: public testing::Test {
 };
 
 TEST_F(rdb_Compiler_test, test_simple) {
-    ExpressionPtr expr = xpr.integer(1)->lt(xpr.integer(2));
+    ExpressionPtr expr = xpr.int64_(1)->lt(xpr.int64_(2));
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), ":lit_0 < :lit_1");
     EXPECT_EQ(bind(":lit_0"), Variant(1));
@@ -61,7 +61,7 @@ TEST_F(rdb_Compiler_test, test_simple) {
 }
 
 TEST_F(rdb_Compiler_test, test_between) {
-    ExpressionPtr expr = xpr.integer(1)->between(xpr.integer(0), xpr.integer(2));
+    ExpressionPtr expr = xpr.int64_(1)->between(xpr.int64_(0), xpr.int64_(2));
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), ":lit_0 >= :lit_1 AND :lit_2 <= :lit_3");
     EXPECT_EQ(bind(":lit_0"), Variant(1));
@@ -78,7 +78,7 @@ TEST_F(rdb_Compiler_test, test_string_literal) {
 }
 
 TEST_F(rdb_Compiler_test, test_parentheses) {
-    ExpressionPtr expr = xpr.integer(1)->parentheses();
+    ExpressionPtr expr = xpr.int64_(1)->parentheses();
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), "(:lit_0)");
     EXPECT_EQ(bind(":lit_0"), Variant(1));
@@ -146,7 +146,7 @@ TEST_F(rdb_Compiler_test, test_select) {
     select->what(column);
     select->what(column2);
     select->what(column3);
-    select->where(column->lt(xpr.integer(1)));
+    select->where(column->lt(xpr.int64_(1)));
     String expected("SELECT t1.c1, t1.c2, t2.c3\nFROM t1, t2\nWHERE t1.c1 < :lit_0");
     compiler.compile(*select);
     EXPECT_EQ(compiler.compiled(), expected);
@@ -155,8 +155,8 @@ TEST_F(rdb_Compiler_test, test_select) {
 
 TEST_F(rdb_Compiler_test, test_factory_or_) {
     TablePtr t = Table::create("t");
-    ExpressionPtr e1 = t->column("c")->eq(xpr.integer(1));
-    ExpressionPtr e2 = t->column("c")->eq(xpr.integer(2));
+    ExpressionPtr e1 = t->column("c")->eq(xpr.int64_(1));
+    ExpressionPtr e2 = t->column("c")->eq(xpr.int64_(2));
     ExpressionPtr e3 = xpr.or_(e1, e2);
     String expected("t.c = :lit_0 OR t.c = :lit_1");
     compiler.compile(*e3);

@@ -46,11 +46,21 @@ Factory::string(const char* value) const {
 
 LiteralPtr
 Factory::integer(long long value) const {
+    return int64_(value);
+}
+
+LiteralPtr
+Factory::int64_(long long value) const {
     return Literal::create(Variant(value));
 }
 
 LiteralPtr
 Factory::real(double value) const {
+    return double_(value);
+}
+
+LiteralPtr
+Factory::double_(double value) const {
     return Literal::create(Variant(value));
 }
 
@@ -66,6 +76,11 @@ Factory::time(int hour, int minute, int second) const {
 
 LiteralPtr
 Factory::boolean(bool value) const {
+    return bool_(value);
+}
+
+LiteralPtr
+Factory::bool_(bool value) const {
     return Literal::create(Variant(value));
 }
 
