@@ -34,19 +34,33 @@ class Variant;
 namespace oh5 {
 
 /**
- * @brief HLHDF scalar data
+ * @brief HLHDF scalar data as raw byte array
  */
 class HL_Data {
   public:
+    /**
+     * @brief constructor
+     * @param size size of the array (number of bytes in the value)
+     * @param type name of the type
+     */
     HL_Data(size_t size, const std::string& type, unsigned char* data)
             : type_(type)
             , data_(data, data + size) {
    } 
-
+    
+    /**
+     * @brief access typename of contained data
+     */
     const char* type() const { return type_.c_str(); }
-
+    
+    /**
+     * @brief access array size
+     */
     size_t size() const { return data_.size(); }
-
+    
+    /**
+     * @brief access array
+     */
     unsigned char* data() {
         return &data_[0];
     }
@@ -66,14 +80,18 @@ class Converter {
      * @param format format as defined in HLHDF library
      * @param data value bytes
      * @return Variant containing the value
+     * @throw value_error if the conversion fails
      *
-     * @see do_convert
+     * @see do_convert(HL_FormatSpecifier, unsigned char*) const
      */
     Variant convert(HL_FormatSpecifier format,
                      unsigned char* data) const;
     
     /**
-     * @brief convert QVaraint to HLHDF format
+     * @brief convert a Variant to HLHDF format
+     * @param value the Variant to convert
+     * @see do_convert(const Variant&) const
+     * @throw value_error if the conversion fails
      */
     HL_Data convert(const Variant& value) const;
 
@@ -84,13 +102,13 @@ class Converter {
 
   protected:
     /**
-     * @brief do the actual conversion
+     * @brief do the actual conversion to Variant
      */
     virtual Variant do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const = 0;
 
     /**
-     * @brief do the actial conversion
+     * @brief do the actial conversion to HL_Data
      */
     virtual HL_Data do_convert(const Variant& value) const = 0;
 };
@@ -102,7 +120,11 @@ class Converter {
 /**
  * @brief Conversion from HLHDF_STRING to String
  *
- * the string is assumed to be encoded in UTF-8
+ * the string is assumed to be encoded in UTF-8.
+ *
+ * @note ODIM_H5 specifies that strings can use any encoding, with the
+ *       default encoding being ASCII. It states using UNICODE might be
+ *       preferrable, but again doesn't give any specific encoding.
  */
 class StringConverter : public Converter {
   protected:
@@ -114,12 +136,11 @@ class StringConverter : public Converter {
 
 /**
  * @brief Conversion from HLHDF_STRING to Date
+ *
+ * date is converted from string encoded as YYYYMMDD
  */
 class DateConverter : public StringConverter {
   protected:
-    /**
-     * date values in ODIM_H5 files are encoded as YYYYMMDD strings
-     */
     virtual Variant do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
 
@@ -128,12 +149,11 @@ class DateConverter : public StringConverter {
 
 /**
  * @brief Conversion from HLHDF_STRING to Time
+ *
+ * time is converted from string encoded as HHMMSS
  */
 class TimeConverter : public StringConverter {
   protected:
-    /**
-     * time values in ODIM_H5 files are encoded as HHMMSS strings
-     */
     virtual Variant do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
 
@@ -142,6 +162,18 @@ class TimeConverter : public StringConverter {
 
 /**
  * @brief Conversion from HLHDF integer formats to 64-bit integer
+ *
+ * supports conversion from:
+ *  - HLHDF_INT
+ *  - HLHDF_LONG
+ *  - HLHDF_LLONG
+ *
+ * @note conversion from Variant to HLHDF format always results in a
+ *       HLHDF_LLONG
+ * @note unsigned integers probably need their own converter (to fit a
+ *       ullong). ODIM_H5 currently doesn't specify any attributes with
+ *       ullong precision (in fact, no unsigned values), although it
+ *       leaves a possibility for an attribute value to be encoded as one.
  */
 class Int64Converter : public Converter {
   protected:
@@ -152,7 +184,15 @@ class Int64Converter : public Converter {
 };
 
 /**
- * @brief Conversion from HLHDF floating point formats to double
+ * @brief Conversion from HLHDF floating-point formats to double
+ *
+ * supports conversion from:
+ *  - HLHDF_FLOAT
+ *  - HLHDF_DOUBLE
+ *  - HLHDF_LDOUBLE (with possible loss of precision)
+ *
+ * @note conversion from Variant to HLHDF format always results in a
+ *       HLHDF_DOUBLE
  */
 class DoubleConverter : public Converter {
   protected:
@@ -163,13 +203,12 @@ class DoubleConverter : public Converter {
 };
 
 /**
- * @brief Conversion from HLHDF_STRING to QLongLong
+ * @brief Conversion from HLHDF_STRING to bool
+ *
+ * bool value is converted from a string encoded as "True" or "False"
  */
 class BoolConverter : public StringConverter {
   protected:
-    /**
-     * boolean values in ODIM_H5 files are encoded as "True"/"False" strings
-     */
     virtual Variant do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
 

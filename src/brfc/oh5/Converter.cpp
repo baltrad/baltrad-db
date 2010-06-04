@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/numeric/conversion/cast.hpp>
 
-#include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
@@ -61,14 +60,15 @@ DoubleConverter::do_convert(HL_FormatSpecifier format,
             val = numeric_cast<double>(*reinterpret_cast<long double*>(data));
             break;
         default:
-            throw value_error("invalid format for 'real'");
+            throw value_error("invalid format for conversion to double");
     }
     return Variant(val);
 }
 
 HL_Data
 DoubleConverter::do_convert(const Variant& value) const {
-    BRFC_ASSERT(value.type() == Variant::DOUBLE);
+    if (value.type() != Variant::DOUBLE)
+        throw value_error("invalid Variant conversion to HLHDF double");
 
     double v = value.double_();
     return HL_Data(sizeof(double), "double",
@@ -91,14 +91,15 @@ Int64Converter::do_convert(HL_FormatSpecifier format,
             val = *reinterpret_cast<long long*>(data);
             break;
         default:
-            throw value_error("invalid format for 'integer'");
+            throw value_error("invalid format for conversion to int64");
     }
     return Variant(val);
 }
 
 HL_Data
 Int64Converter::do_convert(const Variant& value) const {
-    BRFC_ASSERT(value.type() == Variant::INT64);
+    if (value.type() != Variant::INT64)
+        throw value_error("invalid Variant conversion to HLHDF llong");
     
     long long v = value.int64_();
     return HL_Data(sizeof(long long), "llong",
@@ -109,16 +110,15 @@ Variant
 StringConverter::do_convert(HL_FormatSpecifier format,
                            unsigned char* data) const {
     if (format != HLHDF_STRING)
-        throw value_error("invalid format for 'string'");
-    BRFC_ASSERT(format == HLHDF_STRING);
+        throw value_error("invalid format for conversion to String");
     String s = String::from_utf8(reinterpret_cast<char*>(data));
     return Variant(s);
 }
 
 HL_Data
 StringConverter::do_convert(const Variant& value) const {
-    BRFC_ASSERT(value.type() == Variant::STRING);
-    
+    if (value.type() != Variant::STRING)
+        throw value_error("invalid Variant conversion to HLHDF string");
     std::string v = value.string().to_utf8();
     return HL_Data(v.size() + 1, "string",
                    reinterpret_cast<unsigned char*>(
@@ -136,7 +136,8 @@ DateConverter::do_convert(HL_FormatSpecifier format,
 
 HL_Data
 DateConverter::do_convert(const Variant& value) const {
-    BRFC_ASSERT(value.type() == Variant::DATE);
+    if (value.type() != Variant::DATE)
+        throw value_error("invalid Variant conversion to date string");
     Variant var(value.date().to_string("yyyyMMdd"));
     return StringConverter::do_convert(var);
 }
@@ -151,7 +152,8 @@ TimeConverter::do_convert(HL_FormatSpecifier format,
 
 HL_Data
 TimeConverter::do_convert(const Variant& value) const {
-    BRFC_ASSERT(value.type() == Variant::TIME);
+    if (value.type() != Variant::TIME)
+        throw value_error("invalid Variant conversion to time string");
     Variant var(value.time().to_string("hhmmss"));
     return StringConverter::do_convert(var);
 }
@@ -167,14 +169,15 @@ BoolConverter::do_convert(HL_FormatSpecifier format,
     } else if (str == "False") {
         val = false;
     } else {
-        throw value_error("invalid format for 'bool'");
+        throw value_error("invalid HLHDF string for conversion to bool");
     }
     return Variant(val);
 }
 
 HL_Data
 BoolConverter::do_convert(const Variant& value) const {
-    BRFC_ASSERT(value.type() == Variant::BOOL);
+    if (value.type() != Variant::BOOL)
+        throw value_error("invalid Variant conversion to bool string");
 
     String bool_str;
     if (value.bool_()) {
