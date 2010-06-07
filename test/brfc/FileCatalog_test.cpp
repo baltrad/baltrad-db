@@ -18,7 +18,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
 #include <boost/filesystem.hpp>
 
@@ -39,6 +38,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test/TempDir.hpp>
 
 #include "common.hpp"
+#include "MockDatabase.hpp"
 
 
 using testing::_;
@@ -51,24 +51,6 @@ using testing::Throw;
 namespace fs = boost::filesystem;
 
 namespace brfc {
-
-class MockDatabase : public Database {
-  public:
-    MOCK_METHOD0(do_begin, void());
-    MOCK_METHOD0(do_rollback, void());
-    MOCK_METHOD0(do_commit, void());
-    
-    MOCK_METHOD1(do_has_file, bool(const oh5::File&));
-    MOCK_METHOD1(do_remove_file, void(const String&));
-    MOCK_METHOD3(do_save_file, long long(const oh5::File&,
-                                         const String&,
-                                         unsigned int));
-    MOCK_METHOD1(do_db_id, long long(const oh5::File&));
-    MOCK_METHOD1(do_next_filename_version, unsigned int(const String&));
-    MOCK_METHOD1(do_load_source, shared_ptr<oh5::Source>(const String&));
-    MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
-    MOCK_METHOD0(do_clean, void());  
-};
 
 class MockNamer : public FileNamer {
   public:
