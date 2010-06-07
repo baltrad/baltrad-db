@@ -20,8 +20,8 @@ cls = Task.simple_task_type('swig', swig_str, color='BLUE', ext_in='.i .h', ext_
 re_module = re.compile('%module(?:\s*\(.*\))?\s+(.+)', re.M)
 
 re_1 = re.compile(r'^%module.*?\s+([\w]+)\s*?$', re.M)
-re_2 = re.compile('%include "(.*)"', re.M)
-re_3 = re.compile('#include "(.*)"', re.M)
+re_2 = re.compile('%include ["<](.*)[">]', re.M)
+re_3 = re.compile('#include ["<](.*)[">]', re.M)
 
 def scan(self):
     "scan for swig dependencies, climb the .i files"
