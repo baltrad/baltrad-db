@@ -35,16 +35,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/Date.hpp>
     #include <brfc/Time.hpp>
     #include <brfc/Variant.hpp>
-    
-    #include <brfc/expr/fwd.hpp>
-    #include <brfc/expr/Element.hpp>
-    #include <brfc/expr/Expression.hpp>
-    #include <brfc/expr/Factory.hpp>
-    #include <brfc/expr/Attribute.hpp>
-    #include <brfc/expr/Parentheses.hpp>
-    #include <brfc/expr/Label.hpp>
-    #include <brfc/expr/BinaryOperator.hpp>
-    #include <brfc/expr/Literal.hpp>
 %}
 
 %typemap("javapackage") brfc::oh5::File,
