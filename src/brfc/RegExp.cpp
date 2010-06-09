@@ -42,6 +42,14 @@ RegExp::index_in(const String& str, int pos) {
     return this->pos();
 }
 
+bool
+RegExp::match(const String& str, int pos) {
+    input_.setTo(str.utf16(), str.length());
+    re_.reset(input_);
+    matches_ = re_.matches(pos, uerr_);
+    return matches_;    
+}
+
 int
 RegExp::matched_length() const {
     if (not matches_)
@@ -73,6 +81,19 @@ RegExp::pos() const {
     if (U_FAILURE(uerr_))
         throw std::runtime_error(u_errorName(uerr_));
     return start;
+}
+
+String
+RegExp::group(int n) const {
+    String grp(re_.group(n, uerr_));
+    if (U_FAILURE(uerr_))
+        throw std::runtime_error(u_errorName(uerr_));
+    return grp;
+}
+
+int
+RegExp::group_count() const {
+    return re_.groupCount();
 }
 
 } // namespace brfc

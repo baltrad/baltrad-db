@@ -33,6 +33,12 @@ class RegExp {
     int index_in(const String& str, int pos=0);    
 
     /**
+     * @brief match this pattern against @c str
+     * @return if true if pattern matches
+     **/
+    bool match(const String& str, int pos=0);
+
+    /**
      * @return length of the last match or -1 if no match
      */
     int matched_length() const;    
@@ -46,6 +52,16 @@ class RegExp {
      * @return position of the last match or -1 if no match
      */
     int pos() const;
+        
+    /**
+     * @return text matched by n-th group
+     */
+    String group(int n) const;
+
+    /**
+     * @return number of groups in pattern
+     */
+    int group_count() const;
 
   private:
     mutable UErrorCode uerr_;

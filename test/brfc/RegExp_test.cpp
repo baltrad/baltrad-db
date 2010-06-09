@@ -17,6 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdexcept>
+
 #include <gtest/gtest.h>
 
 #include <brfc/RegExp.hpp>
@@ -77,6 +79,27 @@ TEST(RegExp_test, test_pos) {
     EXPECT_EQ(1, re.pos());
     re.index_in(str, 4);
     EXPECT_EQ(11, re.pos());
+}
+
+TEST(RegExp_test, test_group_count) {
+    RegExp re1("([0-9]+)(abc)(cde)");
+    EXPECT_EQ(re1.group_count(), 3);
+
+    RegExp re2("");
+    EXPECT_EQ(re2.group_count(), 0);
+}
+
+TEST(RegExp_test, test_group) {
+    RegExp re("([0-9]+)[a-z]+([0-9]+)");
+    EXPECT_TRUE(re.match("0a1"));
+    EXPECT_EQ("0", re.group(1));
+    EXPECT_EQ("1", re.group(2));
+
+    EXPECT_FALSE(re.match("aabbcc1"));
+    EXPECT_THROW(re.group(1), std::runtime_error);
+
+    EXPECT_FALSE(re.match("1aabb"));
+    EXPECT_THROW(re.group(1), std::runtime_error);
 }
 
 } // namespace brfc
