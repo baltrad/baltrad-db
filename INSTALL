@@ -10,6 +10,7 @@ for building:
 
 library dependencies:
 * HLHDF library                 0.7.7
+* boost::bimap			1.38
 * boost::filesystem             1.38
 * boost::iterator               1.38
 * boost::lexical_cast           1.38

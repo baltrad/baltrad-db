@@ -65,9 +65,9 @@ SaveAttribute::invalid_attribute_query(const oh5::Attribute& attr) {
     }
     SqlQuery& qry = iter->second;
 
-    GroupIdCache::OptionalId grp_id;
+    GroupIdCache::OptionalKey grp_id;
     if (attr.parent_group())
-        grp_id = group_id_cache_->get(*attr.parent_group());
+        grp_id = group_id_cache_->key(attr.parent_group());
 
     qry.binds().add("name", Variant(attr.full_name()));
     qry.binds().add("group_id", grp_id ? Variant(grp_id.get())
@@ -89,9 +89,9 @@ SaveAttribute::valid_attribute_query(const oh5::Attribute& attr) {
     }
     SqlQuery& qry = iter->second;
 
-    GroupIdCache::OptionalId grp_id;
+    GroupIdCache::OptionalKey grp_id;
     if (attr.parent_group())
-        grp_id = group_id_cache_->get(*attr.parent_group());
+        grp_id = group_id_cache_->key(attr.parent_group());
     
     qry.binds().clear();
     qry.binds().add(":group_id", grp_id ? Variant(grp_id.get())

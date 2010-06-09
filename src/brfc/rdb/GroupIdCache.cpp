@@ -21,8 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/ResultSet.hpp>
 
-#include <brfc/oh5/Group.hpp>
-
 #include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
@@ -30,29 +28,30 @@ namespace brfc {
 namespace rdb {
 
 GroupIdCache::GroupIdCache(RelationalDatabase* rdb)
-        : IdCache<oh5::Group, long long>() 
+        : IdCache<long long, weak_ptr<const oh5::Group> >()
         , rdb_(rdb) {
 
 }
 
-GroupIdCache::OptionalId
-GroupIdCache::do_query(const oh5::Group& group) {
+GroupIdCache::OptionalKey
+GroupIdCache::do_lookup_key(weak_ptr<const oh5::Group> weak_group) {
+    shared_ptr<const oh5::Group> group = weak_group.lock();
     String qry = "SELECT id FROM groups WHERE file_id = :file_id "
                   "AND parent_id = :parent_id AND name = :name ";
     BindMap binds;
-    binds.add(":file_id", Variant(rdb_->db_id(*group.file())));
-    shared_ptr<const oh5::Group> parent = group.parent<const oh5::Group>();
+    binds.add(":file_id", Variant(rdb_->db_id(*group->file())));
+    shared_ptr<const oh5::Group> parent = group->parent<const oh5::Group>();
 
     Variant parent_id;
     if (parent) {
-        OptionalId id = get(*parent);
+        OptionalKey id = key(parent);
         if (id)
             parent_id = Variant(id.get());
     }
     binds.add(":parent_id", parent_id);
-    binds.add(":name", Variant(group.name()));
+    binds.add(":name", Variant(group->name()));
     shared_ptr<ResultSet> r = rdb_->query(qry, binds);
-    return r->next() ? r->int64_(0) : OptionalId();
+    return r->next() ? r->int64_(0) : OptionalKey();
 }
 
 } // namespace rdb

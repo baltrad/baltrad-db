@@ -20,24 +20,20 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_RDB_GROUP_ID_CACHE_HPP
 #define BRFC_RDB_GROUP_ID_CACHE_HPP
 
+#include <brfc/smart_ptr.hpp>
 #include <brfc/rdb/IdCache.hpp>
+#include <brfc/oh5/Group.hpp>
 
 namespace brfc {
-
-namespace oh5 {
-
-class Group;
-
-}
 
 namespace rdb {
 
 class RelationalDatabase;
 
 /**
- * @brief map oh5::Group instances to their database ids
+ * @brief cache for stored oh5::Group instances
  */
-class GroupIdCache : public IdCache<oh5::Group, long long> {
+class GroupIdCache : public IdCache<long long, weak_ptr<const oh5::Group> > {
   public:
     /**
      * @brief constructor
@@ -50,7 +46,7 @@ class GroupIdCache : public IdCache<oh5::Group, long long> {
     /**
      * @brief query for existing id from database
      */
-    virtual OptionalId do_query(const oh5::Group& group);   
+    virtual OptionalKey do_lookup_key(weak_ptr<const oh5::Group> group);
 
   private:
     RelationalDatabase* rdb_;

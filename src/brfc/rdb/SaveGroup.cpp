@@ -67,17 +67,17 @@ SaveGroup::operator()(const oh5::Group& group) {
 
     shared_ptr<ResultSet> result = rdb_->connection().execute(qry_);
 
-    id_cache_->set_cached(group.shared_from_this(), last_id(*result));
+    id_cache_->insert(last_id(*result), group.shared_from_this());
 }
 
 
 void
 SaveGroup::bind_plain(const oh5::Group& group) {
     Variant file_id;
-    GroupIdCache::OptionalId parent_id;
+    GroupIdCache::OptionalKey parent_id;
     shared_ptr<const oh5::Group> parent = group.parent<oh5::Group>();
     if (parent) {
-        parent_id = id_cache_->get(*parent);
+        parent_id = id_cache_->key(parent);
     }
     if (group.file())
         file_id = Variant(rdb_->db_id(*group.file()));

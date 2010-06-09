@@ -32,25 +32,22 @@ using ::testing::ByRef;
 namespace brfc {
 namespace rdb {
 
-class FakeCached : public enable_shared_from_this<FakeCached> {
+template<typename Key, typename Value>
+class MockIdCache : public IdCache<Key, Value> {
   public:
-    FakeCached()
-            : enable_shared_from_this<FakeCached>() {
-    }
-};
+    typedef typename IdCache<Key, Value>::OptionalKey OptionalKey;
+    typedef typename IdCache<Key, Value>::OptionalValue OptionalValue;
 
-template<typename T, typename Id>
-class MockIdCache : public IdCache<T, Id> {
-  public:
-    typedef typename IdCache<T, Id>::OptionalId  OptionalId;
-    MOCK_METHOD1_T(do_query, OptionalId(const T&));
+    MOCK_METHOD1_T(do_lookup_key, OptionalKey(const Key&));
+    MOCK_METHOD1_T(do_lookup_value, OptionalValue(const Value&));
+    MOCK_METHOD1_T(do_is_expired, bool(const Value&));
 };
 
 class rdb_IdCache_test : public ::testing::Test {
   public:
-    typedef long long Id;
-    typedef MockIdCache<FakeCached, Id> Cache;
-    typedef Cache::OptionalId OptionalId;
+    typedef MockIdCache<int, int> Cache;
+    typedef Cache::OptionalKey OptionalKey;
+    typedef Cache::OptionalValue OptionalValue;
 
     rdb_IdCache_test()
             : cache() {
@@ -59,63 +56,105 @@ class rdb_IdCache_test : public ::testing::Test {
     Cache cache;
 };
 
-TEST_F(rdb_IdCache_test, test_query_called_if_missing) {
-    shared_ptr<FakeCached> obj = make_shared<FakeCached>();
-    EXPECT_CALL(cache, do_query(_)).WillOnce(Return(1));
+TEST_F(rdb_IdCache_test, test_get_key_LOOKUP_MISSING) {
+    EXPECT_CALL(cache, do_lookup_key(1))
+        .WillOnce(Return(2));
 
-    OptionalId id = cache.get(*obj);
+    OptionalKey key = cache.key(1, Cache::LOOKUP_MISSING);
+    EXPECT_EQ((size_t)1, cache.size()); // stored
+    ASSERT_TRUE(key);
+    EXPECT_EQ(key.get(), 2);
+    
+    // lookup not called
+    key = cache.key(1, Cache::LOOKUP_MISSING);
+    ASSERT_TRUE(key);
+    EXPECT_EQ(key.get(), 2);
+}
+
+TEST_F(rdb_IdCache_test, test_get_value_LOOKUP_MISSING) {
+    EXPECT_CALL(cache, do_lookup_value(1))
+        .WillOnce(Return(2));
+
+    OptionalValue value = cache.value(1, Cache::LOOKUP_MISSING);
+    EXPECT_EQ((size_t)1, cache.size()); // stored
+    ASSERT_TRUE(value);
+    EXPECT_EQ(value.get(), 2);
+    
+    // lookup not called
+    value = cache.value(1, Cache::LOOKUP_MISSING);
+    ASSERT_TRUE(value);
+    EXPECT_EQ(value.get(), 2);
+}
+
+
+TEST_F(rdb_IdCache_test, test_get_key_FORCE_LOOKUP) {
+    EXPECT_CALL(cache, do_lookup_key(1))
+        .WillOnce(Return(2))
+        .WillOnce(Return(3));
+
+    OptionalKey key = cache.key(1, Cache::FORCE_LOOKUP);
+    EXPECT_EQ((size_t)1, cache.size()); // stored
+    ASSERT_TRUE(key);
+    EXPECT_EQ(key.get(), 2);
+
+    key = cache.key(1, Cache::FORCE_LOOKUP);
     EXPECT_EQ((size_t)1, cache.size());
-    ASSERT_TRUE(id);
-    EXPECT_EQ(id.get(), 1);
+    ASSERT_TRUE(key);
+    EXPECT_EQ(key.get(), 3);
 }
 
-TEST_F(rdb_IdCache_test, test_null_query_not_cached) {
-    shared_ptr<FakeCached> obj = make_shared<FakeCached>();
-    EXPECT_CALL(cache, do_query(_)).WillOnce(Return(OptionalId()));
+TEST_F(rdb_IdCache_test, test_get_value_FORCE_LOOKUP) {
+    EXPECT_CALL(cache, do_lookup_value(1))
+        .WillOnce(Return(2))
+        .WillOnce(Return(3));
 
-    OptionalId id = cache.get(*obj);
-    EXPECT_FALSE(id);
-    EXPECT_EQ((size_t)0, cache.size());
-}
+    OptionalValue value = cache.value(1, Cache::FORCE_LOOKUP);
+    EXPECT_EQ((size_t)1, cache.size()); // stored
+    ASSERT_TRUE(value);
+    EXPECT_EQ(value.get(), 2);
 
-TEST_F(rdb_IdCache_test, test_remove_expired) {
-    shared_ptr<FakeCached> obj1 = make_shared<FakeCached>();
-    shared_ptr<FakeCached> obj2 = make_shared<FakeCached>();
-    cache.set_cached(obj1, 1);
-    cache.set_cached(obj2, 2);
-    obj1.reset();
-
-    EXPECT_EQ((size_t)2, cache.size());
-    cache.remove_expired();
+    value = cache.value(1, Cache::FORCE_LOOKUP);
     EXPECT_EQ((size_t)1, cache.size());
-
-    EXPECT_FALSE(cache.get_cached(obj1));
-    EXPECT_TRUE(cache.get_cached(obj2));
+    ASSERT_TRUE(value);
+    EXPECT_EQ(value.get(), 3);
 }
 
-TEST_F(rdb_IdCache_test, test_autoremove_expired_on_get_cached) {
-    shared_ptr<FakeCached> obj = make_shared<FakeCached>();
-    weak_ptr<FakeCached> weakptr(obj);
-    cache.set_cached(weakptr, 1);
-    obj.reset();
+TEST_F(rdb_IdCache_test, test_get_key_NO_LOOKUP) {
+    OptionalKey key = cache.key(1, Cache::NO_LOOKUP);
+    EXPECT_EQ((size_t)0, cache.size());
+    EXPECT_FALSE(key);
+}
 
-    OptionalId id = cache.get_cached(weakptr);
-    EXPECT_FALSE(id);
+TEST_F(rdb_IdCache_test, test_get_value_NO_LOOKUP) {
+    OptionalValue value = cache.value(1, Cache::NO_LOOKUP);
+    EXPECT_EQ((size_t)0, cache.size());
+    EXPECT_FALSE(value);
+}
+
+TEST_F(rdb_IdCache_test, test_empty_key_lookup_not_stored) {
+    EXPECT_CALL(cache, do_lookup_key(1))
+        .WillOnce(Return(Cache::OptionalKey()));
+
+    OptionalKey key = cache.key(1);
+    EXPECT_FALSE(key);
     EXPECT_EQ((size_t)0, cache.size());
 }
 
-TEST_F(rdb_IdCache_test, test_set_cached_expired_ignored) {
-    shared_ptr<FakeCached> obj = make_shared<FakeCached>();
-    weak_ptr<FakeCached> weakptr(obj);
-    obj.reset();
-    cache.set_cached(weakptr, 1);
+TEST_F(rdb_IdCache_test, test_empty_value_lookup_not_stored) {
+    EXPECT_CALL(cache, do_lookup_value(1))
+        .WillOnce(Return(Cache::OptionalValue()));
 
-    EXPECT_EQ((size_t)0, cache.size());
+    OptionalValue value = cache.value(1);
+    EXPECT_FALSE(value);
+    EXPECT_EQ((size_t)0, cache.size());    
 }
 
-TEST_F(rdb_IdCache_test, test_get_cached_nonstored) {
-    shared_ptr<FakeCached> obj = make_shared<FakeCached>();
-    EXPECT_FALSE(cache.get_cached(obj));
+TEST_F(rdb_IdCache_test, test_get_stored_key_nonstored) {
+    EXPECT_FALSE(cache.stored_key(1));
+}
+
+TEST_F(rdb_IdCache_test, test_get_stored_value_nonstored) {
+    EXPECT_FALSE(cache.stored_value(1));
 }
 
 } // namespace rdb
