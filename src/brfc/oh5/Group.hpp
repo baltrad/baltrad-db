@@ -33,6 +33,18 @@ class Attribute;
 class Group : public Node {
   public:
     /**
+     * @brief create a Group subclass instance from name
+     * @return pointer to instance or null pointer if name is not a group
+     *
+     * ODIM_H5 node names map as (where N is an integer):
+     *  - datasetN -> @ref DataSetGroup
+     *  - dataN -> @ref DataGroup
+     *  - qualityN -> @ref QualityGroup
+     *  - (what|where|how) -> @ref AttributeGroup
+     */
+    static shared_ptr<Group> create_by_name(const String& name);
+
+    /**
      * @brief destructor
      */
     virtual ~Group();
@@ -44,7 +56,7 @@ class Group : public Node {
     shared_ptr<const Group> shared_from_this() const {
         return static_pointer_cast<const Group>(Node::shared_from_this());
     }
-
+    
     /**
      * @{
      * @brief access a child attribute

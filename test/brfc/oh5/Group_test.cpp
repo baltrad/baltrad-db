@@ -23,6 +23,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Variant.hpp>
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/DataGroup.hpp>
+#include <brfc/oh5/DataSetGroup.hpp>
+#include <brfc/oh5/QualityGroup.hpp>
 
 #include "../common.hpp"
 
@@ -133,6 +136,33 @@ TEST_F(oh5_Group_test, test_attribute_access) {
     EXPECT_EQ(shared_ptr<Attribute>(), ds1_d2->attribute("attr2"));
     EXPECT_EQ(w_attr1, ds1_d2->attribute("what/attr1"));
     EXPECT_EQ(ds1_d1_w_attr1, ds1_d1->attribute("what/attr1"));
+}
+
+TEST_F(oh5_Group_test, test_create_by_name_valid_names) {
+    shared_ptr<Group> grp;
+
+    grp = Group::create_by_name("dataset1");
+    EXPECT_TRUE(dynamic_pointer_cast<DataSetGroup>(grp));
+
+    grp = Group::create_by_name("data2");
+    EXPECT_TRUE(dynamic_pointer_cast<DataGroup>(grp));
+
+    grp = Group::create_by_name("quality3");
+    EXPECT_TRUE(dynamic_pointer_cast<QualityGroup>(grp));
+
+    grp = Group::create_by_name("what");
+    EXPECT_TRUE(dynamic_pointer_cast<AttributeGroup>(grp));
+    grp = Group::create_by_name("where");
+    EXPECT_TRUE(dynamic_pointer_cast<AttributeGroup>(grp));
+    grp = Group::create_by_name("how");
+    EXPECT_TRUE(dynamic_pointer_cast<AttributeGroup>(grp));
+}
+
+TEST_F(oh5_Group_test, test_create_by_name_invalid_names) {
+    EXPECT_FALSE(Group::create_by_name("dataset1a2"));
+    EXPECT_FALSE(Group::create_by_name("data"));
+    EXPECT_FALSE(Group::create_by_name("what/bla"));
+    EXPECT_FALSE(Group::create_by_name("/dataset1"));
 }
 
 } // namespace oh5
