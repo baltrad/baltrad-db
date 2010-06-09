@@ -36,7 +36,7 @@ class Group;
 namespace rdb {
 
 class RelationalDatabase;
-class GroupIdCache;
+class GroupCache;
 
 /**
  * @brief save oh5::Group instances to database
@@ -47,13 +47,13 @@ class SaveGroup {
      * @brief constructor
      *
      * @param rdb database to save to
-     * @param id_cache cache for inserted group ids
+     * @param cache cache for inserted group ids
      * @throw db_error if preparing the query fails
      *
      * prepare a query for use by operator(). If the database supports
      * RETURNING, use it to fetch the id of inserted group entry.
      */
-    SaveGroup(RelationalDatabase* rdb, GroupIdCache* id_cache);
+    SaveGroup(RelationalDatabase* rdb, GroupCache* cache);
     
     /**
      * @brief save a oh5::Group instance to database
@@ -84,7 +84,7 @@ class SaveGroup {
     long long last_id(ResultSet& result);
 
     RelationalDatabase* rdb_;
-    GroupIdCache* id_cache_;
+    GroupCache* cache_;
     SqlQuery qry_;
     MappingVector special_;
 };

@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/visit.hpp>
 
-#include <brfc/rdb/GroupIdCache.hpp>
+#include <brfc/rdb/GroupCache.hpp>
 #include <brfc/rdb/SaveAttribute.hpp>
 #include <brfc/rdb/SaveGroup.hpp>
 
@@ -95,7 +95,7 @@ class SaveFile {
 
   private:
     RelationalDatabase* rdb_;
-    GroupIdCache group_id_cache_;
+    GroupCache group_cache_;
     SaveAttribute save_attribute_;
     SaveGroup save_group_;
 };

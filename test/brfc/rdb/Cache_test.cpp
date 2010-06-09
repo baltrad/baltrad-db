@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <brfc/rdb/IdCache.hpp>
+#include <brfc/rdb/Cache.hpp>
 
 #include "../common.hpp"
 
@@ -33,30 +33,30 @@ namespace brfc {
 namespace rdb {
 
 template<typename Key, typename Value>
-class MockIdCache : public IdCache<Key, Value> {
+class MockCache : public Cache<Key, Value> {
   public:
-    typedef typename IdCache<Key, Value>::OptionalKey OptionalKey;
-    typedef typename IdCache<Key, Value>::OptionalValue OptionalValue;
+    typedef typename Cache<Key, Value>::OptionalKey OptionalKey;
+    typedef typename Cache<Key, Value>::OptionalValue OptionalValue;
 
     MOCK_METHOD1_T(do_lookup_key, OptionalKey(const Key&));
     MOCK_METHOD1_T(do_lookup_value, OptionalValue(const Value&));
     MOCK_METHOD1_T(do_is_expired, bool(const Value&));
 };
 
-class rdb_IdCache_test : public ::testing::Test {
+class rdb_Cache_test : public ::testing::Test {
   public:
-    typedef MockIdCache<int, int> Cache;
+    typedef MockCache<int, int> Cache;
     typedef Cache::OptionalKey OptionalKey;
     typedef Cache::OptionalValue OptionalValue;
 
-    rdb_IdCache_test()
+    rdb_Cache_test()
             : cache() {
     }
 
     Cache cache;
 };
 
-TEST_F(rdb_IdCache_test, test_get_key_LOOKUP_MISSING) {
+TEST_F(rdb_Cache_test, test_get_key_LOOKUP_MISSING) {
     EXPECT_CALL(cache, do_lookup_key(1))
         .WillOnce(Return(2));
 
@@ -71,7 +71,7 @@ TEST_F(rdb_IdCache_test, test_get_key_LOOKUP_MISSING) {
     EXPECT_EQ(key.get(), 2);
 }
 
-TEST_F(rdb_IdCache_test, test_get_value_LOOKUP_MISSING) {
+TEST_F(rdb_Cache_test, test_get_value_LOOKUP_MISSING) {
     EXPECT_CALL(cache, do_lookup_value(1))
         .WillOnce(Return(2));
 
@@ -87,7 +87,7 @@ TEST_F(rdb_IdCache_test, test_get_value_LOOKUP_MISSING) {
 }
 
 
-TEST_F(rdb_IdCache_test, test_get_key_FORCE_LOOKUP) {
+TEST_F(rdb_Cache_test, test_get_key_FORCE_LOOKUP) {
     EXPECT_CALL(cache, do_lookup_key(1))
         .WillOnce(Return(2))
         .WillOnce(Return(3));
@@ -103,7 +103,7 @@ TEST_F(rdb_IdCache_test, test_get_key_FORCE_LOOKUP) {
     EXPECT_EQ(key.get(), 3);
 }
 
-TEST_F(rdb_IdCache_test, test_get_value_FORCE_LOOKUP) {
+TEST_F(rdb_Cache_test, test_get_value_FORCE_LOOKUP) {
     EXPECT_CALL(cache, do_lookup_value(1))
         .WillOnce(Return(2))
         .WillOnce(Return(3));
@@ -119,19 +119,19 @@ TEST_F(rdb_IdCache_test, test_get_value_FORCE_LOOKUP) {
     EXPECT_EQ(value.get(), 3);
 }
 
-TEST_F(rdb_IdCache_test, test_get_key_NO_LOOKUP) {
+TEST_F(rdb_Cache_test, test_get_key_NO_LOOKUP) {
     OptionalKey key = cache.key(1, Cache::NO_LOOKUP);
     EXPECT_EQ((size_t)0, cache.size());
     EXPECT_FALSE(key);
 }
 
-TEST_F(rdb_IdCache_test, test_get_value_NO_LOOKUP) {
+TEST_F(rdb_Cache_test, test_get_value_NO_LOOKUP) {
     OptionalValue value = cache.value(1, Cache::NO_LOOKUP);
     EXPECT_EQ((size_t)0, cache.size());
     EXPECT_FALSE(value);
 }
 
-TEST_F(rdb_IdCache_test, test_empty_key_lookup_not_stored) {
+TEST_F(rdb_Cache_test, test_empty_key_lookup_not_stored) {
     EXPECT_CALL(cache, do_lookup_key(1))
         .WillOnce(Return(Cache::OptionalKey()));
 
@@ -140,7 +140,7 @@ TEST_F(rdb_IdCache_test, test_empty_key_lookup_not_stored) {
     EXPECT_EQ((size_t)0, cache.size());
 }
 
-TEST_F(rdb_IdCache_test, test_empty_value_lookup_not_stored) {
+TEST_F(rdb_Cache_test, test_empty_value_lookup_not_stored) {
     EXPECT_CALL(cache, do_lookup_value(1))
         .WillOnce(Return(Cache::OptionalValue()));
 
@@ -149,11 +149,11 @@ TEST_F(rdb_IdCache_test, test_empty_value_lookup_not_stored) {
     EXPECT_EQ((size_t)0, cache.size());    
 }
 
-TEST_F(rdb_IdCache_test, test_get_stored_key_nonstored) {
+TEST_F(rdb_Cache_test, test_get_stored_key_nonstored) {
     EXPECT_FALSE(cache.stored_key(1));
 }
 
-TEST_F(rdb_IdCache_test, test_get_stored_value_nonstored) {
+TEST_F(rdb_Cache_test, test_get_stored_value_nonstored) {
     EXPECT_FALSE(cache.stored_value(1));
 }
 

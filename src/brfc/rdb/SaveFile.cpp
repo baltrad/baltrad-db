@@ -38,9 +38,9 @@ namespace rdb {
 
 SaveFile::SaveFile(RelationalDatabase* rdb)
         : rdb_(rdb)
-        , group_id_cache_(rdb)
-        , save_attribute_(rdb, &group_id_cache_)
-        , save_group_(rdb, &group_id_cache_) {
+        , group_cache_(rdb)
+        , save_attribute_(rdb, &group_cache_)
+        , save_group_(rdb, &group_cache_) {
 }
 
 void

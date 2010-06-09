@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/GroupIdCache.hpp>
+#include <brfc/rdb/GroupCache.hpp>
 
 #include <brfc/ResultSet.hpp>
 
@@ -27,14 +27,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace rdb {
 
-GroupIdCache::GroupIdCache(RelationalDatabase* rdb)
-        : IdCache<long long, weak_ptr<const oh5::Group> >()
+GroupCache::GroupCache(RelationalDatabase* rdb)
+        : Cache<long long, weak_ptr<const oh5::Group> >()
         , rdb_(rdb) {
 
 }
 
-GroupIdCache::OptionalKey
-GroupIdCache::do_lookup_key(weak_ptr<const oh5::Group> weak_group) {
+GroupCache::OptionalKey
+GroupCache::do_lookup_key(weak_ptr<const oh5::Group> weak_group) {
     shared_ptr<const oh5::Group> group = weak_group.lock();
     String qry = "SELECT id FROM groups WHERE file_id = :file_id "
                   "AND parent_id = :parent_id AND name = :name ";

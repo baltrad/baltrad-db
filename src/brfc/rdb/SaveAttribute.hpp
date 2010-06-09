@@ -35,7 +35,7 @@ class Attribute;
 namespace rdb {
 
 class AttributeMapper;
-class GroupIdCache;
+class GroupCache;
 class RelationalDatabase;
 
 /**
@@ -46,9 +46,9 @@ class SaveAttribute {
     /**
      * @brief constrcutor
      * @param rdb database to save to
-     * @param group_id_cache cache of group ids
+     * @param group_cache cache of group ids
      */
-    SaveAttribute(RelationalDatabase* rdb, GroupIdCache* group_id_cache);
+    SaveAttribute(RelationalDatabase* rdb, GroupCache* group_cache);
     
     /**
      * @brief save an oh5::Attribute instance to database
@@ -71,7 +71,7 @@ class SaveAttribute {
 
     RelationalDatabase* rdb_;
     const AttributeMapper* mapper_;
-    GroupIdCache* group_id_cache_;
+    GroupCache* group_cache_;
     QueryMap queries_;
 };
 

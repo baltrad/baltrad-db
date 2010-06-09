@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_RDB_GROUP_ID_CACHE_HPP
 
 #include <brfc/smart_ptr.hpp>
-#include <brfc/rdb/IdCache.hpp>
+#include <brfc/rdb/Cache.hpp>
 #include <brfc/oh5/Group.hpp>
 
 namespace brfc {
@@ -33,14 +33,14 @@ class RelationalDatabase;
 /**
  * @brief cache for stored oh5::Group instances
  */
-class GroupIdCache : public IdCache<long long, weak_ptr<const oh5::Group> > {
+class GroupCache : public Cache<long long, weak_ptr<const oh5::Group> > {
   public:
     /**
      * @brief constructor
      *
      * @param rdb database this cache operates on
      */
-    GroupIdCache(RelationalDatabase* rdb);
+    GroupCache(RelationalDatabase* rdb);
 
   protected:
     /**

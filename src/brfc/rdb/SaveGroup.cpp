@@ -28,7 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Group.hpp>
 
-#include <brfc/rdb/GroupIdCache.hpp>
+#include <brfc/rdb/GroupCache.hpp>
 #include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
@@ -37,9 +37,9 @@ namespace brfc {
 namespace rdb {
 
 SaveGroup::SaveGroup(RelationalDatabase* rdb,
-                     GroupIdCache* id_cache)
+                     GroupCache* cache)
         : rdb_(rdb)
-        , id_cache_(id_cache)
+        , cache_(cache)
         , qry_("")
         , special_(rdb->mapper().specializations_on("bdb_groups")) {
     StringList columns, binds; 
@@ -67,17 +67,17 @@ SaveGroup::operator()(const oh5::Group& group) {
 
     shared_ptr<ResultSet> result = rdb_->connection().execute(qry_);
 
-    id_cache_->insert(last_id(*result), group.shared_from_this());
+    cache_->insert(last_id(*result), group.shared_from_this());
 }
 
 
 void
 SaveGroup::bind_plain(const oh5::Group& group) {
     Variant file_id;
-    GroupIdCache::OptionalKey parent_id;
+    GroupCache::OptionalKey parent_id;
     shared_ptr<const oh5::Group> parent = group.parent<oh5::Group>();
     if (parent) {
-        parent_id = id_cache_->key(parent);
+        parent_id = cache_->key(parent);
     }
     if (group.file())
         file_id = Variant(rdb_->db_id(*group.file()));

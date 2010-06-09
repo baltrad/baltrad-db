@@ -36,7 +36,7 @@ namespace rdb {
  * @tparam Value must fulfill boost::optional requirements
  */
 template<typename Key, typename Value>
-class IdCache {
+class Cache {
     typedef boost::bimaps::bimap<
                 boost::bimaps::set_of<Key>,
                 boost::bimaps::set_of<Value>
@@ -60,14 +60,14 @@ class IdCache {
     /**
      * @brief construct an empty map
      */
-    IdCache()
+    Cache()
             : map_() {
     }
     
     /**
      * @brief destructor
      */
-    virtual ~IdCache() { }
+    virtual ~Cache() { }
     
     /**
      * @brief get key associated with @c value, optionally doing a lookup

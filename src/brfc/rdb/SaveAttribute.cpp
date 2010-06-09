@@ -24,17 +24,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/Connection.hpp>
-#include <brfc/rdb/GroupIdCache.hpp>
+#include <brfc/rdb/GroupCache.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
 namespace brfc {
 namespace rdb {
 
 SaveAttribute::SaveAttribute(RelationalDatabase* rdb,
-                             GroupIdCache* group_id_cache)
+                             GroupCache* group_cache)
         : rdb_(rdb)
         , mapper_(&rdb->mapper())
-        , group_id_cache_(group_id_cache)
+        , group_cache_(group_cache)
         , queries_() {
 }
 
@@ -65,9 +65,9 @@ SaveAttribute::invalid_attribute_query(const oh5::Attribute& attr) {
     }
     SqlQuery& qry = iter->second;
 
-    GroupIdCache::OptionalKey grp_id;
+    GroupCache::OptionalKey grp_id;
     if (attr.parent_group())
-        grp_id = group_id_cache_->key(attr.parent_group());
+        grp_id = group_cache_->key(attr.parent_group());
 
     qry.binds().add("name", Variant(attr.full_name()));
     qry.binds().add("group_id", grp_id ? Variant(grp_id.get())
@@ -89,9 +89,9 @@ SaveAttribute::valid_attribute_query(const oh5::Attribute& attr) {
     }
     SqlQuery& qry = iter->second;
 
-    GroupIdCache::OptionalKey grp_id;
+    GroupCache::OptionalKey grp_id;
     if (attr.parent_group())
-        grp_id = group_id_cache_->key(attr.parent_group());
+        grp_id = group_cache_->key(attr.parent_group());
     
     qry.binds().clear();
     qry.binds().add(":group_id", grp_id ? Variant(grp_id.get())
