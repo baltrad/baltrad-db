@@ -29,6 +29,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+/**
+ * @brief Variant value
+ */
 class Variant {
   public:
     enum Type {
@@ -101,11 +104,6 @@ class Variant {
     }
 
     /**
-     * @brief construct longlong variant
-     */
-    explicit Variant(unsigned long long value);
-
-    /**
      * @brief construct double variant
      */
     explicit Variant(double value)
@@ -149,7 +147,7 @@ class Variant {
     }
 
     Type type() const { return type_; }
-
+    
     bool is_null() const;
     bool is_string() const;
 
@@ -164,7 +162,11 @@ class Variant {
     bool is_bool() const;
     bool is_date() const;
     bool is_time() const;
-
+    
+    /**
+     * @name strict value access
+     * @{
+     */
     const String& string() const;
     
     /**
@@ -181,11 +183,27 @@ class Variant {
     const Date& date() const;
 
     const Time& time() const;
-
+    ///@}
+    
+    /**
+     * @name value conversion
+     * @{
+     */
     /**
      * @brief convert to String
      */
     String to_string() const;
+
+    long long to_int64() const;
+
+    double to_double() const;
+
+    bool to_bool() const;
+
+    Time to_time() const;
+
+    Date to_date() const;
+    ///@}
 
   private:
     friend bool operator==(const Variant&, const Variant&);

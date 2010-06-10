@@ -91,27 +91,73 @@ TEST(Variant_test, equality_comparison) {
     EXPECT_EQ(v4, v4);
 }
 
-TEST(Variant_test, null_to_string) {
+TEST(Variant_test, to_string) {
     EXPECT_EQ(Variant().to_string(), "");
-}
-
-TEST(Variant_test, int_to_string) {
+    EXPECT_EQ(Variant("foo").to_string(), "foo");
     EXPECT_EQ(Variant(10).to_string(), "10");
-}
-
-TEST(Variant_test, double_to_string) {
-    EXPECT_EQ(Variant("1.1").to_string(), "1.1");
-}
-
-TEST(Variant_test, bool_to_string) {
+    EXPECT_EQ(Variant(1.2).to_string(), "1.2");
     EXPECT_EQ(Variant(true).to_string(), "True");
     EXPECT_EQ(Variant(false).to_string(), "False");
-}
-
-TEST(Variant_test, date_to_string) {
     EXPECT_EQ(Variant(Date(2000, 11, 12)).to_string(), "20001112");
+    EXPECT_EQ(Variant(Time(12, 34, 56)).to_string(), "123456");
 }
 
-TEST(Variant_test, time_to_string) {
-    EXPECT_EQ(Variant(Time(12, 34, 56)).to_string(), "123456");
+TEST(Variant_test, to_int64) {
+    EXPECT_EQ(0, Variant().to_int64());
+    EXPECT_EQ(10, Variant("10").to_int64());
+    EXPECT_THROW(Variant("foo").to_int64(), value_error);
+    EXPECT_EQ(10, Variant(10).to_int64());
+    EXPECT_EQ(1, Variant(1.2).to_int64());
+    EXPECT_EQ(1, Variant(true).to_int64());
+    EXPECT_EQ(0, Variant(false).to_int64());
+    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_int64(), value_error);
+    EXPECT_THROW(Variant(Time(12, 34, 56)).to_int64(), value_error);
+}
+
+TEST(Variant_test, to_double) {
+    EXPECT_EQ(0.0, Variant().to_double());
+    EXPECT_EQ(10.0, Variant("10").to_double());
+    EXPECT_THROW(Variant("foo").to_double(), value_error);
+    EXPECT_EQ(10.0, Variant(10).to_double());
+    EXPECT_EQ(1.2, Variant(1.2).to_double());
+    EXPECT_EQ(1.0, Variant(true).to_double());
+    EXPECT_EQ(0.0, Variant(false).to_double());
+    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_double(), value_error);
+    EXPECT_THROW(Variant(Time(12, 34, 56)).to_double(), value_error);
+}
+
+TEST(Variant_test, to_bool) {
+    EXPECT_EQ(false, Variant().to_bool());
+    EXPECT_EQ(true, Variant("foo").to_bool());
+    EXPECT_EQ(false, Variant("").to_bool());
+    EXPECT_EQ(true, Variant(10).to_bool());
+    EXPECT_EQ(true, Variant(1.2).to_bool());
+    EXPECT_EQ(true, Variant(true).to_bool());
+    EXPECT_EQ(false, Variant(false).to_bool());
+    EXPECT_EQ(true, Variant(Date(2000, 11, 12)).to_bool());
+    EXPECT_EQ(true, Variant(Time(12, 34, 56)).to_bool());
+}
+
+TEST(Variant_test, to_time) {
+    EXPECT_THROW(Variant().to_time(), value_error);
+    EXPECT_THROW(Variant("foo").to_time(), value_error);
+    EXPECT_EQ(Time(12, 34, 56), Variant("12:34:56").to_time());
+    EXPECT_THROW(Variant(10).to_time(), value_error);
+    EXPECT_THROW(Variant(1.2).to_time(), value_error);
+    EXPECT_THROW(Variant(true).to_time(), value_error);
+    EXPECT_THROW(Variant(false).to_time(), value_error);
+    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_time(), value_error);
+    EXPECT_EQ(Time(12, 34, 56), Variant(Time(12, 34, 56)).to_time());
+}
+
+TEST(Variant_test, to_date) {
+    EXPECT_THROW(Variant().to_date(), value_error);
+    EXPECT_THROW(Variant("foo").to_date(), value_error);
+    EXPECT_EQ(Date(2000, 11, 12), Variant("2000-11-12").to_date());
+    EXPECT_THROW(Variant(10).to_date(), value_error);
+    EXPECT_THROW(Variant(1.2).to_date(), value_error);
+    EXPECT_THROW(Variant(true).to_date(), value_error);
+    EXPECT_THROW(Variant(false).to_date(), value_error);
+    EXPECT_EQ(Date(2000, 11, 12), Variant(Date(2000, 11, 12)).to_date());
+    EXPECT_THROW(Variant(Time(12, 34, 56)).to_date(), value_error);
 }
