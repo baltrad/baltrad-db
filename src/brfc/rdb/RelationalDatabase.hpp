@@ -87,8 +87,6 @@ class RelationalDatabase : public Database {
         return *conn_;
     }
 
-    bool supports_returning() const;
-
     void file_hasher(shared_ptr<FileHasher> hasher);
     
     /**

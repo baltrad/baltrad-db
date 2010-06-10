@@ -52,11 +52,6 @@ RelationalDatabase::RelationalDatabase(const String& dsn_)
     conn_->open();
 }
 
-bool
-RelationalDatabase::supports_returning() const {
-    return conn_->has_feature(Connection::RETURNING);
-}
-
 RelationalDatabase::~RelationalDatabase() {
 
 }

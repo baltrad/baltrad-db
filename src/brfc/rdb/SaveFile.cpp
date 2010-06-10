@@ -76,7 +76,7 @@ SaveFile::operator()(const oh5::File& file,
                  ", hash_type, proposed_filename, filename_version) "
                  "VALUES(" + binds.join(", ") +
                  ", :hash_type, :proposed_filename, :filename_version)");
-    if (rdb_->supports_returning())
+    if (rdb_->connection().has_feature(Connection::RETURNING))
         stmt += " RETURNING id";
 
     SqlQuery qry(stmt);
@@ -106,7 +106,7 @@ SaveFile::operator()(const oh5::File& file,
         visit(node, *this);
     }
 
-    if (rdb_->supports_returning() and result->next()) {
+    if (rdb_->connection().has_feature(Connection::RETURNING) and result->next()) {
         return result->int64_(0);
     } else {
         // XXX: last insert id!

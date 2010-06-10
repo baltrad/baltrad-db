@@ -54,7 +54,7 @@ SaveGroup::SaveGroup(RelationalDatabase* rdb,
     }
     String qrystr("INSERT INTO bdb_groups(" + columns.join(", ") +
                    ") VALUES(" + binds.join(", ") + ")");
-    if (rdb->supports_returning())
+    if (rdb->connection().has_feature(Connection::RETURNING))
         qrystr += " RETURNING id";
     qry_.statement(qrystr);
 }
@@ -100,7 +100,7 @@ SaveGroup::bind_specializations(const oh5::Group& group) {
 
 long long
 SaveGroup::last_id(ResultSet& result) {
-    if (rdb_->supports_returning() and result.next()) {
+    if (rdb_->connection().has_feature(Connection::RETURNING) and result.next()) {
         return result.int64_(0);
     } else {
         // XXX: last insert id!
