@@ -42,6 +42,18 @@ class Connection {
         RETURNING = 1,
         LAST_INSERT_ID = 2
     };
+    
+    /**
+     * @brief create a Connection instance from dsn
+     * @param dsn dsn (transformed to Url)
+     * @throw value_error if url with invalid scheme is supplied
+     *
+     * construct a connection according to Url::scheme.
+     *
+     * schemes map as:
+     *  - postgresql -> PostgresConnection
+     */
+    static shared_ptr<Connection> create(const String& dsn);
 
     virtual ~Connection() {
 

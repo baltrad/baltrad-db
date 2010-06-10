@@ -21,11 +21,23 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/String.hpp>
+#include <brfc/Url.hpp>
 
 #include <brfc/rdb/SqlQuery.hpp>
+#include <brfc/rdb/PostgresConnection.hpp>
 
 namespace brfc {
 namespace rdb {
+
+shared_ptr<Connection>
+Connection::create(const String& dsn) {
+    Url url(dsn);
+    if (url.scheme() == "postgresql")
+        return make_shared<PostgresConnection>(url);
+    else
+        throw value_error("no mapping found for dsn scheme: "
+                          + url.scheme().to_utf8());
+}
 
 void
 Connection::open() {

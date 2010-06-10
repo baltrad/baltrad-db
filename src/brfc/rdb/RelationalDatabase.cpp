@@ -27,7 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/StringList.hpp>
-#include <brfc/Url.hpp>
 
 #include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
@@ -37,7 +36,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/Compiler.hpp>
-#include <brfc/rdb/PostgresConnection.hpp>
+#include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/SaveFile.hpp>
 
@@ -45,14 +44,11 @@ namespace brfc {
 namespace rdb {
 
 RelationalDatabase::RelationalDatabase(const String& dsn_)
-        : conn_()
+        : conn_(Connection::create(dsn_))
         , mapper_(new AttributeMapper())
         , specs_(new oh5::AttributeSpecs())
         , file_hasher_() {
 
-    Url dsn(dsn_);
-    
-    conn_.reset(new PostgresConnection(dsn));
     conn_->open();
 }
 

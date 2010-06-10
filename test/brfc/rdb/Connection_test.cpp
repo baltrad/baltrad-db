@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/Variant.hpp>
 #include <brfc/rdb/Connection.hpp>
@@ -49,6 +50,14 @@ class rdb_Connection_test : public testing::Test {
 
     ::testing::NiceMock<MockConnection> conn;
 };
+
+TEST_F(rdb_Connection_test, test_create_valid_url) {
+    EXPECT_TRUE(Connection::create("postgresql://user:password@localhost/dbname"));
+}
+
+TEST_F(rdb_Connection_test, test_create_invalid_url) {
+    EXPECT_THROW(Connection::create("bla://user:password@localhost/dbname"), value_error);
+}
 
 TEST_F(rdb_Connection_test, test_no_transaction_execute) {
     String stmt("query");
