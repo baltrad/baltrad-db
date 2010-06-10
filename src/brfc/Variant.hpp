@@ -21,11 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_VARIANT_HPP
 
 #include <boost/variant.hpp>
-#include <boost/numeric/conversion/cast.hpp>
 
 #include <brfc/deprecate.hpp>
-#include <brfc/exceptions.hpp>
-#include <brfc/smart_ptr.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/String.hpp>
 #include <brfc/Time.hpp>
@@ -106,10 +103,7 @@ class Variant {
     /**
      * @brief construct longlong variant
      */
-    explicit Variant(unsigned long long value)
-            : type_(INT64)
-            , value_(boost::numeric_cast<long long>(value)) {
-    }
+    explicit Variant(unsigned long long value);
 
     /**
      * @brief construct double variant

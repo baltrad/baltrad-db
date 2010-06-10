@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/SqlQuery.hpp>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/String.hpp>
 #include <brfc/RegExp.hpp>
 

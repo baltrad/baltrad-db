@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/PostgresResultSet.hpp>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 
 namespace brfc {
