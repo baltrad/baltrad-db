@@ -102,35 +102,45 @@ FileCatalog::is_cataloged(const oh5::File& f) const {
     return db_->has_file(f);
 }
 
-shared_ptr<const oh5::File>
+shared_ptr<oh5::File>
 FileCatalog::catalog(const String& path) {
     shared_ptr<oh5::File> f = oh5::File::from_filesystem(path, *specs_);
+    catalog(*f); 
+    return f;
+}
 
-    std::string path_utf8 = path.to_utf8();
+void
+FileCatalog::catalog(oh5::File& file) {
+
+    std::string path_utf8 = file.path().to_utf8();
     fs::path fs_path(path_utf8);
     
-    f->source(db_->load_source(f->what_source()));
+    file.source(db_->load_source(file.what_source()));
 
-    if (is_cataloged(*f))
+    if (is_cataloged(file))
         throw duplicate_entry(path_utf8);
     
-    String proposed_name = namer_->name(*f);
+    String proposed_name = namer_->name(file);
     
     // move to FileNamer::name
     if (fs::path(proposed_name.to_utf8()).is_complete())
         throw std::runtime_error("namer must not return absolute paths");
     
     unsigned int name_version = db_->next_filename_version(proposed_name);
-    
+
     String target = FileNamer::inject_version(proposed_name, name_version);
     fs::path fs_target = fs::path(storage_.to_utf8()) / target.to_utf8();
-    f->path(fs_target.string());
-
+    String orig_path = file.path();
+    // set new path here because we need to store it in db
+    file.path(fs_target.string());
+    
     db_->begin();
     // try saving to database
     try {
-        db_->save_file(*f, proposed_name, name_version);
+        file.path(fs_target.file_string());
+        db_->save_file(file, proposed_name, name_version);
     } catch (const db_error& e) {
+        file.path(orig_path);
         db_->rollback();
         throw;
     }
@@ -140,10 +150,10 @@ FileCatalog::catalog(const String& path) {
         fs::copy_file(fs_path, fs_target);
         db_->commit();
     } catch (const fs::filesystem_error& e) {
+        file.path(orig_path);
         db_->rollback();
         throw fs_error(e.what());
     }
-    return f;
 }
 
 void

@@ -41,6 +41,13 @@ namespace oh5 {
 
 /**
  * @brief indexes and stores ODIM_H5 File instances
+ *
+ * @note there are several similar methods accepting file as as a path string
+ *       or oh5::File instance. Methods accepting file path are mostly just
+ *       short-hands for loading the file from filesystem and then passing
+ *       it to the method accepting oh5::File instance. If you want to call
+ *       several methods on the same file, it's more efficient to create the
+ *       oh5::File instance yourself.
  */
 class FileCatalog {
   public:
@@ -85,14 +92,32 @@ class FileCatalog {
      * @throw db_error if database query fails
      * @throw fs_error if file can not be opened
      * @return true if file is cataloged
+     * 
+     * this is a short-hand for:
+     * @code
+     * FileCatalog fc(...);
+     * shared_ptr<oh5::File> f =
+     *      oh5::File::from_filesystem(path,
+     *                                 fc.attribute_specs());
+     * fc.is_cataloged(*f);
+     * @endcode
+     *
+     * @sa File::unique_identifier
+     * @sa is_cataloged(const oh5::File&) const
+     */
+    bool is_cataloged(const String& path) const;
+    
+    /**
+     * @brief has file been imported to this catalog
+     * @param file oh5::File instance to test
+     * @throw db_error if database query fails
+     * @return true if file is cataloged
      *
      * a file is cataloged when a file with the same unique identifier is
      * already present in database. For the exact rules on how the unique id
      * is determined, refer to File documentation.
-     *
-     * @sa File::unique_identifier
      */
-    bool is_cataloged(const String& path) const;
+    bool is_cataloged(const oh5::File& f) const;
     
     /**
      * @brief import file to catalog
@@ -103,9 +128,29 @@ class FileCatalog {
                        fails.
      * @throw duplicate_entry if file has already been cataloged
      *
-     * on import file is physically copied to a new location
+     * this is a short-hand for:
+     * @code
+     * FileCatalog fc(...);
+     * shared_ptr<oh5::File> f =
+     *      oh5::File::from_filesystem(path, fc.attribute_specs());
+     * fc.catalog(*f);
+     * @endcode
+     *
+     * @sa catalog(oh5::File& file)
      */
-    shared_ptr<const oh5::File> catalog(const String& path);
+    shared_ptr<oh5::File> catalog(const String& path);
+    
+    /**
+     * @brief import file to catalog
+     * @param file oh5::File instance to import
+     * @throw db_error if storing file to database fails
+     * @throw fs_error if copy to new destination fails
+     * @throw duplicate_entry if file has already been cataloged
+     *
+     * on import file is physically copied to a new location. If the file
+     * import is successful file.path() will contain this new location.
+     */
+    void catalog(oh5::File& file);
     
     /**
      * @brief remove file from catalog
@@ -138,7 +183,6 @@ class FileCatalog {
     //void sync();
     
   private:
-    bool is_cataloged(const oh5::File& f) const;
 
     void check_storage() const;
     

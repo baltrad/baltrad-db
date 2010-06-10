@@ -75,6 +75,7 @@ struct FileCatalog_test : public testing::Test {
 
     virtual void SetUp() {
         tempfile.write(*minfile);
+        minfile->path(tempfile.path());
         specs->add(oh5::AttributeSpec("Conventions", "string"));
         specs->add(oh5::AttributeSpec("what/object", "string"));
         specs->add(oh5::AttributeSpec("what/version", "string"));
@@ -99,6 +100,10 @@ TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
     EXPECT_THROW(FileCatalog("invalid_dsn", tempdir->path()), value_error);
 }
 
+TEST_F(FileCatalog_test, test_catalog_nx_file_by_path) {
+    EXPECT_THROW(fc.catalog("/path/to/nxfile"), fs_error);
+}
+
 TEST_F(FileCatalog_test, test_catalog) {
     const String& target = tempdir->path() + "/test_000010";
     EXPECT_CALL(*db, do_load_source(src_str));
@@ -115,15 +120,17 @@ TEST_F(FileCatalog_test, test_catalog) {
         .WillOnce(Return(1));
     EXPECT_CALL(*db, do_commit());
     
+    fc.catalog(*minfile);
     // file is given the correct path
-    shared_ptr<const oh5::File> f = fc.catalog(tempfile.path());
-    EXPECT_EQ(f->path(), target);
-
+    EXPECT_EQ(target, minfile->path());
+    // file exists
     EXPECT_TRUE(fs::exists(target.to_utf8()));
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
     const String& target = tempdir->path() + "/test_000010";
+    String orig_path = minfile->path();
+
     EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
@@ -135,13 +142,19 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
     EXPECT_CALL(*db, do_save_file(_, _, _))
         .WillOnce(Throw(db_error("")));
     EXPECT_CALL(*db, do_rollback());
-    
-    EXPECT_THROW(fc.catalog(tempfile.path()), db_error);
+
+     // propagates db_error
+    EXPECT_THROW(fc.catalog(*minfile), db_error);
+    // file not copied
     EXPECT_FALSE(fs::exists(target.to_utf8()));
+    // retains original location
+    EXPECT_EQ(orig_path, minfile->path());
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
     const String& target = tempdir->path() + "/test_000010";
+    String orig_path = minfile->path();
+
     EXPECT_CALL(*db, do_load_source(src_str));
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_has_file(_))
@@ -155,9 +168,13 @@ TEST_F(FileCatalog_test, test_catalog_on_copy_failure) {
     EXPECT_CALL(*db, do_rollback());
 
     tempdir.reset(); // tempdir removed
-
-    EXPECT_THROW(fc.catalog(tempfile.path()), fs_error);
+    
+    // propagates fs_error
+    EXPECT_THROW(fc.catalog(*minfile), fs_error);
+    // file not copied
     EXPECT_FALSE(fs::exists(target.to_utf8()));
+    // retains original location
+    EXPECT_EQ(orig_path, minfile->path());
 }
 
 TEST_F(FileCatalog_test, test_double_import_throws) {
@@ -165,10 +182,10 @@ TEST_F(FileCatalog_test, test_double_import_throws) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(true));
 
-    EXPECT_THROW(fc.catalog(tempfile.path()), duplicate_entry);
+    EXPECT_THROW(fc.catalog(*minfile), duplicate_entry);
 }
 
-TEST_F(FileCatalog_test, test_is_cataloged_on_nx_file) {
+TEST_F(FileCatalog_test, test_is_cataloged_nx_file_by_path) {
     EXPECT_THROW(fc.is_cataloged("/path/to/nxfile"), fs_error);
 }
 
@@ -176,7 +193,7 @@ TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
 
-    EXPECT_FALSE(fc.is_cataloged(tempfile.path()));
+    EXPECT_FALSE(fc.is_cataloged(*minfile));
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {
@@ -191,7 +208,7 @@ TEST_F(FileCatalog_test, test_remove_existing_file) {
     EXPECT_FALSE(fs::exists(target.to_utf8()));
 }
 
-TEST_F(FileCatalog_test, test_removing_nx_file) {
+TEST_F(FileCatalog_test, test_remove_nx_file) {
     EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_remove_file(String("/path/to/nxfile")));
     EXPECT_CALL(*db, do_rollback());
