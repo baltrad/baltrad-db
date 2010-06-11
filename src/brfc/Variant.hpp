@@ -38,7 +38,7 @@ class Variant {
         NONE,
         STRING,
         INT64,
-        LONGLONG = INT64, // XXX: deprecated
+        LONGLONG = INT64, ///< XXX: deprecated
         DOUBLE,
         BOOL,
         DATE,
@@ -145,43 +145,103 @@ class Variant {
         }
         return *this;
     }
-
+    
+    /**
+     * @name type determination
+     * @{
+     */
+    /**
+     * @brief enumerated type
+     */
     Type type() const { return type_; }
     
+    /**
+     * @brief test for NULL variant
+     */
     bool is_null() const;
+
+    /**
+     * @brief test for STRING variant
+     */
     bool is_string() const;
 
     /**
+     * @brief test for INT64 variant
      * @deprecated use is_int64()
      */
     DEPRECATED(bool is_long() const);
-
+    
+    /**
+     * @brief test for INT64 variant
+     */
     bool is_int64() const;
-
+    
+    /**
+     * @brief test for DOUBLE variant
+     */
     bool is_double() const;
+
+    /**
+     * @brief test for BOOL variant
+     */
     bool is_bool() const;
+
+    /**
+     * @brief test for DATE variant
+     */
     bool is_date() const;
+    
+    /**
+     * @brief test for TIME variant
+     */
     bool is_time() const;
+    ///@}
     
     /**
      * @name strict value access
      * @{
      */
+    /**
+     * @brief access STRING variant
+     * @throw value_error if type() != STRING
+     */
     const String& string() const;
     
     /**
+     * @brief access INT64 variant
+     * @throw value_error if type() != INT64
      * @deprecated use int64_()
      */
     DEPRECATED(long long longlong() const);
 
+    /**
+     * @brief access INT64 variant
+     * @throw value_error if type() != INT64
+     */
     long long int64_() const;
 
+    /**
+     * @brief access DOUBLE variant
+     * @throw value_error if type() != DOUBLE
+     */
     double double_() const;
 
+    /**
+     * @brief access BOOL variant
+     * @throw value_error if type() != BOOL
+     */
     bool bool_() const;
 
+    /**
+     * @brief access DATE variant
+     * @throw value_error if type() != DATE
+     */
     const Date& date() const;
 
+    /**
+     * @brief access TIME variant
+     * @throw value_error if type() != TIME
+     */
     const Time& time() const;
     ///@}
     
@@ -191,17 +251,74 @@ class Variant {
      */
     /**
      * @brief convert to String
+     *
+     * all variants are convertible to string.
+     *
+     * conversions:
+     *  - NULL variant is converted to empty String
+     *  - double and int64 variants are converted using String::number
+     *  - bool variant maps is converted to "True" or "False"
+     *  - Date variant is converted to ISO 8601 format yyyy-MM-dd
+     *  - Time variant is converted to ISO 8601 format hh:mm:ss
+     *
+     * @note Date/Time conversion is not symmetric with to_date() / to_time()
      */
     String to_string() const;
-
+    
+    /**
+     * @brief convert to 64-bit integer
+     * @throw value_error if not convertible
+     * 
+     * conversions:
+     *  - NULL variant is converted to 0
+     *  - String values are converted with boost::lexical_cast
+     *  - double and bool variants are converted with implicit C++ conversion
+     *  - all other variants are not convertible
+     */
     long long to_int64() const;
-
+    
+    /**
+     * @brief convert to double precision floating-point number
+     *
+     * conversions:
+     *  - NULL variant is converted to 0.0
+     *  - String values are converted with boost::lexical_cast
+     *  - int64 and bool variants are converted with implicit C++ conversion
+     *  - all other variants are not convertible
+     */
     double to_double() const;
-
+    
+    /**
+     * @brief convert to bool value
+     * 
+     * all variants are convertible to bool
+     *
+     * conversions:
+     *  - NULL variant is converted to false
+     *  - empty String is converted to false, all other strings to true
+     *  - Date and Time variants are converted to true
+     *  - all other variants are converted using implicit C++ conversion
+     */
     bool to_bool() const;
-
+    
+    /**
+     * @brief convert to Time value
+     *
+     * only String values containing ISO 8601 format 'yyyy-MM-dd' are
+     * convertible. 
+     *
+     * @note Time conversion is not symmetric with to_string()
+     */
     Time to_time() const;
-
+    
+    /**
+     * @brief convert to Date value
+     *
+     * only String values containing ISO 8601 format 'hh:mm:ss' are
+     * convertible. 
+     *
+     * @note Time conversion is not symmetric with to_string()
+     */
     Date to_date() const;
     ///@}
 
@@ -225,7 +342,6 @@ class Variant {
  * @brief equality comparison
  */
 bool operator==(const Variant& lhs, const Variant& rhs);
-
 
 /**
  * @brief inequality comparison

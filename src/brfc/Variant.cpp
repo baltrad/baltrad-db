@@ -19,30 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/Variant.hpp>
 
-#include <brfc/exceptions.hpp>
-
 #include <boost/lexical_cast.hpp>
-#include <boost/numeric/conversion/cast.hpp>
-
-#include <utility>
-
-#include <boost/numeric/conversion/cast.hpp>
 
 #include <brfc/exceptions.hpp>
 
 namespace brfc {
-
-/*
-Variant::Variant(unsigned long long value)
-        : type_(INT64)
-        , value_() {
-    try {
-        value_ = boost::numeric_cast<long long>(value); 
-    } catch (const boost::bad_numeric_cast& e) {
-        throw value_error(e.what());
-    }
-}
-*/
 
 bool Variant::is_null() const { return type_ == NONE; }
 bool Variant::is_string() const { return type_ == STRING; }
