@@ -30,14 +30,7 @@ class MockResultSet : public ResultSet {
     MOCK_METHOD1(do_seek, bool(int));
     MOCK_METHOD0(do_size, int());
 
-    MOCK_CONST_METHOD1(do_is_null, bool(unsigned int));
-
-    MOCK_CONST_METHOD1(do_string, String(unsigned int));
-    MOCK_CONST_METHOD1(do_int64, long long(unsigned int));
-    MOCK_CONST_METHOD1(do_double, double(unsigned int));
-    MOCK_CONST_METHOD1(do_bool, bool(unsigned int));
-    MOCK_CONST_METHOD1(do_date, Date(unsigned int));
-    MOCK_CONST_METHOD1(do_time, Time(unsigned int));
+    MOCK_CONST_METHOD1(do_value_at, Variant(unsigned int));
 
 };
 

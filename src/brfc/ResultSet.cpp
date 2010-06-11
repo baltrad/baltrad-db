@@ -26,54 +26,59 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+Variant
+ResultSet::value_at(unsigned int pos) const {
+    return do_value_at(pos);
+}
+
 bool
 ResultSet::is_null(unsigned int pos) const {
-    return do_is_null(pos);
+    return value_at(pos).is_null();
 }
 
 String
 ResultSet::string(unsigned int pos) const {
-    return do_string(pos);
+    return value_at(pos).to_string();
 }
 
 long long
 ResultSet::integer(unsigned int pos) const {
-    return do_int64(pos);
+    return int64_(pos);
 }
 
 long long
 ResultSet::int64_(unsigned int pos) const {
-    return do_int64(pos);
+    return value_at(pos).to_int64();
 }
 
 double
 ResultSet::real(unsigned int pos) const {
-    return do_double(pos);
+    return double_(pos);
 }
 
 double
 ResultSet::double_(unsigned int pos) const {
-    return do_double(pos);
+    return value_at(pos).to_double();
 }
 
 bool
 ResultSet::boolean(unsigned int pos) const {
-    return do_bool(pos);
+    return bool_(pos);
 }
 
 bool
 ResultSet::bool_(unsigned int pos) const {
-    return do_bool(pos);
+    return value_at(pos).to_bool();
 }
 
 Date
 ResultSet::date(unsigned int pos) const {
-    return do_date(pos);
+    return value_at(pos).to_date();
 }
 
 Time
 ResultSet::time(unsigned int pos) const {
-    return do_time(pos);
+    return value_at(pos).to_time();
 }
 
 } // namespace brfc

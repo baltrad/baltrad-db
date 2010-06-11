@@ -48,62 +48,17 @@ PostgresResultSet::do_size() {
     return result_.size();
 }
 
-namespace {
-
-template<typename T>
-T
-get_result_at(const pqxx::result& result, int row, unsigned int pos) {
-    T val;
+Variant
+PostgresResultSet::do_value_at(unsigned int pos) const {
     try {
-        result.at(row).at(pos).to(val);
+        const pqxx::result::field& field = result_.at(row_).at(pos);
+        if (field.is_null()) {
+            return Variant();
+        } else {
+            return Variant(String::from_utf8(field.c_str()));
+        }
     } catch (const std::out_of_range&) {
         throw lookup_error("invalid pqxx::result position");
-    }
-    return val;
-}
-
-} // namespace anonymous
-
-bool
-PostgresResultSet::do_is_null(unsigned int pos) const {
-    return result_.at(row_).at(pos).is_null();
-}
-
-String
-PostgresResultSet::do_string(unsigned int pos) const {
-    return String::from_utf8(result_.at(row_).at(pos).c_str());
-}
-
-long long
-PostgresResultSet::do_int64(unsigned int pos) const {
-    return get_result_at<long long>(result_, row_, pos);
-}
-
-double
-PostgresResultSet::do_double(unsigned int pos) const {
-    return get_result_at<double>(result_, row_, pos);
-}
-
-bool
-PostgresResultSet::do_bool(unsigned int pos) const {
-    return get_result_at<bool>(result_, row_, pos);
-}
-
-Date
-PostgresResultSet::do_date(unsigned int pos) const {
-    std::string str_utf8 = get_result_at<std::string>(result_, row_, pos);
-    String str = String::from_utf8(str_utf8);
-    return Date::from_string(str, "yyyy-MM-dd");
-}
-
-Time
-PostgresResultSet::do_time(unsigned int pos) const {
-    std::string str_utf8 = get_result_at<std::string>(result_, row_, pos);
-    String str = String::from_utf8(str_utf8);
-    try {
-        return Time::from_string(str, "hh:mm:ss.zzz");
-    } catch (value_error) {
-        return Time::from_string(str, "hh:mm:ss");
     }
 }
 

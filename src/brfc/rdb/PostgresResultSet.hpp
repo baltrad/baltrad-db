@@ -36,14 +36,7 @@ class PostgresResultSet : public ResultSet {
     virtual bool do_seek(int idx);
     virtual int do_size();
 
-    virtual bool do_is_null(unsigned int pos) const;
-    
-    virtual String do_string(unsigned int pos) const;
-    virtual long long do_int64(unsigned int pos) const;
-    virtual double do_double(unsigned int pos) const;
-    virtual bool do_bool(unsigned int pos) const;
-    virtual Date do_date(unsigned int pos) const;
-    virtual Time do_time(unsigned int pos) const;
+    virtual Variant do_value_at(unsigned int pos) const;
 
   private:
     pqxx::result result_;

@@ -80,6 +80,11 @@ class ResultSet : public boost::noncopyable {
      * @{
      */
     /**
+     * @brief get value at @c pos as Variant
+     */
+    Variant value_at(unsigned int pos) const;
+
+    /**
      * @brief get string value at \c pos
      */
     String string(unsigned int pos) const;
@@ -122,23 +127,16 @@ class ResultSet : public boost::noncopyable {
     /**
      * @brief get time value at \c pos
      */
-    Time time(unsigned int pos) const;
+    Time time(unsigned int pos) const;    
     //@}
+     
   
   protected:
     virtual bool do_next() = 0;
     virtual bool do_seek(int idx) = 0;
     virtual int do_size() = 0;
 
-    virtual bool do_is_null(unsigned int pos) const = 0;
-    
-    virtual String do_string(unsigned int pos) const = 0;
-    virtual long long do_int64(unsigned int pos) const = 0;
-    virtual double do_double(unsigned int pos) const = 0;
-    virtual bool do_bool(unsigned int pos) const = 0;
-    virtual Date do_date(unsigned int pos) const = 0;
-    virtual Time do_time(unsigned int pos) const = 0;
-
+    virtual Variant do_value_at(unsigned int pos) const = 0;
 };
 
 }
