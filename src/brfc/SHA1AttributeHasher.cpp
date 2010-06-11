@@ -43,6 +43,24 @@ SHA1AttributeHasher::~SHA1AttributeHasher() {
 }
 
 String
+SHA1AttributeHasher::attribute_string(const oh5::Attribute& attr) {
+    const Variant& value = attr.value();
+    String value_str;
+    switch (value.type()) {
+        case Variant::DATE:
+            value_str = value.date().to_string("yyyyMMdd");
+            break;
+        case Variant::TIME:
+            value_str = value.time().to_string("hhmmss");
+            break;
+        default:
+            value_str = value.to_string();
+            break;
+    }
+    return attr.path() + "=" + value_str;
+}
+
+String
 SHA1AttributeHasher::do_name() const {
     return "sha1_attribute";
 }
@@ -66,7 +84,7 @@ SHA1AttributeHasher::do_hash(const oh5::File& file) {
         // this might throw, but we should have all the specs
         spec = &specs_->get(attr->full_name());
         if (not spec->ignore_in_hash) {
-            strs.append(attr->to_string());
+            strs.append(attribute_string(*attr));
         }
     }
     strs.sort(); // ensure same order

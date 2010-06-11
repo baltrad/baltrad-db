@@ -85,13 +85,6 @@ class Attribute : public Node {
      */
     String full_name() const;
     
-    /**
-     * @brief string representation of this attribute
-     *
-     * /path/to/attribute=value
-     */
-    String to_string() const;
-
   protected:
     template<class T, class A1>
     friend

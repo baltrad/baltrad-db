@@ -71,10 +71,5 @@ Attribute::full_name() const {
     }
 }
 
-String
-Attribute::to_string() const {
-    return path() + "=" + value_.to_string();
-}
-
 } // namespace oh5
 } // namespace brfc

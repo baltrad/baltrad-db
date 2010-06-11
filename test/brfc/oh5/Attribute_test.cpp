@@ -67,14 +67,6 @@ TEST_F(oh5_Attribute_test, test_full_name) {
     EXPECT_EQ(a2->full_name(), "what/a2");
 }
 
-TEST_F(oh5_Attribute_test, to_string) {
-    EXPECT_EQ(a1->to_string(), "/a1=1");
-    root->add_child(dataset1);
-    dataset1->add_child(what);
-    what->add_child(a2);
-    EXPECT_EQ(a2->to_string(), "/dataset1/what/a2=2");
-}
-
 TEST_F(oh5_Attribute_test, test_add_child_Attribute) {
     shared_ptr<Attribute> a = make_shared<Attribute>("a", Variant(1));
     EXPECT_THROW(a1->add_child(a), value_error);

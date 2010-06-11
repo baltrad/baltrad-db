@@ -27,6 +27,7 @@ namespace brfc {
 
 namespace oh5 {
 
+class Attribute;
 class AttributeSpecs;
 
 } // namespace oh5
@@ -39,6 +40,8 @@ class SHA1AttributeHasher : public FileHasher {
     explicit SHA1AttributeHasher(shared_ptr<const oh5::AttributeSpecs> specs);
 
     virtual ~SHA1AttributeHasher();
+
+    static String attribute_string(const oh5::Attribute& attr);
   
   protected:
     /**
