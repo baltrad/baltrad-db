@@ -81,61 +81,100 @@ class ResultSet : public boost::noncopyable {
      */
     /**
      * @brief get value at @c pos as Variant
+     * @throw lookup_error if @c pos is out of range
      */
     Variant value_at(unsigned int pos) const;
 
     /**
      * @brief get string value at \c pos
+     * @throw lookup_error if @c pos is out of range
+     *
+     * equivalent to: @code value_at(pos).to_string(); @endcode
      */
     String string(unsigned int pos) const;
 
     /**
-     * @brief get integer value at \c pos
+     * @brief get a 64-bit integer value at \c pos
+     * @throw lookup_error if @c pos is out of range
      * @deprecated use int64_()
      */
     DEPRECATED(long long integer(unsigned int pos) const);
     
     /**
      * @brief get a 64-bit integer value at \c pos
+     * @throw lookup_error if @c pos is out of range
+     *
+     * equivalent to: @code value_at(pos).to_int64(); @endcode
      */
     long long int64_(unsigned int pos) const;
 
     /**
      * @brief get a double precision floating-point value at \c pos
+     * @throw lookup_error if @c pos is out of range
      * @deprecated use double_()
      */
     DEPRECATED(double real(unsigned int pos) const);
     
     /**
      * @brief get a double precision floating-point value at \c pos
+     * @throw lookup_error if @c pos is out of range
+     *
+     * equivalent to: @code value_at(pos).to_double(); @endcode
      */
     double double_(unsigned int pos) const;
 
     /**
      * @brief get boolean value at \c pos
+     * @throw lookup_error if @c pos is out of range
      * @deprecated use bool_()
      */
     DEPRECATED(bool boolean(unsigned int pos) const);
 
+    /**
+     * @brief get boolean value at \c pos
+     * @throw lookup_error if @c pos is out of range
+     *
+     * equivalent to: @code value_at(pos).to_bool(); @endcode
+     */
     bool bool_(unsigned int pos) const;
 
     /**
      * @brief get date value at \c pos
+     * @throw lookup_error if @c pos is out of range
+     *
+     * equivalent to: @code value_at(pos).to_date(); @endcode
      */
     Date date(unsigned int pos) const;
 
     /**
      * @brief get time value at \c pos
+     * @throw lookup_error if @c pos is out of range
+     *
+     * equivalent to: @code value_at(pos).to_time(); @endcode
      */
     Time time(unsigned int pos) const;    
     //@}
      
   
   protected:
+    /**
+     * @brief next() implementation
+     */
     virtual bool do_next() = 0;
+
+    /**
+     * @brief seek() implementation
+     */
     virtual bool do_seek(int idx) = 0;
+
+    /**
+     * @brief size() implementation
+     */
     virtual int do_size() = 0;
 
+    /**
+     * @brief value_at() implementation
+     */
     virtual Variant do_value_at(unsigned int pos) const = 0;
 };
 

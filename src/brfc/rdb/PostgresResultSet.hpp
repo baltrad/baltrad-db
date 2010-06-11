@@ -35,7 +35,12 @@ class PostgresResultSet : public ResultSet {
     virtual bool do_next();
     virtual bool do_seek(int idx);
     virtual int do_size();
-
+    
+    /**
+     * @brief get value at @c pos
+     * @return NULL Variant if value at pos is NULL, string Variant otherwise
+     * @throw lookup_error if pos is out of rance
+     */
     virtual Variant do_value_at(unsigned int pos) const;
 
   private:
