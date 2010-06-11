@@ -260,8 +260,6 @@ class Variant {
      *  - bool variant maps is converted to "True" or "False"
      *  - Date variant is converted to ISO 8601 format yyyy-MM-dd
      *  - Time variant is converted to ISO 8601 format hh:mm:ss
-     *
-     * @note Date/Time conversion is not symmetric with to_date() / to_time()
      */
     String to_string() const;
     
@@ -306,8 +304,6 @@ class Variant {
      *
      * only String values containing ISO 8601 format 'yyyy-MM-dd' are
      * convertible. 
-     *
-     * @note Time conversion is not symmetric with to_string()
      */
     Time to_time() const;
     
@@ -316,8 +312,6 @@ class Variant {
      *
      * only String values containing ISO 8601 format 'hh:mm:ss' are
      * convertible. 
-     *
-     * @note Time conversion is not symmetric with to_string()
      */
     Date to_date() const;
     ///@}

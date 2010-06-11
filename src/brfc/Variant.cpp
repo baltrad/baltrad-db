@@ -95,11 +95,11 @@ class variant_to_string : public boost::static_visitor<String> {
     }
 
     String operator()(const Date& value) const {
-        return value.to_string("yyyyMMdd");
+        return value.to_string("yyyy-MM-dd");
     }
 
     String operator()(const Time& value) const {
-        return value.to_string("hhmmss");
+        return value.to_string("hh:mm:ss");
     }
 };
 

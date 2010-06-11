@@ -98,8 +98,8 @@ TEST(Variant_test, to_string) {
     EXPECT_EQ(Variant(1.2).to_string(), "1.2");
     EXPECT_EQ(Variant(true).to_string(), "True");
     EXPECT_EQ(Variant(false).to_string(), "False");
-    EXPECT_EQ(Variant(Date(2000, 11, 12)).to_string(), "20001112");
-    EXPECT_EQ(Variant(Time(12, 34, 56)).to_string(), "123456");
+    EXPECT_EQ(Variant(Date(2000, 11, 12)).to_string(), "2000-11-12");
+    EXPECT_EQ(Variant(Time(12, 34, 56)).to_string(), "12:34:56");
 }
 
 TEST(Variant_test, to_int64) {
