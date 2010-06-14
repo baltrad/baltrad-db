@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/Converter.hpp>
 #include <brfc/oh5/DataGroup.hpp>
 #include <brfc/oh5/DataSetGroup.hpp>
@@ -39,9 +38,8 @@ namespace brfc {
 namespace oh5 {
 
 
-FileLoader::FileLoader(const AttributeSpecs* specs)
-        : specs_(specs)
-        , file_() {
+FileLoader::FileLoader()
+        : file_() {
 
 }
 
@@ -83,8 +81,6 @@ FileLoader::get_or_create_group(const SplitPath& path) {
 void
 FileLoader::add_attribute_from_node(HL_Node* node) {
     String nodename = String::from_utf8(HLNode_getName(node));
-    unsigned char* data = HLNode_getData(node);
-
     SplitPath path(nodename);
 
     // XXX: don't load if attribute is attached to DataSet
@@ -94,13 +90,12 @@ FileLoader::add_attribute_from_node(HL_Node* node) {
     shared_ptr<Attribute> attr =
         make_shared<Attribute>(path.attribute_name());
     
-    try {
-        const Converter& converter =
-            specs_->converter(path.full_attribute_name());
-        attr->value(converter.convert(HLNode_getFormat(node), data));
-    } catch (const lookup_error& e) {
-        // pass
-    }
+
+    shared_ptr<const Converter> converter =
+        Converter::create_from_hlhdf_node(*node);
+    if (converter)
+        attr->value(converter->convert(*node));
+    // unconvertible HL_Node keeps empty Variant as value
 
     shared_ptr<Group> group = get_or_create_group(path);
     group->add_child(attr);

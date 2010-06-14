@@ -41,24 +41,11 @@ class oh5_FileLoader_test : public ::testing::Test {
   public:
     oh5_FileLoader_test()
             : tempfile()
-            , specs()
             , t_12_05_01(Time(12, 5, 1))
             , d_2000_01_02(Date(2000, 1, 2)) {
     }
 
-    virtual void SetUp() {
-        specs.add(AttributeSpec("date", "date"));
-        specs.add(AttributeSpec("time", "time"));
-        specs.add(AttributeSpec("what/date", "date"));
-        specs.add(AttributeSpec("what/time", "time"));
-    }
-
-    virtual void TearDown() {
-        specs.clear();
-    }
-
     test::TempH5File tempfile;
-    AttributeSpecs specs;
     Variant t_12_05_01;
     Variant d_2000_01_02;
 };
@@ -75,7 +62,7 @@ TEST_F(oh5_FileLoader_test, load) {
 
     tempfile.write(*f);
 
-    shared_ptr<File> g = File::from_filesystem(tempfile.path(), specs);
+    shared_ptr<File> g = File::from_filesystem(tempfile.path());
     EXPECT_EQ(g->path(), tempfile.path());
     shared_ptr<RootGroup> root = g->root();
     EXPECT_EQ((size_t)3, root->children().size());
@@ -86,15 +73,16 @@ TEST_F(oh5_FileLoader_test, load) {
     ASSERT_TRUE(root->child_attribute("time"));
     ASSERT_TRUE(g->group("/what"));
     ASSERT_TRUE(g->group("/what")->child_attribute("date"));
-    EXPECT_EQ(d_2000_01_02, root->child_attribute("date")->value());
-    EXPECT_EQ(t_12_05_01, root->child_attribute("time")->value());
-    EXPECT_EQ(d_2000_01_02, g->group("/what")->child_attribute("date")->value());
+    EXPECT_EQ("20000102", root->child_attribute("date")->value().string());
+    EXPECT_EQ("120501", root->child_attribute("time")->value().string());
+    EXPECT_EQ("20000102", g->group("/what")->child_attribute("date")->value().string());
 
     // nothing ignored
     EXPECT_EQ((size_t)0, g->invalid_attributes().size());
 }
 
-TEST_F(oh5_FileLoader_test, ignored_attributes) {
+// disabled: attributes are no longer ignored by spec
+TEST_F(oh5_FileLoader_test, DISABLED_ignored_attributes) {
     shared_ptr<File> f = File::create();
 
     f->root()->add_child(make_shared<Attribute>("ignore", Variant(2.0)));
@@ -105,7 +93,7 @@ TEST_F(oh5_FileLoader_test, ignored_attributes) {
 
     tempfile.write(*f);
 
-    shared_ptr<File> g = File::from_filesystem(tempfile.path(), specs);
+    shared_ptr<File> g = File::from_filesystem(tempfile.path());
 
     shared_ptr<RootGroup> root = g->root();
     // still present in the structure
@@ -119,14 +107,15 @@ TEST_F(oh5_FileLoader_test, ignored_attributes) {
     EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/what/ignore") != ignored.end());
 }
 
-TEST_F(oh5_FileLoader_test, invalid_conversion_throws) {
+// disabled: can't create a non-converting file with TempH5File
+TEST_F(oh5_FileLoader_test, DISABLED_invalid_conversion_throws) {
     shared_ptr<File> f = File::create();
 
     f->root()->add_child(make_shared<Attribute>("date", t_12_05_01));
 
     tempfile.write(*f);
 
-    ASSERT_THROW(File::from_filesystem(tempfile.path(), specs), value_error);
+    ASSERT_THROW(File::from_filesystem(tempfile.path()), value_error);
 }
 
 

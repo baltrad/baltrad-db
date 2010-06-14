@@ -56,8 +56,8 @@ File::create() {
 }
 
 shared_ptr<File>
-File::from_filesystem(const String& path, const AttributeSpecs& specs) {
-    return FileLoader(&specs).load(path);
+File::from_filesystem(const String& path) {
+    return FileLoader().load(path);
 }
 
 shared_ptr<File>

@@ -38,14 +38,12 @@ namespace oh5 {
 
 struct oh5_File_test : public testing::Test {
     oh5_File_test()
-            : specs()
-            , f1(File::minimal("pvol",
+            : f1(File::minimal("pvol",
                                Date(2000, 1, 2),
                                Time(12, 5),
                                "WMO:02606")) {
     }
 
-    AttributeSpecs specs;
     shared_ptr<File> f1;
 };
 
@@ -78,7 +76,7 @@ TEST_F(oh5_File_test, required_attribute_shortcuts) {
 }
 
 TEST_F(oh5_File_test, open_nx_file) {
-    EXPECT_THROW(File::from_filesystem("/path/to/nxfile", specs), fs_error);
+    EXPECT_THROW(File::from_filesystem("/path/to/nxfile"), fs_error);
 }
 
 TEST_F(oh5_File_test, test_name) {

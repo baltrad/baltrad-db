@@ -24,6 +24,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/numeric/conversion/cast.hpp>
 
+#include <brfc/oh5/hlhdf.hpp>
+
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
@@ -32,10 +34,46 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
+shared_ptr<const Converter>
+Converter::create_from_hlhdf_node(const HL_Node& node) {
+    HL_Node* node_ptr = const_cast<HL_Node*>(&node);
+    HL_FormatSpecifier fmt = HLNode_getFormat(node_ptr);
+    switch (fmt) {
+        case HLHDF_INT:
+        case HLHDF_LONG:
+        case HLHDF_LLONG:
+            return make_shared<Int64Converter>();
+        case HLHDF_FLOAT:
+        case HLHDF_DOUBLE:
+        case HLHDF_LDOUBLE:
+            return make_shared<DoubleConverter>();
+        case HLHDF_STRING:
+            return make_shared<StringConverter>();
+        default:
+            return shared_ptr<Converter>();
+    }
+}
+
+shared_ptr<const Converter>
+Converter::create_from_variant(const Variant& variant) {
+    switch (variant.type()) {
+        case Variant::INT64:
+            return make_shared<Int64Converter>();
+        case Variant::DOUBLE:
+            return make_shared<DoubleConverter>();
+        case Variant::STRING:
+            return make_shared<StringConverter>();
+        default:
+            return shared_ptr<Converter>();
+    }
+}
+
 Variant
-Converter::convert(HL_FormatSpecifier format,
-                   unsigned char* data) const {
-    return do_convert(format, data);
+Converter::convert(const HL_Node& node) const {
+    HL_Node* node_ptr = const_cast<HL_Node*>(&node);
+    HL_FormatSpecifier fmt = HLNode_getFormat(node_ptr);
+    unsigned char* data = HLNode_getData(node_ptr);
+    return do_convert(fmt, data);
 }
 
 HL_Data

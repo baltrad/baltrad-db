@@ -29,7 +29,6 @@ class String;
 
 namespace oh5 {
 
-class AttributeSpecs;
 class File;
 class Group;
 class SplitPath;
@@ -41,9 +40,8 @@ class FileLoader {
   public:
     /**
      * @brief constructor
-     * @param specs used for converter lookups
      */
-    explicit FileLoader(const AttributeSpecs* specs);
+    FileLoader();
 
     /**
      * @brief desctructor
@@ -66,7 +64,6 @@ class FileLoader {
 
     void add_attribute_from_node(HL_Node* node);
 
-    const AttributeSpecs* specs_;
     shared_ptr<File> file_;
 };
 

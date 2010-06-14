@@ -93,7 +93,7 @@ FileCatalog::file_namer(FileNamer* namer) {
 
 bool
 FileCatalog::is_cataloged(const String& path) const {
-    shared_ptr<oh5::File> f = oh5::File::from_filesystem(path, *specs_);
+    shared_ptr<oh5::File> f = oh5::File::from_filesystem(path);
     return is_cataloged(*f);
 }
 
@@ -104,7 +104,7 @@ FileCatalog::is_cataloged(const oh5::File& f) const {
 
 shared_ptr<oh5::File>
 FileCatalog::catalog(const String& path) {
-    shared_ptr<oh5::File> f = oh5::File::from_filesystem(path, *specs_);
+    shared_ptr<oh5::File> f = oh5::File::from_filesystem(path);
     catalog(*f); 
     return f;
 }

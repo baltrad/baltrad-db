@@ -35,7 +35,6 @@ class Time;
 namespace oh5 {
 
 class Attribute;
-class AttributeSpecs;
 class Group;
 class RootGroup;
 class Source;
@@ -60,14 +59,10 @@ class File : public boost::noncopyable,
     /**
      * @brief construct from physical file
      * @param path absolute path to the file
-     * @param specs AttributeSpecs instance used for converter lookups
      * @throw fs_error if file can not be opened
-     *
-     * full paths of ignored attributes (not defined in specs) are stored
-     * and accessible through ignored_attributes();
      */
     static shared_ptr<File>
-    from_filesystem(const String& path, const AttributeSpecs& specs);
+    from_filesystem(const String& path);
     
     /**
      * @brief construct with mandatory attributes present

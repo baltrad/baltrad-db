@@ -27,6 +27,8 @@ extern "C" {
 #include <string>
 #include <vector>
 
+#include <brfc/smart_ptr.hpp>
+
 namespace brfc {
 
 class Variant;
@@ -46,7 +48,7 @@ class HL_Data {
     HL_Data(size_t size, const std::string& type, unsigned char* data)
             : type_(type)
             , data_(data, data + size) {
-   } 
+    } 
     
     /**
      * @brief access typename of contained data
@@ -71,10 +73,18 @@ class HL_Data {
 };
 
 /**
- * @brief ABC for HDF5 data to Variant conversion
+ * @brief ABC for HL_Data <-> Variant conversion
  */
 class Converter {
   public:
+    static
+    shared_ptr<const Converter>
+    create_from_hlhdf_node(const HL_Node& node);
+
+    static
+    shared_ptr<const Converter>
+    create_from_variant(const Variant& variant);
+
     /**
      * @brief convert data from HLHDF format to Variant
      * @param format format as defined in HLHDF library
@@ -84,14 +94,14 @@ class Converter {
      *
      * @see do_convert(HL_FormatSpecifier, unsigned char*) const
      */
-    Variant convert(HL_FormatSpecifier format,
-                     unsigned char* data) const;
+    Variant convert(const HL_Node& node) const;
     
     /**
      * @brief convert a Variant to HLHDF format
      * @param value the Variant to convert
-     * @see do_convert(const Variant&) const
      * @throw value_error if the conversion fails
+     *
+     * @see do_convert(const Variant&) const
      */
     HL_Data convert(const Variant& value) const;
 

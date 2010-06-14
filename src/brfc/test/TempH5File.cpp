@@ -111,11 +111,11 @@ class GatherHLNodes {
             case Variant::STRING:
                 return oh5::StringConverter().convert(value);
             case Variant::DATE:
-                return oh5::DateConverter().convert(value);
+                return oh5::StringConverter().convert(Variant(value.date().to_string("yyyyMMdd")));
             case Variant::TIME:
-                return oh5::TimeConverter().convert(value);
+                return oh5::StringConverter().convert(Variant(value.time().to_string("hhmmss")));
             case Variant::BOOL:
-                return oh5::BoolConverter().convert(value);
+                return oh5::StringConverter().convert(Variant(value.to_string()));
             default:
                 throw std::runtime_error("could not convert");
         }
