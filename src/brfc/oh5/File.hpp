@@ -163,33 +163,32 @@ class File : public boost::noncopyable,
 
     /**
      * @brief access /what/object
-     *
-     * equivalent to
-     * @c root()->child_attribute("what/object")->value().string()
+     * @throw lookup_error if attribute is missing
+     * @throw value_error if attribute value is not a String
      */
     String what_object() const;
 
     /**
      * @brief access /what/date
-     *
-     * equivalent to
-     * @c root()->child_attribute("what/date")->value().date()
+     * @throw lookup_error if attribute is missing
+     * @throw value_error if attribute value is not a Date or a String in
+     *                    'yyyyMMdd' format
      */
     Date what_date() const;
 
     /**
      * @brief access /what/time
-     *
-     * equivalent to
-     * @c root()->child_attribute("what/time")->value().time()
+     * @throw lookup_error if attribute is missing
+     * @throw value_error if attribute value is not a Time or a String in
+     *                    'hhmmss' format
      */
     Time what_time() const;
 
     /**
      * @brief access /what/source
      *
-     * equivalent to
-     * @c root()->child_attribute("what/source")->value().string()
+     * @throw lookup_error if attribute is missing
+     * @throw value_error if attribute value is not a String
      */
     String what_source() const;
     ///@}

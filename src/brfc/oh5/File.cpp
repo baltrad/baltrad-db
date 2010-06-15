@@ -83,24 +83,54 @@ File::source(shared_ptr<Source> source) {
     source_ = source;
 }
 
+namespace {
+
+shared_ptr<const Attribute>
+get_child_attribute(const Group& grp, const String& name) {
+    shared_ptr<const Attribute> attr = grp.child_attribute(name);
+    if (not attr)
+        throw lookup_error("missing attribute: " + name.to_utf8());
+    return attr;
+}
+
+} // namespace anonymous
+
 String
 File::what_object() const {
-    return root_->child_attribute("what/object")->value().string();
+    return get_child_attribute(*root_, "what/object")->value().string();
 }
 
 Date
 File::what_date() const {
-    return root_->child_attribute("what/date")->value().date();
+    Variant value = get_child_attribute(*root_, "what/date")->value();
+    switch (value.type()) {
+        case Variant::DATE:
+            return value.date();
+        case Variant::STRING:
+            return Date::from_string(value.string(), "yyyyMMdd");
+        default:
+            throw value_error("invalid value in 'what/date' (" +
+                              value.to_string().to_utf8() + ")");
+    }
 }
 
 Time
 File::what_time() const {
-    return root_->child_attribute("what/time")->value().time();
+    Variant value = get_child_attribute(*root_, "what/time")->value();
+    switch (value.type()) {
+        case Variant::TIME:
+            return value.time();
+        case Variant::STRING:
+            return Time::from_string(value.string(), "hhmmss");
+        default:
+            throw value_error("invalid value in 'what/time' (" +
+                              value.to_string().to_utf8() + ")");
+    }
 }
 
 String
 File::what_source() const {
-    return root_->child_attribute("what/source")->value().string();
+    return get_child_attribute(*root_, "what/source")->value().string();
 }
 
 String

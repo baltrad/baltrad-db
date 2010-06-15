@@ -47,16 +47,6 @@ struct oh5_File_test : public testing::Test {
     shared_ptr<File> f1;
 };
 
-/*
-TEST_F(oh5_File_test, get_same_node) {
-    File f;
-    DataObject& d1 = f.data_object("/path/to/object", true);
-    DataObject& d2 = f.data_object("/path/to/object", true);
-
-    EXPECT_EQ(&d1, &d2);
-}
-*/
-
 TEST_F(oh5_File_test, get_nx_node) {
     shared_ptr<File> f = File::create();
     EXPECT_FALSE(f->group("/nx"));
@@ -73,6 +63,29 @@ TEST_F(oh5_File_test, required_attribute_shortcuts) {
     EXPECT_EQ(f1->what_date(), Date(2000, 1, 2));
     EXPECT_EQ(f1->what_time(), Time(12, 5));
     EXPECT_EQ(f1->what_source(), "WMO:02606");
+}
+
+TEST_F(oh5_File_test, required_attribute_shortcuts_when_missing) {
+    shared_ptr<File> f = File::create();
+    EXPECT_THROW(f->what_object(), lookup_error);
+    EXPECT_THROW(f->what_date(), lookup_error);
+    EXPECT_THROW(f->what_time(), lookup_error);
+    EXPECT_THROW(f->what_source(), lookup_error);
+}
+
+TEST_F(oh5_File_test, required_attribute_shortcuts_conversion) {
+    shared_ptr<File> f = File::create();
+    shared_ptr<Group> what = f->root()->get_or_create_child_group_by_name("what");
+    what->add_child(make_shared<Attribute>("date", Variant("20001213")));
+    what->add_child(make_shared<Attribute>("time", Variant("123456")));
+    EXPECT_EQ(Date(2000, 12, 13), f->what_date());
+    EXPECT_EQ(Time(12, 34, 56), f->what_time());
+
+    what->child_attribute("date")->value(Variant("foo"));
+    EXPECT_THROW(f->what_date(), value_error);
+
+    what->child_attribute("time")->value(Variant("bar"));
+    EXPECT_THROW(f->what_time(), value_error);
 }
 
 TEST_F(oh5_File_test, open_nx_file) {
