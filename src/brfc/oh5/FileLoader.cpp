@@ -19,20 +19,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/FileLoader.hpp>
 
-#include <boost/foreach.hpp>
-
 #include <brfc/exceptions.hpp>
+#include <brfc/StringList.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/Converter.hpp>
-#include <brfc/oh5/DataGroup.hpp>
-#include <brfc/oh5/DataSetGroup.hpp>
 #include <brfc/oh5/File.hpp>
-#include <brfc/oh5/QualityGroup.hpp>
 #include <brfc/oh5/RootGroup.hpp>
-#include <brfc/oh5/SplitPath.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -47,57 +41,30 @@ FileLoader::~FileLoader() {
 
 }
 
-namespace {
-
-template<typename T>
-shared_ptr<Group>
-get_or_create_child(Group& group, const String& name) {
-    shared_ptr<Group> child = group.child_group_by_name(name);
-    if (not child) {
-        child = make_shared<T>(name);
-        group.add_child(child);
-    }
-    return child;
-}
-
-} // namespace anonymous
-
-shared_ptr<Group>
-FileLoader::get_or_create_group(const SplitPath& path) {
-    shared_ptr<Group> group = file_->root();
-
-    if (path.dataset_group() != "")
-        group = get_or_create_child<DataSetGroup>(*group, path.dataset_group());
-    if (path.data_group() != "")
-        group = get_or_create_child<DataGroup>(*group, path.data_group());
-    if (path.quality_group() != "")
-        group = get_or_create_child<QualityGroup>(*group, path.quality_group());
-    if (path.attribute_group() != "")
-        group = get_or_create_child<AttributeGroup>(*group, path.attribute_group());
-
-    return group;
-}
-
 void
 FileLoader::add_attribute_from_node(HL_Node* node) {
     String nodename = String::from_utf8(HLNode_getName(node));
-    SplitPath path(nodename);
+    StringList path = nodename.split("/");
+
+    String attr_name = path.take_last(); // last element is always attribute
 
     // XXX: don't load if attribute is attached to DataSet
-    if (path.dataset() != "")
+    if (path.back() == "data")
         return;
-
-    shared_ptr<Attribute> attr =
-        make_shared<Attribute>(path.attribute_name());
     
-
+    // create attribute with empty value
+    shared_ptr<Attribute> attr = make_shared<Attribute>(attr_name);
+    
     shared_ptr<const Converter> converter =
         Converter::create_from_hlhdf_node(*node);
     if (converter)
         attr->value(converter->convert(*node));
     // unconvertible HL_Node keeps empty Variant as value
 
-    shared_ptr<Group> group = get_or_create_group(path);
+    path.take_first(); // discard the root element
+    shared_ptr<Group> group =
+        file_->root()->get_or_create_child_group_by_path(path);
+
     group->add_child(attr);
 }
 

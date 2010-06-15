@@ -26,12 +26,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class String;
+class StringList;
 
 namespace oh5 {
 
 class File;
 class Group;
-class SplitPath;
 
 /**
  * @brief load metadata from a file in filesystem
@@ -54,14 +54,12 @@ class FileLoader {
      * @return File pointer
      * @throw fs_error if the file can not be opened
      *
-     * attributes for which name and/or converter lookup fails, are stored
-     * with an empty Variant as a value (meaning they are invalid). 
+     * attributes for which converter lookup (or conversion) fails, are
+     * stored with an empty Variant as a value (meaning they are invalid).
      */
     shared_ptr<File> load(const String& path);
 
   private:
-    shared_ptr<Group> get_or_create_group(const SplitPath& path);
-
     void add_attribute_from_node(HL_Node* node);
 
     shared_ptr<File> file_;
