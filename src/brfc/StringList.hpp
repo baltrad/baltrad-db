@@ -77,6 +77,14 @@ class StringList {
         return list_.front();
     }
 
+    String& back() {
+        return list_.back();
+    }
+
+    const String& back() const {
+        return list_.back();
+    }
+
     void push_front(const String& str) {
         list_.push_front(str);
     }
