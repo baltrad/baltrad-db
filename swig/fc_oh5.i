@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/oh5/Node.hpp>
     #include <brfc/oh5/Attribute.hpp>
     #include <brfc/oh5/AttributeGroup.hpp>
-    #include <brfc/oh5/AttributeSpecs.hpp>
     #include <brfc/oh5/DataGroup.hpp>
     #include <brfc/oh5/DataSetGroup.hpp>
     #include <brfc/oh5/File.hpp>
@@ -49,8 +48,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     }
   }
 %}
-
-%ignore brfc::oh5::AttributeSpecs::converter;
 
 %ignore brfc::oh5::Node::begin;
 %ignore brfc::oh5::Node::end;
@@ -89,8 +86,6 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
                         brfc::oh5::Source,
                         brfc::oh5::SourceRadar);
 
-SWIG_SHARED_PTR(AttributeSpecs, brfc::oh5::AttributeSpecs);
-
 %template(NodeVector) std::vector<brfc::shared_ptr<brfc::oh5::Node> >;
 %template(AttributeVector) std::vector<brfc::shared_ptr<brfc::oh5::Attribute> >;
 
@@ -113,8 +108,7 @@ SWIG_SHARED_PTR(AttributeSpecs, brfc::oh5::AttributeSpecs);
 %}
 
 // make constructors for SWIG_SHARED_PTR public
-%typemap(javabody) brfc::oh5::AttributeSpecs,
-                   brfc::oh5::File,
+%typemap(javabody) brfc::oh5::File,
                    brfc::oh5::Source %{
   private long swigCPtr;
   private boolean swigCMemOwnBase;
@@ -136,7 +130,6 @@ SWIG_SHARED_PTR(AttributeSpecs, brfc::oh5::AttributeSpecs);
 %include <brfc/oh5/Node.hpp>
 %include <brfc/oh5/Group.hpp>
 %include <brfc/oh5/AttributeGroup.hpp>
-%include <brfc/oh5/AttributeSpecs.hpp>
 %include <brfc/oh5/DataSetGroup.hpp>
 %include <brfc/oh5/DataGroup.hpp>
 %include <brfc/oh5/QualityGroup.hpp>

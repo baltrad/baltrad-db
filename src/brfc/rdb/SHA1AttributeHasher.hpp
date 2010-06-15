@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_SHA1_ATTRIBUTE_HASHER_HPP
-#define BRFC_SHA1_ATTRIBUTE_HASHER_HPP
+#ifndef BRFC_RDB_SHA1_ATTRIBUTE_HASHER_HPP
+#define BRFC_RDB_SHA1_ATTRIBUTE_HASHER_HPP
 
 #include <brfc/smart_ptr.hpp>
 #include <brfc/FileHasher.hpp>
@@ -28,18 +28,19 @@ namespace brfc {
 namespace oh5 {
 
 class Attribute;
-class AttributeSpecs;
 
 } // namespace oh5
 
 namespace rdb {
+
+class AttributeSpecs;
 
 /**
  * @brief generate SHA-1 hash of ODIM_H5 metadata attributes
  */
 class SHA1AttributeHasher : public FileHasher {
   public:
-    explicit SHA1AttributeHasher(shared_ptr<const oh5::AttributeSpecs> specs);
+    explicit SHA1AttributeHasher(shared_ptr<const AttributeSpecs> specs);
 
     virtual ~SHA1AttributeHasher();
 
@@ -64,10 +65,10 @@ class SHA1AttributeHasher : public FileHasher {
     virtual String do_hash(const oh5::File& file);
   
   private:
-    shared_ptr<const oh5::AttributeSpecs> specs_;
+    shared_ptr<const AttributeSpecs> specs_;
 };
 
 } // namespace rdb
 } // namespace brfc
 
-#endif // BRFC_SHA1_ATTRIBUTE_HASHER_HPP
+#endif // BRFC_RDB_SHA1_ATTRIBUTE_HASHER_HPP

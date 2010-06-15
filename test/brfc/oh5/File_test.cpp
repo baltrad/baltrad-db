@@ -27,7 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 

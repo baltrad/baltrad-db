@@ -24,12 +24,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/DataSetGroup.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
+#include <brfc/rdb/AttributeSpecs.hpp>
 #include <brfc/rdb/SHA1AttributeHasher.hpp>
 
 #include "../common.hpp"
@@ -40,7 +40,7 @@ namespace rdb {
 class rdb_SHA1AttributeHasher_test : public ::testing::Test {
   public:
     rdb_SHA1AttributeHasher_test()
-            : specs(new oh5::AttributeSpecs())
+            : specs(new AttributeSpecs())
             , src(make_shared<oh5::SourceRadar>())
             , f1(oh5::File::minimal("pvol",
                                     Date(2000, 1, 2),
@@ -60,20 +60,20 @@ class rdb_SHA1AttributeHasher_test : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        specs->add(oh5::AttributeSpec("Conventions", "string", true));
-        specs->add(oh5::AttributeSpec("what/object", "string", false));
-        specs->add(oh5::AttributeSpec("what/date", "date", false));
-        specs->add(oh5::AttributeSpec("what/time", "time", false));
-        specs->add(oh5::AttributeSpec("what/source", "string", true));
-        specs->add(oh5::AttributeSpec("what/version", "string", true));
-        specs->add(oh5::AttributeSpec("ignore", "string", true));
-        specs->add(oh5::AttributeSpec("attr", "string", false));
+        specs->add(AttributeSpec("Conventions", "string", true));
+        specs->add(AttributeSpec("what/object", "string", false));
+        specs->add(AttributeSpec("what/date", "date", false));
+        specs->add(AttributeSpec("what/time", "time", false));
+        specs->add(AttributeSpec("what/source", "string", true));
+        specs->add(AttributeSpec("what/version", "string", true));
+        specs->add(AttributeSpec("ignore", "string", true));
+        specs->add(AttributeSpec("attr", "string", false));
         f1->source(src);
         f2->source(src);
         f3->source(src);
     }
     
-    shared_ptr<oh5::AttributeSpecs> specs;
+    shared_ptr<AttributeSpecs> specs;
     shared_ptr<oh5::SourceRadar> src;
     shared_ptr<oh5::File> f1, f2, f3;
     SHA1AttributeHasher hasher;

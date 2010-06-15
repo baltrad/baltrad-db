@@ -17,15 +17,15 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_OH5_ATTRIBUTE_SPECS_HPP
-#define BRFC_OH5_ATTRIBUTE_SPECS_HPP
+#ifndef BRFC_RDB_ATTRIBUTE_SPECS_HPP
+#define BRFC_RDB_ATTRIBUTE_SPECS_HPP
 
 #include <map>
 
 #include <brfc/String.hpp>
 
 namespace brfc {
-namespace oh5 {
+namespace rdb {
 
 struct AttributeSpec {
     AttributeSpec(const String& name_,
@@ -90,7 +90,7 @@ class AttributeSpecs {
     AttributeSpecMap specs_;
 };
 
-} // namespace oh5
+} // namespace rdb
 } // namespace brfc
 
-#endif // BRFC_OH5_ATTRIBUTE_SPECS_HPP
+#endif // BRFC_RDB_ATTRIBUTE_SPECS_HPP

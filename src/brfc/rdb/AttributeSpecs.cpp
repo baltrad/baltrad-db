@@ -17,13 +17,12 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/AttributeSpecs.hpp>
+#include <brfc/rdb/AttributeSpecs.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/oh5/Converter.hpp>
 
 namespace brfc {
-namespace oh5 {
+namespace rdb {
 
 AttributeSpecs::AttributeSpecs()
          : specs_() {
@@ -59,5 +58,5 @@ AttributeSpecs::get(const String& name) const {
     return iter->second;
 }
 
-} // namespace oh5
+} // namespace rdb
 } // namespace brfc

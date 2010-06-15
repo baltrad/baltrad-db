@@ -28,12 +28,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/ResultSet.hpp>
 #include <brfc/StringList.hpp>
 
-#include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/SourceCentre.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
+#include <brfc/rdb/AttributeSpecs.hpp>
 #include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/Compiler.hpp>
 #include <brfc/rdb/Connection.hpp>
@@ -47,7 +47,7 @@ namespace rdb {
 RelationalDatabase::RelationalDatabase(const String& dsn_)
         : conn_(Connection::create(dsn_))
         , mapper_(new AttributeMapper())
-        , specs_(new oh5::AttributeSpecs())
+        , specs_(new AttributeSpecs())
         , file_hasher_(new SHA1AttributeHasher(specs_)) {
     conn_->open();
     populate_mapper_and_specs();
@@ -57,12 +57,12 @@ RelationalDatabase::~RelationalDatabase() {
 
 }
 
-shared_ptr<const oh5::AttributeSpecs>
+shared_ptr<const AttributeSpecs>
 RelationalDatabase::specs() const {
     return specs_;
 }
 
-shared_ptr<oh5::AttributeSpecs>
+shared_ptr<AttributeSpecs>
 RelationalDatabase::specs() {
     return specs_;
 }
@@ -303,9 +303,9 @@ RelationalDatabase::populate_mapper_and_specs() {
                              r->string(1),  // name
                              r->string(3),  // table
                              r->string(4))); // column
-        specs_->add(oh5::AttributeSpec(r->string(1), // name
-                                       r->string(2), // typename
-                                       r->bool_(5))); // ignored in hash
+        specs_->add(AttributeSpec(r->string(1), // name
+                                  r->string(2), // typename
+                                  r->bool_(5))); // ignored in hash
     }
 }
 
