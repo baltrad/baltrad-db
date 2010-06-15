@@ -22,13 +22,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <map>
 
-#include <brfc/smart_ptr.hpp>
 #include <brfc/String.hpp>
 
 namespace brfc {
 namespace oh5 {
-
-class Converter;
 
 struct AttributeSpec {
     AttributeSpec(const String& name_,
@@ -85,22 +82,12 @@ class AttributeSpecs {
      */
     const AttributeSpec& get(const String& name) const;
 
-    /**
-     * @brief get Converter
-     * @param name Attribute name
-     * @return Converter for the Attribute
-     * @throw lookup_error if not found
-     */
-    const Converter& converter(const String& name) const;
-
     void clear() { specs_.clear(); }
 
   private:
     typedef std::map<String, AttributeSpec> AttributeSpecMap;
-    typedef std::map<String, shared_ptr<Converter> > ConverterMap;
 
     AttributeSpecMap specs_;
-    ConverterMap converters_;
 };
 
 } // namespace oh5

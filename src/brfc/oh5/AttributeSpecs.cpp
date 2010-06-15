@@ -26,20 +26,11 @@ namespace brfc {
 namespace oh5 {
 
 AttributeSpecs::AttributeSpecs()
-         : specs_()
-         , converters_() {
-    converters_["int"] = shared_ptr<Converter>(new Int64Converter());
-    converters_["real"] = shared_ptr<Converter>(new DoubleConverter());
-    converters_["string"] = shared_ptr<Converter>(new StringConverter());
-    converters_["date"] = shared_ptr<Converter>(new DateConverter());
-    converters_["time"] = shared_ptr<Converter>(new TimeConverter());
-    converters_["bool"] = shared_ptr<Converter>(new BoolConverter());
-    converters_["sequence"] = shared_ptr<Converter>(new SequenceConverter());
+         : specs_() {
 }
 
 AttributeSpecs::AttributeSpecs(const AttributeSpecs& other)
-        : specs_(other.specs_)
-        , converters_(other.converters_) {
+        : specs_(other.specs_) {
 
 }
 
@@ -51,9 +42,6 @@ void
 AttributeSpecs::add(const AttributeSpec& spec) {
     if (has(spec.name))
         throw duplicate_entry(spec.name.to_utf8());
-    ConverterMap::const_iterator iter = converters_.find(spec.type);
-    if (iter == converters_.end())
-        throw lookup_error(spec.type.to_utf8());
     specs_.insert(std::make_pair(spec.name, spec));
 }
 
@@ -69,15 +57,6 @@ AttributeSpecs::get(const String& name) const {
     if (iter == specs_.end())
         throw lookup_error(name.to_utf8());
     return iter->second;
-}
-
-const Converter&
-AttributeSpecs::converter(const String& name) const {
-    AttributeSpecMap::const_iterator iter = specs_.find(name);
-    if (iter == specs_.end())
-        throw lookup_error(name.to_utf8());
-    ConverterMap::const_iterator i = converters_.find(iter->second.type);
-    return *(i->second);
 }
 
 } // namespace oh5

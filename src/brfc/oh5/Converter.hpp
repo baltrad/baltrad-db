@@ -124,10 +124,6 @@ class Converter {
 };
 
 /**
- * @defgroup converter Converters
- * @{
- */
-/**
  * @brief Conversion from HLHDF_STRING to String
  *
  * the string is assumed to be encoded in UTF-8.
@@ -141,32 +137,6 @@ class StringConverter : public Converter {
     virtual Variant do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
     
-    virtual HL_Data do_convert(const Variant& value) const;
-};
-
-/**
- * @brief Conversion from HLHDF_STRING to Date
- *
- * date is converted from string encoded as YYYYMMDD
- */
-class DateConverter : public StringConverter {
-  protected:
-    virtual Variant do_convert(HL_FormatSpecifier format,
-                               unsigned char* data) const;
-
-    virtual HL_Data do_convert(const Variant& value) const;
-};
-
-/**
- * @brief Conversion from HLHDF_STRING to Time
- *
- * time is converted from string encoded as HHMMSS
- */
-class TimeConverter : public StringConverter {
-  protected:
-    virtual Variant do_convert(HL_FormatSpecifier format,
-                               unsigned char* data) const;
-
     virtual HL_Data do_convert(const Variant& value) const;
 };
 
@@ -211,33 +181,6 @@ class DoubleConverter : public Converter {
 
     virtual HL_Data do_convert(const Variant& value) const;
 };
-
-/**
- * @brief Conversion from HLHDF_STRING to bool
- *
- * bool value is converted from a string encoded as "True" or "False"
- */
-class BoolConverter : public StringConverter {
-  protected:
-    virtual Variant do_convert(HL_FormatSpecifier format,
-                               unsigned char* data) const;
-
-    virtual HL_Data do_convert(const Variant& value) const;
-};
-
-/**
- * @brief Conversion from HLHDF_STRING to String
- * 
- * a sequence in ODIM_H5 files is a string of scalar values separated by
- * commas
- *
- * this converter currently does nothing, the values are returned as strings
- */
-class SequenceConverter : public StringConverter {
-
-};
-
-//@}
 
 } // namespace oh5
 } // namespace brfc
