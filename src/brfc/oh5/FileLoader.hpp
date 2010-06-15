@@ -21,33 +21,20 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_OH5_FILE_LOADER_HPP
 
 #include <brfc/smart_ptr.hpp>
-#include <brfc/oh5/hlhdf.hpp>
 
 namespace brfc {
 
 class String;
-class StringList;
 
 namespace oh5 {
 
 class File;
-class Group;
 
 /**
  * @brief load metadata from a file in filesystem
  */
 class FileLoader {
   public:
-    /**
-     * @brief constructor
-     */
-    FileLoader();
-
-    /**
-     * @brief desctructor
-     */
-    ~FileLoader();
-  
     /**
      * @brief load from filesystem
      * @param path path in filesystem
@@ -58,11 +45,6 @@ class FileLoader {
      * stored with an empty Variant as a value (meaning they are invalid).
      */
     shared_ptr<File> load(const String& path);
-
-  private:
-    void add_attribute_from_node(HL_Node* node);
-
-    shared_ptr<File> file_;
 };
 
 } // namespace oh5

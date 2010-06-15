@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/StringList.hpp>
 #include <brfc/Variant.hpp>
 
+#include <brfc/oh5/hlhdf.hpp>
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Converter.hpp>
 #include <brfc/oh5/File.hpp>
@@ -31,18 +32,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
+namespace {
 
-FileLoader::FileLoader()
-        : file_() {
-
-}
-
-FileLoader::~FileLoader() {
-
-}
-
-void
-FileLoader::add_attribute_from_node(HL_Node* node) {
+void add_attribute_from_node(RootGroup& root, HL_Node* node) {
     String nodename = String::from_utf8(HLNode_getName(node));
     StringList path = nodename.split("/");
 
@@ -63,36 +55,39 @@ FileLoader::add_attribute_from_node(HL_Node* node) {
 
     path.take_first(); // discard the root element
     shared_ptr<Group> group =
-        file_->root()->get_or_create_child_group_by_path(path);
+        root.get_or_create_child_group_by_path(path);
 
     group->add_child(attr);
 }
 
+} // namespace anonymous
+
 shared_ptr<File>
 FileLoader::load(const String& path) {
     init_hlhdflib();
-    std::string path_str = path.to_utf8();
-    HL_NodeList* nodes = HLNodeList_read(path_str.c_str());
-    if (nodes == 0) {
-        throw fs_error("could not open file: " +
-                       std::string(path_str.c_str()));
-    }
-    HLNodeList_selectMetadataNodes(nodes);
-    HLNodeList_fetchMarkedNodes(nodes);
 
-    file_ = File::create();
-    file_->path(path);
+    std::string path_utf8 = path.to_utf8();
+    shared_ptr<HL_NodeList> nodes(HLNodeList_read(path_utf8.c_str()),
+                                  &HLNodeList_free);
+    if (not nodes)
+        throw fs_error("could not open file: " + path_utf8);
 
-    for (int i=0; i < HLNodeList_getNumberOfNodes(nodes); ++i) {
-        HL_Node* node = HLNodeList_getNodeByIndex(nodes, i);
+    HLNodeList_selectMetadataNodes(nodes.get());
+    HLNodeList_fetchMarkedNodes(nodes.get());
+
+    shared_ptr<File> file = File::create();
+    file->path(path);
+    RootGroup& root = *file->root();
+
+    for (int i=0; i < HLNodeList_getNumberOfNodes(nodes.get()); ++i) {
+        HL_Node* node = HLNodeList_getNodeByIndex(nodes.get(), i);
         if (HLNode_getType(node) == ATTRIBUTE_ID) {
-            add_attribute_from_node(node);
+            add_attribute_from_node(root, node);
         }
     }
 
-    return file_;
+    return file;
 }
-
 
 } // namespace oh5
 } // namespace brfc
