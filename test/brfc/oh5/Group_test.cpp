@@ -20,7 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/StringList.hpp>
 #include <brfc/Variant.hpp>
+
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/DataGroup.hpp>
@@ -164,6 +166,92 @@ TEST_F(oh5_Group_test, test_create_by_name_invalid_names) {
     EXPECT_FALSE(Group::create_by_name("what/bla"));
     EXPECT_FALSE(Group::create_by_name("/dataset1"));
 }
+
+TEST_F(oh5_Group_test, test_get_or_create_child_group_by_name_invalid) {
+    shared_ptr<Group> child;
+
+    child = g->get_or_create_child_group_by_name("qwe");
+    EXPECT_FALSE(child);
+    EXPECT_FALSE(g->has_child_by_name("qwe"));
+}
+
+TEST_F(oh5_Group_test, test_get_or_create_child_group_by_name_valid) {
+    shared_ptr<Group> child1, child2;
+
+    child1 = g->get_or_create_child_group_by_name("dataset1");
+    EXPECT_TRUE(child1);
+    EXPECT_TRUE(g->has_child_by_name("dataset1"));
+
+    child2 = g->get_or_create_child_group_by_name("dataset1");
+    EXPECT_TRUE(child2);
+
+    EXPECT_EQ(child1, child2);
+}
+
+TEST_F(oh5_Group_test, test_get_or_create_child_group_by_name_unaccepted) {
+    shared_ptr<Group> grp, child;
+    grp = Group::create_by_name("quality1");
+
+    EXPECT_THROW(child = grp->get_or_create_child_group_by_name("dataset1"), value_error);
+    EXPECT_FALSE(grp->has_child_by_name("dataset1"));
+}
+
+TEST_F(oh5_Group_test, test_get_or_create_child_group_by_path_invalid) {
+    shared_ptr<Group> child;
+
+    StringList path = String("path/to").split("/");
+
+    child = g->get_or_create_child_group_by_path(path);
+    EXPECT_FALSE(child);
+    EXPECT_FALSE(g->has_child_by_name("path"));
+}
+
+TEST_F(oh5_Group_test, test_get_or_create_child_group_by_path_valid) {
+    shared_ptr<Group> child1, child2;
+
+    StringList path = String("dataset1/data1").split("/");
+
+    child1 = g->get_or_create_child_group_by_path(path);
+    EXPECT_TRUE(child1);
+    EXPECT_EQ("data1", child1->name());
+    ASSERT_TRUE(g->has_child_by_name("dataset1"));
+    EXPECT_TRUE(g->child_by_name("dataset1")->has_child_by_name("data1"));
+    
+    child2 = g->get_or_create_child_group_by_path(path);
+    EXPECT_TRUE(child2);
+
+    EXPECT_EQ(child1, child2);
+}
+
+TEST_F(oh5_Group_test, test_get_or_create_child_group_by_path_invalid_end) {
+    shared_ptr<Group> child;
+
+    StringList path = String("dataset1/invalid").split("/");
+    
+    child = g->get_or_create_child_group_by_path(path);
+    EXPECT_FALSE(child);
+    EXPECT_FALSE(g->has_child_by_name("dataset1"));
+}
+
+TEST_F(oh5_Group_test, test_get_or_create_child_grop_by_path_invalid_end2) {
+    shared_ptr<Group> child, ds1;
+
+    StringList path = String("dataset1/invalid").split("/");
+    ds1 = g->get_or_create_child_group_by_name("dataset1");
+    child = g->get_or_create_child_group_by_path(path);
+    EXPECT_FALSE(child);
+    EXPECT_TRUE(g->has_child_by_name("dataset1"));
+    EXPECT_FALSE(ds1->has_child_by_name("data1"));
+}
+
+TEST_F(oh5_Group_test, test_get_or_create_child_group_by_path_unaccepted) {
+    shared_ptr<Group> child;
+    StringList path = String("dataset1/what/quality1").split("/");
+    
+    EXPECT_THROW(child = g->get_or_create_child_group_by_path(path), value_error);
+    EXPECT_FALSE(g->has_child_by_name("dataset1"));
+}
+
 
 } // namespace oh5
 } // namespace brfc

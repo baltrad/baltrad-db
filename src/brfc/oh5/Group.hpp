@@ -23,6 +23,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Node.hpp>
 
 namespace brfc {
+
+class StringList;
+
 namespace oh5 {
 
 class Attribute;
@@ -123,7 +126,30 @@ class Group : public Node {
 
     shared_ptr<const Group> child_group_by_name(const String& name) const;
     ///@}
-
+    
+    /**
+     * @brief access child group by name, trying to create one if missing
+     * @return pointer to group or null if group can not be created
+     *
+     * @sa create_by_name()
+     */
+    shared_ptr<Group>
+    get_or_create_child_group_by_name(const String& name);
+    
+    /**
+     * @brief access child group by path, trying to create missing groups
+     * @throw value_error if an invalid name is encountered in @c path
+     * @return pointer to the last group in path or null if the path could
+     *         not be created
+     *
+     * if a group in path can not be created, none of the groups are
+     * attached to this group.
+     * 
+     * @sa get_or_create_child_group_by_name()
+     */
+    shared_ptr<Group>
+    get_or_create_child_group_by_path(const StringList& path);
+    
   protected:
     template<class T, class A1> 
     friend 

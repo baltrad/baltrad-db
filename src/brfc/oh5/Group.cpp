@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Group.hpp>
 
 #include <brfc/RegExp.hpp>
+#include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
@@ -91,6 +92,55 @@ Group::child_group_by_name(const String& name) {
 shared_ptr<const Group>
 Group::child_group_by_name(const String& name) const {
     return dynamic_pointer_cast<const Group>(child_by_name(name));
+}
+
+shared_ptr<Group>
+Group::get_or_create_child_group_by_name(const String& name) {
+    shared_ptr<Group> child = child_group_by_name(name);
+    if (not child) {
+        child = create_by_name(name);
+        if (child)
+            add_child(child);
+    }
+    return child;
+}
+
+shared_ptr<Group>
+Group::get_or_create_child_group_by_path(const StringList& path) {
+    shared_ptr<Group> last_existing = shared_from_this();
+    shared_ptr<Group> node;
+
+    StringList::const_iterator iter = path.begin();
+
+    // seek existing nodes
+    while (iter != path.end()) {
+        node = last_existing->child_group_by_name(*iter);
+        if (not node)
+            break;
+        last_existing = node;
+        ++iter;
+    }
+    
+    // no nodes need to be created
+    if (iter == path.end())
+        return last_existing;
+    
+    shared_ptr<Group> created_root = create_by_name(*(iter++));
+    shared_ptr<Group> last_created = created_root;
+
+    // create missing nodes
+    while (last_created and iter != path.end()) {
+        node = create_by_name(*iter);
+        if (node)
+            last_created->add_child(node);
+        last_created = node;
+        ++iter;
+    }
+
+    // all children created, attach created nodes to last pre-existing node
+    if (last_created)
+        last_existing->add_child(created_root);
+    return last_created;
 }
 
 bool

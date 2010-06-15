@@ -113,6 +113,13 @@ TEST_F(oh5_Node_test, changing_child_name_throws_when_parent_has_entry) {
     EXPECT_THROW(f->name("b"), duplicate_entry);
 }
 
+TEST_F(oh5_Node_test, root) {
+    EXPECT_EQ(a, c->root());
+    EXPECT_EQ(a, b->root());
+    EXPECT_EQ(a, a->root());
+    EXPECT_EQ(f, f->root());
+}
+
 TEST_F(oh5_Node_test, is_root) {
     EXPECT_TRUE(a->is_root());
     EXPECT_FALSE(b->is_root());
