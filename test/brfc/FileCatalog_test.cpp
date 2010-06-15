@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Query.hpp>
 #include <brfc/Time.hpp>
 
-#include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/Source.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
@@ -62,8 +61,7 @@ struct FileCatalog_test : public testing::Test {
             : tempdir(new test::TempDir())
             , db(new MockDatabase())
             , namer(new MockNamer())
-            , specs(new oh5::AttributeSpecs())
-            , fc(db, specs, namer, tempdir->path())
+            , fc(db, namer, tempdir->path())
             , src_str("WMO:02606")
             , default_src(make_shared<oh5::SourceRadar>())
             , tempfile()
@@ -76,19 +74,12 @@ struct FileCatalog_test : public testing::Test {
     virtual void SetUp() {
         tempfile.write(*minfile);
         minfile->path(tempfile.path());
-        specs->add(oh5::AttributeSpec("Conventions", "string"));
-        specs->add(oh5::AttributeSpec("what/object", "string"));
-        specs->add(oh5::AttributeSpec("what/version", "string"));
-        specs->add(oh5::AttributeSpec("what/date", "date"));
-        specs->add(oh5::AttributeSpec("what/time", "time"));
-        specs->add(oh5::AttributeSpec("what/source", "string"));
         DefaultValue<shared_ptr<oh5::Source> >::Set(default_src);
     }
 
     auto_ptr<test::TempDir> tempdir;
     shared_ptr<MockDatabase> db;
     shared_ptr<MockNamer> namer;
-    shared_ptr<oh5::AttributeSpecs> specs;
     FileCatalog fc;
     String src_str;
     shared_ptr<oh5::Source> default_src;

@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/SHA1AttributeHasher.hpp>
+#include <brfc/rdb/SHA1AttributeHasher.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -32,6 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/RootGroup.hpp>
 
 namespace brfc {
+namespace rdb {
 
 SHA1AttributeHasher::SHA1AttributeHasher(
     shared_ptr<const oh5::AttributeSpecs> specs)
@@ -101,4 +102,5 @@ SHA1AttributeHasher::do_hash(const oh5::File& file) {
     return String(hash).to_lower();
 }
 
+} // namespace rdb
 } // namespace brfc

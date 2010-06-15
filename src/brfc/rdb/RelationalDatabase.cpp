@@ -39,6 +39,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/SaveFile.hpp>
+#include <brfc/rdb/SHA1AttributeHasher.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -47,9 +48,9 @@ RelationalDatabase::RelationalDatabase(const String& dsn_)
         : conn_(Connection::create(dsn_))
         , mapper_(new AttributeMapper())
         , specs_(new oh5::AttributeSpecs())
-        , file_hasher_() {
-
+        , file_hasher_(new SHA1AttributeHasher(specs_)) {
     conn_->open();
+    populate_mapper_and_specs();
 }
 
 RelationalDatabase::~RelationalDatabase() {

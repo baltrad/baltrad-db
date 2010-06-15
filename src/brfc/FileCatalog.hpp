@@ -31,11 +31,9 @@ namespace brfc {
     
 class Database;
 class FileNamer;
-class FileHasher;
 class Query;
 
 namespace oh5 {
-    class AttributeSpecs;
     class File;
 }
 
@@ -59,14 +57,10 @@ class FileCatalog {
      * @throw db_error if DB could not be opened
      * @throw value_error if dsn is invalid
      * @throw fs_error if storage path does not exist
-     *
-     * on creating a FileCatalog instance, owned AttributeSpecs is filled
-     * from Database
      */
     FileCatalog(const String& dsn, const String& storage);
 
     FileCatalog(shared_ptr<Database> db,
-                shared_ptr<oh5::AttributeSpecs> specs,
                 shared_ptr<FileNamer> namer,
                 const String& storage);
 
@@ -187,7 +181,6 @@ class FileCatalog {
     void check_storage() const;
     
     shared_ptr<Database> db_;
-    shared_ptr<oh5::AttributeSpecs> specs_;
     shared_ptr<FileNamer> namer_;
     String storage_;
 };

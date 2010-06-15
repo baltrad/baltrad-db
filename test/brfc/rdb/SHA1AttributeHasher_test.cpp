@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/smart_ptr.hpp>
-#include <brfc/SHA1AttributeHasher.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -31,13 +30,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
-#include "common.hpp"
+#include <brfc/rdb/SHA1AttributeHasher.hpp>
+
+#include "../common.hpp"
 
 namespace brfc {
+namespace rdb {
 
-class SHA1AttributeHasher_test : public ::testing::Test {
+class rdb_SHA1AttributeHasher_test : public ::testing::Test {
   public:
-    SHA1AttributeHasher_test()
+    rdb_SHA1AttributeHasher_test()
             : specs(new oh5::AttributeSpecs())
             , src(make_shared<oh5::SourceRadar>())
             , f1(oh5::File::minimal("pvol",
@@ -77,7 +79,7 @@ class SHA1AttributeHasher_test : public ::testing::Test {
     SHA1AttributeHasher hasher;
 };
 
-TEST_F(SHA1AttributeHasher_test, attribute_string) {
+TEST_F(rdb_SHA1AttributeHasher_test, attribute_string) {
     shared_ptr<oh5::Attribute> a1 = make_shared<oh5::Attribute>("a1", Variant(1));
     EXPECT_EQ("/a1=1", SHA1AttributeHasher::attribute_string(*a1));
 
@@ -94,20 +96,20 @@ TEST_F(SHA1AttributeHasher_test, attribute_string) {
     EXPECT_EQ("/dataset1/what/a1=121314", SHA1AttributeHasher::attribute_string(*a1));
 }
 
-TEST_F(SHA1AttributeHasher_test, check_concrete_digests) {
+TEST_F(rdb_SHA1AttributeHasher_test, check_concrete_digests) {
     EXPECT_EQ("0833a94578041a8177afb30ee1e7ac0a660be043", hasher.hash(*f1));
     EXPECT_EQ("91176508177e2acc5638faec441a925a268700ae", hasher.hash(*f2));
 }
 
-TEST_F(SHA1AttributeHasher_test, hash_same_meta) {
+TEST_F(rdb_SHA1AttributeHasher_test, hash_same_meta) {
     EXPECT_EQ(hasher.hash(*f1), hasher.hash(*f3));
 }
 
-TEST_F(SHA1AttributeHasher_test, hash_different_meta) {
+TEST_F(rdb_SHA1AttributeHasher_test, hash_different_meta) {
     EXPECT_NE(hasher.hash(*f1), hasher.hash(*f2));
 }
 
-TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
+TEST_F(rdb_SHA1AttributeHasher_test, hash_ignores_attributes) {
     String hash1 = hasher.hash(*f1);
     f1->root()->add_child(make_shared<oh5::Attribute>("ignore", Variant("val")));
     String hash2 = hasher.hash(*f1);
@@ -119,7 +121,7 @@ TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
     EXPECT_EQ(hash2, hash3);
 }
 
-TEST_F(SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
+TEST_F(rdb_SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
     String hash1 = hasher.hash(*f1);
     f1->root()->add_child(make_shared<oh5::Attribute>("attr", Variant("val")));
     String hash2 = hasher.hash(*f1);
@@ -131,5 +133,5 @@ TEST_F(SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
     EXPECT_NE(hash2, hash3);
 }
 
-
+} // namespace rdb
 } // namespace brfc

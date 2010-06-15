@@ -26,11 +26,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Database.hpp>
 #include <brfc/DefaultFileNamer.hpp>
 #include <brfc/Query.hpp>
-#include <brfc/SHA1AttributeHasher.hpp>
 
 #include <brfc/expr/Attribute.hpp>
 
-#include <brfc/oh5/AttributeSpecs.hpp>
 #include <brfc/oh5/File.hpp>
 
 #include <brfc/rdb/RelationalDatabase.hpp>
@@ -42,24 +40,15 @@ namespace brfc {
 FileCatalog::FileCatalog(const String& dsn,
                          const String& storage)
         : db_(new rdb::RelationalDatabase(dsn))
-        , specs_()
         , namer_(new DefaultFileNamer())
         , storage_(storage) {
     check_storage();
-    rdb::RelationalDatabase* rdb =
-        static_cast<rdb::RelationalDatabase*>(db_.get());
-    rdb->populate_mapper_and_specs();
-    specs_ = rdb->specs();
-    shared_ptr<FileHasher> hasher(new SHA1AttributeHasher(specs_));
-    rdb->file_hasher(hasher);
 }
 
 FileCatalog::FileCatalog(shared_ptr<Database> db,
-                         shared_ptr<oh5::AttributeSpecs> specs,
                          shared_ptr<FileNamer> namer,
                          const String& storage)
         : db_(db)
-        , specs_(specs)
         , namer_(namer)
         , storage_(storage) {
     check_storage();

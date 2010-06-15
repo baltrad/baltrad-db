@@ -32,6 +32,8 @@ class AttributeSpecs;
 
 } // namespace oh5
 
+namespace rdb {
+
 /**
  * @brief generate SHA-1 hash of ODIM_H5 metadata attributes
  */
@@ -65,6 +67,7 @@ class SHA1AttributeHasher : public FileHasher {
     shared_ptr<const oh5::AttributeSpecs> specs_;
 };
 
+} // namespace rdb
 } // namespace brfc
 
 #endif // BRFC_SHA1_ATTRIBUTE_HASHER_HPP

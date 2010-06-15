@@ -61,7 +61,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 %ignore brfc::FileCatalog::FileCatalog(shared_ptr<Database>,
-                                       shared_ptr<oh5::AttributeSpecs>,
                                        shared_ptr<FileNamer>,
                                        const String&);
 %ignore brfc::FileCatalog::file_namer(shared_ptr<FileNamer>);
