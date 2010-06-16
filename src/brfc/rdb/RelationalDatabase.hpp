@@ -24,12 +24,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/smart_ptr.hpp>
 #include <brfc/Database.hpp>
-#include <brfc/String.hpp>
 
 
 namespace brfc {
 
 class FileHasher;
+class String;
 class Variant;
 
 namespace oh5 {
@@ -119,17 +119,11 @@ class RelationalDatabase : public Database {
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
-    String dialect() const { return "postgresql"; }
-
   private:
     /**
      * @brief map source id's to source instances
      */
     typedef std::map<long long, shared_ptr<oh5::Source> > SourceMap;
-
-    void init();
-
-    void init_qapp();
 
     shared_ptr<oh5::SourceRadar>
     load_source_radar(shared_ptr<oh5::SourceRadar> src);
@@ -149,8 +143,6 @@ class RelationalDatabase : public Database {
      * @brief remove file from database
      */
     void remove_file(const String& path);
-    
-    String qt_engine(const String& engine) const;
 
     shared_ptr<Connection> conn_;
     shared_ptr<AttributeMapper> mapper_;

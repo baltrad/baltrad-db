@@ -41,6 +41,7 @@ class MockConnection : public Connection {
 
     MOCK_METHOD1(do_execute, shared_ptr<ResultSet>(const String&));
     MOCK_CONST_METHOD0(do_in_transaction, bool());
+    MOCK_CONST_METHOD0(do_dialect, String());
 };
 
 } // namespace rdb

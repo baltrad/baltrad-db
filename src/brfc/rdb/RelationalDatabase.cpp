@@ -26,6 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileHasher.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
+#include <brfc/String.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/File.hpp>

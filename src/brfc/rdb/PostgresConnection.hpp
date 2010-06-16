@@ -34,6 +34,10 @@ class PostgresConnection : public Connection {
         return transaction_.get() != 0;
     }
 
+    virtual String do_dialect() const {
+        return "postgresql";
+    }
+
     virtual shared_ptr<ResultSet> do_execute(const String& query);
 
     virtual bool do_has_feature(Feature feature) const;

@@ -64,7 +64,7 @@ TestRDB::clean() {
 StringList
 TestRDB::load_queries(const String& filename) {
     fs::path qf_path = fs::path(schema_dir_)
-                       / dialect().to_utf8()
+                       / connection().dialect().to_utf8()
                        / filename.to_utf8();
     
     std::ifstream ifs(qf_path.string().c_str(), std::ios::binary);

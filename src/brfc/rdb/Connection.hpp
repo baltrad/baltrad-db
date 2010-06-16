@@ -158,6 +158,10 @@ class Connection {
         return do_has_feature(feature);
     }
 
+    String dialect() const {
+        return do_dialect();
+    }
+
   protected:
     virtual void do_open() = 0;
     virtual void do_close() = 0;
@@ -180,6 +184,8 @@ class Connection {
     virtual bool do_has_feature(Feature /*feature*/) const {
         return false;
     }
+
+    virtual String do_dialect() const = 0;
     
     /**
      * @brief default implementation

@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_TEST_TEST_RDB_HPP
 #define BRFC_TEST_TEST_RDB_HPP
 
+#include <brfc/String.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
 class StringList;
