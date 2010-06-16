@@ -33,7 +33,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/SourceRadar.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
-#include <brfc/rdb/AttributeSpecs.hpp>
 #include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/Compiler.hpp>
 #include <brfc/rdb/Connection.hpp>
@@ -47,8 +46,7 @@ namespace rdb {
 RelationalDatabase::RelationalDatabase(const String& dsn_)
         : conn_(Connection::create(dsn_))
         , mapper_(new AttributeMapper())
-        , specs_(new AttributeSpecs())
-        , file_hasher_(new SHA1AttributeHasher(specs_)) {
+        , file_hasher_(new SHA1AttributeHasher(mapper_)) {
     conn_->open();
 }
 
@@ -56,19 +54,14 @@ RelationalDatabase::~RelationalDatabase() {
 
 }
 
-shared_ptr<const AttributeSpecs>
-RelationalDatabase::specs() const {
-    return specs_;
+shared_ptr<AttributeMapper>
+RelationalDatabase::mapper() {
+    return mapper_;
 }
 
-shared_ptr<AttributeSpecs>
-RelationalDatabase::specs() {
-    return specs_;
-}
-
-const AttributeMapper&
+shared_ptr<const AttributeMapper>
 RelationalDatabase::mapper() const {
-    return *mapper_;
+    return mapper_;
 }
 
 void
@@ -290,21 +283,19 @@ RelationalDatabase::query(const String& query_str,
 }
 
 void
-RelationalDatabase::populate_mapper_and_specs() {
+RelationalDatabase::populate_mapper() {
     mapper_->clear();
-    specs_->clear();
     shared_ptr<ResultSet> r = query("SELECT id, name, converter, "
                                     "storage_table, storage_column, "
                                     "ignore_in_hash "
                                     "FROM bdb_attributes", BindMap());
     while (r->next()) {
-        mapper_->add(Mapping(r->int64_(0), // id
+        mapper_->add(Mapping(r->int64_(0),  // id
                              r->string(1),  // name
+                             r->string(2),  // typename
                              r->string(3),  // table
-                             r->string(4))); // column
-        specs_->add(AttributeSpec(r->string(1), // name
-                                  r->string(2), // typename
-                                  r->bool_(5))); // ignored in hash
+                             r->string(4),  // column
+                             r->bool_(5))); // ignored in hash
     }
 }
 

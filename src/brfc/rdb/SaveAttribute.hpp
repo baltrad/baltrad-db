@@ -34,7 +34,6 @@ class Attribute;
 
 namespace rdb {
 
-class AttributeMapper;
 class GroupCache;
 class RelationalDatabase;
 
@@ -70,7 +69,6 @@ class SaveAttribute {
     SqlQuery& valid_attribute_query(const oh5::Attribute& attr);
 
     RelationalDatabase* rdb_;
-    const AttributeMapper* mapper_;
     GroupCache* group_cache_;
     QueryMap queries_;
 };

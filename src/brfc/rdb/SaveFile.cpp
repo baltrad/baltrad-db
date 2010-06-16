@@ -61,7 +61,7 @@ SaveFile::operator()(const oh5::File& file,
     columns.append("source_id");
     columns.append("unique_id");
 
-    const MappingVector& special = rdb_->mapper().specializations_on("bdb_files");
+    const MappingVector& special = rdb_->mapper()->specializations_on("bdb_files");
     BOOST_FOREACH(const Mapping& mapping, special) {
         // XXX: get rid of this
         if (mapping.attribute == "file_id") 

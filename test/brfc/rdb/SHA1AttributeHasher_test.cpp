@@ -29,7 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
-#include <brfc/rdb/AttributeSpecs.hpp>
+#include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/SHA1AttributeHasher.hpp>
 
 #include "../common.hpp"
@@ -40,7 +40,7 @@ namespace rdb {
 class rdb_SHA1AttributeHasher_test : public ::testing::Test {
   public:
     rdb_SHA1AttributeHasher_test()
-            : specs(new AttributeSpecs())
+            : mapper(new AttributeMapper())
             , src(make_shared<oh5::SourceRadar>())
             , f1(oh5::File::minimal("pvol",
                                     Date(2000, 1, 2),
@@ -55,25 +55,25 @@ class rdb_SHA1AttributeHasher_test : public ::testing::Test {
                                     Date(2000, 1, 2),
                                     Time(12, 5),
                                     "WMO:02606")) 
-            , hasher(specs) {
+            , hasher(mapper) {
         
     }
 
     virtual void SetUp() {
-        specs->add(AttributeSpec("Conventions", "string", true));
-        specs->add(AttributeSpec("what/object", "string", false));
-        specs->add(AttributeSpec("what/date", "date", false));
-        specs->add(AttributeSpec("what/time", "time", false));
-        specs->add(AttributeSpec("what/source", "string", true));
-        specs->add(AttributeSpec("what/version", "string", true));
-        specs->add(AttributeSpec("ignore", "string", true));
-        specs->add(AttributeSpec("attr", "string", false));
+        mapper->add(Mapping(1, "Conventions", "string", "", "", true));
+        mapper->add(Mapping(2, "what/object", "string", "", "", false));
+        mapper->add(Mapping(3, "what/date", "date", "", "", false));
+        mapper->add(Mapping(4, "what/time", "time", "", "", false));
+        mapper->add(Mapping(5, "what/source", "string", "", "", true));
+        mapper->add(Mapping(6, "what/version", "string", "", "", true));
+        mapper->add(Mapping(7, "ignore", "string", "", "", true));
+        mapper->add(Mapping(8, "attr", "string", "", "", false));
         f1->source(src);
         f2->source(src);
         f3->source(src);
     }
     
-    shared_ptr<AttributeSpecs> specs;
+    shared_ptr<AttributeMapper> mapper;
     shared_ptr<oh5::SourceRadar> src;
     shared_ptr<oh5::File> f1, f2, f3;
     SHA1AttributeHasher hasher;

@@ -41,7 +41,7 @@ SaveGroup::SaveGroup(RelationalDatabase* rdb,
         : rdb_(rdb)
         , cache_(cache)
         , qry_("")
-        , special_(rdb->mapper().specializations_on("bdb_groups")) {
+        , special_(rdb->mapper()->specializations_on("bdb_groups")) {
     StringList columns, binds; 
     columns.append("parent_id");
     columns.append("file_id");

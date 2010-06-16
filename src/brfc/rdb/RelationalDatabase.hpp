@@ -43,7 +43,6 @@ class SourceRadar;
 namespace rdb {
 
 class AttributeMapper;
-class AttributeSpecs;
 class BindMap;
 class Connection;
 
@@ -73,14 +72,12 @@ class RelationalDatabase : public Database {
      */
     shared_ptr<ResultSet> query(const String& query,
                                 const BindMap& binds);
+
+    shared_ptr<AttributeMapper> mapper();
     
-    shared_ptr<const AttributeSpecs> specs() const;
+    shared_ptr<const AttributeMapper> mapper() const;
 
-    shared_ptr<AttributeSpecs> specs();
-
-    const AttributeMapper& mapper() const;
-
-    void populate_mapper_and_specs();
+    void populate_mapper();
 
     Connection& connection() {
         return *conn_;
@@ -156,8 +153,7 @@ class RelationalDatabase : public Database {
     String qt_engine(const String& engine) const;
 
     shared_ptr<Connection> conn_;
-    scoped_ptr<AttributeMapper> mapper_;
-    shared_ptr<AttributeSpecs> specs_;
+    shared_ptr<AttributeMapper> mapper_;
     shared_ptr<FileHasher> file_hasher_;
     SourceMap sources_;
 };

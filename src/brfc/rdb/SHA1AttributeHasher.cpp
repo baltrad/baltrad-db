@@ -30,14 +30,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Source.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
-#include <brfc/rdb/AttributeSpecs.hpp>
+#include <brfc/rdb/AttributeMapper.hpp>
 
 namespace brfc {
 namespace rdb {
 
 SHA1AttributeHasher::SHA1AttributeHasher(
-    shared_ptr<const AttributeSpecs> specs)
-        : specs_(specs) {
+    shared_ptr<const AttributeMapper> mapper)
+        : mapper_(mapper) {
 }
 
 SHA1AttributeHasher::~SHA1AttributeHasher() {
@@ -77,15 +77,15 @@ SHA1AttributeHasher::do_hash(const oh5::File& file) {
     StringList strs(file.source()->node_id());
 
     const oh5::Attribute* attr = 0;
-    const AttributeSpec* spec = 0;
+    const Mapping* mapping = 0;
     BOOST_FOREACH(const oh5::Node& node, *file.root()) {
         attr = dynamic_cast<const oh5::Attribute*>(&node);
         if (not attr or not attr->is_valid())
             continue;
 
-        // this might throw, but we should have all the specs
-        spec = &specs_->get(attr->full_name());
-        if (not spec->ignore_in_hash) {
+        // this might throw, but we should have all the mappings
+        mapping = &mapper_->mapping(attr->full_name());
+        if (not mapping->ignore_in_hash) {
             strs.append(attribute_string(*attr));
         }
     }

@@ -77,7 +77,7 @@ AttributeMapper::specializations_on(const String& table) const {
     return vec;
 }
 
-Mapping
+const Mapping&
 AttributeMapper::mapping(const String& attribute) const {
     MappingMap::const_iterator i = mappings_.find(attribute);
     if (i == mappings_.end()) {

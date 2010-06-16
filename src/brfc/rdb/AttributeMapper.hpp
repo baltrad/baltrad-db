@@ -34,18 +34,24 @@ namespace rdb {
 struct Mapping {
     Mapping(int id_,
             const String& attribute_,
+            const String& type_,
             const String& table_,
-            const String& column_)
+            const String& column_,
+            bool ignore_in_hash_=false)
             : id(id_)
             , attribute(attribute_)
+            , type(type_)
             , table(table_)
-            , column(column_) {
+            , column(column_)
+            , ignore_in_hash(ignore_in_hash_) {
     }
     
     int id; ///< unique id
     String attribute; ///< Attribute name
+    String type; ///< type name of the attribute
     String table; ///< table where the value is stored
     String column; ///< column in the table where value is stored
+    bool ignore_in_hash; ///< ignore this attribute when hashing metadata
 };
 
 /**
@@ -118,8 +124,7 @@ class AttributeMapper {
      * @return Mapping for the Attribute
      * @throw lookup_error if not found
      */
-    Mapping
-    mapping(const String& attribute) const;
+    const Mapping& mapping(const String& attribute) const;
 
     void clear() { mappings_.clear(); }
     

@@ -29,10 +29,10 @@ namespace rdb {
 class rdb_AttributeMapper_test : public testing::Test {
   public:
     static void SetUpTestCase() {
-        mapper.add(Mapping(0, "attr1", "table1", "column1"));
-        mapper.add(Mapping(1, "attr2", "table1", "column2"));
-        mapper.add(Mapping(2, "attr3", "table2", "column1"));
-        mapper.add(Mapping(3, "attr4", "bdb_attribute_values_str", "value"));
+        mapper.add(Mapping(0, "attr1", "string", "table1", "column1"));
+        mapper.add(Mapping(1, "attr2", "string", "table1", "column2"));
+        mapper.add(Mapping(2, "attr3", "string", "table2", "column1"));
+        mapper.add(Mapping(3, "attr4", "string", "bdb_attribute_values_str", "value"));
     }
 
     static AttributeMapper mapper;

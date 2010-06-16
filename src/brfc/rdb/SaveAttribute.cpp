@@ -33,7 +33,6 @@ namespace rdb {
 SaveAttribute::SaveAttribute(RelationalDatabase* rdb,
                              GroupCache* group_cache)
         : rdb_(rdb)
-        , mapper_(&rdb->mapper())
         , group_cache_(group_cache)
         , queries_() {
 }
@@ -43,7 +42,7 @@ SaveAttribute::operator()(const oh5::Attribute& attr) {
     SqlQuery* qry = 0;
     if (not attr.is_valid()) {
         qry = &invalid_attribute_query(attr);
-    } else if (mapper_->is_specialized(attr.full_name())) {
+    } else if (rdb_->mapper()->is_specialized(attr.full_name())) {
         // ignore specialized attributes
     } else {
         qry = &valid_attribute_query(attr);
@@ -78,7 +77,7 @@ SaveAttribute::invalid_attribute_query(const oh5::Attribute& attr) {
 
 SqlQuery&
 SaveAttribute::valid_attribute_query(const oh5::Attribute& attr) {
-    const Mapping& mapping = mapper_->mapping(attr.full_name());
+    const Mapping& mapping = rdb_->mapper()->mapping(attr.full_name());
     QueryMap::iterator iter = queries_.find(mapping.table);
     if (iter == queries_.end()) {
         SqlQuery qry("INSERT INTO " + mapping.table +

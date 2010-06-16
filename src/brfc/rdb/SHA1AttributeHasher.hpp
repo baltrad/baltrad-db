@@ -33,14 +33,14 @@ class Attribute;
 
 namespace rdb {
 
-class AttributeSpecs;
+class AttributeMapper;
 
 /**
  * @brief generate SHA-1 hash of ODIM_H5 metadata attributes
  */
 class SHA1AttributeHasher : public FileHasher {
   public:
-    explicit SHA1AttributeHasher(shared_ptr<const AttributeSpecs> specs);
+    explicit SHA1AttributeHasher(shared_ptr<const AttributeMapper> mapper);
 
     virtual ~SHA1AttributeHasher();
 
@@ -65,7 +65,7 @@ class SHA1AttributeHasher : public FileHasher {
     virtual String do_hash(const oh5::File& file);
   
   private:
-    shared_ptr<const AttributeSpecs> specs_;
+    shared_ptr<const AttributeMapper> mapper_;
 };
 
 } // namespace rdb

@@ -43,7 +43,7 @@ FileCatalog::FileCatalog(const String& dsn,
         , namer_(new DefaultFileNamer())
         , storage_(storage) {
     check_storage();
-    dynamic_pointer_cast<rdb::RelationalDatabase>(db_)->populate_mapper_and_specs();
+    static_pointer_cast<rdb::RelationalDatabase>(db_)->populate_mapper();
 }
 
 FileCatalog::FileCatalog(shared_ptr<Database> db,
