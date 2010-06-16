@@ -40,7 +40,7 @@ SaveAttribute::SaveAttribute(RelationalDatabase* rdb,
 void
 SaveAttribute::operator()(const oh5::Attribute& attr) {
     SqlQuery* qry = 0;
-    if (not attr.is_valid()) {
+    if (not rdb_->mapper()->has(attr.full_name())) {
         qry = &invalid_attribute_query(attr);
     } else if (rdb_->mapper()->is_specialized(attr.full_name())) {
         // ignore specialized attributes
@@ -97,6 +97,11 @@ SaveAttribute::valid_attribute_query(const oh5::Attribute& attr) {
                                         : Variant());
     qry.binds().add(":attribute_id", Variant(mapping.id));
     qry.binds().add(":value", attr.value());
+
+    // XXX: note that this relies on implicit convertion of attribute value
+    //      in DB (True/False -> bool; ISO 8601 date/time strings)
+    //
+    // XXX: this should be explicit
     
     return qry;
 }

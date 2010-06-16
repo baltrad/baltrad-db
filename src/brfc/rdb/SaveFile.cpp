@@ -91,6 +91,10 @@ SaveFile::operator()(const oh5::File& file,
         const Variant& value = 
                 file.root()->child_attribute(mapping.attribute)->value();
         qry.binds().add(":" + mapping.column, value);
+        // XXX: note that this relies on implicit convertion of attribute value
+        //      in DB (True/False -> bool; ISO 8601 date/time strings)
+        //
+        // XXX: this should be explicit
     }
 
     qry.binds().add(":path", Variant(file.path()));

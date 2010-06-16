@@ -96,6 +96,10 @@ SaveGroup::bind_specializations(const oh5::Group& group) {
         qry_.binds().add(":" + mapping.column, attr ? attr->value()
                                                     : Variant());
     }
+    // XXX: note that this relies on implicit convertion of attribute value
+    //      in DB (True/False -> bool; ISO 8601 date/time strings)
+    //
+    // XXX: this should be explicit
 }
 
 long long
