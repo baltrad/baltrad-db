@@ -19,17 +19,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Converter.hpp>
 
-#include <algorithm>
 #include <string>
 
 #include <boost/numeric/conversion/cast.hpp>
 
-#include <brfc/oh5/hlhdf.hpp>
-
 #include <brfc/exceptions.hpp>
-#include <brfc/Date.hpp>
-#include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
+
+#include <brfc/oh5/hlhdf.hpp>
 
 namespace brfc {
 namespace oh5 {
