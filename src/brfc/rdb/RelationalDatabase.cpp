@@ -50,7 +50,6 @@ RelationalDatabase::RelationalDatabase(const String& dsn_)
         , specs_(new AttributeSpecs())
         , file_hasher_(new SHA1AttributeHasher(specs_)) {
     conn_->open();
-    populate_mapper_and_specs();
 }
 
 RelationalDatabase::~RelationalDatabase() {
