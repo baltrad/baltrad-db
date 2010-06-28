@@ -19,8 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Factory.hpp>
 
-#include <brfc/Date.hpp>
-#include <brfc/Time.hpp>
+#include <brfc/DateTime.hpp>
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/Expression.hpp>
@@ -66,12 +65,32 @@ Factory::double_(double value) const {
 
 LiteralPtr
 Factory::date(int year, int month, int day) const {
-    return Literal::create(Variant(Date(year, month, day)));
+    return date(Date(year, month, day));
+}
+
+LiteralPtr
+Factory::date(const Date& date) const {
+    return Literal::create(Variant(Date(date)));
+}
+
+LiteralPtr
+Factory::date(const DateTime& datetime) const {
+    return date(datetime.date());
 }
 
 LiteralPtr
 Factory::time(int hour, int minute, int second) const {
-    return Literal::create(Variant(Time(hour, minute, second)));
+    return time(Time(hour, minute, second));
+}
+
+LiteralPtr
+Factory::time(const Time& time) const {
+    return Literal::create(Variant(time));
+}
+
+LiteralPtr
+Factory::time(const DateTime& datetime) const {
+    return time(datetime.time());
 }
 
 LiteralPtr

@@ -21,6 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %include "common.i"
 
+%import "fc.i"
+
 %{
     #include <brfc/expr/fwd.hpp>
     #include <brfc/expr/Element.hpp>
@@ -87,6 +89,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   }
 %}
 
+%typemap(javaimports) brfc::expr::Factory %{
+    import eu.baltrad.fc.Date;
+    import eu.baltrad.fc.DateTime;
+    import eu.baltrad.fc.Time;
+%}
 
 SWIG_SHARED_PTR(Element,
                 brfc::expr::Element)
@@ -143,6 +150,12 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
   public static long getCPtr($javaclassname obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
+%}
+
+%pragma(java) jniclassimports=%{
+    import eu.baltrad.fc.Date;
+    import eu.baltrad.fc.DateTime;
+    import eu.baltrad.fc.Time;
 %}
 
 %include <brfc/expr/fwd.hpp>

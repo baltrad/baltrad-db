@@ -33,6 +33,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/ResultSet.hpp>
     #include <brfc/Database.hpp>
     #include <brfc/Date.hpp>
+    #include <brfc/DateTime.hpp>
     #include <brfc/Time.hpp>
     #include <brfc/Variant.hpp>
 %}
@@ -44,6 +45,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %feature("director") brfc::FileNamer;
 
 %typemap(javabody) brfc::Date,
+                   brfc::DateTime,
                    brfc::Time,
                    brfc::Variant,
                    std::vector<brfc::String> %{
@@ -164,6 +166,7 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 %include <brfc/Query.hpp>
 %include <brfc/Date.hpp>
 %include <brfc/Time.hpp>
+%include <brfc/DateTime.hpp>
 %include <brfc/Variant.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:

@@ -26,6 +26,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/fwd.hpp>
 
 namespace brfc {
+
+class Date;
+class Time;
+class DateTime;
+
 namespace expr {
 
 /**
@@ -79,9 +84,29 @@ class Factory {
     LiteralPtr date(int year, int month, int day) const;
 
     /**
+     * @brief construct expr::Literal containing a date
+     */
+    LiteralPtr date(const Date& date) const;
+
+    /**
+     * @brief construct expr::Literal containing a date
+     */
+    LiteralPtr date(const DateTime& datetime) const;
+
+    /**
      * @brief construct expr::Literal containing a time
      */
     LiteralPtr time(int hour, int minute, int second=0) const;
+
+    /**
+     * @brief construct expr::Literal containing a time
+     */
+    LiteralPtr time(const Time& time) const;
+
+    /**
+     * @brief construct expr::Literal containing a time
+     */
+    LiteralPtr time(const DateTime& datetime) const;
 
     /**
      * @brief construct expr::Literal containing a bool
