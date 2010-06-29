@@ -41,6 +41,7 @@ class QueryToSelect {
   public:
     typedef mpl::vector<expr::Attribute,
                         expr::BinaryOperator,
+                        Column,
                         expr::Label,
                         expr::Literal,
                         expr::Parentheses> accepted_types;
@@ -70,6 +71,8 @@ class QueryToSelect {
     void operator()(expr::Attribute& attr);
     
     void operator()(expr::BinaryOperator& op);
+
+    void operator()(Column& op);
 
     void operator()(expr::Label& label);
 

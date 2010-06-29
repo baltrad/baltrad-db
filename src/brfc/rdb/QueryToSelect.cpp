@@ -141,6 +141,11 @@ QueryToSelect::operator()(expr::BinaryOperator& op) {
 }
 
 void
+QueryToSelect::operator()(Column& col) {
+    push(col.shared_from_this());
+}
+
+void
 QueryToSelect::operator()(expr::Label& label) {
     visit(*label.expression(), *this);
     label.expression(pop());
