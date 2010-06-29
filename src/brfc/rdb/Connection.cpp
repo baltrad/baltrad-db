@@ -125,6 +125,8 @@ Connection::do_variant_to_string(const Variant& value) const {
             return "'" + value.date().to_string("yyyy-MM-dd") + "'";
         case Variant::TIME:
             return "'" + value.time().to_string("HH:mm:ss.zzz") + "'";
+        case Variant::DATETIME:
+            return "'" + value.datetime().to_string("yyyy-MM-dd hh:mm:ss.zzz") + "'";
         default:
             throw value_error(value.to_string().to_std_string());
     }
