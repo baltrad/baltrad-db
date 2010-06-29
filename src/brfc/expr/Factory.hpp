@@ -109,6 +109,11 @@ class Factory {
     LiteralPtr time(const DateTime& datetime) const;
 
     /**
+     * @brief construct expr::Literal containing a datetime
+     */
+    LiteralPtr datetime(const DateTime& datetime) const;
+
+    /**
      * @brief construct expr::Literal containing a bool
      * @deprecated use bool_()
      */
@@ -175,6 +180,15 @@ class Factory {
      */
     BinaryOperatorPtr or_(ExpressionPtr lhs, ExpressionPtr rhs) const;
     //@}
+    
+    /**
+     * @name arithmetic operators
+     * @{
+     */
+    /**
+     * @brief lhs + rhs
+     */
+    BinaryOperatorPtr add(ExpressionPtr lhs, ExpressionPtr rhs) const;
 
     /**
      * @brief surround expr with parentheses

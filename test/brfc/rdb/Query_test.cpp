@@ -22,17 +22,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Date.hpp>
+#include <brfc/DateTime.hpp>
 #include <brfc/FileHasher.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/StringList.hpp>
-#include <brfc/Time.hpp>
 
 #include <brfc/expr/Factory.hpp>
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/Parentheses.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
@@ -238,6 +238,27 @@ TEST_P(rdb_Query_test, test_filter_by_xsize_distinct) {
     EXPECT_EQ(r->size(), 1);
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->string(0), "td3");
+}
+
+TEST_P(rdb_Query_test, test_filter_by_combined_datetime) {
+    DateTime min(2000, 1, 1, 12, 1);
+    DateTime max(2001, 1, 1, 12, 0);
+    expr::ExpressionPtr what_dt =
+        xpr.add(
+            xpr.attribute("what/date"),
+            xpr.attribute("what/time")
+        )->parentheses();
+
+    query.fetch(xpr.attribute("path"));
+    query.filter(what_dt->between(xpr.datetime(min), xpr.datetime(max)));
+    shared_ptr<ResultSet> r = query.execute();
+
+    EXPECT_EQ(r->size(), 3);
+    const StringList& v = extract_strings_at(*r, 0);
+
+    EXPECT_TRUE(v.contains("td2"));
+    EXPECT_TRUE(v.contains("td3"));
+    EXPECT_TRUE(v.contains("td4"));
 }
 
 TEST_P(rdb_Query_test, test_select_by_wmo_code) {

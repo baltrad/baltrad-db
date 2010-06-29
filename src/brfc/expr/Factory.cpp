@@ -94,6 +94,11 @@ Factory::time(const DateTime& datetime) const {
 }
 
 LiteralPtr
+Factory::datetime(const DateTime& datetime) const {
+    return Literal::create(Variant(datetime));
+}
+
+LiteralPtr
 Factory::boolean(bool value) const {
     return bool_(value);
 }
@@ -135,8 +140,8 @@ Factory::ge(ExpressionPtr lhs, ExpressionPtr rhs) const {
 
 BinaryOperatorPtr
 Factory::between(ExpressionPtr expr,
-                          ExpressionPtr low,
-                          ExpressionPtr high) const {
+                 ExpressionPtr low,
+                 ExpressionPtr high) const {
     return expr->between(low, high);
 }
 
@@ -148,6 +153,11 @@ Factory::and_(ExpressionPtr lhs, ExpressionPtr rhs) const {
 BinaryOperatorPtr
 Factory::or_(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->or_(rhs);
+}
+
+BinaryOperatorPtr
+Factory::add(ExpressionPtr lhs, ExpressionPtr rhs) const {
+    return lhs->add(rhs);
 }
 
 ParenthesesPtr

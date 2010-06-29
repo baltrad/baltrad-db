@@ -93,6 +93,16 @@ class Expression : public Element {
      */
     BinaryOperatorPtr or_(ExpressionPtr rhs) const;
     //@}
+    
+    /**
+     * @name arithmetic operators
+     * @{
+     */
+    /**
+     * @brief this + rhs
+     */
+    BinaryOperatorPtr add(ExpressionPtr rhs) const;
+    //@}
 
     /**
      * @brief surround with parentheses

@@ -69,6 +69,11 @@ Expression::or_(ExpressionPtr rhs) const {
 }
 
 BinaryOperatorPtr
+Expression::add(ExpressionPtr rhs) const {
+    return BinaryOperator::create("+", this->shared_from_this(), rhs);
+}
+
+BinaryOperatorPtr
 Expression::between(ExpressionPtr low, ExpressionPtr high) const {
     // this >= low and this <= high
     ExpressionPtr rhs = le(high);
