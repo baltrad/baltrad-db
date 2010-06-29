@@ -71,6 +71,11 @@ Variant::time() const {
     return get<const Time&>();
 }
 
+const DateTime&
+Variant::datetime() const {
+    return get<const DateTime&>();
+}
+
 namespace {
 
 /**
