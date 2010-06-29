@@ -54,6 +54,12 @@ class DateTime {
     const Time& time() const { return time_; }
     Time& time() { return time_; }
 
+    String to_string(const String& format) const;
+
+    static DateTime from_string(const String& str, const String& format);
+
+    bool operator==(const DateTime& rhs) const;
+
   private:
     Date date_;
     Time time_;

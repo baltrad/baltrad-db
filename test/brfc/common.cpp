@@ -80,6 +80,18 @@ std::ostream& operator<<(std::ostream& out, const brfc::Time& value) {
     return out;
 }
 
+std::ostream& operator<<(std::ostream& out, const brfc::DateTime& value) {
+    out << "DateTime("
+        << value.date().year() << ", "
+        << value.date().month() << ", "
+        << value.date().day() << ", "
+        << value.time().hour() << ", "
+        << value.time().minute() << ", "
+        << value.time().second() << ", "
+        << value.time().msec() << ")";
+    return out;
+}
+
 std::ostream& operator<<(std::ostream& out, const brfc::Variant& value) {
     out << value.to_string().to_std_string();
     return out;

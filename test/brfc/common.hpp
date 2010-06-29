@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class Date;
+class DateTime;
 class Time;
 class Variant;
 
@@ -60,6 +61,9 @@ operator<<(std::ostream& out, const brfc::Date& value);
 
 std::ostream&
 operator<<(std::ostream& out, const brfc::Time& value);
+
+std::ostream&
+operator<<(std::ostream& out, const brfc::DateTime& value);
 
 std::ostream&
 operator<<(std::ostream& out, const brfc::Variant& value);

@@ -101,6 +101,10 @@ class variant_to_string : public boost::static_visitor<String> {
     String operator()(const Time& value) const {
         return value.to_string("hh:mm:ss");
     }
+
+    String operator()(const DateTime& value) const {
+        return value.to_string("yyyy-MM-dd hh:mm:ss");
+    }
 };
 
 class variant_to_int64 : public boost::static_visitor<long long> {
@@ -152,6 +156,7 @@ class variant_to_bool : public boost::static_visitor<bool> {
     bool operator()(const String& value) const { return value != ""; }
     bool operator()(const Time&) const { return true; }
     bool operator()(const Date&) const { return true; }
+    bool operator()(const DateTime&) const { return true; }
 
     template<typename T>
     bool operator()(const T& value) const {
@@ -166,6 +171,8 @@ class variant_to_time : public boost::static_visitor<Time> {
     }
 
     Time operator()(const Time& value) const { return value; }
+
+    Time operator()(const DateTime& value) const { return value.time(); }
 
     template<typename T>
     Time operator()(const T&) const {
@@ -183,11 +190,29 @@ class variant_to_date : public boost::static_visitor<Date> {
 
     Date operator()(const Date& value) const { return value; }
 
+    Date operator()(const DateTime& value) const { return value.date(); }
+
     template<typename T>
     Date operator()(const T&) const {
         throw value_error("held variant (" +
                           std::string(typeid(T).name()) + ") "
                           "can't be converted to Date");
+    }
+};
+
+class variant_to_datetime : public boost::static_visitor<DateTime> {
+  public:
+    DateTime operator()(const String& value) const {
+        return DateTime::from_string(value, "yyyy-MM-dd hh:mm:ss");
+    }
+
+    DateTime operator()(const DateTime& value) const { return value; }
+
+    template<typename T>
+    DateTime operator()(const T&) const {
+        throw value_error("held variant (" +
+                          std::string(typeid(T).name()) + ") "
+                          "can't be converted to DateTime");
     }
 };
 
@@ -229,6 +254,13 @@ Variant::to_date() const {
     if (type_ == NONE)
         throw value_error("held variant (NULL) can't be converted to Date");
     return boost::apply_visitor(variant_to_date(), value_);
+}
+
+DateTime
+Variant::to_datetime() const {
+    if (type_ == NONE)
+        throw value_error("held valiant (NULL) can't be converted to DateTime");
+    return boost::apply_visitor(variant_to_datetime(), value_);
 }
 
 template<typename T>

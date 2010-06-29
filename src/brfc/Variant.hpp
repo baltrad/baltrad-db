@@ -23,9 +23,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/variant.hpp>
 
 #include <brfc/deprecate.hpp>
-#include <brfc/Date.hpp>
 #include <brfc/String.hpp>
-#include <brfc/Time.hpp>
+#include <brfc/DateTime.hpp>
 
 namespace brfc {
 
@@ -42,7 +41,8 @@ class Variant {
         DOUBLE,
         BOOL,
         DATE,
-        TIME
+        TIME,
+        DATETIME
     };
 
     /**
@@ -134,6 +134,15 @@ class Variant {
             : type_(TIME)
             , value_(value) {
     }
+    
+    /**
+     * @brief construct datetime variant
+     */
+    explicit Variant(const DateTime& value)
+            : type_(DATETIME)
+            , value_(value) {
+
+    }
 
     /**
      * @brief copy assignment
@@ -190,6 +199,10 @@ class Variant {
      * @brief test for DATE variant
      */
     bool is_date() const;
+
+    /**
+     * @brief test for DATETIME variant
+     */
     
     /**
      * @brief test for TIME variant
@@ -243,6 +256,12 @@ class Variant {
      * @throw value_error if type() != TIME
      */
     const Time& time() const;
+
+    /**
+     * @brief access DATETIME variant
+     * @throw value_error if type() != DATETIME
+     */
+    const DateTime& datetime() const;
     ///@}
     
     /**
@@ -260,6 +279,7 @@ class Variant {
      *  - bool variant maps is converted to "True" or "False"
      *  - Date variant is converted to ISO 8601 format yyyy-MM-dd
      *  - Time variant is converted to ISO 8601 format hh:mm:ss
+     *  - DateTime variant is converted to ISO 8601 format yyyy-MM-dd hh:mm:ss
      */
     String to_string() const;
     
@@ -302,19 +322,32 @@ class Variant {
     /**
      * @brief convert to Time value
      *
-     * only String values containing ISO 8601 format 'yyyy-MM-dd' are
-     * convertible. 
+     * conversions:
+     *  - String variant containing ISO 8601 format 'yyyy-MM-dd'
+     *  - DateTime values convert to contained Time value
+     *  - all other variants are not convertible
      */
     Time to_time() const;
     
     /**
      * @brief convert to Date value
      *
-     * only String values containing ISO 8601 format 'hh:mm:ss' are
-     * convertible. 
+     * conversions:
+     *  - String variant containing ISO 8601 format 'hh:mm:ss'
+     *  - DateTime values convert to contained Date value
+     *  - all other variants are not convertible
      */
     Date to_date() const;
     ///@}
+
+    /**
+     * @brief convert to DateTime value
+     *
+     * conversions:
+     *  - String variant containing ISO 8601 format 'yyyy-MM-dd hh:mm:ss'
+     *  - all other variants are not convertible
+     */
+    DateTime to_datetime() const;
 
   private:
     friend bool operator==(const Variant&, const Variant&);
@@ -328,7 +361,8 @@ class Variant {
                            double,
                            bool,
                            Date,
-                           Time> ValueType;
+                           Time,
+                           DateTime> ValueType;
     ValueType value_;
 };
 
