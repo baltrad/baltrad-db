@@ -48,7 +48,7 @@
 
   <target name="execute-database-tests" depends="create-postgresql-testdb" unless="db.test_db_dsn">
     <mkdir dir="${waf.builddir}/test/reports"/>
-    <junit showoutput="true" printsummary="no">
+    <junit showoutput="true" printsummary="no" fork="yes">
       <classpath location="deplib/junit4.jar" />
       <classpath location="${waf.builddir}/jbrfc.jar" />
       <classpath location="${waf.builddir}/jbrfc_test.jar" />
@@ -62,7 +62,7 @@
 
   <target name="execute-simple-tests">
     <mkdir dir="${waf.builddir}/test/reports"/>
-    <junit showoutput="true" printsummary="no">
+    <junit showoutput="true" printsummary="no" fork="yes">
       <classpath location="deplib/junit4.jar" />
       <classpath location="${waf.builddir}/jbrfc.jar" />
       <classpath location="${waf.builddir}/jbrfc_test.jar" />
