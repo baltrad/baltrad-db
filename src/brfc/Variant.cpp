@@ -158,7 +158,16 @@ class variant_to_double : public boost::static_visitor<double> {
 
 class variant_to_bool : public boost::static_visitor<bool> {
   public:
-    bool operator()(const String& value) const { return value != ""; }
+    bool operator()(const String& value) const {
+        // XXX: "f" is postgresql specific. This should be removed once
+        //      ResultSet conversion doesn't rely solely on conversions
+        //      set up in Variant
+        if (value == "false" or value == "f" or value == "0" or value == "")
+            return false;
+        else
+            return true;
+    }
+
     bool operator()(const Time&) const { return true; }
     bool operator()(const Date&) const { return true; }
     bool operator()(const DateTime&) const { return true; }

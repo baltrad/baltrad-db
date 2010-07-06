@@ -313,7 +313,8 @@ class Variant {
      *
      * conversions:
      *  - NULL variant is converted to false
-     *  - empty String is converted to false, all other strings to true
+     *  - empty String and String containing "0" or "false" is converted to
+     *    false, all other strings to true
      *  - Date and Time variants are converted to true
      *  - all other variants are converted using implicit C++ conversion
      */

@@ -133,6 +133,9 @@ TEST(Variant_test, to_bool) {
     EXPECT_EQ(false, Variant().to_bool());
     EXPECT_EQ(true, Variant("foo").to_bool());
     EXPECT_EQ(false, Variant("").to_bool());
+    EXPECT_EQ(true, Variant("true").to_bool());
+    EXPECT_EQ(false, Variant("false").to_bool());
+    EXPECT_EQ(false, Variant("0").to_bool());
     EXPECT_EQ(true, Variant(10).to_bool());
     EXPECT_EQ(true, Variant(1.2).to_bool());
     EXPECT_EQ(true, Variant(true).to_bool());
