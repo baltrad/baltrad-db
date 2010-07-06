@@ -116,8 +116,27 @@ class Date {
     bool operator!=(const Date& rhs) const {
         return not (*this == rhs);
     }
-
+    
+    /**
+     * @brief parse time from string
+     *
+     * @throw value_error if a valid date can not be parsed from the format
+     */
     static Date from_string(const String& str, const String& format);
+    
+    /**
+     * @brief parse date in format 'yyyyMMdd' from @c str
+     *
+     * @throw value_error if a valid date can not be parsed
+     */
+    static Date from_iso_string(const String& str);
+
+    /**
+     * @brief parse date in format 'yyyy-MM-dd' from @c str
+     *
+     * @throw value_error if a valid date can not be parsed
+     */
+    static Date from_extended_iso_string(const String& str);
 
     String to_string(const String& format) const;
 

@@ -193,4 +193,15 @@ TEST(Date_test, test_from_string) {
     EXPECT_THROW(Date::from_string("200122", "yyyyMMdd"), value_error);
 }
 
+TEST(Date_test, test_from_iso_string) {
+    EXPECT_EQ(Date(2000, 1, 2), Date::from_iso_string("20000102"));
+    EXPECT_THROW(Date::from_iso_string("2000:01:02"), value_error);
+}
+
+TEST(Date_test, test_from_extended_iso_string) {
+    EXPECT_EQ(Date(2000, 1, 2), Date::from_extended_iso_string("2000-01-02"));
+    EXPECT_THROW(Date::from_extended_iso_string("2000:01:02"), value_error);
+    EXPECT_THROW(Date::from_extended_iso_string("20000102"), value_error);
+}
+
 } // namespace brfc

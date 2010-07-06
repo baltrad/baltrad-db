@@ -74,9 +74,7 @@ class Literal : public Token {
         return str_;
     }
 
-    virtual int to_datetime(DateTime& dt, const String& str) const {
-        return str_.length();
-    }
+    virtual int to_datetime(DateTime& dt, const String& str) const;
 
     virtual int max_length() const { return str_.length(); }
     

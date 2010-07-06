@@ -141,6 +141,23 @@ TEST(DateTimeParser_test, test_int_token_zero_prefixed_signed) {
     EXPECT_THROW(t.to_datetime(dt, "9"), value_error);
 }
 
+TEST(DateTimeParser_test, test_literal_token) {
+    DateTime dt;
+    dttok::Literal l("qwe");
+    
+    EXPECT_EQ(l.max_length(), 3);
+
+    int consumed = 0;
+    EXPECT_NO_THROW(consumed = l.to_datetime(dt, "qwe"));
+    EXPECT_EQ(3, consumed);
+
+    EXPECT_NO_THROW(consumed = l.to_datetime(dt, "qweasd"));
+    EXPECT_EQ(3, consumed);
+
+    EXPECT_THROW(l.to_datetime(dt, "q"), value_error);
+    EXPECT_THROW(l.to_datetime(dt, "qasd"), value_error);
+}
+
 namespace {
 
 template<typename T>
@@ -238,6 +255,13 @@ TEST(DateTimeParser_test, test_from_string) {
     EXPECT_NO_THROW(dt = parser.from_string("2005/12/13 12:34:56.789"));
     EXPECT_EQ(Date(2005, 12, 13), dt.date());
     EXPECT_EQ(Time(12, 34, 56, 789), dt.time());
+}
+
+TEST(DateTimeParser_test, test_from_string_invalid_literal) {
+    DateTimeParser parser("yyyy/MM/dd");
+    DateTime dt;
+    EXPECT_THROW(dt = parser.from_string("2000-01-02"), value_error);
+    EXPECT_NE(Date(2000, 1, 2), dt.date());
 }
 
 TEST(DateTimeParser_test, test_to_string) {

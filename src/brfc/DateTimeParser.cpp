@@ -37,6 +37,14 @@ IntToken::max_length() const {
     return len;
 }
 
+int
+Literal::to_datetime(DateTime& dt, const String& str) const {
+    if (not str.starts_with(str_))
+        throw value_error("Literal token '" + str_.to_std_string() +
+                          "' not encountered");
+    return str_.length();
+}
+
 String
 IntToken::to_string(const DateTime& dt) const {
     int val = get_value(dt);

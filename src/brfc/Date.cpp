@@ -206,6 +206,16 @@ Date::from_string(const String& str, const String& format) {
     return parser.date_from_string(str);
 }
 
+Date
+Date::from_iso_string(const String& str) {
+    return from_string(str, "yyyyMMdd");
+}
+
+Date
+Date::from_extended_iso_string(const String& str) {
+    return from_string(str, "yyyy-MM-dd");
+}
+
 String
 Date::to_string(const String& format) const {
     DateTimeParser parser(format);

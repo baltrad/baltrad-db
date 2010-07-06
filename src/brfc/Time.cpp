@@ -185,6 +185,16 @@ Time::from_string(const String& str, const String& format) {
     return parser.time_from_string(str);
 }
 
+Time
+Time::from_iso_string(const String& str) {
+    return from_string(str, "hhmmss");
+}
+
+Time
+Time::from_extended_iso_string(const String& str) {
+    return from_string(str, "hh:mm:ss");
+}
+
 String
 Time::to_string(const String& format) const {
     DateTimeParser parser(format);

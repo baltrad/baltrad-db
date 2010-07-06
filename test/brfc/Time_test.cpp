@@ -174,12 +174,24 @@ TEST(Time_test, test_from_string) {
     EXPECT_THROW(Time::from_string("11:22:33", "hh:mm:ss.zzz"), value_error);
 }
 
+TEST(Time_test, test_from_iso_string) {
+    EXPECT_EQ(Time(12, 13, 14, 0),
+              Time::from_iso_string("121314"));
+    EXPECT_THROW(Time::from_iso_string("12:13:14"), value_error);
+}
+
+TEST(Time_test, test_from_extended_iso_string) {
+    EXPECT_EQ(Time(12, 13, 14, 0),
+              Time::from_extended_iso_string("12:13:14"));
+    EXPECT_THROW(Time::from_extended_iso_string("12-13-14"), value_error);
+    EXPECT_THROW(Time::from_extended_iso_string("121314"), value_error);
+}
+
 TEST(Time_test, test_to_string) {
     EXPECT_EQ("12:13:14.015",
               Time(12, 13, 14, 15).to_string("hh:mm:ss.zzz"));
     EXPECT_EQ("121314015",
               Time(12, 13, 14 ,15).to_string("hhmmsszzz"));
 }
-
 
 } // namespace brfc
