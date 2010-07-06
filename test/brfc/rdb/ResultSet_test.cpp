@@ -29,8 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test/TestRDB.hpp>
 
-#include <iostream>
-
 #include "config.hpp"
 #include "../common.hpp"
 
@@ -83,7 +81,6 @@ TEST_P(rdb_ResultSet_test, bool_) {
 TEST_P(rdb_ResultSet_test, bool_false) {
     shared_ptr<ResultSet> r = db->query("SELECT false", BindMap());
     ASSERT_TRUE(r->next());
-    std::cout << r->string(0) << std::endl;
     EXPECT_EQ(r->bool_(0), false);
 }
 

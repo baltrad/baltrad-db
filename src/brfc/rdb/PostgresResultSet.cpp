@@ -22,6 +22,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 
+#include <postgres.h>
+#include <catalog/pg_type.h>
+
 namespace brfc {
 namespace rdb {
 
@@ -52,10 +55,24 @@ Variant
 PostgresResultSet::do_value_at(unsigned int pos) const {
     try {
         const pqxx::result::field& field = result_.at(row_).at(pos);
-        if (field.is_null()) {
+        if (field.is_null())
             return Variant();
-        } else {
-            return Variant(String::from_utf8(field.c_str()));
+        switch (result_.column_type(pos)) {
+            case INT2OID:
+            case INT4OID:
+            case INT8OID:
+                return Variant(field.as<long long>());
+            case FLOAT4OID:
+            case FLOAT8OID:
+                return Variant(field.as<double>());
+            case BOOLOID:
+                return Variant(field.as<bool>());
+            case DATEOID:
+                return Variant(Date::from_extended_iso_string(field.c_str()));
+            case TIMEOID:
+                return Variant(Time::from_extended_iso_string(field.c_str()));
+            default:
+                return Variant(String::from_utf8(field.c_str()));
         }
     } catch (const std::out_of_range&) {
         throw lookup_error("invalid pqxx::result position");

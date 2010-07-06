@@ -104,6 +104,10 @@ def set_options(opt):
     libnames = ("boost", "hdf5", "hlhdf", "gmock", "gtest", "icu", "jdk", "pqxx")
     for libname in libnames:
         _add_lib_path_options(grp, libname)
+    
+    grp.add_option("--postgresql_inc_dir", metavar="DIR",
+                   default="/usr/include/postgresql",
+                   help="postgresql includes directory [default: %%default]")
 
     opt.tool_options("ant", tooldir="misc/waf_tools")
     opt.tool_options("swig", tooldir="misc/waf_tools")
@@ -133,6 +137,15 @@ def configure(conf):
     if env.build_java:
         conf.check_tool("ant", tooldir="misc/waf_tools")
         conf.check_tool("swig", tooldir="misc/waf_tools")
+    
+    # check for postgresql headers
+    env.postgresql_inc_dir = Options.options.postgresql_inc_dir
+    conf.check_cc(
+        header_name=["postgres.h", "catalog/pg_type.h"],
+        includes=env.postgresql_inc_dir,
+        uselib_store="POSTGRESQL",
+        mandatory=True,
+    )
     
     # check for libpqxx
     _lib_path_opts_to_env(env, "pqxx")
@@ -326,7 +339,7 @@ def _build_shared_library(bld):
             "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM",
             "HDF5", "HLHDF",
             "ICU",
-            "PQXX",
+            "POSTGRESQL", "PQXX",
         ],
         install_path="${install_root}/lib",
     )
