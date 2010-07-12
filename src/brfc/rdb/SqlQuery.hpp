@@ -22,8 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/String.hpp>
 
-#include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/Connection.hpp>
+#include <brfc/sql/BindMap.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -33,20 +33,20 @@ class Connection;
 class SqlQuery {
   public:
     explicit SqlQuery(const String& statement="",
-                      const BindMap& binds=BindMap())
+                      const sql::BindMap& binds=sql::BindMap())
             : statement_(statement)
             , binds_(binds) {
     }
 
-    void binds(const BindMap& binds) {
+    void binds(const sql::BindMap& binds) {
         binds_ = binds;
     }
 
-    BindMap& binds() {
+    sql::BindMap& binds() {
         return binds_;
     }
 
-    const BindMap& binds() const {
+    const sql::BindMap& binds() const {
         return binds_;
     }
 
@@ -71,7 +71,7 @@ class SqlQuery {
     
   private:
     String statement_;
-    BindMap binds_;
+    sql::BindMap binds_;
 };
 
 } // namespace rdb

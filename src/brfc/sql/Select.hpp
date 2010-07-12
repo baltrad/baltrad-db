@@ -17,14 +17,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_SELECT_HPP
-#define BRFC_RDB_SELECT_HPP
+#ifndef BRFC_SQL_SELECT_HPP
+#define BRFC_SQL_SELECT_HPP
 
-#include <brfc/rdb/Selectable.hpp>
+#include <brfc/sql/Selectable.hpp>
 #include <vector>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
 class Select : public Selectable {
   public:
@@ -34,7 +34,7 @@ class Select : public Selectable {
         return SelectPtr(new Select());
     }
 
-    void what(expr::ExpressionPtr expr) {
+    void what(ExpressionPtr expr) {
         what_.push_back(expr);
     }
 
@@ -57,16 +57,16 @@ class Select : public Selectable {
     /**
      * @brief append Expression to where clause
      */
-    void append_where(expr::ExpressionPtr expr);
+    void append_where(ExpressionPtr expr);
 
     /**
      * @brief set Expression as where clause
      */
-    void where(expr::ExpressionPtr expr) {
+    void where(ExpressionPtr expr) {
         where_ = expr;
     }
 
-    const std::vector<expr::ExpressionPtr>& what() const {
+    const std::vector<ExpressionPtr>& what() const {
         return what_;
     }
 
@@ -75,11 +75,11 @@ class Select : public Selectable {
     }
 
 
-    expr::ExpressionPtr where() const {
+    ExpressionPtr where() const {
         return where_;
     }
 
-    std::vector<expr::ExpressionPtr>& what() {
+    std::vector<ExpressionPtr>& what() {
         return what_;
     }
 
@@ -88,7 +88,7 @@ class Select : public Selectable {
     }
 
 
-    expr::ExpressionPtr where() {
+    ExpressionPtr where() {
         return where_;
     }
 
@@ -97,13 +97,13 @@ class Select : public Selectable {
     Select();
 
   private:
-    std::vector<expr::ExpressionPtr> what_;
+    std::vector<ExpressionPtr> what_;
     FromClausePtr from_;
-    expr::ExpressionPtr where_;
+    ExpressionPtr where_;
     bool distinct_;
 };
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_SELECT_HPP
+#endif // BRFC_SQL_SELECT_HPP

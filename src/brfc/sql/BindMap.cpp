@@ -17,14 +17,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/BindMap.hpp>
+#include <brfc/sql/BindMap.hpp>
 
 #include <utility>
 
 #include <brfc/exceptions.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
 BindMap::BindMap()
         : binds_() {
@@ -87,5 +87,5 @@ BindMap::remove(const String& name) {
     return binds_.erase(name_to_placeholder(name));
 }
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc

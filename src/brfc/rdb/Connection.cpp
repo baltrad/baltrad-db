@@ -81,7 +81,7 @@ Connection::commit() {
 }
 
 shared_ptr<ResultSet>
-Connection::execute(const String& statement, const BindMap& binds) {
+Connection::execute(const String& statement, const sql::BindMap& binds) {
     return execute(SqlQuery(statement, binds));    
 }
 

@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/Compiler.hpp>
+#include <brfc/sql/Compiler.hpp>
 
 #include <algorithm>
 
@@ -25,21 +25,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/StringList.hpp>
 
-#include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
-#include <brfc/expr/Label.hpp>
-#include <brfc/expr/Literal.hpp>
-#include <brfc/expr/Parentheses.hpp>
-
-#include <brfc/rdb/Alias.hpp>
-#include <brfc/rdb/Column.hpp>
-#include <brfc/rdb/FromClause.hpp>
-#include <brfc/rdb/Join.hpp>
-#include <brfc/rdb/Select.hpp>
-#include <brfc/rdb/Table.hpp>
+#include <brfc/sql/Alias.hpp>
+#include <brfc/sql/BinaryOperator.hpp>
+#include <brfc/sql/Column.hpp>
+#include <brfc/sql/FromClause.hpp>
+#include <brfc/sql/Join.hpp>
+#include <brfc/sql/Label.hpp>
+#include <brfc/sql/Literal.hpp>
+#include <brfc/sql/Parentheses.hpp>
+#include <brfc/sql/Select.hpp>
+#include <brfc/sql/Table.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
 template<typename T>
 void
@@ -54,12 +52,11 @@ template void Compiler::compile(FromClause& expr);
 template void Compiler::compile(Join& expr);
 template void Compiler::compile(Select& expr);
 template void Compiler::compile(Table& expr);
-template void Compiler::compile(expr::Attribute& expr);
-template void Compiler::compile(expr::BinaryOperator& expr);
-template void Compiler::compile(expr::Expression& expr);
-template void Compiler::compile(expr::Label& expr);
-template void Compiler::compile(expr::Literal& expr);
-template void Compiler::compile(expr::Parentheses& expr);
+template void Compiler::compile(BinaryOperator& expr);
+template void Compiler::compile(Expression& expr);
+template void Compiler::compile(Label& expr);
+template void Compiler::compile(Literal& expr);
+template void Compiler::compile(Parentheses& expr);
 
 String
 Compiler::pop() {
@@ -75,7 +72,7 @@ Compiler::push(const String& top) {
 }
 
 void
-Compiler::operator()(expr::BinaryOperator& expr) {
+Compiler::operator()(BinaryOperator& expr) {
     visit(*expr.lhs(), *this);
     visit(*expr.rhs(), *this);
     const String& rhs = pop();
@@ -98,11 +95,6 @@ Compiler::operator()(Alias& expr) {
         // discard aliased content
         push(expr.alias()); // replace with an alias instead
     }
-}
-
-void
-Compiler::operator()(expr::Attribute& expr) {
-    BRFC_ASSERT(false); // attributes should be replaced at this point
 }
 
 void
@@ -134,20 +126,20 @@ Compiler::operator()(Join& join) {
 }
 
 void
-Compiler::operator()(expr::Literal& expr) {
+Compiler::operator()(Literal& expr) {
     String key = String(":lit_") + String::number(literal_count_++);
     push(key);
     binds_.add(key, expr.value());
 }
 
 void
-Compiler::operator()(expr::Label& label) {
+Compiler::operator()(Label& label) {
     visit(*label.expression(), *this);
     push(pop() + " AS " + label.name());
 }
 
 void
-Compiler::operator()(expr::Parentheses& expr) {
+Compiler::operator()(Parentheses& expr) {
     visit(*expr.expression(), *this);
     push("(" + pop() + ")");
 }
@@ -177,7 +169,7 @@ Compiler::operator()(FromClause& from) {
 void
 Compiler::operator()(Select& select) {
 
-    BOOST_FOREACH(expr::ExpressionPtr col, select.what()) {
+    BOOST_FOREACH(ExpressionPtr col, select.what()) {
         visit(*col, *this);
     }
     
@@ -214,5 +206,5 @@ Compiler::operator()(Table& expr) {
     push(expr.name());
 }
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc

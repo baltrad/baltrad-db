@@ -23,8 +23,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <brfc/visit.hpp>
-#include <brfc/expr/Factory.hpp>
-#include <brfc/rdb/fwd.hpp>
+
+#include <brfc/expr/fwd.hpp>
+
+#include <brfc/sql/fwd.hpp>
+#include <brfc/sql/Factory.hpp>
 
 namespace brfc {
 
@@ -41,7 +44,6 @@ class QueryToSelect {
   public:
     typedef mpl::vector<expr::Attribute,
                         expr::BinaryOperator,
-                        Column,
                         expr::Label,
                         expr::Literal,
                         expr::Parentheses> accepted_types;
@@ -54,8 +56,8 @@ class QueryToSelect {
      * expression is also visited and becomes the where clause for the
      * select statement. From clause is formed during the visitation.
      */
-    static SelectPtr transform(const Query& query,
-                               const AttributeMapper& mapper);
+    static sql::SelectPtr transform(const Query& query,
+                                    const AttributeMapper& mapper);
     
     /**
      * @brief replace expr::Attribute with the mapped Column
@@ -72,7 +74,7 @@ class QueryToSelect {
     
     void operator()(expr::BinaryOperator& op);
 
-    void operator()(Column& op);
+//    void operator()(Column& op);
 
     void operator()(expr::Label& label);
 
@@ -89,9 +91,9 @@ class QueryToSelect {
      */
     QueryToSelect(const AttributeMapper* mapper);
 
-    expr::ExpressionPtr pop();
+    sql::ExpressionPtr pop();
 
-    void push(expr::ExpressionPtr p);
+    void push(sql::ExpressionPtr p);
 
     /**
      * @brief join "groups" table if not already joined
@@ -100,10 +102,10 @@ class QueryToSelect {
 
   private:
     const AttributeMapper* mapper_;
-    expr::Factory xpr_;
-    std::vector<expr::ExpressionPtr> stack_;
-    TablePtr files_t_, src_t_, src_radars_t_, src_centres_t_, groups_t_;
-    JoinPtr from_;
+    sql::Factory xpr_;
+    std::vector<sql::ExpressionPtr> stack_;
+    sql::TablePtr files_t_, src_t_, src_radars_t_, src_centres_t_, groups_t_;
+    sql::JoinPtr from_;
 };
 
 } // namespace rdb

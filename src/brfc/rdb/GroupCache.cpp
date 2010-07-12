@@ -21,8 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/ResultSet.hpp>
 
-#include <brfc/rdb/BindMap.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
+#include <brfc/sql/BindMap.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -38,7 +38,7 @@ GroupCache::do_lookup_key(weak_ptr<const oh5::Group> weak_group) {
     shared_ptr<const oh5::Group> group = weak_group.lock();
     String qry = "SELECT id FROM groups WHERE file_id = :file_id "
                   "AND parent_id = :parent_id AND name = :name ";
-    BindMap binds;
+    sql::BindMap binds;
     binds.add(":file_id", Variant(rdb_->db_id(*group->file())));
     shared_ptr<const oh5::Group> parent = group->parent<const oh5::Group>();
 

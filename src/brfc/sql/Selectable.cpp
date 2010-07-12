@@ -17,40 +17,34 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/Join.hpp>
+#include <brfc/sql/Selectable.hpp>
+
+#include <brfc/sql/Alias.hpp>
+#include <brfc/sql/Column.hpp>
+#include <brfc/sql/Join.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-Join::Join(SelectablePtr from,
-           SelectablePtr to,
-           expr::ExpressionPtr condition,
-           Type type)
-        : from_(from)
-        , to_(to)
-        , condition_(condition)
-        , type_(type) {
-
+AliasPtr
+Selectable::alias(const String& name) {
+    return Alias::create(this->shared_from_this(), name);
 }
 
-bool
-Join::contains(SelectablePtr element) const {
-    int contains = 0;
-
-    if (JoinPtr j = dynamic_pointer_cast<Join>(from_)) {
-        contains += j->contains(element);
-    } else {
-        contains += from_->name() == element->name();
-    }
-
-    if (JoinPtr j = dynamic_pointer_cast<Join>(to_)) {
-        contains += j->contains(element);
-    } else {
-        contains += to_->name() == element->name();
-    }
-
-    return contains;
+ColumnPtr
+Selectable::column(const String& name) {
+    return Column::create(this->shared_from_this(), name);
 }
 
-} // namespace rdb
+JoinPtr
+Selectable::join(SelectablePtr rhs, ExpressionPtr condition) {
+    return Join::create(this->shared_from_this(), rhs, condition, Join::INNER);
+}
+
+JoinPtr
+Selectable::outerjoin(SelectablePtr rhs, ExpressionPtr condition) {
+    return Join::create(this->shared_from_this(), rhs, condition, Join::LEFT);
+}
+
+} // namespace sql
 } // namespace brfc

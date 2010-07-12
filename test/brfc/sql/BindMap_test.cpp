@@ -20,46 +20,46 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/rdb/BindMap.hpp>
+#include <brfc/sql/BindMap.hpp>
 
 #include "../common.hpp"
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-class rdb_BindMap_test : public testing::Test {
+class sql_BindMap_test : public testing::Test {
   public:
-    rdb_BindMap_test() 
+    sql_BindMap_test() 
             : binds() {
     }
 
     BindMap binds;
 };
 
-TEST_F(rdb_BindMap_test, test_add_qvariant) {
+TEST_F(sql_BindMap_test, test_add_qvariant) {
     Variant val(1);
     binds.add(":bind", val);
     EXPECT_EQ(val, binds.get(":bind"));
 }
 
-TEST_F(rdb_BindMap_test, test_add_variant) {
+TEST_F(sql_BindMap_test, test_add_variant) {
     Variant val(1);
     binds.add(":bind", val);
     EXPECT_EQ(val, binds.get(":bind"));
 }
 
-TEST_F(rdb_BindMap_test, test_add_without_colon) {
+TEST_F(sql_BindMap_test, test_add_without_colon) {
     Variant val(1);
     binds.add("bind", val);
     EXPECT_EQ(val, binds.get(":bind"));
 }
 
-TEST_F(rdb_BindMap_test, test_add_duplicate) {
+TEST_F(sql_BindMap_test, test_add_duplicate) {
     binds.add(":bind", Variant());
     EXPECT_THROW(binds.add(":bind", Variant()), duplicate_entry);
 }
 
-TEST_F(rdb_BindMap_test, test_get_without_colon) {
+TEST_F(sql_BindMap_test, test_get_without_colon) {
     Variant val(1);
     Variant result;
     binds.add(":bind", val);
@@ -67,20 +67,20 @@ TEST_F(rdb_BindMap_test, test_get_without_colon) {
     EXPECT_EQ(val, result); 
 }
 
-TEST_F(rdb_BindMap_test, test_get_with_default) {
+TEST_F(sql_BindMap_test, test_get_with_default) {
     Variant default_(1);
     Variant result;
     EXPECT_NO_THROW(result = binds.get(":bind", default_));
     EXPECT_EQ(default_, result);
 }
 
-TEST_F(rdb_BindMap_test, test_size) {
+TEST_F(sql_BindMap_test, test_size) {
     EXPECT_EQ((size_t)0, binds.size());
     binds.add(":bind", Variant());
     EXPECT_EQ((size_t)1, binds.size());
 }
 
-TEST_F(rdb_BindMap_test, test_copy) {
+TEST_F(sql_BindMap_test, test_copy) {
     Variant val(1);
     binds.add(":bind", val);
 
@@ -98,7 +98,7 @@ TEST_F(rdb_BindMap_test, test_copy) {
     EXPECT_EQ(val, binds.get(":bind", Variant()));
 }
 
-TEST_F(rdb_BindMap_test, test_remove) {
+TEST_F(sql_BindMap_test, test_remove) {
     Variant val(1);
     binds.add(":bind1", val);
     binds.add(":bind2", val);
@@ -112,7 +112,7 @@ TEST_F(rdb_BindMap_test, test_remove) {
     EXPECT_FALSE(binds.has(":bind2"));
 }
 
-TEST_F(rdb_BindMap_test, test_clear) {
+TEST_F(sql_BindMap_test, test_clear) {
     Variant val(1);
     binds.add(":bind1", val);
     binds.add(":bind2", val);
@@ -123,6 +123,6 @@ TEST_F(rdb_BindMap_test, test_clear) {
     EXPECT_FALSE(binds.has(":bind2"));
 }
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 

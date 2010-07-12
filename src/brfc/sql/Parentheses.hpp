@@ -17,35 +17,42 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/FromClause.hpp>
+#ifndef BRFC_SQL_PARENTHESES_HPP
+#define BRFC_SQL_PARENTHESES_HPP
 
-#include <boost/foreach.hpp>
-
-#include <brfc/exceptions.hpp>
-
-#include <brfc/rdb/Selectable.hpp>
+#include <brfc/sql/Expression.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-void
-FromClause::add(SelectablePtr selectable) {
-    if (has(selectable))
-        throw duplicate_entry("duplicate selectable");
-    elements_.push_back(selectable);
-}
-
-bool
-FromClause::has(SelectablePtr selectable) const {
-    // always accept unnamed
-    if (selectable->name() == "")
-        return false;
-    BOOST_FOREACH(SelectablePtr element, elements_) {
-        if (selectable->name() == element->name())
-            return true;
+/**
+ * @brief surround expression in parentheses
+ */
+class Parentheses : public Expression {
+  public:
+    static ParenthesesPtr create(ExpressionPtr expression) {
+        return ParenthesesPtr(new Parentheses(expression));
     }
-    return false;
+
+    void expression(ExpressionPtr expression) {
+        expression_ = expression;
+    }
+    
+    ExpressionPtr expression() const {
+        return expression_;
+    }
+
+  protected:
+    Parentheses(ExpressionPtr expression)
+            : Expression()
+            , expression_(expression) {
+    }
+
+  private:
+    ExpressionPtr expression_;
+};
+
+}
 }
 
-} // namespace rdb
-} // namespace brfc
+#endif // BRFC_SQL_PARENTHESES_HPP

@@ -22,37 +22,35 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 #include <brfc/Variant.hpp>
 
-#include <brfc/expr/BinaryOperator.hpp>
-#include <brfc/expr/Factory.hpp>
-#include <brfc/expr/Literal.hpp>
-#include <brfc/expr/Parentheses.hpp>
-
-#include <brfc/rdb/Alias.hpp>
-#include <brfc/rdb/Column.hpp>
-#include <brfc/rdb/FromClause.hpp>
-#include <brfc/rdb/Join.hpp>
-#include <brfc/rdb/Select.hpp>
-#include <brfc/rdb/Table.hpp>
+#include <brfc/sql/Alias.hpp>
+#include <brfc/sql/BinaryOperator.hpp>
+#include <brfc/sql/Column.hpp>
+#include <brfc/sql/Factory.hpp>
+#include <brfc/sql/FromClause.hpp>
+#include <brfc/sql/Join.hpp>
+#include <brfc/sql/Literal.hpp>
+#include <brfc/sql/Parentheses.hpp>
+#include <brfc/sql/Select.hpp>
+#include <brfc/sql/Table.hpp>
 
 #include "common.hpp"
 
 namespace brfc {
-namespace expr {
+namespace sql {
 
-class Expression_test: public testing::Test {
+class sql_Expression_test: public testing::Test {
   public:
     Factory xpr;
 };
 
 
-TEST_F(Expression_test, test_utf_string_literal) {
+TEST_F(sql_Expression_test, test_utf_string_literal) {
     LiteralPtr lit = xpr.string("öäü");
     String s = lit->value().string();
     EXPECT_EQ(s.length(), 3);
 }
 
-TEST_F(Expression_test, test_join_contains) {
-    using namespace ::brfc::rdb;
+TEST_F(sql_Expression_test, test_join_contains) {
 
     TablePtr t1 = Table::create("t1");
     TablePtr t2 = Table::create("t2");
@@ -65,5 +63,5 @@ TEST_F(Expression_test, test_join_contains) {
     EXPECT_TRUE(j->contains(t3));
 }
 
-} // namespace expr
+} // namespace sql
 } // namespace brfc

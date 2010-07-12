@@ -40,10 +40,15 @@ class SourceRadar;
 
 }
 
+namespace sql {
+
+class BindMap;
+
+}
+
 namespace rdb {
 
 class AttributeMapper;
-class BindMap;
 class Connection;
 
 /**
@@ -71,7 +76,7 @@ class RelationalDatabase : public Database {
      * @brief execute a select query
      */
     shared_ptr<ResultSet> query(const String& query,
-                                const BindMap& binds);
+                                const sql::BindMap& binds);
 
     shared_ptr<AttributeMapper> mapper();
     

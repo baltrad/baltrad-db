@@ -17,15 +17,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_JOIN_HPP
-#define BRFC_RDB_JOIN_HPP
+#ifndef BRFC_SQL_JOIN_HPP
+#define BRFC_SQL_JOIN_HPP
 
-#include <brfc/rdb/fwd.hpp>
-#include <brfc/expr/fwd.hpp>
-#include <brfc/rdb/Selectable.hpp>
+#include <brfc/sql/fwd.hpp>
+#include <brfc/sql/Selectable.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
 class Join : public Selectable {
   public:
@@ -37,7 +36,7 @@ class Join : public Selectable {
 
     static JoinPtr create(SelectablePtr from,
                           SelectablePtr to,
-                          expr::ExpressionPtr condition,
+                          ExpressionPtr condition,
                           Type type=INNER) {
         return JoinPtr(new Join(from, to, condition, type));
     }
@@ -60,11 +59,11 @@ class Join : public Selectable {
         to_ = to;
     }
 
-    expr::ExpressionPtr condition() const {
+    ExpressionPtr condition() const {
         return condition_;
     }
 
-    void condition(expr::ExpressionPtr condition) {
+    void condition(ExpressionPtr condition) {
         condition_ = condition;
     }
     
@@ -81,17 +80,17 @@ class Join : public Selectable {
   protected:
     Join(SelectablePtr from,
         SelectablePtr to,
-        expr::ExpressionPtr condition,
+        ExpressionPtr condition,
         Type type);
 
   private:
     SelectablePtr from_;
     SelectablePtr to_;
-    expr::ExpressionPtr condition_;
+    ExpressionPtr condition_;
     Type type_;
 };
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_JOIN_HPP
+#endif // BRFC_SQL_JOIN_HPP

@@ -17,38 +17,50 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_TABLE_HPP
-#define BRFC_RDB_TABLE_HPP
+#ifndef BRFC_SQL_FROM_CLAUSE_HPP
+#define BRFC_SQL_FROM_CLAUSE_HPP
 
-#include <brfc/rdb/Selectable.hpp>
+#include <vector>
+
+#include <brfc/sql/Element.hpp>
+
+#include <brfc/sql/fwd.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-class Table : public Selectable {
+class FromClause : public Element {
   public:
-    static TablePtr create(const String& name) {
-        return TablePtr(new Table(name));
+    static FromClausePtr create() {
+        return FromClausePtr(new FromClause());
     }
+    
+    /**
+     * @throw duplicate_entry if not unique
+     */
+    void add(SelectablePtr selectable);
+    
+    /**
+     * @return true if already has a selectable with same name
+     */
+    bool has(SelectablePtr selectable) const;
 
-    void name(const String& name) {
-        name_ = name;
-    }
+    std::vector<SelectablePtr>& elements() { return elements_; }
 
-    virtual String name() const {
-        return name_;
+    bool empty() const {
+        return elements_.empty();
     }
 
   protected:
-    explicit Table(const String& name)
-            : name_(name) {
+    FromClause()
+            : elements_() {
     }
 
   private:
-    String name_;
+    std::vector<SelectablePtr> elements_;
 };
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_TABLE_HPP
+#endif // BRFC_SQL_FROM_CLAUSE_HPP

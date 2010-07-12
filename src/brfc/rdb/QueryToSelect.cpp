@@ -25,18 +25,24 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Query.hpp>
 
 #include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/Parentheses.hpp>
-#include <brfc/expr/Label.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/Label.hpp>
 #include <brfc/expr/Literal.hpp>
+#include <brfc/expr/Parentheses.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
-#include <brfc/rdb/Alias.hpp>
-#include <brfc/rdb/Column.hpp>
-#include <brfc/rdb/FromClause.hpp>
-#include <brfc/rdb/Join.hpp>
-#include <brfc/rdb/Select.hpp>
-#include <brfc/rdb/Table.hpp>
+
+#include <brfc/sql/Alias.hpp>
+#include <brfc/sql/BinaryOperator.hpp>
+#include <brfc/sql/Column.hpp>
+#include <brfc/sql/Expression.hpp>
+#include <brfc/sql/FromClause.hpp>
+#include <brfc/sql/Join.hpp>
+#include <brfc/sql/Label.hpp>
+#include <brfc/sql/Literal.hpp>
+#include <brfc/sql/Parentheses.hpp>
+#include <brfc/sql/Select.hpp>
+#include <brfc/sql/Table.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -44,11 +50,11 @@ namespace rdb {
 QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
-        , files_t_(Table::create("bdb_files"))
-        , src_t_(Table::create("bdb_sources"))
-        , src_radars_t_(Table::create("bdb_source_radars"))
-        , src_centres_t_(Table::create("bdb_source_centres"))
-        , groups_t_(Table::create("bdb_groups"))
+        , files_t_(sql::Table::create("bdb_files"))
+        , src_t_(sql::Table::create("bdb_sources"))
+        , src_radars_t_(sql::Table::create("bdb_source_radars"))
+        , src_centres_t_(sql::Table::create("bdb_source_centres"))
+        , groups_t_(sql::Table::create("bdb_groups"))
         , from_() {
     // always select from files and join sources
     from_ = files_t_->join(src_t_,
@@ -62,12 +68,12 @@ QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
                                      src_centres_t_->column("id")));
 }
 
-SelectPtr
+sql::SelectPtr
 QueryToSelect::transform(const Query& query,
                          const AttributeMapper& mapper) {
     QueryToSelect rpl(&mapper);
 
-    SelectPtr select = Select::create();
+    sql::SelectPtr select = sql::Select::create();
     select->distinct(query.distinct());
 
     // replace attributes with columns
@@ -94,7 +100,7 @@ QueryToSelect::operator()(expr::Attribute& attr) {
 
     // query table and column where this value can be found
     Mapping mapping = mapper_->mapping(name);
-    SelectablePtr value_t = Table::create(mapping.table);
+    sql::SelectablePtr value_t = sql::Table::create(mapping.table);
     
     if (not mapper_->is_specialized(name)) {
         // try to join groups, they have to appear earlier in the join
@@ -135,46 +141,46 @@ void
 QueryToSelect::operator()(expr::BinaryOperator& op) {
     visit(*op.lhs(), *this);
     visit(*op.rhs(), *this);
-    op.rhs(pop());
-    op.lhs(pop());
-    push(op.shared_from_this());
+    sql::ExpressionPtr rhs = pop();
+    sql::ExpressionPtr lhs = pop();
+    push(sql::BinaryOperator::create(op.op(), lhs, rhs));
 }
 
+/*
 void
 QueryToSelect::operator()(Column& col) {
     push(col.shared_from_this());
 }
+*/
 
 void
 QueryToSelect::operator()(expr::Label& label) {
     visit(*label.expression(), *this);
-    label.expression(pop());
-    push(label.shared_from_this());
+    push(sql::Label::create(pop(), label.name()));
 }
 
 void
 QueryToSelect::operator()(expr::Literal& literal) {
-    push(literal.shared_from_this());
+    push(sql::Literal::create(literal.value()));
 }
 
 void
 QueryToSelect::operator()(expr::Parentheses& parentheses) {
     visit(*parentheses.expression(), *this);
-    parentheses.expression(pop());
-    push(parentheses.shared_from_this());
+    push(sql::Parentheses::create(pop()));
 }
 
-expr::ExpressionPtr
+sql::ExpressionPtr
 QueryToSelect::pop() {
     BRFC_ASSERT(!stack_.empty());
-    expr::ExpressionPtr p = stack_.back();
+    sql::ExpressionPtr p = stack_.back();
     stack_.pop_back();
     BRFC_ASSERT(p);
     return p;
 }
 
 void
-QueryToSelect::push(expr::ExpressionPtr p) {
+QueryToSelect::push(sql::ExpressionPtr p) {
     BRFC_ASSERT(p);
     stack_.push_back(p);
 }

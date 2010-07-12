@@ -17,14 +17,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_BIND_MAP_HPP
-#define BRFC_RDB_BIND_MAP_HPP
+#ifndef BRFC_SQL_BIND_MAP_HPP
+#define BRFC_SQL_BIND_MAP_HPP
 
 #include <map>
 #include <brfc/Variant.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
 class BindMap {
   public:
@@ -95,7 +95,7 @@ class BindMap {
     map binds_;
 };
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_BIND_MAP_HPP
+#endif // BRFC_SQL_BIND_MAP_HPP

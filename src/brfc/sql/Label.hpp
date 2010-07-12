@@ -17,51 +17,58 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_COLUMN_HPP
-#define BRFC_RDB_COLUMN_HPP
+#ifndef BRFC_SQL_LABEL_HPP
+#define BRFC_SQL_LABEL_HPP
 
 #include <brfc/String.hpp>
 
-#include <brfc/expr/Expression.hpp>
-
-#include <brfc/rdb/fwd.hpp>
+#include <brfc/sql/Expression.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-class Column : public expr::Expression {
+/**
+ * @brief labeled expression
+ *
+ * table.column AS label
+ */
+class Label : public Expression {
   public:
-    static ColumnPtr create(SelectablePtr selectable,
-                            const String& name) {
-        return ColumnPtr(new Column(selectable, name));
+    static LabelPtr create(ExpressionPtr expression, const String& name) {
+        return LabelPtr(new Label(expression, name));
     }
-
-    void selectable(SelectablePtr selectable) {
-        selectable_ = selectable;
-    }
-
-    SelectablePtr selectable() const { return selectable_; }
 
     void name(const String& name) {
         name_ = name;
     }
 
-    const String& name() const { return name_; }
+    const String& name() const {
+        return name_;
+    }
+
+    void expression(ExpressionPtr expression) {
+        expression_ = expression;
+    }
+
+    /**
+     * @brief get expression this label is for
+     */
+    ExpressionPtr expression() const {
+        return expression_;
+    }
 
   protected:
-    Column(SelectablePtr selectable,
-           const String& name)
-            : selectable_(selectable)
+    explicit Label(ExpressionPtr expression, const String& name)
+            : expression_(expression)
             , name_(name) {
-
     }
 
   private:
-    SelectablePtr selectable_;
+    ExpressionPtr expression_;
     String name_;
 };
 
-} // namespace rdb
-} // namespace brfc
+}
+}
 
-#endif // BRFC_RDB_COLUMN_HPP
+#endif // BRFC_SQL_LABEL_HPP

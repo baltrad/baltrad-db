@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
-#include <brfc/rdb/BindMap.hpp>
+#include <brfc/sql/BindMap.hpp>
 
 #include <brfc/test/TestRDB.hpp>
 
@@ -44,60 +44,60 @@ struct rdb_ResultSet_test : public testing::TestWithParam<const char*> {
 };
 
 TEST_P(rdb_ResultSet_test, size) {
-    shared_ptr<ResultSet> r = db->query("SELECT 1", BindMap());
+    shared_ptr<ResultSet> r = db->query("SELECT 1", sql::BindMap());
     EXPECT_EQ(r->size(), 1);
 }
 
 TEST_P(rdb_ResultSet_test, next) {
-    shared_ptr<ResultSet> r = db->query("SELECT 1", BindMap());
+    shared_ptr<ResultSet> r = db->query("SELECT 1", sql::BindMap());
     EXPECT_TRUE(r->next());
     EXPECT_TRUE(not r->next());
 }
 
 TEST_P(rdb_ResultSet_test, int64) {
-    shared_ptr<ResultSet> r = db->query("SELECT 1", BindMap());
+    shared_ptr<ResultSet> r = db->query("SELECT 1", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->int64_(0), 1);
 }
 
 TEST_P(rdb_ResultSet_test, double_) {
-    shared_ptr<ResultSet> r = db->query("SELECT 1.1::real", BindMap());
+    shared_ptr<ResultSet> r = db->query("SELECT 1.1::real", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_NEAR(r->double_(0), 1.1, 0.00001);
 }
 
 TEST_P(rdb_ResultSet_test, string) {
-    shared_ptr<ResultSet> r = db->query("SELECT 'bla'", BindMap());
+    shared_ptr<ResultSet> r = db->query("SELECT 'bla'", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->string(0), "bla");
 }
 
 TEST_P(rdb_ResultSet_test, bool_) {
-    shared_ptr<ResultSet> r = db->query("SELECT true", BindMap());
+    shared_ptr<ResultSet> r = db->query("SELECT true", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->bool_(0), true);
 }
 
 TEST_P(rdb_ResultSet_test, bool_false) {
-    shared_ptr<ResultSet> r = db->query("SELECT false", BindMap());
+    shared_ptr<ResultSet> r = db->query("SELECT false", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->bool_(0), false);
 }
 
 TEST_P(rdb_ResultSet_test, date) {
-    shared_ptr<ResultSet> r = db->query("SELECT DATE '2001-01-02'", BindMap());
+    shared_ptr<ResultSet> r = db->query("SELECT DATE '2001-01-02'", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->date(0), Date(2001, 1, 2));
 }
 
 TEST_P(rdb_ResultSet_test, time) {
-    shared_ptr<ResultSet> r = db->query("SELECT TIME '12:00:05'", BindMap());
+    shared_ptr<ResultSet> r = db->query("SELECT TIME '12:00:05'", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(Time(12, 0, 5), r->time(0));
 }
 
 TEST_P(rdb_ResultSet_test, invalid_column) {
-    shared_ptr<ResultSet> r = db->query("SELECT 1", BindMap());
+    shared_ptr<ResultSet> r = db->query("SELECT 1", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_THROW(r->int64_(1), lookup_error);
 }

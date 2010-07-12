@@ -32,7 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/SourceCentre.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
-#include <brfc/rdb/BindMap.hpp>
+#include <brfc/sql/BindMap.hpp>
 
 #include <brfc/test/TestRDB.hpp>
 #include <iostream>
@@ -166,7 +166,7 @@ TEST_P(rdb_RelationalDatabase_test, resultset_keeps_qsqldatabase_alive) {
     shared_ptr<ResultSet> r;
     {
         RelationalDatabase db(GetParam());
-        r = db.query("SELECT 1", BindMap());
+        r = db.query("SELECT 1", sql::BindMap());
     };
     r->size();
 }

@@ -17,28 +17,35 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/Select.hpp>
+#include <brfc/sql/FromClause.hpp>
 
-#include <brfc/expr/Expression.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
+#include <boost/foreach.hpp>
 
-#include <brfc/rdb/FromClause.hpp>
+#include <brfc/exceptions.hpp>
+
+#include <brfc/sql/Selectable.hpp>
 
 namespace brfc {
-namespace rdb {
-
-Select::Select()
-        : what_()
-        , from_(FromClause::create())
-        , where_()
-        , distinct_(false) {
-}
-
+namespace sql {
 
 void
-Select::append_where(expr::ExpressionPtr expr) {
-    where_ = where_ ? where_->and_(expr) : expr;
+FromClause::add(SelectablePtr selectable) {
+    if (has(selectable))
+        throw duplicate_entry("duplicate selectable");
+    elements_.push_back(selectable);
 }
 
-} // namespace rdb
+bool
+FromClause::has(SelectablePtr selectable) const {
+    // always accept unnamed
+    if (selectable->name() == "")
+        return false;
+    BOOST_FOREACH(SelectablePtr element, elements_) {
+        if (selectable->name() == element->name())
+            return true;
+    }
+    return false;
+}
+
+} // namespace sql
 } // namespace brfc

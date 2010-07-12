@@ -17,50 +17,32 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_FROM_CLAUSE_HPP
-#define BRFC_RDB_FROM_CLAUSE_HPP
+#ifndef BRFC_SQL_ELEMENT_HPP
+#define BRFC_SQL_ELEMENT_HPP
 
-#include <vector>
-
-#include <brfc/expr/Element.hpp>
-
-#include <brfc/rdb/fwd.hpp>
+#include <brfc/smart_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-class FromClause : public expr::Element {
+/**
+ * @brief ABC for elements in sql statements
+ */
+class Element : public boost::noncopyable
+              , public enable_shared_from_this<Element> {
   public:
-    static FromClausePtr create() {
-        return FromClausePtr(new FromClause());
-    }
+    virtual ~Element() {}
     
-    /**
-     * @throw duplicate_entry if not unique
-     */
-    void add(SelectablePtr selectable);
-    
-    /**
-     * @return true if already has a selectable with same name
-     */
-    bool has(SelectablePtr selectable) const;
-
-    std::vector<SelectablePtr>& elements() { return elements_; }
-
-    bool empty() const {
-        return elements_.empty();
-    }
-
   protected:
-    FromClause()
-            : elements_() {
+    Element()
+            : boost::noncopyable()
+            , enable_shared_from_this<Element>() {
     }
-
-  private:
-    std::vector<SelectablePtr> elements_;
 };
 
-} // namespace rdb
+
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_FROM_CLAUSE_HPP
+#endif // BRFC_SQL_ELEMENT_HPP

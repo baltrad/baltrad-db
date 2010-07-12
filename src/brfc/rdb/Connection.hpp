@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/smart_ptr.hpp>
 
-#include <brfc/rdb/BindMap.hpp>
+#include <brfc/sql/BindMap.hpp>
 
 namespace brfc {
 
@@ -131,7 +131,7 @@ class Connection {
      * @code execute(SqlQuery(statement, binds)); @endcode
      */
     shared_ptr<ResultSet> execute(const String& statement,
-                                  const BindMap& binds=BindMap());
+                                  const sql::BindMap& binds=sql::BindMap());
     
     /**
      * @brief execute an SQL query

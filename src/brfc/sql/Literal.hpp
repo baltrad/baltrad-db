@@ -17,38 +17,38 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_SELECTABLE_HPP
-#define BRFC_RDB_SELECTABLE_HPP
+#ifndef BRFC_SQL_LITERAL_HPP
+#define BRFC_SQL_LITERAL_HPP
 
-#include <brfc/String.hpp>
-
-#include <brfc/expr/fwd.hpp>
-#include <brfc/expr/Element.hpp>
-
-#include <brfc/rdb/fwd.hpp>
+#include <brfc/sql/Expression.hpp>
+#include <brfc/Variant.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-class Selectable : public expr::Element {
+/**
+ * @brief a literal value
+ */
+class Literal : public Expression {
   public:
-    SelectablePtr shared_from_this() const {
-        return static_pointer_cast<Selectable>(
-                const_pointer_cast<Element>(Element::shared_from_this()));
+    static LiteralPtr create(const Variant& value) {
+        return LiteralPtr(new Literal(value));
     }
 
-    virtual String name() const = 0;
+    const Variant& value() const {
+        return value_;
+    }
 
-    ColumnPtr column(const String& name);
+  protected:
+    explicit Literal(const Variant& value)
+            : value_(value) {
+    }
 
-    AliasPtr alias(const String& name);
-
-    JoinPtr join(SelectablePtr rhs, expr::ExpressionPtr condition);
-
-    JoinPtr outerjoin(SelectablePtr rhs, expr::ExpressionPtr condition);
+  private:
+    Variant value_;
 };
 
-} // namespace rdb
-} // namespace brfc
+}
+}
 
-#endif // BRFC_RDB_SELECTABLE_HPP
+#endif // BRFC_SQL_LITERAL_HPP

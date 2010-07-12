@@ -24,31 +24,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/visit.hpp>
 #include <brfc/Variant.hpp>
 
-#include <brfc/rdb/BindMap.hpp>
+#include <brfc/sql/fwd.hpp>
+#include <brfc/sql/BindMap.hpp>
 
 #include <vector>
 
 namespace brfc {
 
-namespace expr {
-
-class Attribute;
-class BinaryOperator;
-class Label;
-class Literal;
-class Parentheses;
-
-} // namespace expr
-
-namespace rdb {
-
-class Alias;
-class Column;
-class FromClause;
-class Join;
-class Select;
-class Table;
-
+namespace sql {
 
 /**
  * @brief compile elements to string form
@@ -56,16 +39,15 @@ class Table;
 class Compiler {
   public:
     typedef mpl::vector<Alias,
+                        BinaryOperator,
                         Column,
                         FromClause,
                         Join,
+                        Parentheses,
+                        Label,
+                        Literal,
                         Select,
-                        Table,
-                        expr::Attribute,
-                        expr::BinaryOperator,
-                        expr::Label,
-                        expr::Literal,
-                        expr::Parentheses> accepted_types;
+                        Table> accepted_types;
 
     /**
      * @brief constructor
@@ -103,18 +85,11 @@ class Compiler {
     void operator()(Alias& expr);
 
     /**
-     * @brief always throws
-     *
-     * @throw assert_error (attributes should be replaced before compiling)
-     */
-    void operator()(expr::Attribute& expr);
-
-    /**
      * @brief compile binary operator to string form
      *
      * @post stack contains lhs OP rhs
      */
-    void operator()(expr::BinaryOperator& expr);
+    void operator()(BinaryOperator& expr);
 
     /**
      * @brief compile column to string form
@@ -140,19 +115,19 @@ class Compiler {
      * @post top of the stack contains literal binding key, binds contains
      *       a mapping of this key to value
      */
-    void operator()(expr::Literal& expr);
+    void operator()(Literal& expr);
     
     /**
      * @brief compile Label to string form
      * @post top of the stack contains labelled AS label
      */
-    void operator()(expr::Label& label);
+    void operator()(Label& label);
 
     /**
      * @brief surround the top of the stack with parentheses
      * @post stack contains (content)
      */
-    void operator()(expr::Parentheses& expr);
+    void operator()(Parentheses& expr);
 
     /**
      * @brief compile Select statement to string form

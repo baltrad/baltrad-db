@@ -201,7 +201,7 @@ TEST_F(rdb_Connection_test, test_commit_on_closed_connection) {
 
 TEST_F(rdb_Connection_test, test_execute_sqlquery) {
     String stmt("query");
-    BindMap binds;
+    sql::BindMap binds;
     SqlQuery query(stmt, binds);
 
     EXPECT_CALL(conn, do_in_transaction())
@@ -214,7 +214,7 @@ TEST_F(rdb_Connection_test, test_execute_sqlquery) {
 
 TEST_F(rdb_Connection_test, test_execute_replaces_binds) {
     String stmt(":bind");
-    BindMap binds;
+    sql::BindMap binds;
     binds.add(":bind", Variant(1));
 
     ON_CALL(conn, do_execute(_))

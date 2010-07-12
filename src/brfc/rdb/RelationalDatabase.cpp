@@ -34,12 +34,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/SourceRadar.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
-#include <brfc/rdb/BindMap.hpp>
-#include <brfc/rdb/Compiler.hpp>
 #include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/SaveFile.hpp>
 #include <brfc/rdb/SHA1AttributeHasher.hpp>
+
+#include <brfc/sql/BindMap.hpp>
+#include <brfc/sql/Compiler.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -93,7 +94,7 @@ RelationalDatabase::do_commit() {
 bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
     String qry("SELECT true FROM bdb_files WHERE unique_id = :unique_id");
-    BindMap binds;
+    sql::BindMap binds;
     binds.add(":unique_id", Variant(file_hasher().hash(file)));
     shared_ptr<ResultSet> result = connection().execute(qry, binds);
     return result->size() > 0;
@@ -112,7 +113,7 @@ RelationalDatabase::do_next_filename_version(const String& filename) {
     String qry("SELECT MAX(filename_version) + 1 "
                 "FROM bdb_files "
                 "WHERE proposed_filename = :filename");
-    BindMap binds;
+    sql::BindMap binds;
     binds.add(":filename", Variant(filename));
     shared_ptr<ResultSet> result = connection().execute(qry, binds);
     result->next();
@@ -125,9 +126,9 @@ RelationalDatabase::do_next_filename_version(const String& filename) {
 
 shared_ptr<ResultSet>
 RelationalDatabase::do_query(const Query& query) {
-    SelectPtr select = QueryToSelect::transform(query, *mapper_.get());
+    sql::SelectPtr select = QueryToSelect::transform(query, *mapper_.get());
 
-    Compiler compiler;
+    sql::Compiler compiler;
     compiler.compile(*select);
 
     return this->query(compiler.compiled(), compiler.binds());
@@ -137,7 +138,7 @@ RelationalDatabase::do_query(const Query& query) {
 long long
 RelationalDatabase::do_db_id(const oh5::File& file) {
     String qry("SELECT id FROM bdb_files WHERE unique_id = :unique_id");
-    BindMap binds;
+    sql::BindMap binds;
     binds.add(":unique_id", Variant(file_hasher().hash(file)));
     shared_ptr<ResultSet> r = query(qry, binds);
     r->next();
@@ -147,7 +148,7 @@ RelationalDatabase::do_db_id(const oh5::File& file) {
 long long
 RelationalDatabase::db_id(const oh5::Source& src) {
     String qry("SELECT id FROM bdb_sources WHERE node_id = :node_id");
-    BindMap binds;
+    sql::BindMap binds;
     binds.add(":node_id", Variant(src.node_id()));
     shared_ptr<ResultSet> r = query(qry, binds);
     if (r->next())
@@ -160,7 +161,7 @@ shared_ptr<oh5::SourceCentre>
 RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
                                        long long id) {
     StringList wcl;
-    BindMap binds;
+    sql::BindMap binds;
 
     // originating_centre or country_code is required for org. sources
     if (src->originating_centre()) {
@@ -209,7 +210,7 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
 shared_ptr<oh5::SourceRadar>
 RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
     StringList wcl;
-    BindMap binds;
+    sql::BindMap binds;
 
     // wmo_code or radar_site is required for radar sources
     if (src->wmo_code()) {
@@ -279,7 +280,7 @@ RelationalDatabase::do_load_source(const String& srcstr) {
 
 shared_ptr<ResultSet>
 RelationalDatabase::query(const String& query_str,
-                          const BindMap& binds) {
+                          const sql::BindMap& binds) {
     return connection().execute(query_str, binds);
 }
 
@@ -289,7 +290,7 @@ RelationalDatabase::populate_mapper() {
     shared_ptr<ResultSet> r = query("SELECT id, name, converter, "
                                     "storage_table, storage_column, "
                                     "ignore_in_hash "
-                                    "FROM bdb_attributes", BindMap());
+                                    "FROM bdb_attributes", sql::BindMap());
     while (r->next()) {
         mapper_->add(Mapping(r->int64_(0),  // id
                              r->string(1),  // name
@@ -303,7 +304,7 @@ RelationalDatabase::populate_mapper() {
 void
 RelationalDatabase::do_remove_file(const String& path) {
     String qry("DELETE FROM bdb_files WHERE path = :path");
-    BindMap binds;
+    sql::BindMap binds;
     binds.add(":path", Variant(path));
     connection().execute(qry, binds);
 }

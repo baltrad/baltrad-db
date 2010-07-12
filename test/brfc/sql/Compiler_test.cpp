@@ -22,28 +22,26 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 #include <brfc/Variant.hpp>
 
-#include <brfc/expr/BinaryOperator.hpp>
-#include <brfc/expr/Factory.hpp>
-#include <brfc/expr/Literal.hpp>
-#include <brfc/expr/Parentheses.hpp>
+#include <brfc/sql/BinaryOperator.hpp>
+#include <brfc/sql/Factory.hpp>
+#include <brfc/sql/Literal.hpp>
+#include <brfc/sql/Parentheses.hpp>
 
-#include <brfc/rdb/Alias.hpp>
-#include <brfc/rdb/BindMap.hpp>
-#include <brfc/rdb/Column.hpp>
-#include <brfc/rdb/Compiler.hpp>
-#include <brfc/rdb/FromClause.hpp>
-#include <brfc/rdb/Join.hpp>
-#include <brfc/rdb/Select.hpp>
-#include <brfc/rdb/Table.hpp>
+#include <brfc/sql/Alias.hpp>
+#include <brfc/sql/BindMap.hpp>
+#include <brfc/sql/Column.hpp>
+#include <brfc/sql/Compiler.hpp>
+#include <brfc/sql/FromClause.hpp>
+#include <brfc/sql/Join.hpp>
+#include <brfc/sql/Select.hpp>
+#include <brfc/sql/Table.hpp>
 
 #include "../common.hpp"
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-using namespace expr;
-
-struct rdb_Compiler_test: public testing::Test {
+struct sql_Compiler_test: public testing::Test {
     const Variant& bind(const String& key) const {
         return compiler.binds().get(key, Variant());
     }
@@ -52,7 +50,7 @@ struct rdb_Compiler_test: public testing::Test {
     Factory xpr;
 };
 
-TEST_F(rdb_Compiler_test, test_simple) {
+TEST_F(sql_Compiler_test, test_simple) {
     ExpressionPtr expr = xpr.int64_(1)->lt(xpr.int64_(2));
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), ":lit_0 < :lit_1");
@@ -60,7 +58,7 @@ TEST_F(rdb_Compiler_test, test_simple) {
     EXPECT_EQ(bind(":lit_1"), Variant(2));
 }
 
-TEST_F(rdb_Compiler_test, test_between) {
+TEST_F(sql_Compiler_test, test_between) {
     ExpressionPtr expr = xpr.int64_(1)->between(xpr.int64_(0), xpr.int64_(2));
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), ":lit_0 >= :lit_1 AND :lit_2 <= :lit_3");
@@ -70,33 +68,33 @@ TEST_F(rdb_Compiler_test, test_between) {
     EXPECT_EQ(bind(":lit_3"), Variant(2));
 }
 
-TEST_F(rdb_Compiler_test, test_string_literal) {
+TEST_F(sql_Compiler_test, test_string_literal) {
     LiteralPtr l = xpr.string("a string");
     compiler.compile(*l);
     EXPECT_EQ(compiler.compiled(), ":lit_0");
     EXPECT_EQ(bind(":lit_0"), Variant("a string"));
 }
 
-TEST_F(rdb_Compiler_test, test_parentheses) {
+TEST_F(sql_Compiler_test, test_parentheses) {
     ExpressionPtr expr = xpr.int64_(1)->parentheses();
     compiler.compile(*expr);
     EXPECT_EQ(compiler.compiled(), "(:lit_0)");
     EXPECT_EQ(bind(":lit_0"), Variant(1));
 }
 
-TEST_F(rdb_Compiler_test, test_column) {
+TEST_F(sql_Compiler_test, test_column) {
     ColumnPtr c = Table::create("table_name")->column("column_name");
     compiler.compile(*c);
     EXPECT_EQ(compiler.compiled(), "table_name.column_name");
 }
 
-TEST_F(rdb_Compiler_test, test_aliased_table_column) {
+TEST_F(sql_Compiler_test, test_aliased_table_column) {
     ColumnPtr c = Table::create("table_name")->alias("table_alias")->column("column_name");
     compiler.compile(*c);
     EXPECT_EQ(compiler.compiled(), "table_alias.column_name");
 }
 
-TEST_F(rdb_Compiler_test, test_basic_join) {
+TEST_F(sql_Compiler_test, test_basic_join) {
     TablePtr t1 = Table::create("t1");
     TablePtr t2 = Table::create("t2");
     JoinPtr j = t1->join(t2, t1->column("c1")->eq(t2->column("c2")));
@@ -104,7 +102,7 @@ TEST_F(rdb_Compiler_test, test_basic_join) {
     EXPECT_EQ(compiler.compiled(), "t1 JOIN t2 ON t1.c1 = t2.c2");
 }
 
-TEST_F(rdb_Compiler_test, test_outerjoin) {
+TEST_F(sql_Compiler_test, test_outerjoin) {
     SelectablePtr t1 = Table::create("t1");
     SelectablePtr t2 = Table::create("t2");
     JoinPtr j = t1->outerjoin(t2, t1->column("c1")->eq(t2->column("c2")));
@@ -114,7 +112,7 @@ TEST_F(rdb_Compiler_test, test_outerjoin) {
 
 
 
-TEST_F(rdb_Compiler_test, test_join_with_alias) {
+TEST_F(sql_Compiler_test, test_join_with_alias) {
     TablePtr t1 = Table::create("t1");
     SelectablePtr a = Table::create("t2")->alias("a");
     JoinPtr j = t1->join(a, t1->column("c1")->eq(a->column("c2")));
@@ -122,7 +120,7 @@ TEST_F(rdb_Compiler_test, test_join_with_alias) {
     EXPECT_EQ(compiler.compiled(), "t1 JOIN t2 AS a ON t1.c1 = a.c2");
 }
 
-TEST_F(rdb_Compiler_test, test_join_with_multiple_aliases) {
+TEST_F(sql_Compiler_test, test_join_with_multiple_aliases) {
     SelectablePtr a1 = Table::create("t1")->alias("a1");
     SelectablePtr a2 = Table::create("t2")->alias("a2");
     SelectablePtr a3 = Table::create("t3")->alias("a3");
@@ -134,7 +132,7 @@ TEST_F(rdb_Compiler_test, test_join_with_multiple_aliases) {
     EXPECT_EQ(compiler.compiled(), "t1 AS a1 JOIN t2 AS a2 ON a1.c1 = a2.c2 JOIN t3 AS a3 ON a2.c2 = a3.c3");
 }
 
-TEST_F(rdb_Compiler_test, test_select) {
+TEST_F(sql_Compiler_test, test_select) {
     SelectPtr select = Select::create();
     TablePtr t1 = Table::create("t1");
     TablePtr t2 = Table::create("t2");
@@ -153,7 +151,7 @@ TEST_F(rdb_Compiler_test, test_select) {
     EXPECT_EQ(bind(":lit_0"), Variant(1));
 }
 
-TEST_F(rdb_Compiler_test, test_factory_or_) {
+TEST_F(sql_Compiler_test, test_factory_or_) {
     TablePtr t = Table::create("t");
     ExpressionPtr e1 = t->column("c")->eq(xpr.int64_(1));
     ExpressionPtr e2 = t->column("c")->eq(xpr.int64_(2));
@@ -165,6 +163,6 @@ TEST_F(rdb_Compiler_test, test_factory_or_) {
     EXPECT_EQ(bind(":lit_1"), Variant(2));
 }
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
