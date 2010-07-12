@@ -20,8 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_EXPRESSION_HPP
 #define BRFC_EXPR_EXPRESSION_HPP
 
+#include <boost/noncopyable.hpp>
+
 #include <brfc/expr/fwd.hpp>
-#include <brfc/expr/Element.hpp>
 
 namespace brfc {
 
@@ -30,13 +31,16 @@ class String;
 namespace expr {
 
 /**
- * @brief ABC for expressions
+ * @brief ABC for query expressions
  */
-class Expression : public Element {
+class Expression : public boost::noncopyable
+                 , public enable_shared_from_this<Expression> {
   public:
+    virtual ~Expression() { }
+
     ExpressionPtr shared_from_this() const {
-        return static_pointer_cast<Expression>(
-                const_pointer_cast<Element>(Element::shared_from_this()));
+        return const_pointer_cast<Expression>(
+                enable_shared_from_this<Expression>::shared_from_this());
     }
     /**
      * @name comparison operators
@@ -116,7 +120,8 @@ class Expression : public Element {
 
   protected:
     Expression()
-            : Element() {
+            : boost::noncopyable()
+            , enable_shared_from_this<Expression>() {
     }
 };
 

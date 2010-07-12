@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %{
     #include <brfc/expr/fwd.hpp>
-    #include <brfc/expr/Element.hpp>
     #include <brfc/expr/Expression.hpp>
     #include <brfc/expr/Factory.hpp>
     #include <brfc/expr/Attribute.hpp>
@@ -51,7 +50,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::expr::Compiler;
 %ignore brfc::expr::Select;
 
-%ignore brfc::expr::Element::accept;
 %ignore brfc::expr::Expression::shared_from_this;
 %ignore brfc::expr::Factory::string(const char* value) const;
 %ignore brfc::expr::Literal::create;
@@ -95,11 +93,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     import eu.baltrad.fc.Time;
 %}
 
-SWIG_SHARED_PTR(Element,
-                brfc::expr::Element)
-SWIG_SHARED_PTR_DERIVED(Expression,
-                        brfc::expr::Element,
-                        brfc::expr::Expression);
+SWIG_SHARED_PTR(Expression,
+                brfc::expr::Expression)
 SWIG_SHARED_PTR_DERIVED(BinaryOperator,
                         brfc::expr::Expression,
                         brfc::expr::BinaryOperator);
@@ -137,13 +132,13 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
 %template(AttributeExprVector) std::vector<brfc::shared_ptr<brfc::expr::Attribute> >;
 
 
-%typemap(javabody_derived) brfc::expr::Expression %{
+// make constructors for SWIG_SHARED_PTR public
+%typemap(javabody) brfc::expr::Expression %{
   private long swigCPtr;
-  private boolean swigCMemOwnDerived;
+  private boolean swigCMemOwnBase;
 
   public $javaclassname(long cPtr, boolean cMemoryOwn) {
-    super($imclassname.$javaclassname_SWIGSharedPtrUpcast(cPtr), true);
-    swigCMemOwnDerived = cMemoryOwn;
+    swigCMemOwnBase = cMemoryOwn;
     swigCPtr = cPtr;
   }
 
@@ -152,6 +147,7 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
   }
 %}
 
+
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.DateTime;
@@ -159,7 +155,6 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
 %}
 
 %include <brfc/expr/fwd.hpp>
-%include <brfc/expr/Element.hpp>
 %include <brfc/expr/Expression.hpp>
 %include <brfc/expr/Label.hpp>
 %include <brfc/expr/Factory.hpp>

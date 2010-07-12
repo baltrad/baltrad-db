@@ -31,7 +31,6 @@ namespace expr {
 
 class Attribute;
 class BinaryOperator;
-class Element;
 class Expression;
 class Label;
 class Literal;
@@ -39,7 +38,6 @@ class Parentheses;
 
 typedef shared_ptr<Attribute> AttributePtr;
 typedef shared_ptr<BinaryOperator> BinaryOperatorPtr;
-typedef shared_ptr<Element> ElementPtr;
 typedef shared_ptr<Expression> ExpressionPtr;
 typedef shared_ptr<Label> LabelPtr;
 typedef shared_ptr<Literal> LiteralPtr;
