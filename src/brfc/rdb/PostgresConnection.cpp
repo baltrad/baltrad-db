@@ -22,6 +22,7 @@ PostgresConnection::do_open() {
     conn_.reset(new pqxx::connection(url_to_pg(url_).to_std_string()));
     conn_->set_client_encoding("utf8");
     conn_->set_variable("datestyle", "ISO");
+    load_type_oids();
 }
 
 bool
@@ -57,7 +58,7 @@ PostgresConnection::do_execute(const String& query) {
     shared_ptr<ResultSet> result;
     try {
         pqxx::result pg_result = transaction_->exec(query.to_utf8());
-        result = make_shared<PostgresResultSet>(pg_result);
+        result = make_shared<PostgresResultSet>(pg_result, &types_);
     } catch (const std::runtime_error& e) {
         throw db_error(e.what());
     }
@@ -98,6 +99,37 @@ PostgresConnection::do_has_feature(Connection::Feature feature) const {
             return false;
         default:
             return false;
+    }
+}
+
+void
+PostgresConnection::load_type_oids() {
+    const char* qry = "SELECT oid, typname FROM pg_catalog.pg_type "
+                      "WHERE typname IN ('int2', 'int4', 'int8', "
+                                        "'float4', 'float8', "
+                                        "'bool', 'date', 'time')";
+    pqxx::transaction<> tx(*conn_);
+    pqxx::result result = tx.exec(qry);
+
+    for (pqxx::result::size_type i = 0; i < result.size(); ++i) {
+        pqxx::oid typoid = result.at(i).at(0).as<pqxx::oid>();
+        std::string typname = result.at(i).at(1).as<std::string>();
+        if (typname == "int2")
+            types_.int2_oid = typoid;
+        else if (typname == "int4")
+            types_.int4_oid = typoid;
+        else if (typname == "int8")
+            types_.int8_oid = typoid;
+        else if (typname == "float4")
+            types_.float4_oid = typoid;
+        else if (typname == "float8")
+            types_.float8_oid = typoid;
+        else if (typname == "bool")
+            types_.bool_oid = typoid;
+        else if (typname == "date")
+            types_.date_oid = typoid;
+        else if (typname == "time")
+            types_.time_oid = typoid;
     }
 }
 
