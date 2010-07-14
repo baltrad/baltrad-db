@@ -17,34 +17,42 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/sql/Selectable.hpp>
+#ifndef BRFC_RDB_MODEL_HPP
+#define BRFC_RDB_MODEL_HPP
 
-#include <brfc/sql/Alias.hpp>
-#include <brfc/sql/Column.hpp>
-#include <brfc/sql/Join.hpp>
+#include <map>
+
+#include <brfc/String.hpp>
+#include <brfc/sql/fwd.hpp>
 
 namespace brfc {
-namespace sql {
+namespace rdb {
 
-AliasPtr
-Selectable::alias(const String& name) {
-    return Alias::create(this->shared_from_this(), name);
-}
+class Model {
+  public:
+    static Model& instance();
 
-ColumnPtr
-Selectable::column(const String& name) {
-    return Column::create(name, this->shared_from_this());
-}
+    sql::TablePtr sources;
+    sql::TablePtr source_radars;
+    sql::TablePtr source_centres;
+    sql::TablePtr files;
+    sql::TablePtr groups;
+    sql::TablePtr attrvals_int;
+    sql::TablePtr attrvals_str;
+    sql::TablePtr attrvals_real;
+    sql::TablePtr attrvals_bool;
 
-JoinPtr
-Selectable::join(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition, Join::INNER);
-}
+    sql::TablePtr table_by_name(const String& name) const;
 
-JoinPtr
-Selectable::outerjoin(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition, Join::LEFT);
-}
+  private:
+    Model();
 
-} // namespace sql
+    typedef std::map<String, sql::TablePtr> TableMap;
+    
+    TableMap tables_;
+};
+
+} // namespace rdb
 } // namespace brfc
+
+#endif // BRFC_RDB_MODEL_HPP

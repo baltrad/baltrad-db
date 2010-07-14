@@ -31,6 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Parentheses.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
+#include <brfc/rdb/Model.hpp>
 
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>
@@ -50,22 +51,19 @@ namespace rdb {
 QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
-        , files_t_(sql::Table::create("bdb_files"))
-        , src_t_(sql::Table::create("bdb_sources"))
-        , src_radars_t_(sql::Table::create("bdb_source_radars"))
-        , src_centres_t_(sql::Table::create("bdb_source_centres"))
-        , groups_t_(sql::Table::create("bdb_groups"))
+        , model_(&Model::instance())
         , from_() {
     // always select from files and join sources
-    from_ = files_t_->join(src_t_,
-                           xpr_.eq(files_t_->column("source_id"),
-                                   src_t_->column("id")));
-    from_ = from_->outerjoin(src_radars_t_,
-                             xpr_.eq(src_t_->column("id"),
-                                     src_radars_t_->column("id")));
-    from_ = from_->outerjoin(src_centres_t_,
-                             xpr_.eq(src_t_->column("id"),
-                                     src_centres_t_->column("id")));
+    Model* m = model_;
+    from_ = m->files->join(m->sources,
+                           xpr_.eq(m->files->column("source_id"),
+                                   m->sources->column("id")));
+    from_ = from_->outerjoin(m->source_radars,
+                             xpr_.eq(m->sources->column("id"),
+                                     m->source_radars->column("id")));
+    from_ = from_->outerjoin(m->source_centres,
+                             xpr_.eq(m->sources->column("id"),
+                                     m->source_centres->column("id")));
 }
 
 sql::SelectPtr
@@ -100,7 +98,7 @@ QueryToSelect::operator()(expr::Attribute& attr) {
 
     // query table and column where this value can be found
     Mapping mapping = mapper_->mapping(name);
-    sql::SelectablePtr value_t = sql::Table::create(mapping.table);
+    sql::SelectablePtr value_t = model_->table_by_name(mapping.table);
     
     if (not mapper_->is_specialized(name)) {
         // try to join groups, they have to appear earlier in the join
@@ -114,7 +112,7 @@ QueryToSelect::operator()(expr::Attribute& attr) {
         if (not from_->contains(value_t)) {
             from_ = from_->join(value_t,
                                 xpr_.and_(xpr_.eq(value_t->column("group_id"),
-                                                  groups_t_->column("id")),
+                                                  model_->groups->column("id")),
                                           xpr_.eq(value_t->column("attribute_id"),
                                                   xpr_.int64_(mapping.id))));
         }
@@ -130,10 +128,10 @@ QueryToSelect::operator()(expr::Attribute& attr) {
 void
 QueryToSelect::join_groups() {
     // join groups if not already joined
-    if (not from_->contains(groups_t_)) {
-        from_ = from_->join(groups_t_,
-                            xpr_.eq(groups_t_->column("file_id"),
-                                    files_t_->column("id")));
+    if (not from_->contains(model_->groups)) {
+        from_ = from_->join(model_->groups,
+                            xpr_.eq(model_->groups->column("file_id"),
+                                    model_->files->column("id")));
     }
 }
 

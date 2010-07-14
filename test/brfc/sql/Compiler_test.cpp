@@ -42,12 +42,30 @@ namespace brfc {
 namespace sql {
 
 struct sql_Compiler_test: public testing::Test {
+    sql_Compiler_test()
+            : compiler()
+            , xpr()
+            , t1(Table::create("t1"))
+            , t2(Table::create("t2"))
+            , t3(Table::create("t3")) {
+        t1->add_column(Column::create("c1"));
+        t1->add_column(Column::create("c2"));
+        t1->add_column(Column::create("c3"));
+        t2->add_column(Column::create("c1"));
+        t2->add_column(Column::create("c2"));
+        t2->add_column(Column::create("c3"));
+        t3->add_column(Column::create("c1"));
+        t3->add_column(Column::create("c2"));
+        t3->add_column(Column::create("c3"));
+    }
+
     const Variant& bind(const String& key) const {
         return compiler.binds().get(key, Variant());
     }
 
     Compiler compiler;
     Factory xpr;
+    TablePtr t1, t2, t3;
 };
 
 TEST_F(sql_Compiler_test, test_simple) {
@@ -83,28 +101,25 @@ TEST_F(sql_Compiler_test, test_parentheses) {
 }
 
 TEST_F(sql_Compiler_test, test_column) {
-    ColumnPtr c = Table::create("table_name")->column("column_name");
+    ColumnPtr c = t1->column("c1");
     compiler.compile(*c);
-    EXPECT_EQ(compiler.compiled(), "table_name.column_name");
+    EXPECT_EQ(compiler.compiled(), "t1.c1");
 }
 
 TEST_F(sql_Compiler_test, test_aliased_table_column) {
-    ColumnPtr c = Table::create("table_name")->alias("table_alias")->column("column_name");
+    AliasPtr a = t1->alias("table_alias");
+    ColumnPtr c = a->column("c1");
     compiler.compile(*c);
-    EXPECT_EQ(compiler.compiled(), "table_alias.column_name");
+    EXPECT_EQ(compiler.compiled(), "table_alias.c1");
 }
 
 TEST_F(sql_Compiler_test, test_basic_join) {
-    TablePtr t1 = Table::create("t1");
-    TablePtr t2 = Table::create("t2");
     JoinPtr j = t1->join(t2, t1->column("c1")->eq(t2->column("c2")));
     compiler.compile(*j);
     EXPECT_EQ(compiler.compiled(), "t1 JOIN t2 ON t1.c1 = t2.c2");
 }
 
 TEST_F(sql_Compiler_test, test_outerjoin) {
-    SelectablePtr t1 = Table::create("t1");
-    SelectablePtr t2 = Table::create("t2");
     JoinPtr j = t1->outerjoin(t2, t1->column("c1")->eq(t2->column("c2")));
     compiler.compile(*j);
     EXPECT_EQ(compiler.compiled(), "t1 LEFT JOIN t2 ON t1.c1 = t2.c2");
@@ -113,17 +128,16 @@ TEST_F(sql_Compiler_test, test_outerjoin) {
 
 
 TEST_F(sql_Compiler_test, test_join_with_alias) {
-    TablePtr t1 = Table::create("t1");
-    SelectablePtr a = Table::create("t2")->alias("a");
+    SelectablePtr a = t2->alias("a");
     JoinPtr j = t1->join(a, t1->column("c1")->eq(a->column("c2")));
     compiler.compile(*j);
     EXPECT_EQ(compiler.compiled(), "t1 JOIN t2 AS a ON t1.c1 = a.c2");
 }
 
 TEST_F(sql_Compiler_test, test_join_with_multiple_aliases) {
-    SelectablePtr a1 = Table::create("t1")->alias("a1");
-    SelectablePtr a2 = Table::create("t2")->alias("a2");
-    SelectablePtr a3 = Table::create("t3")->alias("a3");
+    SelectablePtr a1 = t1->alias("a1");
+    SelectablePtr a2 = t2->alias("a2");
+    SelectablePtr a3 = t3->alias("a3");
 
     JoinPtr j = a1->join(a2, a1->column("c1")->eq(a2->column("c2")));
     j = j->join(a3, a2->column("c2")->eq(a3->column("c3")));
@@ -134,8 +148,6 @@ TEST_F(sql_Compiler_test, test_join_with_multiple_aliases) {
 
 TEST_F(sql_Compiler_test, test_select) {
     SelectPtr select = Select::create();
-    TablePtr t1 = Table::create("t1");
-    TablePtr t2 = Table::create("t2");
     ColumnPtr column = t1->column("c1");
     ColumnPtr column2 = t1->column("c2");
     ColumnPtr column3 = t2->column("c3");
@@ -152,11 +164,10 @@ TEST_F(sql_Compiler_test, test_select) {
 }
 
 TEST_F(sql_Compiler_test, test_factory_or_) {
-    TablePtr t = Table::create("t");
-    ExpressionPtr e1 = t->column("c")->eq(xpr.int64_(1));
-    ExpressionPtr e2 = t->column("c")->eq(xpr.int64_(2));
+    ExpressionPtr e1 = t1->column("c1")->eq(xpr.int64_(1));
+    ExpressionPtr e2 = t1->column("c1")->eq(xpr.int64_(2));
     ExpressionPtr e3 = xpr.or_(e1, e2);
-    String expected("t.c = :lit_0 OR t.c = :lit_1");
+    String expected("t1.c1 = :lit_0 OR t1.c1 = :lit_1");
     compiler.compile(*e3);
     EXPECT_EQ(expected, compiler.compiled());
     EXPECT_EQ(bind(":lit_0"), Variant(1));

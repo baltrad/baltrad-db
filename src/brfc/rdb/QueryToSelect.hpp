@@ -36,6 +36,7 @@ class Query;
 namespace rdb {
 
 class AttributeMapper;
+class Model;
 
 /**
  * @brief transform a Query to Select statement
@@ -104,7 +105,7 @@ class QueryToSelect {
     const AttributeMapper* mapper_;
     sql::Factory xpr_;
     std::vector<sql::ExpressionPtr> stack_;
-    sql::TablePtr files_t_, src_t_, src_radars_t_, src_centres_t_, groups_t_;
+    Model* model_;
     sql::JoinPtr from_;
 };
 

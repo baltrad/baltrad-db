@@ -31,9 +31,9 @@ namespace sql {
 
 class Column : public Expression {
   public:
-    static ColumnPtr create(SelectablePtr selectable,
-                            const String& name) {
-        return ColumnPtr(new Column(selectable, name));
+    static ColumnPtr create(const String& name,
+                            SelectablePtr selectable=SelectablePtr()) {
+        return ColumnPtr(new Column(name, selectable));
     }
 
     void selectable(SelectablePtr selectable) {
@@ -49,16 +49,16 @@ class Column : public Expression {
     const String& name() const { return name_; }
 
   protected:
-    Column(SelectablePtr selectable,
-           const String& name)
-            : selectable_(selectable)
-            , name_(name) {
+    Column(const String& name,
+           SelectablePtr selectable)
+            : name_(name)
+            , selectable_(selectable) {
 
     }
 
   private:
-    SelectablePtr selectable_;
     String name_;
+    SelectablePtr selectable_;
 };
 
 } // namespace sql

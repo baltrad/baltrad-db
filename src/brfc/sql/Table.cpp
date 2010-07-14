@@ -17,33 +17,29 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/sql/Selectable.hpp>
-
-#include <brfc/sql/Alias.hpp>
+#include <brfc/sql/Table.hpp>
 #include <brfc/sql/Column.hpp>
-#include <brfc/sql/Join.hpp>
+
+#include <brfc/exceptions.hpp>
 
 namespace brfc {
 namespace sql {
 
-AliasPtr
-Selectable::alias(const String& name) {
-    return Alias::create(this->shared_from_this(), name);
+void
+Table::add_column(ColumnPtr column) {
+    if (column->selectable())
+        throw value_error("column already associated with a Selectable");
+    if (not columns_.insert(std::make_pair(column->name(), column)).second)
+        throw duplicate_entry(column->name().to_std_string());
+    column->selectable(this->shared_from_this());
 }
 
 ColumnPtr
-Selectable::column(const String& name) {
-    return Column::create(name, this->shared_from_this());
-}
-
-JoinPtr
-Selectable::join(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition, Join::INNER);
-}
-
-JoinPtr
-Selectable::outerjoin(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition, Join::LEFT);
+Table::column(const String& name) const {
+    ColumnMap::const_iterator iter = columns_.find(name);
+    if (iter == columns_.end())
+        throw lookup_error(name_.to_std_string() + "." + name.to_std_string());
+    return iter->second;
 }
 
 } // namespace sql

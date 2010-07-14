@@ -17,33 +17,29 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/sql/Selectable.hpp>
+#include <gtest/gtest.h>
 
-#include <brfc/sql/Alias.hpp>
+#include <brfc/exceptions.hpp>
+
 #include <brfc/sql/Column.hpp>
-#include <brfc/sql/Join.hpp>
+#include <brfc/sql/Table.hpp>
 
 namespace brfc {
 namespace sql {
 
-AliasPtr
-Selectable::alias(const String& name) {
-    return Alias::create(this->shared_from_this(), name);
-}
+TEST(sql_Table_test, test_column) {
+    TablePtr t = Table::create("t");
 
-ColumnPtr
-Selectable::column(const String& name) {
-    return Column::create(name, this->shared_from_this());
-}
+    EXPECT_THROW(t->column("c"), lookup_error);
 
-JoinPtr
-Selectable::join(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition, Join::INNER);
-}
+    ColumnPtr c = Column::create("c");
+    t->add_column(c);
+    EXPECT_EQ(c->selectable(), t);
+    EXPECT_EQ(t->column("c"), c);
 
-JoinPtr
-Selectable::outerjoin(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition, Join::LEFT);
+    EXPECT_THROW(t->add_column(c), value_error);
+    EXPECT_THROW(t->add_column(Column::create("c")), duplicate_entry);
+
 }
 
 } // namespace sql

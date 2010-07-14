@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_TABLE_HPP
 #define BRFC_SQL_TABLE_HPP
 
+#include <map>
+
 #include <brfc/sql/Selectable.hpp>
 
 namespace brfc {
@@ -39,13 +41,21 @@ class Table : public Selectable {
         return name_;
     }
 
+    void add_column(ColumnPtr column);
+
+    virtual ColumnPtr column(const String& name) const;
+
   protected:
     explicit Table(const String& name)
-            : name_(name) {
+            : name_(name)
+            , columns_() {
     }
 
   private:
+    typedef std::map<String, ColumnPtr> ColumnMap;
+
     String name_;
+    ColumnMap columns_;
 };
 
 } // namespace sql
