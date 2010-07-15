@@ -13,6 +13,17 @@ class String;
 namespace brfc {
 namespace rdb {
 
+struct PgTypes {
+    pqxx::oid int2_oid;
+    pqxx::oid int4_oid;
+    pqxx::oid int8_oid;
+    pqxx::oid float4_oid;
+    pqxx::oid float8_oid;
+    pqxx::oid bool_oid;
+    pqxx::oid date_oid;
+    pqxx::oid time_oid;
+};
+
 class PostgresConnection : public Connection {
   public:
     explicit PostgresConnection(const Url& url);
@@ -43,7 +54,10 @@ class PostgresConnection : public Connection {
     virtual bool do_has_feature(Feature feature) const;
 
   private:
+    void load_type_oids();
+
     Url url_;
+    PgTypes types_;
     scoped_ptr<pqxx::connection> conn_;
     scoped_ptr<pqxx::transaction<> > transaction_;
 };

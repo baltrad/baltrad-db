@@ -27,9 +27,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace rdb {
 
+class PgTypes;
+
 class PostgresResultSet : public ResultSet {
   public:
-    explicit PostgresResultSet(const pqxx::result& result);
+    PostgresResultSet(const pqxx::result& result, const PgTypes* types);
   
   protected:
     virtual bool do_next();
@@ -45,6 +47,7 @@ class PostgresResultSet : public ResultSet {
 
   private:
     pqxx::result result_;
+    const PgTypes* types_;
     int row_;
 };
 
