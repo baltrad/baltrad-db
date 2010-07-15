@@ -28,6 +28,11 @@ namespace brfc {
 namespace sql {
 
 LiteralPtr
+Factory::literal(const Variant& value) const {
+    return Literal::create(value);
+}
+
+LiteralPtr
 Factory::string(const String& value) const {
     return Literal::create(Variant(value));
 }

@@ -28,8 +28,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class Date;
-class Time;
 class DateTime;
+class Time;
+class Variant;
 
 namespace sql {
 
@@ -38,6 +39,11 @@ namespace sql {
  */
 class Factory {
   public:
+    /**
+     * @brief construct sql::Literal from Variant
+     */
+    LiteralPtr literal(const Variant& value) const;
+
     /**
      * @brief construct sql::Literal containing a string
      * @{
