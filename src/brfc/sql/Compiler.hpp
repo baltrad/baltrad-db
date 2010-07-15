@@ -42,6 +42,7 @@ class Compiler {
                         BinaryOperator,
                         Column,
                         FromClause,
+                        Insert,
                         Join,
                         Parentheses,
                         Label,
@@ -134,6 +135,12 @@ class Compiler {
      * @post top of the stack contains compiled where clause
      */
     void operator()(Select& select);
+
+    /**
+     * @brief compile Insert statement to string form
+     * @post top of the stack contiains compiled string
+     */
+    void operator()(Insert& insert);
 
     /**
      * @brief compile Table to string form

@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/FromClause.hpp>
+#include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Label.hpp>
 #include <brfc/sql/Literal.hpp>
@@ -51,6 +52,7 @@ template void Compiler::compile(Column& expr);
 template void Compiler::compile(FromClause& expr);
 template void Compiler::compile(Join& expr);
 template void Compiler::compile(Select& expr);
+template void Compiler::compile(Insert& expr);
 template void Compiler::compile(Table& expr);
 template void Compiler::compile(BinaryOperator& expr);
 template void Compiler::compile(Expression& expr);
@@ -199,6 +201,30 @@ Compiler::operator()(Select& select) {
                               + from_clause
                               + where_clause;
     push(clause);
+}
+
+void
+Compiler::operator()(Insert& insert) {
+    StringList cols;
+    StringList vals;
+    BOOST_FOREACH(const Insert::ValueMap::value_type& bind, insert.values()) {
+        cols.append(bind.first);
+        visit(*bind.second, *this);
+        vals.append(pop());
+    }
+
+    String stmt = "INSERT INTO " + insert.table()->name() + "(" +
+                  cols.join(", ") + ") VALUES (" + vals.join(", ") + ")";
+    
+    if (insert.returns().size() > 0) {
+        StringList rets;
+        BOOST_FOREACH(ExpressionPtr expr, insert.returns()) {
+            visit(*expr, *this);
+            rets.append(pop());
+        }
+        stmt += " RETURNING " + rets.join(", ");
+    }
+    push(stmt);
 }
 
 void

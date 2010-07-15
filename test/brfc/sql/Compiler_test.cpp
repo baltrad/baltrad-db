@@ -32,7 +32,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Compiler.hpp>
 #include <brfc/sql/FromClause.hpp>
+#include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Join.hpp>
+#include <brfc/sql/Literal.hpp>
 #include <brfc/sql/Select.hpp>
 #include <brfc/sql/Table.hpp>
 
@@ -161,6 +163,18 @@ TEST_F(sql_Compiler_test, test_select) {
     compiler.compile(*select);
     EXPECT_EQ(compiler.compiled(), expected);
     EXPECT_EQ(bind(":lit_0"), Variant(1));
+}
+
+TEST_F(sql_Compiler_test, test_insert) {
+    InsertPtr insert = Insert::create(t1);
+    insert->value("c1", xpr.int64_(1));
+    insert->value("c2", xpr.int64_(2));
+    insert->return_(t1->column("c3"));
+    String expected("INSERT INTO t1(c1, c2) VALUES (:lit_0, :lit_1) RETURNING t1.c3");
+    compiler.compile(*insert);
+    EXPECT_EQ(compiler.compiled(), expected);
+    EXPECT_EQ(bind(":lit_0"), Variant(1));
+    EXPECT_EQ(bind(":lit_1"), Variant(2));
 }
 
 TEST_F(sql_Compiler_test, test_factory_or_) {
