@@ -28,8 +28,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Group.hpp>
 
+#include <brfc/sql/Column.hpp>
+#include <brfc/sql/Compiler.hpp>
+#include <brfc/sql/Factory.hpp>
+#include <brfc/sql/Insert.hpp>
+#include <brfc/sql/Literal.hpp>
+#include <brfc/sql/Table.hpp>
+
 #include <brfc/rdb/GroupCache.hpp>
 #include <brfc/rdb/Connection.hpp>
+#include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
 
@@ -40,32 +48,24 @@ SaveGroup::SaveGroup(RelationalDatabase* rdb,
                      GroupCache* cache)
         : rdb_(rdb)
         , cache_(cache)
-        , qry_("")
-        , special_(rdb->mapper()->specializations_on("bdb_groups")) {
-    StringList columns, binds; 
-    columns.append("parent_id");
-    columns.append("file_id");
-    columns.append("name");
-    BOOST_FOREACH(const Mapping& mapping, special_) {
-        columns.append(mapping.column);
-    }
-    BOOST_FOREACH(const String& column, columns) {
-        binds.append(":" + column);
-    }
-    String qrystr("INSERT INTO bdb_groups(" + columns.join(", ") +
-                   ") VALUES(" + binds.join(", ") + ")");
-    if (rdb->connection().has_feature(Connection::RETURNING))
-        qrystr += " RETURNING id";
-    qry_.statement(qrystr);
+        , stmt_()
+        , special_(rdb->mapper()->specializations_on(Model::instance().groups)) {
 }
 
 void
 SaveGroup::operator()(const oh5::Group& group) {
-    qry_.binds().clear();
+    stmt_ = sql::Insert::create(Model::instance().groups);
+    if (rdb_->connection().has_feature(Connection::RETURNING))
+        stmt_->return_(stmt_->table()->column("id"));
+
     bind_plain(group);
     bind_specializations(group);
 
-    shared_ptr<ResultSet> result = rdb_->connection().execute(qry_);
+    sql::Compiler c;
+    c.compile(*stmt_);
+
+    shared_ptr<ResultSet> result =
+        rdb_->connection().execute(c.compiled(), c.binds());
 
     cache_->insert(last_id(*result), group.shared_from_this());
 }
@@ -82,19 +82,21 @@ SaveGroup::bind_plain(const oh5::Group& group) {
     if (group.file())
         file_id = Variant(rdb_->db_id(*group.file()));
 
-    qry_.binds().add(":parent_id", parent_id ? Variant(parent_id.get())
-                                             : Variant());
-    qry_.binds().add(":file_id", file_id);
-    qry_.binds().add(":name", Variant(group.name()));
+    sql::Factory xpr;
+    if (parent_id)
+        stmt_->value("parent_id", xpr.int64_(parent_id.get()));
+    stmt_->value("file_id", xpr.literal(file_id));
+    stmt_->value("name", xpr.string(group.name()));
 }
 
 void
 SaveGroup::bind_specializations(const oh5::Group& group) {
+    sql::Factory xpr;
     BOOST_FOREACH(const Mapping& mapping, special_) {
         shared_ptr<const oh5::Attribute> attr =
             group.child_attribute(mapping.attribute);
-        qry_.binds().add(":" + mapping.column, attr ? attr->value()
-                                                    : Variant());
+        if (attr)
+            stmt_->value(mapping.column->name(), xpr.literal(attr->value()));
     }
     // XXX: note that this relies on implicit convertion of attribute value
     //      in DB (True/False -> bool; ISO 8601 date/time strings)

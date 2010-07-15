@@ -21,6 +21,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/AttributeMapper.hpp>
 
+#include <brfc/sql/Table.hpp>
+#include <brfc/sql/Column.hpp>
+
 #include "../common.hpp"
 
 namespace brfc {
@@ -28,20 +31,30 @@ namespace rdb {
 
 class rdb_AttributeMapper_test : public testing::Test {
   public:
-    static void SetUpTestCase() {
-        mapper.add(Mapping(0, "attr1", "string", "table1", "column1"));
-        mapper.add(Mapping(1, "attr2", "string", "table1", "column2"));
-        mapper.add(Mapping(2, "attr3", "string", "table2", "column1"));
-        mapper.add(Mapping(3, "attr4", "string", "bdb_attribute_values_str", "value"));
+    rdb_AttributeMapper_test()
+            : t1(sql::Table::create("t1"))
+            , t2(sql::Table::create("t2"))
+            , t3(sql::Table::create("bdb_attribute_values_str"))
+            , mapper() {
     }
 
-    static AttributeMapper mapper;
+    void SetUp() {
+        t1->add_column(sql::Column::create("c1"));
+        t1->add_column(sql::Column::create("c2"));
+        t2->add_column(sql::Column::create("c1"));
+        t3->add_column(sql::Column::create("value"));
+        mapper.add(Mapping(0, "attr1", "string", t1->column("c1")));
+        mapper.add(Mapping(1, "attr2", "string", t1->column("c2")));
+        mapper.add(Mapping(2, "attr3", "string", t2->column("c1")));
+        mapper.add(Mapping(3, "attr4", "string", t3->column("value")));
+    }
+
+    sql::TablePtr t1, t2, t3;
+    AttributeMapper mapper;
 };
 
-AttributeMapper rdb_AttributeMapper_test::mapper;
-
 TEST_F(rdb_AttributeMapper_test, specializations_on) {
-    MappingVector v = mapper.specializations_on("table1");
+    MappingVector v = mapper.specializations_on(t1);
     ASSERT_EQ(v.size(), (size_t)2);
     EXPECT_EQ(v.at(0).attribute, "attr1");
     EXPECT_EQ(v.at(1).attribute, "attr2");

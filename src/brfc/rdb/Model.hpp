@@ -37,6 +37,7 @@ class Model {
     sql::TablePtr source_centres;
     sql::TablePtr files;
     sql::TablePtr groups;
+    sql::TablePtr invalid_attrs;
     sql::TablePtr attrvals_int;
     sql::TablePtr attrvals_str;
     sql::TablePtr attrvals_real;

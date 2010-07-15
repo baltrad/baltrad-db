@@ -98,7 +98,7 @@ QueryToSelect::operator()(expr::Attribute& attr) {
 
     // query table and column where this value can be found
     Mapping mapping = mapper_->mapping(name);
-    sql::SelectablePtr value_t = model_->table_by_name(mapping.table);
+    sql::SelectablePtr value_t = mapping.column->selectable();
     
     if (not mapper_->is_specialized(name)) {
         // try to join groups, they have to appear earlier in the join
@@ -122,7 +122,7 @@ QueryToSelect::operator()(expr::Attribute& attr) {
         }
     }
     // replace the attribute with value column
-    push(value_t->column(mapping.column));
+    push(value_t->column(mapping.column->name()));
 }
 
 void

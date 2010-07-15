@@ -35,12 +35,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/Connection.hpp>
+#include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/SaveFile.hpp>
 #include <brfc/rdb/SHA1AttributeHasher.hpp>
 
 #include <brfc/sql/BindMap.hpp>
+#include <brfc/sql/Column.hpp>
 #include <brfc/sql/Compiler.hpp>
+#include <brfc/sql/Table.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -291,12 +294,12 @@ RelationalDatabase::populate_mapper() {
                                     "storage_table, storage_column, "
                                     "ignore_in_hash "
                                     "FROM bdb_attributes", sql::BindMap());
+    const Model& model = Model::instance();
     while (r->next()) {
         mapper_->add(Mapping(r->int64_(0),  // id
                              r->string(1),  // name
                              r->string(2),  // typename
-                             r->string(3),  // table
-                             r->string(4),  // column
+                             model.table_by_name(r->string(3))->column(r->string(4)),
                              r->bool_(5))); // ignored in hash
     }
 }

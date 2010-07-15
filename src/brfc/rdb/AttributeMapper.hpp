@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <brfc/String.hpp>
+#include <brfc/sql/fwd.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -35,13 +36,11 @@ struct Mapping {
     Mapping(int id_,
             const String& attribute_,
             const String& type_,
-            const String& table_,
-            const String& column_,
+            sql::ColumnPtr column_,
             bool ignore_in_hash_=false)
             : id(id_)
             , attribute(attribute_)
             , type(type_)
-            , table(table_)
             , column(column_)
             , ignore_in_hash(ignore_in_hash_) {
     }
@@ -49,8 +48,7 @@ struct Mapping {
     int id; ///< unique id
     String attribute; ///< Attribute name
     String type; ///< type name of the attribute
-    String table; ///< table where the value is stored
-    String column; ///< column in the table where value is stored
+    sql::ColumnPtr column; ///< column in the table where value is stored
     bool ignore_in_hash; ///< ignore this attribute when hashing metadata
 };
 
@@ -109,7 +107,7 @@ class AttributeMapper {
                in the table
      */
     MappingVector
-    specializations_on(const String& table) const;
+    specializations_on(sql::TablePtr table) const;
 
     /**
      * @brief is mapper aware of Attribute

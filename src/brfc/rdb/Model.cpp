@@ -33,6 +33,7 @@ Model::Model()
         , source_centres(sql::Table::create("bdb_source_centres"))
         , files(sql::Table::create("bdb_files"))
         , groups(sql::Table::create("bdb_groups"))
+        , invalid_attrs(sql::Table::create("bdb_invalid_attributes"))
         , attrvals_int(sql::Table::create("bdb_attribute_values_int"))
         , attrvals_str(sql::Table::create("bdb_attribute_values_str"))
         , attrvals_real(sql::Table::create("bdb_attribute_values_real"))
@@ -73,6 +74,9 @@ Model::Model()
     groups->add_column(sql::Column::create("enddate"));
     groups->add_column(sql::Column::create("endtime"));
     groups->add_column(sql::Column::create("file_id"));
+
+    invalid_attrs->add_column(sql::Column::create("name"));
+    invalid_attrs->add_column(sql::Column::create("group_id"));
 
     attrvals_int->add_column(sql::Column::create("attribute_id"));
     attrvals_int->add_column(sql::Column::create("group_id"));

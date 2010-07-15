@@ -32,6 +32,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/SHA1AttributeHasher.hpp>
 
+#include <brfc/sql/fwd.hpp>
+
 #include "../common.hpp"
 
 namespace brfc {
@@ -60,14 +62,14 @@ class rdb_SHA1AttributeHasher_test : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        mapper->add(Mapping(1, "Conventions", "string", "", "", true));
-        mapper->add(Mapping(2, "what/object", "string", "", "", false));
-        mapper->add(Mapping(3, "what/date", "date", "", "", false));
-        mapper->add(Mapping(4, "what/time", "time", "", "", false));
-        mapper->add(Mapping(5, "what/source", "string", "", "", true));
-        mapper->add(Mapping(6, "what/version", "string", "", "", true));
-        mapper->add(Mapping(7, "ignore", "string", "", "", true));
-        mapper->add(Mapping(8, "attr", "string", "", "", false));
+        mapper->add(Mapping(1, "Conventions", "string", sql::ColumnPtr(), true));
+        mapper->add(Mapping(2, "what/object", "string", sql::ColumnPtr(), false));
+        mapper->add(Mapping(3, "what/date", "date", sql::ColumnPtr(), false));
+        mapper->add(Mapping(4, "what/time", "time", sql::ColumnPtr(), false));
+        mapper->add(Mapping(5, "what/source", "string", sql::ColumnPtr(), true));
+        mapper->add(Mapping(6, "what/version", "string", sql::ColumnPtr(), true));
+        mapper->add(Mapping(7, "ignore", "string", sql::ColumnPtr(), true));
+        mapper->add(Mapping(8, "attr", "string", sql::ColumnPtr(), false));
         f1->source(src);
         f2->source(src);
         f3->source(src);

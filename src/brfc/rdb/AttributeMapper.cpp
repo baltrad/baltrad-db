@@ -19,9 +19,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/AttributeMapper.hpp>
 
+#include <boost/foreach.hpp>
+
 #include <brfc/exceptions.hpp>
 
-#include <boost/foreach.hpp>
+#include <brfc/sql/Table.hpp>
+#include <brfc/sql/Column.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -62,15 +65,15 @@ AttributeMapper::has(const String& attribute) const {
 bool
 AttributeMapper::is_specialized(const String& attribute) const {
     String s = String::from_utf8("bdb_attribute_values");
-    return not mapping(attribute).table.starts_with(s);
+    return not mapping(attribute).column->selectable()->name().starts_with(s);
 }
 
 MappingVector
-AttributeMapper::specializations_on(const String& table) const {
+AttributeMapper::specializations_on(sql::TablePtr table) const {
     MappingVector vec;
     BOOST_FOREACH(const MappingMap::value_type& entry, mappings_) {
         const Mapping& mapping = entry.second;
-        if (mapping.table == table) {
+        if (mapping.column->selectable()->name() == table->name()) {
             vec.push_back(mapping);
         }
     }

@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_RDB_SAVE_GROUP_HPP
 
 #include <brfc/rdb/AttributeMapper.hpp>
-#include <brfc/rdb/SqlQuery.hpp>
+#include <brfc/sql/fwd.hpp>
 
 namespace brfc {
 
@@ -85,7 +85,7 @@ class SaveGroup {
 
     RelationalDatabase* rdb_;
     GroupCache* cache_;
-    SqlQuery qry_;
+    sql::InsertPtr stmt_;
     MappingVector special_;
 };
 

@@ -25,7 +25,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/GroupCache.hpp>
+#include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
+
+#include <brfc/sql/Column.hpp>
+#include <brfc/sql/Compiler.hpp>
+#include <brfc/sql/Factory.hpp>
+#include <brfc/sql/Insert.hpp>
+#include <brfc/sql/Literal.hpp>
+#include <brfc/sql/Table.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -33,77 +41,64 @@ namespace rdb {
 SaveAttribute::SaveAttribute(RelationalDatabase* rdb,
                              GroupCache* group_cache)
         : rdb_(rdb)
-        , group_cache_(group_cache)
-        , queries_() {
+        , group_cache_(group_cache) {
 }
 
 void
 SaveAttribute::operator()(const oh5::Attribute& attr) {
-    SqlQuery* qry = 0;
+    sql::InsertPtr stmt;
     if (not rdb_->mapper()->has(attr.full_name())) {
-        qry = &invalid_attribute_query(attr);
+        stmt = invalid_attribute_query(attr);
     } else if (rdb_->mapper()->is_specialized(attr.full_name())) {
         // ignore specialized attributes
     } else {
-        qry = &valid_attribute_query(attr);
+        stmt = valid_attribute_query(attr);
     }
 
-    if (qry != 0)
-        rdb_->connection().execute(*qry);
+    if (stmt) {
+        sql::Compiler c;
+        c.compile(*stmt);
+        rdb_->connection().execute(c.compiled(), c.binds());
+    }
 }
 
-SqlQuery&
+sql::InsertPtr
 SaveAttribute::invalid_attribute_query(const oh5::Attribute& attr) {
-    QueryMap::iterator iter = queries_.find("bdb_invalid_attributes");
-    if (iter == queries_.end()) {
-        String stmt("INSERT INTO bdb_invalid_attributes(name, group_id) "
-                     "VALUES (:name, :group_id)");
-        SqlQuery qry(stmt);
-        QueryMap::value_type val("bdb_invalid_attributes", qry);
-        iter = queries_.insert(val).first;
-    }
-    SqlQuery& qry = iter->second;
-
-    GroupCache::OptionalKey grp_id;
-    if (attr.parent_group())
-        grp_id = group_cache_->key(attr.parent_group());
-
-    qry.binds().add("name", Variant(attr.full_name()));
-    qry.binds().add("group_id", grp_id ? Variant(grp_id.get())
-                                       : Variant());
-
-    return qry;
-}
-
-SqlQuery&
-SaveAttribute::valid_attribute_query(const oh5::Attribute& attr) {
-    const Mapping& mapping = rdb_->mapper()->mapping(attr.full_name());
-    QueryMap::iterator iter = queries_.find(mapping.table);
-    if (iter == queries_.end()) {
-        SqlQuery qry("INSERT INTO " + mapping.table +
-                     "(group_id, attribute_id, value) " +
-                     "VALUES(:group_id, :attribute_id, :value)");
-        QueryMap::value_type val(mapping.table, qry);
-        iter = queries_.insert(val).first;
-    }
-    SqlQuery& qry = iter->second;
+    sql::InsertPtr stmt = sql::Insert::create(Model::instance().invalid_attrs);
 
     GroupCache::OptionalKey grp_id;
     if (attr.parent_group())
         grp_id = group_cache_->key(attr.parent_group());
     
-    qry.binds().clear();
-    qry.binds().add(":group_id", grp_id ? Variant(grp_id.get())
-                                        : Variant());
-    qry.binds().add(":attribute_id", Variant(mapping.id));
-    qry.binds().add(":value", attr.value());
+    sql::Factory xpr;
+    stmt->value("name", xpr.string(attr.full_name()));
+    if (grp_id)
+        stmt->value("group_id", xpr.int64_(grp_id.get()));
+    return stmt;
+}
+
+sql::InsertPtr
+SaveAttribute::valid_attribute_query(const oh5::Attribute& attr) {
+    const Mapping& mapping = rdb_->mapper()->mapping(attr.full_name());
+    sql::InsertPtr stmt = sql::Insert::create(
+        dynamic_pointer_cast<sql::Table>(mapping.column->selectable()));
+
+    GroupCache::OptionalKey grp_id;
+    if (attr.parent_group())
+        grp_id = group_cache_->key(attr.parent_group());
+    
+    sql::Factory xpr;
+    if (grp_id)
+        stmt->value("group_id", xpr.int64_(grp_id.get()));
+    stmt->value("attribute_id", xpr.int64_(mapping.id));
+    stmt->value("value", xpr.literal(attr.value()));
 
     // XXX: note that this relies on implicit convertion of attribute value
     //      in DB (True/False -> bool; ISO 8601 date/time strings)
     //
     // XXX: this should be explicit
     
-    return qry;
+    return stmt;
 }
 
 } // namespace rdb

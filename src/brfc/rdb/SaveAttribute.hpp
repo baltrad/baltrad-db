@@ -20,9 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_RDB_SAVE_ATTRIBUTE_HPP
 #define BRFC_RDB_SAVE_ATTRIBUTE_HPP
 
-#include <map>
-
-#include <brfc/rdb/SqlQuery.hpp> 
+#include <brfc/sql/fwd.hpp>
 
 namespace brfc {
 
@@ -59,18 +57,11 @@ class SaveAttribute {
     void operator()(const oh5::Attribute& attr);
 
   private:
-    /**
-     * @brief map table name to a SqlQuery
-     */
-    typedef std::map<String, SqlQuery> QueryMap;
-
-    SqlQuery& invalid_attribute_query(const oh5::Attribute& attr);
-   
-    SqlQuery& valid_attribute_query(const oh5::Attribute& attr);
+    sql::InsertPtr invalid_attribute_query(const oh5::Attribute& attr);
+    sql::InsertPtr valid_attribute_query(const oh5::Attribute& attr);
 
     RelationalDatabase* rdb_;
     GroupCache* group_cache_;
-    QueryMap queries_;
 };
 
 
