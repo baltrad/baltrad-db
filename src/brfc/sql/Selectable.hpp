@@ -38,7 +38,7 @@ class Selectable : public Element {
 
     virtual String name() const = 0;
 
-    ColumnPtr column(const String& name);
+    virtual ColumnPtr column(const String& name) const;
 
     AliasPtr alias(const String& name);
 

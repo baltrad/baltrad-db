@@ -32,7 +32,7 @@ Selectable::alias(const String& name) {
 }
 
 ColumnPtr
-Selectable::column(const String& name) {
+Selectable::column(const String& name) const {
     return Column::create(name, this->shared_from_this());
 }
 
