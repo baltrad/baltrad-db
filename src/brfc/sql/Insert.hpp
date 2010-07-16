@@ -33,7 +33,7 @@ namespace sql {
 
 class Insert : public Element {
   public:
-    typedef std::map<String, ExpressionPtr> ValueMap;
+    typedef std::map<ColumnPtr, ExpressionPtr> ValueMap;
     typedef std::vector<ExpressionPtr> ReturnVector;
 
     static InsertPtr create(TablePtr table) {
@@ -48,6 +48,7 @@ class Insert : public Element {
      * @throw duplicate_entry if a value is already bound for the column
      */
     void value(const String& column, ExpressionPtr expr);
+    void value(ColumnPtr column, ExpressionPtr expr);
 
     /**
      * @brief values bound to columns

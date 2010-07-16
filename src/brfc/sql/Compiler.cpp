@@ -208,7 +208,7 @@ Compiler::operator()(Insert& insert) {
     StringList cols;
     StringList vals;
     BOOST_FOREACH(const Insert::ValueMap::value_type& bind, insert.values()) {
-        cols.append(bind.first);
+        cols.append(bind.first->name());
         visit(*bind.second, *this);
         vals.append(pop());
     }

@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Insert.hpp>
 
 #include <brfc/exceptions.hpp>
+
+#include <brfc/sql/Column.hpp>
 #include <brfc/sql/Table.hpp>
 
 namespace brfc {
@@ -27,10 +29,15 @@ namespace sql {
 
 void
 Insert::value(const String& column, ExpressionPtr expr) {
-    // propagate lookup_error
-    table_->column(column);
+    value(table_->column(column), expr);
+}
+
+void
+Insert::value(ColumnPtr column, ExpressionPtr expr) {
+    if (column->selectable() != table_)
+        throw value_error("table mismatch");
     if (not values_.insert(std::make_pair(column, expr)).second)
-        throw duplicate_entry(column.to_std_string());
+        throw duplicate_entry(column->name().to_std_string());
 }
 
 void

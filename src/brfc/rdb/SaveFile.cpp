@@ -83,7 +83,7 @@ SaveFile::operator()(const oh5::File& file,
             continue;
         const Variant& value = 
                 file.root()->child_attribute(mapping.attribute)->value();
-        stmt->value(mapping.column->name(), xpr.literal(value));
+        stmt->value(mapping.column, xpr.literal(value));
         // XXX: note that this relies on implicit convertion of attribute value
         //      in DB (True/False -> bool; ISO 8601 date/time strings)
         //
