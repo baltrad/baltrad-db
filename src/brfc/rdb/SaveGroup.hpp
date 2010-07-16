@@ -25,8 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-class ResultSet;
-
 namespace oh5 {
 
 class Group;
@@ -36,6 +34,7 @@ class Group;
 namespace rdb {
 
 class RelationalDatabase;
+class Result;
 class GroupCache;
 
 /**
@@ -81,7 +80,7 @@ class SaveGroup {
     /**
      * @brief id of the last insert
      */
-    long long last_id(ResultSet& result);
+    long long last_id(Result& result);
 
     RelationalDatabase* rdb_;
     GroupCache* cache_;

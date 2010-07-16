@@ -17,41 +17,40 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_POSTGRES_RESULT_SET_HPP
-#define BRFC_RDB_POSTGRES_RESULT_SET_HPP
+#ifndef BRFC_RDB_RELATIONAL_RESULT_SET_HPP
+#define BRFC_RDB_RELATIONAL_RESULT_SET_HPP
 
+#include <brfc/smart_ptr.hpp>
 #include <brfc/ResultSet.hpp>
-
-#include <pqxx/result>
 
 namespace brfc {
 namespace rdb {
 
-class PgTypes;
+class Result;
 
-class PostgresResultSet : public ResultSet {
+/**
+ * @brief mediate rdb::Result to ResultSet
+ */
+class RelationalResultSet : public ResultSet {
   public:
-    PostgresResultSet(const pqxx::result& result, const PgTypes* types);
+    explicit RelationalResultSet(shared_ptr<Result> result)
+            : result_(result) {
+    }
   
   protected:
     virtual bool do_next();
+
     virtual bool do_seek(int idx);
+
     virtual int do_size();
-    
-    /**
-     * @brief get value at @c pos
-     * @return NULL Variant if value at pos is NULL, string Variant otherwise
-     * @throw lookup_error if pos is out of rance
-     */
+
     virtual Variant do_value_at(unsigned int pos) const;
 
   private:
-    pqxx::result result_;
-    const PgTypes* types_;
-    int row_;
+    shared_ptr<Result> result_;
 };
 
 } // namespace rdb
 } // namespace brfc
 
-#endif // BRFC_RDB_POSTGRES_RESULT_SET_HPP
+#endif // BRFC_RDB_RELATIONAL_RESULT_SET_HPP

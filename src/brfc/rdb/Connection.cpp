@@ -80,15 +80,15 @@ Connection::commit() {
     do_commit();
 }
 
-shared_ptr<ResultSet>
+shared_ptr<Result>
 Connection::execute(const String& statement, const sql::BindMap& binds) {
     return execute(SqlQuery(statement, binds));    
 }
 
-shared_ptr<ResultSet>
+shared_ptr<Result>
 Connection::execute(const SqlQuery& query) {
     String statement = query.replace_binds(*this);
-    shared_ptr<ResultSet> result;
+    shared_ptr<Result> result;
     if (not in_transaction()) {
         try {
             begin();

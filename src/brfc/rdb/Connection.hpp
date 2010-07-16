@@ -26,11 +26,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-class ResultSet;
 class String;
 
 namespace rdb {
 
+class Result;
 class SqlQuery;
 
 /**
@@ -130,7 +130,7 @@ class Connection {
      * equivalent to:
      * @code execute(SqlQuery(statement, binds)); @endcode
      */
-    shared_ptr<ResultSet> execute(const String& statement,
+    shared_ptr<Result> execute(const String& statement,
                                   const sql::BindMap& binds=sql::BindMap());
     
     /**
@@ -145,7 +145,7 @@ class Connection {
      *
      * @sa do_execute
      */
-    shared_ptr<ResultSet> execute(const SqlQuery& query);
+    shared_ptr<Result> execute(const SqlQuery& query);
 
     /**
      * @sa do_variant_to_string
@@ -171,7 +171,7 @@ class Connection {
     virtual void do_commit() = 0;
     virtual void do_rollback() = 0;
 
-    virtual shared_ptr<ResultSet> do_execute(const String& statement) = 0;
+    virtual shared_ptr<Result> do_execute(const String& statement) = 0;
     
     /**
      * @return true if there is an ongoing transaction

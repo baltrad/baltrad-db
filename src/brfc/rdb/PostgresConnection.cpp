@@ -2,7 +2,7 @@
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/rdb/PostgresResultSet.hpp>
+#include <brfc/rdb/PostgresResult.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -53,12 +53,12 @@ PostgresConnection::do_rollback() {
     transaction_.reset();
 }
 
-shared_ptr<ResultSet>
+shared_ptr<Result>
 PostgresConnection::do_execute(const String& query) {
-    shared_ptr<ResultSet> result;
+    shared_ptr<Result> result;
     try {
         pqxx::result pg_result = transaction_->exec(query.to_utf8());
-        result = make_shared<PostgresResultSet>(pg_result, &types_);
+        result = make_shared<PostgresResult>(pg_result, &types_);
     } catch (const std::runtime_error& e) {
         throw db_error(e.what());
     }

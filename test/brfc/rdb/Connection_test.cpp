@@ -21,13 +21,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gmock/gmock.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/ResultSet.hpp>
 #include <brfc/Variant.hpp>
 #include <brfc/rdb/Connection.hpp>
+#include <brfc/rdb/Result.hpp>
 #include <brfc/rdb/SqlQuery.hpp>
 
 #include "../common.hpp"
-#include "../MockResultSet.hpp"
+#include "MockResult.hpp"
 #include "MockConnection.hpp"
 
 using testing::Return;
@@ -67,7 +67,7 @@ TEST_F(rdb_Connection_test, test_no_transaction_execute) {
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_begin());
     EXPECT_CALL(conn, do_execute(stmt))
-        .WillOnce(Return(make_shared<MockResultSet>()));
+        .WillOnce(Return(make_shared<MockResult>()));
     EXPECT_CALL(conn, do_commit());
 
     conn.execute(stmt);
@@ -92,7 +92,7 @@ TEST_F(rdb_Connection_test, test_in_transaction_execute) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
-        .WillOnce(Return(make_shared<MockResultSet>()));
+        .WillOnce(Return(make_shared<MockResult>()));
     
     conn.execute(stmt);
 }
@@ -207,7 +207,7 @@ TEST_F(rdb_Connection_test, test_execute_sqlquery) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
-        .WillOnce(Return(make_shared<MockResultSet>()));
+        .WillOnce(Return(make_shared<MockResult>()));
     
     conn.execute(query);
 }
@@ -218,12 +218,12 @@ TEST_F(rdb_Connection_test, test_execute_replaces_binds) {
     binds.add(":bind", Variant(1));
 
     ON_CALL(conn, do_execute(_))
-        .WillByDefault(Return(shared_ptr<ResultSet>()));
+        .WillByDefault(Return(shared_ptr<Result>()));
 
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(String("1")))
-        .WillOnce(Return(shared_ptr<ResultSet>()));
+        .WillOnce(Return(shared_ptr<Result>()));
     
     conn.execute(stmt, binds);
 }

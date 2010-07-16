@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <brfc/FileHasher.hpp>
-#include <brfc/ResultSet.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -32,6 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/Result.hpp>
 #include <brfc/rdb/Model.hpp>
 
 #include <brfc/sql/Column.hpp>
@@ -100,7 +100,7 @@ SaveFile::operator()(const oh5::File& file,
     sql::Compiler c;
     c.compile(*stmt);
 
-    shared_ptr<ResultSet> result =
+    shared_ptr<Result> result =
         rdb_->connection().execute(c.compiled(), c.binds());
 
     BOOST_FOREACH(const oh5::Node& node, *file.root()) {
@@ -108,7 +108,7 @@ SaveFile::operator()(const oh5::File& file,
     }
 
     if (rdb_->connection().has_feature(Connection::RETURNING) and result->next()) {
-        return result->int64_(0);
+        return result->value_at(0).int64_();
     } else {
         // XXX: last insert id!
         return 0;

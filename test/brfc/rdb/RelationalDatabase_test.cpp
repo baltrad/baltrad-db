@@ -32,6 +32,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/SourceCentre.hpp>
 #include <brfc/oh5/SourceRadar.hpp>
 
+#include <brfc/rdb/Connection.hpp>
+#include <brfc/rdb/Result.hpp>
+
 #include <brfc/sql/BindMap.hpp>
 
 #include <brfc/test/TestRDB.hpp>
@@ -163,10 +166,10 @@ TEST_P(rdb_RelationalDatabase_test, next_filename_version_nxfile) {
 }
 
 TEST_P(rdb_RelationalDatabase_test, resultset_keeps_qsqldatabase_alive) {
-    shared_ptr<ResultSet> r;
+    shared_ptr<Result> r;
     {
         RelationalDatabase db(GetParam());
-        r = db.query("SELECT 1", sql::BindMap());
+        r = db.connection().execute("SELECT 1", sql::BindMap());
     };
     r->size();
 }

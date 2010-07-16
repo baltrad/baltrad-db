@@ -22,11 +22,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/ResultSet.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Group.hpp>
+
+#include <brfc/rdb/GroupCache.hpp>
+#include <brfc/rdb/Connection.hpp>
+#include <brfc/rdb/Model.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/Result.hpp>
 
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Compiler.hpp>
@@ -34,12 +39,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Literal.hpp>
 #include <brfc/sql/Table.hpp>
-
-#include <brfc/rdb/GroupCache.hpp>
-#include <brfc/rdb/Connection.hpp>
-#include <brfc/rdb/Model.hpp>
-#include <brfc/rdb/RelationalDatabase.hpp>
-
 
 namespace brfc {
 namespace rdb {
@@ -64,7 +63,7 @@ SaveGroup::operator()(const oh5::Group& group) {
     sql::Compiler c;
     c.compile(*stmt_);
 
-    shared_ptr<ResultSet> result =
+    shared_ptr<Result> result =
         rdb_->connection().execute(c.compiled(), c.binds());
 
     cache_->insert(last_id(*result), group.shared_from_this());
@@ -105,9 +104,9 @@ SaveGroup::bind_specializations(const oh5::Group& group) {
 }
 
 long long
-SaveGroup::last_id(ResultSet& result) {
+SaveGroup::last_id(Result& result) {
     if (rdb_->connection().has_feature(Connection::RETURNING) and result.next()) {
-        return result.int64_(0);
+        return result.value_at(0).int64_();
     } else {
         // XXX: last insert id!
         return 0;

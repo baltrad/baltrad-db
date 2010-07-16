@@ -72,12 +72,6 @@ class RelationalDatabase : public Database {
      */
     virtual ~RelationalDatabase();
 
-    /**
-     * @brief execute a select query
-     */
-    shared_ptr<ResultSet> query(const String& query,
-                                const sql::BindMap& binds);
-
     shared_ptr<AttributeMapper> mapper();
     
     shared_ptr<const AttributeMapper> mapper() const;

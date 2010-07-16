@@ -37,6 +37,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
+#include <brfc/rdb/Result.hpp>
+#include <brfc/rdb/RelationalResultSet.hpp>
 #include <brfc/rdb/SaveFile.hpp>
 #include <brfc/rdb/SHA1AttributeHasher.hpp>
 
@@ -99,7 +101,7 @@ RelationalDatabase::do_has_file(const oh5::File& file) {
     String qry("SELECT true FROM bdb_files WHERE unique_id = :unique_id");
     sql::BindMap binds;
     binds.add(":unique_id", Variant(file_hasher().hash(file)));
-    shared_ptr<ResultSet> result = connection().execute(qry, binds);
+    shared_ptr<Result> result = connection().execute(qry, binds);
     return result->size() > 0;
 }
 
@@ -118,12 +120,12 @@ RelationalDatabase::do_next_filename_version(const String& filename) {
                 "WHERE proposed_filename = :filename");
     sql::BindMap binds;
     binds.add(":filename", Variant(filename));
-    shared_ptr<ResultSet> result = connection().execute(qry, binds);
+    shared_ptr<Result> result = connection().execute(qry, binds);
     result->next();
-    if (result->is_null(0)) {
+    if (result->value_at(0).is_null()) {
         return 0;
     } else {
-        return static_cast<unsigned int>(result->int64_(0));
+        return static_cast<unsigned int>(result->value_at(0).int64_());
     }
 }
 
@@ -134,7 +136,9 @@ RelationalDatabase::do_query(const Query& query) {
     sql::Compiler compiler;
     compiler.compile(*select);
 
-    return this->query(compiler.compiled(), compiler.binds());
+    shared_ptr<Result> res = connection().execute(compiler.compiled(),
+                                                  compiler.binds());
+    return shared_ptr<ResultSet>(new RelationalResultSet(res));
 }
 
 
@@ -143,9 +147,9 @@ RelationalDatabase::do_db_id(const oh5::File& file) {
     String qry("SELECT id FROM bdb_files WHERE unique_id = :unique_id");
     sql::BindMap binds;
     binds.add(":unique_id", Variant(file_hasher().hash(file)));
-    shared_ptr<ResultSet> r = query(qry, binds);
+    shared_ptr<Result> r = connection().execute(qry, binds);
     r->next();
-    return r->int64_(0);
+    return r->value_at(0).int64_();
 }
 
 long long
@@ -153,9 +157,9 @@ RelationalDatabase::db_id(const oh5::Source& src) {
     String qry("SELECT id FROM bdb_sources WHERE node_id = :node_id");
     sql::BindMap binds;
     binds.add(":node_id", Variant(src.node_id()));
-    shared_ptr<ResultSet> r = query(qry, binds);
+    shared_ptr<Result> r = connection().execute(qry, binds);
     if (r->next())
-        return r->int64_(0);
+        return r->value_at(0).int64_();
     else
         return 0;
 }
@@ -186,25 +190,25 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
                    String("JOIN bdb_sources ON bdb_sources.id = bdb_source_centres.id ") +
                    String("WHERE ") + wcl.join(" OR ");
     
-    shared_ptr<ResultSet> result = connection().execute(qstr, binds);
+    shared_ptr<Result> r = connection().execute(qstr, binds);
     
-    if (result->size() < 1) {
+    if (r->size() < 1) {
         throw lookup_error("no source found: " +
                            src->to_string().to_std_string());
-    } else if (result->size() > 1) {
+    } else if (r->size() > 1) {
         throw lookup_error("multiple sources found: " +
                            src->to_string().to_std_string());
     }
-    result->next();
+    r->next();
 
-    id = result->int64_(0);
+    id = r->value_at("id").int64_();
     SourceMap::iterator i = sources_.find(id);
 
     if (i == sources_.end()) {
-        src->node_id(result->string(1));
-        src->country_code(result->int64_(2));
-        src->originating_centre(result->int64_(3));
-        src->wmo_cccc(result->string(4));
+        src->node_id(r->value_at("node_id").string());
+        src->country_code(r->value_at("country_code").int64_());
+        src->originating_centre(r->value_at("originating_centre").int64_());
+        src->wmo_cccc(r->value_at("wmo_cccc").string());
         i = sources_.insert(std::make_pair(id, src)).first;
     }
     return static_pointer_cast<oh5::SourceCentre>(i->second);
@@ -234,30 +238,30 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
                    String("FROM bdb_source_radars ") +
                    String("JOIN bdb_sources ON bdb_source_radars.id = bdb_sources.id ") +
                    String("WHERE ") + wcl.join(" OR ");
-    shared_ptr<ResultSet> result = connection().execute(qstr, binds);
+    shared_ptr<Result> r = connection().execute(qstr, binds);
 
-    if (result->size() < 1) {
+    if (r->size() < 1) {
         throw lookup_error("no source found: " +
                            src->to_string().to_std_string());
-    } else if (result->size() > 1) {
+    } else if (r->size() > 1) {
         throw lookup_error("multiple sources found: " +
                            src->to_string().to_std_string());
     }
     
-    result->next();
+    r->next();
 
-    long long id = result->int64_(0);
+    long long id = r->value_at("id").int64_();
     SourceMap::iterator i = sources_.find(id);
 
     if (i == sources_.end()) {
         shared_ptr<oh5::SourceCentre> centre = make_shared<oh5::SourceCentre>();
-        centre = load_source_centre(centre, result->int64_(2));
+        centre = load_source_centre(centre, r->value_at("centre_id").int64_());
 
         src->centre(centre);
-        src->node_id(result->string(1));
-        src->wmo_code(result->int64_(3));
-        src->radar_site(result->string(4));
-        src->place(result->string(5));
+        src->node_id(r->value_at("node_id").string());
+        src->wmo_code(r->value_at("wmo_code").int64_());
+        src->radar_site(r->value_at("radar_site").string());
+        src->place(r->value_at("place").string());
         i = sources_.insert(std::make_pair(id, src)).first;
     }
 
@@ -281,26 +285,26 @@ RelationalDatabase::do_load_source(const String& srcstr) {
 
 }
 
-shared_ptr<ResultSet>
-RelationalDatabase::query(const String& query_str,
-                          const sql::BindMap& binds) {
-    return connection().execute(query_str, binds);
-}
-
 void
 RelationalDatabase::populate_mapper() {
     mapper_->clear();
-    shared_ptr<ResultSet> r = query("SELECT id, name, converter, "
-                                    "storage_table, storage_column, "
-                                    "ignore_in_hash "
-                                    "FROM bdb_attributes", sql::BindMap());
+    String qry("SELECT id, name, converter, "
+                      "storage_table, storage_column, "
+                      "ignore_in_hash "
+               "FROM bdb_attributes");
+    shared_ptr<Result> r = connection().execute(qry);
+
     const Model& model = Model::instance();
+    String table, column;
     while (r->next()) {
-        mapper_->add(Mapping(r->int64_(0),  // id
-                             r->string(1),  // name
-                             r->string(2),  // typename
-                             model.table_by_name(r->string(3))->column(r->string(4)),
-                             r->bool_(5))); // ignored in hash
+        table = r->value_at("storage_table").string();
+        column = r->value_at("storage_column").string();
+        Mapping mapping(r->value_at("id").int64_(),
+                        r->value_at("name").string(),
+                        r->value_at("converter").string(),
+                        model.table_by_name(table)->column(column),
+                        r->value_at("ignore_in_hash").bool_());
+        mapper_->add(mapping);
     }
 }
 

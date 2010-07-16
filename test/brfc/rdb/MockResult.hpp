@@ -17,34 +17,28 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_MOCK_CONNECTION_HPP
-#define BRFC_RDB_MOCK_CONNECTION_HPP
+#ifndef BRFC_RDB_MOCK_RESULT_HPP
+#define BRFC_RDB_MOCK_RESULT_HPP
 
 #include <gmock/gmock.h>
 
-
-#include <brfc/smart_ptr.hpp>
-#include <brfc/rdb/Connection.hpp>
+#include <brfc/rdb/Result.hpp>
 
 namespace brfc {
+
 namespace rdb {
 
-class MockConnection : public Connection {
+class MockResult : public Result {
   public:
-    MOCK_METHOD0(do_open, void());
-    MOCK_CONST_METHOD0(do_is_open, bool());
-    MOCK_METHOD0(do_close, void());
+    MOCK_METHOD0(do_next, bool());
+    MOCK_METHOD1(do_seek, bool(int));
+    MOCK_METHOD0(do_size, int());
 
-    MOCK_METHOD0(do_begin, void());
-    MOCK_METHOD0(do_commit, void());
-    MOCK_METHOD0(do_rollback, void());
-
-    MOCK_METHOD1(do_execute, shared_ptr<Result>(const String&));
-    MOCK_CONST_METHOD0(do_in_transaction, bool());
-    MOCK_CONST_METHOD0(do_dialect, String());
+    MOCK_CONST_METHOD1(do_value_at, Variant(unsigned int));
+    MOCK_CONST_METHOD1(do_value_at, Variant(const String&));
 };
 
 } // namespace rdb
 } // namespace brfc
 
-#endif // BRFC_RDB_MOCK_CONNECTION_HPP
+#endif // BRFC_RDB_MOCK_RESULT_HPP

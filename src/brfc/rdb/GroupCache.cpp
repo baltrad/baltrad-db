@@ -19,9 +19,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/GroupCache.hpp>
 
-#include <brfc/ResultSet.hpp>
-
+#include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/Result.hpp>
 #include <brfc/sql/BindMap.hpp>
 
 namespace brfc {
@@ -50,8 +50,8 @@ GroupCache::do_lookup_key(weak_ptr<const oh5::Group> weak_group) {
     }
     binds.add(":parent_id", parent_id);
     binds.add(":name", Variant(group->name()));
-    shared_ptr<ResultSet> r = rdb_->query(qry, binds);
-    return r->next() ? r->int64_(0) : OptionalKey();
+    shared_ptr<Result> r = rdb_->connection().execute(qry, binds);
+    return r->next() ? r->value_at(0).int64_() : OptionalKey();
 }
 
 } // namespace rdb
