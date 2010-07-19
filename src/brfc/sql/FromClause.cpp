@@ -29,18 +29,18 @@ namespace brfc {
 namespace sql {
 
 void
-FromClause::add(SelectablePtr selectable) {
+FromClause::add(ConstSelectablePtr selectable) {
     if (has(selectable))
         throw duplicate_entry("duplicate selectable");
     elements_.push_back(selectable);
 }
 
 bool
-FromClause::has(SelectablePtr selectable) const {
+FromClause::has(ConstSelectablePtr selectable) const {
     // always accept unnamed
     if (selectable->name() == "")
         return false;
-    BOOST_FOREACH(SelectablePtr element, elements_) {
+    BOOST_FOREACH(ConstSelectablePtr element, elements_) {
         if (selectable->name() == element->name())
             return true;
     }

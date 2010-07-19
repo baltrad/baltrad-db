@@ -58,6 +58,7 @@ typedef shared_ptr<Label> LabelPtr;
 typedef shared_ptr<Literal> LiteralPtr;
 typedef shared_ptr<Parentheses> ParenthesesPtr;
 typedef shared_ptr<Selectable> SelectablePtr;
+typedef shared_ptr<const Selectable> ConstSelectablePtr;
 typedef shared_ptr<Select> SelectPtr;
 typedef shared_ptr<Table> TablePtr;
 

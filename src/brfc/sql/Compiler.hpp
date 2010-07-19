@@ -40,17 +40,17 @@ class Query;
  */
 class Compiler {
   public:
-    typedef mpl::vector<Alias,
-                        BinaryOperator,
-                        Column,
-                        FromClause,
-                        Insert,
-                        Join,
-                        Parentheses,
-                        Label,
-                        Literal,
-                        Select,
-                        Table> accepted_types;
+    typedef mpl::vector<const Alias,
+                        const BinaryOperator,
+                        const Column,
+                        const FromClause,
+                        const Insert,
+                        const Join,
+                        const Parentheses,
+                        const Label,
+                        const Literal,
+                        const Select,
+                        const Table> accepted_types;
 
     /**
      * @brief constructor
@@ -68,77 +68,77 @@ class Compiler {
      * @post stack contains compiled string, accessible through compiled()
      */
     template<typename T>
-    Query compile(T& expr);
+    Query compile(const T& expr);
 
     /**
      * @brief compile Alias to string form
      *
      * @post top of the stack contains alias or 'content AS alias'
      */
-    void operator()(Alias& expr);
+    void operator()(const Alias& expr);
 
     /**
      * @brief compile binary operator to string form
      *
      * @post stack contains lhs OP rhs
      */
-    void operator()(BinaryOperator& expr);
+    void operator()(const BinaryOperator& expr);
 
     /**
      * @brief compile column to string form
      * @post top of the stack contains compiled column
      */
-    void operator()(Column& expr);
+    void operator()(const Column& expr);
     
     /**
      * @brief compile from clause to string form
      * @post top of the stack contains FROM + selectables joined by ','
      */
-    void operator()(FromClause& expr);
+    void operator()(const FromClause& expr);
 
     /**
      * @brief compile Join to string form
      * @post top of the stack contains 
      *       '\<from\> JOIN \<to\> ON \<expression\>'
      */
-    void operator()(Join& join);
+    void operator()(const Join& join);
 
     /**
      * @brief compile Literal to string form
      * @post top of the stack contains literal binding key, binds contains
      *       a mapping of this key to value
      */
-    void operator()(Literal& expr);
+    void operator()(const Literal& expr);
     
     /**
      * @brief compile Label to string form
      * @post top of the stack contains labelled AS label
      */
-    void operator()(Label& label);
+    void operator()(const Label& label);
 
     /**
      * @brief surround the top of the stack with parentheses
      * @post stack contains (content)
      */
-    void operator()(Parentheses& expr);
+    void operator()(const Parentheses& expr);
 
     /**
      * @brief compile Select statement to string form
      * @post top of the stack contains compiled where clause
      */
-    void operator()(Select& select);
+    void operator()(const Select& select);
 
     /**
      * @brief compile Insert statement to string form
      * @post top of the stack contiains compiled string
      */
-    void operator()(Insert& insert);
+    void operator()(const Insert& insert);
 
     /**
      * @brief compile Table to string form
      * @post top of the stack contains table name
      */
-    void operator()(Table& expr);
+    void operator()(const Table& expr);
 
   private:
     String pop();

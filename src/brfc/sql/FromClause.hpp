@@ -38,14 +38,14 @@ class FromClause : public Element {
     /**
      * @throw duplicate_entry if not unique
      */
-    void add(SelectablePtr selectable);
+    void add(ConstSelectablePtr selectable);
     
     /**
      * @return true if already has a selectable with same name
      */
-    bool has(SelectablePtr selectable) const;
+    bool has(ConstSelectablePtr selectable) const;
 
-    std::vector<SelectablePtr>& elements() { return elements_; }
+    const std::vector<ConstSelectablePtr>& elements() const { return elements_; }
 
     bool empty() const {
         return elements_.empty();
@@ -57,7 +57,7 @@ class FromClause : public Element {
     }
 
   private:
-    std::vector<SelectablePtr> elements_;
+    std::vector<ConstSelectablePtr> elements_;
 };
 
 } // namespace sql

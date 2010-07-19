@@ -43,24 +43,24 @@ namespace sql {
 
 template<typename T>
 Query
-Compiler::compile(T& expr) {
+Compiler::compile(const T& expr) {
     visit(expr, *this);
     return Query(stack_.back(), binds_);
 }
 
 // explicitly instantiate the template
-template Query Compiler::compile(Alias& expr);
-template Query Compiler::compile(Column& expr);
-template Query Compiler::compile(FromClause& expr);
-template Query Compiler::compile(Join& expr);
-template Query Compiler::compile(Select& expr);
-template Query Compiler::compile(Insert& expr);
-template Query Compiler::compile(Table& expr);
-template Query Compiler::compile(BinaryOperator& expr);
-template Query Compiler::compile(Expression& expr);
-template Query Compiler::compile(Label& expr);
-template Query Compiler::compile(Literal& expr);
-template Query Compiler::compile(Parentheses& expr);
+template Query Compiler::compile(const Alias& expr);
+template Query Compiler::compile(const Column& expr);
+template Query Compiler::compile(const FromClause& expr);
+template Query Compiler::compile(const Join& expr);
+template Query Compiler::compile(const Select& expr);
+template Query Compiler::compile(const Insert& expr);
+template Query Compiler::compile(const Table& expr);
+template Query Compiler::compile(const BinaryOperator& expr);
+template Query Compiler::compile(const Expression& expr);
+template Query Compiler::compile(const Label& expr);
+template Query Compiler::compile(const Literal& expr);
+template Query Compiler::compile(const Parentheses& expr);
 
 String
 Compiler::pop() {
@@ -76,7 +76,7 @@ Compiler::push(const String& top) {
 }
 
 void
-Compiler::operator()(BinaryOperator& expr) {
+Compiler::operator()(const BinaryOperator& expr) {
     visit(*expr.lhs(), *this);
     visit(*expr.rhs(), *this);
     const String& rhs = pop();
@@ -85,13 +85,13 @@ Compiler::operator()(BinaryOperator& expr) {
 }
 
 void
-Compiler::operator()(Column& expr) {
+Compiler::operator()(const Column& expr) {
     visit(*expr.selectable(), *this);
     push(pop() + "." + expr.name());
 }
 
 void
-Compiler::operator()(Alias& expr) {
+Compiler::operator()(const Alias& expr) {
     if (in_from_clause_) {
         visit(*expr.aliased(), *this);
         push(pop() + " AS " + expr.alias());
@@ -102,7 +102,7 @@ Compiler::operator()(Alias& expr) {
 }
 
 void
-Compiler::operator()(Join& join) {
+Compiler::operator()(const Join& join) {
     in_from_clause_ = true;
     visit(*join.from(), *this);
     visit(*join.to(), *this);
@@ -130,32 +130,32 @@ Compiler::operator()(Join& join) {
 }
 
 void
-Compiler::operator()(Literal& expr) {
+Compiler::operator()(const Literal& expr) {
     String key = String(":lit_") + String::number(literal_count_++);
     push(key);
     binds_.add(key, expr.value());
 }
 
 void
-Compiler::operator()(Label& label) {
+Compiler::operator()(const Label& label) {
     visit(*label.expression(), *this);
     push(pop() + " AS " + label.name());
 }
 
 void
-Compiler::operator()(Parentheses& expr) {
+Compiler::operator()(const Parentheses& expr) {
     visit(*expr.expression(), *this);
     push("(" + pop() + ")");
 }
 
 void
-Compiler::operator()(FromClause& from) {
+Compiler::operator()(const FromClause& from) {
     if (from.empty())
         return;
 
     in_from_clause_ = true;
 
-    BOOST_FOREACH(SelectablePtr element, from.elements()) {
+    BOOST_FOREACH(ConstSelectablePtr element, from.elements()) {
         visit(*element, *this);
     }
 
@@ -171,7 +171,7 @@ Compiler::operator()(FromClause& from) {
 }
 
 void
-Compiler::operator()(Select& select) {
+Compiler::operator()(const Select& select) {
 
     BOOST_FOREACH(ExpressionPtr col, select.what()) {
         visit(*col, *this);
@@ -206,7 +206,7 @@ Compiler::operator()(Select& select) {
 }
 
 void
-Compiler::operator()(Insert& insert) {
+Compiler::operator()(const Insert& insert) {
     StringList cols;
     StringList vals;
     BOOST_FOREACH(const Insert::ValueMap::value_type& bind, insert.values()) {
@@ -230,7 +230,7 @@ Compiler::operator()(Insert& insert) {
 }
 
 void
-Compiler::operator()(Table& expr) {
+Compiler::operator()(const Table& expr) {
     push(expr.name());
 }
 
