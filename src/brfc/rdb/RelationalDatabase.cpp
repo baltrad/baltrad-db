@@ -45,6 +45,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Query.hpp>
 #include <brfc/sql/Result.hpp>
+#include <brfc/sql/Select.hpp>
 #include <brfc/sql/Table.hpp>
 
 namespace brfc {

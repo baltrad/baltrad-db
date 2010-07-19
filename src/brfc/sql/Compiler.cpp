@@ -41,26 +41,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-template<typename T>
 Query
-Compiler::compile(const T& expr) {
+Compiler::compile(const Element& expr) {
     visit(expr, *this);
     return Query(stack_.back(), binds_);
 }
-
-// explicitly instantiate the template
-template Query Compiler::compile(const Alias& expr);
-template Query Compiler::compile(const Column& expr);
-template Query Compiler::compile(const FromClause& expr);
-template Query Compiler::compile(const Join& expr);
-template Query Compiler::compile(const Select& expr);
-template Query Compiler::compile(const Insert& expr);
-template Query Compiler::compile(const Table& expr);
-template Query Compiler::compile(const BinaryOperator& expr);
-template Query Compiler::compile(const Expression& expr);
-template Query Compiler::compile(const Label& expr);
-template Query Compiler::compile(const Literal& expr);
-template Query Compiler::compile(const Parentheses& expr);
 
 String
 Compiler::pop() {

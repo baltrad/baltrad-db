@@ -67,8 +67,7 @@ class Compiler {
      * @pre stack is empty
      * @post stack contains compiled string, accessible through compiled()
      */
-    template<typename T>
-    Query compile(const T& expr);
+    Query compile(const Element& expr);
 
     /**
      * @brief compile Alias to string form
