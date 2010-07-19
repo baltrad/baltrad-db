@@ -43,18 +43,8 @@ Factory::string(const char* value) const {
 }
 
 LiteralPtr
-Factory::integer(long long value) const {
-    return int64_(value);
-}
-
-LiteralPtr
 Factory::int64_(long long value) const {
     return Literal::create(Variant(value));
-}
-
-LiteralPtr
-Factory::real(double value) const {
-    return double_(value);
 }
 
 LiteralPtr
@@ -95,11 +85,6 @@ Factory::time(const DateTime& datetime) const {
 LiteralPtr
 Factory::datetime(const DateTime& datetime) const {
     return Literal::create(Variant(datetime));
-}
-
-LiteralPtr
-Factory::boolean(bool value) const {
-    return bool_(value);
 }
 
 LiteralPtr
