@@ -38,6 +38,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Literal.hpp>
+#include <brfc/sql/Query.hpp>
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Table.hpp>
 
@@ -98,10 +99,9 @@ SaveFile::operator()(const oh5::File& file,
     stmt->value("filename_version", xpr.int64_(filename_version));
 
     sql::Compiler c;
-    c.compile(*stmt);
+    const sql::Query& q = c.compile(*stmt);
 
-    shared_ptr<sql::Result> result =
-        rdb_->connection().execute(c.compiled(), c.binds());
+    shared_ptr<sql::Result> result = rdb_->connection().execute(q);
 
     BOOST_FOREACH(const oh5::Node& node, *file.root()) {
         visit(node, *this);

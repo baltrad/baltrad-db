@@ -43,6 +43,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Compiler.hpp>
 #include <brfc/sql/Connection.hpp>
+#include <brfc/sql/Query.hpp>
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Table.hpp>
 
@@ -133,10 +134,9 @@ RelationalDatabase::do_query(const Query& query) {
     sql::SelectPtr select = QueryToSelect::transform(query, *mapper_.get());
 
     sql::Compiler compiler;
-    compiler.compile(*select);
+    const sql::Query& q = compiler.compile(*select);
 
-    shared_ptr<sql::Result> res = connection().execute(compiler.compiled(),
-                                                  compiler.binds());
+    shared_ptr<sql::Result> res = connection().execute(q);
     return shared_ptr<ResultSet>(new RelationalResultSet(res));
 }
 

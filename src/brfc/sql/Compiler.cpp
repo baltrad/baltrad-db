@@ -34,6 +34,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Label.hpp>
 #include <brfc/sql/Literal.hpp>
 #include <brfc/sql/Parentheses.hpp>
+#include <brfc/sql/Query.hpp>
 #include <brfc/sql/Select.hpp>
 #include <brfc/sql/Table.hpp>
 
@@ -41,24 +42,25 @@ namespace brfc {
 namespace sql {
 
 template<typename T>
-void
+Query
 Compiler::compile(T& expr) {
     visit(expr, *this);
+    return Query(stack_.back(), binds_);
 }
 
 // explicitly instantiate the template
-template void Compiler::compile(Alias& expr);
-template void Compiler::compile(Column& expr);
-template void Compiler::compile(FromClause& expr);
-template void Compiler::compile(Join& expr);
-template void Compiler::compile(Select& expr);
-template void Compiler::compile(Insert& expr);
-template void Compiler::compile(Table& expr);
-template void Compiler::compile(BinaryOperator& expr);
-template void Compiler::compile(Expression& expr);
-template void Compiler::compile(Label& expr);
-template void Compiler::compile(Literal& expr);
-template void Compiler::compile(Parentheses& expr);
+template Query Compiler::compile(Alias& expr);
+template Query Compiler::compile(Column& expr);
+template Query Compiler::compile(FromClause& expr);
+template Query Compiler::compile(Join& expr);
+template Query Compiler::compile(Select& expr);
+template Query Compiler::compile(Insert& expr);
+template Query Compiler::compile(Table& expr);
+template Query Compiler::compile(BinaryOperator& expr);
+template Query Compiler::compile(Expression& expr);
+template Query Compiler::compile(Label& expr);
+template Query Compiler::compile(Literal& expr);
+template Query Compiler::compile(Parentheses& expr);
 
 String
 Compiler::pop() {

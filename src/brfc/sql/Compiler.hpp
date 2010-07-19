@@ -33,6 +33,8 @@ namespace brfc {
 
 namespace sql {
 
+class Query;
+
 /**
  * @brief compile elements to string form
  */
@@ -66,17 +68,7 @@ class Compiler {
      * @post stack contains compiled string, accessible through compiled()
      */
     template<typename T>
-    void compile(T& expr);
-
-    /**
-     * @brief access literal bindings
-     */
-    const BindMap& binds() const { return binds_; }
-    
-    /**
-     * @brief access to compiled string
-     */
-    const String& compiled() const { return stack_.back(); }
+    Query compile(T& expr);
 
     /**
      * @brief compile Alias to string form

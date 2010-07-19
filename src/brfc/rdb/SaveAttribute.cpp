@@ -33,6 +33,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Literal.hpp>
+#include <brfc/sql/Query.hpp>
 #include <brfc/sql/Table.hpp>
 
 namespace brfc {
@@ -57,8 +58,8 @@ SaveAttribute::operator()(const oh5::Attribute& attr) {
 
     if (stmt) {
         sql::Compiler c;
-        c.compile(*stmt);
-        rdb_->connection().execute(c.compiled(), c.binds());
+        const sql::Query& q = c.compile(*stmt);
+        rdb_->connection().execute(q);
     }
 }
 
