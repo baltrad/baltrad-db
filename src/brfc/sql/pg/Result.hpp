@@ -18,7 +18,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef BRFC_SQL_PG_RESULT_HPP
-#define BRFC_RDB_PG_RESULT_HPP
+#define BRFC_SQL_PG_RESULT_HPP
 
 #include <brfc/sql/Result.hpp>
 
