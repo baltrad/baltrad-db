@@ -22,9 +22,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
-#include <brfc/rdb/Connection.hpp>
-#include <brfc/rdb/Result.hpp>
-#include <brfc/rdb/SqlQuery.hpp>
+
+#include <brfc/sql/Connection.hpp>
+#include <brfc/sql/Query.hpp>
+#include <brfc/sql/Result.hpp>
 
 #include "../common.hpp"
 #include "MockResult.hpp"
@@ -35,11 +36,11 @@ using testing::Throw;
 using testing::_;
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-class rdb_Connection_test : public testing::Test {
+class sql_Connection_test : public testing::Test {
   public:
-    rdb_Connection_test()
+    sql_Connection_test()
         : conn() {
     }
 
@@ -51,15 +52,15 @@ class rdb_Connection_test : public testing::Test {
     ::testing::NiceMock<MockConnection> conn;
 };
 
-TEST_F(rdb_Connection_test, test_create_valid_url) {
+TEST_F(sql_Connection_test, test_create_valid_url) {
     EXPECT_TRUE(Connection::create("postgresql://user:password@localhost/dbname"));
 }
 
-TEST_F(rdb_Connection_test, test_create_invalid_url) {
+TEST_F(sql_Connection_test, test_create_invalid_url) {
     EXPECT_THROW(Connection::create("bla://user:password@localhost/dbname"), value_error);
 }
 
-TEST_F(rdb_Connection_test, test_no_transaction_execute) {
+TEST_F(sql_Connection_test, test_no_transaction_execute) {
     String stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false))  // execute()
@@ -73,7 +74,7 @@ TEST_F(rdb_Connection_test, test_no_transaction_execute) {
     conn.execute(stmt);
 }
 
-TEST_F(rdb_Connection_test, test_no_transaction_excute_throws) {
+TEST_F(sql_Connection_test, test_no_transaction_excute_throws) {
     String stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false)) // execute()
@@ -87,7 +88,7 @@ TEST_F(rdb_Connection_test, test_no_transaction_excute_throws) {
     EXPECT_THROW(conn.execute(stmt), db_error);
 }
 
-TEST_F(rdb_Connection_test, test_in_transaction_execute) {
+TEST_F(sql_Connection_test, test_in_transaction_execute) {
     String stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
@@ -97,7 +98,7 @@ TEST_F(rdb_Connection_test, test_in_transaction_execute) {
     conn.execute(stmt);
 }
 
-TEST_F(rdb_Connection_test, test_in_transaction_execute_throws) {
+TEST_F(sql_Connection_test, test_in_transaction_execute_throws) {
     String stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
@@ -107,31 +108,31 @@ TEST_F(rdb_Connection_test, test_in_transaction_execute_throws) {
     EXPECT_THROW(conn.execute(stmt), db_error);
 }
 
-TEST_F(rdb_Connection_test, test_variant_to_string_string) {
+TEST_F(sql_Connection_test, test_variant_to_string_string) {
     EXPECT_EQ("'qweqwe'", conn.variant_to_string(Variant("qweqwe")));
 }
 
-TEST_F(rdb_Connection_test, test_variant_to_string_integer) {
+TEST_F(sql_Connection_test, test_variant_to_string_integer) {
     EXPECT_EQ("1", conn.variant_to_string(Variant(1)));
 }
 
-TEST_F(rdb_Connection_test, test_variant_to_string_float) {
+TEST_F(sql_Connection_test, test_variant_to_string_float) {
     EXPECT_EQ("0.5", conn.variant_to_string(Variant(0.5)));
 }
 
-TEST_F(rdb_Connection_test, test_variant_to_string_date) {
+TEST_F(sql_Connection_test, test_variant_to_string_date) {
     EXPECT_EQ("'2001-05-01'", conn.variant_to_string(Variant(Date(2001, 5, 1))));
 }
 
-TEST_F(rdb_Connection_test, test_variant_to_string_time) {
+TEST_F(sql_Connection_test, test_variant_to_string_time) {
     EXPECT_EQ("'13:05:59.001'", conn.variant_to_string(Variant(Time(13, 5, 59, 1))));
 }
 
-TEST_F(rdb_Connection_test, test_variant_to_string_null) {
+TEST_F(sql_Connection_test, test_variant_to_string_null) {
     EXPECT_EQ("NULL", conn.variant_to_string(Variant()));
 }
 
-TEST_F(rdb_Connection_test, test_begin) {
+TEST_F(sql_Connection_test, test_begin) {
     EXPECT_CALL(conn, do_is_open())
         .WillOnce(Return(true));
     EXPECT_CALL(conn, do_in_transaction())
@@ -141,21 +142,21 @@ TEST_F(rdb_Connection_test, test_begin) {
     EXPECT_NO_THROW(conn.begin());
 }
 
-TEST_F(rdb_Connection_test, test_begin_in_transaction) {
+TEST_F(sql_Connection_test, test_begin_in_transaction) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(true));
 
     EXPECT_THROW(conn.begin(), db_error);
 }
 
-TEST_F(rdb_Connection_test, test_begin_on_closed_connection) {
+TEST_F(sql_Connection_test, test_begin_on_closed_connection) {
     EXPECT_CALL(conn, do_is_open())
         .WillOnce(Return(false));
     
     EXPECT_THROW(conn.begin(), db_error);
 }
 
-TEST_F(rdb_Connection_test, test_rollback_in_transaction) {
+TEST_F(sql_Connection_test, test_rollback_in_transaction) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(true));
     EXPECT_CALL(conn, do_rollback());
@@ -163,21 +164,21 @@ TEST_F(rdb_Connection_test, test_rollback_in_transaction) {
     EXPECT_NO_THROW(conn.rollback());
 }
 
-TEST_F(rdb_Connection_test, test_rollback_no_transaction) {
+TEST_F(sql_Connection_test, test_rollback_no_transaction) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false));
 
     EXPECT_THROW(conn.rollback(), db_error);
 }
 
-TEST_F(rdb_Connection_test, test_rollback_on_closed_connection) {
+TEST_F(sql_Connection_test, test_rollback_on_closed_connection) {
     EXPECT_CALL(conn, do_is_open())
         .WillOnce(Return(false));
     
     EXPECT_THROW(conn.rollback(), db_error);
 }
 
-TEST_F(rdb_Connection_test, test_commit_in_transaction) {
+TEST_F(sql_Connection_test, test_commit_in_transaction) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(true));
     EXPECT_CALL(conn, do_commit());
@@ -185,24 +186,24 @@ TEST_F(rdb_Connection_test, test_commit_in_transaction) {
     EXPECT_NO_THROW(conn.commit());
 }
 
-TEST_F(rdb_Connection_test, test_commit_no_transaction) {
+TEST_F(sql_Connection_test, test_commit_no_transaction) {
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false));
 
     EXPECT_THROW(conn.commit(), db_error);
 }
 
-TEST_F(rdb_Connection_test, test_commit_on_closed_connection) {
+TEST_F(sql_Connection_test, test_commit_on_closed_connection) {
     EXPECT_CALL(conn, do_is_open())
         .WillOnce(Return(false));
     
     EXPECT_THROW(conn.commit(), db_error);
 }
 
-TEST_F(rdb_Connection_test, test_execute_sqlquery) {
+TEST_F(sql_Connection_test, test_execute_sqlquery) {
     String stmt("query");
-    sql::BindMap binds;
-    SqlQuery query(stmt, binds);
+    BindMap binds;
+    Query query(stmt, binds);
 
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
@@ -212,9 +213,9 @@ TEST_F(rdb_Connection_test, test_execute_sqlquery) {
     conn.execute(query);
 }
 
-TEST_F(rdb_Connection_test, test_execute_replaces_binds) {
+TEST_F(sql_Connection_test, test_execute_replaces_binds) {
     String stmt(":bind");
-    sql::BindMap binds;
+    BindMap binds;
     binds.add(":bind", Variant(1));
 
     ON_CALL(conn, do_execute(_))
@@ -228,5 +229,5 @@ TEST_F(rdb_Connection_test, test_execute_replaces_binds) {
     conn.execute(stmt, binds);
 }
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc

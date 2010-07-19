@@ -17,21 +17,22 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_POSTGRES_RESULT_HPP
-#define BRFC_RDB_POSTGRES_RESULT_HPP
+#ifndef BRFC_SQL_PG_RESULT_HPP
+#define BRFC_RDB_PG_RESULT_HPP
 
-#include <brfc/rdb/Result.hpp>
+#include <brfc/sql/Result.hpp>
 
 #include <pqxx/result>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
+namespace pg {
 
-class PgTypes;
+class Types;
 
-class PostgresResult : public Result {
+class Result : public sql::Result {
   public:
-    PostgresResult(const pqxx::result& result, const PgTypes* types);
+    Result(const pqxx::result& result, const Types* types);
   
   protected:
     virtual bool do_next();
@@ -52,11 +53,12 @@ class PostgresResult : public Result {
                               pqxx::oid coltype) const;
 
     pqxx::result result_;
-    const PgTypes* types_;
+    const Types* types_;
     int row_;
 };
 
-} // namespace rdb
+} // namespace pg
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_POSTGRES_RESULT_SET_HPP
+#endif // BRFC_SQL_PG_RESULT_SET_HPP

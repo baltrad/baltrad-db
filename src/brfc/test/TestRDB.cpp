@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/StringList.hpp>
 
-#include <brfc/rdb/Connection.hpp>
+#include <brfc/sql/Connection.hpp>
 
 namespace fs = boost::filesystem;
 

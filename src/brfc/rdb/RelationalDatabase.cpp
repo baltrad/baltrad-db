@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/FileHasher.hpp>
 #include <brfc/Query.hpp>
-#include <brfc/ResultSet.hpp>
 #include <brfc/String.hpp>
 #include <brfc/StringList.hpp>
 
@@ -34,10 +33,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/SourceRadar.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
-#include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
-#include <brfc/rdb/Result.hpp>
 #include <brfc/rdb/RelationalResultSet.hpp>
 #include <brfc/rdb/SaveFile.hpp>
 #include <brfc/rdb/SHA1AttributeHasher.hpp>
@@ -45,13 +42,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Compiler.hpp>
+#include <brfc/sql/Connection.hpp>
+#include <brfc/sql/Result.hpp>
 #include <brfc/sql/Table.hpp>
 
 namespace brfc {
 namespace rdb {
 
 RelationalDatabase::RelationalDatabase(const String& dsn_)
-        : conn_(Connection::create(dsn_))
+        : conn_(sql::Connection::create(dsn_))
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher(mapper_)) {
     conn_->open();
@@ -101,7 +100,7 @@ RelationalDatabase::do_has_file(const oh5::File& file) {
     String qry("SELECT true FROM bdb_files WHERE unique_id = :unique_id");
     sql::BindMap binds;
     binds.add(":unique_id", Variant(file_hasher().hash(file)));
-    shared_ptr<Result> result = connection().execute(qry, binds);
+    shared_ptr<sql::Result> result = connection().execute(qry, binds);
     return result->size() > 0;
 }
 
@@ -120,7 +119,7 @@ RelationalDatabase::do_next_filename_version(const String& filename) {
                 "WHERE proposed_filename = :filename");
     sql::BindMap binds;
     binds.add(":filename", Variant(filename));
-    shared_ptr<Result> result = connection().execute(qry, binds);
+    shared_ptr<sql::Result> result = connection().execute(qry, binds);
     result->next();
     if (result->value_at(0).is_null()) {
         return 0;
@@ -136,7 +135,7 @@ RelationalDatabase::do_query(const Query& query) {
     sql::Compiler compiler;
     compiler.compile(*select);
 
-    shared_ptr<Result> res = connection().execute(compiler.compiled(),
+    shared_ptr<sql::Result> res = connection().execute(compiler.compiled(),
                                                   compiler.binds());
     return shared_ptr<ResultSet>(new RelationalResultSet(res));
 }
@@ -147,7 +146,7 @@ RelationalDatabase::do_db_id(const oh5::File& file) {
     String qry("SELECT id FROM bdb_files WHERE unique_id = :unique_id");
     sql::BindMap binds;
     binds.add(":unique_id", Variant(file_hasher().hash(file)));
-    shared_ptr<Result> r = connection().execute(qry, binds);
+    shared_ptr<sql::Result> r = connection().execute(qry, binds);
     r->next();
     return r->value_at(0).int64_();
 }
@@ -157,7 +156,7 @@ RelationalDatabase::db_id(const oh5::Source& src) {
     String qry("SELECT id FROM bdb_sources WHERE node_id = :node_id");
     sql::BindMap binds;
     binds.add(":node_id", Variant(src.node_id()));
-    shared_ptr<Result> r = connection().execute(qry, binds);
+    shared_ptr<sql::Result> r = connection().execute(qry, binds);
     if (r->next())
         return r->value_at(0).int64_();
     else
@@ -190,7 +189,7 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
                    String("JOIN bdb_sources ON bdb_sources.id = bdb_source_centres.id ") +
                    String("WHERE ") + wcl.join(" OR ");
     
-    shared_ptr<Result> r = connection().execute(qstr, binds);
+    shared_ptr<sql::Result> r = connection().execute(qstr, binds);
     
     if (r->size() < 1) {
         throw lookup_error("no source found: " +
@@ -238,7 +237,7 @@ RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
                    String("FROM bdb_source_radars ") +
                    String("JOIN bdb_sources ON bdb_source_radars.id = bdb_sources.id ") +
                    String("WHERE ") + wcl.join(" OR ");
-    shared_ptr<Result> r = connection().execute(qstr, binds);
+    shared_ptr<sql::Result> r = connection().execute(qstr, binds);
 
     if (r->size() < 1) {
         throw lookup_error("no source found: " +
@@ -292,7 +291,7 @@ RelationalDatabase::populate_mapper() {
                       "storage_table, storage_column, "
                       "ignore_in_hash "
                "FROM bdb_attributes");
-    shared_ptr<Result> r = connection().execute(qry);
+    shared_ptr<sql::Result> r = connection().execute(qry);
 
     const Model& model = Model::instance();
     String table, column;

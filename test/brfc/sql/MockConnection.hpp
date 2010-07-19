@@ -17,17 +17,17 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_MOCK_CONNECTION_HPP
-#define BRFC_RDB_MOCK_CONNECTION_HPP
+#ifndef BRFC_SQL_MOCK_CONNECTION_HPP
+#define BRFC_SQL_MOCK_CONNECTION_HPP
 
 #include <gmock/gmock.h>
 
 
 #include <brfc/smart_ptr.hpp>
-#include <brfc/rdb/Connection.hpp>
+#include <brfc/sql/Connection.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
 class MockConnection : public Connection {
   public:
@@ -44,7 +44,7 @@ class MockConnection : public Connection {
     MOCK_CONST_METHOD0(do_dialect, String());
 };
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_MOCK_CONNECTION_HPP
+#endif // BRFC_SQL_MOCK_CONNECTION_HPP

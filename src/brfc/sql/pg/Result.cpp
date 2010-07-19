@@ -17,18 +17,19 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/PostgresResult.hpp>
+#include <brfc/sql/pg/Result.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 
-#include <brfc/rdb/PostgresConnection.hpp>
+#include <brfc/sql/pg/Types.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
+namespace pg {
 
-PostgresResult::PostgresResult(const pqxx::result& result,
-                               const PgTypes* types)
+Result::Result(const pqxx::result& result,
+               const Types* types)
         : result_(result)
         , types_(types)
         , row_(-1) {
@@ -36,24 +37,24 @@ PostgresResult::PostgresResult(const pqxx::result& result,
 }
 
 bool
-PostgresResult::do_next() {
+Result::do_next() {
     ++row_;
     return row_ < size();
 }
 
 bool
-PostgresResult::do_seek(int idx) {
+Result::do_seek(int idx) {
     row_ += idx;
     return row_ < size() and row_ > -1;
 }
 
 int
-PostgresResult::do_size() {
+Result::do_size() {
     return result_.size();
 }
 
 Variant
-PostgresResult::pqtype_to_variant(const pqxx::result::field& field,
+Result::pqtype_to_variant(const pqxx::result::field& field,
                                   pqxx::oid coltype) const {
     if (field.is_null())
         return Variant();
@@ -75,7 +76,7 @@ PostgresResult::pqtype_to_variant(const pqxx::result::field& field,
 }
 
 Variant
-PostgresResult::do_value_at(unsigned int pos) const {
+Result::do_value_at(unsigned int pos) const {
     try {
         const pqxx::result::field& field = result_.at(row_).at(pos);
         pqxx::oid coltype = result_.column_type(pos);
@@ -86,7 +87,7 @@ PostgresResult::do_value_at(unsigned int pos) const {
 }
 
 Variant
-PostgresResult::do_value_at(const String& col) const  {
+Result::do_value_at(const String& col) const  {
     std::string col_std = col.to_std_string();
     try {
         const pqxx::result::field& field = result_.at(row_).at(col_std);
@@ -97,5 +98,6 @@ PostgresResult::do_value_at(const String& col) const  {
     }
 }
 
-} // namespace rdb
+} // namespace pg
+} // namespace sql
 } // namespace brfc

@@ -24,16 +24,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/ResultSet.hpp>
 
 namespace brfc {
-namespace rdb {
 
-class Result;
+namespace sql {
+    class Result;
+}
+
+namespace rdb {
 
 /**
  * @brief mediate rdb::Result to ResultSet
  */
 class RelationalResultSet : public ResultSet {
   public:
-    explicit RelationalResultSet(shared_ptr<Result> result)
+    explicit RelationalResultSet(shared_ptr<sql::Result> result)
             : result_(result) {
     }
   
@@ -47,7 +50,7 @@ class RelationalResultSet : public ResultSet {
     virtual Variant do_value_at(unsigned int pos) const;
 
   private:
-    shared_ptr<Result> result_;
+    shared_ptr<sql::Result> result_;
 };
 
 } // namespace rdb

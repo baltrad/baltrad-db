@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_CONNECTION_HPP
-#define BRFC_RDB_CONNECTION_HPP
+#ifndef BRFC_SQL_CONNECTION_HPP
+#define BRFC_SQL_CONNECTION_HPP
 
 #include <brfc/smart_ptr.hpp>
 
@@ -28,10 +28,10 @@ namespace brfc {
 
 class String;
 
-namespace rdb {
+namespace sql {
 
 class Result;
-class SqlQuery;
+class Query;
 
 /**
  * @brief ABC for database connections
@@ -128,10 +128,10 @@ class Connection {
      * @param binds binds to replace into the statement
      * 
      * equivalent to:
-     * @code execute(SqlQuery(statement, binds)); @endcode
+     * @code execute(Query(statement, binds)); @endcode
      */
     shared_ptr<Result> execute(const String& statement,
-                                  const sql::BindMap& binds=sql::BindMap());
+                               const BindMap& binds=BindMap());
     
     /**
      * @brief execute an SQL query
@@ -145,7 +145,7 @@ class Connection {
      *
      * @sa do_execute
      */
-    shared_ptr<Result> execute(const SqlQuery& query);
+    shared_ptr<Result> execute(const Query& query);
 
     /**
      * @sa do_variant_to_string
@@ -198,7 +198,7 @@ class Connection {
     virtual String do_variant_to_string(const Variant& value) const;
 };
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_CONNECTION_HPP
+#endif // BRFC_SQL_CONNECTION_HPP

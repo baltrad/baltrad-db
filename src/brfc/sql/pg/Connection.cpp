@@ -1,24 +1,44 @@
-#include <brfc/rdb/PostgresConnection.hpp>
+/*
+Copyright 2010 Estonian Meteorological and Hydrological Institute
+
+This file is part of baltrad-db.
+
+baltrad-db is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+baltrad-db is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include <brfc/sql/pg/Connection.hpp>
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/rdb/PostgresResult.hpp>
+#include <brfc/sql/pg/Result.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
+namespace pg {
 
-PostgresConnection::PostgresConnection(const Url& url)
+Connection::Connection(const Url& url)
         : url_(url)
         , conn_()
         , transaction_() {
 }
 
-PostgresConnection::~PostgresConnection() {
+Connection::~Connection() {
 
 }
 
 void
-PostgresConnection::do_open() {
+Connection::do_open() {
     conn_.reset(new pqxx::connection(url_to_pg(url_).to_std_string()));
     conn_->set_client_encoding("utf8");
     conn_->set_variable("datestyle", "ISO");
@@ -26,39 +46,39 @@ PostgresConnection::do_open() {
 }
 
 bool
-PostgresConnection::do_is_open() const {
+Connection::do_is_open() const {
     if (conn_ and conn_->is_open())
         return true;
     return false;
 }
 
 void
-PostgresConnection::do_close() {
+Connection::do_close() {
     conn_.reset();
 }
 
 void
-PostgresConnection::do_begin() {
+Connection::do_begin() {
     transaction_.reset(new pqxx::transaction<>(*conn_));
 }
 
 void
-PostgresConnection::do_commit() {
+Connection::do_commit() {
     transaction_->commit();
     transaction_.reset();
 }
 
 void
-PostgresConnection::do_rollback() {
+Connection::do_rollback() {
     transaction_.reset();
 }
 
-shared_ptr<Result>
-PostgresConnection::do_execute(const String& query) {
-    shared_ptr<Result> result;
+shared_ptr<sql::Result>
+Connection::do_execute(const String& query) {
+    shared_ptr<sql::Result> result;
     try {
         pqxx::result pg_result = transaction_->exec(query.to_utf8());
-        result = make_shared<PostgresResult>(pg_result, &types_);
+        result = make_shared<Result>(pg_result, &types_);
     } catch (const std::runtime_error& e) {
         throw db_error(e.what());
     }
@@ -67,7 +87,7 @@ PostgresConnection::do_execute(const String& query) {
 }
 
 String
-PostgresConnection::url_to_pg(const Url& url) {
+Connection::url_to_pg(const Url& url) {
     String pgargs;
     if (url.host() != "")
         pgargs += " host=" + url.host();
@@ -88,7 +108,7 @@ PostgresConnection::url_to_pg(const Url& url) {
 }
 
 bool
-PostgresConnection::do_has_feature(Connection::Feature feature) const {
+Connection::do_has_feature(Connection::Feature feature) const {
     switch (feature) {
         case RETURNING:
             // XXX: supported since 8.2, do a version check
@@ -103,7 +123,7 @@ PostgresConnection::do_has_feature(Connection::Feature feature) const {
 }
 
 void
-PostgresConnection::load_type_oids() {
+Connection::load_type_oids() {
     const char* qry = "SELECT oid, typname FROM pg_catalog.pg_type "
                       "WHERE typname IN ('int2', 'int4', 'int8', "
                                         "'float4', 'float8', "
@@ -133,5 +153,6 @@ PostgresConnection::load_type_oids() {
     }
 }
 
-} // namespace rdb
+} // namespace pg
+} // namespace sql
 } // namespace brfc

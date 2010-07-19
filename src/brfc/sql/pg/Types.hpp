@@ -17,28 +17,28 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_MOCK_RESULT_HPP
-#define BRFC_RDB_MOCK_RESULT_HPP
+#ifndef BRFC_SQL_PG_TYPES_HPP
+#define BRFC_SQL_PG_TYPES_HPP
 
-#include <gmock/gmock.h>
-
-#include <brfc/rdb/Result.hpp>
+#include <pqxx/util>
 
 namespace brfc {
+namespace sql {
+namespace pg {
 
-namespace rdb {
-
-class MockResult : public Result {
-  public:
-    MOCK_METHOD0(do_next, bool());
-    MOCK_METHOD1(do_seek, bool(int));
-    MOCK_METHOD0(do_size, int());
-
-    MOCK_CONST_METHOD1(do_value_at, Variant(unsigned int));
-    MOCK_CONST_METHOD1(do_value_at, Variant(const String&));
+struct Types {
+    pqxx::oid int2_oid;
+    pqxx::oid int4_oid;
+    pqxx::oid int8_oid;
+    pqxx::oid float4_oid;
+    pqxx::oid float8_oid;
+    pqxx::oid bool_oid;
+    pqxx::oid date_oid;
+    pqxx::oid time_oid;
 };
 
-} // namespace rdb
+} // namespace pg
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_MOCK_RESULT_HPP
+#endif // BRFC_SQL_PG_TYPES_HPP

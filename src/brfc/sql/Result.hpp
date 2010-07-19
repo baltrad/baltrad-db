@@ -17,15 +17,15 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_RESULT_HPP
-#define BRFC_RDB_RESULT_HPP
+#ifndef BRFC_SQL_RESULT_HPP
+#define BRFC_SQL_RESULT_HPP
 
 #include <boost/noncopyable.hpp>
 
 #include <brfc/Variant.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
 /**
  * @brief ABC for database results
@@ -110,7 +110,7 @@ class Result : public boost::noncopyable {
     virtual Variant do_value_at(const String& column) const = 0;
 };
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_RESULT_HPP
+#endif // BRFC_SQL_RESULT_HPP

@@ -17,36 +17,34 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_SQL_QUERY_HPP
-#define BRFC_RDB_SQL_QUERY_HPP
+#ifndef BRFC_SQL_QUERY_HPP
+#define BRFC_SQL_QUERY_HPP
 
 #include <brfc/String.hpp>
 
-#include <brfc/rdb/Connection.hpp>
+#include <brfc/sql/Connection.hpp>
 #include <brfc/sql/BindMap.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-class Connection;
-
-class SqlQuery {
+class Query {
   public:
-    explicit SqlQuery(const String& statement="",
-                      const sql::BindMap& binds=sql::BindMap())
+    explicit Query(const String& statement="",
+                   const BindMap& binds=BindMap())
             : statement_(statement)
             , binds_(binds) {
     }
 
-    void binds(const sql::BindMap& binds) {
+    void binds(const BindMap& binds) {
         binds_ = binds;
     }
 
-    sql::BindMap& binds() {
+    BindMap& binds() {
         return binds_;
     }
 
-    const sql::BindMap& binds() const {
+    const BindMap& binds() const {
         return binds_;
     }
 
@@ -71,10 +69,10 @@ class SqlQuery {
     
   private:
     String statement_;
-    sql::BindMap binds_;
+    BindMap binds_;
 };
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_SQL_QUERY_HPP
+#endif // BRFC_SQL_QUERY_HPP

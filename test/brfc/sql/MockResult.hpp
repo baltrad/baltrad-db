@@ -17,35 +17,28 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/RelationalResultSet.hpp>
+#ifndef BRFC_SQL_MOCK_RESULT_HPP
+#define BRFC_SQL_MOCK_RESULT_HPP
 
-#include <brfc/Variant.hpp>
+#include <gmock/gmock.h>
 
 #include <brfc/sql/Result.hpp>
 
 namespace brfc {
-namespace rdb {
 
-bool
-RelationalResultSet::do_next() {
-    return result_->next();
-}
+namespace sql {
 
-bool
-RelationalResultSet::do_seek(int idx) {
-    return result_->seek(idx);
-}
+class MockResult : public Result {
+  public:
+    MOCK_METHOD0(do_next, bool());
+    MOCK_METHOD1(do_seek, bool(int));
+    MOCK_METHOD0(do_size, int());
 
-int
-RelationalResultSet::do_size() {
-    return result_->size();
-}
+    MOCK_CONST_METHOD1(do_value_at, Variant(unsigned int));
+    MOCK_CONST_METHOD1(do_value_at, Variant(const String&));
+};
 
-Variant
-RelationalResultSet::do_value_at(unsigned int pos) const {
-    return result_->value_at(pos);
-}
-
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
+#endif // BRFC_SQL_MOCK_RESULT_HPP

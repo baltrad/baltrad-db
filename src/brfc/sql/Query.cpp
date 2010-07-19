@@ -17,17 +17,17 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/SqlQuery.hpp>
+#include <brfc/sql/Query.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/String.hpp>
 #include <brfc/RegExp.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
 String
-SqlQuery::replace_binds(const Connection& connection) const {
+Query::replace_binds(const Connection& connection) const {
     if (binds_.size() == 0)
         return statement_;
     RegExp bind_re(":[a-zA-Z0-9_]+");
@@ -58,5 +58,5 @@ SqlQuery::replace_binds(const Connection& connection) const {
 }
 
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc

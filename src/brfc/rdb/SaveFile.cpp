@@ -29,16 +29,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
-#include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
-#include <brfc/rdb/Result.hpp>
 #include <brfc/rdb/Model.hpp>
 
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Compiler.hpp>
+#include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Literal.hpp>
+#include <brfc/sql/Result.hpp>
 #include <brfc/sql/Table.hpp>
 
 namespace brfc {
@@ -73,7 +73,7 @@ SaveFile::operator()(const oh5::File& file,
 
     sql::InsertPtr stmt = sql::Insert::create(files);
 
-    if (rdb_->connection().has_feature(Connection::RETURNING))
+    if (rdb_->connection().has_feature(sql::Connection::RETURNING))
         stmt->return_(files->column("id"));
     
     sql::Factory xpr;
@@ -100,14 +100,14 @@ SaveFile::operator()(const oh5::File& file,
     sql::Compiler c;
     c.compile(*stmt);
 
-    shared_ptr<Result> result =
+    shared_ptr<sql::Result> result =
         rdb_->connection().execute(c.compiled(), c.binds());
 
     BOOST_FOREACH(const oh5::Node& node, *file.root()) {
         visit(node, *this);
     }
 
-    if (rdb_->connection().has_feature(Connection::RETURNING) and result->next()) {
+    if (rdb_->connection().has_feature(sql::Connection::RETURNING) and result->next()) {
         return result->value_at(0).int64_();
     } else {
         // XXX: last insert id!

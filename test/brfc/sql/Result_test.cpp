@@ -24,10 +24,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
-#include <brfc/rdb/Connection.hpp>
-#include <brfc/rdb/Result.hpp>
 
 #include <brfc/sql/BindMap.hpp>
+#include <brfc/sql/Connection.hpp>
+#include <brfc/sql/Result.hpp>
 
 #include <brfc/test/TestRDB.hpp>
 
@@ -35,14 +35,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include "../common.hpp"
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
 struct rdb_Result_test : public testing::TestWithParam<const char*> {
     rdb_Result_test()
             : db(TestRDBEnv::get_database(GetParam())) {
     }
 
-    shared_ptr<Result> query(const String& stmt, const sql::BindMap& binds) {
+    shared_ptr<Result> query(const String& stmt, const BindMap& binds) {
         return db->connection().execute(stmt, binds);
     }
     
@@ -122,5 +122,5 @@ INSTANTIATE_TEST_CASE_P(rdb_Result_test_p,
                         ::testing::ValuesIn(test_dsns));
 #endif // BRFC_TEST_DSN_COUNT
 
-} // namepsace rdb
+} // namepsace sql
 } // namespace brfc

@@ -17,23 +17,23 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/Connection.hpp>
+#include <brfc/sql/Connection.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/String.hpp>
 #include <brfc/Url.hpp>
 
-#include <brfc/rdb/SqlQuery.hpp>
-#include <brfc/rdb/PostgresConnection.hpp>
+#include <brfc/sql/Query.hpp>
+#include <brfc/sql/pg/Connection.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
 shared_ptr<Connection>
 Connection::create(const String& dsn) {
     Url url(dsn);
     if (url.scheme() == "postgresql")
-        return make_shared<PostgresConnection>(url);
+        return make_shared<pg::Connection>(url);
     else
         throw value_error("no mapping found for dsn scheme: "
                           + url.scheme().to_utf8());
@@ -81,12 +81,12 @@ Connection::commit() {
 }
 
 shared_ptr<Result>
-Connection::execute(const String& statement, const sql::BindMap& binds) {
-    return execute(SqlQuery(statement, binds));    
+Connection::execute(const String& statement, const BindMap& binds) {
+    return execute(Query(statement, binds));    
 }
 
 shared_ptr<Result>
-Connection::execute(const SqlQuery& query) {
+Connection::execute(const Query& query) {
     String statement = query.replace_binds(*this);
     shared_ptr<Result> result;
     if (not in_transaction()) {
@@ -132,5 +132,5 @@ Connection::do_variant_to_string(const Variant& value) const {
     }
 }
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc

@@ -38,18 +38,18 @@ class Source;
 class SourceCentre;
 class SourceRadar;
 
-}
+} // namespace oh5
 
 namespace sql {
 
 class BindMap;
+class Connection;
 
-}
+} // namespace sql
 
 namespace rdb {
 
 class AttributeMapper;
-class Connection;
 
 /**
  * @brief Relational database backend
@@ -78,7 +78,7 @@ class RelationalDatabase : public Database {
 
     void populate_mapper();
 
-    Connection& connection() {
+    sql::Connection& connection() {
         return *conn_;
     }
 
@@ -143,7 +143,7 @@ class RelationalDatabase : public Database {
      */
     void remove_file(const String& path);
 
-    shared_ptr<Connection> conn_;
+    shared_ptr<sql::Connection> conn_;
     shared_ptr<AttributeMapper> mapper_;
     shared_ptr<FileHasher> file_hasher_;
     SourceMap sources_;

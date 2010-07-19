@@ -23,13 +23,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Group.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
-#include <brfc/rdb/Connection.hpp>
 #include <brfc/rdb/GroupCache.hpp>
 #include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Compiler.hpp>
+#include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Literal.hpp>
