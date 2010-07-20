@@ -17,33 +17,22 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_SQL_COMPILER_HPP
-#define BRFC_SQL_COMPILER_HPP
+#ifndef BRFC_SQL_MOCK_COMPILER_HPP
+#define BRFC_SQL_MOCK_COMPILER_HPP
 
-#include <brfc/sql/Query.hpp>
+#include <gmock/gmock.h>
+
+#include <brfc/sql/Compiler.hpp>
 
 namespace brfc {
-namespace sql {
+namespace sql  {
 
-class Element;
-
-/**
- * @brief ABC
- */
-class Compiler {
+class MockCompiler : public Compiler {
   public:
-    Query compile(const Element& expr) {
-        return do_compile(expr);
-    }
-
-  protected:
-    /**
-     * @brief compile expression/statement to string form
-     */
-    virtual Query do_compile(const Element& expr) = 0;
+    MOCK_METHOD1(do_compile, Query(const Element&));
 };
 
 } // namespace sql
 } // namespace brfc
 
-#endif // BRFC_SQL_COMPILER_HPP
+#endif // BRFC_SQL_MOCK_COMPILER_HPP

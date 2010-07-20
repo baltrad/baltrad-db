@@ -17,12 +17,13 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/sql/Compiler.hpp>
+#include <brfc/sql/DefaultCompiler.hpp>
 
 #include <algorithm>
 
 #include <boost/foreach.hpp>
 
+#include <brfc/assert.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/sql/Alias.hpp>
@@ -42,13 +43,15 @@ namespace brfc {
 namespace sql {
 
 Query
-Compiler::compile(const Element& expr) {
+DefaultCompiler::do_compile(const Element& expr) {
+    stack_.clear();
+    binds_.clear();
     visit(expr, *this);
     return Query(stack_.back(), binds_);
 }
 
 String
-Compiler::pop() {
+DefaultCompiler::pop() {
     BRFC_ASSERT(!stack_.empty());
     String top = stack_.back();
     stack_.pop_back();
@@ -56,12 +59,12 @@ Compiler::pop() {
 }
 
 void
-Compiler::push(const String& top) {
+DefaultCompiler::push(const String& top) {
     stack_.push_back(top);
 }
 
 void
-Compiler::operator()(const BinaryOperator& expr) {
+DefaultCompiler::operator()(const BinaryOperator& expr) {
     visit(*expr.lhs(), *this);
     visit(*expr.rhs(), *this);
     const String& rhs = pop();
@@ -70,13 +73,13 @@ Compiler::operator()(const BinaryOperator& expr) {
 }
 
 void
-Compiler::operator()(const Column& expr) {
+DefaultCompiler::operator()(const Column& expr) {
     visit(*expr.selectable(), *this);
     push(pop() + "." + expr.name());
 }
 
 void
-Compiler::operator()(const Alias& expr) {
+DefaultCompiler::operator()(const Alias& expr) {
     if (in_from_clause_) {
         visit(*expr.aliased(), *this);
         push(pop() + " AS " + expr.alias());
@@ -87,7 +90,7 @@ Compiler::operator()(const Alias& expr) {
 }
 
 void
-Compiler::operator()(const Join& join) {
+DefaultCompiler::operator()(const Join& join) {
     in_from_clause_ = true;
     visit(*join.from(), *this);
     visit(*join.to(), *this);
@@ -115,26 +118,26 @@ Compiler::operator()(const Join& join) {
 }
 
 void
-Compiler::operator()(const Literal& expr) {
+DefaultCompiler::operator()(const Literal& expr) {
     String key = String(":lit_") + String::number(literal_count_++);
     push(key);
     binds_.add(key, expr.value());
 }
 
 void
-Compiler::operator()(const Label& label) {
+DefaultCompiler::operator()(const Label& label) {
     visit(*label.expression(), *this);
     push(pop() + " AS " + label.name());
 }
 
 void
-Compiler::operator()(const Parentheses& expr) {
+DefaultCompiler::operator()(const Parentheses& expr) {
     visit(*expr.expression(), *this);
     push("(" + pop() + ")");
 }
 
 void
-Compiler::operator()(const FromClause& from) {
+DefaultCompiler::operator()(const FromClause& from) {
     if (from.empty())
         return;
 
@@ -156,7 +159,7 @@ Compiler::operator()(const FromClause& from) {
 }
 
 void
-Compiler::operator()(const Select& select) {
+DefaultCompiler::operator()(const Select& select) {
 
     BOOST_FOREACH(ExpressionPtr col, select.what()) {
         visit(*col, *this);
@@ -191,7 +194,7 @@ Compiler::operator()(const Select& select) {
 }
 
 void
-Compiler::operator()(const Insert& insert) {
+DefaultCompiler::operator()(const Insert& insert) {
     StringList cols;
     StringList vals;
     BOOST_FOREACH(const Insert::ValueMap::value_type& bind, insert.values()) {
@@ -215,7 +218,7 @@ Compiler::operator()(const Insert& insert) {
 }
 
 void
-Compiler::operator()(const Table& expr) {
+DefaultCompiler::operator()(const Table& expr) {
     push(expr.name());
 }
 

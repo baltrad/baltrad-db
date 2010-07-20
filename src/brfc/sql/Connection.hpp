@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/smart_ptr.hpp>
 
 #include <brfc/sql/BindMap.hpp>
+#include <brfc/sql/Compiler.hpp>
 
 namespace brfc {
 
@@ -30,8 +31,11 @@ class String;
 
 namespace sql {
 
-class Result;
+class Compiler;
+class Insert;
 class Query;
+class Result;
+class Select;
 
 /**
  * @brief ABC for database connections
@@ -42,7 +46,9 @@ class Connection {
         RETURNING = 1,
         LAST_INSERT_ID = 2
     };
-    
+
+    Connection(shared_ptr<Compiler> compiler=shared_ptr<Compiler>());
+
     /**
      * @brief create a Connection instance from dsn
      * @param dsn dsn (transformed to Url)
@@ -55,10 +61,8 @@ class Connection {
      */
     static shared_ptr<Connection> create(const String& dsn);
 
-    virtual ~Connection() {
+    virtual ~Connection();    
 
-    }
-    
     /**
      * @brief open the connection
      * @throw db_error if connection is already open
@@ -134,6 +138,16 @@ class Connection {
                                const BindMap& binds=BindMap());
     
     /**
+     * @brief execute an Insert statement
+     */
+    shared_ptr<Result> execute(const Insert& stmt);
+
+    /**
+     * @brief execute a Select statement
+     */
+    shared_ptr<Result> execute(const Select& stmt);
+    
+    /**
      * @brief execute an SQL query
      *
      * The actual statement (returned by SqlQuery::replace_binds(*this)) is
@@ -196,6 +210,9 @@ class Connection {
      * - string surrounded by apostrophes (')
      */
     virtual String do_variant_to_string(const Variant& value) const;
+  
+  private:
+    shared_ptr<Compiler> compiler_;
 };
 
 } // namespace sql

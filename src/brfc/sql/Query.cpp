@@ -23,6 +23,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 #include <brfc/RegExp.hpp>
 
+#include <brfc/sql/Connection.hpp>
+
 namespace brfc {
 namespace sql {
 

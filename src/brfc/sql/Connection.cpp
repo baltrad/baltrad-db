@@ -23,11 +23,24 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 #include <brfc/Url.hpp>
 
+#include <brfc/sql/DefaultCompiler.hpp>
+#include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Query.hpp>
+#include <brfc/sql/Select.hpp>
 #include <brfc/sql/pg/Connection.hpp>
 
 namespace brfc {
 namespace sql {
+
+Connection::Connection(shared_ptr<Compiler> compiler)
+        : compiler_(compiler) {
+    if (not compiler_)
+        compiler_.reset(new DefaultCompiler);
+}
+
+Connection::~Connection() {
+
+}
 
 shared_ptr<Connection>
 Connection::create(const String& dsn) {
@@ -83,6 +96,16 @@ Connection::commit() {
 shared_ptr<Result>
 Connection::execute(const String& statement, const BindMap& binds) {
     return execute(Query(statement, binds));    
+}
+
+shared_ptr<Result>
+Connection::execute(const Insert& stmt) {
+    return execute(compiler_->compile(stmt));
+}
+
+shared_ptr<Result>
+Connection::execute(const Select& stmt) {
+    return execute(compiler_->compile(stmt));
 }
 
 shared_ptr<Result>

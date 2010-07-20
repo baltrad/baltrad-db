@@ -31,6 +31,10 @@ namespace sql {
 
 class MockConnection : public Connection {
   public:
+    MockConnection(shared_ptr<Compiler> c=shared_ptr<Compiler>())
+            : Connection(c) {
+    }
+
     MOCK_METHOD0(do_open, void());
     MOCK_CONST_METHOD0(do_is_open, bool());
     MOCK_METHOD0(do_close, void());

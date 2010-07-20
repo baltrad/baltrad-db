@@ -26,11 +26,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Query.hpp>
 #include <brfc/sql/Result.hpp>
+#include <brfc/sql/Insert.hpp>
+#include <brfc/sql/Select.hpp>
+#include <brfc/sql/Table.hpp>
 
 #include "../common.hpp"
-#include "MockResult.hpp"
+#include "MockCompiler.hpp"
 #include "MockConnection.hpp"
+#include "MockResult.hpp"
 
+using testing::Ref;
 using testing::Return;
 using testing::Throw;
 using testing::_;
@@ -41,7 +46,8 @@ namespace sql {
 class sql_Connection_test : public testing::Test {
   public:
     sql_Connection_test()
-        : conn() {
+        : compiler()
+        , conn(shared_ptr<Compiler>(&compiler, no_delete)) {
     }
 
     void SetUp() {
@@ -49,6 +55,7 @@ class sql_Connection_test : public testing::Test {
             .WillByDefault(Return(true));
     }
 
+    ::testing::NiceMock<MockCompiler> compiler;
     ::testing::NiceMock<MockConnection> conn;
 };
 
@@ -211,6 +218,36 @@ TEST_F(sql_Connection_test, test_execute_sqlquery) {
         .WillOnce(Return(make_shared<MockResult>()));
     
     conn.execute(query);
+}
+
+TEST_F(sql_Connection_test, test_execute_insert) {
+    TablePtr t = Table::create("t");
+    InsertPtr query = Insert::create(t);
+    Query compiled("query");
+
+    EXPECT_CALL(compiler, do_compile(Ref(*query)))
+        .WillOnce(Return(compiled));
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(conn, do_execute(compiled.statement()))
+        .WillOnce(Return(make_shared<MockResult>()));
+    
+    conn.execute(*query);
+}
+
+TEST_F(sql_Connection_test, test_execute_select) {
+    SelectPtr query = Select::create();
+    Query compiled("query");
+
+    EXPECT_CALL(compiler, do_compile(Ref(*query)))
+        .WillOnce(Return(compiled));
+    EXPECT_CALL(conn, do_in_transaction())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(conn, do_execute(compiled.statement()))
+        .WillOnce(Return(make_shared<MockResult>()));
+    
+    conn.execute(*query);
+
 }
 
 TEST_F(sql_Connection_test, test_execute_replaces_binds) {

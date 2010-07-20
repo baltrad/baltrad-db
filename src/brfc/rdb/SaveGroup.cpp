@@ -32,12 +32,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/sql/Column.hpp>
-#include <brfc/sql/Compiler.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Literal.hpp>
-#include <brfc/sql/Query.hpp>
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Table.hpp>
 
@@ -61,11 +59,7 @@ SaveGroup::operator()(const oh5::Group& group) {
     bind_plain(group);
     bind_specializations(group);
 
-    sql::Compiler c;
-
-    const sql::Query& q = c.compile(*stmt_);
-
-    shared_ptr<sql::Result> result = rdb_->connection().execute(q);
+    shared_ptr<sql::Result> result = rdb_->connection().execute(*stmt_);
 
     cache_->insert(last_id(*result), group.shared_from_this());
 }
