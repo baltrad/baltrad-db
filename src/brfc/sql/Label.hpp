@@ -42,7 +42,7 @@ class Label : public Expression {
         name_ = name;
     }
 
-    const String& name() const {
+    virtual const String& name() const {
         return name_;
     }
 

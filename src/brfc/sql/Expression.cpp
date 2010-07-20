@@ -28,6 +28,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
+const String&
+Expression::name() const {
+    static String empty;
+    return empty;
+}
+
 BinaryOperatorPtr
 Expression::ne(ExpressionPtr rhs) const {
     return BinaryOperator::create("!=", this->shared_from_this(), rhs);

@@ -38,6 +38,12 @@ class Expression : public Element {
         return static_pointer_cast<Expression>(
                 const_pointer_cast<Element>(Element::shared_from_this()));
     }
+    
+    /**
+     * @return name of the expression or empty string if unnamed
+     */
+    virtual const String& name() const;
+
     /**
      * @name comparison operators
      * @{

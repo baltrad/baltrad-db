@@ -46,7 +46,7 @@ class Column : public Expression {
         name_ = name;
     }
 
-    const String& name() const { return name_; }
+    virtual const String& name() const { return name_; }
 
   protected:
     Column(const String& name,
