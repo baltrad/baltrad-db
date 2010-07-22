@@ -49,18 +49,26 @@ class Column : public Expression {
     }
 
     virtual const String& name() const { return name_; }
+    
+    void references(ColumnPtr column) {
+        references_ = column;
+    }
+
+    ColumnPtr references() const { return references_; }
 
   protected:
     Column(const String& name,
            SelectablePtr selectable)
             : name_(name)
-            , selectable_(selectable) {
+            , selectable_(selectable)
+            , references_() {
 
     }
 
   private:
     String name_;
     SelectablePtr selectable_;
+    ColumnPtr references_;
 };
 
 } // namespace sql

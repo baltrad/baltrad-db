@@ -42,5 +42,24 @@ TEST(sql_Table_test, test_column) {
 
 }
 
+TEST(sql_Table_test, test_fk_columns) {
+    TablePtr t1 = Table::create("t1");
+    t1->add_column(Column::create("c1"));
+    t1->add_column(Column::create("c2"));
+    
+    TablePtr t2 = Table::create("t2");
+    t2->add_column(Column::create("d1"));
+    t2->add_column(Column::create("d2"));
+    t2->add_column(Column::create("d3"));
+
+    t2->column("d1")->references(t1->column("c1"));
+    t2->column("d2")->references(t1->column("c2"));
+
+    const std::vector<ColumnPtr> fkcols = t2->fk_columns();
+    EXPECT_EQ((size_t)2, fkcols.size());
+    EXPECT_TRUE(std::find(fkcols.begin(), fkcols.end(), t2->column("d1")) != fkcols.end());
+    EXPECT_TRUE(std::find(fkcols.begin(), fkcols.end(), t2->column("d2")) != fkcols.end());
+}
+
 } // namespace sql
 } // namespace brfc

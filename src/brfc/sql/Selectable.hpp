@@ -43,6 +43,8 @@ class Selectable : public Element {
 
     virtual std::vector<ColumnPtr> columns() const = 0;
 
+    virtual std::vector<ColumnPtr> fk_columns() const;
+
     AliasPtr alias(const String& name);
 
     JoinPtr join(SelectablePtr rhs, ExpressionPtr condition);

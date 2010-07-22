@@ -65,5 +65,15 @@ Selectable::column(const String& name) const {
     return found;
 }
 
+std::vector<ColumnPtr>
+Selectable::fk_columns() const {
+    std::vector<ColumnPtr> cols;
+    BOOST_FOREACH(ColumnPtr col, columns()) {
+        if (col->references())
+            cols.push_back(col);
+    }
+    return cols;
+}
+
 } // namespace sql
 } // namespace brfc
