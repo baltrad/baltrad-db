@@ -45,6 +45,11 @@ Selectable::outerjoin(SelectablePtr rhs, ExpressionPtr condition) {
     return Join::create(this->shared_from_this(), rhs, condition, Join::LEFT);
 }
 
+JoinPtr
+Selectable::crossjoin(SelectablePtr rhs) {
+    return Join::create(this->shared_from_this(), rhs, ExpressionPtr(), Join::CROSS);
+}
+
 ColumnPtr
 Selectable::column(const String& name) const {
     ColumnPtr found;

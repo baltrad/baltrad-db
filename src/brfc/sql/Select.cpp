@@ -26,17 +26,20 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Expression.hpp>
-#include <brfc/sql/FromClause.hpp>
 #include <brfc/sql/Label.hpp>
 
 namespace brfc {
 namespace sql {
 
-Select::Select()
+Select::Select(SelectablePtr from)
         : what_()
-        , from_(FromClause::create())
+        , from_(from)
         , where_()
         , distinct_(false) {
+    if (from) {
+        const std::vector<ColumnPtr>& cols = from->columns();
+        what_.insert(what_.end(), cols.begin(), cols.end());
+    }
 }
 
 void

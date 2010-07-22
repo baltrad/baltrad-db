@@ -37,7 +37,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Expression.hpp>
-#include <brfc/sql/FromClause.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Label.hpp>
 #include <brfc/sql/Literal.hpp>
@@ -87,7 +86,7 @@ QueryToSelect::transform(const Query& query,
     } 
     
     // add the built join as from clause
-    select->from()->add(rpl.from_);
+    select->from(rpl.from_);
 
     return select;
 }

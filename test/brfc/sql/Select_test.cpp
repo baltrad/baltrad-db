@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
-#include <brfc/sql/FromClause.hpp>
 #include <brfc/sql/Label.hpp>
 #include <brfc/sql/Select.hpp>
 #include <brfc/sql/Table.hpp>
@@ -51,7 +50,7 @@ class sql_Select_test : public ::testing::Test {
 TEST_F(sql_Select_test, test_column) {
     SelectPtr s = Select::create();
     EXPECT_THROW(s->column("c1"), lookup_error);
-    s->from()->add(t1);
+    s->from(t1);
     s->what(t1->column("c1"));
     
     ColumnPtr c;
@@ -63,7 +62,7 @@ TEST_F(sql_Select_test, test_column) {
 TEST_F(sql_Select_test, test_column_labeled_expr) {
     SelectPtr s = Select::create();
     s->what(t1->column("c1")->label("l"));
-    s->from()->add(t1);
+    s->from(t1);
 
     EXPECT_THROW(s->column("c1"), lookup_error);
 

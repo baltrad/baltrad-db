@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Factory.hpp>
-#include <brfc/sql/FromClause.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Literal.hpp>
 #include <brfc/sql/Parentheses.hpp>

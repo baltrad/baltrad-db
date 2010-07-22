@@ -48,6 +48,8 @@ class Selectable : public Element {
     JoinPtr join(SelectablePtr rhs, ExpressionPtr condition);
 
     JoinPtr outerjoin(SelectablePtr rhs, ExpressionPtr condition);
+
+    JoinPtr crossjoin(SelectablePtr rhs);
 };
 
 } // namespace sql

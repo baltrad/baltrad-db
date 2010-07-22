@@ -29,7 +29,7 @@ namespace sql {
 class Join : public Selectable {
   public:
     enum Type {
-        NONE = 0,
+        CROSS = 0,
         INNER = 1,
         LEFT = 2
     };
@@ -37,7 +37,7 @@ class Join : public Selectable {
     static JoinPtr create(SelectablePtr from,
                           SelectablePtr to,
                           ExpressionPtr condition,
-                          Type type=INNER) {
+                          Type type=CROSS) {
         return JoinPtr(new Join(from, to, condition, type));
     }
 

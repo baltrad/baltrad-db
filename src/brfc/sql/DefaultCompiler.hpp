@@ -39,7 +39,6 @@ class DefaultCompiler : public Compiler {
     typedef mpl::vector<const Alias,
                         const BinaryOperator,
                         const Column,
-                        const FromClause,
                         const Insert,
                         const Join,
                         const Parentheses,
@@ -78,12 +77,6 @@ class DefaultCompiler : public Compiler {
      */
     void operator()(const Column& expr);
     
-    /**
-     * @brief compile from clause to string form
-     * @post top of the stack contains FROM + selectables joined by ','
-     */
-    void operator()(const FromClause& expr);
-
     /**
      * @brief compile Join to string form
      * @post top of the stack contains 

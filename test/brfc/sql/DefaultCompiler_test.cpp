@@ -31,7 +31,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/DefaultCompiler.hpp>
-#include <brfc/sql/FromClause.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Literal.hpp>
@@ -155,13 +154,12 @@ TEST_F(sql_DefaultCompiler_test, test_select) {
     ColumnPtr column = t1->column("c1");
     ColumnPtr column2 = t1->column("c2");
     ColumnPtr column3 = t2->column("c3");
-    select->from()->add(t1);
-    select->from()->add(t2);
+    select->from(t1->crossjoin(t2));
     select->what(column);
     select->what(column2);
     select->what(column3);
     select->where(column->lt(xpr.int64_(1)));
-    String expected("SELECT t1.c1, t1.c2, t2.c3\nFROM t1, t2\nWHERE t1.c1 < :lit_0");
+    String expected("SELECT t1.c1, t1.c2, t2.c3\nFROM t1 CROSS JOIN t2\nWHERE t1.c1 < :lit_0");
     const Query& q = compiler.compile(*select);
     EXPECT_EQ(expected, q.statement());
     EXPECT_EQ(Variant(1), bind(q, ":lit_0"));

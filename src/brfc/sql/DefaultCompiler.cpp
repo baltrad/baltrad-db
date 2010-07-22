@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
-#include <brfc/sql/FromClause.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Label.hpp>
@@ -91,19 +90,25 @@ DefaultCompiler::operator()(const Alias& expr) {
 
 void
 DefaultCompiler::operator()(const Join& join) {
+    String condition, to, from;
     in_from_clause_ = true;
     visit(*join.from(), *this);
     visit(*join.to(), *this);
     in_from_clause_ = false;
-    visit(*join.condition(), * this);
+    if (join.condition()) {
+        visit(*join.condition(), * this);
+        condition = pop();
+    }
     in_from_clause_ = true;
 
-    String condition = pop();
-    String to = pop();
-    String from = pop();
+    to = pop();
+    from = pop();
 
     String jointype;
     switch (join.type()) {
+        case Join::CROSS:
+            jointype = " CROSS JOIN ";
+            break;
         case Join::INNER:
             jointype = " JOIN ";
             break;
@@ -114,7 +119,11 @@ DefaultCompiler::operator()(const Join& join) {
             BRFC_ASSERT(false);
     }
 
-    push(from + jointype + to + " ON " + condition);
+    if (join.condition())
+        push(from + jointype + to + " ON " + condition);
+    else {
+        push(from + jointype + to);
+    }
 }
 
 void
@@ -137,46 +146,27 @@ DefaultCompiler::operator()(const Parentheses& expr) {
 }
 
 void
-DefaultCompiler::operator()(const FromClause& from) {
-    if (from.empty())
-        return;
-
-    in_from_clause_ = true;
-
-    BOOST_FOREACH(ConstSelectablePtr element, from.elements()) {
-        visit(*element, *this);
-    }
-
-    StringList from_clause_elements;
-    for (size_t i = 0; i < from.elements().size(); ++i) {
-        from_clause_elements.push_back(pop());
-    }
-    std::reverse(from_clause_elements.begin(), from_clause_elements.end());
-    String from_clause = "\nFROM " + from_clause_elements.join(", ");
-    push(from_clause);
-
-    in_from_clause_ = false;
-}
-
-void
 DefaultCompiler::operator()(const Select& select) {
 
     BOOST_FOREACH(ExpressionPtr col, select.what()) {
         visit(*col, *this);
     }
     
-    visit(*select.from(), *this);
-
     if (select.where())
         visit(*select.where(), *this);
 
     String where_clause;
     if (select.where())
         where_clause = "\nWHERE " + pop();
+
     String from_clause;
-    if (!select.from()->empty())
-        from_clause = pop();
-    
+    if (select.from()) {
+        in_from_clause_ = true;
+        visit(*select.from(), *this);
+        in_from_clause_ = false;
+        from_clause = "\nFROM " + pop();
+    }
+
     StringList result_column_elm;
     for (size_t i = 0; i < select.what().size(); ++i) {
         result_column_elm.push_back(pop());
