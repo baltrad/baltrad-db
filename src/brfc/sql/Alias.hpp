@@ -52,6 +52,10 @@ class Alias : public Selectable {
         return alias_;
     }
 
+    virtual ColumnPtr column(const String& name) const;
+
+    virtual std::vector<ColumnPtr> columns() const;
+
   protected:
     Alias(SelectablePtr aliased,
           const String& alias)

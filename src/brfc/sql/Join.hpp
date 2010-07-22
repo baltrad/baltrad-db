@@ -77,6 +77,8 @@ class Join : public Selectable {
 
     Type type() const { return type_; }
 
+    std::vector<ColumnPtr> columns() const;
+
   protected:
     Join(SelectablePtr from,
         SelectablePtr to,

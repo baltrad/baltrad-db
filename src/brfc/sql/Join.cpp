@@ -52,5 +52,13 @@ Join::contains(SelectablePtr element) const {
     return contains;
 }
 
+std::vector<ColumnPtr>
+Join::columns() const {
+    std::vector<ColumnPtr> cols = from_->columns();
+    const std::vector<ColumnPtr>& to_cols = to_->columns();
+    cols.insert(cols.end(), to_cols.begin(), to_cols.end());
+    return cols;
+}
+
 } // namespace sql
 } // namespace brfc

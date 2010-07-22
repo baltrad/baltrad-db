@@ -39,6 +39,8 @@ class Column : public Expression {
     void selectable(SelectablePtr selectable) {
         selectable_ = selectable;
     }
+    
+    ColumnPtr rebase(SelectablePtr t) const;
 
     SelectablePtr selectable() const { return selectable_; }
 

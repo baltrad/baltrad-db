@@ -21,7 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_SELECT_HPP
 
 #include <brfc/sql/Selectable.hpp>
-#include <vector>
 
 namespace brfc {
 namespace sql {
@@ -33,11 +32,20 @@ class Select : public Selectable {
     static SelectPtr create() {
         return SelectPtr(new Select());
     }
+    
+    /**
+     * @throw duplicate_entry if the @c expr is labeled and the name
+     *        conflicts with a previous label or column
+     */
+    void what(ExpressionPtr expr);
 
-    void what(ExpressionPtr expr) {
-        what_.push_back(expr);
-    }
+    /**
+     * @throw lookup_error if the column is ambiguous or doesn't exist
+     */
+    virtual ColumnPtr column(const String& name) const;
 
+    virtual std::vector<ColumnPtr> columns() const;
+    
     void from(FromClausePtr from) { from_ = from; }
     
     /**

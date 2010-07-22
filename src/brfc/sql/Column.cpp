@@ -17,50 +17,15 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_SQL_TABLE_HPP
-#define BRFC_SQL_TABLE_HPP
-
-#include <map>
-
-#include <brfc/sql/Selectable.hpp>
+#include <brfc/sql/Column.hpp>
 
 namespace brfc {
 namespace sql {
 
-class Table : public Selectable {
-  public:
-    static TablePtr create(const String& name) {
-        return TablePtr(new Table(name));
-    }
-
-    void name(const String& name) {
-        name_ = name;
-    }
-
-    virtual String name() const {
-        return name_;
-    }
-
-    void add_column(ColumnPtr column);
-
-    virtual ColumnPtr column(const String& name) const;
-
-    virtual std::vector<ColumnPtr> columns() const;
-
-  protected:
-    explicit Table(const String& name)
-            : name_(name)
-            , columns_() {
-    }
-
-  private:
-    typedef std::map<String, ColumnPtr> ColumnMap;
-
-    String name_;
-    ColumnMap columns_;
-};
+ColumnPtr
+Column::rebase(SelectablePtr t) const {
+    return Column::create(name_, t);
+}
 
 } // namespace sql
 } // namespace brfc
-
-#endif // BRFC_SQL_TABLE_HPP

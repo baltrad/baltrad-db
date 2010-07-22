@@ -17,37 +17,28 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/sql/Table.hpp>
-#include <brfc/sql/Column.hpp>
+#include <brfc/sql/Alias.hpp>
 
-#include <brfc/exceptions.hpp>
+#include <boost/foreach.hpp>
+
+#include <brfc/sql/Column.hpp>
 
 namespace brfc {
 namespace sql {
 
-void
-Table::add_column(ColumnPtr column) {
-    if (column->selectable())
-        throw value_error("column already associated with a Selectable");
-    if (not columns_.insert(std::make_pair(column->name(), column)).second)
-        throw duplicate_entry(column->name().to_std_string());
-    column->selectable(this->shared_from_this());
-}
-
 ColumnPtr
-Table::column(const String& name) const {
-    ColumnMap::const_iterator iter = columns_.find(name);
-    if (iter == columns_.end())
-        throw lookup_error(name_.to_std_string() + "." + name.to_std_string());
-    return iter->second;
+Alias::column(const String& name) const {
+    ColumnPtr c = aliased_->column(name);
+    c = c->rebase(this->shared_from_this());
+    return c;
 }
 
 std::vector<ColumnPtr>
-Table::columns() const {
+Alias::columns() const {
     std::vector<ColumnPtr> cols;
-    ColumnMap::const_iterator iter = columns_.begin();
-    for ( ; iter != columns_.end(); ++iter)
-        cols.push_back(iter->second);
+    BOOST_FOREACH(ColumnPtr c, aliased_->columns()) {
+        cols.push_back(c->rebase(this->shared_from_this()));
+    }
     return cols;
 }
 

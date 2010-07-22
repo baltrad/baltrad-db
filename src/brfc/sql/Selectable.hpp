@@ -20,11 +20,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_SELECTABLE_HPP
 #define BRFC_SQL_SELECTABLE_HPP
 
+#include <vector>
+
 #include <brfc/String.hpp>
 
-#include <brfc/sql/Element.hpp>
-
 #include <brfc/sql/fwd.hpp>
+#include <brfc/sql/Element.hpp>
 
 namespace brfc {
 namespace sql {
@@ -39,6 +40,8 @@ class Selectable : public Element {
     virtual String name() const = 0;
 
     virtual ColumnPtr column(const String& name) const;
+
+    virtual std::vector<ColumnPtr> columns() const = 0;
 
     AliasPtr alias(const String& name);
 

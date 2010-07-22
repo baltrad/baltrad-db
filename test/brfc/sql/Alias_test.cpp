@@ -17,47 +17,39 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/sql/Selectable.hpp>
-
-#include <boost/foreach.hpp>
+#include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
 
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/Column.hpp>
-#include <brfc/sql/Join.hpp>
+#include <brfc/sql/Table.hpp>
 
 namespace brfc {
 namespace sql {
 
-AliasPtr
-Selectable::alias(const String& name) {
-    return Alias::create(this->shared_from_this(), name);
-}
-
-JoinPtr
-Selectable::join(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition, Join::INNER);
-}
-
-JoinPtr
-Selectable::outerjoin(SelectablePtr rhs, ExpressionPtr condition) {
-    return Join::create(this->shared_from_this(), rhs, condition, Join::LEFT);
-}
-
-ColumnPtr
-Selectable::column(const String& name) const {
-    ColumnPtr found;
-    BOOST_FOREACH(ColumnPtr col, columns()) {
-        if (col->name() == name) {
-            if (found)
-                throw lookup_error("ambiguous: " + name.to_std_string());
-            found = col;
-        }
+class sql_Alias_test : public ::testing::Test {
+  public:
+    sql_Alias_test()
+            : t1(Table::create("t1")) {
     }
-    if (not found)
-        throw lookup_error(name.to_std_string());
-    return found;
+    
+    void SetUp() {
+        t1->add_column(Column::create("c1"));
+        t1->add_column(Column::create("c2"));
+    }
+
+    TablePtr t1, t2;
+};
+
+TEST_F(sql_Alias_test, test_column) {
+    AliasPtr a = t1->alias("a");
+    
+    ColumnPtr c;
+    EXPECT_THROW(a->column("d1"), lookup_error);
+    EXPECT_NO_THROW(c = a->column("c1"));
+    EXPECT_TRUE(c);
+    EXPECT_EQ(c->selectable(), a);
 }
 
 } // namespace sql
