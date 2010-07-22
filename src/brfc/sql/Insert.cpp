@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Insert.hpp>
 
+#include <boost/foreach.hpp>
+
 #include <brfc/exceptions.hpp>
 
 #include <brfc/sql/Column.hpp>
@@ -36,8 +38,11 @@ void
 Insert::value(ColumnPtr column, ExpressionPtr expr) {
     if (column->selectable() != table_)
         throw value_error("table mismatch");
-    if (not values_.insert(std::make_pair(column, expr)).second)
-        throw duplicate_entry(column->name().to_std_string());
+    BOOST_FOREACH(const ValueMap::value_type& val, values_) {
+        if (val.first == column)
+            throw duplicate_entry(column->name().to_std_string());
+    }
+    values_.push_back(std::make_pair(column, expr));
 }
 
 void

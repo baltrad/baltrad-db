@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_INSERT_HPP
 
 #include <vector>
-#include <map>
+#include <utility>
 
 #include <brfc/String.hpp>
 
@@ -33,7 +33,7 @@ namespace sql {
 
 class Insert : public Element {
   public:
-    typedef std::map<ColumnPtr, ExpressionPtr> ValueMap;
+    typedef std::vector<std::pair<ColumnPtr, ExpressionPtr> > ValueMap;
     typedef std::vector<ExpressionPtr> ReturnVector;
 
     static InsertPtr create(TablePtr table) {
