@@ -39,10 +39,10 @@ class rdb_AttributeMapper_test : public testing::Test {
     }
 
     void SetUp() {
-        t1->add_column(sql::Column::create("c1"));
-        t1->add_column(sql::Column::create("c2"));
-        t2->add_column(sql::Column::create("c1"));
-        t3->add_column(sql::Column::create("value"));
+        t1->add_column("c1");
+        t1->add_column("c2");
+        t2->add_column("c1");
+        t3->add_column("value");
         mapper.add(Mapping(0, "attr1", "string", t1->column("c1")));
         mapper.add(Mapping(1, "attr2", "string", t1->column("c2")));
         mapper.add(Mapping(2, "attr3", "string", t2->column("c1")));

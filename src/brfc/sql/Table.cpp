@@ -25,13 +25,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-void
-Table::add_column(ColumnPtr column) {
-    if (column->selectable())
-        throw value_error("column already associated with a Selectable");
-    if (not columns_.insert(std::make_pair(column->name(), column)).second)
-        throw duplicate_entry(column->name().to_std_string());
-    column->selectable(this->shared_from_this());
+ColumnPtr
+Table::add_column(const String& name) {
+    ColumnPtr column = Column::create(name, this->shared_from_this());
+    if (not columns_.insert(std::make_pair(name, column)).second)
+        throw duplicate_entry(name.to_std_string());
+    return column;
 }
 
 ColumnPtr

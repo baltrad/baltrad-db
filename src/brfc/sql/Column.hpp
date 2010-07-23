@@ -31,8 +31,7 @@ namespace sql {
 
 class Column : public Expression {
   public:
-    static ColumnPtr create(const String& name,
-                            SelectablePtr selectable=SelectablePtr()) {
+    static ColumnPtr create(const String& name, SelectablePtr selectable) {
         return ColumnPtr(new Column(name, selectable));
     }
 

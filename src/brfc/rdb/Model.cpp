@@ -39,60 +39,60 @@ Model::Model()
         , attrvals_real(sql::Table::create("bdb_attribute_values_real"))
         , attrvals_bool(sql::Table::create("bdb_attribute_values_bool")) {
 
-    sources->add_column(sql::Column::create("id"));
-    sources->add_column(sql::Column::create("node_id"));
+    sources->add_column("id");
+    sources->add_column("node_id");
 
-    source_centres->add_column(sql::Column::create("id"));
-    source_centres->add_column(sql::Column::create("originating_centre"));
-    source_centres->add_column(sql::Column::create("country_code"));
-    source_centres->add_column(sql::Column::create("wmo_cccc"));
+    source_centres->add_column("id");
+    source_centres->add_column("originating_centre");
+    source_centres->add_column("country_code");
+    source_centres->add_column("wmo_cccc");
 
-    source_radars->add_column(sql::Column::create("id"));
-    source_radars->add_column(sql::Column::create("centre_id"));
-    source_radars->add_column(sql::Column::create("radar_site"));
-    source_radars->add_column(sql::Column::create("wmo_code"));
-    source_radars->add_column(sql::Column::create("place"));
+    source_radars->add_column("id");
+    source_radars->add_column("centre_id");
+    source_radars->add_column("radar_site");
+    source_radars->add_column("wmo_code");
+    source_radars->add_column("place");
 
 
-    files->add_column(sql::Column::create("id"));
-    files->add_column(sql::Column::create("hash_type"));
-    files->add_column(sql::Column::create("unique_id"));
-    files->add_column(sql::Column::create("path"));
-    files->add_column(sql::Column::create("proposed_filename"));
-    files->add_column(sql::Column::create("filename_version"));
-    files->add_column(sql::Column::create("object"));
-    files->add_column(sql::Column::create("n_date"));
-    files->add_column(sql::Column::create("n_time"));
-    files->add_column(sql::Column::create("source_id"));
+    files->add_column("id");
+    files->add_column("hash_type");
+    files->add_column("unique_id");
+    files->add_column("path");
+    files->add_column("proposed_filename");
+    files->add_column("filename_version");
+    files->add_column("object");
+    files->add_column("n_date");
+    files->add_column("n_time");
+    files->add_column("source_id");
 
-    groups->add_column(sql::Column::create("id"));
-    groups->add_column(sql::Column::create("parent_id"));
-    groups->add_column(sql::Column::create("name"));
-    groups->add_column(sql::Column::create("product"));
-    groups->add_column(sql::Column::create("startdate"));
-    groups->add_column(sql::Column::create("starttime"));
-    groups->add_column(sql::Column::create("enddate"));
-    groups->add_column(sql::Column::create("endtime"));
-    groups->add_column(sql::Column::create("file_id"));
+    groups->add_column("id");
+    groups->add_column("parent_id");
+    groups->add_column("name");
+    groups->add_column("product");
+    groups->add_column("startdate");
+    groups->add_column("starttime");
+    groups->add_column("enddate");
+    groups->add_column("endtime");
+    groups->add_column("file_id");
 
-    invalid_attrs->add_column(sql::Column::create("name"));
-    invalid_attrs->add_column(sql::Column::create("group_id"));
+    invalid_attrs->add_column("name");
+    invalid_attrs->add_column("group_id");
 
-    attrvals_int->add_column(sql::Column::create("attribute_id"));
-    attrvals_int->add_column(sql::Column::create("group_id"));
-    attrvals_int->add_column(sql::Column::create("value"));
+    attrvals_int->add_column("attribute_id");
+    attrvals_int->add_column("group_id");
+    attrvals_int->add_column("value");
 
-    attrvals_str->add_column(sql::Column::create("attribute_id"));
-    attrvals_str->add_column(sql::Column::create("group_id"));
-    attrvals_str->add_column(sql::Column::create("value"));
+    attrvals_str->add_column("attribute_id");
+    attrvals_str->add_column("group_id");
+    attrvals_str->add_column("value");
 
-    attrvals_real->add_column(sql::Column::create("attribute_id"));
-    attrvals_real->add_column(sql::Column::create("group_id"));
-    attrvals_real->add_column(sql::Column::create("value"));
+    attrvals_real->add_column("attribute_id");
+    attrvals_real->add_column("group_id");
+    attrvals_real->add_column("value");
 
-    attrvals_bool->add_column(sql::Column::create("attribute_id"));
-    attrvals_bool->add_column(sql::Column::create("group_id"));
-    attrvals_bool->add_column(sql::Column::create("value"));
+    attrvals_bool->add_column("attribute_id");
+    attrvals_bool->add_column("group_id");
+    attrvals_bool->add_column("value");
 
     tables_.insert(std::make_pair(sources->name(), sources));
     tables_.insert(std::make_pair(source_radars->name(), source_radars));

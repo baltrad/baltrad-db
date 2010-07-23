@@ -32,7 +32,7 @@ namespace sql {
 
 TEST(sql_Insert_test, test_value) {
     TablePtr t = Table::create("t");
-    t->add_column(Column::create("c"));
+    t->add_column("c");
 
     InsertPtr stmt = Insert::create(t);
     LiteralPtr val = Literal::create(Variant(1));

@@ -50,15 +50,15 @@ struct sql_DefaultCompiler_test: public testing::Test {
             , t1(Table::create("t1"))
             , t2(Table::create("t2"))
             , t3(Table::create("t3")) {
-        t1->add_column(Column::create("c1"));
-        t1->add_column(Column::create("c2"));
-        t1->add_column(Column::create("c3"));
-        t2->add_column(Column::create("c1"));
-        t2->add_column(Column::create("c2"));
-        t2->add_column(Column::create("c3"));
-        t3->add_column(Column::create("c1"));
-        t3->add_column(Column::create("c2"));
-        t3->add_column(Column::create("c3"));
+        t1->add_column("c1");
+        t1->add_column("c2");
+        t1->add_column("c3");
+        t2->add_column("c1");
+        t2->add_column("c2");
+        t2->add_column("c3");
+        t3->add_column("c1");
+        t3->add_column("c2");
+        t3->add_column("c3");
     }
 
     const Variant& bind(const Query& qry, const String& key) const {

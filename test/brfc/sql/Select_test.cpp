@@ -38,10 +38,10 @@ class sql_Select_test : public ::testing::Test {
     }
     
     void SetUp() {
-        t1->add_column(Column::create("c1"));
-        t1->add_column(Column::create("c2"));
-        t2->add_column(Column::create("d1"));
-        t2->add_column(Column::create("d2"));
+        t1->add_column("c1");
+        t1->add_column("c2");
+        t2->add_column("d1");
+        t2->add_column("d2");
     }
 
     TablePtr t1, t2;

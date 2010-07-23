@@ -32,25 +32,24 @@ TEST(sql_Table_test, test_column) {
 
     EXPECT_THROW(t->column("c"), lookup_error);
 
-    ColumnPtr c = Column::create("c");
-    t->add_column(c);
+    ColumnPtr c = t->add_column("c");
+    EXPECT_TRUE(c);
     EXPECT_EQ(c->selectable(), t);
     EXPECT_EQ(t->column("c"), c);
 
-    EXPECT_THROW(t->add_column(c), value_error);
-    EXPECT_THROW(t->add_column(Column::create("c")), duplicate_entry);
+    EXPECT_THROW(t->add_column("c"), duplicate_entry);
 
 }
 
 TEST(sql_Table_test, test_fk_columns) {
     TablePtr t1 = Table::create("t1");
-    t1->add_column(Column::create("c1"));
-    t1->add_column(Column::create("c2"));
+    t1->add_column("c1");
+    t1->add_column("c2");
     
     TablePtr t2 = Table::create("t2");
-    t2->add_column(Column::create("d1"));
-    t2->add_column(Column::create("d2"));
-    t2->add_column(Column::create("d3"));
+    t2->add_column("d1");
+    t2->add_column("d2");
+    t2->add_column("d3");
 
     t2->column("d1")->references(t1->column("c1"));
     t2->column("d2")->references(t1->column("c2"));

@@ -41,7 +41,7 @@ class Table : public Selectable {
         return name_;
     }
 
-    void add_column(ColumnPtr column);
+    ColumnPtr add_column(const String& column);
 
     virtual ColumnPtr column(const String& name) const;
 
