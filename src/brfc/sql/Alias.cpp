@@ -29,7 +29,7 @@ namespace sql {
 ColumnPtr
 Alias::column(const String& name) const {
     ColumnPtr c = aliased_->column(name);
-    c = c->rebase(this->shared_from_this());
+    c = c->proxy(this->shared_from_this());
     return c;
 }
 
@@ -37,7 +37,7 @@ std::vector<ColumnPtr>
 Alias::columns() const {
     std::vector<ColumnPtr> cols;
     BOOST_FOREACH(ColumnPtr c, aliased_->columns()) {
-        cols.push_back(c->rebase(this->shared_from_this()));
+        cols.push_back(c->proxy(this->shared_from_this()));
     }
     return cols;
 }

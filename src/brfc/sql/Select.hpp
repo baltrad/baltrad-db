@@ -55,11 +55,6 @@ class Select : public Selectable {
         return distinct_;
     }
     
-    /**
-     * @throw lookup_error if the column is ambiguous or doesn't exist
-     */
-    virtual ColumnPtr column(const String& name) const;
-
     virtual std::vector<ColumnPtr> columns() const;
  
     /**

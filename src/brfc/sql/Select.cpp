@@ -47,28 +47,6 @@ Select::what(ExpressionPtr expr) {
     what_.push_back(expr);
 }
 
-ColumnPtr
-Select::column(const String& name) const {
-    ColumnPtr found;
-    LabelPtr lbl;
-    BOOST_FOREACH(ExpressionPtr xpr, what_) {
-        if (xpr->name() != name)
-            continue;
-        if (found)
-            throw lookup_error("ambiguous: " + name.to_std_string());
-
-        if (found = dynamic_pointer_cast<Column>(xpr)) {
-            found = found->rebase(this->shared_from_this());
-        } else if (lbl = dynamic_pointer_cast<Label>(xpr)) {
-            found = Column::create(lbl->name(), this->shared_from_this());
-        }
-    }
-
-    if (not found)
-        throw lookup_error("not found:" + name.to_std_string());
-    return found;
-}
-
 std::vector<ColumnPtr>
 Select::columns() const {
     std::vector<ColumnPtr> cols;
@@ -76,10 +54,15 @@ Select::columns() const {
     ColumnPtr col;
     BOOST_FOREACH(ExpressionPtr xpr, what_) {
         if (col = dynamic_pointer_cast<Column>(xpr))
-            cols.push_back(col->rebase(this->shared_from_this()));
-        else if (lbl = dynamic_pointer_cast<Label>(xpr))
-            cols.push_back(Column::create(lbl->name(),
-                                          this->shared_from_this()));
+            col = col->proxy(this->shared_from_this());
+        else if (lbl = dynamic_pointer_cast<Label>(xpr)) {
+            if (col = dynamic_pointer_cast<Column>(lbl->expression())) {
+                col = col->proxy(lbl->name(), this->shared_from_this());
+            } else {
+                col = Column::create(lbl->name(), this->shared_from_this());
+            }
+        }
+        cols.push_back(col->proxy(this->shared_from_this()));
     }
     return cols;
 }

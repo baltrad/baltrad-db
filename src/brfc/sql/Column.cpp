@@ -19,14 +19,26 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Column.hpp>
 
+#include <brfc/exceptions.hpp>
+
 namespace brfc {
 namespace sql {
 
+void
+Column::references(ColumnPtr column) {
+    if (references_ or parent_)
+        throw value_error("can't change reference");
+    references_ = column;
+}
+
 ColumnPtr
-Column::rebase(SelectablePtr t) const {
-    ColumnPtr c = Column::create(name_, t);
-    c->references(references_);
-    return c;
+Column::proxy(SelectablePtr t) const {
+    return proxy(name(), t);
+}
+
+ColumnPtr
+Column::proxy(const String& name, SelectablePtr t) const {
+    return Column::create(name, t, this->shared_from_this());
 }
 
 } // namespace sql

@@ -31,42 +31,53 @@ namespace sql {
 
 class Column : public Expression {
   public:
-    static ColumnPtr create(const String& name, SelectablePtr selectable) {
-        return ColumnPtr(new Column(name, selectable));
+    ColumnPtr shared_from_this() const {
+        return static_pointer_cast<Column>(
+                const_pointer_cast<Element>(Element::shared_from_this()));
     }
 
-    void selectable(SelectablePtr selectable) {
-        selectable_ = selectable;
+    static ColumnPtr create(const String& name,
+                            SelectablePtr selectable,
+                            ColumnPtr parent_=ColumnPtr()) {
+        return ColumnPtr(new Column(name, selectable, parent_));
     }
-    
-    ColumnPtr rebase(SelectablePtr t) const;
 
-    SelectablePtr selectable() const { return selectable_; }
-
-    void name(const String& name) {
-        name_ = name;
-    }
 
     virtual const String& name() const { return name_; }
     
-    void references(ColumnPtr column) {
-        references_ = column;
+    virtual SelectablePtr selectable() const { return selectable_; }
+
+    virtual SelectablePtr base_selectable() const {
+        if (parent_)
+            return parent_->base_selectable();
+        return selectable_;
     }
 
-    ColumnPtr references() const { return references_; }
+    virtual void references(ColumnPtr column);
 
+    virtual ColumnPtr references() const {
+        if (parent_)
+            return parent_->references();
+        return references_;
+    }
+
+    ColumnPtr proxy(SelectablePtr t) const;
+
+    ColumnPtr proxy(const String& name, SelectablePtr t) const;
+  
   protected:
     Column(const String& name,
-           SelectablePtr selectable)
+           SelectablePtr selectable,
+           ColumnPtr parent)
             : name_(name)
             , selectable_(selectable)
-            , references_() {
-
+            , parent_(parent) {
     }
 
   private:
     String name_;
     SelectablePtr selectable_;
+    ColumnPtr parent_;
     ColumnPtr references_;
 };
 
