@@ -19,11 +19,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/GroupCache.hpp>
 
+#include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
+#include <brfc/sql/expr.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Result.hpp>
-#include <brfc/sql/BindMap.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -36,22 +37,26 @@ GroupCache::GroupCache(RelationalDatabase* rdb)
 
 GroupCache::OptionalKey
 GroupCache::do_lookup_key(weak_ptr<const oh5::Group> weak_group) {
-    shared_ptr<const oh5::Group> group = weak_group.lock();
-    String qry = "SELECT id FROM groups WHERE file_id = :file_id "
-                  "AND parent_id = :parent_id AND name = :name ";
-    sql::BindMap binds;
-    binds.add(":file_id", Variant(rdb_->db_id(*group->file())));
-    shared_ptr<const oh5::Group> parent = group->parent<const oh5::Group>();
+    const Model& m = Model::instance();
+    sql::Factory xpr;
 
-    Variant parent_id;
+    shared_ptr<const oh5::Group> group = weak_group.lock();
+    sql::SelectPtr qry = sql::Select::create();
+    qry->what(m.groups->column("id"));
+
+    qry->where(m.groups->column("name")->eq(xpr.string(group->name())));
+    
+    long long file_id = rdb_->db_id(*group->file());
+    if (file_id)
+        qry->where(qry->where()->and_(m.groups->column("file_id")->eq(xpr.int64_(file_id))));
+
+    shared_ptr<const oh5::Group> parent = group->parent<const oh5::Group>();
     if (parent) {
         OptionalKey id = key(parent);
         if (id)
-            parent_id = Variant(id.get());
+            qry->where(qry->where()->and_(m.groups->column("parent_id")->eq(xpr.int64_(id.get()))));
     }
-    binds.add(":parent_id", parent_id);
-    binds.add(":name", Variant(group->name()));
-    shared_ptr<sql::Result> r = rdb_->connection().execute(qry, binds);
+    shared_ptr<sql::Result> r = rdb_->connection().execute(*qry);
     return r->next() ? r->value_at(0).int64_() : OptionalKey();
 }
 

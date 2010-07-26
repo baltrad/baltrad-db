@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/RelationalDatabase.hpp>
 
+#include <deque>
+
 #include <boost/foreach.hpp>
 
 #include <brfc/assert.hpp>
@@ -39,12 +41,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/SaveFile.hpp>
 #include <brfc/rdb/SHA1AttributeHasher.hpp>
 
+#include <brfc/sql/expr.hpp>
 #include <brfc/sql/BindMap.hpp>
-#include <brfc/sql/Column.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Result.hpp>
-#include <brfc/sql/Select.hpp>
-#include <brfc/sql/Table.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -97,10 +97,16 @@ RelationalDatabase::do_commit() {
 
 bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
-    String qry("SELECT true FROM bdb_files WHERE unique_id = :unique_id");
-    sql::BindMap binds;
-    binds.add(":unique_id", Variant(file_hasher().hash(file)));
-    shared_ptr<sql::Result> result = connection().execute(qry, binds);
+    const Model& m = Model::instance();
+    const String& hash = file_hasher().hash(file);
+
+    sql::Factory xpr;
+    sql::SelectPtr qry = sql::Select::create();
+    qry->what(xpr.bool_(true));
+    qry->from(m.files);
+    qry->where(m.files->column("unique_id")->eq(xpr.string(hash)));
+
+    shared_ptr<sql::Result> result = connection().execute(*qry);
     return result->size() > 0;
 }
 
@@ -114,12 +120,14 @@ RelationalDatabase::do_save_file(const oh5::File& file,
 
 unsigned int
 RelationalDatabase::do_next_filename_version(const String& filename) {
-    String qry("SELECT MAX(filename_version) + 1 "
-                "FROM bdb_files "
-                "WHERE proposed_filename = :filename");
-    sql::BindMap binds;
-    binds.add(":filename", Variant(filename));
-    shared_ptr<sql::Result> result = connection().execute(qry, binds);
+    const Model& m = Model::instance();
+    
+    sql::Factory xpr;
+    sql::SelectPtr qry = sql::Select::create();
+    qry->what(sql::Function::max(m.files->column("filename_version")->add(xpr.int64_(1))));
+    qry->from(m.files);
+    qry->where(m.files->column("proposed_filename")->eq(xpr.string(filename)));
+    shared_ptr<sql::Result> result = connection().execute(*qry);
     result->next();
     if (result->value_at(0).is_null()) {
         return 0;
@@ -138,20 +146,31 @@ RelationalDatabase::do_query(const Query& query) {
 
 long long
 RelationalDatabase::do_db_id(const oh5::File& file) {
-    String qry("SELECT id FROM bdb_files WHERE unique_id = :unique_id");
-    sql::BindMap binds;
-    binds.add(":unique_id", Variant(file_hasher().hash(file)));
-    shared_ptr<sql::Result> r = connection().execute(qry, binds);
+    const Model& m = Model::instance();
+    const String& hash = file_hasher().hash(file);
+
+    sql::Factory xpr;
+    sql::SelectPtr qry = sql::Select::create();
+    qry->what(m.files->column("id"));
+    qry->from(m.files);
+    qry->where(m.files->column("unique_id")->eq(xpr.string(hash)));
+
+    shared_ptr<sql::Result> r = connection().execute(*qry);
     r->next();
     return r->value_at(0).int64_();
 }
 
 long long
 RelationalDatabase::db_id(const oh5::Source& src) {
-    String qry("SELECT id FROM bdb_sources WHERE node_id = :node_id");
-    sql::BindMap binds;
-    binds.add(":node_id", Variant(src.node_id()));
-    shared_ptr<sql::Result> r = connection().execute(qry, binds);
+    const Model& m = Model::instance();
+
+    sql::Factory xpr;
+    sql::SelectPtr qry = sql::Select::create();
+    qry->what(m.sources->column("id"));
+    qry->from(m.sources);
+    qry->where(m.sources->column("node_id")->eq(xpr.string(src.node_id())));
+
+    shared_ptr<sql::Result> r = connection().execute(*qry);
     if (r->next())
         return r->value_at(0).int64_();
     else
@@ -161,30 +180,30 @@ RelationalDatabase::db_id(const oh5::Source& src) {
 shared_ptr<oh5::SourceCentre>
 RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
                                        long long id) {
-    StringList wcl;
-    sql::BindMap binds;
+    Model m = Model::instance();
 
+    sql::Factory xpr;
+    sql::SelectPtr qry = sql::Select::create(m.source_centres->join(m.sources));
+    qry->where(xpr.bool_(false));
+
+    sql::ExpressionPtr x;
     // originating_centre or country_code is required for org. sources
     if (src->originating_centre()) {
-        wcl.append("originating_centre = :org_centre");
-        binds.add(":org_centre", Variant(src->originating_centre()));
+        x = m.source_centres->column("originating_centre");
+        x = x->eq(xpr.int64_(src->originating_centre()));
+        qry->where(qry->where()->or_(x));
     }
     if (src->country_code()) {
-        wcl.append("country_code = :country_code");
-        binds.add(":country_code", Variant(src->country_code()));
+        x = m.source_centres->column("country_code");
+        x = x->eq(xpr.int64_(src->country_code()));
+        qry->where(qry->where()->or_(x));
     }
     if (id) {
-        wcl.append("bdb_sources.id = :id");
-        binds.add(":id", Variant(id));
+        x = m.source_centres->column("id")->eq(xpr.int64_(id));
+        qry->where(qry->where()->or_(x));
     }
 
-    String qstr = String("SELECT bdb_sources.id, node_id, country_code, ") +
-                   String("originating_centre, wmo_cccc ") +
-                   String("FROM bdb_source_centres ") +
-                   String("JOIN bdb_sources ON bdb_sources.id = bdb_source_centres.id ") +
-                   String("WHERE ") + wcl.join(" OR ");
-    
-    shared_ptr<sql::Result> r = connection().execute(qstr, binds);
+    shared_ptr<sql::Result> r = connection().execute(*qry);
     
     if (r->size() < 1) {
         throw lookup_error("no source found: " +
@@ -210,29 +229,31 @@ RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
 
 shared_ptr<oh5::SourceRadar>
 RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
-    StringList wcl;
-    sql::BindMap binds;
+    Model m = Model::instance();
 
+    sql::Factory xpr;
+    sql::SelectPtr qry = sql::Select::create(m.source_radars->join(m.sources));
+    qry->where(xpr.bool_(false));
+
+    sql::ExpressionPtr x;
     // wmo_code or radar_site is required for radar sources
     if (src->wmo_code()) {
-        wcl.append("wmo_code = :wmo_code");
-        binds.add(":wmo_code", Variant(src->wmo_code()));
+        x = m.source_radars->column("wmo_code");
+        x = x->eq(xpr.int64_(src->wmo_code()));
+        qry->where(qry->where()->or_(x));
     }
     if (src->radar_site() != "") {
-        wcl.append("radar_site = :radar_site");
-        binds.add(":radar_site", Variant(src->radar_site()));
+        x = m.source_radars->column("radar_site");
+        x = x->eq(xpr.string(src->radar_site()));
+        qry->where(qry->where()->or_(x));
     }
     if (src->place() != "") {
-        wcl.append("place = :place");
-        binds.add(":place", Variant(src->place()));
+        x = m.source_radars->column("place");
+        x = x->eq(xpr.string(src->place()));
+        qry->where(qry->where()->or_(x));
     }
 
-    String qstr = String("SELECT bdb_sources.id, node_id, centre_id, ") +
-                   String("wmo_code, radar_site, place ") +
-                   String("FROM bdb_source_radars ") +
-                   String("JOIN bdb_sources ON bdb_source_radars.id = bdb_sources.id ") +
-                   String("WHERE ") + wcl.join(" OR ");
-    shared_ptr<sql::Result> r = connection().execute(qstr, binds);
+    shared_ptr<sql::Result> r = connection().execute(*qry);
 
     if (r->size() < 1) {
         throw lookup_error("no source found: " +
@@ -282,13 +303,11 @@ RelationalDatabase::do_load_source(const String& srcstr) {
 void
 RelationalDatabase::populate_mapper() {
     mapper_->clear();
-    String qry("SELECT id, name, converter, "
-                      "storage_table, storage_column, "
-                      "ignore_in_hash "
-               "FROM bdb_attributes");
-    shared_ptr<sql::Result> r = connection().execute(qry);
 
-    const Model& model = Model::instance();
+    const Model& m = Model::instance();
+    sql::SelectPtr qry = sql::Select::create(m.attrs);
+    shared_ptr<sql::Result> r = connection().execute(*qry);
+
     String table, column;
     while (r->next()) {
         table = r->value_at("storage_table").string();
@@ -296,7 +315,7 @@ RelationalDatabase::populate_mapper() {
         Mapping mapping(r->value_at("id").int64_(),
                         r->value_at("name").string(),
                         r->value_at("converter").string(),
-                        model.table_by_name(table)->column(column),
+                        m.table_by_name(table)->column(column),
                         r->value_at("ignore_in_hash").bool_());
         mapper_->add(mapping);
     }
