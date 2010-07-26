@@ -79,12 +79,12 @@ Model::Model()
     groups->add_column("file_id");
     groups->column("file_id")->references(files->column("id"));
 
-    attrs->add_column(sql::Column::create("id"));
-    attrs->add_column(sql::Column::create("name"));
-    attrs->add_column(sql::Column::create("converter"));
-    attrs->add_column(sql::Column::create("storage_table"));
-    attrs->add_column(sql::Column::create("storage_column"));
-    attrs->add_column(sql::Column::create("ignore_in_hash"));
+    attrs->add_column("id");
+    attrs->add_column("name");
+    attrs->add_column("converter");
+    attrs->add_column("storage_table");
+    attrs->add_column("storage_column");
+    attrs->add_column("ignore_in_hash");
 
     invalid_attrs->add_column("name");
     invalid_attrs->add_column("group_id");
