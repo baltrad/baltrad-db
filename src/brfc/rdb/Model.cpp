@@ -33,6 +33,7 @@ Model::Model()
         , source_centres(sql::Table::create("bdb_source_centres"))
         , files(sql::Table::create("bdb_files"))
         , groups(sql::Table::create("bdb_groups"))
+        , attrs(sql::Table::create("bdb_attributes"))
         , invalid_attrs(sql::Table::create("bdb_invalid_attributes"))
         , attrvals_int(sql::Table::create("bdb_attribute_values_int"))
         , attrvals_str(sql::Table::create("bdb_attribute_values_str"))
@@ -46,13 +47,14 @@ Model::Model()
     source_centres->add_column("originating_centre");
     source_centres->add_column("country_code");
     source_centres->add_column("wmo_cccc");
+    source_centres->column("id")->references(sources->column("id"));
 
     source_radars->add_column("id");
     source_radars->add_column("centre_id");
     source_radars->add_column("radar_site");
     source_radars->add_column("wmo_code");
     source_radars->add_column("place");
-
+    source_radars->column("id")->references(sources->column("id"));
 
     files->add_column("id");
     files->add_column("hash_type");
@@ -64,6 +66,7 @@ Model::Model()
     files->add_column("n_date");
     files->add_column("n_time");
     files->add_column("source_id");
+    files->column("source_id")->references(sources->column("id"));
 
     groups->add_column("id");
     groups->add_column("parent_id");
@@ -74,25 +77,42 @@ Model::Model()
     groups->add_column("enddate");
     groups->add_column("endtime");
     groups->add_column("file_id");
+    groups->column("file_id")->references(files->column("id"));
+
+    attrs->add_column(sql::Column::create("id"));
+    attrs->add_column(sql::Column::create("name"));
+    attrs->add_column(sql::Column::create("converter"));
+    attrs->add_column(sql::Column::create("storage_table"));
+    attrs->add_column(sql::Column::create("storage_column"));
+    attrs->add_column(sql::Column::create("ignore_in_hash"));
 
     invalid_attrs->add_column("name");
     invalid_attrs->add_column("group_id");
+    invalid_attrs->column("group_id")->references(groups->column("id"));
 
     attrvals_int->add_column("attribute_id");
     attrvals_int->add_column("group_id");
     attrvals_int->add_column("value");
+    attrvals_int->column("attribute_id")->references(attrs->column("id"));
+    attrvals_int->column("group_id")->references(groups->column("id"));
 
     attrvals_str->add_column("attribute_id");
     attrvals_str->add_column("group_id");
     attrvals_str->add_column("value");
+    attrvals_str->column("attribute_id")->references(attrs->column("id"));
+    attrvals_str->column("group_id")->references(groups->column("id"));
 
     attrvals_real->add_column("attribute_id");
     attrvals_real->add_column("group_id");
     attrvals_real->add_column("value");
+    attrvals_real->column("attribute_id")->references(attrs->column("id"));
+    attrvals_real->column("group_id")->references(groups->column("id"));
 
     attrvals_bool->add_column("attribute_id");
     attrvals_bool->add_column("group_id");
     attrvals_bool->add_column("value");
+    attrvals_bool->column("attribute_id")->references(attrs->column("id"));
+    attrvals_bool->column("group_id")->references(groups->column("id"));
 
     tables_.insert(std::make_pair(sources->name(), sources));
     tables_.insert(std::make_pair(source_radars->name(), source_radars));
