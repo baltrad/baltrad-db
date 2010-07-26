@@ -36,7 +36,7 @@ class Join : public Selectable {
 
     static JoinPtr create(SelectablePtr from,
                           SelectablePtr to,
-                          ExpressionPtr condition,
+                          ExpressionPtr condition=ExpressionPtr(),
                           Type type=CROSS) {
         return JoinPtr(new Join(from, to, condition, type));
     }
@@ -78,6 +78,9 @@ class Join : public Selectable {
     Type type() const { return type_; }
 
     std::vector<ColumnPtr> columns() const;
+
+    static ExpressionPtr find_condition(const Selectable& lhs,
+                                        const Selectable& rhs);
 
   protected:
     Join(SelectablePtr from,

@@ -49,9 +49,11 @@ class Selectable : public Element {
 
     AliasPtr alias(const String& name);
 
-    JoinPtr join(SelectablePtr rhs, ExpressionPtr condition);
+    JoinPtr join(SelectablePtr rhs,
+                 ExpressionPtr condition=ExpressionPtr());
 
-    JoinPtr outerjoin(SelectablePtr rhs, ExpressionPtr condition);
+    JoinPtr outerjoin(SelectablePtr rhs,
+                      ExpressionPtr condition=ExpressionPtr());
 
     JoinPtr crossjoin(SelectablePtr rhs);
 };

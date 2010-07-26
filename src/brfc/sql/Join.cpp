@@ -19,6 +19,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Join.hpp>
 
+#include <boost/foreach.hpp>
+
+#include <brfc/exceptions.hpp>
+
+#include <brfc/sql/BinaryOperator.hpp>
+#include <brfc/sql/Column.hpp>
+#include <brfc/sql/Table.hpp>
+
 namespace brfc {
 namespace sql {
 
@@ -30,7 +38,27 @@ Join::Join(SelectablePtr from,
         , to_(to)
         , condition_(condition)
         , type_(type) {
+    if (type_ != CROSS and not condition_)
+        condition_ = find_condition(*from, *to);
+}
 
+ExpressionPtr
+Join::find_condition(const Selectable& lhs, const Selectable& rhs) {
+
+    ColumnPtr fk_match;
+    BOOST_FOREACH(ColumnPtr col, lhs.fk_columns()) {
+        if (fk_match = rhs.matching_column(*col->references())) {
+            return col->eq(fk_match);
+        }
+    }
+
+    BOOST_FOREACH(ColumnPtr col, rhs.fk_columns()) {
+        if (fk_match = lhs.matching_column(*col->references())) {
+            return col->eq(fk_match);
+        }
+    }
+
+    throw value_error("can't determine join");
 }
 
 bool

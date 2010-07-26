@@ -21,8 +21,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
+#include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
+#include <brfc/sql/DefaultCompiler.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Table.hpp>
 
@@ -32,8 +34,10 @@ namespace sql {
 class sql_Join_test : public ::testing::Test {
   public:
     sql_Join_test()
-            : t1(Table::create("t1"))
-            , t2(Table::create("t2")) {
+            : compiler()
+            , t1(Table::create("t1"))
+            , t2(Table::create("t2"))
+            , t3(Table::create("t3")) {
     }
     
     void SetUp() {
@@ -41,9 +45,12 @@ class sql_Join_test : public ::testing::Test {
         t1->add_column("c2");
         t2->add_column("d1");
         t2->add_column("d2");
+        t3->add_column("e1");
+        t3->add_column("e2");
     }
 
-    TablePtr t1, t2;
+    DefaultCompiler compiler;
+    TablePtr t1, t2, t3;
 };
 
 TEST_F(sql_Join_test, test_column) {
@@ -69,6 +76,47 @@ TEST_F(sql_Join_test, test_colums) {
     EXPECT_TRUE(cols.end() != std::find(cols.begin(), cols.end(), t1->column("c2")));
     EXPECT_TRUE(cols.end() != std::find(cols.begin(), cols.end(), t2->column("d1")));
     EXPECT_TRUE(cols.end() != std::find(cols.begin(), cols.end(), t2->column("d2")));
+}
+
+TEST_F(sql_Join_test, test_contains) {
+    JoinPtr j = t1->crossjoin(t2)->crossjoin(t3);
+    EXPECT_TRUE(j->contains(t1));
+    EXPECT_TRUE(j->contains(t2));
+    EXPECT_TRUE(j->contains(t3));
+    EXPECT_FALSE(j->contains(t1->alias("a")));
+}
+
+TEST_F(sql_Join_test, test_auto_condition) {
+    t1->column("c1")->references(t2->column("d1"));
+    JoinPtr j;
+    ASSERT_NO_THROW(j = t1->join(t2));
+    ASSERT_TRUE(j->condition());
+    EXPECT_EQ("t1.c1 = t2.d1",
+              compiler.compile(*j->condition()).statement());
+}
+
+TEST_F(sql_Join_test, test_auto_condition_on_chain) {
+    t1->column("c1")->references(t2->column("d1"));
+    t2->column("d2")->references(t3->column("e2"));
+    JoinPtr j;
+    ASSERT_NO_THROW(j = t1->join(t2)->join(t3));
+    ASSERT_TRUE(j->condition());
+    EXPECT_EQ("t2.d2 = t3.e2",
+              compiler.compile(*j->condition()).statement());
+}
+
+TEST_F(sql_Join_test, test_auto_condition_on_alias) {
+    t1->column("c2")->references(t2->column("d2"));
+    AliasPtr a1 = t1->alias("a1");
+    AliasPtr a2 = t2->alias("a2");
+
+    JoinPtr j;
+    ASSERT_NO_THROW(j = a1->join(a2));
+    BinaryOperatorPtr cond = 
+        dynamic_pointer_cast<BinaryOperator>(j->condition());
+    ASSERT_TRUE(cond);
+    EXPECT_EQ("a1.c2 = a2.d2",
+              compiler.compile(*j->condition()).statement());
 }
 
 } // namespace sql
