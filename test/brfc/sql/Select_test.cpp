@@ -23,9 +23,20 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
+#include <brfc/sql/Join.hpp>
 #include <brfc/sql/Label.hpp>
 #include <brfc/sql/Select.hpp>
 #include <brfc/sql/Table.hpp>
+
+namespace {
+
+template<typename T>
+bool
+contains(const T& container, const typename T::value_type& value) {
+    return std::find(container.begin(), container.end(), value) != container.end();
+}
+
+} // namespace anonymous
 
 namespace brfc {
 namespace sql {
@@ -57,6 +68,15 @@ TEST_F(sql_Select_test, test_column) {
     EXPECT_NO_THROW(c = s->column("c1"));
     EXPECT_TRUE(c);
     EXPECT_EQ(c->selectable(), s);
+}
+
+TEST_F(sql_Select_test, test_auto_what) {
+    SelectPtr s = Select::create(t1->crossjoin(t2));
+    EXPECT_TRUE(contains(s->what(), t1->column("c1")));
+    EXPECT_TRUE(contains(s->what(), t1->column("c2")));
+    EXPECT_TRUE(contains(s->what(), t2->column("d1")));
+    EXPECT_TRUE(contains(s->what(), t2->column("d2")));
+    EXPECT_TRUE(s->from());
 }
 
 TEST_F(sql_Select_test, test_column_labeled_expr) {

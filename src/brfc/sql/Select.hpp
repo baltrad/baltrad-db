@@ -38,7 +38,7 @@ class Select : public Selectable {
      *        selectable is set as the from clause.
      */
     static SelectPtr create(SelectablePtr from=SelectablePtr()) {
-        return SelectPtr(new Select());
+        return SelectPtr(new Select(from));
     }
 
     /**
