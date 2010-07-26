@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
+#include <brfc/sql/Function.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Label.hpp>
@@ -75,6 +76,16 @@ void
 DefaultCompiler::operator()(const Column& expr) {
     visit(*expr.selectable(), *this);
     push(pop() + "." + expr.name());
+}
+
+void
+DefaultCompiler::operator()(const Function& func) {
+    StringList args;
+    BOOST_FOREACH(ExpressionPtr arg, func.args()) {
+        visit(*arg, *this);
+        args.append(pop());
+    }
+    push(func.name() + "(" + args.join(", ") + ")");
 }
 
 void

@@ -39,6 +39,7 @@ class DefaultCompiler : public Compiler {
     typedef mpl::vector<const Alias,
                         const BinaryOperator,
                         const Column,
+                        const Function,
                         const Insert,
                         const Join,
                         const Parentheses,
@@ -76,6 +77,12 @@ class DefaultCompiler : public Compiler {
      * @post top of the stack contains compiled column
      */
     void operator()(const Column& expr);
+
+    /**
+     * @brief compile function call to string form
+     * @post top of the stack contains compiled function call
+     */
+    void operator()(const Function& func);
     
     /**
      * @brief compile Join to string form

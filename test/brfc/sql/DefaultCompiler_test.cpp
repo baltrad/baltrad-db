@@ -31,6 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/DefaultCompiler.hpp>
+#include <brfc/sql/Function.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Literal.hpp>
@@ -184,6 +185,16 @@ TEST_F(sql_DefaultCompiler_test, test_factory_or_) {
     String expected("t1.c1 = :lit_0 OR t1.c1 = :lit_1");
     const Query& q = compiler.compile(*e3);
     EXPECT_EQ(expected, q.statement());
+    EXPECT_EQ(Variant(1), bind(q, ":lit_0"));
+    EXPECT_EQ(Variant(2), bind(q, ":lit_1"));
+}
+
+TEST_F(sql_DefaultCompiler_test, test_function) {
+    FunctionPtr f = Function::create("func1");
+    f->add_arg(xpr.int64_(1));
+    f->add_arg(xpr.int64_(2));
+    const Query& q = compiler.compile(*f);
+    EXPECT_EQ("func1(:lit_0, :lit_1)", q.statement());
     EXPECT_EQ(Variant(1), bind(q, ":lit_0"));
     EXPECT_EQ(Variant(2), bind(q, ":lit_1"));
 }
