@@ -31,7 +31,8 @@ namespace sql {
 class sql_Alias_test : public ::testing::Test {
   public:
     sql_Alias_test()
-            : t1(Table::create("t1")) {
+            : t1(Table::create("t1"))
+            , t2(Table::create("t2")) {
     }
     
     void SetUp() {
@@ -50,6 +51,18 @@ TEST_F(sql_Alias_test, test_column) {
     EXPECT_NO_THROW(c = a->column("c1"));
     EXPECT_TRUE(c);
     EXPECT_EQ(c->selectable(), a);
+}
+
+TEST_F(sql_Alias_test, test_matching_column) {
+    AliasPtr a = t1->alias("a");
+
+    t2->add_column("c1");
+    EXPECT_FALSE(a->matching_column(*t2->column("c1")));
+
+    ColumnPtr c = a->matching_column(*t1->column("c1"));
+    ASSERT_TRUE(c);
+    EXPECT_EQ("c1", c->name());
+    EXPECT_EQ(a, c->selectable());
 }
 
 } // namespace sql

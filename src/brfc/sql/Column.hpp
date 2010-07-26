@@ -64,6 +64,10 @@ class Column : public Expression {
     ColumnPtr proxy(SelectablePtr t) const;
 
     ColumnPtr proxy(const String& name, SelectablePtr t) const;
+
+    virtual bool has_parent(const Column& col) const;
+
+    bool operator==(const Column& rhs) const;
   
   protected:
     Column(const String& name,

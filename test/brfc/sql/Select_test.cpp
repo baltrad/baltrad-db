@@ -72,5 +72,18 @@ TEST_F(sql_Select_test, test_column_labeled_expr) {
     EXPECT_EQ(c->selectable(), s);
 }
 
+TEST_F(sql_Select_test, test_matching_column_labeled) {
+    SelectPtr s = Select::create();
+    s->what(t1->column("c1")->label("l"));
+    s->from(t1);
+
+    EXPECT_FALSE(s->matching_column(*t1->column("c2")));
+    
+    ColumnPtr c = s->matching_column(*t1->column("c1"));
+    ASSERT_TRUE(c);
+    EXPECT_EQ("l", c->name());
+    EXPECT_EQ(s, c->selectable());
+}
+
 } // namespace sql
 } // namespace brfc

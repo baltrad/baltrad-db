@@ -75,5 +75,14 @@ Selectable::fk_columns() const {
     return cols;
 }
 
+ColumnPtr
+Selectable::matching_column(const Column& column) const {
+    BOOST_FOREACH(ColumnPtr col, columns()) {
+        if (*col == column or col->has_parent(column))
+            return col;
+    }
+    return ColumnPtr();
+}
+
 } // namespace sql
 } // namespace brfc

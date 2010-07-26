@@ -31,6 +31,21 @@ Column::references(ColumnPtr column) {
     references_ = column;
 }
 
+bool
+Column::has_parent(const Column& col) const {
+    if (parent_) {
+        if (col == (*parent_))
+            return true;
+        return parent_->has_parent(col);
+    }
+    return false;
+}
+
+bool
+Column::operator==(const Column& rhs) const {
+    return name_ == rhs.name_ and selectable_ == rhs.selectable_;
+}
+
 ColumnPtr
 Column::proxy(SelectablePtr t) const {
     return proxy(name(), t);
