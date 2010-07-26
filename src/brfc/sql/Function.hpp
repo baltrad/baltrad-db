@@ -22,6 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
+#include <brfc/String.hpp>
+
 #include <brfc/sql/Expression.hpp>
 
 namespace brfc {
@@ -31,6 +33,12 @@ class Function : public Expression {
   public:
     static FunctionPtr create(const String& name) {
         return FunctionPtr(new Function(name));
+    }
+
+    static FunctionPtr max(const ExpressionPtr& arg) {
+        FunctionPtr f = Function::create("MAX");
+        f->add_arg(arg);
+        return f;
     }
     
     virtual const String& name() const { return name_; }
