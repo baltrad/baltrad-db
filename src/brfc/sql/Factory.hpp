@@ -34,17 +34,17 @@ class Variant;
 namespace sql {
 
 /**
- * @brief factory for constructing expression elements
+ * @brief factory for constructing SQL expression elements
  */
 class Factory {
   public:
     /**
-     * @brief construct sql::Literal from Variant
+     * @brief construct Literal from Variant
      */
     LiteralPtr literal(const Variant& value) const;
 
     /**
-     * @brief construct sql::Literal containing a string
+     * @brief construct Literal containing a string
      * @{
      */
     LiteralPtr string(const String& value) const;
@@ -56,52 +56,52 @@ class Factory {
 
 
     /**
-     * @brief construct sql::Literal containing a 64-bit integer
+     * @brief construct Literal containing a 64-bit integer
      */
     LiteralPtr int64_(long long value) const;
 
     /**
-     * @brief construct sql::Literal containing a double precision float
+     * @brief construct Literal containing a double precision float
      */
     LiteralPtr double_(double value) const;
 
     /**
-     * @brief construct sql::Literal containing a date
+     * @brief construct Literal containing a date
      */
     LiteralPtr date(int year, int month, int day) const;
 
     /**
-     * @brief construct sql::Literal containing a date
+     * @brief construct Literal containing a date
      */
     LiteralPtr date(const Date& date) const;
 
     /**
-     * @brief construct sql::Literal containing a date
+     * @brief construct Literal containing a date
      */
     LiteralPtr date(const DateTime& datetime) const;
 
     /**
-     * @brief construct sql::Literal containing a time
+     * @brief construct Literal containing a time
      */
     LiteralPtr time(int hour, int minute, int second=0) const;
 
     /**
-     * @brief construct sql::Literal containing a time
+     * @brief construct Literal containing a time
      */
     LiteralPtr time(const Time& time) const;
 
     /**
-     * @brief construct sql::Literal containing a time
+     * @brief construct Literal containing a time
      */
     LiteralPtr time(const DateTime& datetime) const;
 
     /**
-     * @brief construct sql::Literal containing a datetime
+     * @brief construct Literal containing a datetime
      */
     LiteralPtr datetime(const DateTime& datetime) const;
 
     /**
-     * @brief construct sql::Literal containing a bool
+     * @brief construct Literal containing a bool
      */
     LiteralPtr bool_(bool value) const;
 
@@ -172,7 +172,7 @@ class Factory {
     BinaryOperatorPtr add(ExpressionPtr lhs, ExpressionPtr rhs) const;
 
     /**
-     * @brief surround sql with parentheses
+     * @brief surround expression with parentheses
      */
     ParenthesesPtr parentheses(ExpressionPtr xpr) const;
 };

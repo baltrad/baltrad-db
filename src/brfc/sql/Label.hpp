@@ -28,36 +28,38 @@ namespace brfc {
 namespace sql {
 
 /**
- * @brief labeled expression
- *
- * table.column AS label
+ * @brief a labeled SQL expression
  */
 class Label : public Expression {
   public:
+    /**
+     * @brief construct as a shared_ptr
+     * @sa Label()
+     */
     static LabelPtr create(ExpressionPtr expression, const String& name) {
         return LabelPtr(new Label(expression, name));
     }
-
-    void name(const String& name) {
-        name_ = name;
-    }
-
+    
+    /**
+     * @brief the label
+     */
     virtual const String& name() const {
         return name_;
     }
 
-    void expression(ExpressionPtr expression) {
-        expression_ = expression;
-    }
-
     /**
-     * @brief get expression this label is for
+     * @brief labeled expression
      */
     ExpressionPtr expression() const {
         return expression_;
     }
 
   protected:
+    /**
+     * @brief constructor
+     * @param expression the expression to label
+     * @param name label name
+     */
     explicit Label(ExpressionPtr expression, const String& name)
             : expression_(expression)
             , name_(name) {

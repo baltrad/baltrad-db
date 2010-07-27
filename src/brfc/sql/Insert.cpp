@@ -37,7 +37,7 @@ Insert::value(const String& column, ExpressionPtr expr) {
 void
 Insert::value(ColumnPtr column, ExpressionPtr expr) {
     if (column->selectable() != table_)
-        throw value_error("table mismatch");
+        throw lookup_error("table mismatch");
     BOOST_FOREACH(const ValueMap::value_type& val, values_) {
         if (val.first == column)
             throw duplicate_entry(column->name().to_std_string());
@@ -46,7 +46,7 @@ Insert::value(ColumnPtr column, ExpressionPtr expr) {
 }
 
 void
-Insert::return_(ExpressionPtr expr) {
+Insert::add_return(ExpressionPtr expr) {
     returns_.push_back(expr);
 }
 

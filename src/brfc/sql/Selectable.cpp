@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/String.hpp>
 
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/Column.hpp>
@@ -29,6 +30,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 namespace sql {
+
+String
+Selectable::name() const {
+    static String empty;
+    return empty;
+}
 
 AliasPtr
 Selectable::alias(const String& name) {
@@ -78,7 +85,7 @@ Selectable::fk_columns() const {
 ColumnPtr
 Selectable::matching_column(const Column& column) const {
     BOOST_FOREACH(ColumnPtr col, columns()) {
-        if (*col == column or col->has_parent(column))
+        if (*col == column or col->is_proxy_of(column))
             return col;
     }
     return ColumnPtr();

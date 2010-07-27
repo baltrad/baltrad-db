@@ -30,7 +30,7 @@ class String;
 namespace sql {
 
 /**
- * @brief ABC for expressions
+ * @brief ABC for SQL expressions
  */
 class Expression : public Element {
   public:

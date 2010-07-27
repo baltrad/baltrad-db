@@ -170,7 +170,7 @@ TEST_F(sql_DefaultCompiler_test, test_insert) {
     InsertPtr insert = Insert::create(t1);
     insert->value("c1", xpr.int64_(1));
     insert->value("c2", xpr.int64_(2));
-    insert->return_(t1->column("c3"));
+    insert->add_return(t1->column("c3"));
     String expected("INSERT INTO t1(c1, c2) VALUES (:lit_0, :lit_1) RETURNING t1.c3");
     const Query& q = compiler.compile(*insert);
     EXPECT_EQ(expected, q.statement());

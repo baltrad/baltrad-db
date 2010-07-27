@@ -30,16 +30,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-Join::Join(SelectablePtr from,
-           SelectablePtr to,
+Join::Join(SelectablePtr lhs,
+           SelectablePtr rhs,
            ExpressionPtr condition,
            Type type)
-        : from_(from)
-        , to_(to)
+        : lhs_(lhs)
+        , rhs_(rhs)
         , condition_(condition)
         , type_(type) {
     if (type_ != CROSS and not condition_)
-        condition_ = find_condition(*from, *to);
+        condition_ = find_condition(*lhs, *rhs);
 }
 
 ExpressionPtr
@@ -58,23 +58,23 @@ Join::find_condition(const Selectable& lhs, const Selectable& rhs) {
         }
     }
 
-    throw value_error("can't determine join");
+    throw lookup_error("can't determine join");
 }
 
 bool
 Join::contains(SelectablePtr element) const {
     int contains = 0;
 
-    if (JoinPtr j = dynamic_pointer_cast<Join>(from_)) {
+    if (JoinPtr j = dynamic_pointer_cast<Join>(lhs_)) {
         contains += j->contains(element);
     } else {
-        contains += from_->name() == element->name();
+        contains += lhs_->name() == element->name();
     }
 
-    if (JoinPtr j = dynamic_pointer_cast<Join>(to_)) {
+    if (JoinPtr j = dynamic_pointer_cast<Join>(rhs_)) {
         contains += j->contains(element);
     } else {
-        contains += to_->name() == element->name();
+        contains += rhs_->name() == element->name();
     }
 
     return contains;
@@ -82,9 +82,9 @@ Join::contains(SelectablePtr element) const {
 
 std::vector<ColumnPtr>
 Join::columns() const {
-    std::vector<ColumnPtr> cols = from_->columns();
-    const std::vector<ColumnPtr>& to_cols = to_->columns();
-    cols.insert(cols.end(), to_cols.begin(), to_cols.end());
+    std::vector<ColumnPtr> cols = lhs_->columns();
+    const std::vector<ColumnPtr>& rhs_cols = rhs_->columns();
+    cols.insert(cols.end(), rhs_cols.begin(), rhs_cols.end());
     return cols;
 }
 

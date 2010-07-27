@@ -26,71 +26,98 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
+/**
+ * @brief SQL JOIN between two Selectables
+ */
 class Join : public Selectable {
   public:
+    /**
+     * @brief type of join
+     */
     enum Type {
-        CROSS = 0,
-        INNER = 1,
-        LEFT = 2
+        CROSS = 0, ///< cross join
+        INNER = 1, ///< inner join
+        LEFT = 2 ///< left outer join
     };
-
-    static JoinPtr create(SelectablePtr from,
-                          SelectablePtr to,
+    
+    /**
+     * @brief construct as a shared_ptr
+     * @sa Join()
+     */
+    static JoinPtr create(SelectablePtr lhs,
+                          SelectablePtr rhs,
                           ExpressionPtr condition=ExpressionPtr(),
                           Type type=CROSS) {
-        return JoinPtr(new Join(from, to, condition, type));
+        return JoinPtr(new Join(lhs, rhs, condition, type));
     }
 
-    virtual String name() const { return ""; }
-
-    SelectablePtr from() const {
-        return from_;
+    /**
+     * @brief left hand selectable
+     */
+    SelectablePtr lhs() const {
+        return lhs_;
     }
-
-    void from(SelectablePtr from) {
-        from_ = from;
+    
+    /**
+     * @brief right hand selectable
+     */
+    SelectablePtr rhs() const {
+        return rhs_;
     }
-
-    SelectablePtr to() const {
-        return to_;
-    }
-
-    void to(SelectablePtr to) {
-        to_ = to;
-    }
-
+    
+    /**
+     * @brief join condition
+     */
     ExpressionPtr condition() const {
         return condition_;
     }
 
-    void condition(ExpressionPtr condition) {
-        condition_ = condition;
-    }
-    
+    Type type() const { return type_; }
+
     /**
      * @brief test if join contains a selectable element
      *
-     * if this join is part of a chain, the check is made in the entire
-     * chain. Selectable::name is used to determine equality.
+     * if this join is part of a chain (lhs or rhs is also a join),
+     * the check is made in the entire chain.
+     *
+     * Selectable::name is used to determine equality.
      */
     bool contains(SelectablePtr element) const;
-
-    Type type() const { return type_; }
-
-    std::vector<ColumnPtr> columns() const;
-
+    
+    /**
+     * @brief union of columns defined on left and right hand selectables
+     */
+    virtual std::vector<ColumnPtr> columns() const;
+    
+    /**
+     * @brief find a join condition between two Selectables
+     * @throw lookup_error if a relation can't be determined
+     *
+     * join condition is determined from foreign key relations between
+     * the two Selectables
+     */
     static ExpressionPtr find_condition(const Selectable& lhs,
                                         const Selectable& rhs);
 
   protected:
-    Join(SelectablePtr from,
-        SelectablePtr to,
-        ExpressionPtr condition,
-        Type type);
+    /**
+     * @brief constructor
+     * @param lhs left hand selectable
+     * @param rhs right hand selectable
+     * @param condition condition to join on
+     * @param type type of the join
+     *
+     * if the join condition is missing and the type is not CROSS, the join
+     * condition is looked up using find_condition()
+     */
+    Join(SelectablePtr lhs,
+         SelectablePtr rhs,
+         ExpressionPtr condition=ExpressionPtr(),
+         Type type=CROSS);
 
   private:
-    SelectablePtr from_;
-    SelectablePtr to_;
+    SelectablePtr lhs_;
+    SelectablePtr rhs_;
     ExpressionPtr condition_;
     Type type_;
 };

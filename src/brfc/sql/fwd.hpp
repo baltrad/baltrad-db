@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 /**
- * @brief query expressions
+ * @brief relational database connection & SQL
  */
 namespace sql {
 

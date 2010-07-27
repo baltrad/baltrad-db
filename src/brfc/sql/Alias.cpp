@@ -26,13 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-ColumnPtr
-Alias::column(const String& name) const {
-    ColumnPtr c = aliased_->column(name);
-    c = c->proxy(this->shared_from_this());
-    return c;
-}
-
 std::vector<ColumnPtr>
 Alias::columns() const {
     std::vector<ColumnPtr> cols;

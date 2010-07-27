@@ -22,39 +22,81 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
-#include <brfc/String.hpp>
-
 #include <brfc/sql/fwd.hpp>
 #include <brfc/sql/Element.hpp>
 
 namespace brfc {
+
+class String;
+
 namespace sql {
 
+/**
+ * @brief ABC for Selectable SQL elements
+ */
 class Selectable : public Element {
   public:
     SelectablePtr shared_from_this() const {
         return static_pointer_cast<Selectable>(
                 const_pointer_cast<Element>(Element::shared_from_this()));
     }
-
-    virtual String name() const = 0;
-
+    
+    /**
+     * @brief name of this selectable
+     * @return empty string
+     *
+     * by default, selectables are unnamed
+     */
+    virtual String name() const;
+    
+    /**
+     * @brief access column by @c name
+     */
     virtual ColumnPtr column(const String& name) const;
-
+    
+    /**
+     * @brief columns defined on this selectable
+     */
     virtual std::vector<ColumnPtr> columns() const = 0;
-
+    
+    /**
+     * @brief foreign key columns defined on this selectable
+     */
     virtual std::vector<ColumnPtr> fk_columns() const;
-
+    
+    /**
+     * @brief find a matching column
+     * @return pointer to Column or null if not found
+     *
+     * find a column that is either the same column or a proxy for
+     * the column.
+     */
     virtual ColumnPtr matching_column(const Column& col) const;
-
+    
+    /**
+     * @brief alias this selectable
+     */
     AliasPtr alias(const String& name);
-
+    
+    /**
+     * @brief create an inner join from this selectable to @c rhs
+     * @throw lookup_error if condition is missing and can not be
+     *        automatically determined.
+     */
     JoinPtr join(SelectablePtr rhs,
                  ExpressionPtr condition=ExpressionPtr());
 
+    /**
+     * @brief create a left outer join from this selectable to @c rhs
+     * @throw lookup_error if condition is missing and can not be
+     *        automatically determined.
+     */
     JoinPtr outerjoin(SelectablePtr rhs,
                       ExpressionPtr condition=ExpressionPtr());
 
+    /**
+     * @brief create a cross join from this selectable to @c rhs
+     */
     JoinPtr crossjoin(SelectablePtr rhs);
 };
 

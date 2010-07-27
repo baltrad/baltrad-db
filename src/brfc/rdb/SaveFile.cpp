@@ -73,7 +73,7 @@ SaveFile::operator()(const oh5::File& file,
     sql::InsertPtr stmt = sql::Insert::create(files);
 
     if (rdb_->connection().has_feature(sql::Connection::RETURNING))
-        stmt->return_(files->column("id"));
+        stmt->add_return(files->column("id"));
     
     sql::Factory xpr;
     BOOST_FOREACH(const Mapping& mapping, special) {

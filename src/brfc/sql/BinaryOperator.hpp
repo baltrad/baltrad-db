@@ -32,20 +32,38 @@ namespace sql {
  */
 class BinaryOperator : public Expression {
   public:
+    /**
+     * @brief construct as a shared_ptr
+     * @sa BinaryOperator()
+     */
     static BinaryOperatorPtr create(const String& op,
                                     ExpressionPtr lhs,
                                     ExpressionPtr rhs) {
         return BinaryOperatorPtr(new BinaryOperator(op, lhs, rhs));
     }
-
-    void lhs(ExpressionPtr lhs) { lhs_ = lhs; }
-    void rhs(ExpressionPtr rhs) { rhs_ = rhs; }
-
-    ExpressionPtr lhs() const { return lhs_; }
-    ExpressionPtr rhs() const { return rhs_; }
+    
+    /**
+     * @brief the operator
+     */
     const String& op() const { return op_; }
 
+    /**
+     * @brief left hand side of the operator
+     */
+    ExpressionPtr lhs() const { return lhs_; }
+
+    /**
+     * @brief right hand side of the operator
+     */
+    ExpressionPtr rhs() const { return rhs_; }
+
   protected:
+    /**
+     * @brief constructor
+     * @param op the operator
+     * @param lhs left hand side expression
+     * @param rhs right hand side expression
+     */
     BinaryOperator(const String& op,
                    ExpressionPtr lhs,
                    ExpressionPtr rhs)

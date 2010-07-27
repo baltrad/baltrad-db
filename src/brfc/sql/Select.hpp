@@ -26,16 +26,13 @@ namespace brfc {
 namespace sql {
 
 /**
- * @brief SELECT statement
+ * @brief SQL SELECT statement
  */
 class Select : public Selectable {
   public:
-    virtual String name() const { return ""; }
-    
     /**
-     * @param from a Selectable to select from. The columns of the
-     *        selectable are added as columns to select and the
-     *        selectable is set as the from clause.
+     * @brief construct as shared_ptr
+     * @sa Select()
      */
     static SelectPtr create(SelectablePtr from=SelectablePtr()) {
         return SelectPtr(new Select(from));
@@ -88,12 +85,19 @@ class Select : public Selectable {
     }
 
     void from(SelectablePtr from) { from_ = from; }
-
+    
     SelectablePtr from() const {
         return from_;
     }
 
   protected:
+    /**
+     * @brief constructor
+     * @param from a Selectable to select from. The columns of the
+     *        selectable are added as columns to select and the
+     *        selectable is set as the from clause.
+     */
+
     Select(SelectablePtr from=SelectablePtr());
 
   private:

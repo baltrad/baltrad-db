@@ -32,7 +32,7 @@ namespace brfc {
 namespace sql {
 
 /**
- * @brief compile elements to string form
+ * @brief default Compiler implementation
  */
 class DefaultCompiler : public Compiler {
   public:
@@ -61,14 +61,15 @@ class DefaultCompiler : public Compiler {
     /**
      * @brief compile Alias to string form
      *
-     * @post top of the stack contains alias or 'content AS alias'
+     * @post top of the stack contains alias or 'aliased AS alias' if compiling
+     *       a FROM-clause
      */
     void operator()(const Alias& expr);
 
     /**
      * @brief compile binary operator to string form
      *
-     * @post stack contains lhs OP rhs
+     * @post stack contains 'lhs op rhs'
      */
     void operator()(const BinaryOperator& expr);
 
@@ -80,7 +81,7 @@ class DefaultCompiler : public Compiler {
 
     /**
      * @brief compile function call to string form
-     * @post top of the stack contains compiled function call
+     * @post top of the stack contains 'name(arg1, arg2, ...)'
      */
     void operator()(const Function& func);
     
@@ -100,25 +101,26 @@ class DefaultCompiler : public Compiler {
     
     /**
      * @brief compile Label to string form
-     * @post top of the stack contains labelled AS label
+     * @post top of the stack contains 'expression AS name'
      */
     void operator()(const Label& label);
 
     /**
      * @brief surround the top of the stack with parentheses
-     * @post stack contains (content)
+     * @post stack contains '(content)'
      */
     void operator()(const Parentheses& expr);
 
     /**
      * @brief compile Select statement to string form
-     * @post top of the stack contains compiled where clause
+     * @post top of the stack contains 'SELECT what FROM from WHERE where'
      */
     void operator()(const Select& select);
 
     /**
      * @brief compile Insert statement to string form
-     * @post top of the stack contiains compiled string
+     * @post top of the stack contains 'INSERT INTO table(bind.keys)
+     *       VALUES(bind.values) RETURNING returns'
      */
     void operator()(const Insert& insert);
 

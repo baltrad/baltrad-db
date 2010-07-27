@@ -29,6 +29,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
+/**
+ * @brief Column on any Selectable
+ *
+ * a column might also be a proxy for another column, meaning it is
+ * ultimately defined somewhere else, but accessible through (another)
+ * Selectable with (another) name.
+ */
 class Column : public Expression {
   public:
     ColumnPtr shared_from_this() const {
@@ -36,40 +43,73 @@ class Column : public Expression {
                 const_pointer_cast<Element>(Element::shared_from_this()));
     }
 
+    /**
+     * @brief construct as a shared_ptr
+     * @sa Column()
+     */
     static ColumnPtr create(const String& name,
                             SelectablePtr selectable,
-                            ColumnPtr parent_=ColumnPtr()) {
-        return ColumnPtr(new Column(name, selectable, parent_));
+                            ColumnPtr parent=ColumnPtr()) {
+        return ColumnPtr(new Column(name, selectable, parent));
     }
-
-
+    
+    /**
+     * @brief name of this column
+     */
     virtual const String& name() const { return name_; }
     
+    /**
+     * @brief the Selectable this column is bound to
+     */
     virtual SelectablePtr selectable() const { return selectable_; }
 
-    virtual SelectablePtr base_selectable() const {
-        if (parent_)
-            return parent_->base_selectable();
-        return selectable_;
-    }
-
+    /**
+     * @brief set this column to reference another @c column
+     */
     virtual void references(ColumnPtr column);
-
+    
+    /**
+     * @brief get referenced column
+     * @return pointer to referenced column or null pointer
+     */
     virtual ColumnPtr references() const {
         if (parent_)
             return parent_->references();
         return references_;
     }
-
-    ColumnPtr proxy(SelectablePtr t) const;
-
+    
+    /**
+     * @brief proxy this column to another @c selectable
+     *
+     * proxied column retains its name
+     */
+    ColumnPtr proxy(SelectablePtr selectable) const;
+    
+    /**
+     * @brief proxy this column to another @c selectable with @c name
+     */
     ColumnPtr proxy(const String& name, SelectablePtr t) const;
-
-    virtual bool has_parent(const Column& col) const;
-
+    
+    /**
+     * @brief test if this column is a proxy of @c col
+     * @return true if this columns is a proxy of @c col
+     */
+    virtual bool is_proxy_of(const Column& col) const;
+    
+    /**
+     * @brief test for column equality
+     * @return true if the columns have the same name and same Selectable
+     */
     bool operator==(const Column& rhs) const;
   
   protected:
+    /**
+     * @brief constructor
+     * @param name name of this column
+     * @param selectable the Selectable this column is bound to
+     * @param parent if specified, this column is considered a proxy
+     *               of the parent column (default: null)
+     */
     Column(const String& name,
            SelectablePtr selectable,
            ColumnPtr parent)

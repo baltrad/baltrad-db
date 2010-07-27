@@ -101,10 +101,10 @@ DefaultCompiler::operator()(const Alias& expr) {
 
 void
 DefaultCompiler::operator()(const Join& join) {
-    String condition, to, from;
+    String condition, lhs, rhs, jointype;
     in_from_clause_ = true;
-    visit(*join.from(), *this);
-    visit(*join.to(), *this);
+    visit(*join.rhs(), *this);
+    visit(*join.lhs(), *this);
     in_from_clause_ = false;
     if (join.condition()) {
         visit(*join.condition(), * this);
@@ -112,10 +112,9 @@ DefaultCompiler::operator()(const Join& join) {
     }
     in_from_clause_ = true;
 
-    to = pop();
-    from = pop();
+    lhs = pop();
+    rhs = pop();
 
-    String jointype;
     switch (join.type()) {
         case Join::CROSS:
             jointype = " CROSS JOIN ";
@@ -131,9 +130,9 @@ DefaultCompiler::operator()(const Join& join) {
     }
 
     if (join.condition())
-        push(from + jointype + to + " ON " + condition);
+        push(lhs + jointype + rhs + " ON " + condition);
     else {
-        push(from + jointype + to);
+        push(lhs + jointype + rhs);
     }
 }
 

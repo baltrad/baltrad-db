@@ -32,11 +32,11 @@ Column::references(ColumnPtr column) {
 }
 
 bool
-Column::has_parent(const Column& col) const {
+Column::is_proxy_of(const Column& col) const {
     if (parent_) {
         if (col == (*parent_))
             return true;
-        return parent_->has_parent(col);
+        return parent_->is_proxy_of(col);
     }
     return false;
 }

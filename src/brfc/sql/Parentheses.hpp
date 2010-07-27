@@ -26,24 +26,31 @@ namespace brfc {
 namespace sql {
 
 /**
- * @brief surround expression in parentheses
+ * @brief SQL expression surrounded by parentheses
  */
 class Parentheses : public Expression {
   public:
+    /**
+     * @brief construct as shared_ptr
+     * @sa Parentheses()
+     */
     static ParenthesesPtr create(ExpressionPtr expression) {
         return ParenthesesPtr(new Parentheses(expression));
     }
-
-    void expression(ExpressionPtr expression) {
-        expression_ = expression;
-    }
     
+    /**
+     * @brief the surrounded expression
+     */
     ExpressionPtr expression() const {
         return expression_;
     }
 
   protected:
-    Parentheses(ExpressionPtr expression)
+    /**
+     * @brief constructor
+     * @param expression the expression to surround
+     */
+    explicit Parentheses(ExpressionPtr expression)
             : Expression()
             , expression_(expression) {
     }

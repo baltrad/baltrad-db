@@ -22,32 +22,49 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <map>
 
+#include <brfc/String.hpp>
+
 #include <brfc/sql/Selectable.hpp>
 
 namespace brfc {
 namespace sql {
 
+/**
+ * @brief SQL Table
+ */
 class Table : public Selectable {
   public:
+    /**
+     * @brief create as smart_ptr
+     * @sa Table()
+     */
     static TablePtr create(const String& name) {
         return TablePtr(new Table(name));
     }
-
-    void name(const String& name) {
-        name_ = name;
-    }
-
+    
+    /**
+     * @brief name of this table
+     */
     virtual String name() const {
         return name_;
     }
-
+    
+    /**
+     * @throw duplicate_entry if the table already has a column
+     *        with the same name
+     * @return the created column
+     */
     ColumnPtr add_column(const String& column);
-
+    
     virtual ColumnPtr column(const String& name) const;
 
     virtual std::vector<ColumnPtr> columns() const;
 
   protected:
+    /**
+     * @brief constructor
+     * @param name the name of this table
+     */
     explicit Table(const String& name)
             : name_(name)
             , columns_() {

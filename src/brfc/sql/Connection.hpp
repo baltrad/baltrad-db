@@ -128,7 +128,7 @@ class Connection {
     /**
      * @brief execute a statement
      *
-     * @param query statment to execute
+     * @param statement statment to execute
      * @param binds binds to replace into the statement
      * 
      * equivalent to:

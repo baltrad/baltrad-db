@@ -28,7 +28,7 @@ namespace sql {
 class Element;
 
 /**
- * @brief ABC
+ * @brief ABC for SQL expression compiler
  */
 class Compiler {
   public:

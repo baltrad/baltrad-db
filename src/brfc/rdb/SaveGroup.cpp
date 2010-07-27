@@ -54,7 +54,7 @@ void
 SaveGroup::operator()(const oh5::Group& group) {
     stmt_ = sql::Insert::create(Model::instance().groups);
     if (rdb_->connection().has_feature(sql::Connection::RETURNING))
-        stmt_->return_(stmt_->table()->column("id"));
+        stmt_->add_return(stmt_->table()->column("id"));
 
     bind_plain(group);
     bind_specializations(group);
