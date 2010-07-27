@@ -36,6 +36,8 @@ class Compiler {
         return do_compile(expr);
     }
 
+    virtual ~Compiler() { }
+
   protected:
     /**
      * @brief compile expression/statement to string form
