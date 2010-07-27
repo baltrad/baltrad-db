@@ -160,7 +160,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
 
 TEST_P(rdb_Query_test, test_simple) {
     shared_ptr<ResultSet> r = 
-            query.fetch(xpr.attribute("path"))
+            query.fetch(xpr.attribute("file:path"))
                  .filter(xpr.attribute("where/xsize")->eq(xpr.int64_(1)))
                  .execute();
     ASSERT_TRUE(r->next());
@@ -178,7 +178,7 @@ extract_strings_at(ResultSet& r, int pos) {
 }
 
 TEST_P(rdb_Query_test, test_list_all_files) {
-    shared_ptr<ResultSet> r = query.fetch(xpr.attribute("path")).execute();
+    shared_ptr<ResultSet> r = query.fetch(xpr.attribute("file:path")).execute();
 
     EXPECT_EQ(r->size(), 5);
     const StringList& v = extract_strings_at(*r, 0);
@@ -192,7 +192,7 @@ TEST_P(rdb_Query_test, test_list_all_files) {
 
 TEST_P(rdb_Query_test, test_filter_by_object) {
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("path"))
+        query.fetch(xpr.attribute("file:path"))
              .filter(xpr.attribute("what/object")->eq(xpr.string("PVOL")))
              .execute();
 
@@ -216,7 +216,7 @@ TEST_P(rdb_Query_test, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("path"))
+        query.fetch(xpr.attribute("file:path"))
              .filter(xsize->eq(xpr.int64_(1))->or_(ysize->eq(xpr.int64_(2))))
              .execute();
 
@@ -231,7 +231,7 @@ TEST_P(rdb_Query_test, test_filter_by_xsize_or_ysize) {
 TEST_P(rdb_Query_test, test_filter_by_xsize_distinct) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     shared_ptr<ResultSet> r = 
-        query.fetch(xpr.attribute("path"))
+        query.fetch(xpr.attribute("file:path"))
              .distinct(true)
              .filter(xsize->eq(xpr.int64_(3)))
              .execute();
@@ -249,7 +249,7 @@ TEST_P(rdb_Query_test, test_filter_by_combined_datetime) {
             xpr.attribute("what/time")
         )->parentheses();
 
-    query.fetch(xpr.attribute("path"));
+    query.fetch(xpr.attribute("file:path"));
     query.filter(what_dt->between(xpr.datetime(min), xpr.datetime(max)));
     shared_ptr<ResultSet> r = query.execute();
 
@@ -262,9 +262,9 @@ TEST_P(rdb_Query_test, test_filter_by_combined_datetime) {
 }
 
 TEST_P(rdb_Query_test, test_select_by_wmo_code) {
-    expr::AttributePtr wmo_code = xpr.attribute("src_WMO");
+    expr::AttributePtr wmo_code = xpr.attribute("what/source:WMO");
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("path"))
+        query.fetch(xpr.attribute("file:path"))
              .filter(wmo_code->eq(xpr.int64_(2666)))
              .execute();
 
@@ -276,9 +276,9 @@ TEST_P(rdb_Query_test, test_select_by_wmo_code) {
 }
 
 TEST_P(rdb_Query_test, test_select_by_or_node) {
-    expr::AttributePtr node = xpr.attribute("src_node");
+    expr::AttributePtr node = xpr.attribute("what/source:node");
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("path"))
+        query.fetch(xpr.attribute("file:path"))
              .filter(node->eq(xpr.string("seang"))->or_(node->eq(xpr.string("sekkr"))))
              .execute();
     EXPECT_EQ(r->size(), 5);
@@ -291,9 +291,9 @@ TEST_P(rdb_Query_test, test_select_by_or_node) {
 }
 
 TEST_P(rdb_Query_test, test_select_by_and_node) {
-    expr::AttributePtr node = xpr.attribute("src_node");
+    expr::AttributePtr node = xpr.attribute("what/source:node");
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("path"))
+        query.fetch(xpr.attribute("file:path"))
              .filter(node->eq(xpr.string("seang"))->and_(node->eq(xpr.string("sekkr"))))
              .execute();
     EXPECT_EQ(r->size(), 0);
@@ -301,8 +301,8 @@ TEST_P(rdb_Query_test, test_select_by_and_node) {
 
 TEST_P(rdb_Query_test, test_select_by_place) {
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("path"))
-             .filter(xpr.attribute("src_PLC")->eq(xpr.string("Ängelholm")))
+        query.fetch(xpr.attribute("file:path"))
+             .filter(xpr.attribute("what/source:PLC")->eq(xpr.string("Ängelholm")))
              .execute();
 
     EXPECT_EQ(r->size(), 3);
@@ -330,8 +330,8 @@ TEST_P(rdb_Query_test, test_has_nx_file) {
 
 TEST_P(rdb_Query_test, test_query_file_id) {
     shared_ptr<ResultSet> r = 
-        query.fetch(xpr.attribute("file_id"))
-             .filter(xpr.attribute("path")->eq(xpr.string("td1")))
+        query.fetch(xpr.attribute("file:id"))
+             .filter(xpr.attribute("file:path")->eq(xpr.string("td1")))
              .execute();
     EXPECT_EQ(r->size(), 1);
     r->next();
@@ -339,8 +339,8 @@ TEST_P(rdb_Query_test, test_query_file_id) {
 }
 
 TEST_P(rdb_Query_test, test_duplicate_fetch_throws) {
-    query.fetch(xpr.attribute("path"));
-    EXPECT_THROW(query.fetch(xpr.attribute("path")), duplicate_entry);
+    query.fetch(xpr.attribute("file:path"));
+    EXPECT_THROW(query.fetch(xpr.attribute("file:path")), duplicate_entry);
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1

@@ -174,7 +174,7 @@ FileCatalog::query() const {
 Query
 FileCatalog::query_file_path() const {
     Query q(db_.get());
-    q.fetch(expr::Attribute::create("path"));
+    q.fetch(expr::Attribute::create("file:path"));
     return q;
 }
 

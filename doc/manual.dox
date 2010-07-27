@@ -121,8 +121,8 @@ using brfc::FileCatalog::query.
 For convenience, a factory for creating elements usable in a query is provided
 (brfc::expr::Factory).
 
-File pathname can be queried using a pseudo-attribute named "path", this is the
-absolute path of the stored file.
+File pathname can be queried using a pseudo-attribute named "file:path", this
+is the absolute path of the stored file.
 
 To get an attribute from database, you must mark it for fetching using
 brfc::Query::fetch.
@@ -139,8 +139,8 @@ brfc::expr::Factory xpr;
 
 brfc::Query q = fc.query();
 
-// create "path" attribute
-brfc::expr::AttributePtr path = xpr.attribute("path");
+// create "file:path" attribute
+brfc::expr::AttributePtr path = xpr.attribute("file:path");
 // mark it for fetching
 q.fetch(path);
 // execute
@@ -171,7 +171,7 @@ brfc::Query q;
 brfc::expr::Factory xpr;
 
 // give back paths
-q.fetch(xpr.attribute("path"));
+q.fetch(xpr.attribute("file:path"));
 // where date < 15.05.2009
 q.filter(xpr.lt(xpr.attribute("what/date"), xpr.date(2009, 5, 15)));
 // where object = PVOL
@@ -205,26 +205,26 @@ Things are a bit trickier when you want to filter by source. A source in
 ODIM_H5 files can contain many attributes. Luckily, when storing the file
 it is associated with one distinct source. But you can query using all the
 possible fields. A source is split to pseudo-attributes with element names
-from ODIM_H5 source specification, prefixed with 'src_'. So WMO becomes
-src_WMO and so on. There are two groups of sources: radar sites and
+from ODIM_H5 source specification following 'what/source:'. So WMO becomes
+'what/source:WMO' and so on. There are two groups of sources: radar sites and
 organisations/countries. Their attribute values don't overlap, meaning:
 radar sites have WMO, RAD and PLC specified, while the other group has
 CTY and ORG.
 
-There is one overlapping attribute though, named src_node, which for
+There is one overlapping attribute though, named 'what/source:node', which for
 radar sites is the node value from ODIM_H5 specifiaction Table 9, and
 for countries/organisations the two-letter internet country code. So
 this is present in all sources. But it's not entirely useful right now.
 (If there is need, we might introduce sql LIKE operator so you can select
 over this attribute to get all country data (including radars) easily like
-this: <tt>xpr.attribute("src_node").like("se*");</tt>)
+this: <tt>xpr.attribute("what/source:node").like("se*");</tt>)
 
 @code
 brfc::expr::Factory xpr;
 
 brfc::Query q = fc.query();
-q.fetch(xpr.attribute("path"));
-q.filter(xpr.attribute("src_node")->eq(xpr.string("seang")));
+q.fetch(xpr.attribute("file:path"));
+q.filter(xpr.attribute("what/source:node")->eq(xpr.string("seang")));
 
 brfc::ResultSet r = q.execute();
 @endcode
@@ -241,7 +241,7 @@ brfc::expr::Factory xpr;
 
 brfc::Query q = fc.query();
 
-q.fetch(xpr.attribute("path"));
+q.fetch(xpr.attribute("file:path"));
 q.filter(xpr.attribute("what/date")->lt(xpr.date(2009, 1, 1)));
 
 brfc::ResultSet r = q.execute();
@@ -297,7 +297,7 @@ try {
 ExpressionFactory xpr;
 
 Query q = fc.query_path();
-q.filter(xpr.attribute("src_node").eq(xpr.string("seang"));
+q.filter(xpr.attribute("what/source:node").eq(xpr.string("seang"));
 
 // execute
 ResultSet r = q.execute();

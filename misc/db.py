@@ -387,14 +387,14 @@ attribute_entries = [
 ]
 
 virtual_attributes = [
-    ("path",    "string",   files.c.path),
-    ("file_id", "int",      files.c.id),
-    ("src_WMO", "int",      source_radars.c.wmo_code),
-    ("src_RAD", "string",   source_radars.c.radar_site),
-    ("src_ORG", "int",      source_centres.c.originating_centre),
-    ("src_CTY", "int",      source_centres.c.country_code),
-    ("src_PLC", "string",   source_radars.c.place),
-    ("src_node", "string",  sources.c.node_id),
+    ("file:path",        "string",   files.c.path),
+    ("file:id",          "int",      files.c.id),
+    ("what/source:WMO",  "int",      source_radars.c.wmo_code),
+    ("what/source:RAD",  "string",   source_radars.c.radar_site),
+    ("what/source:ORG",  "int",      source_centres.c.originating_centre),
+    ("what/source:CTY",  "int",      source_centres.c.country_code),
+    ("what/source:PLC",  "string",   source_radars.c.place),
+    ("what/source:node", "string",   sources.c.node_id),
 ]
 
 ignored_in_hash = [

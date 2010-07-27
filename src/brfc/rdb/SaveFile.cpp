@@ -77,8 +77,7 @@ SaveFile::operator()(const oh5::File& file,
     
     sql::Factory xpr;
     BOOST_FOREACH(const Mapping& mapping, special) {
-        // XXX: do something about it, we can't continue adding here
-        if (mapping.attribute == "path" || mapping.attribute == "file_id")
+        if (mapping.attribute.starts_with("file:"))
             continue;
         const Variant& value = 
                 file.root()->child_attribute(mapping.attribute)->value();

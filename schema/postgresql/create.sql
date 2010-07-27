@@ -1,30 +1,39 @@
 
-CREATE TABLE bdb_attribute_groups (
-	id SERIAL NOT NULL, 
-	name INTEGER NOT NULL, 
-	PRIMARY KEY (id)
-)
-
-;
-
-CREATE TABLE bdb_attributes (
-	id SERIAL NOT NULL, 
-	name TEXT NOT NULL, 
-	converter TEXT NOT NULL, 
-	storage_table TEXT NOT NULL, 
-	storage_column TEXT NOT NULL, 
-	ignore_in_hash BOOLEAN NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (name)
-)
-
-;
-
 CREATE TABLE bdb_sources (
 	id SERIAL NOT NULL, 
 	node_id TEXT NOT NULL, 
 	PRIMARY KEY (id), 
 	 UNIQUE (node_id)
+)
+
+;
+
+CREATE TABLE bdb_source_centres (
+	id INTEGER NOT NULL, 
+	originating_centre INTEGER NOT NULL, 
+	country_code INTEGER NOT NULL, 
+	wmo_cccc VARCHAR(4) NOT NULL, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
+	 UNIQUE (wmo_cccc), 
+	 UNIQUE (originating_centre), 
+	 UNIQUE (country_code)
+)
+
+;
+
+CREATE TABLE bdb_source_radars (
+	id INTEGER NOT NULL, 
+	centre_id INTEGER NOT NULL, 
+	radar_site TEXT, 
+	wmo_code INTEGER, 
+	place TEXT, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
+	 FOREIGN KEY(centre_id) REFERENCES bdb_source_centres (id), 
+	 UNIQUE (radar_site), 
+	 UNIQUE (wmo_code), 
+	 UNIQUE (place)
 )
 
 ;
@@ -41,10 +50,10 @@ CREATE TABLE bdb_files (
 	n_time TIME WITHOUT TIME ZONE NOT NULL, 
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 UNIQUE (path), 
+	 UNIQUE (proposed_filename, filename_version), 
 	 UNIQUE (unique_id), 
 	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id), 
-	 UNIQUE (proposed_filename, filename_version)
+	 UNIQUE (path)
 )
 
 ;
@@ -66,13 +75,43 @@ CREATE TABLE bdb_groups (
 
 ;
 
+CREATE TABLE bdb_invalid_attributes (
+	name TEXT NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	PRIMARY KEY (name, group_id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE bdb_attribute_groups (
+	id SERIAL NOT NULL, 
+	name INTEGER NOT NULL, 
+	PRIMARY KEY (id)
+)
+
+;
+
+CREATE TABLE bdb_attributes (
+	id SERIAL NOT NULL, 
+	name TEXT NOT NULL, 
+	converter TEXT NOT NULL, 
+	storage_table TEXT NOT NULL, 
+	storage_column TEXT NOT NULL, 
+	ignore_in_hash BOOLEAN NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (name)
+)
+
+;
+
 CREATE TABLE bdb_attribute_values_time (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
 	value TIME WITHOUT TIME ZONE NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
 )
 
 ;
@@ -88,17 +127,6 @@ CREATE TABLE bdb_attribute_values_str (
 
 ;
 
-CREATE TABLE bdb_attribute_values_date (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value DATE NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
 CREATE TABLE bdb_attribute_values_int (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
@@ -106,6 +134,17 @@ CREATE TABLE bdb_attribute_values_int (
 	PRIMARY KEY (attribute_id, group_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
 	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE bdb_attribute_values_date (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value DATE NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
 )
 
 ;
@@ -126,47 +165,8 @@ CREATE TABLE bdb_attribute_values_bool (
 	group_id INTEGER NOT NULL, 
 	value BOOLEAN NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_invalid_attributes (
-	name TEXT NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	PRIMARY KEY (name, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_source_centres (
-	id INTEGER NOT NULL, 
-	originating_centre INTEGER NOT NULL, 
-	country_code INTEGER NOT NULL, 
-	wmo_cccc VARCHAR(4) NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (wmo_cccc), 
-	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
-	 UNIQUE (originating_centre), 
-	 UNIQUE (country_code)
-)
-
-;
-
-CREATE TABLE bdb_source_radars (
-	id INTEGER NOT NULL, 
-	centre_id INTEGER NOT NULL, 
-	radar_site TEXT, 
-	wmo_code INTEGER, 
-	place TEXT, 
-	PRIMARY KEY (id), 
-	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
-	 UNIQUE (radar_site), 
-	 FOREIGN KEY(centre_id) REFERENCES bdb_source_centres (id), 
-	 UNIQUE (wmo_code), 
-	 UNIQUE (place)
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
 )
 
 ;
@@ -280,14 +280,14 @@ INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, 
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (108, 'what/undetect', 'real', 'bdb_attribute_values_real', 'value', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (109, 'CLASS', 'string', 'bdb_attribute_values_str', 'value', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (110, 'IMAGE_VERSION', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (111, 'path', 'string', 'bdb_files', 'path', True);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (112, 'file_id', 'int', 'bdb_files', 'id', True);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (113, 'src_WMO', 'int', 'bdb_source_radars', 'wmo_code', True);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (114, 'src_RAD', 'string', 'bdb_source_radars', 'radar_site', True);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (115, 'src_ORG', 'int', 'bdb_source_centres', 'originating_centre', True);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (116, 'src_CTY', 'int', 'bdb_source_centres', 'country_code', True);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (117, 'src_PLC', 'string', 'bdb_source_radars', 'place', True);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (118, 'src_node', 'string', 'bdb_sources', 'node_id', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (111, 'file:path', 'string', 'bdb_files', 'path', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (112, 'file:id', 'int', 'bdb_files', 'id', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (113, 'what/source:WMO', 'int', 'bdb_source_radars', 'wmo_code', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (114, 'what/source:RAD', 'string', 'bdb_source_radars', 'radar_site', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (115, 'what/source:ORG', 'int', 'bdb_source_centres', 'originating_centre', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (116, 'what/source:CTY', 'int', 'bdb_source_centres', 'country_code', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (117, 'what/source:PLC', 'string', 'bdb_source_radars', 'place', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (118, 'what/source:node', 'string', 'bdb_sources', 'node_id', True);
 INSERT INTO bdb_sources (id, node_id) VALUES (1, 'nl');
 INSERT INTO bdb_source_centres (id, originating_centre, country_code, wmo_cccc) VALUES (1, 99, 632, 'EHDB');
 INSERT INTO bdb_sources (id, node_id) VALUES (2, 'dk');
