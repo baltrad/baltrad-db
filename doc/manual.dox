@@ -37,9 +37,9 @@ documentation.
 
 @code
 // define database connection
-QString dsn("postgresql://baltrad:baltrad@localhost/baltrad");
+brfc::String dsn("postgresql://baltrad:baltrad@localhost/baltrad");
 // define a path where FileCatalog will store files
-QString storage_dir("/tmp");
+brfc::String storage_dir("/tmp");
 
 // create a FileCatalog instance, connecting it to database
 // and giving it a storage directory
@@ -149,7 +149,7 @@ shared_ptr<brfc::ResultSet> r = q.execute();
 // loop through results
 while (r->next()) {
     // access the values
-    QString path = r->string(0);
+    brfc::String path = r->string(0);
 }
 @endcode
 
