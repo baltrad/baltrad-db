@@ -134,12 +134,32 @@ QueryToSelect::join_groups() {
     }
 }
 
+namespace {
+
+sql::ExpressionPtr
+replace_pattern(sql::ExpressionPtr expr) {
+    sql::LiteralPtr l = dynamic_pointer_cast<sql::Literal>(expr);
+    if (l and l->value().is_string()) {
+        String value(l->value().string());
+        value.replace("*", "%");
+        value.replace("?", "_");
+        l = sql::Literal::create(Variant(value));
+        return l;
+    }
+    return expr;
+}
+ 
+} // namespace anonymous
+
 void
 QueryToSelect::operator()(expr::BinaryOperator& op) {
     visit(*op.lhs(), *this);
     visit(*op.rhs(), *this);
     sql::ExpressionPtr rhs = pop();
     sql::ExpressionPtr lhs = pop();
+    if (op.op() == "LIKE") {
+        rhs = replace_pattern(rhs);
+    }
     push(sql::BinaryOperator::create(op.op(), lhs, rhs));
 }
 

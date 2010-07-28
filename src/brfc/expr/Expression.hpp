@@ -81,6 +81,23 @@ class Expression : public boost::noncopyable
      */
     BinaryOperatorPtr between(ExpressionPtr low,
                               ExpressionPtr high) const;
+    
+    /**
+     * @brief this LIKE pattern
+     * @param pattern pattern to match against
+     *
+     * perform simple pattern matching on this expression.
+     * In the pattern, '*' matches any number of characters, '?' matches
+     * single character.
+     */
+    BinaryOperatorPtr like(const String& pattern) const;
+    
+    /**
+     *  @brief this LIKE pattern
+     *  @param pattern pattern to match against
+     *  @sa like(const String&) const
+     **/
+    BinaryOperatorPtr like(ExpressionPtr pattern) const;
     //@}
 
     /**

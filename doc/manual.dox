@@ -214,17 +214,16 @@ CTY and ORG.
 There is one overlapping attribute though, named 'what/source:node', which for
 radar sites is the node value from ODIM_H5 specifiaction Table 9, and
 for countries/organisations the two-letter internet country code. So
-this is present in all sources. But it's not entirely useful right now.
-(If there is need, we might introduce sql LIKE operator so you can select
-over this attribute to get all country data (including radars) easily like
-this: <tt>xpr.attribute("what/source:node").like("se*");</tt>)
+this is present in all sources. Since the radar sources are prefixed with
+the country code, you could query for all country data using the @c like
+operator.
 
 @code
 brfc::expr::Factory xpr;
 
 brfc::Query q = fc.query();
 q.fetch(xpr.attribute("file:path"));
-q.filter(xpr.attribute("what/source:node")->eq(xpr.string("seang")));
+q.filter(xpr.attribute("what/source:node")->like("se*"));
 
 brfc::ResultSet r = q.execute();
 @endcode

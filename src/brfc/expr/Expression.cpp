@@ -20,9 +20,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Expression.hpp>
 
 #include <brfc/String.hpp>
+#include <brfc/Variant.hpp>
 
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Label.hpp>
+#include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
 
 namespace brfc {
@@ -79,6 +81,16 @@ Expression::between(ExpressionPtr low, ExpressionPtr high) const {
     ExpressionPtr rhs = le(high);
     ExpressionPtr lhs = ge(low);
     return lhs->and_(rhs);
+}
+
+BinaryOperatorPtr
+Expression::like(const String& pattern) const {
+    return like(Literal::create(Variant(pattern)));
+}
+
+BinaryOperatorPtr
+Expression::like(ExpressionPtr pattern) const {
+    return BinaryOperator::create("LIKE", this->shared_from_this(), pattern);
 }
 
 ParenthesesPtr

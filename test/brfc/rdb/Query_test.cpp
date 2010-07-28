@@ -343,6 +343,19 @@ TEST_P(rdb_Query_test, test_duplicate_fetch_throws) {
     EXPECT_THROW(query.fetch(xpr.attribute("file:path")), duplicate_entry);
 }
 
+TEST_P(rdb_Query_test, test_query_like) {
+    expr::AttributePtr node = xpr.attribute("what/source:node");
+    shared_ptr<ResultSet> r =
+        query.fetch(xpr.attribute("file:path"))
+             .filter(node->like("sea*"))
+             .execute();
+    EXPECT_EQ(3, r->size());
+    const StringList& v = extract_strings_at(*r, 0);
+    EXPECT_TRUE(v.contains("td1"));
+    EXPECT_TRUE(v.contains("td3"));
+    EXPECT_TRUE(v.contains("td5"));
+}
+
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(rdb_Query_test_p,
                         rdb_Query_test,
