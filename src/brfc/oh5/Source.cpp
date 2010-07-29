@@ -51,7 +51,7 @@ parse_source(const String& source) {
             map[kv.at(0)] = kv.at(1);
         }
     } catch (const assertion_error& e) {
-        throw value_error(e.what());
+        throw value_error("Invalid source string: " + source.to_std_string());
     }
     return map;
 }
