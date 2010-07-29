@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
+#include <brfc/StringList.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
@@ -110,9 +111,9 @@ TEST_F(oh5_File_test, test_invalid_attributes) {
 TEST_F(oh5_File_test, test_invalid_attribute_paths) {
     shared_ptr<Attribute> invalid = make_shared<Attribute>("invalid");
     f1->root()->add_child(invalid);
-    File::StringVector v = f1->invalid_attribute_paths();
+    const StringList& v = f1->invalid_attribute_paths();
     EXPECT_EQ(v.size(), (size_t)1);
-    EXPECT_TRUE(std::find(v.begin(), v.end(), "/invalid") != v.end());
+    EXPECT_TRUE(v.contains("/invalid"));
 }
 
 } // namespace oh5

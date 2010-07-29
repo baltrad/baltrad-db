@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %include "std_string.i"
 %include "std_vector.i"
 %include "stdint.i"
-%include "QString.i"
+%include "String.i"
 
 
 %{

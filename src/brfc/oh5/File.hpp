@@ -30,6 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class Date;
+class StringList;
 class Time;
 
 namespace oh5 {
@@ -47,7 +48,6 @@ class File : public boost::noncopyable,
   public:
     typedef std::vector<shared_ptr<Attribute> > AttributeVector;
     typedef std::vector<shared_ptr<const Attribute> > ConstAttributeVector;
-    typedef std::vector<String> StringVector;
 
     /**
      * @brief construct an empty File
@@ -127,7 +127,7 @@ class File : public boost::noncopyable,
     /**
      * @brief get full paths of invalid attributes (have no value)
      */
-    StringVector invalid_attribute_paths() const;
+    StringList invalid_attribute_paths() const;
     
     /**
      * @brief get invalid attributes attributes (have no value)

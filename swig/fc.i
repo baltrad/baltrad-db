@@ -34,6 +34,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/Database.hpp>
     #include <brfc/Date.hpp>
     #include <brfc/DateTime.hpp>
+    #include <brfc/StringList.hpp>
     #include <brfc/Time.hpp>
     #include <brfc/Variant.hpp>
 %}
@@ -46,6 +47,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %typemap(javabody) brfc::Date,
                    brfc::DateTime,
+                   brfc::StringList,
                    brfc::Time,
                    brfc::Variant,
                    std::vector<brfc::String> %{
@@ -96,6 +98,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 // uses int references
 %ignore brfc::Date::date_from_jdn;
 
+%ignore brfc::StringList::iterator;
+%ignore brfc::StringList::const_iterator;
+%ignore brfc::StringList::begin;
+%ignore brfc::StringList::end;
+%ignore brfc::StringList::front(); // nonconst
+%ignore brfc::StringList::back(); // nonconst
+
 // ignore Variant members
 %ignore brfc::Variant::Variant(const char* value);
 %ignore brfc::Variant::operator=;
@@ -117,8 +126,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 SWIG_SHARED_PTR(Database, brfc::Database);
 SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
-
-%template(StringVector) std::vector<brfc::String>;
 
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.expr.Expression;
@@ -167,6 +174,7 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 %include <brfc/Date.hpp>
 %include <brfc/Time.hpp>
 %include <brfc/DateTime.hpp>
+%include <brfc/StringList.hpp>
 %include <brfc/Variant.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:

@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %import "fc.i"
 
 %{
+    #include <brfc/StringList.hpp>
     #include <brfc/oh5/Node.hpp>
     #include <brfc/oh5/Attribute.hpp>
     #include <brfc/oh5/AttributeGroup.hpp>
@@ -93,7 +94,7 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
                       brfc::oh5::File* %{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.Time;
-    import eu.baltrad.fc.StringVector;
+    import eu.baltrad.fc.StringList;
 %}
 
 %typemap(javaimports) brfc::oh5::Attribute,
@@ -101,10 +102,16 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
     import eu.baltrad.fc.Variant;
 %}
 
+%typemap(javaimports) brfc::oh5::Group,
+                      brfc::oh5::Group* %{
+    import eu.baltrad.fc.StringList;
+%}
+
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.Time;
     import eu.baltrad.fc.Variant;
+    import eu.baltrad.fc.StringList;
 %}
 
 // make constructors for SWIG_SHARED_PTR public

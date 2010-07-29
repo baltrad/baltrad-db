@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
+#include <brfc/StringList.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
@@ -138,9 +139,9 @@ File::name() const {
     return path().section("/", -1);
 }
 
-File::StringVector
+StringList
 File::invalid_attribute_paths() const {
-    StringVector paths;
+    StringList paths;
     BOOST_FOREACH(shared_ptr<const Attribute> attr, invalid_attributes()) {
         paths.push_back(attr->path());
     }

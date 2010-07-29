@@ -21,6 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
+#include <brfc/StringList.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
@@ -100,10 +101,10 @@ TEST_F(oh5_FileLoader_test, DISABLED_ignored_attributes) {
     EXPECT_TRUE(root->child_attribute("what/ignore"));
 
     // but accessible through ignored_attributes
-    const File::StringVector& ignored = g->invalid_attribute_paths();
+    const StringList& ignored = g->invalid_attribute_paths();
     EXPECT_EQ(ignored.size(), (size_t)2);
-    EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/ignore") != ignored.end());
-    EXPECT_TRUE(std::find(ignored.begin(), ignored.end(), "/what/ignore") != ignored.end());
+    EXPECT_TRUE(ignored.contains("/ignore"));
+    EXPECT_TRUE(ignored.contains("/what/ignore"));
 }
 
 // disabled: can't create a non-converting file with TempH5File
