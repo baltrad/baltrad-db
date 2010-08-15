@@ -91,6 +91,10 @@ TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
     EXPECT_THROW(FileCatalog("invalid_dsn", tempdir->path()), value_error);
 }
 
+TEST_F(FileCatalog_test, test_nx_storage_throws) {
+    EXPECT_THROW(FileCatalog(db, namer, "/nx/path"), fs_error);
+}
+
 TEST_F(FileCatalog_test, test_catalog_nx_file_by_path) {
     EXPECT_THROW(fc.catalog("/path/to/nxfile"), fs_error);
 }

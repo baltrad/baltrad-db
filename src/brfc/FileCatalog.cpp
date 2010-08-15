@@ -63,12 +63,16 @@ void
 FileCatalog::check_storage() const {
     std::string path_utf8 = storage_.to_utf8();
     fs::path fs_path = fs::path(path_utf8);
-    if (not fs_path.is_complete())
-        throw fs_error("storage '" + path_utf8 + "' is not a complete path");
-    if (not fs::exists(fs_path))
-        throw fs_error("storage '" + path_utf8 + "' does not exist");
-    if (not fs::is_directory(fs_path))
-        throw fs_error("storage '" + path_utf8 + "' is not a directory");
+    try {
+        if (not fs_path.is_complete())
+            throw fs_error("storage '" + path_utf8 + "' is not a complete path");
+        if (not fs::exists(fs_path))
+            throw fs_error("storage '" + path_utf8 + "' does not exist");
+        if (not fs::is_directory(fs_path))
+            throw fs_error("storage '" + path_utf8 + "' is not a directory");
+    } catch (const fs::filesystem_error& e) {
+        throw fs_error(e.what());
+    }
 }
 
 void
