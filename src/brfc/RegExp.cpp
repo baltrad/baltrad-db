@@ -36,6 +36,7 @@ int
 RegExp::index_in(const String& str, int pos) {
     input_.setTo(str.utf16(), str.length()); 
     re_.reset(input_);
+    uerr_ = U_ZERO_ERROR;
     matches_ = re_.find(pos, uerr_);
     if (U_FAILURE(uerr_))
         throw std::runtime_error(u_errorName(uerr_));
@@ -46,7 +47,10 @@ bool
 RegExp::match(const String& str, int pos) {
     input_.setTo(str.utf16(), str.length());
     re_.reset(input_);
+    uerr_ = U_ZERO_ERROR;
     matches_ = re_.matches(pos, uerr_);
+    if (U_FAILURE(uerr_))
+        throw std::runtime_error(u_errorName(uerr_));
     return matches_;    
 }
 
@@ -54,9 +58,11 @@ int
 RegExp::matched_length() const {
     if (not matches_)
         return -1;
+    uerr_ = U_ZERO_ERROR;
     int start = re_.start(uerr_);
     if (U_FAILURE(uerr_))
         throw std::runtime_error(u_errorName(uerr_));
+    uerr_ = U_ZERO_ERROR;
     int end = re_.end(uerr_);
     if (U_FAILURE(uerr_))
         throw std::runtime_error(u_errorName(uerr_));
@@ -67,6 +73,7 @@ String
 RegExp::cap() const {
     if (not matches_)
         return String();
+    uerr_ = U_ZERO_ERROR;
     String str(re_.group(uerr_));
     if (U_FAILURE(uerr_))
         throw std::runtime_error(u_errorName(uerr_));
@@ -77,6 +84,7 @@ int
 RegExp::pos() const {
     if (not matches_)
         return -1;
+    uerr_ = U_ZERO_ERROR;
     int start = re_.start(uerr_);
     if (U_FAILURE(uerr_))
         throw std::runtime_error(u_errorName(uerr_));
@@ -85,6 +93,7 @@ RegExp::pos() const {
 
 String
 RegExp::group(int n) const {
+    uerr_ = U_ZERO_ERROR;
     String grp(re_.group(n, uerr_));
     if (U_FAILURE(uerr_))
         throw std::runtime_error(u_errorName(uerr_));
