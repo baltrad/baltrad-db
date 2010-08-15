@@ -56,7 +56,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 SWIG_SHARED_PTR(File, brfc::oh5::File);
 
 SWIG_SHARED_PTR(Node, brfc::oh5::Node)
-SWIG_SHARED_PTR_DERIVED(Node,
+SWIG_SHARED_PTR_DERIVED(Attribute,
                         brfc::oh5::Node,
                         brfc::oh5::Attribute);
 SWIG_SHARED_PTR_DERIVED(Group,
