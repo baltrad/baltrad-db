@@ -71,13 +71,8 @@ QueryToSelect::transform(const Query& query,
     QueryToSelect rpl(&mapper);
 
     sql::SelectPtr select = sql::Select::create();
-    select->distinct(query.distinct());
-
-    // replace attributes with columns
-    BOOST_FOREACH(expr::AttributePtr expr, query.fetch()) {
-        visit(*expr, rpl);
-        select->what(rpl.pop());
-    }
+    select->distinct(true);
+    select->what(Model::instance().files->column("id"));
 
     // replace attributes in where clause with columns
     if (query.filter()) {

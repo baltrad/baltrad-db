@@ -85,13 +85,9 @@ class SaveFile {
     /**
      * @brief save a oh5::File instance to database
      * @param file the file to be saved
-     * @param proposed_filename filename proposed for this filename
-     * @param filename_version version number of the filename
      * @return database id of the saved file
      */
-    long long operator()(const oh5::File& file,
-                         const String& proposed_filename,
-                         unsigned int filename_version);
+    long long operator()(const oh5::File& file);
 
   private:
     RelationalDatabase* rdb_;

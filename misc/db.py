@@ -82,15 +82,11 @@ files = Table("bdb_files", meta,
     Column("id", Integer, primary_key=True),
     Column("hash_type", Text, nullable=False),
     Column("unique_id", Text, unique=True, nullable=False),
-    Column("path", Text, unique=True, nullable=False),
-    Column("proposed_filename", Text, nullable=False),
-    Column("filename_version", Integer, nullable=False),
     Column("object", Text, nullable=False),
     Column("n_date", Date, nullable=False),
     Column("n_time", Time, nullable=False),
     Column("source_id", Integer, ForeignKey(sources.c.id),
            nullable=False),
-    UniqueConstraint("proposed_filename", "filename_version"),
 )
 
 groups = Table("bdb_groups", meta,
@@ -387,7 +383,6 @@ attribute_entries = [
 ]
 
 virtual_attributes = [
-    ("file:path",        "string",   files.c.path),
     ("file:id",          "int",      files.c.id),
     ("what/source:WMO",  "int",      source_radars.c.wmo_code),
     ("what/source:RAD",  "string",   source_radars.c.radar_site),

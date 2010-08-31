@@ -61,9 +61,7 @@ SaveFile::operator()(const oh5::Attribute& attribute) {
 }
 
 long long
-SaveFile::operator()(const oh5::File& file,
-                     const String& proposed_filename,
-                     unsigned int filename_version) {
+SaveFile::operator()(const oh5::File& file) {
     if (not file.source())
         throw db_error("no Source associated with File");
     
@@ -88,12 +86,9 @@ SaveFile::operator()(const oh5::File& file,
         // XXX: this should be explicit
     }
 
-    stmt->value("path", xpr.string(file.path()));
     stmt->value("hash_type", xpr.string(rdb_->file_hasher().name()));
     stmt->value("unique_id", xpr.string(rdb_->file_hasher().hash(file)));
     stmt->value("source_id", xpr.int64_(rdb_->db_id(*file.source())));
-    stmt->value("proposed_filename", xpr.string(proposed_filename));
-    stmt->value("filename_version", xpr.int64_(filename_version));
 
     shared_ptr<sql::Result> result = rdb_->connection().execute(*stmt);
 

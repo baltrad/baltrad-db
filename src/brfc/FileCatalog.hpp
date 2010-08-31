@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
     
 class Database;
-class FileNamer;
+class FileEntry;
 class Query;
 
 namespace oh5 {
@@ -52,30 +52,26 @@ class FileCatalog {
     /**
      * @brief constructor
      * @param dsn database connection string (using URL-like syntax)
-     * @param storage absolute path to storage root
      *
      * @throw db_error if DB could not be opened
      * @throw value_error if dsn is invalid
-     * @throw fs_error if storage path does not exist
      */
-    FileCatalog(const String& dsn, const String& storage);
-
-    FileCatalog(shared_ptr<Database> db,
-                shared_ptr<FileNamer> namer,
-                const String& storage);
+    FileCatalog(const String& dsn);
+    
+    /**
+     * @brief constructor
+     * @param db database instance
+     */
+    FileCatalog(shared_ptr<Database> db);
 
     /**
      * @brief destructor
      */
     ~FileCatalog();
- 
-    void file_namer(shared_ptr<FileNamer> namer);
-
+    
     /**
-     * @note caller retains namer ownership
+     * @brief access bound database instance
      */
-    void file_namer(FileNamer* namer);
-
     shared_ptr<Database> database() {
         return db_;
     }
@@ -90,9 +86,7 @@ class FileCatalog {
      * this is a short-hand for:
      * @code
      * FileCatalog fc(...);
-     * shared_ptr<oh5::File> f =
-     *      oh5::File::from_filesystem(path,
-     *                                 fc.attribute_specs());
+     * shared_ptr<oh5::File> f = oh5::File::from_filesystem(path);
      * fc.is_cataloged(*f);
      * @endcode
      *
@@ -116,43 +110,41 @@ class FileCatalog {
     /**
      * @brief import file to catalog
      * @param path absolute path to file
-     * @return File instance stored in database
+     * @return FileEntry instance of the stored file
      * @throw db_error if storing file to database fails
-     * @throw fs_error if file can not be opened or copy to new destination
-                       fails.
+     * @throw fs_error if file can not be opened
      * @throw duplicate_entry if file has already been cataloged
      *
      * this is a short-hand for:
      * @code
      * FileCatalog fc(...);
-     * shared_ptr<oh5::File> f =
-     *      oh5::File::from_filesystem(path, fc.attribute_specs());
+     * shared_ptr<oh5::File> f = oh5::File::from_filesystem(path);
      * fc.catalog(*f);
      * @endcode
      *
      * @sa catalog(oh5::File& file)
      */
-    shared_ptr<oh5::File> catalog(const String& path);
+    shared_ptr<FileEntry> catalog(const String& path);
     
     /**
      * @brief import file to catalog
      * @param file oh5::File instance to import
+     * @return FileEntry instance of the stored file
      * @throw db_error if storing file to database fails
-     * @throw fs_error if copy to new destination fails
      * @throw duplicate_entry if file has already been cataloged
      *
      * on import file is physically copied to a new location. If the file
      * import is successful file.path() will contain this new location.
      */
-    void catalog(oh5::File& file);
+    shared_ptr<FileEntry> catalog(const oh5::File& file);
     
     /**
      * @brief remove file from catalog
-     * @param path absolute path to file
+     * @param entry database entry
      * @throw db_error if removing file entry from database fails
      * @throw fs_error if removing file entry from filesystem fails
      */
-    void remove(const String& path);
+    void remove(const FileEntry& entry);
 
     /**
      * @brief get a query object bound to owned database
@@ -171,18 +163,8 @@ class FileCatalog {
      */
     Query query_file_path() const;
 
-    /**
-     * @brief bring this FileCatalog in sync with storage
-     */
-    //void sync();
-    
   private:
-
-    void check_storage() const;
-    
     shared_ptr<Database> db_;
-    shared_ptr<FileNamer> namer_;
-    String storage_;
 };
 
 }

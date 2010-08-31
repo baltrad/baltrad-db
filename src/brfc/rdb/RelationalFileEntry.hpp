@@ -17,35 +17,31 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/RelationalResultSet.hpp>
+#ifndef BRFC_RDB_RELATIONAL_FILE_ENTRY_HPP
+#define BRFC_RDB_RELATIONAL_FILE_ENTRY_HPP
 
-#include <brfc/Variant.hpp>
-
-#include <brfc/sql/Result.hpp>
+#include <brfc/FileEntry.hpp>
 
 namespace brfc {
+
+namespace sql {
+    class Connection;
+}
+
 namespace rdb {
 
-bool
-RelationalResultSet::do_next() {
-    return result_->next();
-}
+class RelationalFileEntry : public FileEntry {
+  public:
+    RelationalFileEntry(long long id, shared_ptr<sql::Connection> conn)
+            : FileEntry(id)
+            , conn_(conn) {
+    }
 
-bool
-RelationalResultSet::do_seek(int idx) {
-    return result_->seek(idx);
-}
-
-int
-RelationalResultSet::do_size() {
-    return result_->size();
-}
-
-Variant
-RelationalResultSet::do_value_at(unsigned int pos) const {
-    return result_->value_at(pos);
-}
+  private:
+    shared_ptr<sql::Connection> conn_;
+};
 
 } // namespace rdb
 } // namespace brfc
 
+#endif // BRFC_RDB_RELATIONAL_FILE_ENTRY_HPP

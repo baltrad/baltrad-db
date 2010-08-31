@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileHasher.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/String.hpp>
+#include <brfc/ResultSet.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/File.hpp>
@@ -37,7 +38,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
-#include <brfc/rdb/RelationalResultSet.hpp>
+#include <brfc/rdb/RelationalFileEntry.hpp>
 #include <brfc/rdb/SaveFile.hpp>
 #include <brfc/rdb/SHA1AttributeHasher.hpp>
 
@@ -110,42 +111,29 @@ RelationalDatabase::do_has_file(const oh5::File& file) {
     return result->size() > 0;
 }
 
-long long
-RelationalDatabase::do_save_file(const oh5::File& file,
-                                 const String& proposed_filename,
-                                 unsigned int filename_version) {
+shared_ptr<FileEntry>
+RelationalDatabase::do_save_file(const oh5::File& file) {
     SaveFile save(this);
-    return save(file, proposed_filename, filename_version);
-}
-
-unsigned int
-RelationalDatabase::do_next_filename_version(const String& filename) {
-    const Model& m = Model::instance();
-    
-    sql::Factory xpr;
-    sql::SelectPtr qry = sql::Select::create();
-    qry->what(sql::Function::max(m.files->column("filename_version")->add(xpr.int64_(1))));
-    qry->from(m.files);
-    qry->where(m.files->column("proposed_filename")->eq(xpr.string(filename)));
-    shared_ptr<sql::Result> result = connection().execute(*qry);
-    result->next();
-    if (result->value_at(0).is_null()) {
-        return 0;
-    } else {
-        return static_cast<unsigned int>(result->value_at(0).int64_());
-    }
+    long long id = save(file);
+    shared_ptr<FileEntry> entry(new RelationalFileEntry(id, conn_));
+    return entry;
 }
 
 shared_ptr<ResultSet>
 RelationalDatabase::do_query(const Query& query) {
     sql::SelectPtr select = QueryToSelect::transform(query, *mapper_.get());
     shared_ptr<sql::Result> res = connection().execute(*select);
-    return shared_ptr<ResultSet>(new RelationalResultSet(res));
+    shared_ptr<ResultSet> rset(new ResultSet());
+    while (res->next()) {
+        long long id = res->value_at(0).int64_();
+        shared_ptr<FileEntry> entry(new RelationalFileEntry(id, conn_));
+        rset->add(entry);
+    }
+    return rset;
 }
 
-
 long long
-RelationalDatabase::do_db_id(const oh5::File& file) {
+RelationalDatabase::db_id(const oh5::File& file) {
     const Model& m = Model::instance();
     const String& hash = file_hasher().hash(file);
 
@@ -322,10 +310,10 @@ RelationalDatabase::populate_mapper() {
 }
 
 void
-RelationalDatabase::do_remove_file(const String& path) {
-    String qry("DELETE FROM bdb_files WHERE path = :path");
+RelationalDatabase::do_remove_file(const FileEntry& entry) {
+    String qry("DELETE FROM bdb_files WHERE id = :id");
     sql::BindMap binds;
-    binds.add(":path", Variant(path));
+    binds.add(":id", Variant(entry.id()));
     connection().execute(qry, binds);
 }
 

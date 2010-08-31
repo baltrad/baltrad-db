@@ -131,7 +131,7 @@ TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
     file->path("/path");
     file->root()->add_child(make_shared<oh5::Attribute>("invalid"));
 
-    EXPECT_NO_THROW(db->save_file(*file, "test", 0));
+    EXPECT_NO_THROW(db->save_file(*file));
 }
 
 TEST_P(rdb_RelationalDatabase_test, attribute_groups_not_saved) {
@@ -141,27 +141,12 @@ TEST_P(rdb_RelationalDatabase_test, attribute_groups_not_saved) {
     file->source(src);
     file->path("/path");
     
-    ASSERT_NO_THROW(db->save_file(*file, "test", 0));
+    ASSERT_NO_THROW(db->save_file(*file));
     
     /* XXX: figure out how to test this
     EXPECT_EQ(0, file->root()->child_group_by_name("what")->db_id());
     EXPECT_NE(0, file->root()->db_id());
     */
-}
-
-TEST_P(rdb_RelationalDatabase_test, next_filename_version) {
-    shared_ptr<oh5::File> file =
-        oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    shared_ptr<oh5::Source> src = db->load_source(file->what_source());
-    file->source(src);
-    file->path("/path");
-
-    ASSERT_NO_THROW(db->save_file(*file, "test", 10));
-    EXPECT_EQ((unsigned int)11, db->next_filename_version("test"));
-}
-
-TEST_P(rdb_RelationalDatabase_test, next_filename_version_nxfile) {
-    EXPECT_EQ((unsigned int)0, db->next_filename_version("nxfile"));
 }
 
 TEST_P(rdb_RelationalDatabase_test, resultset_keeps_qsqldatabase_alive) {

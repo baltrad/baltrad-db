@@ -90,9 +90,9 @@ class RelationalDatabase : public Database {
     void file_hasher(FileHasher* hasher);
 
     FileHasher& file_hasher() { return *file_hasher_; }
-    
-    using Database::db_id;
 
+    long long db_id(const oh5::File& file);
+    
     long long db_id(const oh5::Source& source);
 
   protected:
@@ -104,16 +104,10 @@ class RelationalDatabase : public Database {
      * @brief check if file hash is unique in database
      */
     virtual bool do_has_file(const oh5::File& file);
-    virtual void do_remove_file(const String& path);
+    virtual void do_remove_file(const FileEntry& entry);
 
-    virtual long long do_save_file(const oh5::File& file,
-                                   const String& proposed_filename,
-                                   unsigned int filename_version);
+    virtual shared_ptr<FileEntry> do_save_file(const oh5::File& file);
     
-    virtual long long do_db_id(const oh5::File& file);
-
-    virtual unsigned int do_next_filename_version(const String& filename);
-
     virtual shared_ptr<oh5::Source> do_load_source(const String& srcstr);
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);

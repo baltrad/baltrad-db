@@ -59,9 +59,6 @@ Model::Model()
     files->add_column("id");
     files->add_column("hash_type");
     files->add_column("unique_id");
-    files->add_column("path");
-    files->add_column("proposed_filename");
-    files->add_column("filename_version");
     files->add_column("object");
     files->add_column("n_date");
     files->add_column("n_time");

@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/DateTime.hpp>
+#include <brfc/FileEntry.hpp>
 #include <brfc/FileHasher.hpp>
 #include <brfc/Query.hpp>
 #include <brfc/ResultSet.hpp>
@@ -138,11 +139,11 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
         td5->path("td5");
         ON_CALL(hasher, do_hash(Ref(*td5))).WillByDefault(Return("td5"));
 
-        db->save_file(*td1, "td1", 0);
-        db->save_file(*td2, "td2", 0);
-        db->save_file(*td3, "td3", 0);
-        db->save_file(*td4, "td4", 0);
-        db->save_file(*td5, "td5", 0);
+        fe1 = db->save_file(*td1);
+        fe2 = db->save_file(*td2);
+        fe3 = db->save_file(*td3);
+        fe4 = db->save_file(*td4);
+        fe5 = db->save_file(*td5);
     }
 
     virtual void TearDown() {
@@ -155,89 +156,64 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
     String src1, src2;
     test::TestRDB* db;
     shared_ptr<oh5::File> td1, td2, td3, td4, td5;
+    shared_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     Query query;
 };
 
 TEST_P(rdb_Query_test, test_simple) {
     shared_ptr<ResultSet> r = 
-            query.fetch(xpr.attribute("file:path"))
-                 .filter(xpr.attribute("where/xsize")->eq(xpr.int64_(1)))
+            query.filter(xpr.attribute("where/xsize")->eq(xpr.int64_(1)))
                  .execute();
-    ASSERT_TRUE(r->next());
-    EXPECT_EQ(r->string(0), "td1");
-    ASSERT_TRUE(not r->next());
-}
-
-StringList
-extract_strings_at(ResultSet& r, int pos) {
-    StringList strings;
-    while (r.next()) {
-        strings.append(r.string(pos));
-    }
-    return strings;
+    ASSERT_EQ(1, r->size());
+    EXPECT_EQ(fe1->id(), r->get(0)->id());
 }
 
 TEST_P(rdb_Query_test, test_list_all_files) {
-    shared_ptr<ResultSet> r = query.fetch(xpr.attribute("file:path")).execute();
+    shared_ptr<ResultSet> r = query.execute();
 
-    EXPECT_EQ(r->size(), 5);
-    const StringList& v = extract_strings_at(*r, 0);
+    ASSERT_EQ(5, r->size());
 
-    EXPECT_TRUE(v.contains("td1"));
-    EXPECT_TRUE(v.contains("td2"));
-    EXPECT_TRUE(v.contains("td3"));
-    EXPECT_TRUE(v.contains("td4"));
-    EXPECT_TRUE(v.contains("td5"));
+    EXPECT_EQ(fe1->id(), r->get(0)->id());
+    EXPECT_EQ(fe2->id(), r->get(1)->id());
+    EXPECT_EQ(fe3->id(), r->get(2)->id());
+    EXPECT_EQ(fe4->id(), r->get(3)->id());
+    EXPECT_EQ(fe5->id(), r->get(4)->id());
 }
 
 TEST_P(rdb_Query_test, test_filter_by_object) {
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("file:path"))
-             .filter(xpr.attribute("what/object")->eq(xpr.string("PVOL")))
+        query.filter(xpr.attribute("what/object")->eq(xpr.string("PVOL")))
              .execute();
 
-    EXPECT_EQ(r->size(), 3);
-    const StringList& v = extract_strings_at(*r, 0);
+    ASSERT_EQ(3, r->size());
 
-    EXPECT_TRUE(v.contains("td1"));
-    EXPECT_TRUE(v.contains("td2"));
-    EXPECT_TRUE(v.contains("td3"));
+    EXPECT_EQ(fe1->id(), r->get(0)->id());
+    EXPECT_EQ(fe2->id(), r->get(1)->id());
+    EXPECT_EQ(fe3->id(), r->get(2)->id());
 }
 
-TEST_P(rdb_Query_test, test_fetch_xsize_filtering_by_xsize) {
+TEST_P(rdb_Query_test, test_filter_by_xsize) {
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("where/xsize"))
-             .filter(xpr.attribute("where/xsize")->eq(xpr.int64_(2)))
+        query.filter(xpr.attribute("where/xsize")->eq(xpr.int64_(2)))
              .execute();
-    EXPECT_EQ(r->size(), 2);
+    ASSERT_EQ(2, r->size());
+
+    EXPECT_EQ(fe2->id(), r->get(0)->id());
+    EXPECT_EQ(fe5->id(), r->get(1)->id());
 }
 
 TEST_P(rdb_Query_test, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("file:path"))
-             .filter(xsize->eq(xpr.int64_(1))->or_(ysize->eq(xpr.int64_(2))))
+        query.filter(xsize->eq(xpr.int64_(1))->or_(ysize->eq(xpr.int64_(2))))
              .execute();
 
-    EXPECT_EQ(r->size(), 3);
-    const StringList& v = extract_strings_at(*r, 0);
+    ASSERT_EQ(r->size(), 3);
 
-    EXPECT_TRUE(v.contains("td1"));
-    EXPECT_TRUE(v.contains("td2"));
-    EXPECT_TRUE(v.contains("td5"));
-}
-
-TEST_P(rdb_Query_test, test_filter_by_xsize_distinct) {
-    expr::AttributePtr xsize = xpr.attribute("where/xsize");
-    shared_ptr<ResultSet> r = 
-        query.fetch(xpr.attribute("file:path"))
-             .distinct(true)
-             .filter(xsize->eq(xpr.int64_(3)))
-             .execute();
-    EXPECT_EQ(r->size(), 1);
-    ASSERT_TRUE(r->next());
-    EXPECT_EQ(r->string(0), "td3");
+    EXPECT_EQ(fe1->id(), r->get(0)->id());
+    EXPECT_EQ(fe2->id(), r->get(1)->id());
+    EXPECT_EQ(fe5->id(), r->get(2)->id());
 }
 
 TEST_P(rdb_Query_test, test_filter_by_combined_datetime) {
@@ -249,68 +225,60 @@ TEST_P(rdb_Query_test, test_filter_by_combined_datetime) {
             xpr.attribute("what/time")
         )->parentheses();
 
-    query.fetch(xpr.attribute("file:path"));
     query.filter(what_dt->between(xpr.datetime(min), xpr.datetime(max)));
     shared_ptr<ResultSet> r = query.execute();
 
-    EXPECT_EQ(r->size(), 3);
-    const StringList& v = extract_strings_at(*r, 0);
+    ASSERT_EQ(3, r->size());
 
-    EXPECT_TRUE(v.contains("td2"));
-    EXPECT_TRUE(v.contains("td3"));
-    EXPECT_TRUE(v.contains("td4"));
+    EXPECT_EQ(fe2->id(), r->get(0)->id());
+    EXPECT_EQ(fe3->id(), r->get(1)->id());
+    EXPECT_EQ(fe4->id(), r->get(2)->id());
 }
 
-TEST_P(rdb_Query_test, test_select_by_wmo_code) {
+TEST_P(rdb_Query_test, test_filter_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("what/source:WMO");
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("file:path"))
-             .filter(wmo_code->eq(xpr.int64_(2666)))
+        query.filter(wmo_code->eq(xpr.int64_(2666)))
              .execute();
 
-    EXPECT_EQ(r->size(), 2);
-    const StringList& v = extract_strings_at(*r, 0);
+    ASSERT_EQ(2, r->size());
 
-    EXPECT_TRUE(v.contains("td2"));
-    EXPECT_TRUE(v.contains("td4"));
+    EXPECT_EQ(fe2->id(), r->get(0)->id());
+    EXPECT_EQ(fe4->id(), r->get(1)->id());
 }
 
-TEST_P(rdb_Query_test, test_select_by_or_node) {
+TEST_P(rdb_Query_test, test_filter_by_node_or_node) {
     expr::AttributePtr node = xpr.attribute("what/source:node");
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("file:path"))
-             .filter(node->eq(xpr.string("seang"))->or_(node->eq(xpr.string("sekkr"))))
+        query.filter(node->eq(xpr.string("seang"))->or_(node->eq(xpr.string("sekkr"))))
              .execute();
-    EXPECT_EQ(r->size(), 5);
-    const StringList& v = extract_strings_at(*r, 0);
-    EXPECT_TRUE(v.contains("td1"));
-    EXPECT_TRUE(v.contains("td2"));
-    EXPECT_TRUE(v.contains("td3"));
-    EXPECT_TRUE(v.contains("td4"));
-    EXPECT_TRUE(v.contains("td5"));
+    ASSERT_EQ(r->size(), 5);
+
+    EXPECT_EQ(fe1->id(), r->get(0)->id());
+    EXPECT_EQ(fe2->id(), r->get(1)->id());
+    EXPECT_EQ(fe3->id(), r->get(2)->id());
+    EXPECT_EQ(fe4->id(), r->get(3)->id());
+    EXPECT_EQ(fe5->id(), r->get(4)->id());
 }
 
-TEST_P(rdb_Query_test, test_select_by_and_node) {
+TEST_P(rdb_Query_test, test_filter_by_node_and_node) {
     expr::AttributePtr node = xpr.attribute("what/source:node");
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("file:path"))
-             .filter(node->eq(xpr.string("seang"))->and_(node->eq(xpr.string("sekkr"))))
+        query.filter(node->eq(xpr.string("seang"))->and_(node->eq(xpr.string("sekkr"))))
              .execute();
-    EXPECT_EQ(r->size(), 0);
+    EXPECT_EQ(0, r->size());
 }
 
-TEST_P(rdb_Query_test, test_select_by_place) {
+TEST_P(rdb_Query_test, test_filter_by_place) {
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("file:path"))
-             .filter(xpr.attribute("what/source:PLC")->eq(xpr.string("Ängelholm")))
+        query.filter(xpr.attribute("what/source:PLC")->eq(xpr.string("Ängelholm")))
              .execute();
 
-    EXPECT_EQ(r->size(), 3);
-    const StringList& v = extract_strings_at(*r, 0);
+    ASSERT_EQ(3, r->size());
 
-    EXPECT_TRUE(v.contains("td1"));
-    EXPECT_TRUE(v.contains("td3"));
-    EXPECT_TRUE(v.contains("td5"));
+    EXPECT_EQ(fe1->id(), r->get(0)->id());
+    EXPECT_EQ(fe3->id(), r->get(1)->id());
+    EXPECT_EQ(fe5->id(), r->get(2)->id());
 }
 
 TEST_P(rdb_Query_test, test_has_file) {
@@ -328,32 +296,33 @@ TEST_P(rdb_Query_test, test_has_nx_file) {
     EXPECT_FALSE(result);
 }
 
+/*
 TEST_P(rdb_Query_test, test_query_file_id) {
     shared_ptr<ResultSet> r = 
         query.fetch(xpr.attribute("file:id"))
              .filter(xpr.attribute("file:path")->eq(xpr.string("td1")))
              .execute();
-    EXPECT_EQ(r->size(), 1);
-    r->next();
-    EXPECT_NE(r->int64_(0), 0);
+    EXPECT_EQ(1, r->size());
+    EXPECT_EQ(fe1->id(), r->get(1)->int64_(0), 0);
 }
+*/
 
+/*
 TEST_P(rdb_Query_test, test_duplicate_fetch_throws) {
     query.fetch(xpr.attribute("file:path"));
     EXPECT_THROW(query.fetch(xpr.attribute("file:path")), duplicate_entry);
 }
+*/
 
 TEST_P(rdb_Query_test, test_query_like) {
-    expr::AttributePtr node = xpr.attribute("what/source:node");
     shared_ptr<ResultSet> r =
-        query.fetch(xpr.attribute("file:path"))
-             .filter(node->like("sea*"))
+        query.filter(xpr.attribute("what/source:node")->like("sea*"))
              .execute();
-    EXPECT_EQ(3, r->size());
-    const StringList& v = extract_strings_at(*r, 0);
-    EXPECT_TRUE(v.contains("td1"));
-    EXPECT_TRUE(v.contains("td3"));
-    EXPECT_TRUE(v.contains("td5"));
+    ASSERT_EQ(3, r->size());
+
+    EXPECT_EQ(fe1->id(), r->get(0)->id());
+    EXPECT_EQ(fe3->id(), r->get(1)->id());
+    EXPECT_EQ(fe5->id(), r->get(2)->id());
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1

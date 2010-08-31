@@ -16,53 +16,20 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef BRFC_MOCK_FILE_ENTRY_HPP
+#define BRFC_MOCK_FILE_ENTRY_HPP
 
-#ifndef BRFC_RESULT_SET_HPP
-#define BRFC_RESULT_SET_HPP
-
-#include <vector>
-
-#include <boost/noncopyable.hpp>
-
-#include <brfc/smart_ptr.hpp>
+#include <gmock/gmock.h>
 
 namespace brfc {
 
-class FileEntry;
-
-/**
- * @brief ABC for Query results
- */
-class ResultSet : public boost::noncopyable {
+class MockFileEntry : public FileEntry {
   public:
-    ResultSet()
-        : entries_() {
+    explicit MockFileEntry(long long id)
+            : FileEntry(id) {
     }
-
-    /**
-     * @brief destructor
-     */
-    virtual ~ResultSet() { }
-
-    /**
-     * @brief get number of rows in result
-     */
-    int size() {
-        return entries_.size();
-    }
-
-    shared_ptr<FileEntry> get(int i) {
-        return entries_.at(i);
-    }
-
-    void add(shared_ptr<FileEntry> e) {
-        entries_.push_back(e);
-    }
-    
-  private:
-    std::vector<shared_ptr<FileEntry> > entries_;
 };
 
-}
+} // namespace brfc
 
-#endif // BRFC_RESULT_SET_HPP
+#endif // BRFC_MOCK_FILE_ENTRY_HPP

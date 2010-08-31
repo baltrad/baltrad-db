@@ -16,44 +16,33 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-
-#ifndef BRFC_RDB_RELATIONAL_RESULT_SET_HPP
-#define BRFC_RDB_RELATIONAL_RESULT_SET_HPP
-
-#include <brfc/smart_ptr.hpp>
-#include <brfc/ResultSet.hpp>
+#ifndef BRFC_FILE_ENTRY_HPP
+#define BRFC_FILE_ENTRY_HPP
 
 namespace brfc {
 
-namespace sql {
-    class Result;
-}
-
-namespace rdb {
-
 /**
- * @brief mediate rdb::Result to ResultSet
+ * @brief oh5::File entry in Database
  */
-class RelationalResultSet : public ResultSet {
+class FileEntry {
   public:
-    explicit RelationalResultSet(shared_ptr<sql::Result> result)
-            : result_(result) {
+    explicit FileEntry(long long id)
+            : id_(id) {
     }
-  
-  protected:
-    virtual bool do_next();
 
-    virtual bool do_seek(int idx);
+    virtual ~FileEntry() { }
 
-    virtual int do_size();
-
-    virtual Variant do_value_at(unsigned int pos) const;
+    /**
+     * @brief file id
+     */
+    long long id() const {
+        return id_;
+    }
 
   private:
-    shared_ptr<sql::Result> result_;
+    long long id_;
 };
 
-} // namespace rdb
 } // namespace brfc
 
-#endif // BRFC_RDB_RELATIONAL_RESULT_SET_HPP
+#endif // BRFC_FILE_ENTRY_HPP
