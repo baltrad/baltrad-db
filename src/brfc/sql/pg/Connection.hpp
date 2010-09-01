@@ -64,6 +64,10 @@ class Connection : public sql::Connection {
 
     virtual bool do_has_feature(Feature feature) const;
 
+    virtual shared_ptr<sql::LargeObject> do_large_object(long long id);
+
+    virtual shared_ptr<sql::LargeObject> do_large_object(const String& path);
+
   private:
     void load_type_oids();
 

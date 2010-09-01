@@ -26,7 +26,7 @@ import StringIO as stringio
 
 from sqlalchemy import (MetaData, Table, Column, ForeignKey,
                         ForeignKeyConstraint, PrimaryKeyConstraint,
-                        UniqueConstraint, create_engine)
+                        UniqueConstraint, create_engine, DDL)
 
 from sqlalchemy.types import (Text, Integer, Float, Date, Time,
                               Boolean, String, TypeEngine, TypeDecorator)
@@ -88,6 +88,14 @@ files = Table("bdb_files", meta,
     Column("source_id", Integer, ForeignKey(sources.c.id),
            nullable=False),
 )
+
+file_content = Table("bdb_file_content", meta,
+    Column("file_id", Integer, ForeignKey(files.c.id, ondelete="CASCADE"),
+           primary_key=True),
+    Column("lo_id", Integer))
+DDL("CREATE RULE remove_lo AS ON DELETE TO %(table)s "
+        "DO SELECT lo_unlink(OLD.lo_id)",
+    on="postgres").execute_at("after-create", file_content)
 
 groups = Table("bdb_groups", meta,
     Column("id", Integer, primary_key=True),

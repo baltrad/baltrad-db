@@ -32,6 +32,7 @@ Model::Model()
         , source_radars(sql::Table::create("bdb_source_radars"))
         , source_centres(sql::Table::create("bdb_source_centres"))
         , files(sql::Table::create("bdb_files"))
+        , file_content(sql::Table::create("bdb_file_content"))
         , groups(sql::Table::create("bdb_groups"))
         , attrs(sql::Table::create("bdb_attributes"))
         , invalid_attrs(sql::Table::create("bdb_invalid_attributes"))
@@ -64,6 +65,9 @@ Model::Model()
     files->add_column("n_time");
     files->add_column("source_id");
     files->column("source_id")->references(sources->column("id"));
+
+    file_content->add_column("file_id");
+    file_content->add_column("lo_id");
 
     groups->add_column("id");
     groups->add_column("parent_id");

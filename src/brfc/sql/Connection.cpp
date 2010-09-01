@@ -155,5 +155,15 @@ Connection::do_variant_to_string(const Variant& value) const {
     }
 }
 
+shared_ptr<LargeObject>
+Connection::large_object(long long id) {
+    return do_large_object(id);
+}
+
+shared_ptr<LargeObject>
+Connection::large_object(const String& path) {
+    return do_large_object(path);
+}
+
 } // namespace sql
 } // namespace brfc

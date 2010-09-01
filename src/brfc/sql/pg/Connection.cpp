@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/sql/pg/Result.hpp>
+#include <brfc/sql/pg/LargeObject.hpp>
 
 namespace brfc {
 namespace sql {
@@ -120,6 +121,16 @@ Connection::do_has_feature(Connection::Feature feature) const {
         default:
             return false;
     }
+}
+
+shared_ptr<sql::LargeObject>
+Connection::do_large_object(long long id) {
+    return shared_ptr<sql::LargeObject>(new LargeObject(*transaction_, id));
+}
+
+shared_ptr<sql::LargeObject>
+Connection::do_large_object(const String& path) {
+    return shared_ptr<sql::LargeObject>(new LargeObject(*transaction_, path));
 }
 
 void

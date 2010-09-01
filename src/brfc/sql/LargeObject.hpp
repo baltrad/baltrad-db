@@ -17,45 +17,23 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_MODEL_HPP
-#define BRFC_RDB_MODEL_HPP
-
-#include <map>
-
-#include <brfc/String.hpp>
-#include <brfc/sql/fwd.hpp>
+#ifndef BRFC_SQL_LARGE_OBJECT_HPP
+#define BRFC_SQL_LARGE_OBJECT_HPP
 
 namespace brfc {
-namespace rdb {
+namespace sql {
 
-class Model {
+class LargeObject {
   public:
-    static Model& instance();
+    virtual ~LargeObject() { }
+  
+    long long id() const { return do_id(); }
 
-    sql::TablePtr sources;
-    sql::TablePtr source_radars;
-    sql::TablePtr source_centres;
-    sql::TablePtr files;
-    sql::TablePtr file_content;
-    sql::TablePtr groups;
-    sql::TablePtr attrs;
-    sql::TablePtr invalid_attrs;
-    sql::TablePtr attrvals_int;
-    sql::TablePtr attrvals_str;
-    sql::TablePtr attrvals_real;
-    sql::TablePtr attrvals_bool;
-
-    sql::TablePtr table_by_name(const String& name) const;
-
-  private:
-    Model();
-
-    typedef std::map<String, sql::TablePtr> TableMap;
-    
-    TableMap tables_;
+  protected:
+    virtual long long do_id() const = 0;
 };
 
-} // namespace rdb
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_MODEL_HPP
+#endif // BRFC_SQL_LARGE_OBJECT_HPP

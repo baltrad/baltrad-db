@@ -42,6 +42,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/File.hpp>
 
 #include <brfc/test/TestRDB.hpp>
+#include <brfc/test/TempH5File.hpp>
 
 #include "config.hpp"
 #include "../common.hpp"
@@ -109,26 +110,30 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
         add_attribute(*td1, "dataset1/where/xsize", Variant(1));
         add_attribute(*td1, "dataset1/where/ysize", Variant(2));
         td1->source(db->load_source(src1));
-        td1->path("td1");
+        tf1.write(*td1);
+        td1->path(tf1.path());
         ON_CALL(hasher, do_hash(Ref(*td1))).WillByDefault(Return("td1"));
 
         add_attribute(*td2, "dataset1/where/xsize", Variant(2));
         add_attribute(*td2, "dataset1/where/ysize", Variant(2));
         td2->source(db->load_source(src2));
-        td2->path("td2");
+        tf2.write(*td2);
+        td2->path(tf2.path());
         ON_CALL(hasher, do_hash(Ref(*td2))).WillByDefault(Return("td2"));
 
         add_attribute(*td3, "dataset1/where/xsize", Variant(3));
         add_attribute(*td3, "dataset2/where/xsize", Variant(3));
         td3->source(db->load_source(src1));
-        td3->path("td3");
+        tf3.write(*td3);
+        td3->path(tf3.path());
         ON_CALL(hasher, do_hash(Ref(*td3))).WillByDefault(Return("td3"));
 
         add_attribute(*td4, "dataset1/where/xsize", Variant(6));
         add_attribute(*td4, "dataset1/where/ysize", Variant(4));
         add_attribute(*td4, "dataset2/where/ysize", Variant(5));
         td4->source(db->load_source(src2));
-        td4->path("td4");
+        tf4.write(*td4);
+        td4->path(tf4.path());
         ON_CALL(hasher, do_hash(Ref(*td4))).WillByDefault(Return("td4"));
 
         add_attribute(*td5, "dataset1/where/xsize", Variant(5));
@@ -136,7 +141,8 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
         add_attribute(*td5, "dataset2/where/xsize", Variant(2));
         add_attribute(*td5, "dataset2/where/ysize", Variant(5));
         td5->source(db->load_source(src1));
-        td5->path("td5");
+        tf5.write(*td5);
+        td5->path(tf5.path());
         ON_CALL(hasher, do_hash(Ref(*td5))).WillByDefault(Return("td5"));
 
         fe1 = db->save_file(*td1);
@@ -156,6 +162,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
     String src1, src2;
     test::TestRDB* db;
     shared_ptr<oh5::File> td1, td2, td3, td4, td5;
+    test::TempH5File tf1, tf2, tf3, tf4, tf5;
     shared_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     Query query;
 };

@@ -36,6 +36,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>
+#include <brfc/sql/LargeObject.hpp>
 #include <brfc/sql/Literal.hpp>
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Table.hpp>
@@ -92,16 +93,27 @@ SaveFile::operator()(const oh5::File& file) {
 
     shared_ptr<sql::Result> result = rdb_->connection().execute(*stmt);
 
+    long long file_id = 0;
+    if (rdb_->connection().has_feature(sql::Connection::RETURNING) and result->next()) {
+        file_id = result->value_at(0).int64_();
+    } else {
+        // XXX: last insert id!
+    }
+    
     BOOST_FOREACH(const oh5::Node& node, *file.root()) {
         visit(node, *this);
     }
 
-    if (rdb_->connection().has_feature(sql::Connection::RETURNING) and result->next()) {
-        return result->value_at(0).int64_();
-    } else {
-        // XXX: last insert id!
-        return 0;
-    }
+    // transfer the file to database
+    shared_ptr<sql::LargeObject> lo = rdb_->connection().large_object(file.path());
+
+    stmt = sql::Insert::create(Model::instance().file_content);
+    stmt->value("file_id", xpr.int64_(file_id));
+    stmt->value("lo_id", xpr.int64_(lo->id()));
+
+    rdb_->connection().execute(*stmt);
+
+    return file_id;
 }
 
 

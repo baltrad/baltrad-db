@@ -1,39 +1,17 @@
 
+CREATE TABLE bdb_attribute_groups (
+	id SERIAL NOT NULL, 
+	name INTEGER NOT NULL, 
+	PRIMARY KEY (id)
+)
+
+;
+
 CREATE TABLE bdb_sources (
 	id SERIAL NOT NULL, 
 	node_id TEXT NOT NULL, 
 	PRIMARY KEY (id), 
 	 UNIQUE (node_id)
-)
-
-;
-
-CREATE TABLE bdb_source_centres (
-	id INTEGER NOT NULL, 
-	originating_centre INTEGER NOT NULL, 
-	country_code INTEGER NOT NULL, 
-	wmo_cccc VARCHAR(4) NOT NULL, 
-	PRIMARY KEY (id), 
-	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
-	 UNIQUE (originating_centre), 
-	 UNIQUE (country_code), 
-	 UNIQUE (wmo_cccc)
-)
-
-;
-
-CREATE TABLE bdb_source_radars (
-	id INTEGER NOT NULL, 
-	centre_id INTEGER NOT NULL, 
-	radar_site TEXT, 
-	wmo_code INTEGER, 
-	place TEXT, 
-	PRIMARY KEY (id), 
-	 UNIQUE (radar_site), 
-	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
-	 FOREIGN KEY(centre_id) REFERENCES bdb_source_centres (id), 
-	 UNIQUE (wmo_code), 
-	 UNIQUE (place)
 )
 
 ;
@@ -52,6 +30,16 @@ CREATE TABLE bdb_files (
 )
 
 ;
+
+CREATE TABLE bdb_file_content (
+	file_id INTEGER NOT NULL, 
+	lo_id INTEGER, 
+	PRIMARY KEY (file_id), 
+	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE
+)
+
+;
+CREATE RULE remove_lo AS ON DELETE TO bdb_file_content DO SELECT lo_unlink(OLD.lo_id);
 
 CREATE TABLE bdb_groups (
 	id SERIAL NOT NULL, 
@@ -79,6 +67,36 @@ CREATE TABLE bdb_invalid_attributes (
 
 ;
 
+CREATE TABLE bdb_source_centres (
+	id INTEGER NOT NULL, 
+	originating_centre INTEGER NOT NULL, 
+	country_code INTEGER NOT NULL, 
+	wmo_cccc VARCHAR(4) NOT NULL, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
+	 UNIQUE (country_code), 
+	 UNIQUE (wmo_cccc), 
+	 UNIQUE (originating_centre)
+)
+
+;
+
+CREATE TABLE bdb_source_radars (
+	id INTEGER NOT NULL, 
+	centre_id INTEGER NOT NULL, 
+	radar_site TEXT, 
+	wmo_code INTEGER, 
+	place TEXT, 
+	PRIMARY KEY (id), 
+	 FOREIGN KEY(centre_id) REFERENCES bdb_source_centres (id), 
+	 UNIQUE (place), 
+	 UNIQUE (radar_site), 
+	 FOREIGN KEY(id) REFERENCES bdb_sources (id), 
+	 UNIQUE (wmo_code)
+)
+
+;
+
 CREATE TABLE bdb_attributes (
 	id SERIAL NOT NULL, 
 	name TEXT NOT NULL, 
@@ -88,6 +106,17 @@ CREATE TABLE bdb_attributes (
 	ignore_in_hash BOOLEAN NOT NULL, 
 	PRIMARY KEY (id), 
 	 UNIQUE (name)
+)
+
+;
+
+CREATE TABLE bdb_attribute_values_time (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value TIME WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
 )
 
 ;
@@ -143,25 +172,6 @@ CREATE TABLE bdb_attribute_values_date (
 	PRIMARY KEY (attribute_id, group_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
 	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_attribute_values_time (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value TIME WITHOUT TIME ZONE NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_attribute_groups (
-	id SERIAL NOT NULL, 
-	name INTEGER NOT NULL, 
-	PRIMARY KEY (id)
 )
 
 ;

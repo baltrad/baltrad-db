@@ -33,6 +33,7 @@ namespace sql {
 
 class Compiler;
 class Insert;
+class LargeObject;
 class Query;
 class Result;
 class Select;
@@ -175,6 +176,16 @@ class Connection {
     String dialect() const {
         return do_dialect();
     }
+    
+    /**
+     * @brief access large object identified by @c id
+     */
+    shared_ptr<LargeObject> large_object(long long id);
+    
+    /**
+     * @brief create a new large object from file @c path
+     */
+    shared_ptr<LargeObject> large_object(const String& path);
 
   protected:
     virtual void do_open() = 0;
@@ -210,6 +221,10 @@ class Connection {
      * - string surrounded by apostrophes (')
      */
     virtual String do_variant_to_string(const Variant& value) const;
+
+    virtual shared_ptr<LargeObject> do_large_object(long long id) = 0;
+
+    virtual shared_ptr<LargeObject> do_large_object(const String& path) = 0;
   
   private:
     shared_ptr<Compiler> compiler_;

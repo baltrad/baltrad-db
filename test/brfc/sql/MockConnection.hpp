@@ -46,6 +46,8 @@ class MockConnection : public Connection {
     MOCK_METHOD1(do_execute, shared_ptr<Result>(const String&));
     MOCK_CONST_METHOD0(do_in_transaction, bool());
     MOCK_CONST_METHOD0(do_dialect, String());
+    MOCK_METHOD1(do_large_object, shared_ptr<LargeObject>(long long));
+    MOCK_METHOD1(do_large_object, shared_ptr<LargeObject>(const String&));
 };
 
 } // namespace sql

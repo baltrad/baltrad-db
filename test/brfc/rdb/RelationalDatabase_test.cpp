@@ -37,7 +37,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Result.hpp>
 
 #include <brfc/test/TestRDB.hpp>
-#include <iostream>
+#include <brfc/test/TempH5File.hpp>
 
 #include "config.hpp"
 #include "../common.hpp"
@@ -128,7 +128,10 @@ TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
         oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     shared_ptr<oh5::Source> src = db->load_source(file->what_source());
     file->source(src);
-    file->path("/path");
+    test::TempH5File tf;
+    tf.write(*file);
+    file->path(tf.path());
+    // add an invalid attribute
     file->root()->add_child(make_shared<oh5::Attribute>("invalid"));
 
     EXPECT_NO_THROW(db->save_file(*file));
@@ -139,7 +142,9 @@ TEST_P(rdb_RelationalDatabase_test, attribute_groups_not_saved) {
         oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     shared_ptr<oh5::Source> src = db->load_source(file->what_source());
     file->source(src);
-    file->path("/path");
+    test::TempH5File tf;
+    tf.write(*file);
+    file->path(tf.path());
     
     ASSERT_NO_THROW(db->save_file(*file));
     

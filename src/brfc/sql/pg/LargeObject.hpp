@@ -17,45 +17,42 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_MODEL_HPP
-#define BRFC_RDB_MODEL_HPP
+#ifndef BRFC_SQL_PG_LARGE_OBJECT_HPP
+#define BRFC_SQL_PG_LARGE_OBJECT_HPP
 
-#include <map>
+#include <boost/numeric/conversion/cast.hpp>
 
-#include <brfc/String.hpp>
-#include <brfc/sql/fwd.hpp>
+#include <pqxx/largeobject>
+
+#include <brfc/sql/LargeObject.hpp>
 
 namespace brfc {
-namespace rdb {
+namespace sql {
+namespace pg {
 
-class Model {
+class LargeObject : public sql::LargeObject {
   public:
-    static Model& instance();
+    LargeObject(pqxx::dbtransaction& tx, long long id)
+            : lob_(tx, boost::numeric_cast<pqxx::oid>(id)) {
+        
+    }
 
-    sql::TablePtr sources;
-    sql::TablePtr source_radars;
-    sql::TablePtr source_centres;
-    sql::TablePtr files;
-    sql::TablePtr file_content;
-    sql::TablePtr groups;
-    sql::TablePtr attrs;
-    sql::TablePtr invalid_attrs;
-    sql::TablePtr attrvals_int;
-    sql::TablePtr attrvals_str;
-    sql::TablePtr attrvals_real;
-    sql::TablePtr attrvals_bool;
-
-    sql::TablePtr table_by_name(const String& name) const;
-
-  private:
-    Model();
-
-    typedef std::map<String, sql::TablePtr> TableMap;
+    LargeObject(pqxx::dbtransaction& tx, const String& path)
+            : lob_(tx, path.to_utf8()) {
     
-    TableMap tables_;
+    }
+ 
+  protected:
+    long long do_id() const {
+        return boost::numeric_cast<long long>(lob_.id());
+    }
+  
+  private:
+    pqxx::largeobjectaccess lob_;
 };
 
-} // namespace rdb
+} // namespace pg
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_RDB_MODEL_HPP
+#endif // BRFC_SQL_PG_LARGE_OBJECT_HPP
