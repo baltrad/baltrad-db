@@ -28,10 +28,6 @@ namespace brfc {
 
 class MockDatabase : public Database {
   public:
-    MOCK_METHOD0(do_begin, void());
-    MOCK_METHOD0(do_rollback, void());
-    MOCK_METHOD0(do_commit, void());
-    
     MOCK_METHOD1(do_has_file, bool(const oh5::File&));
     MOCK_METHOD1(do_remove_file, void(const FileEntry&));
     MOCK_METHOD1(do_save_file, shared_ptr<FileEntry>(const oh5::File&));

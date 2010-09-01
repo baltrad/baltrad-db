@@ -96,10 +96,6 @@ class RelationalDatabase : public Database {
     long long db_id(const oh5::Source& source);
 
   protected:
-    virtual void do_begin();
-    virtual void do_rollback();
-    virtual void do_commit();
-
     /**
      * @brief check if file hash is unique in database
      */

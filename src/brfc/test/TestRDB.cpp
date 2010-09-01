@@ -84,14 +84,14 @@ TestRDB::load_queries(const String& filename) {
 void
 TestRDB::exec_queries_from(const String& file) {
     const StringList& queries = load_queries(file);
-    begin();
+    connection().begin();
     try {
         BOOST_FOREACH(const String& stmt, queries) {
             connection().execute(stmt);
         }
-        commit();
+        connection().commit();
     } catch (...) {
-        rollback();
+        connection().rollback();
         throw;
     }
 }

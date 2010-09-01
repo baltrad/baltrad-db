@@ -93,10 +93,8 @@ TEST_F(FileCatalog_test, test_catalog_nx_file_by_path) {
 TEST_F(FileCatalog_test, test_catalog) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
-    EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_save_file(Ref(*minfile)))
         .WillOnce(Return(shared_ptr<FileEntry>(new MockFileEntry(1))));
-    EXPECT_CALL(*db, do_commit());
 
     fc.catalog(*minfile);
 }
@@ -106,10 +104,8 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
 
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
-    EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_save_file(Ref(*minfile)))
         .WillOnce(Throw(db_error("")));
-    EXPECT_CALL(*db, do_rollback());
 
      // propagates db_error
     EXPECT_THROW(fc.catalog(*minfile), db_error);
@@ -138,18 +134,14 @@ TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
 TEST_F(FileCatalog_test, test_remove_existing_file) {
     shared_ptr<FileEntry> entry(new MockFileEntry(1));
 
-    EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_remove_file(Ref(*entry)));
-    EXPECT_CALL(*db, do_commit());
 
     EXPECT_NO_THROW(fc.remove(*entry));
 }
 
 /*
 TEST_F(FileCatalog_test, test_remove_nx_file) {
-    EXPECT_CALL(*db, do_begin());
     EXPECT_CALL(*db, do_remove_file(String("/path/to/nxfile")));
-    EXPECT_CALL(*db, do_rollback());
 
     EXPECT_THROW(fc.remove("/path/to/nxfile"), fs_error);
 }

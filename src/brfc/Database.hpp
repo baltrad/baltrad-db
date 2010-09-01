@@ -49,27 +49,6 @@ class Database : public boost::noncopyable {
     virtual ~Database() { }
     
     /**
-     * @brief start a transaction
-     */
-    void begin() {
-        do_begin();
-    }
-
-    /**
-     * @brief roll back current transaction
-     */
-    void rollback() {
-        do_rollback();
-    }
-
-    /**
-     * @brief commit current transaction
-     */
-    void commit() {
-        do_commit();
-    }
-
-    /**
      * @brief is file stored
      */
     bool has_file(const oh5::File& file) {
@@ -111,10 +90,6 @@ class Database : public boost::noncopyable {
     }
 
   protected:
-    virtual void do_begin() = 0;
-    virtual void do_rollback() = 0;
-    virtual void do_commit() = 0;
-    
     virtual bool do_has_file(const oh5::File& file) = 0;
     virtual void do_remove_file(const FileEntry& entry) = 0;
     virtual shared_ptr<FileEntry> do_save_file(const oh5::File& file) = 0;

@@ -81,21 +81,6 @@ RelationalDatabase::file_hasher(FileHasher* hasher) {
     file_hasher(shared_ptr<FileHasher>(hasher, no_delete));
 }
 
-void
-RelationalDatabase::do_begin() {
-    connection().begin();
-}
-
-void
-RelationalDatabase::do_rollback() {
-    connection().rollback();
-}
-
-void
-RelationalDatabase::do_commit() {
-    connection().commit();
-}
-
 bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
     const Model& m = Model::instance();
@@ -114,7 +99,15 @@ RelationalDatabase::do_has_file(const oh5::File& file) {
 shared_ptr<FileEntry>
 RelationalDatabase::do_save_file(const oh5::File& file) {
     SaveFile save(this);
-    long long id = save(file);
+    long long id = 0;
+    connection().begin();
+    try {
+        id = save(file);
+        connection().commit();
+    } catch (const std::runtime_error&) {
+        connection().rollback();
+        throw;
+    }
     shared_ptr<FileEntry> entry(new RelationalFileEntry(id, conn_));
     return entry;
 }

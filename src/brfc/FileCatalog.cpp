@@ -74,29 +74,12 @@ FileCatalog::catalog(const oh5::File& file) {
     if (is_cataloged(file))
         throw duplicate_entry(path_utf8);
     
-    shared_ptr<FileEntry> entry;
-    db_->begin();
-    // try saving to database
-    try {
-        entry = db_->save_file(file);
-    } catch (const db_error& e) {
-        db_->rollback();
-        throw;
-    }
-    db_->commit();
-    return entry;
+    return db_->save_file(file);
 }
 
 void
 FileCatalog::remove(const FileEntry& entry) {
-    db_->begin();
-    try {
-        db_->remove_file(entry);
-    } catch (const db_error& e) {   
-        db_->rollback();
-        throw;
-    }
-    db_->commit();
+    db_->remove_file(entry);
 }
 
 Query
