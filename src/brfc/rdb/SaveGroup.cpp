@@ -46,6 +46,7 @@ SaveGroup::SaveGroup(RelationalDatabase* rdb,
                      GroupCache* cache)
         : rdb_(rdb)
         , cache_(cache)
+        , file_id_(0)
         , stmt_()
         , special_(rdb->mapper()->specializations_on(Model::instance().groups)) {
 }
@@ -67,19 +68,16 @@ SaveGroup::operator()(const oh5::Group& group) {
 
 void
 SaveGroup::bind_plain(const oh5::Group& group) {
-    Variant file_id;
     GroupCache::OptionalKey parent_id;
     shared_ptr<const oh5::Group> parent = group.parent<oh5::Group>();
     if (parent) {
         parent_id = cache_->key(parent);
     }
-    if (group.file())
-        file_id = Variant(rdb_->db_id(*group.file()));
 
     sql::Factory xpr;
     if (parent_id)
         stmt_->value("parent_id", xpr.int64_(parent_id.get()));
-    stmt_->value("file_id", xpr.literal(file_id));
+    stmt_->value("file_id", xpr.int64_(file_id_));
     stmt_->value("name", xpr.string(group.name()));
 }
 
