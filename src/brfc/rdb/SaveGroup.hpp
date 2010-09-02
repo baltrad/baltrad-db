@@ -64,6 +64,8 @@ class SaveGroup {
      */
     void operator()(const oh5::Group& group);
 
+    void file_id(long long id) { file_id_ = id; }
+
   private:
     /**
      * @brief bind non-attribute columns
@@ -85,6 +87,7 @@ class SaveGroup {
 
     RelationalDatabase* rdb_;
     GroupCache* cache_;
+    long long file_id_;
     sql::InsertPtr stmt_;
     MappingVector special_;
 };

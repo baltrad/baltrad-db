@@ -99,7 +99,9 @@ SaveFile::operator()(const oh5::File& file) {
     } else {
         // XXX: last insert id!
     }
-    
+
+    save_group_.file_id(file_id);
+
     BOOST_FOREACH(const oh5::Node& node, *file.root()) {
         visit(node, *this);
     }
