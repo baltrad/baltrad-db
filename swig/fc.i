@@ -71,29 +71,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %ignore brfc::Query::Query;
 %ignore brfc::ResultSet::ResultSet;
-// deprecated 
-%ignore brfc::ResultSet::integer;
-%ignore brfc::ResultSet::real;
-%ignore brfc::ResultSet::boolean;
 
 %ignore brfc::ResultSet::operator=;
-
-%typemap(javacode) brfc::ResultSet %{
-  @Deprecated
-  public long integer(long pos) {
-    return fcJNI.ResultSet_int64_(swigCPtr, this, pos);
-  }
-  
-  @Deprecated
-  public double real(long pos) {
-    return fcJNI.ResultSet_double_(swigCPtr, this, pos);
-  }
-  
-  @Deprecated
-  public boolean boolean_(long pos) {
-    return fcJNI.ResultSet_bool_(swigCPtr, this, pos);
-  }
-%}
 
 // uses int references
 %ignore brfc::Date::date_from_jdn;
