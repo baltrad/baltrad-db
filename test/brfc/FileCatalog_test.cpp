@@ -94,7 +94,7 @@ TEST_F(FileCatalog_test, test_catalog) {
     EXPECT_CALL(*db, do_has_file(_))
         .WillOnce(Return(false));
     EXPECT_CALL(*db, do_save_file(Ref(*minfile)))
-        .WillOnce(Return(shared_ptr<FileEntry>(new MockFileEntry(1))));
+        .WillOnce(Return(shared_ptr<FileEntry>(new MockFileEntry())));
 
     fc.catalog(*minfile);
 }
@@ -132,7 +132,7 @@ TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {
-    shared_ptr<FileEntry> entry(new MockFileEntry(1));
+    shared_ptr<FileEntry> entry(new MockFileEntry());
 
     EXPECT_CALL(*db, do_remove_file(Ref(*entry)));
 

@@ -26,21 +26,17 @@ namespace brfc {
  */
 class FileEntry {
   public:
-    explicit FileEntry(long long id)
-            : id_(id) {
-    }
-
     virtual ~FileEntry() { }
 
     /**
      * @brief file id
      */
     long long id() const {
-        return id_;
+        return do_id();
     }
 
-  private:
-    long long id_;
+  protected:
+    virtual long long do_id() const = 0;
 };
 
 } // namespace brfc

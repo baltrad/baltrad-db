@@ -33,11 +33,17 @@ namespace rdb {
 class RelationalFileEntry : public FileEntry {
   public:
     RelationalFileEntry(long long id, shared_ptr<sql::Connection> conn)
-            : FileEntry(id)
+            : id_(id)
             , conn_(conn) {
     }
 
+    void id(long long id) { id_ = id; }
+  
+  protected:
+    virtual long long do_id() const { return id_; }
+
   private:
+    long long id_;
     shared_ptr<sql::Connection> conn_;
 };
 

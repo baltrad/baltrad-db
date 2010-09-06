@@ -25,9 +25,7 @@ namespace brfc {
 
 class MockFileEntry : public FileEntry {
   public:
-    explicit MockFileEntry(long long id)
-            : FileEntry(id) {
-    }
+    MOCK_CONST_METHOD0(do_id, long long());
 };
 
 } // namespace brfc
