@@ -68,13 +68,9 @@ SHA1AttributeHasher::do_name() const {
 }
 
 String
-SHA1AttributeHasher::do_hash(const oh5::File& file) {
-    if (not file.source()) {
-        //XXX: needs a better exception type
-        throw value_error("can't form unique_id: not associated with source");
-    }
-    
-    StringList strs(file.source()->node_id());
+SHA1AttributeHasher::do_hash(const oh5::File& file,
+                             const oh5::Source& source) {
+    StringList strs(source.node_id());
 
     const oh5::Attribute* attr = 0;
     const Mapping* mapping = 0;

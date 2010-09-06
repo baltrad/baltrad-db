@@ -38,8 +38,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/DataSetGroup.hpp>
-#include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/File.hpp>
+#include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/Source.hpp>
 
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/test/TempH5File.hpp>
@@ -50,6 +51,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 using testing::Ref;
 using testing::Return;
+using testing::_;
 
 namespace brfc {
 namespace rdb {
@@ -112,21 +114,21 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
         td1->source(db->load_source(src1));
         tf1.write(*td1);
         td1->path(tf1.path());
-        ON_CALL(hasher, do_hash(Ref(*td1))).WillByDefault(Return("td1"));
+        ON_CALL(hasher, do_hash(Ref(*td1), _)).WillByDefault(Return("td1"));
 
         add_attribute(*td2, "dataset1/where/xsize", Variant(2));
         add_attribute(*td2, "dataset1/where/ysize", Variant(2));
         td2->source(db->load_source(src2));
         tf2.write(*td2);
         td2->path(tf2.path());
-        ON_CALL(hasher, do_hash(Ref(*td2))).WillByDefault(Return("td2"));
+        ON_CALL(hasher, do_hash(Ref(*td2), _)).WillByDefault(Return("td2"));
 
         add_attribute(*td3, "dataset1/where/xsize", Variant(3));
         add_attribute(*td3, "dataset2/where/xsize", Variant(3));
         td3->source(db->load_source(src1));
         tf3.write(*td3);
         td3->path(tf3.path());
-        ON_CALL(hasher, do_hash(Ref(*td3))).WillByDefault(Return("td3"));
+        ON_CALL(hasher, do_hash(Ref(*td3), _)).WillByDefault(Return("td3"));
 
         add_attribute(*td4, "dataset1/where/xsize", Variant(6));
         add_attribute(*td4, "dataset1/where/ysize", Variant(4));
@@ -134,7 +136,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
         td4->source(db->load_source(src2));
         tf4.write(*td4);
         td4->path(tf4.path());
-        ON_CALL(hasher, do_hash(Ref(*td4))).WillByDefault(Return("td4"));
+        ON_CALL(hasher, do_hash(Ref(*td4), _)).WillByDefault(Return("td4"));
 
         add_attribute(*td5, "dataset1/where/xsize", Variant(5));
         add_attribute(*td5, "dataset1/where/ysize", Variant(2));
@@ -143,7 +145,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
         td5->source(db->load_source(src1));
         tf5.write(*td5);
         td5->path(tf5.path());
-        ON_CALL(hasher, do_hash(Ref(*td5))).WillByDefault(Return("td5"));
+        ON_CALL(hasher, do_hash(Ref(*td5), _)).WillByDefault(Return("td5"));
 
         fe1 = db->save_file(*td1);
         fe2 = db->save_file(*td2);
@@ -297,7 +299,7 @@ TEST_P(rdb_Query_test, test_has_file) {
 TEST_P(rdb_Query_test, test_has_nx_file) {
     bool result = false;
     shared_ptr<oh5::File> td = oh5::File::minimal("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
-    EXPECT_CALL(hasher, do_hash(Ref(*td))).WillOnce(Return("td"));
+    EXPECT_CALL(hasher, do_hash(Ref(*td), _)).WillOnce(Return("td"));
     td->source(db->load_source(src1));
     ASSERT_NO_THROW(result = db->has_file(*td));
     EXPECT_FALSE(result);

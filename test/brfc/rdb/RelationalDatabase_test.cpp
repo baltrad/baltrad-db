@@ -60,7 +60,7 @@ class rdb_RelationalDatabase_test : public testing::TestWithParam<const char*> {
     virtual void SetUp() {
         db->file_hasher(&hasher);
         ON_CALL(hasher, do_name()).WillByDefault(Return("mock"));
-        ON_CALL(hasher, do_hash(_)).WillByDefault(Return("hash"));
+        ON_CALL(hasher, do_hash(_, _)).WillByDefault(Return("hash"));
     }
 
     virtual void TearDown() {

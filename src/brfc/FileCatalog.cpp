@@ -71,10 +71,6 @@ shared_ptr<FileEntry>
 FileCatalog::catalog(const oh5::File& file) {
     std::string path_utf8 = file.path().to_utf8();
     
-    //XXX: get rid of this
-    oh5::File& f = const_cast<oh5::File&>(file);
-    f.source(db_->load_source(file.what_source()));
-    
     if (is_cataloged(file))
         throw duplicate_entry(path_utf8);
     

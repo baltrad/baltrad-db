@@ -87,9 +87,11 @@ SaveFile::operator()(const oh5::File& file) {
         // XXX: this should be explicit
     }
 
+    shared_ptr<oh5::Source> src = rdb_->load_source(file.what_source());
+
     stmt->value("hash_type", xpr.string(rdb_->file_hasher().name()));
-    stmt->value("unique_id", xpr.string(rdb_->file_hasher().hash(file)));
-    stmt->value("source_id", xpr.int64_(rdb_->db_id(*file.source())));
+    stmt->value("unique_id", xpr.string(rdb_->file_hasher().hash(file, *src)));
+    stmt->value("source_id", xpr.int64_(rdb_->db_id(*src)));
 
     shared_ptr<sql::Result> result = rdb_->connection().execute(*stmt);
 

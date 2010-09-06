@@ -84,7 +84,9 @@ RelationalDatabase::file_hasher(FileHasher* hasher) {
 bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
     const Model& m = Model::instance();
-    const String& hash = file_hasher().hash(file);
+
+    shared_ptr<oh5::Source> src = load_source(file.what_source());
+    const String& hash = file_hasher().hash(file, *src);
 
     sql::Factory xpr;
     sql::SelectPtr qry = sql::Select::create();
@@ -128,7 +130,9 @@ RelationalDatabase::do_query(const Query& query) {
 long long
 RelationalDatabase::db_id(const oh5::File& file) {
     const Model& m = Model::instance();
-    const String& hash = file_hasher().hash(file);
+
+    shared_ptr<oh5::Source> src = load_source(file.what_source());
+    const String& hash = file_hasher().hash(file, *src);
 
     sql::Factory xpr;
     sql::SelectPtr qry = sql::Select::create();

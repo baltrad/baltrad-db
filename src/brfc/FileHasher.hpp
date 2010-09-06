@@ -27,6 +27,7 @@ namespace brfc {
 namespace oh5 {
 
 class File;
+class Source;
 
 } // namespace oh5
 
@@ -47,8 +48,8 @@ class FileHasher {
     /**
      * @brief hash a file
      */
-    String hash(const oh5::File& file) {
-        return do_hash(file);
+    String hash(const oh5::File& file, const oh5::Source& source) {
+        return do_hash(file, source);
     }
 
     virtual ~FileHasher() { }
@@ -56,7 +57,8 @@ class FileHasher {
   protected:
     virtual String do_name() const = 0;
 
-    virtual String do_hash(const oh5::File& file) = 0;
+    virtual String do_hash(const oh5::File& file,
+                           const oh5::Source& source) = 0;
 };
 
 } // namespace brfc

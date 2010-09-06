@@ -10,7 +10,7 @@ namespace brfc {
 class MockHasher : public FileHasher {
   public:
     MOCK_CONST_METHOD0(do_name, String());
-    MOCK_METHOD1(do_hash, String(const oh5::File&));
+    MOCK_METHOD2(do_hash, String(const oh5::File&, const oh5::Source&));
 };
 
 } // namespace brfc

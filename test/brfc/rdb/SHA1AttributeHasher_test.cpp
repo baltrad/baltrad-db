@@ -70,9 +70,6 @@ class rdb_SHA1AttributeHasher_test : public ::testing::Test {
         mapper->add(Mapping(6, "what/version", "string", sql::ColumnPtr(), true));
         mapper->add(Mapping(7, "ignore", "string", sql::ColumnPtr(), true));
         mapper->add(Mapping(8, "attr", "string", sql::ColumnPtr(), false));
-        f1->source(src);
-        f2->source(src);
-        f3->source(src);
     }
     
     shared_ptr<AttributeMapper> mapper;
@@ -99,24 +96,24 @@ TEST_F(rdb_SHA1AttributeHasher_test, attribute_string) {
 }
 
 TEST_F(rdb_SHA1AttributeHasher_test, check_concrete_digests) {
-    EXPECT_EQ("0833a94578041a8177afb30ee1e7ac0a660be043", hasher.hash(*f1));
-    EXPECT_EQ("91176508177e2acc5638faec441a925a268700ae", hasher.hash(*f2));
+    EXPECT_EQ("0833a94578041a8177afb30ee1e7ac0a660be043", hasher.hash(*f1, *src));
+    EXPECT_EQ("91176508177e2acc5638faec441a925a268700ae", hasher.hash(*f2, *src));
 }
 
 TEST_F(rdb_SHA1AttributeHasher_test, hash_same_meta) {
-    EXPECT_EQ(hasher.hash(*f1), hasher.hash(*f3));
+    EXPECT_EQ(hasher.hash(*f1, *src), hasher.hash(*f3, *src));
 }
 
 TEST_F(rdb_SHA1AttributeHasher_test, hash_different_meta) {
-    EXPECT_NE(hasher.hash(*f1), hasher.hash(*f2));
+    EXPECT_NE(hasher.hash(*f1, *src), hasher.hash(*f2, *src));
 }
 
 TEST_F(rdb_SHA1AttributeHasher_test, hash_ignores_attributes) {
-    String hash1 = hasher.hash(*f1);
+    String hash1 = hasher.hash(*f1, *src);
     f1->root()->add_child(make_shared<oh5::Attribute>("ignore", Variant("val")));
-    String hash2 = hasher.hash(*f1);
+    String hash2 = hasher.hash(*f1, *src);
     f1->root()->attribute("ignore")->value(Variant("val2"));
-    String hash3 = hasher.hash(*f1);
+    String hash3 = hasher.hash(*f1, *src);
 
     EXPECT_EQ(hash1, hash2);
     EXPECT_EQ(hash1, hash3);
@@ -124,11 +121,11 @@ TEST_F(rdb_SHA1AttributeHasher_test, hash_ignores_attributes) {
 }
 
 TEST_F(rdb_SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
-    String hash1 = hasher.hash(*f1);
+    String hash1 = hasher.hash(*f1, *src);
     f1->root()->add_child(make_shared<oh5::Attribute>("attr", Variant("val")));
-    String hash2 = hasher.hash(*f1);
+    String hash2 = hasher.hash(*f1, *src);
     f1->root()->attribute("attr")->value(Variant("val2"));
-    String hash3 = hasher.hash(*f1);
+    String hash3 = hasher.hash(*f1, *src);
 
     EXPECT_NE(hash1, hash2);
     EXPECT_NE(hash1, hash3);
