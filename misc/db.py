@@ -57,25 +57,14 @@ meta = MetaData()
 
 sources = Table("bdb_sources", meta,
     Column("id", Integer, primary_key=True),
-    Column("node_id", Text, nullable=False, unique=True),
+    Column("name", Text, nullable=False, unique=True),
 )
 
-source_centres = Table("bdb_source_centres", meta,
-    Column("id", Integer, ForeignKey(sources.c.id),
-           primary_key=True),
-    Column("originating_centre", Integer, nullable=False, unique=True),
-    Column("country_code", Integer, nullable=False, unique=True),
-    Column("wmo_cccc", String(4), nullable=False, unique=True)
-)
-
-source_radars = Table("bdb_source_radars", meta,
-    Column("id", Integer, ForeignKey(sources.c.id),
-           primary_key=True),
-    Column("centre_id", Integer, ForeignKey(source_centres.c.id),
-           nullable=False),
-    Column("radar_site", Text, unique=True),
-    Column("wmo_code", Integer, unique=True),
-    Column("place", Text, unique=True)
+source_kvs = Table("bdb_source_kvs", meta,
+    Column("source_id", Integer, ForeignKey(sources.c.id)),
+    Column("key", String, nullable=False),
+    Column("value", String, nullable=False),
+    PrimaryKeyConstraint("source_id", "key"),
 )
 
 files = Table("bdb_files", meta,
@@ -190,6 +179,11 @@ attribute_values_time = Table("bdb_attribute_values_time", meta,
                          ondelete="CASCADE"),
     PrimaryKeyConstraint("attribute_id", "group_id")
 )
+
+old_meta = MetaData()
+
+Table("bdb_source_centres", old_meta)
+Table("bdb_source_radars", old_meta)
 
 default_storage = {
     "string":   attribute_values_str.c.value,
@@ -392,12 +386,8 @@ attribute_entries = [
 
 virtual_attributes = [
     ("file:id",          "int",      files.c.id),
-    ("what/source:WMO",  "int",      source_radars.c.wmo_code),
-    ("what/source:RAD",  "string",   source_radars.c.radar_site),
-    ("what/source:ORG",  "int",      source_centres.c.originating_centre),
-    ("what/source:CTY",  "int",      source_centres.c.country_code),
-    ("what/source:PLC",  "string",   source_radars.c.place),
-    ("what/source:node", "string",   sources.c.node_id),
+    ("what/source:name", "string",   sources.c.name),
+    ("what/source:node", "string",   sources.c.name),
 ]
 
 ignored_in_hash = [
@@ -405,86 +395,80 @@ ignored_in_hash = [
     "Conventions",
 ]
 
-countries = {
-    "dk": 611,
-    "ee": 612,
-    "fi": 613,
-    "lv": 625,
-    "nl": 632,
-    "no": 633,
-    "pl": 634,
-    "se": 643
-}
+class _Org(object):
+    def __init__(self, name, org, cty):
+        self.name = name
+        self.kv = {
+            "ORG": org,
+            "CTY": cty,
+        }
 
-# from WMO codes C-1
-org_centres = {
-    "dk": 94, # copenhagen
-    "ee": 231, # estonia (NMC)
-    "fi": 86, # helsinki
-    "lv": 236, # latvia (NMC)
-    "nl": 99, # de bilt
-    "no": 88, # oslo
-    "pl": 220, # warsaw
-    "se": 82, # norrköping
-}
+orgs = [
+    _Org("dk", 94,  611),
+    _Org("ee", 231, 612),
+    _Org("fi", 86,  613),
+    _Org("lv", 236, 625),
+    _Org("nl", 99,  632),
+    _Org("no", 88,  633),
+    _Org("pl", 220, 634),
+    _Org("se", 82,  643),
+]
 
-wmo_ccccs = {
-    "dk": "EKMI",
-    "ee": "EEMH",
-    "fi": "EFKL",
-    "lv": "EVRR",
-    "nl": "EHDB",
-    "no": "ENMI",
-    "pl": "SOWR",
-    "se": "ESWI",
-}
+class _Radar(object):
+    def __init__(self, name, rad, wmo, plc):
+        self.name = name
+        self.kv = {
+            "RAD": rad,
+            "WMO": wmo,
+            "PLC": plc,
+        }
 
-# country code, CID, WMO code, node, plc
+# node, CID, WMO code, node
 radars = [
-    ("dk", "DN44",             0, "dkbor", u"Bornholm"),
-    ("dk", "DN41",          6180, "dkste", u"Stevns"),
-    ("dk", "DN42",             0, "dkrom", u"Rømø"),
-    ("dk", "DN43",             0, "dksin", u"Sindal"),
-    ("ee", "EE-HARKU",     26038, "eetal", u"Harku"),
-    ("ee", "EE-SYRGAVERE", 26232, "eesur", u"Sürgavere"),
-    ("fi", "FI42",          2975, "fivan", u"Vantaa"),
-    ("fi", "FI43",          2941, "fiika", u"Ikaalinen"),
-    ("fi", "FI44",          2954, "fianj", u"Anjalankoski"),
-    ("fi", "FI45",          2918, "fikuo", u"Kuopio"),
-    ("fi", "FI46",          2933, "fikor", u"Korpo"),
-    ("fi", "FI47",          2870, "fiuta", u"Utajärvi"),
-    ("fi", "FI48",          2840, "filuo", u"Luosto"),
-    ("fi", "FI49",          2925, "fivim", u"Vimpeli"),
-    ("lv", "LVaa",         26422, "lvrix", u"Riga"),
-    ("nl", "NL50",          6260, "nldbl", u"De Bilt"),
-    ("nl", "NL51",          6234, "nldhl", u"Den Helder"),
-    ("no", "NOaa",          1104, "norst", u"Røst"),
-    ("no", "NOab",          1405, "nobom", u"Bømlo"),
-    ("no", "NO41",          1499, "nosol", u"Oslo"),
-    ("no", "NO42",          1438, "nohgb", u"Hægebostad"),
-    ("no", "NO43",          1247, "norsa", u"Rissa"),
-    ("no", "NOac",          1018, "noand", u"Andøya"),
-    ("no", "NOad",          1042, "nohas", u"Hasvik"),
-    ("pl", "PL41",         12374, "plleg", u"Legionowo"),
-    ("pl", "PL42",         12514, "plram", u"Ramża"),
-    ("pl", "PL43",         12544, "plpas", u"Pastewnik"),
-    ("pl", "PL44",         12579, "plrze", u"Rzeszów"),
-    ("pl", "PL45",         12331, "plpoz", u"Poznań"),
-    ("pl", "PL46",         12220, "plswi", u"Świdwin"),
-    ("pl", "PL47",         12151, "plgda", u"Gdańsk"),
-    ("pl", "PL48",         12568, "plbrz", u"Brzuchania"),
-    ("se", "SE40",          2032, "sekir", u"Kiruna"),
-    ("se", "SE41",          2092, "selul", u"Luleå"),
-    ("se", "SE42",          2200, "seosu", u"Östersund"),
-    ("se", "SE43",          2262, "seovi", u"Örnsköldsvik"),
-    ("se", "SE44",          2334, "sehud", u"Hudiksvall"),
-    ("se", "SE45",          2430, "selek", u"Leksand"),
-    ("se", "SE46",          2451, "searl", u"Arlanda"),
-    ("se", "SE47",          2588, "sease", u"Ase"),
-    ("se", "SE48",          2570, "sevil", u"Vilebo"),
-    ("se", "SE49",          2600, "sevar", u"Vara"),
-    ("se", "SE50",          2606, "seang", u"Ängelholm"),
-    ("se", "SE51",          2666, "sekkr", u"Karlskrona"),
+    _Radar("dkbor", "DN44",             "0", u"Bornholm"),
+    _Radar("dkste", "DN41",         "06180", u"Stevns"),
+    _Radar("dkrom", "DN42",             "0", u"Rømø"),
+    _Radar("dksin", "DN43",             "0", u"Sindal"),
+    _Radar("eetal", "EE-HARKU",     "26038", u"Harku"),
+    _Radar("eesur", "EE-SYRGAVERE", "26232", u"Sürgavere"),
+    _Radar("fivan", "FI42",         "02975", u"Vantaa"),
+    _Radar("fiika", "FI43",         "02941", u"Ikaalinen"),
+    _Radar("fianj", "FI44",         "02954", u"Anjalankoski"),
+    _Radar("fikuo", "FI45",         "02918", u"Kuopio"),
+    _Radar("fikor", "FI46",         "02933", u"Korpo"),
+    _Radar("fiuta", "FI47",         "02870", u"Utajärvi"),
+    _Radar("filuo", "FI48",         "02840", u"Luosto"),
+    _Radar("fivim", "FI49",         "02925", u"Vimpeli"),
+    _Radar("lvrix", "LVaa",         "26422", u"Riga"),
+    _Radar("nldbl", "NL50",         "06260", u"De Bilt"),
+    _Radar("nldhl", "NL51",         "06234", u"Den Helder"),
+    _Radar("norst", "NOaa",         "01104", u"Røst"),
+    _Radar("nobom", "NOab",         "01405", u"Bømlo"),
+    _Radar("nosol", "NO41",         "01499", u"Oslo"),
+    _Radar("nohgb", "NO42",         "01438", u"Hægebostad"),
+    _Radar("norsa", "NO43",         "01247", u"Rissa"),
+    _Radar("noand", "NOac",         "01018", u"Andøya"),
+    _Radar("nohas", "NOad",         "01042", u"Hasvik"),
+    _Radar("plleg", "PL41",         "12374", u"Legionowo"),
+    _Radar("plram", "PL42",         "12514", u"Ramża"),
+    _Radar("plpas", "PL43",         "12544", u"Pastewnik"),
+    _Radar("plrze", "PL44",         "12579", u"Rzeszów"),
+    _Radar("plpoz", "PL45",         "12331", u"Poznań"),
+    _Radar("plswi", "PL46",         "12220", u"Świdwin"),
+    _Radar("plgda", "PL47",         "12151", u"Gdańsk"),
+    _Radar("plbrz", "PL48",         "12568", u"Brzuchania"),
+    _Radar("sekir", "SE40",         "02032", u"Kiruna"),
+    _Radar("selul", "SE41",         "02092", u"Luleå"),
+    _Radar("seosu", "SE42",         "02200", u"Östersund"),
+    _Radar("seovi", "SE43",         "02262", u"Örnsköldsvik"),
+    _Radar("sehud", "SE44",         "02334", u"Hudiksvall"),
+    _Radar("selek", "SE45",         "02430", u"Leksand"),
+    _Radar("searl", "SE46",         "02451", u"Arlanda"),
+    _Radar("sease", "SE47",         "02588", u"Ase"),
+    _Radar("sevil", "SE48",         "02570", u"Vilebo"),
+    _Radar("sevar", "SE49",         "02600", u"Vara"),
+    _Radar("seang", "SE50",         "02606", u"Ängelholm"),
+    _Radar("sekkr", "SE51",         "02666", u"Karlskrona"),
 ]
 
 def populate_attributes_table(engine):
@@ -510,27 +494,14 @@ def populate_attributes_table(engine):
 
 def populate_sources_table(engine):
     idgen = (i for i in itertools.count(1))
-    centre_ids = {}
 
-    for cc, country in countries.iteritems():
-        centre_ids[cc] = id = idgen.next()
-        engine.execute(sources.insert(), id=id, node_id=cc)
-        engine.execute(source_centres.insert(),
-                       id=id,
-                       country_code=country,
-                       wmo_cccc=wmo_ccccs[cc],
-                       originating_centre=org_centres[cc])
-    
-    for (cc, site, wmo_code, node_id, place) in radars:
+    for src in orgs + radars:
         id = idgen.next()
-        engine.execute(sources.insert(), id=id, node_id=node_id)
-        engine.execute(source_radars.insert(),
-                       id=id,
-                       centre_id=centre_ids[cc],
-                       wmo_code=(wmo_code if wmo_code != 0  else None),
-                       radar_site=site,
-                       place=place)
-
+        engine.execute(sources.insert(), id=id, name=src.name)
+        kvs = [{"source_id": id, "key": k, "value": v} for k, v in src.kv.iteritems()]
+        for kv in kvs:
+            engine.execute(source_kvs.insert(), **kv)
+    
 class Template(string.Template):
     delimiter = ":"
 
@@ -592,6 +563,7 @@ def main():
     populate_attributes_table(engine)
     populate_sources_table(engine)
     executor.write_content(os.path.join(outdir, dialect_name, "create.sql"))
+    old_meta.drop_all(bind=engine)
     meta.drop_all(bind=engine)
     executor.write_content(os.path.join(outdir, dialect_name, "drop.sql"))
     

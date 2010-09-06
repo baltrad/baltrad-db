@@ -110,19 +110,15 @@ class File : public boost::noncopyable,
     ///@}
     
     /**
-     * @brief get the Source definiton
-     * @{
+     * @brief get the Source instance from /what/source
+     * @throw value_error if /what/source is not correctly formed
      */
-    shared_ptr<const Source> source() const {
-        return source_;
-    }
-
-    shared_ptr<Source> source() {
-        return source_;
-    }
-    ///@}
-
-    void source(shared_ptr<Source> src);
+    Source source() const;
+    
+    /**
+     * @brief set /what/source from a Source instance
+     */
+    void source(const Source& src);
 
     /**
      * @brief get full paths of invalid attributes (have no value)
@@ -200,7 +196,6 @@ class File : public boost::noncopyable,
 
     shared_ptr<RootGroup> root_;
     String path_;
-    shared_ptr<Source> source_;
 };
 
 } // namespace oh5

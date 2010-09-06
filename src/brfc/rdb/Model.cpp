@@ -29,8 +29,7 @@ namespace rdb {
 
 Model::Model()
         : sources(sql::Table::create("bdb_sources"))
-        , source_radars(sql::Table::create("bdb_source_radars"))
-        , source_centres(sql::Table::create("bdb_source_centres"))
+        , source_kvs(sql::Table::create("bdb_source_kvs"))
         , files(sql::Table::create("bdb_files"))
         , file_content(sql::Table::create("bdb_file_content"))
         , groups(sql::Table::create("bdb_groups"))
@@ -42,20 +41,12 @@ Model::Model()
         , attrvals_bool(sql::Table::create("bdb_attribute_values_bool")) {
 
     sources->add_column("id");
-    sources->add_column("node_id");
-
-    source_centres->add_column("id");
-    source_centres->add_column("originating_centre");
-    source_centres->add_column("country_code");
-    source_centres->add_column("wmo_cccc");
-    source_centres->column("id")->references(sources->column("id"));
-
-    source_radars->add_column("id");
-    source_radars->add_column("centre_id");
-    source_radars->add_column("radar_site");
-    source_radars->add_column("wmo_code");
-    source_radars->add_column("place");
-    source_radars->column("id")->references(sources->column("id"));
+    sources->add_column("name");
+    
+    source_kvs->add_column("source_id");
+    source_kvs->add_column("key");
+    source_kvs->add_column("value");
+    source_kvs->column("source_id")->references(sources->column("id"));
 
     files->add_column("id");
     files->add_column("hash_type");
@@ -116,8 +107,7 @@ Model::Model()
     attrvals_bool->column("group_id")->references(groups->column("id"));
 
     tables_.insert(std::make_pair(sources->name(), sources));
-    tables_.insert(std::make_pair(source_radars->name(), source_radars));
-    tables_.insert(std::make_pair(source_centres->name(), source_centres));
+    tables_.insert(std::make_pair(source_kvs->name(), source_kvs));
     tables_.insert(std::make_pair(files->name(), files));
     tables_.insert(std::make_pair(groups->name(), groups));
     tables_.insert(std::make_pair(attrvals_int->name(), attrvals_int));

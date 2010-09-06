@@ -33,8 +33,7 @@ class Model {
     static Model& instance();
 
     sql::TablePtr sources;
-    sql::TablePtr source_radars;
-    sql::TablePtr source_centres;
+    sql::TablePtr source_kvs;
     sql::TablePtr files;
     sql::TablePtr file_content;
     sql::TablePtr groups;

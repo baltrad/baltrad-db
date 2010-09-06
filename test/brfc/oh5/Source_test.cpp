@@ -21,60 +21,84 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/oh5/Source.hpp>
-#include <brfc/oh5/SourceRadar.hpp>
-#include <brfc/oh5/SourceCentre.hpp>
 
 #include "../common.hpp"
 
 namespace brfc {
 namespace oh5 {
 
-TEST(oh5_Source_test, valid_source) {
-    String value = String::from_utf8("WMO:02606,RAD:SE50");
-    shared_ptr<Source> s = Source::from_source_attribute(value);
+TEST(oh5_Source_test, test_from_string_valid) {
+    Source s = Source::from_string("WMO:02606,RAD:SE50");
 
-    shared_ptr<SourceRadar> rad = dynamic_pointer_cast<SourceRadar>(s);
+    EXPECT_EQ((size_t)2, s.keys().size());
 
-    EXPECT_TRUE(rad);
-    
-    EXPECT_EQ(rad->wmo_code(), 2606);
+    EXPECT_TRUE(s.has("WMO"));
+    EXPECT_TRUE(s.has("RAD"));
 
-    EXPECT_EQ(rad->radar_site(), "SE50");
-
-    EXPECT_EQ(rad->place(), "");
+    EXPECT_EQ("02606", s.at("WMO"));
+    EXPECT_EQ("SE50", s.at("RAD"));
 }
 
-TEST(oh5_Source_test, from_empty_source) {
-    String value = String::from_utf8("");
-    EXPECT_THROW(Source::from_source_attribute(value), value_error);
+TEST(oh5_Source_test, test_from_string_empty) {
+    Source s = Source::from_string("");
+    EXPECT_EQ((size_t)0, s.keys().size());
 }
 
-TEST(oh5_Source_test, from_source_missing_value) {
-    String value = String::from_utf8("WMO:");
-    EXPECT_THROW(Source::from_source_attribute(value), value_error);
+TEST(oh5_Source_test, test_from_string_skip_empty) {
+    Source s = Source::from_string("WMO:");
+    EXPECT_FALSE(s.has("WMO"));
 }
 
-TEST(oh5_Source_test, from_source_with_invalid_key) {
-    String value = String::from_utf8("asd:qwe");
-    EXPECT_THROW(Source::from_source_attribute(value), value_error);
+TEST(oh5_Source_test, test_from_string_invalid) {
+    EXPECT_THROW(Source::from_string("a:b,sd"), value_error);
+    EXPECT_THROW(Source::from_string("a:b:c"), value_error);
+    EXPECT_THROW(Source::from_string("a,b,"), value_error);
 }
 
-TEST(oh5_Source_test, radar_to_string) {
-    shared_ptr<SourceRadar> radar = make_shared<SourceRadar>();
-    radar->wmo_code(2606);
-    EXPECT_EQ(radar->to_string(), "WMO:2606");
-    radar->radar_site("SE50");
-    EXPECT_EQ(radar->to_string(), "WMO:2606,RAD:SE50");
-    radar->place("Ängelholm");
-    EXPECT_EQ(radar->to_string(), "WMO:2606,RAD:SE50,PLC:Ängelholm");
+TEST(oh5_Source_test, test_add) {
+    Source s;
+    EXPECT_FALSE(s.has("qwe"));
+
+    s.add("qwe", "asd");
+    EXPECT_TRUE(s.has("qwe"));
+
+    EXPECT_THROW(s.add("qwe", "123"), duplicate_entry);
 }
 
-TEST(oh5_Source_test, centre_to_string) {
-    shared_ptr<SourceCentre> centre = make_shared<SourceCentre>();
-    centre->originating_centre(247);
-    EXPECT_EQ(centre->to_string(), "ORG:247");
-    centre->country_code(613);
-    EXPECT_EQ(centre->to_string(), "ORG:247,CTY:613");
+TEST(oh5_Source_test, test_at) {
+    Source s;
+    EXPECT_THROW(s.at("qwe"), lookup_error);
+
+    s.add("qwe", "asd");
+    EXPECT_EQ("asd", s.at("qwe"));
+}
+
+TEST(oh5_Source_test, test_keys) {
+    Source s;
+    EXPECT_EQ((size_t)0, s.keys().size());
+    s.add("qwe", "asd");
+    EXPECT_EQ((size_t)1, s.keys().size());
+    EXPECT_TRUE(s.keys().contains("qwe"));
+}
+
+TEST(oh5_Source_test, test_remove) {
+    Source s;
+    EXPECT_THROW(s.remove("qwe"), lookup_error);
+    s.add("qwe", "asd");
+    EXPECT_TRUE(s.has("qwe"));
+    EXPECT_NO_THROW(s.remove("qwe"));
+    EXPECT_FALSE(s.has("qwe"));
+}
+
+TEST(oh5_Source_test, test_to_string) {
+    Source s;
+    EXPECT_EQ("", s.to_string());
+    s.add("WMO", "02606");
+    EXPECT_EQ("WMO:02606", s.to_string());
+    s.add("RAD", "SE50");
+    EXPECT_EQ("RAD:SE50,WMO:02606", s.to_string());
+    s.add("PLC", "Ängelholm");
+    EXPECT_EQ("PLC:Ängelholm,RAD:SE50,WMO:02606", s.to_string());
 }
 
 } // namespace oh5

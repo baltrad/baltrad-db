@@ -21,47 +21,93 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_OH5_SOURCE_H
 
 #include <brfc/smart_ptr.hpp>
-#include <brfc/String.hpp>
+#include <brfc/StringList.hpp>
+
+#include <map>
 
 namespace brfc {
 namespace oh5 {
 
-class Source : public enable_shared_from_this<Source> {
+/**
+ * @brief ODIM_H5 source
+ *
+ * this is a simple key <-> value mapping. Although ODIM_H5 specifies
+ * [WMO,RAD,ORG,PLC,CTY,CMT] as valid keys, this class accepts anything.
+ */
+class Source {
   public:
-    virtual ~Source() { }
+    /**
+     * @brief construct empty Source
+     */
+    Source()
+            : map_() {
+    }
+    
+    /**
+     * @brief copy constructor
+     */
+    Source(const Source& other)
+            : map_(other.map_) {
+    }
+    
+    /**
+     * @brief copy assignment
+     */
+    Source& operator=(const Source& rhs) {
+        if (this != &rhs) {
+            map_ = rhs.map_;
+        }
+        return *this;
+    }
 
     /**
-     * @brief construct from ODIM_H5 '/what/source' metadata attribute
-     *
-     * @param source contents of '/what/source'
-     * @throw value_error when source contains invalid fields or not
-     *        correctly formed
-     *
-     * valid elements are [WMO,RAD,ORG,PLC,CTY,CMT]
-     * string should consist of element-value pairs, where
-     * element and value are separated by a colon.
-     * pairs are separated by comma.
-     *
+     * @brief construct from a string
+     * @param source key:value pairs separated by comma
+     * @throw value_error when source is incorrectly formed
      */
-    static shared_ptr<Source> from_source_attribute(const String& source);
-
-    String node_id() const { return node_id_; }
-
-    void node_id(const String& value) {
-        node_id_ = value;
-    }
-
-    virtual String wmo_cccc() const = 0;
-
-    virtual String to_string() const = 0;
-  
-  protected:
-    explicit Source(const String& node_id="")
-             : node_id_(node_id) {
-    }
+    static Source from_string(const String& source);
+    
+    /**
+     * @brief add a new key:value pair
+     * @throw duplicate_entry when key already has a value
+     */
+    void add(const String& key, const String& value);
+    
+    /**
+     * @brief test if key is present
+     */
+    bool has(const String& key) const;
+    
+    /**
+     * @brief key value
+     * @throw lookup_error when key does not exist
+     */
+    const String& at(const String& key) const;
+    
+    /**
+     * @brief list of set keys
+     */
+    StringList keys() const;
+    
+    /**
+     * @throw lookup_error when key does not exist
+     */
+    void remove(const String& key);
+    
+    /**
+     * @brief clear the contents
+     */
+    void clear();
+    
+    /**
+     * @brief join to key:value pairs separated by comma
+     */
+    String to_string() const;
 
   private:
-    String node_id_;
+    typedef std::map<String, String> Map;
+
+    Map map_;
 };
 
 } // namespace oh5

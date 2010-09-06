@@ -30,8 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 
 #include <brfc/oh5/File.hpp>
-#include <brfc/oh5/Source.hpp>
-#include <brfc/oh5/SourceRadar.hpp>
 
 #include <brfc/test/TempH5File.hpp>
 #include <brfc/test/TempDir.hpp>
@@ -59,7 +57,6 @@ struct FileCatalog_test : public testing::Test {
             , db(new MockDatabase())
             , fc(db)
             , src_str("WMO:02606")
-            , default_src(make_shared<oh5::SourceRadar>())
             , tempfile()
             , minfile(oh5::File::minimal("PVOL",
                                          Date(2000, 1, 1),
@@ -70,14 +67,12 @@ struct FileCatalog_test : public testing::Test {
     virtual void SetUp() {
         tempfile.write(*minfile);
         minfile->path(tempfile.path());
-        DefaultValue<shared_ptr<oh5::Source> >::Set(default_src);
     }
 
     auto_ptr<test::TempDir> tempdir;
     shared_ptr<MockDatabase> db;
     FileCatalog fc;
     String src_str;
-    shared_ptr<oh5::Source> default_src;
     test::TempH5File tempfile;
     shared_ptr<oh5::File> minfile;
 };
@@ -91,8 +86,6 @@ TEST_F(FileCatalog_test, test_catalog_nx_file_by_path) {
 }
 
 TEST_F(FileCatalog_test, test_catalog) {
-    EXPECT_CALL(*db, do_has_file(_))
-        .WillOnce(Return(false));
     EXPECT_CALL(*db, do_save_file(Ref(*minfile)))
         .WillOnce(Return(shared_ptr<FileEntry>(new MockFileEntry())));
 
@@ -102,8 +95,6 @@ TEST_F(FileCatalog_test, test_catalog) {
 TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
     String orig_path = minfile->path();
 
-    EXPECT_CALL(*db, do_has_file(_))
-        .WillOnce(Return(false));
     EXPECT_CALL(*db, do_save_file(Ref(*minfile)))
         .WillOnce(Throw(db_error("")));
 
@@ -113,21 +104,17 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
     EXPECT_EQ(orig_path, minfile->path());
 }
 
+/*
 TEST_F(FileCatalog_test, test_double_import_throws) {
-    EXPECT_CALL(*db, do_has_file(Ref(*minfile)))
-        .WillOnce(Return(true));
-
     EXPECT_THROW(fc.catalog(*minfile), duplicate_entry);
 }
+*/
 
 TEST_F(FileCatalog_test, test_is_cataloged_nx_file_by_path) {
     EXPECT_THROW(fc.is_cataloged("/path/to/nxfile"), fs_error);
 }
 
 TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
-    EXPECT_CALL(*db, do_has_file(Ref(*minfile)))
-        .WillOnce(Return(false));
-
     EXPECT_FALSE(fc.is_cataloged(*minfile));
 }
 

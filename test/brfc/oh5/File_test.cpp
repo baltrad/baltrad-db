@@ -30,6 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/Source.hpp>
 
 #include "../common.hpp"
 
@@ -115,6 +116,29 @@ TEST_F(oh5_File_test, test_invalid_attribute_paths) {
     EXPECT_EQ(v.size(), (size_t)1);
     EXPECT_TRUE(v.contains("/invalid"));
 }
+
+TEST_F(oh5_File_test, test_source_get) {
+    shared_ptr<File> f = File::create();
+    EXPECT_EQ("", f->source().to_string());
+
+    EXPECT_EQ("WMO:02606", f1->source().to_string());
+}
+
+TEST_F(oh5_File_test, test_source_set) {
+    Source s;
+    s.add("WMO", "02606");
+    s.add("RAD", "SE50");
+    const String& expected = s.to_string();
+
+    f1->source(s);
+    EXPECT_EQ(expected, f1->what_source());
+
+    shared_ptr<File> f = File::create();
+    f->source(s);
+    ASSERT_NO_THROW(f->what_source());
+    EXPECT_EQ(expected, f->what_source());
+}
+
 
 } // namespace oh5
 } // namespace brfc

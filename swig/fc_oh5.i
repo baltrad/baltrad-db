@@ -34,8 +34,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/oh5/QualityGroup.hpp>
     #include <brfc/oh5/RootGroup.hpp>
     #include <brfc/oh5/Source.hpp>
-    #include <brfc/oh5/SourceCentre.hpp>
-    #include <brfc/oh5/SourceRadar.hpp>
 %}
 
 // Enable the JNI class to load the required native library.
@@ -79,14 +77,6 @@ SWIG_SHARED_PTR_DERIVED(QualityGroup,
                         brfc::oh5::QualityGroup);
 
 
-SWIG_SHARED_PTR(Source, brfc::oh5::Source);
-SWIG_SHARED_PTR_DERIVED(SourceCentre,
-                        brfc::oh5::Source,
-                        brfc::oh5::SourceCentre);
-SWIG_SHARED_PTR_DERIVED(SourceRadar,
-                        brfc::oh5::Source,
-                        brfc::oh5::SourceRadar);
-
 %template(NodeVector) std::vector<brfc::shared_ptr<brfc::oh5::Node> >;
 %template(AttributeVector) std::vector<brfc::shared_ptr<brfc::oh5::Attribute> >;
 
@@ -103,7 +93,9 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
 %}
 
 %typemap(javaimports) brfc::oh5::Group,
-                      brfc::oh5::Group* %{
+                      brfc::oh5::Group*,
+                      brfc::oh5::Source,
+                      brfc::oh5::Source* %{
     import eu.baltrad.fc.StringList;
 %}
 
@@ -115,8 +107,7 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
 %}
 
 // make constructors for SWIG_SHARED_PTR public
-%typemap(javabody) brfc::oh5::File,
-                   brfc::oh5::Source %{
+%typemap(javabody) brfc::oh5::File %{
   private long swigCPtr;
   private boolean swigCMemOwnBase;
 
@@ -130,9 +121,19 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
   }
 %}
 
-// ignore Source members
-%ignore brfc::Source::Source;
-%ignore brfc::Source::from_source_attribute;
+%typemap(javabody) brfc::oh5::Source %{
+  private long swigCPtr;
+  protected boolean swigCMemOwn;
+
+  public $javaclassname(long cPtr, boolean cMemoryOwn) {
+    swigCMemOwn = cMemoryOwn;
+    swigCPtr = cPtr;
+  }
+
+  public static long getCPtr($javaclassname obj) {
+    return (obj == null) ? 0 : obj.swigCPtr;
+  }
+%}
 
 %include <brfc/oh5/Node.hpp>
 %include <brfc/oh5/Group.hpp>
@@ -143,8 +144,6 @@ SWIG_SHARED_PTR_DERIVED(SourceRadar,
 %include <brfc/oh5/RootGroup.hpp>
 %include <brfc/oh5/Attribute.hpp>
 %include <brfc/oh5/Source.hpp>
-%include <brfc/oh5/SourceCentre.hpp>
-%include <brfc/oh5/SourceRadar.hpp>
 %include <brfc/oh5/File.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:

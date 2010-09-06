@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 #include <brfc/Query.hpp>
+#include <brfc/StringList.hpp>
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
@@ -57,12 +58,6 @@ QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
     from_ = m->files->join(m->sources,
                            xpr_.eq(m->files->column("source_id"),
                                    m->sources->column("id")));
-    from_ = from_->outerjoin(m->source_radars,
-                             xpr_.eq(m->sources->column("id"),
-                                     m->source_radars->column("id")));
-    from_ = from_->outerjoin(m->source_centres,
-                             xpr_.eq(m->sources->column("id"),
-                                     m->source_centres->column("id")));
 }
 
 sql::SelectPtr
@@ -90,9 +85,32 @@ void
 QueryToSelect::operator()(expr::Attribute& attr) {
     String name = attr.name();
 
+    sql::SelectablePtr value_t;
+
+    if (name.starts_with("what/source:")) {
+        // alias
+        String key = name.split(":").at(1);
+        if (key == "name" or key == "node") {
+            push(model_->sources->column("name"));
+        } else {
+            String alias = "src_" + key;
+            value_t = model_->source_kvs->alias(alias);
+
+            if (not from_->contains(value_t)) {
+                from_ = from_->join(value_t,
+                                    xpr_.and_(xpr_.eq(value_t->column("source_id"),
+                                                      model_->sources->column("id")),
+                                              xpr_.eq(value_t->column("key"),
+                                                      xpr_.string(key))));
+            }
+            push(value_t->column("value"));
+        }
+        return;
+    }
+
     // query table and column where this value can be found
     Mapping mapping = mapper_->mapping(name);
-    sql::SelectablePtr value_t = mapping.column->selectable();
+    value_t = mapping.column->selectable();
     
     if (not mapper_->is_specialized(name)) {
         // try to join groups, they have to appear earlier in the join

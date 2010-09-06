@@ -32,8 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/File.hpp>
-#include <brfc/oh5/SourceCentre.hpp>
-#include <brfc/oh5/SourceRadar.hpp>
+#include <brfc/oh5/Source.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/Model.hpp>
@@ -46,6 +45,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Result.hpp>
+
+#include <iostream>
 
 namespace brfc {
 namespace rdb {
@@ -85,8 +86,8 @@ bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
     const Model& m = Model::instance();
 
-    shared_ptr<oh5::Source> src = load_source(file.what_source());
-    const String& hash = file_hasher().hash(file, *src);
+    oh5::Source src = load_source(file.what_source());
+    const String& hash = file_hasher().hash(file, src);
 
     sql::Factory xpr;
     sql::SelectPtr qry = sql::Select::create();
@@ -131,8 +132,8 @@ long long
 RelationalDatabase::db_id(const oh5::File& file) {
     const Model& m = Model::instance();
 
-    shared_ptr<oh5::Source> src = load_source(file.what_source());
-    const String& hash = file_hasher().hash(file, *src);
+    oh5::Source src = load_source(file.what_source());
+    const String& hash = file_hasher().hash(file, src);
 
     sql::Factory xpr;
     sql::SelectPtr qry = sql::Select::create();
@@ -148,141 +149,57 @@ RelationalDatabase::db_id(const oh5::File& file) {
 long long
 RelationalDatabase::db_id(const oh5::Source& src) {
     const Model& m = Model::instance();
-
     sql::Factory xpr;
+
     sql::SelectPtr qry = sql::Select::create();
+    qry->distinct(true);
     qry->what(m.sources->column("id"));
-    qry->from(m.sources);
-    qry->where(m.sources->column("node_id")->eq(xpr.string(src.node_id())));
+    qry->from(m.sources->join(m.source_kvs));
+    qry->where(xpr.bool_(false));
+    
+    sql::ExpressionPtr x;
+    BOOST_FOREACH(const String& key, src.keys()) {
+        x = m.source_kvs->column("key")->eq(xpr.string(key));
+        x = x->and_(m.source_kvs->column("value")->eq(xpr.string(src.at(key))));
+        qry->where(qry->where()->or_(x->parentheses()));
+    }
 
     shared_ptr<sql::Result> r = connection().execute(*qry);
-    if (r->next())
+    if (r->size() == 1 and r->next())
         return r->value_at(0).int64_();
     else
         return 0;
 }
 
-shared_ptr<oh5::SourceCentre>
-RelationalDatabase::load_source_centre(shared_ptr<oh5::SourceCentre> src,
-                                       long long id) {
-    Model m = Model::instance();
-
+oh5::Source
+RelationalDatabase::load_source(const String& srcstr) {
+    const Model& m = Model::instance();
     sql::Factory xpr;
-    sql::SelectPtr qry = sql::Select::create(m.source_centres->join(m.sources));
-    qry->where(xpr.bool_(false));
 
-    sql::ExpressionPtr x;
-    // originating_centre or country_code is required for org. sources
-    if (src->originating_centre()) {
-        x = m.source_centres->column("originating_centre");
-        x = x->eq(xpr.int64_(src->originating_centre()));
-        qry->where(qry->where()->or_(x));
-    }
-    if (src->country_code()) {
-        x = m.source_centres->column("country_code");
-        x = x->eq(xpr.int64_(src->country_code()));
-        qry->where(qry->where()->or_(x));
-    }
-    if (id) {
-        x = m.source_centres->column("id")->eq(xpr.int64_(id));
-        qry->where(qry->where()->or_(x));
-    }
+    oh5::Source src = oh5::Source::from_string(srcstr);
 
-    shared_ptr<sql::Result> r = connection().execute(*qry);
-    
-    if (r->size() < 1) {
-        throw lookup_error("no source found: " +
-                           src->to_string().to_std_string());
-    } else if (r->size() > 1) {
-        throw lookup_error("multiple sources found: " +
-                           src->to_string().to_std_string());
-    }
-    r->next();
+    long long id = db_id(src);
 
-    id = r->value_at("id").int64_();
-    SourceMap::iterator i = sources_.find(id);
-
-    if (i == sources_.end()) {
-        src->node_id(r->value_at("node_id").string());
-        src->country_code(r->value_at("country_code").int64_());
-        src->originating_centre(r->value_at("originating_centre").int64_());
-        src->wmo_cccc(r->value_at("wmo_cccc").string());
-        i = sources_.insert(std::make_pair(id, src)).first;
-    }
-    return static_pointer_cast<oh5::SourceCentre>(i->second);
-}
-
-shared_ptr<oh5::SourceRadar>
-RelationalDatabase::load_source_radar(shared_ptr<oh5::SourceRadar> src) {
-    Model m = Model::instance();
-
-    sql::Factory xpr;
-    sql::SelectPtr qry = sql::Select::create(m.source_radars->join(m.sources));
-    qry->where(xpr.bool_(false));
-
-    sql::ExpressionPtr x;
-    // wmo_code or radar_site is required for radar sources
-    if (src->wmo_code()) {
-        x = m.source_radars->column("wmo_code");
-        x = x->eq(xpr.int64_(src->wmo_code()));
-        qry->where(qry->where()->or_(x));
-    }
-    if (src->radar_site() != "") {
-        x = m.source_radars->column("radar_site");
-        x = x->eq(xpr.string(src->radar_site()));
-        qry->where(qry->where()->or_(x));
-    }
-    if (src->place() != "") {
-        x = m.source_radars->column("place");
-        x = x->eq(xpr.string(src->place()));
-        qry->where(qry->where()->or_(x));
-    }
+    sql::SelectPtr qry = sql::Select::create(m.source_kvs);
+    qry->where(m.source_kvs->column("source_id")->eq(xpr.int64_(id)));
 
     shared_ptr<sql::Result> r = connection().execute(*qry);
 
-    if (r->size() < 1) {
-        throw lookup_error("no source found: " +
-                           src->to_string().to_std_string());
-    } else if (r->size() > 1) {
-        throw lookup_error("multiple sources found: " +
-                           src->to_string().to_std_string());
-    }
+    src.clear();
     
+    while (r->next()) {
+        src.add(r->value_at("key").string(), r->value_at("value").string());
+    }
+
+    qry = sql::Select::create(m.sources);
+    qry->where(m.sources->column("id")->eq(xpr.int64_(id)));
+
+    r = connection().execute(*qry);
+
     r->next();
+    src.add("name", r->value_at("name").string());
 
-    long long id = r->value_at("id").int64_();
-    SourceMap::iterator i = sources_.find(id);
-
-    if (i == sources_.end()) {
-        shared_ptr<oh5::SourceCentre> centre = make_shared<oh5::SourceCentre>();
-        centre = load_source_centre(centre, r->value_at("centre_id").int64_());
-
-        src->centre(centre);
-        src->node_id(r->value_at("node_id").string());
-        src->wmo_code(r->value_at("wmo_code").int64_());
-        src->radar_site(r->value_at("radar_site").string());
-        src->place(r->value_at("place").string());
-        i = sources_.insert(std::make_pair(id, src)).first;
-    }
-
-    return static_pointer_cast<oh5::SourceRadar>(i->second);
-}
-
-shared_ptr<oh5::Source>
-RelationalDatabase::do_load_source(const String& srcstr) {
-
-    shared_ptr<oh5::Source> src = oh5::Source::from_source_attribute(srcstr);
-    shared_ptr<oh5::SourceRadar> radar;
-    shared_ptr<oh5::SourceCentre> centre;
-
-    if (radar = dynamic_pointer_cast<oh5::SourceRadar>(src)) {
-        return load_source_radar(radar);
-    } else if (centre = dynamic_pointer_cast<oh5::SourceCentre>(src)) {
-        return load_source_centre(centre);
-    } else {
-        throw lookup_error(srcstr.to_utf8());
-    }
-
+    return src;
 }
 
 void

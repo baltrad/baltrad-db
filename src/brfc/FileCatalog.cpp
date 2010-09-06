@@ -69,11 +69,6 @@ FileCatalog::catalog(const String& path) {
 
 shared_ptr<FileEntry>
 FileCatalog::catalog(const oh5::File& file) {
-    std::string path_utf8 = file.path().to_utf8();
-    
-    if (is_cataloged(file))
-        throw duplicate_entry(path_utf8);
-    
     return db_->save_file(file);
 }
 

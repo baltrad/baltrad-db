@@ -35,8 +35,6 @@ class Variant;
 namespace oh5 {
 
 class Source;
-class SourceCentre;
-class SourceRadar;
 
 } // namespace oh5
 
@@ -95,6 +93,8 @@ class RelationalDatabase : public Database {
     
     long long db_id(const oh5::Source& source);
 
+    oh5::Source load_source(const String& srcstr);
+
   protected:
     /**
      * @brief check if file hash is unique in database
@@ -104,30 +104,9 @@ class RelationalDatabase : public Database {
 
     virtual shared_ptr<FileEntry> do_save_file(const oh5::File& file);
     
-    virtual shared_ptr<oh5::Source> do_load_source(const String& srcstr);
-    
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
   private:
-    /**
-     * @brief map source id's to source instances
-     */
-    typedef std::map<long long, shared_ptr<oh5::Source> > SourceMap;
-
-    shared_ptr<oh5::SourceRadar>
-    load_source_radar(shared_ptr<oh5::SourceRadar> src);
-
-    shared_ptr<oh5::SourceCentre>
-    load_source_centre(shared_ptr<oh5::SourceCentre> src,
-                       long long id=0);
-
-    /**
-     * @brief save file to database
-     */
-    id_type save(const oh5::File& file,
-                 const String& proposed_filename,
-                 unsigned int filename_version);
-
     /**
      * @brief remove file from database
      */
@@ -136,7 +115,6 @@ class RelationalDatabase : public Database {
     shared_ptr<sql::Connection> conn_;
     shared_ptr<AttributeMapper> mapper_;
     shared_ptr<FileHasher> file_hasher_;
-    SourceMap sources_;
 };
 
 } // namespace rdb

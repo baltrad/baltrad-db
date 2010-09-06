@@ -40,8 +40,7 @@ namespace oh5 {
 File::File()
         : enable_shared_from_this<File>()
         , root_(make_shared<RootGroup>())
-        , path_()
-        , source_() {
+        , path_() {
 }
 
 File::~File() {
@@ -79,9 +78,25 @@ File::minimal(const String& object,
     return f;
 }
 
+Source
+File::source() const {
+    shared_ptr<const Attribute> attr =
+        dynamic_pointer_cast<const Attribute>(root_->child_by_path("what/source"));
+    if (attr)
+        return Source::from_string(attr->value().to_string());
+    return Source();
+}
+
 void
-File::source(shared_ptr<Source> source) {
-    source_ = source;
+File::source(const Source& source) {
+    shared_ptr<Group> grp =
+        root_->get_or_create_child_group_by_name("what");
+    Variant srcval = Variant(source.to_string());
+    shared_ptr<Attribute> attr = grp->child_attribute("source");
+    if (attr)
+        attr->value(srcval);
+    else
+        grp->add_child(make_shared<Attribute>("source", srcval));
 }
 
 namespace {

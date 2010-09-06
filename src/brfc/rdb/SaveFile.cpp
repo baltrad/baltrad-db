@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/Source.hpp>
 
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/rdb/Model.hpp>
@@ -63,9 +64,6 @@ SaveFile::operator()(const oh5::Attribute& attribute) {
 
 long long
 SaveFile::operator()(const oh5::File& file) {
-    if (not file.source())
-        throw db_error("no Source associated with File");
-    
     sql::TablePtr files = Model::instance().files;
     const MappingVector& special = rdb_->mapper()->specializations_on(files);
 
@@ -87,11 +85,11 @@ SaveFile::operator()(const oh5::File& file) {
         // XXX: this should be explicit
     }
 
-    shared_ptr<oh5::Source> src = rdb_->load_source(file.what_source());
+    oh5::Source src = rdb_->load_source(file.what_source());
 
     stmt->value("hash_type", xpr.string(rdb_->file_hasher().name()));
-    stmt->value("unique_id", xpr.string(rdb_->file_hasher().hash(file, *src)));
-    stmt->value("source_id", xpr.int64_(rdb_->db_id(*src)));
+    stmt->value("unique_id", xpr.string(rdb_->file_hasher().hash(file, src)));
+    stmt->value("source_id", xpr.int64_(rdb_->db_id(file.source())));
 
     shared_ptr<sql::Result> result = rdb_->connection().execute(*stmt);
 

@@ -34,7 +34,6 @@ class FileEntry;
 namespace oh5 {
 
 class File;
-class Source;
 
 }
 
@@ -65,23 +64,14 @@ class Database : public boost::noncopyable {
     /**
      * @brief save file to database
      * @param file the file to be saved
-     * @param proposed_filename filename proposed by a namer, a string for
-     *        which filename_version is valid.
-     * @param filename_version filename version associated with proposed
-     *        filename
-     * @return database id associated with the file
+     * @return a FileEntry instance for the saved file
+     * @throw db_error if a database error occurs
+     * @throw duplicate_entry if file is already stored to database
      */
     shared_ptr<FileEntry> save_file(const oh5::File& file) {
         return do_save_file(file);
     }
 
-    /**
-     * @brief load source from DB by contents of /what/source
-     */
-    shared_ptr<oh5::Source> load_source(const String& source) {
-        return do_load_source(source);
-    }
-    
     /**
      * @brief execute a select query
      */
@@ -93,8 +83,6 @@ class Database : public boost::noncopyable {
     virtual bool do_has_file(const oh5::File& file) = 0;
     virtual void do_remove_file(const FileEntry& entry) = 0;
     virtual shared_ptr<FileEntry> do_save_file(const oh5::File& file) = 0;
-
-    virtual shared_ptr<oh5::Source> do_load_source(const String& source) = 0;
 
     virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
 };

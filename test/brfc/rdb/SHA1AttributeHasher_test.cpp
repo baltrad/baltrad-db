@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/smart_ptr.hpp>
 #include <brfc/Variant.hpp>
 
@@ -27,7 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/DataSetGroup.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
-#include <brfc/oh5/SourceRadar.hpp>
+#include <brfc/oh5/Source.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/SHA1AttributeHasher.hpp>
@@ -43,7 +44,7 @@ class rdb_SHA1AttributeHasher_test : public ::testing::Test {
   public:
     rdb_SHA1AttributeHasher_test()
             : mapper(new AttributeMapper())
-            , src(make_shared<oh5::SourceRadar>())
+            , src()
             , f1(oh5::File::minimal("pvol",
                                     Date(2000, 1, 2),
                                     Time(12, 5),
@@ -70,13 +71,20 @@ class rdb_SHA1AttributeHasher_test : public ::testing::Test {
         mapper->add(Mapping(6, "what/version", "string", sql::ColumnPtr(), true));
         mapper->add(Mapping(7, "ignore", "string", sql::ColumnPtr(), true));
         mapper->add(Mapping(8, "attr", "string", sql::ColumnPtr(), false));
+        src.add("name", "seang");
     }
     
     shared_ptr<AttributeMapper> mapper;
-    shared_ptr<oh5::SourceRadar> src;
+    oh5::Source src;
     shared_ptr<oh5::File> f1, f2, f3;
     SHA1AttributeHasher hasher;
 };
+
+TEST_F(rdb_SHA1AttributeHasher_test, missing_source_name_throws) {
+    f1->root()->attribute("what/source")->value(Variant("WMO:02606"));
+    src.remove("name");
+    EXPECT_THROW(hasher.hash(*f1, src), value_error);
+}
 
 TEST_F(rdb_SHA1AttributeHasher_test, attribute_string) {
     shared_ptr<oh5::Attribute> a1 = make_shared<oh5::Attribute>("a1", Variant(1));
@@ -96,24 +104,24 @@ TEST_F(rdb_SHA1AttributeHasher_test, attribute_string) {
 }
 
 TEST_F(rdb_SHA1AttributeHasher_test, check_concrete_digests) {
-    EXPECT_EQ("0833a94578041a8177afb30ee1e7ac0a660be043", hasher.hash(*f1, *src));
-    EXPECT_EQ("91176508177e2acc5638faec441a925a268700ae", hasher.hash(*f2, *src));
+    EXPECT_EQ("1f1f260a9a205199a389d57cb20b5fce40d48cf7", hasher.hash(*f1, src));
+    EXPECT_EQ("119ac9954c675a020d9901a6e4df43b5c66f6a6c", hasher.hash(*f2, src));
 }
 
 TEST_F(rdb_SHA1AttributeHasher_test, hash_same_meta) {
-    EXPECT_EQ(hasher.hash(*f1, *src), hasher.hash(*f3, *src));
+    EXPECT_EQ(hasher.hash(*f1, src), hasher.hash(*f3, src));
 }
 
 TEST_F(rdb_SHA1AttributeHasher_test, hash_different_meta) {
-    EXPECT_NE(hasher.hash(*f1, *src), hasher.hash(*f2, *src));
+    EXPECT_NE(hasher.hash(*f1, src), hasher.hash(*f2, src));
 }
 
 TEST_F(rdb_SHA1AttributeHasher_test, hash_ignores_attributes) {
-    String hash1 = hasher.hash(*f1, *src);
+    String hash1 = hasher.hash(*f1, src);
     f1->root()->add_child(make_shared<oh5::Attribute>("ignore", Variant("val")));
-    String hash2 = hasher.hash(*f1, *src);
+    String hash2 = hasher.hash(*f1, src);
     f1->root()->attribute("ignore")->value(Variant("val2"));
-    String hash3 = hasher.hash(*f1, *src);
+    String hash3 = hasher.hash(*f1, src);
 
     EXPECT_EQ(hash1, hash2);
     EXPECT_EQ(hash1, hash3);
@@ -121,11 +129,11 @@ TEST_F(rdb_SHA1AttributeHasher_test, hash_ignores_attributes) {
 }
 
 TEST_F(rdb_SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
-    String hash1 = hasher.hash(*f1, *src);
+    String hash1 = hasher.hash(*f1, src);
     f1->root()->add_child(make_shared<oh5::Attribute>("attr", Variant("val")));
-    String hash2 = hasher.hash(*f1, *src);
+    String hash2 = hasher.hash(*f1, src);
     f1->root()->attribute("attr")->value(Variant("val2"));
-    String hash3 = hasher.hash(*f1, *src);
+    String hash3 = hasher.hash(*f1, src);
 
     EXPECT_NE(hash1, hash2);
     EXPECT_NE(hash1, hash3);

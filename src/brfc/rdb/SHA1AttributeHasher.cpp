@@ -70,7 +70,13 @@ SHA1AttributeHasher::do_name() const {
 String
 SHA1AttributeHasher::do_hash(const oh5::File& file,
                              const oh5::Source& source) {
-    StringList strs(source.node_id());
+    // sources loaded from database have unique identifier 'name'
+    if (not source.has("name")) {
+        //XXX: needs a better exception type
+        throw value_error("can't form unique_id: no 'name' in source");
+    }
+    
+    StringList strs(source.at("name"));
 
     const oh5::Attribute* attr = 0;
     const Mapping* mapping = 0;

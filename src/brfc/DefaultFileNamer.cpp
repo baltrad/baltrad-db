@@ -34,13 +34,15 @@ String
 DefaultFileNamer::do_name(const oh5::File& f) const {
     String name = String("Z_");
     name.append(f.what_object());
-    name.append("_C_");
-    name.append(f.source()->wmo_cccc());
+    if (f.source().has("CCCC")) {
+        name.append("_C_");
+        name.append(f.source().at("CCCC"));
+    }
     name.append("_");
     name.append(f.what_date().to_string("yyyyMMdd"));
     name.append(f.what_time().to_string("hhmmss"));
     name.append("_");
-    name.append(f.source()->node_id());
+    name.append(f.source().at("node"));
     name.append(".h5");
 
     return name;
