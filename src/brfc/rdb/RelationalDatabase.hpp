@@ -76,6 +76,8 @@ class RelationalDatabase : public Database {
 
     void populate_mapper();
 
+    void populate_hasher();
+
     sql::Connection& connection() {
         return *conn_;
     }

@@ -20,14 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_FILE_HASHER_HPP
 #define BRFC_FILE_HASHER_HPP
 
-#include <brfc/String.hpp>
+#include <brfc/StringList.hpp>
 
 namespace brfc {
 
 namespace oh5 {
 
 class File;
-class Source;
 
 } // namespace oh5
 
@@ -39,26 +38,48 @@ class Source;
 class FileHasher {
   public:
     /**
+     * @brief constructor
+     */
+    explicit FileHasher(const String& name)
+            : name_(name)
+            , ignored_() {
+    }
+
+    virtual ~FileHasher() { }
+
+    /**
      * @brief name of this hasher
      */
     String name() const {
-        return do_name();
+        return name_;
     }
 
     /**
      * @brief hash a file
      */
-    String hash(const oh5::File& file, const oh5::Source& source) {
-        return do_hash(file, source);
+    String hash(const oh5::File& file) {
+        return do_hash(file);
     }
 
-    virtual ~FileHasher() { }
+    void ignore(const StringList& ignored) {
+        ignored_ = ignored;
+    }
+
+    const StringList& ignored() const {
+        return ignored_;
+    }
+
+    void clear_ignored() {
+        ignored_.clear();
+    }
+
 
   protected:
-    virtual String do_name() const = 0;
-
-    virtual String do_hash(const oh5::File& file,
-                           const oh5::Source& source) = 0;
+    virtual String do_hash(const oh5::File& file) = 0;
+  
+  private:
+    String name_;
+    StringList ignored_;
 };
 
 } // namespace brfc

@@ -18,7 +18,7 @@ CREATE TABLE bdb_files (
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
 	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id), 
-	 UNIQUE (unique_id)
+	 UNIQUE (unique_id, source_id)
 )
 
 ;

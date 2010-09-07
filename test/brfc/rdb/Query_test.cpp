@@ -107,32 +107,31 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
 
     virtual void SetUp() {
         db->file_hasher(&hasher);
-        ON_CALL(hasher, do_name()).WillByDefault(Return("mock"));
 
         add_attribute(*td1, "dataset1/where/xsize", Variant(1));
         add_attribute(*td1, "dataset1/where/ysize", Variant(2));
         tf1.write(*td1);
         td1->path(tf1.path());
-        ON_CALL(hasher, do_hash(Ref(*td1), _)).WillByDefault(Return("td1"));
+        ON_CALL(hasher, do_hash(Ref(*td1))).WillByDefault(Return("td1"));
 
         add_attribute(*td2, "dataset1/where/xsize", Variant(2));
         add_attribute(*td2, "dataset1/where/ysize", Variant(2));
         tf2.write(*td2);
         td2->path(tf2.path());
-        ON_CALL(hasher, do_hash(Ref(*td2), _)).WillByDefault(Return("td2"));
+        ON_CALL(hasher, do_hash(Ref(*td2))).WillByDefault(Return("td2"));
 
         add_attribute(*td3, "dataset1/where/xsize", Variant(3));
         add_attribute(*td3, "dataset2/where/xsize", Variant(3));
         tf3.write(*td3);
         td3->path(tf3.path());
-        ON_CALL(hasher, do_hash(Ref(*td3), _)).WillByDefault(Return("td3"));
+        ON_CALL(hasher, do_hash(Ref(*td3))).WillByDefault(Return("td3"));
 
         add_attribute(*td4, "dataset1/where/xsize", Variant(6));
         add_attribute(*td4, "dataset1/where/ysize", Variant(4));
         add_attribute(*td4, "dataset2/where/ysize", Variant(5));
         tf4.write(*td4);
         td4->path(tf4.path());
-        ON_CALL(hasher, do_hash(Ref(*td4), _)).WillByDefault(Return("td4"));
+        ON_CALL(hasher, do_hash(Ref(*td4))).WillByDefault(Return("td4"));
 
         add_attribute(*td5, "dataset1/where/xsize", Variant(5));
         add_attribute(*td5, "dataset1/where/ysize", Variant(2));
@@ -140,7 +139,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
         add_attribute(*td5, "dataset2/where/ysize", Variant(5));
         tf5.write(*td5);
         td5->path(tf5.path());
-        ON_CALL(hasher, do_hash(Ref(*td5), _)).WillByDefault(Return("td5"));
+        ON_CALL(hasher, do_hash(Ref(*td5))).WillByDefault(Return("td5"));
 
         fe1 = db->save_file(*td1);
         fe2 = db->save_file(*td2);
@@ -150,7 +149,6 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
     }
 
     virtual void TearDown() {
-        db->file_hasher(0);
         db->clean();
     }
     
@@ -294,7 +292,7 @@ TEST_P(rdb_Query_test, test_has_file) {
 TEST_P(rdb_Query_test, test_has_nx_file) {
     bool result = false;
     shared_ptr<oh5::File> td = oh5::File::minimal("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
-    EXPECT_CALL(hasher, do_hash(Ref(*td), _)).WillOnce(Return("td"));
+    EXPECT_CALL(hasher, do_hash(Ref(*td))).WillOnce(Return("td"));
     ASSERT_NO_THROW(result = db->has_file(*td));
     EXPECT_FALSE(result);
 }

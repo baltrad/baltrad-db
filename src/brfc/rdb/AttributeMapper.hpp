@@ -27,6 +27,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/fwd.hpp>
 
 namespace brfc {
+
+class StringList;
+
 namespace rdb {
 
 /**
@@ -125,6 +128,8 @@ class AttributeMapper {
     const Mapping& mapping(const String& attribute) const;
 
     void clear() { mappings_.clear(); }
+
+    StringList ignored_in_hash() const;
     
   private:
     typedef std::map<String, Mapping> MappingMap;

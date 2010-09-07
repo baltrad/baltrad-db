@@ -21,7 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gmock/gmock.h>
 
 #include <brfc/Date.hpp>
-#include <brfc/FileHasher.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/Time.hpp>
 
@@ -57,13 +56,11 @@ class rdb_RelationalDatabase_test : public testing::TestWithParam<const char*> {
 
     virtual void SetUp() {
         db->file_hasher(&hasher);
-        ON_CALL(hasher, do_name()).WillByDefault(Return("mock"));
-        ON_CALL(hasher, do_hash(_, _)).WillByDefault(Return("hash"));
+        ON_CALL(hasher, do_hash(_)).WillByDefault(Return("hash"));
     }
 
     virtual void TearDown() {
         db->clean();
-        db->file_hasher(0);
     }
 
     test::TestRDB* db;

@@ -17,27 +17,21 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/SHA1AttributeHasher.hpp>
-
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/SHA1.hpp>
-#include <brfc/StringList.hpp>
+#include <brfc/SHA1AttributeHasher.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/File.hpp>
-#include <brfc/oh5/Source.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
-#include <brfc/rdb/AttributeMapper.hpp>
-
 namespace brfc {
-namespace rdb {
 
-SHA1AttributeHasher::SHA1AttributeHasher(
-    shared_ptr<const AttributeMapper> mapper)
-        : mapper_(mapper) {
+SHA1AttributeHasher::SHA1AttributeHasher()
+        : FileHasher("sha1_attribute") {
+
 }
 
 SHA1AttributeHasher::~SHA1AttributeHasher() {
@@ -63,34 +57,19 @@ SHA1AttributeHasher::attribute_string(const oh5::Attribute& attr) {
 }
 
 String
-SHA1AttributeHasher::do_name() const {
-    return "sha1_attribute";
-}
-
-String
-SHA1AttributeHasher::do_hash(const oh5::File& file,
-                             const oh5::Source& source) {
-    // sources loaded from database have unique identifier 'name'
-    if (not source.has("name")) {
-        //XXX: needs a better exception type
-        throw value_error("can't form unique_id: no 'name' in source");
-    }
-    
-    StringList strs(source.at("name"));
-
+SHA1AttributeHasher::do_hash(const oh5::File& file) {
+    StringList strs;
     const oh5::Attribute* attr = 0;
-    const Mapping* mapping = 0;
+
     BOOST_FOREACH(const oh5::Node& node, *file.root()) {
         attr = dynamic_cast<const oh5::Attribute*>(&node);
-        if (not attr or not attr->is_valid())
-            continue;
+        if (attr and attr->is_valid()
+            and not ignored().contains(attr->full_name())) {
 
-        // this might throw, but we should have all the mappings
-        mapping = &mapper_->mapping(attr->full_name());
-        if (not mapping->ignore_in_hash) {
             strs.append(attribute_string(*attr));
         }
     }
+
     strs.sort(); // ensure same order
     
     CSHA1 sha1;
@@ -105,5 +84,4 @@ SHA1AttributeHasher::do_hash(const oh5::File& file,
     return String(hash).to_lower();
 }
 
-} // namespace rdb
 } // namespace brfc

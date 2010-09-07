@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <brfc/StringList.hpp>
+
 #include <brfc/rdb/AttributeMapper.hpp>
 
 #include <brfc/sql/Table.hpp>
@@ -63,6 +65,19 @@ TEST_F(rdb_AttributeMapper_test, specializations_on) {
 TEST_F(rdb_AttributeMapper_test, is_specialized) {
     EXPECT_TRUE(mapper.is_specialized("attr1"));
     EXPECT_FALSE(mapper.is_specialized("attr4"));
+}
+
+TEST_F(rdb_AttributeMapper_test, ignored_in_hash) {
+    StringList l = mapper.ignored_in_hash();
+    EXPECT_EQ(0, l.size());
+    
+    mapper.add(Mapping(4, "attr5", "string", t1->column("c1"), true));
+    mapper.add(Mapping(5, "attr6", "string", t1->column("c1"), true));
+
+    l = mapper.ignored_in_hash();
+    EXPECT_EQ(2, l.size());
+    EXPECT_TRUE(l.contains("attr5"));
+    EXPECT_TRUE(l.contains("attr6"));
 }
 
 } // namespace rdb

@@ -93,6 +93,10 @@ class StringList {
         list_.push_back(str);
     }
 
+    void clear() {
+        return list_.clear();
+    }
+
     iterator begin() {
         return list_.begin();
     }

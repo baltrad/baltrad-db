@@ -17,11 +17,12 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/AttributeMapper.hpp>
-
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/StringList.hpp>
+
+#include <brfc/rdb/AttributeMapper.hpp>
 
 #include <brfc/sql/Table.hpp>
 #include <brfc/sql/Column.hpp>
@@ -88,6 +89,17 @@ AttributeMapper::mapping(const String& attribute) const {
         throw lookup_error(err.to_utf8());
     }
     return i->second;
+}
+
+StringList
+AttributeMapper::ignored_in_hash() const {
+    StringList ignored;
+    BOOST_FOREACH(const MappingMap::value_type& entry, mappings_) {
+        const Mapping& mapping = entry.second;
+        if (mapping.ignore_in_hash)
+            ignored.append(mapping.attribute);
+    }
+    return ignored;
 }
 
 } // namespace rdb

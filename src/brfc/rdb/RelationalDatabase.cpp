@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Query.hpp>
 #include <brfc/String.hpp>
 #include <brfc/ResultSet.hpp>
+#include <brfc/SHA1AttributeHasher.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/File.hpp>
@@ -39,7 +40,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/RelationalFileEntry.hpp>
 #include <brfc/rdb/SaveFile.hpp>
-#include <brfc/rdb/SHA1AttributeHasher.hpp>
 
 #include <brfc/sql/expr.hpp>
 #include <brfc/sql/BindMap.hpp>
@@ -54,7 +54,7 @@ namespace rdb {
 RelationalDatabase::RelationalDatabase(const String& dsn_)
         : conn_(sql::Connection::create(dsn_))
         , mapper_(new AttributeMapper())
-        , file_hasher_(new SHA1AttributeHasher(mapper_)) {
+        , file_hasher_(new SHA1AttributeHasher()) {
     conn_->open();
 }
 
@@ -75,25 +75,32 @@ RelationalDatabase::mapper() const {
 void
 RelationalDatabase::file_hasher(shared_ptr<FileHasher> hasher) {
     file_hasher_.swap(hasher);
+    populate_hasher();
 }
 
 void
 RelationalDatabase::file_hasher(FileHasher* hasher) {
     file_hasher(shared_ptr<FileHasher>(hasher, no_delete));
+    populate_hasher();
 }
 
 bool
 RelationalDatabase::do_has_file(const oh5::File& file) {
     const Model& m = Model::instance();
 
-    oh5::Source src = load_source(file.what_source());
-    const String& hash = file_hasher().hash(file, src);
+    const String& hash = file_hasher().hash(file);
+    long long src_id = db_id(file.source());
 
     sql::Factory xpr;
     sql::SelectPtr qry = sql::Select::create();
     qry->what(xpr.bool_(true));
     qry->from(m.files);
-    qry->where(m.files->column("unique_id")->eq(xpr.string(hash)));
+    qry->where(
+        xpr.and_(
+            m.files->column("unique_id")->eq(xpr.string(hash)),
+            m.files->column("source_id")->eq(xpr.int64_(src_id))
+        )
+    );
 
     shared_ptr<sql::Result> result = connection().execute(*qry);
     return result->size() > 0;
@@ -133,7 +140,7 @@ RelationalDatabase::db_id(const oh5::File& file) {
     const Model& m = Model::instance();
 
     oh5::Source src = load_source(file.what_source());
-    const String& hash = file_hasher().hash(file, src);
+    const String& hash = file_hasher().hash(file);
 
     sql::Factory xpr;
     sql::SelectPtr qry = sql::Select::create();
@@ -221,6 +228,13 @@ RelationalDatabase::populate_mapper() {
                         r->value_at("ignore_in_hash").bool_());
         mapper_->add(mapping);
     }
+    populate_hasher();
+}
+
+void
+RelationalDatabase::populate_hasher() {
+    file_hasher_->clear_ignored();
+    file_hasher_->ignore(mapper_->ignored_in_hash());
 }
 
 void
