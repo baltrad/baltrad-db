@@ -16,20 +16,20 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef BRFC_MOCK_FILE_ENTRY_HPP
-#define BRFC_MOCK_FILE_ENTRY_HPP
 
-#include <gmock/gmock.h>
-
+#include <brfc/Database.hpp>
 #include <brfc/FileEntry.hpp>
+
+#include <brfc/oh5/File.hpp>
 
 namespace brfc {
 
-class MockFileEntry : public FileEntry {
-  public:
-    MOCK_CONST_METHOD0(do_id, long long());
-};
+shared_ptr<FileEntry>
+Database::save_file(const oh5::File& file) {
+    shared_ptr<FileEntry> e = do_save_file(file);
+    e->file(file.shared_from_this());
+    return e;
+}
 
 } // namespace brfc
 
-#endif // BRFC_MOCK_FILE_ENTRY_HPP

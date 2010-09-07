@@ -16,20 +16,40 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef BRFC_MOCK_FILE_ENTRY_HPP
-#define BRFC_MOCK_FILE_ENTRY_HPP
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include <brfc/FileEntry.hpp>
+#include <brfc/oh5/File.hpp>
+
+#include "MockDatabase.hpp"
+#include "MockFileEntry.hpp"
+
+using ::testing::Ref;
+using ::testing::Return;
 
 namespace brfc {
 
-class MockFileEntry : public FileEntry {
+class Database_test : public ::testing::Test {
   public:
-    MOCK_CONST_METHOD0(do_id, long long());
+    Database_test()
+        : db() {
+    }
+
+    MockDatabase db;
 };
 
-} // namespace brfc
+TEST_F(Database_test, test_save_associates_file_with_entry) {
+    shared_ptr<FileEntry> e(new MockFileEntry());
 
-#endif // BRFC_MOCK_FILE_ENTRY_HPP
+    shared_ptr<oh5::File> f(oh5::File::create());
+
+    EXPECT_CALL(db, do_save_file(Ref(*f)))
+        .WillOnce(Return(e));
+    
+    e = db.save_file(*f);
+    
+    EXPECT_TRUE(e->file());
+    EXPECT_EQ(f, e->file());
+}
+
+} // namespace brfc

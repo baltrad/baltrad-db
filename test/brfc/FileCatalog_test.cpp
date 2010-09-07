@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/FileCatalog.hpp>
 #include <brfc/FileEntry.hpp>
-#include <brfc/Query.hpp>
 #include <brfc/Time.hpp>
 
 #include <brfc/oh5/File.hpp>

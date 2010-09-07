@@ -19,13 +19,25 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_FILE_ENTRY_HPP
 #define BRFC_FILE_ENTRY_HPP
 
+#include <brfc/smart_ptr.hpp>
+
 namespace brfc {
+
+namespace oh5 {
+
+class File;
+
+} // namespace oh5
 
 /**
  * @brief oh5::File entry in Database
  */
 class FileEntry {
   public:
+    FileEntry()
+            : file_() {
+    }
+
     virtual ~FileEntry() { }
 
     /**
@@ -34,9 +46,25 @@ class FileEntry {
     long long id() const {
         return do_id();
     }
+    
+    /**
+     * @brief node-local file
+     * @return pointer to File instance or null pointer if file is not
+     *         known to be accessible in local node
+     */
+    shared_ptr<const oh5::File> file() {
+        return file_;
+    }
+
+    void file(shared_ptr<const oh5::File> file) {
+        file_ = file;
+    }
 
   protected:
     virtual long long do_id() const = 0;
+  
+  private:
+    shared_ptr<const oh5::File> file_;
 };
 
 } // namespace brfc

@@ -35,7 +35,7 @@ namespace oh5 {
 
 class File;
 
-}
+} // namespace oh5
 
 /**
  * @brief ABC for Database access
@@ -67,10 +67,10 @@ class Database : public boost::noncopyable {
      * @return a FileEntry instance for the saved file
      * @throw db_error if a database error occurs
      * @throw duplicate_entry if file is already stored to database
+     *
+     * associates oh5::File with FileEntry instance
      */
-    shared_ptr<FileEntry> save_file(const oh5::File& file) {
-        return do_save_file(file);
-    }
+    shared_ptr<FileEntry> save_file(const oh5::File& file);
 
     /**
      * @brief execute a select query

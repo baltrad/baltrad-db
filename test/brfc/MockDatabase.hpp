@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gmock/gmock.h>
 
 #include <brfc/Database.hpp>
+#include <brfc/Query.hpp>
 
 namespace brfc {
 
