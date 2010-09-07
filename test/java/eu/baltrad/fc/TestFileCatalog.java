@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 package eu.baltrad.fc;
 
 import eu.baltrad.fc.FileCatalog;
+import eu.baltrad.fc.FileEntry;
 import eu.baltrad.fc.Date;
 import eu.baltrad.fc.Time;
 import eu.baltrad.fc.Variant;
@@ -47,7 +48,7 @@ public class TestFileCatalog extends TestCase {
     schema_dir = System.getProperty("db.test_db_schema_dir");
     tempdir = new TempDir();
     rdb = new TestRDB(dsn, schema_dir);
-    fc = new FileCatalog(dsn, tempdir.path());
+    fc = new FileCatalog(dsn);
 
     file = File.minimal("pvol",
                         new Date(2000, 05, 01),
@@ -64,14 +65,13 @@ public class TestFileCatalog extends TestCase {
   }
 
   public void testImport() {
-    File f = fc.catalog(tempfile.path());
-    assertNotNull(f);
-    assertTrue(fc.database().db_id(f) > 0);
+    FileEntry f = fc.catalog(tempfile.path());
+    assertTrue(f.id() > 0);
   }
 
   public void testImportNXFile() {
     try {
-      File f = fc.catalog("/path/to/nxfile");
+      FileEntry f = fc.catalog("/path/to/nxfile");
       fail("expected FileSystemError");
     } catch (FileSystemError e) {
       // pass
@@ -82,13 +82,6 @@ public class TestFileCatalog extends TestCase {
     FileNamer namer = new IncrementalFileNamer(1);
     assertEquals("1", namer.name(file));
     assertEquals("2", namer.name(file));
-  }
-
-  public void testCustomFileNamerThroughFileCatalog() {
-    fc.file_namer(new IncrementalFileNamer(1));
-    File f = fc.catalog(tempfile.path());
-    assertNotNull(f);
-    assertEquals("invalid name", "1_000000", f.name());
   }
 
 }

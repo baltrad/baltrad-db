@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/exceptions.hpp>
     #include <brfc/smart_ptr.hpp>
     #include <brfc/FileCatalog.hpp>
+    #include <brfc/FileEntry.hpp>
     #include <brfc/FileNamer.hpp>
     #include <brfc/Query.hpp>
     #include <brfc/ResultSet.hpp>
@@ -105,6 +106,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 SWIG_SHARED_PTR(Database, brfc::Database);
 SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
+SWIG_SHARED_PTR(FileEntry, brfc::FileEntry);
 
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.expr.Expression;
@@ -147,6 +149,7 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 
 %include <brfc/ResultSet.hpp>
 %include <brfc/Database.hpp>
+%include <brfc/FileEntry.hpp>
 %include <brfc/FileNamer.hpp>
 %include <brfc/FileCatalog.hpp>
 %include <brfc/Query.hpp>
