@@ -20,6 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RelationalFileEntry.hpp>
 
 #include <brfc/assert.hpp>
+#include <brfc/String.hpp>
+
+#include <brfc/sql/Connection.hpp>
+#include <brfc/sql/LargeObject.hpp>
 
 namespace brfc {
 namespace rdb {
@@ -35,6 +39,18 @@ RelationalFileEntry::RelationalFileEntry(shared_ptr<sql::Connection> conn,
 
 RelationalFileEntry::~RelationalFileEntry() {
 
+}
+
+void
+RelationalFileEntry::do_write_to_file(const String& path) const {
+    conn_->begin();
+    try {
+        conn_->large_object(lo_id_)->write_to_file(path);
+        conn_->commit();
+    } catch (...) {
+        conn_->rollback();
+        throw;
+    }
 }
 
 } // namespace rdb

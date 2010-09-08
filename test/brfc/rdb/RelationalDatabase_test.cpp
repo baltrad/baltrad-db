@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <boost/filesystem.hpp>
+
 #include <brfc/Date.hpp>
 #include <brfc/ResultSet.hpp>
 #include <brfc/Time.hpp>
@@ -45,6 +47,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 using testing::_;
 using testing::Return;
 
+namespace fs = boost::filesystem;
 
 namespace brfc {
 namespace rdb {
@@ -135,6 +138,23 @@ TEST_P(rdb_RelationalDatabase_test, save_file) {
     ASSERT_TRUE(re);
     EXPECT_TRUE(re->id() > 0);
     EXPECT_TRUE(re->lo_id() > 0);
+}
+
+//XXX: this should be tested somewhere else?
+TEST_P(rdb_RelationalDatabase_test, write_entry_to_file) {
+    shared_ptr<oh5::File> file =
+        oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    test::TempH5File tf;
+    tf.write(*file);
+    file->path(tf.path());
+    
+    shared_ptr<FileEntry> e;
+    EXPECT_NO_THROW(e = db->save_file(*file));
+    
+    // test writing
+    test::TempH5File tef;
+    EXPECT_NO_THROW(e->write_to_file(tef.path()));
+    EXPECT_EQ(fs::file_size(tef.path().to_utf8()), fs::file_size(tf.path().to_utf8()));
 }
 
 TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {

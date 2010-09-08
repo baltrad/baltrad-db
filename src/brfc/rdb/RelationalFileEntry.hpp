@@ -49,6 +49,8 @@ class RelationalFileEntry : public FileEntry {
   protected:
     virtual long long do_id() const { return id_; }
 
+    virtual void do_write_to_file(const String& path) const;
+
   private:
     shared_ptr<sql::Connection> conn_;
     long long id_;

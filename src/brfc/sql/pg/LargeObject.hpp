@@ -20,8 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_PG_LARGE_OBJECT_HPP
 #define BRFC_SQL_PG_LARGE_OBJECT_HPP
 
-#include <boost/numeric/conversion/cast.hpp>
-
 #include <pqxx/largeobject>
 
 #include <brfc/sql/LargeObject.hpp>
@@ -32,20 +30,14 @@ namespace pg {
 
 class LargeObject : public sql::LargeObject {
   public:
-    LargeObject(pqxx::dbtransaction& tx, long long id)
-            : lob_(tx, boost::numeric_cast<pqxx::oid>(id)) {
-        
-    }
+    LargeObject(pqxx::dbtransaction& tx, long long id);
 
-    LargeObject(pqxx::dbtransaction& tx, const String& path)
-            : lob_(tx, path.to_utf8()) {
-    
-    }
+    LargeObject(pqxx::dbtransaction& tx, const String& path);
  
   protected:
-    long long do_id() const {
-        return boost::numeric_cast<long long>(lob_.id());
-    }
+    virtual long long do_id() const;
+
+    virtual void do_write_to_file(const String& path) const;
   
   private:
     pqxx::largeobjectaccess lob_;

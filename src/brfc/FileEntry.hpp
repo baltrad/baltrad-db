@@ -23,6 +23,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+class String;
+
 namespace oh5 {
 
 class File;
@@ -60,8 +62,14 @@ class FileEntry {
         file_ = file;
     }
 
+    void write_to_file(const String& path) const {
+        do_write_to_file(path);
+    }
+
   protected:
     virtual long long do_id() const = 0;
+
+    virtual void do_write_to_file(const String& path) const = 0;
   
   private:
     shared_ptr<const oh5::File> file_;

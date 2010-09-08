@@ -16,21 +16,37 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef BRFC_MOCK_FILE_ENTRY_HPP
-#define BRFC_MOCK_FILE_ENTRY_HPP
 
-#include <gmock/gmock.h>
+#include <brfc/sql/pg/LargeObject.hpp>
 
-#include <brfc/FileEntry.hpp>
+#include <boost/numeric/conversion/cast.hpp>
+
+#include <brfc/String.hpp>
 
 namespace brfc {
+namespace sql {
+namespace pg {
 
-class MockFileEntry : public FileEntry {
-  public:
-    MOCK_CONST_METHOD0(do_id, long long());
-    MOCK_CONST_METHOD1(do_write_to_file, void(const String&));
-};
+LargeObject::LargeObject(pqxx::dbtransaction& tx, long long id)
+        : lob_(tx, boost::numeric_cast<pqxx::oid>(id)) {
+    
+}
 
+LargeObject::LargeObject(pqxx::dbtransaction& tx, const String& path)
+        : lob_(tx, path.to_utf8()) {
+
+}
+
+long long
+LargeObject::do_id() const {
+    return boost::numeric_cast<long long>(lob_.id());
+}
+
+void
+LargeObject::do_write_to_file(const String& path) const {
+    lob_.to_file(path.to_utf8());
+}
+
+} // namespace pg
+} // namespace sql
 } // namespace brfc
-
-#endif // BRFC_MOCK_FILE_ENTRY_HPP
