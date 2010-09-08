@@ -17,45 +17,25 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_RDB_RELATIONAL_FILE_ENTRY_HPP
-#define BRFC_RDB_RELATIONAL_FILE_ENTRY_HPP
+#include <brfc/rdb/RelationalFileEntry.hpp>
 
-#include <brfc/FileEntry.hpp>
+#include <brfc/assert.hpp>
 
 namespace brfc {
-
-namespace sql {
-    class Connection;
-}
-
 namespace rdb {
 
-class RelationalFileEntry : public FileEntry {
-  public:
-    explicit RelationalFileEntry(shared_ptr<sql::Connection> conn,
-                                  long long id=0,
-                                  long long lo_id=0);
+RelationalFileEntry::RelationalFileEntry(shared_ptr<sql::Connection> conn,
+                                         long long id,
+                                         long long lo_id)
+        : conn_(conn)
+        , id_(id)
+        , lo_id_(lo_id) {
+    BRFC_ASSERT(conn);
+}
 
-    virtual ~RelationalFileEntry();
+RelationalFileEntry::~RelationalFileEntry() {
 
-    using FileEntry::id;
-
-    void id(long long id) { id_ = id; }
-
-    void lo_id(long long id) { lo_id_ = id; }
-
-    long long lo_id() const { return lo_id_; }
-  
-  protected:
-    virtual long long do_id() const { return id_; }
-
-  private:
-    shared_ptr<sql::Connection> conn_;
-    long long id_;
-    long long lo_id_;
-};
+}
 
 } // namespace rdb
 } // namespace brfc
-
-#endif // BRFC_RDB_RELATIONAL_FILE_ENTRY_HPP

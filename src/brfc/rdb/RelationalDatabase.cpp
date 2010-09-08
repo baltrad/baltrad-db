@@ -109,16 +109,15 @@ RelationalDatabase::do_has_file(const oh5::File& file) {
 shared_ptr<FileEntry>
 RelationalDatabase::do_save_file(const oh5::File& file) {
     SaveFile save(this);
-    long long id = 0;
+    shared_ptr<FileEntry> entry;
     connection().begin();
     try {
-        id = save(file);
+        entry = save(file);
         connection().commit();
     } catch (const std::runtime_error&) {
         connection().rollback();
         throw;
     }
-    shared_ptr<FileEntry> entry(new RelationalFileEntry(id, conn_));
     return entry;
 }
 
@@ -129,7 +128,8 @@ RelationalDatabase::do_query(const Query& query) {
     shared_ptr<ResultSet> rset(new ResultSet());
     while (res->next()) {
         long long id = res->value_at(0).int64_();
-        shared_ptr<FileEntry> entry(new RelationalFileEntry(id, conn_));
+        long long lo_id = res->value_at(1).int64_();
+        shared_ptr<FileEntry> entry(new RelationalFileEntry(conn_, id, lo_id));
         rset->add(entry);
     }
     return rset;

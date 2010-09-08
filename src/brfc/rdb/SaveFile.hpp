@@ -39,6 +39,8 @@ class Attribute;
 
 namespace rdb {
 
+class RelationalFileEntry;
+
 /**
  * @brief save oh5::File instances to database
  */
@@ -87,7 +89,7 @@ class SaveFile {
      * @param file the file to be saved
      * @return database id of the saved file
      */
-    long long operator()(const oh5::File& file);
+    shared_ptr<RelationalFileEntry> operator()(const oh5::File& file);
 
   private:
     RelationalDatabase* rdb_;

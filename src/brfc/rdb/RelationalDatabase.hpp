@@ -81,6 +81,10 @@ class RelationalDatabase : public Database {
     sql::Connection& connection() {
         return *conn_;
     }
+    
+    shared_ptr<sql::Connection> connection_ptr() {
+        return conn_;
+    }
 
     void file_hasher(shared_ptr<FileHasher> hasher);
     

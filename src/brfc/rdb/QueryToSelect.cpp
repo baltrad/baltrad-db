@@ -58,6 +58,9 @@ QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
     from_ = m->files->join(m->sources,
                            xpr_.eq(m->files->column("source_id"),
                                    m->sources->column("id")));
+    from_ = from_->join(m->file_content,
+                        xpr_.eq(m->file_content->column("file_id"),
+                                m->files->column("id")));
 }
 
 sql::SelectPtr
@@ -68,6 +71,7 @@ QueryToSelect::transform(const Query& query,
     sql::SelectPtr select = sql::Select::create();
     select->distinct(true);
     select->what(Model::instance().files->column("id"));
+    select->what(Model::instance().file_content->column("lo_id"));
 
     // replace attributes in where clause with columns
     if (query.filter()) {

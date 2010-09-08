@@ -31,6 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Source.hpp>
 
 #include <brfc/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/RelationalFileEntry.hpp>
 #include <brfc/rdb/Model.hpp>
 
 #include <brfc/sql/Column.hpp>
@@ -62,7 +63,7 @@ SaveFile::operator()(const oh5::Attribute& attribute) {
     save_attribute_(attribute);
 }
 
-long long
+shared_ptr<RelationalFileEntry>
 SaveFile::operator()(const oh5::File& file) {
     sql::TablePtr files = Model::instance().files;
     const MappingVector& special = rdb_->mapper()->specializations_on(files);
@@ -113,7 +114,10 @@ SaveFile::operator()(const oh5::File& file) {
 
     rdb_->connection().execute(*stmt);
 
-    return file_id;
+    return shared_ptr<RelationalFileEntry>(
+                new RelationalFileEntry(rdb_->connection_ptr(),
+                                        file_id,
+                                        lo->id()));
 }
 
 

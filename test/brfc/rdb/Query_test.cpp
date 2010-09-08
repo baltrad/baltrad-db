@@ -35,6 +35,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Parentheses.hpp>
 
+#include <brfc/rdb/RelationalFileEntry.hpp>
+
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/DataSetGroup.hpp>
@@ -161,6 +163,26 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
     shared_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     Query query;
 };
+
+TEST_P(rdb_Query_test, test_queried_entry_has_lob) {
+    shared_ptr<ResultSet> r =
+            query.filter(xpr.attribute("file:id")->eq(xpr.int64_(fe1->id())))
+                 .execute();
+    ASSERT_EQ(1, r->size());
+
+    shared_ptr<RelationalFileEntry> qre =
+        dynamic_pointer_cast<RelationalFileEntry>(r->get(0));
+    shared_ptr<RelationalFileEntry> fre1 =
+        dynamic_pointer_cast<RelationalFileEntry>(fe1);
+    
+    ASSERT_TRUE(qre);
+    ASSERT_TRUE(fre1);
+    
+    EXPECT_TRUE(qre->lo_id() > 0);
+    EXPECT_TRUE(qre->id() > 0);
+    EXPECT_EQ(qre->id(), fre1->id());
+    EXPECT_EQ(qre->lo_id(), fre1->lo_id());
+}
 
 TEST_P(rdb_Query_test, test_simple) {
     shared_ptr<ResultSet> r = 
