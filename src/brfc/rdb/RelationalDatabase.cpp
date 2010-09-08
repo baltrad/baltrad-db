@@ -237,12 +237,13 @@ RelationalDatabase::populate_hasher() {
     file_hasher_->ignore(mapper_->ignored_in_hash());
 }
 
-void
+bool
 RelationalDatabase::do_remove_file(const FileEntry& entry) {
     String qry("DELETE FROM bdb_files WHERE id = :id");
     sql::BindMap binds;
     binds.add(":id", Variant(entry.id()));
-    connection().execute(qry, binds);
+    shared_ptr<sql::Result> r = connection().execute(qry, binds);
+    return r->affected_rows();
 }
 
 } // namespace rdb

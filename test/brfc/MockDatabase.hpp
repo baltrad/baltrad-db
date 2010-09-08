@@ -30,10 +30,9 @@ namespace brfc {
 class MockDatabase : public Database {
   public:
     MOCK_METHOD1(do_has_file, bool(const oh5::File&));
-    MOCK_METHOD1(do_remove_file, void(const FileEntry&));
+    MOCK_METHOD1(do_remove_file, bool(const FileEntry&));
     MOCK_METHOD1(do_save_file, shared_ptr<FileEntry>(const oh5::File&));
     MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
-    MOCK_METHOD0(do_clean, void());  
 };
 
 } // namespace brfc

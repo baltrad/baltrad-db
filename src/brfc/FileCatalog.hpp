@@ -141,10 +141,11 @@ class FileCatalog {
     /**
      * @brief remove file from catalog
      * @param entry database entry
+     * @return true if file was removed, false if it did not exist
      * @throw db_error if removing file entry from database fails
      * @throw fs_error if removing file entry from filesystem fails
      */
-    void remove(const FileEntry& entry);
+    bool remove(const FileEntry& entry);
 
     /**
      * @brief get a query object bound to owned database

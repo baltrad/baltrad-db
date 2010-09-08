@@ -72,9 +72,9 @@ FileCatalog::catalog(const oh5::File& file) {
     return db_->save_file(file);
 }
 
-void
+bool
 FileCatalog::remove(const FileEntry& entry) {
-    db_->remove_file(entry);
+    return db_->remove_file(entry);
 }
 
 Query

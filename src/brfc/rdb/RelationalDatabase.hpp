@@ -106,18 +106,13 @@ class RelationalDatabase : public Database {
      * @brief check if file hash is unique in database
      */
     virtual bool do_has_file(const oh5::File& file);
-    virtual void do_remove_file(const FileEntry& entry);
+    virtual bool do_remove_file(const FileEntry& entry);
 
     virtual shared_ptr<FileEntry> do_save_file(const oh5::File& file);
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 
   private:
-    /**
-     * @brief remove file from database
-     */
-    void remove_file(const String& path);
-
     shared_ptr<sql::Connection> conn_;
     shared_ptr<AttributeMapper> mapper_;
     shared_ptr<FileHasher> file_hasher_;

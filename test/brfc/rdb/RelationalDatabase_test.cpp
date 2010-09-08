@@ -140,6 +140,24 @@ TEST_P(rdb_RelationalDatabase_test, save_file) {
     EXPECT_TRUE(re->lo_id() > 0);
 }
 
+TEST_P(rdb_RelationalDatabase_test, remove_file) {
+    shared_ptr<oh5::File> file =
+        oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    test::TempH5File tf;
+    tf.write(*file);
+    file->path(tf.path());
+    
+    shared_ptr<FileEntry> e;
+    EXPECT_NO_THROW(e = db->save_file(*file));
+
+    bool removed = false;
+    EXPECT_NO_THROW(removed = db->remove_file(*e));
+    EXPECT_TRUE(removed);
+
+    EXPECT_NO_THROW(removed = db->remove_file(*e));
+    EXPECT_FALSE(removed);
+}
+
 //XXX: this should be tested somewhere else?
 TEST_P(rdb_RelationalDatabase_test, write_entry_to_file) {
     shared_ptr<oh5::File> file =

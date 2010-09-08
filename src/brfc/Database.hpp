@@ -56,9 +56,11 @@ class Database : public boost::noncopyable {
     
     /**
      * @brief remove file from database
+     * @throw db_error if a database error occurs
+     * @return true if the file was removed, false if it did not exist
      */
-    void remove_file(const FileEntry& entry) {
-        do_remove_file(entry);
+    bool remove_file(const FileEntry& entry) {
+        return do_remove_file(entry);
     }
 
     /**
@@ -81,7 +83,7 @@ class Database : public boost::noncopyable {
 
   protected:
     virtual bool do_has_file(const oh5::File& file) = 0;
-    virtual void do_remove_file(const FileEntry& entry) = 0;
+    virtual bool do_remove_file(const FileEntry& entry) = 0;
     virtual shared_ptr<FileEntry> do_save_file(const oh5::File& file) = 0;
 
     virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
