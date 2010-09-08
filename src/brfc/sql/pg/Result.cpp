@@ -98,6 +98,11 @@ Result::do_value_at(const String& col) const  {
     }
 }
 
+int
+Result::do_affected_rows() const {
+    return result_.affected_rows();
+}
+
 } // namespace pg
 } // namespace sql
 } // namespace brfc

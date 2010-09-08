@@ -81,6 +81,13 @@ class Result : public boost::noncopyable {
     Variant value_at(const String& column) const {
         return do_value_at(column);
     }
+    
+    /**
+     * @brief number of rows the executed statement affected
+     */
+    int affected_rows() const {
+        return do_affected_rows();
+    }
 
 
   protected:
@@ -108,6 +115,8 @@ class Result : public boost::noncopyable {
      * @brief value_at(const String&) implementation
      */
     virtual Variant do_value_at(const String& column) const = 0;
+
+    virtual int do_affected_rows() const = 0;
 };
 
 } // namespace sql

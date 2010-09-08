@@ -48,6 +48,8 @@ class Result : public sql::Result {
 
     virtual Variant do_value_at(const String& column) const;
 
+    virtual int do_affected_rows() const;
+
   private:
     Variant pqtype_to_variant(const pqxx::result::field& field,
                               pqxx::oid coltype) const;
