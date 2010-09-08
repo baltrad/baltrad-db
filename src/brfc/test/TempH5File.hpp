@@ -58,6 +58,8 @@ class TempH5File {
     
     String path() const;
 
+    void copy(const String& dest) const;
+
   private:
     shared_ptr<char> path_;
 };

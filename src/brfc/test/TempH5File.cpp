@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 
 #include <boost/foreach.hpp>
+#include <boost/filesystem.hpp>
 
 #include <brfc/visit.hpp>
 #include <brfc/Variant.hpp>
@@ -32,6 +33,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Converter.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace brfc {
 namespace test {
@@ -141,6 +144,11 @@ class GatherHLNodes {
 String
 TempH5File::path() const {
     return String::from_utf8(path_.get());
+}
+
+void
+TempH5File::copy(const String& dest) const {
+    fs::copy_file(path().to_utf8(), dest.to_utf8());
 }
 
 void
