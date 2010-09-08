@@ -54,7 +54,7 @@ class FileEntry {
      * @return pointer to File instance or null pointer if file is not
      *         known to be accessible in local node
      */
-    shared_ptr<const oh5::File> file() {
+    shared_ptr<const oh5::File> file() const {
         return file_;
     }
 
