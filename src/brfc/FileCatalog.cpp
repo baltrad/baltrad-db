@@ -19,12 +19,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/FileCatalog.hpp>
 
-#include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
+#include <iostream>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Database.hpp>
 #include <brfc/DefaultFileNamer.hpp>
+#include <brfc/FileEntry.hpp>
+#include <brfc/NullStorage.hpp>
 #include <brfc/Query.hpp>
 
 #include <brfc/expr/Attribute.hpp>
@@ -33,21 +34,32 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/RelationalDatabase.hpp>
 
-namespace fs = boost::filesystem;
-
 namespace brfc {
     
-FileCatalog::FileCatalog(const String& dsn)
-        : db_(new rdb::RelationalDatabase(dsn)) {
+FileCatalog::FileCatalog(const String& dsn,
+                         shared_ptr<LocalStorage> storage)
+        : db_(new rdb::RelationalDatabase(dsn)) 
+        , storage_() {
+    this->storage(storage);
     static_pointer_cast<rdb::RelationalDatabase>(db_)->populate_mapper();
 }
 
-FileCatalog::FileCatalog(shared_ptr<Database> db)
-        : db_(db) {
+FileCatalog::FileCatalog(shared_ptr<Database> db,
+                         shared_ptr<LocalStorage> storage)
+        : db_(db)
+        , storage_() {
+    this->storage(storage);
 }
 
 FileCatalog::~FileCatalog() {
 
+}
+
+void
+FileCatalog::storage(shared_ptr<LocalStorage> storage) {
+    if (not storage)
+        storage.reset(new NullStorage());
+    storage_ = storage;
 }
 
 bool
@@ -61,32 +73,42 @@ FileCatalog::is_cataloged(const oh5::File& f) const {
     return db_->has_file(f);
 }
 
-shared_ptr<FileEntry>
+shared_ptr<const FileEntry>
 FileCatalog::catalog(const String& path) {
     shared_ptr<oh5::File> f = oh5::File::from_filesystem(path);
     return catalog(*f); 
 }
 
-shared_ptr<FileEntry>
+shared_ptr<const FileEntry>
 FileCatalog::catalog(const oh5::File& file) {
-    return db_->save_file(file);
+    shared_ptr<FileEntry> e = db_->save_file(file);
+    shared_ptr<const oh5::File> stored_file;
+    try {
+        stored_file = storage_->prestore(*e);
+    } catch (const std::runtime_error& e) {
+        std::cerr << "IGNORED EXCEPTION: LocalStorage::prestore: "
+                  << e.what() << std::endl << std::flush;
+    }
+    if (stored_file)
+        e->file(stored_file);
+    return e;
 }
 
 bool
 FileCatalog::remove(const FileEntry& entry) {
-    return db_->remove_file(entry);
+    bool removed = db_->remove_file(entry);
+    try {
+        storage_->remove(entry);
+    } catch (const std::runtime_error& e) {
+        std::cerr << "IGNORED EXCEPTION: LocalStorage::remove: "
+                  << e.what() << std::endl << std::flush;
+    }
+    return removed;
 }
 
 Query
 FileCatalog::query() const {
     return Query(db_.get());
-}
-
-Query
-FileCatalog::query_file_path() const {
-    Query q(db_.get());
-    q.fetch(expr::Attribute::create("file:path"));
-    return q;
 }
 
 } // namespace brfc

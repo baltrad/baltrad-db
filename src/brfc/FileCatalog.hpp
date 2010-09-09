@@ -31,6 +31,7 @@ namespace brfc {
     
 class Database;
 class FileEntry;
+class LocalStorage;
 class Query;
 
 namespace oh5 {
@@ -56,25 +57,41 @@ class FileCatalog {
      * @throw db_error if DB could not be opened
      * @throw value_error if dsn is invalid
      */
-    FileCatalog(const String& dsn);
-    
+    explicit
+    FileCatalog(const String& dsn,
+                shared_ptr<LocalStorage> storage=shared_ptr<LocalStorage>());
+
     /**
      * @brief constructor
      * @param db database instance
      */
-    FileCatalog(shared_ptr<Database> db);
-
+    explicit
+    FileCatalog(shared_ptr<Database> db,
+                shared_ptr<LocalStorage> storage=shared_ptr<LocalStorage>());
+    
     /**
      * @brief destructor
      */
     ~FileCatalog();
     
     /**
-     * @brief access bound database instance
+     * @brief access bound Database instance
      */
     shared_ptr<Database> database() {
         return db_;
     }
+    
+    /**
+     * @brief access bound LocalStorage instance
+     */
+    shared_ptr<LocalStorage> storage() { return storage_; }
+    
+    /**
+     * @brief bind a LocalStorage instance
+     *
+     * if @c storage is null, bind NullStorage
+     */
+    void storage(shared_ptr<LocalStorage> storage);
 
     /**
      * @brief has file been imported to this catalog
@@ -124,7 +141,7 @@ class FileCatalog {
      *
      * @sa catalog(oh5::File& file)
      */
-    shared_ptr<FileEntry> catalog(const String& path);
+    shared_ptr<const FileEntry> catalog(const String& path);
     
     /**
      * @brief import file to catalog
@@ -132,11 +149,14 @@ class FileCatalog {
      * @return FileEntry instance of the stored file
      * @throw db_error if storing file to database fails
      * @throw duplicate_entry if file has already been cataloged
+     * 
+     * the FileEntry is passed to LocalStorage::prestore and if successful,
+     * the resulting oh5::File will replace FileEntry::file.
      *
-     * on import file is physically copied to a new location. If the file
-     * import is successful file.path() will contain this new location.
+     * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
+     * is considered failed.
      */
-    shared_ptr<FileEntry> catalog(const oh5::File& file);
+    shared_ptr<const FileEntry> catalog(const oh5::File& file);
     
     /**
      * @brief remove file from catalog
@@ -144,6 +164,11 @@ class FileCatalog {
      * @return true if file was removed, false if it did not exist
      * @throw db_error if removing file entry from database fails
      * @throw fs_error if removing file entry from filesystem fails
+     *
+     * the FileEntry is passed to LocalStorage::remove.
+     *
+     * Exceptions thrown by LocalStorage::remove are ignored and removing from
+     * local storage is considered failed.
      */
     bool remove(const FileEntry& entry);
 
@@ -152,20 +177,9 @@ class FileCatalog {
      */
     Query query() const;
     
-    /**
-     * @brief get a query object bound to owned database
-     *
-     * shorthand for
-     *
-     * @code
-     * Query q = fc.query();
-     * q.fetch(expr::Attribute::create("path"));
-     * @endcode
-     */
-    Query query_file_path() const;
-
   private:
     shared_ptr<Database> db_;
+    shared_ptr<LocalStorage> storage_;
 };
 
 }

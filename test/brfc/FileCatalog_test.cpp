@@ -36,7 +36,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include "common.hpp"
 #include "MockDatabase.hpp"
 #include "MockFileEntry.hpp"
-
+#include "MockLocalStorage.hpp"
 
 using testing::_;
 using testing::Eq;
@@ -54,7 +54,9 @@ struct FileCatalog_test : public testing::Test {
     FileCatalog_test()
             : tempdir(new test::TempDir())
             , db(new MockDatabase())
-            , fc(db)
+            , entry(new MockFileEntry())
+            , storage(new MockLocalStorage())
+            , fc(db, storage)
             , src_str("WMO:02606")
             , tempfile()
             , minfile(oh5::File::minimal("PVOL",
@@ -70,6 +72,8 @@ struct FileCatalog_test : public testing::Test {
 
     auto_ptr<test::TempDir> tempdir;
     shared_ptr<MockDatabase> db;
+    shared_ptr<MockFileEntry> entry;
+    shared_ptr<MockLocalStorage> storage;
     FileCatalog fc;
     String src_str;
     test::TempH5File tempfile;
@@ -85,10 +89,18 @@ TEST_F(FileCatalog_test, test_catalog_nx_file_by_path) {
 }
 
 TEST_F(FileCatalog_test, test_catalog) {
-    EXPECT_CALL(*db, do_save_file(Ref(*minfile)))
-        .WillOnce(Return(shared_ptr<FileEntry>(new MockFileEntry())));
+    shared_ptr<oh5::File> newfile = oh5::File::create();
 
-    fc.catalog(*minfile);
+    EXPECT_CALL(*db, do_save_file(Ref(*minfile)))
+        .WillOnce(Return(entry));
+    EXPECT_CALL(*storage, do_prestore(Ref(*entry)))
+        .WillOnce(Return(newfile));
+    
+    shared_ptr<const FileEntry> e;
+    EXPECT_NO_THROW(e = fc.catalog(*minfile));
+
+    // substitutes prestore return value to FileEntry
+    EXPECT_EQ(newfile, e->file());
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
@@ -103,6 +115,18 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
     EXPECT_EQ(orig_path, minfile->path());
 }
 
+TEST_F(FileCatalog_test, test_catalog_on_prestore_failure) {
+    EXPECT_CALL(*db, do_save_file(Ref(*minfile)))
+        .WillOnce(Return(entry));
+    EXPECT_CALL(*storage, do_prestore(Ref(*entry)))
+        .WillOnce(Throw(std::runtime_error("error")));
+    
+    shared_ptr<const FileEntry> e;
+    EXPECT_NO_THROW(e = fc.catalog(*minfile));
+    // retains imported file
+    EXPECT_EQ(minfile, e->file());
+}
+
 /*
 TEST_F(FileCatalog_test, test_double_import_throws) {
     EXPECT_THROW(fc.catalog(*minfile), duplicate_entry);
@@ -114,23 +138,27 @@ TEST_F(FileCatalog_test, test_is_cataloged_nx_file_by_path) {
 }
 
 TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
+    EXPECT_CALL(*db, do_has_file(Ref(*minfile)))
+        .WillOnce(Return(false));
+
     EXPECT_FALSE(fc.is_cataloged(*minfile));
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {
-    shared_ptr<FileEntry> entry(new MockFileEntry());
-
     EXPECT_CALL(*db, do_remove_file(Ref(*entry)));
+    EXPECT_CALL(*storage, do_remove(Ref(*entry)))
+        .WillOnce(Return(true));
 
     EXPECT_NO_THROW(fc.remove(*entry));
 }
 
-/*
 TEST_F(FileCatalog_test, test_remove_nx_file) {
-    EXPECT_CALL(*db, do_remove_file(String("/path/to/nxfile")));
-
-    EXPECT_THROW(fc.remove("/path/to/nxfile"), fs_error);
+    EXPECT_CALL(*db, do_remove_file(Ref(*entry)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*storage, do_remove(Ref(*entry)))
+        .WillOnce(Return(true));
+    
+    EXPECT_TRUE(fc.remove(*entry));
 }
-*/
 
 } // namespace brfc
