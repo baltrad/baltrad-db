@@ -27,11 +27,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/oh5/Node.hpp>
     #include <brfc/oh5/Attribute.hpp>
     #include <brfc/oh5/AttributeGroup.hpp>
-    #include <brfc/oh5/DataGroup.hpp>
-    #include <brfc/oh5/DataSetGroup.hpp>
     #include <brfc/oh5/File.hpp>
     #include <brfc/oh5/Group.hpp>
-    #include <brfc/oh5/QualityGroup.hpp>
     #include <brfc/oh5/RootGroup.hpp>
     #include <brfc/oh5/Source.hpp>
 %}
@@ -66,16 +63,6 @@ SWIG_SHARED_PTR_DERIVED(RootGroup,
 SWIG_SHARED_PTR_DERIVED(AttributeGroup,
                         brfc::oh5::Group,
                         brfc::oh5::AttributeGroup);
-SWIG_SHARED_PTR_DERIVED(DataSetGroup,
-                        brfc::oh5::Group,
-                        brfc::oh5::DataSetGroup);
-SWIG_SHARED_PTR_DERIVED(DataGroup,
-                        brfc::oh5::Group,
-                        brfc::oh5::DataGroup);
-SWIG_SHARED_PTR_DERIVED(QualityGroup,
-                        brfc::oh5::Group,
-                        brfc::oh5::QualityGroup);
-
 
 %template(NodeVector) std::vector<brfc::shared_ptr<brfc::oh5::Node> >;
 %template(AttributeVector) std::vector<brfc::shared_ptr<brfc::oh5::Attribute> >;
@@ -138,9 +125,6 @@ SWIG_SHARED_PTR_DERIVED(QualityGroup,
 %include <brfc/oh5/Node.hpp>
 %include <brfc/oh5/Group.hpp>
 %include <brfc/oh5/AttributeGroup.hpp>
-%include <brfc/oh5/DataSetGroup.hpp>
-%include <brfc/oh5/DataGroup.hpp>
-%include <brfc/oh5/QualityGroup.hpp>
 %include <brfc/oh5/RootGroup.hpp>
 %include <brfc/oh5/Attribute.hpp>
 %include <brfc/oh5/Source.hpp>

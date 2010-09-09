@@ -24,9 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/DataGroup.hpp>
-#include <brfc/oh5/DataSetGroup.hpp>
-#include <brfc/oh5/QualityGroup.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
 #include "../common.hpp"
@@ -40,7 +37,7 @@ struct oh5_Attribute_test : public ::testing::Test {
             : a1(make_shared<Attribute>("a1", Variant(1)))
             , a2(make_shared<Attribute>("a2", Variant(2)))
             , what(make_shared<AttributeGroup>("what"))
-            , dataset1(make_shared<DataSetGroup>("dataset1"))
+            , dataset1(make_shared<Group>("dataset1"))
             , root(make_shared<RootGroup>()) {
 
     }
@@ -48,7 +45,7 @@ struct oh5_Attribute_test : public ::testing::Test {
     shared_ptr<Attribute> a1;
     shared_ptr<Attribute> a2;
     shared_ptr<AttributeGroup> what;
-    shared_ptr<DataSetGroup> dataset1;
+    shared_ptr<Group> dataset1;
     shared_ptr<RootGroup> root;
 };
 
@@ -75,21 +72,6 @@ TEST_F(oh5_Attribute_test, test_add_child_Attribute) {
 TEST_F(oh5_Attribute_test, test_add_child_AttributeGroup) {
     shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
     EXPECT_THROW(a1->add_child(what), value_error);
-}
-
-TEST_F(oh5_Attribute_test, test_add_child_DataGroup) {
-    shared_ptr<DataGroup> data1 = make_shared<DataGroup>("data1");
-    EXPECT_THROW(a1->add_child(data1), value_error);
-}
-
-TEST_F(oh5_Attribute_test, test_add_child_DataSetGroup) {
-    shared_ptr<DataSetGroup> dataset2 = make_shared<DataSetGroup>("dataset2");
-    EXPECT_THROW(a1->add_child(dataset2), value_error);
-}
-
-TEST_F(oh5_Attribute_test, test_add_child_QualityGroup) {
-    shared_ptr<QualityGroup> a1 = make_shared<QualityGroup>("a1");
-    EXPECT_THROW(a1->add_child(a1), value_error);
 }
 
 TEST_F(oh5_Attribute_test, test_add_child_RootGroup) {

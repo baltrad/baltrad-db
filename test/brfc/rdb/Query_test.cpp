@@ -39,7 +39,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/DataSetGroup.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
@@ -90,9 +89,9 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
         StringList names = path.split("/");
 
         String dsname = names.take_first();
-        shared_ptr<oh5::DataSetGroup> ds = dynamic_pointer_cast<oh5::DataSetGroup>(file.root()->child_by_name(dsname));
+        shared_ptr<oh5::Group> ds = dynamic_pointer_cast<oh5::Group>(file.root()->child_by_name(dsname));
         if (not ds) {
-            ds = make_shared<oh5::DataSetGroup>(dsname);
+            ds = make_shared<oh5::Group>(dsname);
             file.root()->add_child(ds);
         }
 

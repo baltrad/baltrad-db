@@ -25,38 +25,18 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/DataGroup.hpp>
-#include <brfc/oh5/DataSetGroup.hpp>
-#include <brfc/oh5/QualityGroup.hpp>
 
 #include "../common.hpp"
 
 namespace brfc {
 namespace oh5 {
 
-class FakeGroup : public Group {
-  public:
-    FakeGroup(const String& name)
-            : Group(name) {
-    }
-
-  protected:
-  /*
-    template<class T, class A1> 
-    friend 
-    shared_ptr<T> boost::make_shared(const A1& a1);
-*/
-    virtual bool do_accepts_child(const Node& child) const {
-        return true;
-    }
-};
-
 struct oh5_Group_test : public ::testing::Test {
     oh5_Group_test()
-            : g(make_shared<FakeGroup>("g")) {
+            : g(make_shared<Group>("g")) {
     }
 
-    shared_ptr<FakeGroup> g;
+    shared_ptr<Group> g;
 };
 
 TEST_F(oh5_Group_test, test_add_child_attribute) {
@@ -70,7 +50,7 @@ TEST_F(oh5_Group_test, test_add_child_attributegroup) {
 }
 
 TEST_F(oh5_Group_test, test_add_child_group) {
-    shared_ptr<FakeGroup> d = make_shared<FakeGroup>("d");
+    shared_ptr<Group> d = make_shared<Group>("d");
     EXPECT_NO_THROW(g->add_child(d));
 }
 
@@ -86,7 +66,7 @@ TEST_F(oh5_Group_test, test_child_attribute_access) {
 }
 
 TEST_F(oh5_Group_test, test_child_group_by_name) {
-    shared_ptr<FakeGroup> g2 = make_shared<FakeGroup>("g2");
+    shared_ptr<Group> g2 = make_shared<Group>("g2");
     g->add_child(g2);
     shared_ptr<AttributeGroup> ag = make_shared<AttributeGroup>("ag");
     g2->add_child(ag);
@@ -113,9 +93,9 @@ TEST_F(oh5_Group_test, test_attribute_access) {
     shared_ptr<AttributeGroup> w = make_shared<AttributeGroup>("what");
     shared_ptr<AttributeGroup> ds1_d1_w = make_shared<AttributeGroup>("what");
 
-    shared_ptr<FakeGroup> ds1 = make_shared<FakeGroup>("dataset1");
-    shared_ptr<FakeGroup> ds1_d1 = make_shared<FakeGroup>("data1");
-    shared_ptr<FakeGroup> ds1_d2 = make_shared<FakeGroup>("data2");
+    shared_ptr<Group> ds1 = make_shared<Group>("dataset1");
+    shared_ptr<Group> ds1_d1 = make_shared<Group>("data1");
+    shared_ptr<Group> ds1_d2 = make_shared<Group>("data2");
 
     shared_ptr<Attribute> w_attr1 = make_shared<Attribute>("attr1");
     shared_ptr<Attribute> w_attr2 = make_shared<Attribute>("attr2");
@@ -144,13 +124,13 @@ TEST_F(oh5_Group_test, test_create_by_name_valid_names) {
     shared_ptr<Group> grp;
 
     grp = Group::create_by_name("dataset1");
-    EXPECT_TRUE(dynamic_pointer_cast<DataSetGroup>(grp));
+    EXPECT_TRUE(dynamic_pointer_cast<Group>(grp));
 
     grp = Group::create_by_name("data2");
-    EXPECT_TRUE(dynamic_pointer_cast<DataGroup>(grp));
+    EXPECT_TRUE(dynamic_pointer_cast<Group>(grp));
 
     grp = Group::create_by_name("quality3");
-    EXPECT_TRUE(dynamic_pointer_cast<QualityGroup>(grp));
+    EXPECT_TRUE(dynamic_pointer_cast<Group>(grp));
 
     grp = Group::create_by_name("what");
     EXPECT_TRUE(dynamic_pointer_cast<AttributeGroup>(grp));
@@ -186,14 +166,6 @@ TEST_F(oh5_Group_test, test_get_or_create_child_group_by_name_valid) {
     EXPECT_TRUE(child2);
 
     EXPECT_EQ(child1, child2);
-}
-
-TEST_F(oh5_Group_test, test_get_or_create_child_group_by_name_unaccepted) {
-    shared_ptr<Group> grp, child;
-    grp = Group::create_by_name("quality1");
-
-    EXPECT_THROW(child = grp->get_or_create_child_group_by_name("dataset1"), value_error);
-    EXPECT_FALSE(grp->has_child_by_name("dataset1"));
 }
 
 TEST_F(oh5_Group_test, test_get_or_create_child_group_by_path_invalid) {

@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/DataSetGroup.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
@@ -73,7 +72,7 @@ TEST_F(SHA1AttributeHasher_test, attribute_string) {
     shared_ptr<oh5::Attribute> a1 = make_shared<oh5::Attribute>("a1", Variant(1));
     EXPECT_EQ("/a1=1", SHA1AttributeHasher::attribute_string(*a1));
 
-    shared_ptr<oh5::DataSetGroup> dataset1 = make_shared<oh5::DataSetGroup>("dataset1");
+    shared_ptr<oh5::Group> dataset1 = make_shared<oh5::Group>("dataset1");
     shared_ptr<oh5::AttributeGroup> what = make_shared<oh5::AttributeGroup>("what");
     dataset1->add_child(what);
     what->add_child(a1);

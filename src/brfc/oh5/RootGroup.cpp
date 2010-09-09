@@ -19,8 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/DataSetGroup.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -35,9 +33,8 @@ RootGroup::RootGroup()
 
 bool
 RootGroup::do_accepts_child(const Node& node) const {
-    if (dynamic_cast<const Attribute*>(&node) != 0 or
-        dynamic_cast<const AttributeGroup*>(&node) != 0 or
-        dynamic_cast<const DataSetGroup*>(&node) != 0) {
+    if (dynamic_cast<const Group*>(&node) != 0 or
+        dynamic_cast<const Attribute*>(&node) != 0) {
         return true;
     } else {
         return false;

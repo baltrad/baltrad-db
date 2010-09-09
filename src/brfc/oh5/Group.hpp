@@ -31,7 +31,7 @@ namespace oh5 {
 class Attribute;
 
 /**
- * @brief ABC for ODIM_H5 elements that can have children
+ * @brief ODIM_H5 Group element
  */
 class Group : public Node {
   public:
@@ -39,11 +39,10 @@ class Group : public Node {
      * @brief create a Group subclass instance from name
      * @return pointer to instance or null pointer if name is not a group
      *
-     * ODIM_H5 node names map as (where N is an integer):
-     *  - datasetN -> @ref DataSetGroup
-     *  - dataN -> @ref DataGroup
-     *  - qualityN -> @ref QualityGroup
+     * ODIM_H5 node names map by name (where N is an integer):
+     *  - datasetN, dataN, qualityN -> @ref Group
      *  - (what|where|how) -> @ref AttributeGroup
+     *  - everything else -> null pointer
      */
     static shared_ptr<Group> create_by_name(const String& name);
 
@@ -162,7 +161,7 @@ class Group : public Node {
         : Node(name) {
     }
 
-    virtual bool do_accepts_child(const Node& node) const = 0;
+    virtual bool do_accepts_child(const Node& node) const;
 
     virtual bool do_accepts_parent(const Node& node) const;
 };

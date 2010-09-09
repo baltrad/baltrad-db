@@ -126,6 +126,10 @@ SWIG_SHARED_PTR(FileEntry, brfc::FileEntry);
     import eu.baltrad.fc.oh5.File;
 %}
 
+%typemap(javaimports) brfc::FileEntry, brfc::FileEntry* %{
+    import eu.baltrad.fc.oh5.File;
+%}
+
 %typemap(javaimports) brfc::FileNamer, brfc::FileNamer* %{
     import eu.baltrad.fc.oh5.File;
 %}

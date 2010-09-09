@@ -24,9 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/DataGroup.hpp>
-#include <brfc/oh5/DataSetGroup.hpp>
-#include <brfc/oh5/QualityGroup.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -37,19 +34,11 @@ Group::~Group() {
 
 shared_ptr<Group>
 Group::create_by_name(const String& name) {
-    RegExp re("([a-z]+)([0-9]+)");
+    RegExp re("(data|dataset|quality)([0-9]+)");
     
     if (re.match(name)) {
-        const String& grp_name = re.group(1);
-        if (grp_name == "dataset") {
-            return make_shared<DataSetGroup>(name);
-        } else if (grp_name == "data") {
-            return make_shared<DataGroup>(name);
-        } else if (grp_name == "quality") {
-            return make_shared<QualityGroup>(name);
-        }
+        return make_shared<Group>(name);
     }
-
     if (name == "what" or name == "where" or name == "how")
         return make_shared<AttributeGroup>(name);
 
@@ -141,6 +130,11 @@ Group::get_or_create_child_group_by_path(const StringList& path) {
     if (last_created)
         last_existing->add_child(created_root);
     return last_created;
+}
+
+bool
+Group::do_accepts_child(const Node& node) const {
+    return true;
 }
 
 bool
