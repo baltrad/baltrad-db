@@ -46,6 +46,8 @@ class NullStorage : public LocalStorage {
     virtual bool do_remove(const FileEntry&) {
         return true;
     }
+
+    virtual void do_clean() { }
 };
 
 } // namespace brfc

@@ -109,4 +109,12 @@ TEST_F(CacheDirStorage_test, test_remove_nx) {
     EXPECT_FALSE(fs::exists(path.to_utf8()));
 }
 
+TEST_F(CacheDirStorage_test, test_clean) {
+    const String& path = storage.entry_path(entry);
+    tmpfile.copy(path);
+
+    EXPECT_NO_THROW(storage.clean());
+    EXPECT_FALSE(fs::exists(path.to_utf8()));
+}
+
 } // namespace brfc

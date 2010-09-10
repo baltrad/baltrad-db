@@ -49,6 +49,7 @@ class CacheDirStorage : public LocalStorage {
     virtual shared_ptr<const oh5::File> do_store(const FileEntry& entry);
     virtual shared_ptr<const oh5::File> do_prestore(const FileEntry& entry);
     virtual bool do_remove(const FileEntry& entry);
+    virtual void do_clean();
   
   private:
     void check_dir() const;

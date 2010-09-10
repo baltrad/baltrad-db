@@ -92,4 +92,12 @@ CacheDirStorage::do_remove(const FileEntry& entry) {
     return not fs::exists(fs_path);
 }
 
+void
+CacheDirStorage::do_clean() {
+    fs::directory_iterator iter(dir_.to_utf8());
+    for ( ; iter != fs::directory_iterator(); ++iter) {
+        fs::remove(iter->path());
+    }
+}
+
 } // namespace brfc

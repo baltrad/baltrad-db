@@ -63,6 +63,13 @@ class LocalStorage {
     bool remove(const FileEntry& entry) {
         return do_remove(entry);
     }
+    
+    /**
+     * @brief remove all files
+     */
+    void clean() {
+        do_clean();
+    }
 
   protected:
     /**
@@ -79,6 +86,8 @@ class LocalStorage {
      * @return true if the file no longer exists
      */
     virtual bool do_remove(const FileEntry& entry) = 0;
+
+    virtual void do_clean() = 0;
 };
 
 } // namespace brfc
