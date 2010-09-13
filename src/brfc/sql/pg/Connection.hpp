@@ -64,8 +64,11 @@ class Connection : public sql::Connection {
     virtual shared_ptr<sql::Result> do_execute(const String& query);
 
     virtual shared_ptr<sql::LargeObject> do_large_object(long long id);
-
     virtual shared_ptr<sql::LargeObject> do_large_object(const String& path);
+
+    virtual long long do_last_insert_id() const {
+        return 0;
+    }
 
   private:
     void load_type_oids();

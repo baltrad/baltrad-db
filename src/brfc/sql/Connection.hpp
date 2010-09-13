@@ -179,6 +179,10 @@ class Connection {
      */
     shared_ptr<LargeObject> large_object(const String& path);
 
+    long long last_insert_id() const {
+        return do_last_insert_id();
+    }
+
   protected:
     virtual void do_open() = 0;
     virtual void do_close() = 0;
@@ -208,8 +212,9 @@ class Connection {
     virtual String do_variant_to_string(const Variant& value) const;
 
     virtual shared_ptr<LargeObject> do_large_object(long long id) = 0;
-
     virtual shared_ptr<LargeObject> do_large_object(const String& path) = 0;
+
+    virtual long long do_last_insert_id() const = 0;
   
   private:
     shared_ptr<Compiler> compiler_;

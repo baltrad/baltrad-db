@@ -99,11 +99,13 @@ SaveGroup::bind_specializations(const oh5::Group& group) {
 
 long long
 SaveGroup::last_id(sql::Result& result) {
-    if (rdb_->connection().dialect().has_feature(sql::Dialect::RETURNING) and result.next()) {
+    const sql::Dialect& d = rdb_->connection().dialect();
+    if (d.has_feature(sql::Dialect::RETURNING) and result.next()) {
         return result.value_at(0).int64_();
+    } else if (d.has_feature(sql::Dialect::LAST_INSERT_ID)) {
+        return rdb_->connection().last_insert_id();
     } else {
-        // XXX: last insert id!
-        return 0;
+        throw db_error("could not determine inserted group id");
     }
 }
 

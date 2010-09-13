@@ -67,11 +67,12 @@ SaveFile::operator()(const oh5::Attribute& attribute) {
 shared_ptr<RelationalFileEntry>
 SaveFile::operator()(const oh5::File& file) {
     sql::TablePtr files = Model::instance().files;
+    const sql::Dialect& dialect = rdb_->connection().dialect();
     const MappingVector& special = rdb_->mapper()->specializations_on(files);
 
     sql::InsertPtr stmt = sql::Insert::create(files);
 
-    if (rdb_->connection().dialect().has_feature(sql::Dialect::RETURNING))
+    if (dialect.has_feature(sql::Dialect::RETURNING))
         stmt->add_return(files->column("id"));
     
     sql::Factory xpr;
@@ -94,10 +95,12 @@ SaveFile::operator()(const oh5::File& file) {
     shared_ptr<sql::Result> result = rdb_->connection().execute(*stmt);
 
     long long file_id = 0;
-    if (rdb_->connection().dialect().has_feature(sql::Dialect::RETURNING) and result->next()) {
+    if (dialect.has_feature(sql::Dialect::RETURNING) and result->next()) {
         file_id = result->value_at(0).int64_();
+    } else if (dialect.has_feature(sql::Dialect::LAST_INSERT_ID)) {
+        file_id = rdb_->connection().last_insert_id();
     } else {
-        // XXX: last insert id!
+        throw db_error("could not determine inserted file id");
     }
 
     save_group_.file_id(file_id);
