@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/StringList.hpp>
 
 #include <brfc/sql/Connection.hpp>
+#include <brfc/sql/Dialect.hpp>
 
 namespace fs = boost::filesystem;
 
@@ -64,7 +65,7 @@ TestRDB::clean() {
 StringList
 TestRDB::load_queries(const String& filename) {
     fs::path qf_path = fs::path(schema_dir_)
-                       / connection().dialect().to_utf8()
+                       / connection().dialect().name().to_utf8()
                        / filename.to_utf8();
     
     std::ifstream ifs(qf_path.string().c_str(), std::ios::binary);

@@ -36,6 +36,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Connection.hpp>
+#include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/LargeObject.hpp>
@@ -70,7 +71,7 @@ SaveFile::operator()(const oh5::File& file) {
 
     sql::InsertPtr stmt = sql::Insert::create(files);
 
-    if (rdb_->connection().has_feature(sql::Connection::RETURNING))
+    if (rdb_->connection().dialect().has_feature(sql::Dialect::RETURNING))
         stmt->add_return(files->column("id"));
     
     sql::Factory xpr;
@@ -93,7 +94,7 @@ SaveFile::operator()(const oh5::File& file) {
     shared_ptr<sql::Result> result = rdb_->connection().execute(*stmt);
 
     long long file_id = 0;
-    if (rdb_->connection().has_feature(sql::Connection::RETURNING) and result->next()) {
+    if (rdb_->connection().dialect().has_feature(sql::Dialect::RETURNING) and result->next()) {
         file_id = result->value_at(0).int64_();
     } else {
         // XXX: last insert id!

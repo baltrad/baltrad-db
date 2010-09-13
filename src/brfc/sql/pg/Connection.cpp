@@ -31,7 +31,8 @@ namespace pg {
 Connection::Connection(const Url& url)
         : url_(url)
         , conn_()
-        , transaction_() {
+        , transaction_()
+        , dialect_() {
 }
 
 Connection::~Connection() {
@@ -44,6 +45,7 @@ Connection::do_open() {
     conn_->set_client_encoding("utf8");
     conn_->set_variable("datestyle", "ISO");
     load_type_oids();
+    dialect_.version(conn_->server_version());
 }
 
 bool
@@ -106,21 +108,6 @@ Connection::url_to_pg(const Url& url) {
         pgargs += " dbname=" + database;
 
     return pgargs;
-}
-
-bool
-Connection::do_has_feature(Connection::Feature feature) const {
-    switch (feature) {
-        case RETURNING:
-            // XXX: supported since 8.2, do a version check
-            return true;
-        case LAST_INSERT_ID:
-            // technically possible, but useless
-            // if database supports OIDs, last OID can be fetched
-            return false;
-        default:
-            return false;
-    }
 }
 
 shared_ptr<sql::LargeObject>

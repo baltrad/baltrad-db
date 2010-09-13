@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Connection.hpp>
 
 #include <brfc/sql/pg/Types.hpp>
+#include <brfc/sql/pg/Dialect.hpp>
 
 class String;
 
@@ -56,13 +57,11 @@ class Connection : public sql::Connection {
         return transaction_.get() != 0;
     }
 
-    virtual String do_dialect() const {
-        return "postgresql";
+    virtual const Dialect& do_dialect() const {
+        return dialect_;
     }
 
     virtual shared_ptr<sql::Result> do_execute(const String& query);
-
-    virtual bool do_has_feature(Feature feature) const;
 
     virtual shared_ptr<sql::LargeObject> do_large_object(long long id);
 
@@ -75,6 +74,7 @@ class Connection : public sql::Connection {
     Types types_;
     scoped_ptr<pqxx::connection> conn_;
     scoped_ptr<pqxx::transaction<> > transaction_;
+    Dialect dialect_;
 };
 
 } // namespace pg

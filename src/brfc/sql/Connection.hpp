@@ -32,6 +32,7 @@ class String;
 namespace sql {
 
 class Compiler;
+class Dialect;
 class Insert;
 class LargeObject;
 class Query;
@@ -43,11 +44,6 @@ class Select;
  */
 class Connection {
   public:
-    enum Feature {
-        RETURNING = 1,
-        LAST_INSERT_ID = 2
-    };
-
     Connection(shared_ptr<Compiler> compiler=shared_ptr<Compiler>());
 
     /**
@@ -169,11 +165,7 @@ class Connection {
         return do_variant_to_string(value);
     }
 
-    bool has_feature(Feature feature) const {
-        return do_has_feature(feature);
-    }
-
-    String dialect() const {
+    const Dialect& dialect() const {
         return do_dialect();
     }
     
@@ -203,14 +195,7 @@ class Connection {
      */
     virtual bool do_in_transaction() const = 0;
     
-    /**
-     * @return false
-     */
-    virtual bool do_has_feature(Feature /*feature*/) const {
-        return false;
-    }
-
-    virtual String do_dialect() const = 0;
+    virtual const Dialect& do_dialect() const = 0;
     
     /**
      * @brief default implementation

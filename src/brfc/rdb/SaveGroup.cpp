@@ -33,6 +33,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Connection.hpp>
+#include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Literal.hpp>
@@ -54,7 +55,7 @@ SaveGroup::SaveGroup(RelationalDatabase* rdb,
 void
 SaveGroup::operator()(const oh5::Group& group) {
     stmt_ = sql::Insert::create(Model::instance().groups);
-    if (rdb_->connection().has_feature(sql::Connection::RETURNING))
+    if (rdb_->connection().dialect().has_feature(sql::Dialect::RETURNING))
         stmt_->add_return(stmt_->table()->column("id"));
 
     bind_plain(group);
@@ -98,7 +99,7 @@ SaveGroup::bind_specializations(const oh5::Group& group) {
 
 long long
 SaveGroup::last_id(sql::Result& result) {
-    if (rdb_->connection().has_feature(sql::Connection::RETURNING) and result.next()) {
+    if (rdb_->connection().dialect().has_feature(sql::Dialect::RETURNING) and result.next()) {
         return result.value_at(0).int64_();
     } else {
         // XXX: last insert id!
