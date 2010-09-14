@@ -158,13 +158,6 @@ class Connection {
      */
     shared_ptr<Result> execute(const Query& query);
 
-    /**
-     * @sa do_variant_to_string
-     */
-    String variant_to_string(const Variant& value) const {
-        return do_variant_to_string(value);
-    }
-
     const Dialect& dialect() const {
         return do_dialect();
     }
@@ -201,16 +194,6 @@ class Connection {
     
     virtual const Dialect& do_dialect() const = 0;
     
-    /**
-     * @brief default implementation
-     * 
-     * - date and time in ISO 8601 format
-     * - bool values as TRUE or FALSE
-     * - none as NULL
-     * - string surrounded by apostrophes (')
-     */
-    virtual String do_variant_to_string(const Variant& value) const;
-
     virtual shared_ptr<LargeObject> do_large_object(long long id) = 0;
     virtual shared_ptr<LargeObject> do_large_object(const String& path) = 0;
 

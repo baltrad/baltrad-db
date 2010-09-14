@@ -33,10 +33,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include "../common.hpp"
 #include "MockCompiler.hpp"
 #include "MockConnection.hpp"
+#include "MockDialect.hpp"
 #include "MockResult.hpp"
 
 using testing::Ref;
 using testing::Return;
+using testing::ReturnRef;
 using testing::Throw;
 using testing::_;
 
@@ -47,15 +49,19 @@ class sql_Connection_test : public testing::Test {
   public:
     sql_Connection_test()
         : compiler()
+        , dialect()
         , conn(shared_ptr<Compiler>(&compiler, no_delete)) {
     }
 
     void SetUp() {
         ON_CALL(conn, do_is_open())
             .WillByDefault(Return(true));
+        ON_CALL(conn, do_dialect())
+            .WillByDefault(ReturnRef(dialect));
     }
 
     ::testing::NiceMock<MockCompiler> compiler;
+    ::testing::NiceMock<MockDialect> dialect;
     ::testing::NiceMock<MockConnection> conn;
 };
 
@@ -113,30 +119,6 @@ TEST_F(sql_Connection_test, test_in_transaction_execute_throws) {
         .WillOnce(Throw(std::runtime_error("")));
     
     EXPECT_THROW(conn.execute(stmt), db_error);
-}
-
-TEST_F(sql_Connection_test, test_variant_to_string_string) {
-    EXPECT_EQ("'qweqwe'", conn.variant_to_string(Variant("qweqwe")));
-}
-
-TEST_F(sql_Connection_test, test_variant_to_string_integer) {
-    EXPECT_EQ("1", conn.variant_to_string(Variant(1)));
-}
-
-TEST_F(sql_Connection_test, test_variant_to_string_float) {
-    EXPECT_EQ("0.5", conn.variant_to_string(Variant(0.5)));
-}
-
-TEST_F(sql_Connection_test, test_variant_to_string_date) {
-    EXPECT_EQ("'2001-05-01'", conn.variant_to_string(Variant(Date(2001, 5, 1))));
-}
-
-TEST_F(sql_Connection_test, test_variant_to_string_time) {
-    EXPECT_EQ("'13:05:59.001'", conn.variant_to_string(Variant(Time(13, 5, 59, 1))));
-}
-
-TEST_F(sql_Connection_test, test_variant_to_string_null) {
-    EXPECT_EQ("NULL", conn.variant_to_string(Variant()));
 }
 
 TEST_F(sql_Connection_test, test_begin) {

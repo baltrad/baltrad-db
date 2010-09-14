@@ -20,9 +20,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_DIALECT_HPP
 #define BRFC_SQL_DIALECT_HPP
 
+#include <brfc/String.hpp>
+
 namespace brfc {
 
-class String;
+class Variant;
 
 namespace sql {
 
@@ -43,6 +45,13 @@ class Dialect {
         return do_name();
     }
 
+    /**
+     * @sa do_variant_to_string
+     */
+    String variant_to_string(const Variant& value) const {
+        return do_variant_to_string(value);
+    }
+
   protected:
     /**
      * @return false
@@ -50,6 +59,16 @@ class Dialect {
     virtual bool do_has_feature(Feature feature) const = 0;
 
     virtual const String& do_name() const = 0;
+
+    /**
+     * @brief default implementation
+     * 
+     * - date and time in ISO 8601 format
+     * - bool values as TRUE or FALSE
+     * - none as NULL
+     * - string surrounded by apostrophes (')
+     */
+    virtual String do_variant_to_string(const Variant& value) const;
 };
 
 } // namespace sql

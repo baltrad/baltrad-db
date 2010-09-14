@@ -23,13 +23,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 #include <brfc/RegExp.hpp>
 
-#include <brfc/sql/Connection.hpp>
+#include <brfc/sql/Dialect.hpp>
 
 namespace brfc {
 namespace sql {
 
 String
-Query::replace_binds(const Connection& connection) const {
+Query::replace_binds(const Dialect& dialect) const {
     if (binds_.size() == 0)
         return statement_;
     RegExp bind_re(":[a-zA-Z0-9_]+");
@@ -43,7 +43,7 @@ Query::replace_binds(const Connection& connection) const {
             continue;
         }
         try {
-            bind_str = connection.variant_to_string(binds_.get(bind_re.cap()));
+            bind_str = dialect.variant_to_string(binds_.get(bind_re.cap()));
         } catch (const lookup_error&) {
             throw value_error("missing value for bind placeholder " +
                               bind_re.cap().to_std_string());

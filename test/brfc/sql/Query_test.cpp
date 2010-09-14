@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Query.hpp>
 
 #include "../common.hpp"
-#include "MockConnection.hpp"
+#include "MockDialect.hpp"
 
 namespace brfc {
 namespace sql {
@@ -34,18 +34,18 @@ class sql_Query_test : public testing::Test {
   public:
     sql_Query_test()
         : query()
-        , conn() {
+        , dialect() {
     }
 
     Query query;
-    MockConnection conn;
+    MockDialect dialect;
 };
 
 TEST_F(sql_Query_test, test_replace_binds_missing_binds) {
     query.statement(":bind1 :bind2");
     query.binds().add(":bind1", Variant());
 
-    EXPECT_THROW(query.replace_binds(conn), value_error);
+    EXPECT_THROW(query.replace_binds(dialect), value_error);
 }
 
 TEST_F(sql_Query_test, test_replace_binds_excessive_binds) {
@@ -53,7 +53,7 @@ TEST_F(sql_Query_test, test_replace_binds_excessive_binds) {
     query.binds().add(":bind1", Variant());
     query.binds().add(":bind2", Variant());
 
-    EXPECT_THROW(query.replace_binds(conn), value_error);
+    EXPECT_THROW(query.replace_binds(dialect), value_error);
 }
 
 TEST_F(sql_Query_test, test_replace_binds_find_simple_placeholders) {
@@ -62,7 +62,7 @@ TEST_F(sql_Query_test, test_replace_binds_find_simple_placeholders) {
     query.binds().add(":bind2", Variant(2));
 
     String result;
-    EXPECT_NO_THROW(result = query.replace_binds(conn));
+    EXPECT_NO_THROW(result = query.replace_binds(dialect));
     EXPECT_EQ("1 asd 2 qwe", result);
 }
 
@@ -73,7 +73,7 @@ TEST_F(sql_Query_test, test_replace_binds_find_complex_placeholders) {
     query.binds().add(":bind_3", Variant(3));
     
     String result;
-    EXPECT_NO_THROW(result = query.replace_binds(conn));
+    EXPECT_NO_THROW(result = query.replace_binds(dialect));
     EXPECT_EQ("(1), 2, 3+", result);
 }
 
@@ -83,7 +83,7 @@ TEST_F(sql_Query_test, test_replace_binds_large_replacement) {
     query.binds().add(":bind1", Variant(1234567));
     
     String result;
-    EXPECT_NO_THROW(result = query.replace_binds(conn));
+    EXPECT_NO_THROW(result = query.replace_binds(dialect));
     EXPECT_EQ("1234567", result);
 }
 
@@ -94,7 +94,7 @@ TEST_F(sql_Query_test, test_replace_binds_replacement_with_colon) {
     query.binds().add(":bind3", Variant(":a:b:c:d:e:"));
 
     String result;
-    EXPECT_NO_THROW(result = query.replace_binds(conn));
+    EXPECT_NO_THROW(result = query.replace_binds(dialect));
     EXPECT_EQ("':a:b:c:d:e:' texttext 'a:b:c:d:e' texttext ':a:b:c:d:e:'", result);
 }
 
@@ -102,7 +102,7 @@ TEST_F(sql_Query_test, test_replace_binds_escaped_placeholder_marker) {
     query.statement("\\:notabind");
 
     String result;
-    EXPECT_NO_THROW(result = query.replace_binds(conn));
+    EXPECT_NO_THROW(result = query.replace_binds(dialect));
     EXPECT_EQ(result, "\\:notabind");
 }
 

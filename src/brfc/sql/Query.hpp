@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-class Connection;
+class Dialect;
 
 class Query {
   public:
@@ -63,10 +63,10 @@ class Query {
 
     /**
      * @brief replace bind placeholders in the SQL statement
-     * @param connection database connection the replacement is done for
+     * @param dialect database dialect the replacement is done for
      * @throw value_error if not all binds consumed or available
      */
-    String replace_binds(const Connection& connection) const;
+    String replace_binds(const Dialect& dialect) const;
     
   private:
     String statement_;

@@ -110,7 +110,7 @@ Connection::execute(const Select& stmt) {
 
 shared_ptr<Result>
 Connection::execute(const Query& query) {
-    String statement = query.replace_binds(*this);
+    String statement = query.replace_binds(dialect());
     shared_ptr<Result> result;
     if (not in_transaction()) {
         try {
@@ -129,30 +129,6 @@ Connection::execute(const Query& query) {
         }
     }
     return result;
-}
-
-String
-Connection::do_variant_to_string(const Variant& value) const {
-    switch (value.type()) {
-        case Variant::NONE:
-            return "NULL";
-        case Variant::STRING:
-            // XXX: escape!!!
-            return "'" + value.string() + "'";
-        case Variant::INT64:
-        case Variant::DOUBLE:
-            return value.to_string();
-        case Variant::BOOL:
-            return value.to_string().to_lower();
-        case Variant::DATE:
-            return "'" + value.date().to_string("yyyy-MM-dd") + "'";
-        case Variant::TIME:
-            return "'" + value.time().to_string("HH:mm:ss.zzz") + "'";
-        case Variant::DATETIME:
-            return "'" + value.datetime().to_string("yyyy-MM-dd hh:mm:ss.zzz") + "'";
-        default:
-            throw value_error(value.to_string().to_std_string());
-    }
 }
 
 shared_ptr<LargeObject>
