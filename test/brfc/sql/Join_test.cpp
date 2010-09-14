@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
-#include <brfc/sql/DefaultCompiler.hpp>
+#include <brfc/sql/DialectCompiler.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Table.hpp>
 
@@ -53,7 +53,7 @@ class sql_Join_test : public ::testing::Test {
     }
     
     ::testing::NiceMock<MockDialect> dialect;
-    DefaultCompiler compiler;
+    DialectCompiler compiler;
     TablePtr t1, t2, t3;
 };
 

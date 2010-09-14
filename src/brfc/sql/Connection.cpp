@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 #include <brfc/Url.hpp>
 
-#include <brfc/sql/DefaultCompiler.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Query.hpp>
 #include <brfc/sql/Select.hpp>

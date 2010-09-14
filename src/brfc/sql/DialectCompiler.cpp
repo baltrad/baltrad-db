@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/sql/DefaultCompiler.hpp>
+#include <brfc/sql/DialectCompiler.hpp>
 
 #include <algorithm>
 
@@ -44,7 +44,7 @@ namespace brfc {
 namespace sql {
 
 Query
-DefaultCompiler::do_compile(const Element& expr) {
+DialectCompiler::do_compile(const Element& expr) {
     stack_.clear();
     binds_.clear();
     visit(expr, *this);
@@ -52,7 +52,7 @@ DefaultCompiler::do_compile(const Element& expr) {
 }
 
 String
-DefaultCompiler::pop() {
+DialectCompiler::pop() {
     BRFC_ASSERT(!stack_.empty());
     String top = stack_.back();
     stack_.pop_back();
@@ -60,12 +60,12 @@ DefaultCompiler::pop() {
 }
 
 void
-DefaultCompiler::push(const String& top) {
+DialectCompiler::push(const String& top) {
     stack_.push_back(top);
 }
 
 void
-DefaultCompiler::operator()(const BinaryOperator& expr) {
+DialectCompiler::operator()(const BinaryOperator& expr) {
     visit(*expr.lhs(), *this);
     visit(*expr.rhs(), *this);
     const String& rhs = pop();
@@ -74,13 +74,13 @@ DefaultCompiler::operator()(const BinaryOperator& expr) {
 }
 
 void
-DefaultCompiler::operator()(const Column& expr) {
+DialectCompiler::operator()(const Column& expr) {
     visit(*expr.selectable(), *this);
     push(pop() + "." + expr.name());
 }
 
 void
-DefaultCompiler::operator()(const Function& func) {
+DialectCompiler::operator()(const Function& func) {
     StringList args;
     BOOST_FOREACH(ExpressionPtr arg, func.args()) {
         visit(*arg, *this);
@@ -90,7 +90,7 @@ DefaultCompiler::operator()(const Function& func) {
 }
 
 void
-DefaultCompiler::operator()(const Alias& expr) {
+DialectCompiler::operator()(const Alias& expr) {
     if (in_from_clause_) {
         visit(*expr.aliased(), *this);
         push(pop() + " AS " + expr.alias());
@@ -101,7 +101,7 @@ DefaultCompiler::operator()(const Alias& expr) {
 }
 
 void
-DefaultCompiler::operator()(const Join& join) {
+DialectCompiler::operator()(const Join& join) {
     String condition, lhs, rhs, jointype;
     in_from_clause_ = true;
     visit(*join.rhs(), *this);
@@ -138,24 +138,24 @@ DefaultCompiler::operator()(const Join& join) {
 }
 
 void
-DefaultCompiler::operator()(const Literal& expr) {
+DialectCompiler::operator()(const Literal& expr) {
     push(dialect_->variant_to_string(expr.value()));
 }
 
 void
-DefaultCompiler::operator()(const Label& label) {
+DialectCompiler::operator()(const Label& label) {
     visit(*label.expression(), *this);
     push(pop() + " AS " + label.name());
 }
 
 void
-DefaultCompiler::operator()(const Parentheses& expr) {
+DialectCompiler::operator()(const Parentheses& expr) {
     visit(*expr.expression(), *this);
     push("(" + pop() + ")");
 }
 
 void
-DefaultCompiler::operator()(const Select& select) {
+DialectCompiler::operator()(const Select& select) {
 
     BOOST_FOREACH(ExpressionPtr col, select.what()) {
         visit(*col, *this);
@@ -193,7 +193,7 @@ DefaultCompiler::operator()(const Select& select) {
 }
 
 void
-DefaultCompiler::operator()(const Insert& insert) {
+DialectCompiler::operator()(const Insert& insert) {
     StringList cols;
     StringList vals;
     BOOST_FOREACH(const Insert::ValueMap::value_type& bind, insert.values()) {
@@ -217,7 +217,7 @@ DefaultCompiler::operator()(const Insert& insert) {
 }
 
 void
-DefaultCompiler::operator()(const Table& expr) {
+DialectCompiler::operator()(const Table& expr) {
     push(expr.name());
 }
 

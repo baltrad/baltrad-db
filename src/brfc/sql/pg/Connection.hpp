@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Url.hpp>
 
 #include <brfc/sql/Connection.hpp>
-#include <brfc/sql/DefaultCompiler.hpp>
+#include <brfc/sql/DialectCompiler.hpp>
 
 #include <brfc/sql/pg/Types.hpp>
 #include <brfc/sql/pg/Dialect.hpp>
@@ -83,7 +83,7 @@ class Connection : public sql::Connection {
     scoped_ptr<pqxx::connection> conn_;
     scoped_ptr<pqxx::transaction<> > transaction_;
     Dialect dialect_;
-    DefaultCompiler compiler_;
+    DialectCompiler compiler_;
 };
 
 } // namespace pg

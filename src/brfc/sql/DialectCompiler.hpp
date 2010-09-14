@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_SQL_DEFAULT_COMPILER_HPP
-#define BRFC_SQL_DEFAULT_COMPILER_HPP
+#ifndef BRFC_SQL_DIALECT_COMPILER_HPP
+#define BRFC_SQL_DIALECT_COMPILER_HPP
 
 #include <brfc/visit.hpp>
 #include <brfc/Variant.hpp>
@@ -34,9 +34,9 @@ namespace sql {
 class Dialect;
 
 /**
- * @brief default Compiler implementation
+ * @brief compiler using a Dialect
  */
-class DefaultCompiler : public Compiler {
+class DialectCompiler : public Compiler {
   public:
     typedef mpl::vector<const Alias,
                         const BinaryOperator,
@@ -53,7 +53,7 @@ class DefaultCompiler : public Compiler {
     /**
      * @brief constructor
      */
-    explicit DefaultCompiler(const Dialect* dialect)
+    explicit DialectCompiler(const Dialect* dialect)
             : dialect_(dialect)
             , in_from_clause_(false)
             , binds_()
@@ -152,4 +152,4 @@ class DefaultCompiler : public Compiler {
 }
 }
 
-#endif // BRFC_SQL_DEFAULT_COMPILER_HPP
+#endif // BRFC_SQL_DIALECT_COMPILER_HPP

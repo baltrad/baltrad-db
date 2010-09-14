@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Column.hpp>
-#include <brfc/sql/DefaultCompiler.hpp>
+#include <brfc/sql/DialectCompiler.hpp>
 #include <brfc/sql/Function.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Join.hpp>
@@ -74,8 +74,8 @@ class Replacer {
 
 } // namespace anonymous
 
-struct sql_DefaultCompiler_test: public testing::Test {
-    sql_DefaultCompiler_test()
+struct sql_DialectCompiler_test: public testing::Test {
+    sql_DialectCompiler_test()
             : dialect()
             , compiler(&dialect)
             , xpr()
@@ -101,12 +101,12 @@ struct sql_DefaultCompiler_test: public testing::Test {
     
     Replacer replacer;
     ::testing::NiceMock<MockDialect> dialect;
-    DefaultCompiler compiler;
+    DialectCompiler compiler;
     Factory xpr;
     TablePtr t1, t2, t3;
 };
 
-TEST_F(sql_DefaultCompiler_test, test_simple) {
+TEST_F(sql_DialectCompiler_test, test_simple) {
     ExpressionPtr expr = xpr.int64_(1)->lt(xpr.int64_(2));
     const Query& q = compiler.compile(*expr);
     EXPECT_EQ(":lit_0 < :lit_1", q.statement());
@@ -114,7 +114,7 @@ TEST_F(sql_DefaultCompiler_test, test_simple) {
     EXPECT_EQ(Variant(2), replacer.value(":lit_1"));
 }
 
-TEST_F(sql_DefaultCompiler_test, test_between) {
+TEST_F(sql_DialectCompiler_test, test_between) {
     ExpressionPtr expr = xpr.int64_(1)->between(xpr.int64_(0), xpr.int64_(2));
     const Query& q = compiler.compile(*expr);
     EXPECT_EQ(":lit_0 >= :lit_1 AND :lit_2 <= :lit_3", q.statement());
@@ -124,40 +124,40 @@ TEST_F(sql_DefaultCompiler_test, test_between) {
     EXPECT_EQ(Variant(2), replacer.value(":lit_3"));
 }
 
-TEST_F(sql_DefaultCompiler_test, test_string_literal) {
+TEST_F(sql_DialectCompiler_test, test_string_literal) {
     LiteralPtr l = xpr.string("a string");
     const Query& q = compiler.compile(*l);
     EXPECT_EQ(":lit_0", q.statement());
     EXPECT_EQ(Variant("a string"), replacer.value(":lit_0"));
 }
 
-TEST_F(sql_DefaultCompiler_test, test_parentheses) {
+TEST_F(sql_DialectCompiler_test, test_parentheses) {
     ExpressionPtr expr = xpr.int64_(1)->parentheses();
     const Query& q = compiler.compile(*expr);
     EXPECT_EQ("(:lit_0)", q.statement());
     EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
 }
 
-TEST_F(sql_DefaultCompiler_test, test_column) {
+TEST_F(sql_DialectCompiler_test, test_column) {
     ColumnPtr c = t1->column("c1");
     const Query& q = compiler.compile(*c);
     EXPECT_EQ("t1.c1", q.statement());
 }
 
-TEST_F(sql_DefaultCompiler_test, test_aliased_table_column) {
+TEST_F(sql_DialectCompiler_test, test_aliased_table_column) {
     AliasPtr a = t1->alias("table_alias");
     ColumnPtr c = a->column("c1");
     const Query& q = compiler.compile(*c);
     EXPECT_EQ("table_alias.c1", q.statement());
 }
 
-TEST_F(sql_DefaultCompiler_test, test_basic_join) {
+TEST_F(sql_DialectCompiler_test, test_basic_join) {
     JoinPtr j = t1->join(t2, t1->column("c1")->eq(t2->column("c2")));
     const Query& q = compiler.compile(*j);
     EXPECT_EQ("t1 JOIN t2 ON t1.c1 = t2.c2", q.statement());
 }
 
-TEST_F(sql_DefaultCompiler_test, test_outerjoin) {
+TEST_F(sql_DialectCompiler_test, test_outerjoin) {
     JoinPtr j = t1->outerjoin(t2, t1->column("c1")->eq(t2->column("c2")));
     const Query& q = compiler.compile(*j);
     EXPECT_EQ("t1 LEFT JOIN t2 ON t1.c1 = t2.c2", q.statement());
@@ -165,14 +165,14 @@ TEST_F(sql_DefaultCompiler_test, test_outerjoin) {
 
 
 
-TEST_F(sql_DefaultCompiler_test, test_join_with_alias) {
+TEST_F(sql_DialectCompiler_test, test_join_with_alias) {
     SelectablePtr a = t2->alias("a");
     JoinPtr j = t1->join(a, t1->column("c1")->eq(a->column("c2")));
     const Query& q = compiler.compile(*j);
     EXPECT_EQ("t1 JOIN t2 AS a ON t1.c1 = a.c2", q.statement());
 }
 
-TEST_F(sql_DefaultCompiler_test, test_join_with_multiple_aliases) {
+TEST_F(sql_DialectCompiler_test, test_join_with_multiple_aliases) {
     SelectablePtr a1 = t1->alias("a1");
     SelectablePtr a2 = t2->alias("a2");
     SelectablePtr a3 = t3->alias("a3");
@@ -185,7 +185,7 @@ TEST_F(sql_DefaultCompiler_test, test_join_with_multiple_aliases) {
               q.statement());
 }
 
-TEST_F(sql_DefaultCompiler_test, test_select) {
+TEST_F(sql_DialectCompiler_test, test_select) {
     SelectPtr select = Select::create();
     ColumnPtr column = t1->column("c1");
     ColumnPtr column2 = t1->column("c2");
@@ -201,7 +201,7 @@ TEST_F(sql_DefaultCompiler_test, test_select) {
     EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
 }
 
-TEST_F(sql_DefaultCompiler_test, test_insert) {
+TEST_F(sql_DialectCompiler_test, test_insert) {
     InsertPtr insert = Insert::create(t1);
     insert->value("c1", xpr.int64_(1));
     insert->value("c2", xpr.int64_(2));
@@ -213,7 +213,7 @@ TEST_F(sql_DefaultCompiler_test, test_insert) {
     EXPECT_EQ(Variant(2), replacer.value(":lit_1"));
 }
 
-TEST_F(sql_DefaultCompiler_test, test_factory_or_) {
+TEST_F(sql_DialectCompiler_test, test_factory_or_) {
     ExpressionPtr e1 = t1->column("c1")->eq(xpr.int64_(1));
     ExpressionPtr e2 = t1->column("c1")->eq(xpr.int64_(2));
     ExpressionPtr e3 = xpr.or_(e1, e2);
@@ -224,7 +224,7 @@ TEST_F(sql_DefaultCompiler_test, test_factory_or_) {
     EXPECT_EQ(Variant(2), replacer.value(":lit_1"));
 }
 
-TEST_F(sql_DefaultCompiler_test, test_function) {
+TEST_F(sql_DialectCompiler_test, test_function) {
     FunctionPtr f = Function::create("func1");
     f->add_arg(xpr.int64_(1));
     f->add_arg(xpr.int64_(2));
