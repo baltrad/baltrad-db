@@ -40,17 +40,54 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Table.hpp>
 
 #include "../common.hpp"
+#include "MockDialect.hpp"
+
+using ::testing::_;
+using ::testing::Invoke;
 
 namespace brfc {
 namespace sql {
 
+namespace {
+
+class Replacer {
+  public:
+    Replacer()
+            : binds_()
+            , count_(0) {
+    }
+
+    String replace(const Variant& value) {
+        String key = String(":lit_") + String::number(count_++);
+        binds_.add(key, value);
+        return key;
+    }
+
+    Variant value(const String& key) const {
+        return binds_.get(key, Variant());
+    }
+
+  private:
+    BindMap binds_;
+    int count_;
+};
+
+} // namespace anonymous
+
 struct sql_DefaultCompiler_test: public testing::Test {
     sql_DefaultCompiler_test()
-            : compiler()
+            : dialect()
+            , compiler(&dialect)
             , xpr()
             , t1(Table::create("t1"))
             , t2(Table::create("t2"))
             , t3(Table::create("t3")) {
+    }
+
+    virtual void SetUp() {
+        ON_CALL(dialect, do_variant_to_string(_))
+            .WillByDefault(Invoke(&replacer, &Replacer::replace));
+
         t1->add_column("c1");
         t1->add_column("c2");
         t1->add_column("c3");
@@ -61,11 +98,9 @@ struct sql_DefaultCompiler_test: public testing::Test {
         t3->add_column("c2");
         t3->add_column("c3");
     }
-
-    const Variant& bind(const Query& qry, const String& key) const {
-        return qry.binds().get(key, Variant());
-    }
-
+    
+    Replacer replacer;
+    ::testing::NiceMock<MockDialect> dialect;
     DefaultCompiler compiler;
     Factory xpr;
     TablePtr t1, t2, t3;
@@ -75,32 +110,32 @@ TEST_F(sql_DefaultCompiler_test, test_simple) {
     ExpressionPtr expr = xpr.int64_(1)->lt(xpr.int64_(2));
     const Query& q = compiler.compile(*expr);
     EXPECT_EQ(":lit_0 < :lit_1", q.statement());
-    EXPECT_EQ(Variant(1), bind(q, ":lit_0"));
-    EXPECT_EQ(Variant(2), bind(q, ":lit_1"));
+    EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
+    EXPECT_EQ(Variant(2), replacer.value(":lit_1"));
 }
 
 TEST_F(sql_DefaultCompiler_test, test_between) {
     ExpressionPtr expr = xpr.int64_(1)->between(xpr.int64_(0), xpr.int64_(2));
     const Query& q = compiler.compile(*expr);
     EXPECT_EQ(":lit_0 >= :lit_1 AND :lit_2 <= :lit_3", q.statement());
-    EXPECT_EQ(Variant(1), bind(q, ":lit_0"));
-    EXPECT_EQ(Variant(0), bind(q, ":lit_1"));
-    EXPECT_EQ(Variant(1), bind(q, ":lit_2"));
-    EXPECT_EQ(Variant(2), bind(q, ":lit_3"));
+    EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
+    EXPECT_EQ(Variant(0), replacer.value(":lit_1"));
+    EXPECT_EQ(Variant(1), replacer.value(":lit_2"));
+    EXPECT_EQ(Variant(2), replacer.value(":lit_3"));
 }
 
 TEST_F(sql_DefaultCompiler_test, test_string_literal) {
     LiteralPtr l = xpr.string("a string");
     const Query& q = compiler.compile(*l);
     EXPECT_EQ(":lit_0", q.statement());
-    EXPECT_EQ(Variant("a string"), bind(q, ":lit_0"));
+    EXPECT_EQ(Variant("a string"), replacer.value(":lit_0"));
 }
 
 TEST_F(sql_DefaultCompiler_test, test_parentheses) {
     ExpressionPtr expr = xpr.int64_(1)->parentheses();
     const Query& q = compiler.compile(*expr);
     EXPECT_EQ("(:lit_0)", q.statement());
-    EXPECT_EQ(Variant(1), bind(q, ":lit_0"));
+    EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
 }
 
 TEST_F(sql_DefaultCompiler_test, test_column) {
@@ -163,7 +198,7 @@ TEST_F(sql_DefaultCompiler_test, test_select) {
     String expected("SELECT t1.c1, t1.c2, t2.c3\nFROM t1 CROSS JOIN t2\nWHERE t1.c1 < :lit_0");
     const Query& q = compiler.compile(*select);
     EXPECT_EQ(expected, q.statement());
-    EXPECT_EQ(Variant(1), bind(q, ":lit_0"));
+    EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
 }
 
 TEST_F(sql_DefaultCompiler_test, test_insert) {
@@ -174,8 +209,8 @@ TEST_F(sql_DefaultCompiler_test, test_insert) {
     String expected("INSERT INTO t1(c1, c2) VALUES (:lit_0, :lit_1) RETURNING t1.c3");
     const Query& q = compiler.compile(*insert);
     EXPECT_EQ(expected, q.statement());
-    EXPECT_EQ(Variant(1), bind(q, ":lit_0"));
-    EXPECT_EQ(Variant(2), bind(q, ":lit_1"));
+    EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
+    EXPECT_EQ(Variant(2), replacer.value(":lit_1"));
 }
 
 TEST_F(sql_DefaultCompiler_test, test_factory_or_) {
@@ -185,8 +220,8 @@ TEST_F(sql_DefaultCompiler_test, test_factory_or_) {
     String expected("t1.c1 = :lit_0 OR t1.c1 = :lit_1");
     const Query& q = compiler.compile(*e3);
     EXPECT_EQ(expected, q.statement());
-    EXPECT_EQ(Variant(1), bind(q, ":lit_0"));
-    EXPECT_EQ(Variant(2), bind(q, ":lit_1"));
+    EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
+    EXPECT_EQ(Variant(2), replacer.value(":lit_1"));
 }
 
 TEST_F(sql_DefaultCompiler_test, test_function) {
@@ -195,8 +230,8 @@ TEST_F(sql_DefaultCompiler_test, test_function) {
     f->add_arg(xpr.int64_(2));
     const Query& q = compiler.compile(*f);
     EXPECT_EQ("func1(:lit_0, :lit_1)", q.statement());
-    EXPECT_EQ(Variant(1), bind(q, ":lit_0"));
-    EXPECT_EQ(Variant(2), bind(q, ":lit_1"));
+    EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
+    EXPECT_EQ(Variant(2), replacer.value(":lit_1"));
 }
 
 } // namespace sql

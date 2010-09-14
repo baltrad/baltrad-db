@@ -62,7 +62,7 @@ class Connection : public sql::Connection {
         return dialect_;
     }
 
-    Compiler& do_compiler() {
+    virtual Compiler& do_compiler() {
         return compiler_;
     }
 

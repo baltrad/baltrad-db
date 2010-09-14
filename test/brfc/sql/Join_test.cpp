@@ -28,13 +28,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Table.hpp>
 
+#include "MockDialect.hpp"
+
 namespace brfc {
 namespace sql {
 
 class sql_Join_test : public ::testing::Test {
   public:
     sql_Join_test()
-            : compiler()
+            : dialect()
+            , compiler(&dialect)
             , t1(Table::create("t1"))
             , t2(Table::create("t2"))
             , t3(Table::create("t3")) {
@@ -48,7 +51,8 @@ class sql_Join_test : public ::testing::Test {
         t3->add_column("e1");
         t3->add_column("e2");
     }
-
+    
+    ::testing::NiceMock<MockDialect> dialect;
     DefaultCompiler compiler;
     TablePtr t1, t2, t3;
 };

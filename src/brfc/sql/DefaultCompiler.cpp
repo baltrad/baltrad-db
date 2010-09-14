@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
+#include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Function.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Join.hpp>
@@ -138,9 +139,7 @@ DefaultCompiler::operator()(const Join& join) {
 
 void
 DefaultCompiler::operator()(const Literal& expr) {
-    String key = String(":lit_") + String::number(literal_count_++);
-    push(key);
-    binds_.add(key, expr.value());
+    push(dialect_->variant_to_string(expr.value()));
 }
 
 void

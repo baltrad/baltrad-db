@@ -31,6 +31,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
+class Dialect;
+
 /**
  * @brief default Compiler implementation
  */
@@ -51,9 +53,9 @@ class DefaultCompiler : public Compiler {
     /**
      * @brief constructor
      */
-    DefaultCompiler()
-            : in_from_clause_(false)
-            , literal_count_(0)
+    explicit DefaultCompiler(const Dialect* dialect)
+            : dialect_(dialect)
+            , in_from_clause_(false)
             , binds_()
             , stack_() {
     }
@@ -94,8 +96,7 @@ class DefaultCompiler : public Compiler {
 
     /**
      * @brief compile Literal to string form
-     * @post top of the stack contains literal binding key, binds contains
-     *       a mapping of this key to value
+     * @post top of the stack contains result of Dialect::variant_to_string
      */
     void operator()(const Literal& expr);
     
@@ -141,9 +142,9 @@ class DefaultCompiler : public Compiler {
   private:
     String pop();
     void push(const String& str);
-
+    
+    const Dialect* dialect_;
     bool in_from_clause_;
-    unsigned int literal_count_;
     BindMap binds_;
     std::vector<String> stack_;
 };
