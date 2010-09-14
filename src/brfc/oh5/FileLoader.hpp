@@ -40,9 +40,6 @@ class FileLoader {
      * @param path path in filesystem
      * @return File pointer
      * @throw fs_error if the file can not be opened
-     *
-     * attributes for which converter lookup (or conversion) fails, are
-     * stored with an empty Variant as a value (meaning they are invalid).
      */
     shared_ptr<File> load(const String& path);
 };

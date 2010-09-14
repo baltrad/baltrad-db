@@ -20,14 +20,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Attribute.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Variant.hpp>
+
 #include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/Scalar.hpp>
 
 namespace brfc {
 namespace oh5 {
 
 Attribute::Attribute(const String& name,
-                     const Variant& value)
+                     const Scalar& value)
         : Node(name)
         , value_(value) {
 }
@@ -52,13 +53,8 @@ Attribute::parent_group() const {
 }
 
 void
-Attribute::value(const Variant& value) {
+Attribute::value(const Scalar& value) {
     value_ = value;
-}
-
-bool
-Attribute::is_valid() const {
-    return not value_.is_null();
 }
 
 String

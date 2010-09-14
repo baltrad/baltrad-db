@@ -21,7 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/StringList.hpp>
-#include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
@@ -40,7 +39,7 @@ struct oh5_Group_test : public ::testing::Test {
 };
 
 TEST_F(oh5_Group_test, test_add_child_attribute) {
-    shared_ptr<Attribute> a = make_shared<Attribute>("a", Variant(1));
+    shared_ptr<Attribute> a = make_shared<Attribute>("a", Scalar(1));
     EXPECT_NO_THROW(g->add_child(a));
 }
 
@@ -57,7 +56,7 @@ TEST_F(oh5_Group_test, test_add_child_group) {
 TEST_F(oh5_Group_test, test_child_attribute_access) {
     shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
     g->add_child(what);
-    shared_ptr<Attribute> a1 = make_shared<Attribute>("a1", Variant(1));
+    shared_ptr<Attribute> a1 = make_shared<Attribute>("a1", Scalar(1));
     what->add_child(a1);
 
     EXPECT_EQ(g->child_attribute("what/a1"), a1);
@@ -97,11 +96,12 @@ TEST_F(oh5_Group_test, test_attribute_access) {
     shared_ptr<Group> ds1_d1 = make_shared<Group>("data1");
     shared_ptr<Group> ds1_d2 = make_shared<Group>("data2");
 
-    shared_ptr<Attribute> w_attr1 = make_shared<Attribute>("attr1");
-    shared_ptr<Attribute> w_attr2 = make_shared<Attribute>("attr2");
-    shared_ptr<Attribute> ds1_attr1 = make_shared<Attribute>("attr1");
-    shared_ptr<Attribute> ds1_d1_w_attr1 = make_shared<Attribute>("attr1");
-    shared_ptr<Attribute> ds1_d1_w_attr2 = make_shared<Attribute>("attr2");
+    Scalar val(1);
+    shared_ptr<Attribute> w_attr1 = make_shared<Attribute>("attr1", val);
+    shared_ptr<Attribute> w_attr2 = make_shared<Attribute>("attr2", val);
+    shared_ptr<Attribute> ds1_attr1 = make_shared<Attribute>("attr1", val);
+    shared_ptr<Attribute> ds1_d1_w_attr1 = make_shared<Attribute>("attr1", val);
+    shared_ptr<Attribute> ds1_d1_w_attr2 = make_shared<Attribute>("attr2", val);
 
     g->add_child(w);
     g->add_child(ds1);

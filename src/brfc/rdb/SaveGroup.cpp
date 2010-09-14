@@ -30,6 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/GroupCache.hpp>
 #include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/SaveAttribute.hpp>
 
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Connection.hpp>
@@ -84,17 +85,12 @@ SaveGroup::bind_plain(const oh5::Group& group) {
 
 void
 SaveGroup::bind_specializations(const oh5::Group& group) {
-    sql::Factory xpr;
     BOOST_FOREACH(const Mapping& mapping, special_) {
         shared_ptr<const oh5::Attribute> attr =
             group.child_attribute(mapping.attribute);
         if (attr)
-            stmt_->value(mapping.column, xpr.literal(attr->value()));
+            stmt_->value(mapping.column, attr_sql_value(*attr));
     }
-    // XXX: note that this relies on implicit convertion of attribute value
-    //      in DB (True/False -> bool; ISO 8601 date/time strings)
-    //
-    // XXX: this should be explicit
 }
 
 long long

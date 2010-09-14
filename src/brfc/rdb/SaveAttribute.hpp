@@ -64,7 +64,8 @@ class SaveAttribute {
     GroupCache* group_cache_;
 };
 
-
+sql::LiteralPtr
+attr_sql_value(const oh5::Attribute& attr);
 
 } // namespace rdb
 } // namespace brfc

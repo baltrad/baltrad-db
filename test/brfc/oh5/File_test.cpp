@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/StringList.hpp>
 #include <brfc/Time.hpp>
-#include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/File.hpp>
@@ -77,15 +76,15 @@ TEST_F(oh5_File_test, required_attribute_shortcuts_when_missing) {
 TEST_F(oh5_File_test, required_attribute_shortcuts_conversion) {
     shared_ptr<File> f = File::create();
     shared_ptr<Group> what = f->root()->get_or_create_child_group_by_name("what");
-    what->add_child(make_shared<Attribute>("date", Variant("20001213")));
-    what->add_child(make_shared<Attribute>("time", Variant("123456")));
+    what->add_child(make_shared<Attribute>("date", Scalar("20001213")));
+    what->add_child(make_shared<Attribute>("time", Scalar("123456")));
     EXPECT_EQ(Date(2000, 12, 13), f->what_date());
     EXPECT_EQ(Time(12, 34, 56), f->what_time());
 
-    what->child_attribute("date")->value(Variant("foo"));
+    what->child_attribute("date")->value(Scalar("foo"));
     EXPECT_THROW(f->what_date(), value_error);
 
-    what->child_attribute("time")->value(Variant("bar"));
+    what->child_attribute("time")->value(Scalar("bar"));
     EXPECT_THROW(f->what_time(), value_error);
 }
 
@@ -99,22 +98,6 @@ TEST_F(oh5_File_test, test_name) {
     EXPECT_EQ(f1->name(), "filename");
     f1->path("filename2");
     EXPECT_EQ(f1->name(), "filename2");
-}
-
-TEST_F(oh5_File_test, test_invalid_attributes) {
-    shared_ptr<Attribute> invalid = make_shared<Attribute>("invalid");
-    f1->root()->add_child(invalid);
-    File::AttributeVector v = f1->invalid_attributes();
-    EXPECT_EQ(v.size(), (size_t)1);
-    EXPECT_TRUE(std::find(v.begin(), v.end(), invalid) != v.end());
-}
-
-TEST_F(oh5_File_test, test_invalid_attribute_paths) {
-    shared_ptr<Attribute> invalid = make_shared<Attribute>("invalid");
-    f1->root()->add_child(invalid);
-    const StringList& v = f1->invalid_attribute_paths();
-    EXPECT_EQ(v.size(), (size_t)1);
-    EXPECT_TRUE(v.contains("/invalid"));
 }
 
 TEST_F(oh5_File_test, test_source_get) {

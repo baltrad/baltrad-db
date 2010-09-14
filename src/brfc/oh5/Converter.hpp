@@ -30,10 +30,9 @@ extern "C" {
 #include <brfc/smart_ptr.hpp>
 
 namespace brfc {
-
-class Variant;
-
 namespace oh5 {
+
+class Scalar;
 
 /**
  * @brief HLHDF scalar data as raw byte array
@@ -73,7 +72,7 @@ class HL_Data {
 };
 
 /**
- * @brief ABC for HL_Data <-> Variant conversion
+ * @brief ABC for HL_Data <-> Scalar conversion
  */
 class Converter {
   public:
@@ -83,27 +82,27 @@ class Converter {
 
     static
     shared_ptr<const Converter>
-    create_from_variant(const Variant& variant);
+    create_from_variant(const Scalar& variant);
 
     /**
-     * @brief convert data from HLHDF format to Variant
+     * @brief convert data from HLHDF format to Scalar
      * @param format format as defined in HLHDF library
      * @param data value bytes
-     * @return Variant containing the value
+     * @return Scalar containing the value
      * @throw value_error if the conversion fails
      *
      * @see do_convert(HL_FormatSpecifier, unsigned char*) const
      */
-    Variant convert(const HL_Node& node) const;
+    Scalar convert(const HL_Node& node) const;
     
     /**
-     * @brief convert a Variant to HLHDF format
-     * @param value the Variant to convert
+     * @brief convert a Scalar to HLHDF format
+     * @param value the Scalar to convert
      * @throw value_error if the conversion fails
      *
-     * @see do_convert(const Variant&) const
+     * @see do_convert(const Scalar&) const
      */
-    HL_Data convert(const Variant& value) const;
+    HL_Data convert(const Scalar& value) const;
 
     /**
      * @brief destructor
@@ -112,15 +111,15 @@ class Converter {
 
   protected:
     /**
-     * @brief do the actual conversion to Variant
+     * @brief do the actual conversion to Scalar
      */
-    virtual Variant do_convert(HL_FormatSpecifier format,
+    virtual Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const = 0;
 
     /**
      * @brief do the actial conversion to HL_Data
      */
-    virtual HL_Data do_convert(const Variant& value) const = 0;
+    virtual HL_Data do_convert(const Scalar& value) const = 0;
 };
 
 /**
@@ -134,10 +133,10 @@ class Converter {
  */
 class StringConverter : public Converter {
   protected:
-    virtual Variant do_convert(HL_FormatSpecifier format,
+    virtual Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
     
-    virtual HL_Data do_convert(const Variant& value) const;
+    virtual HL_Data do_convert(const Scalar& value) const;
 };
 
 /**
@@ -148,7 +147,7 @@ class StringConverter : public Converter {
  *  - HLHDF_LONG
  *  - HLHDF_LLONG
  *
- * @note conversion from Variant to HLHDF format always results in a
+ * @note conversion from Scalar to HLHDF format always results in a
  *       HLHDF_LLONG
  * @note unsigned integers probably need their own converter (to fit a
  *       ullong). ODIM_H5 currently doesn't specify any attributes with
@@ -157,10 +156,10 @@ class StringConverter : public Converter {
  */
 class Int64Converter : public Converter {
   protected:
-    virtual Variant do_convert(HL_FormatSpecifier format,
+    virtual Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
 
-    virtual HL_Data do_convert(const Variant& value) const;
+    virtual HL_Data do_convert(const Scalar& value) const;
 };
 
 /**
@@ -171,15 +170,15 @@ class Int64Converter : public Converter {
  *  - HLHDF_DOUBLE
  *  - HLHDF_LDOUBLE (with possible loss of precision)
  *
- * @note conversion from Variant to HLHDF format always results in a
+ * @note conversion from Scalar to HLHDF format always results in a
  *       HLHDF_DOUBLE
  */
 class DoubleConverter : public Converter {
   protected:
-    virtual Variant do_convert(HL_FormatSpecifier format,
+    virtual Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
 
-    virtual HL_Data do_convert(const Variant& value) const;
+    virtual HL_Data do_convert(const Scalar& value) const;
 };
 
 } // namespace oh5

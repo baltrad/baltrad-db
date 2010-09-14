@@ -40,20 +40,7 @@ SHA1AttributeHasher::~SHA1AttributeHasher() {
 
 String
 SHA1AttributeHasher::attribute_string(const oh5::Attribute& attr) {
-    const Variant& value = attr.value();
-    String value_str;
-    switch (value.type()) {
-        case Variant::DATE:
-            value_str = value.date().to_string("yyyyMMdd");
-            break;
-        case Variant::TIME:
-            value_str = value.time().to_string("hhmmss");
-            break;
-        default:
-            value_str = value.to_string();
-            break;
-    }
-    return attr.path() + "=" + value_str;
+    return attr.path() + "=" + attr.value().to_string();
 }
 
 String
@@ -63,9 +50,7 @@ SHA1AttributeHasher::do_hash(const oh5::File& file) {
 
     BOOST_FOREACH(const oh5::Node& node, *file.root()) {
         attr = dynamic_cast<const oh5::Attribute*>(&node);
-        if (attr and attr->is_valid()
-            and not ignored().contains(attr->full_name())) {
-
+        if (attr and not ignored().contains(attr->full_name())) {
             strs.append(attribute_string(*attr));
         }
     }

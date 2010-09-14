@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Variant.hpp>
+
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/RootGroup.hpp>
@@ -39,7 +39,7 @@ struct oh5_AttributeGroup_test : public ::testing::Test {
 };
 
 TEST_F(oh5_AttributeGroup_test, test_add_child_Attribute) {
-    shared_ptr<Attribute> a = make_shared<Attribute>("a", Variant(1));
+    shared_ptr<Attribute> a = make_shared<Attribute>("a", Scalar(1));
     EXPECT_NO_THROW(what->add_child(a));
 }
 

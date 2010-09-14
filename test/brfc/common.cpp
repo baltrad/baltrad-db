@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
+#include <brfc/oh5/Scalar.hpp>
 #include <brfc/test/TestRDB.hpp>
 
 #include <boost/foreach.hpp>
@@ -94,5 +95,12 @@ std::ostream& operator<<(std::ostream& out, const brfc::DateTime& value) {
 
 std::ostream& operator<<(std::ostream& out, const brfc::Variant& value) {
     out << value.to_string().to_std_string();
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const brfc::oh5::Scalar& value) {
+    out << "oh5::Scalar("
+        << value.to_string().to_std_string()
+        << ")";
     return out;
 }

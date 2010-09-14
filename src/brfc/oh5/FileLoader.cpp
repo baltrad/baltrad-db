@@ -21,13 +21,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/StringList.hpp>
-#include <brfc/Variant.hpp>
 
 #include <brfc/oh5/hlhdf.hpp>
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Converter.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/Scalar.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -43,15 +43,18 @@ void add_attribute_from_node(RootGroup& root, HL_Node* node) {
     // XXX: don't load if attribute is attached to DataSet
     if (path.back() == "data")
         return;
-    
-    // create attribute with empty value
-    shared_ptr<Attribute> attr = make_shared<Attribute>(attr_name);
-    
+     
     shared_ptr<const Converter> converter =
         Converter::create_from_hlhdf_node(*node);
-    if (converter)
-        attr->value(converter->convert(*node));
-    // unconvertible HL_Node keeps empty Variant as value
+    if (not converter)
+        throw std::runtime_error("could not convert " +
+                                 nodename.to_utf8() + 
+                                 " value");
+
+    Scalar value = converter->convert(*node);
+
+    // create attribute with empty value
+    shared_ptr<Attribute> attr = make_shared<Attribute>(attr_name, value);
 
     path.take_first(); // discard the root element
     shared_ptr<Group> group =

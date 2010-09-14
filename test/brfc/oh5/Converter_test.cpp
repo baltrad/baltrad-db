@@ -22,10 +22,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <cstring>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Variant.hpp>
 
 #include <brfc/oh5/hlhdf.hpp>
 #include <brfc/oh5/Converter.hpp>
+#include <brfc/oh5/Scalar.hpp>
 
 #include "../common.hpp"
 
@@ -97,17 +97,15 @@ TEST(oh5_Converter_test, test_create_converter_from_hlhdf_node) {
 
 TEST(oh5_Converter_test, test_create_converter_from_variant) {
     shared_ptr<const Converter> conv;
-    Variant v;
-    
-    v = Variant(1);
+    Scalar v(1);
     conv = Converter::create_from_variant(v);
     EXPECT_TRUE(dynamic_pointer_cast<const Int64Converter>(conv));
 
-    v = Variant(1.1);
+    v = Scalar(1.1);
     conv = Converter::create_from_variant(v);
     EXPECT_TRUE(dynamic_pointer_cast<const DoubleConverter>(conv));
 
-    v = Variant("foo");
+    v = Scalar("foo");
     conv = Converter::create_from_variant(v);
     EXPECT_TRUE(dynamic_pointer_cast<const StringConverter>(conv));
 
@@ -116,19 +114,19 @@ TEST(oh5_Converter_test, test_create_converter_from_variant) {
 TEST(oh5_Int64Converter_test, test_convert_hlnode) {
     Int64Converter conv;
     shared_ptr<HL_Node> node;
-    Variant v;
+    Scalar v(0);
     
     node = create_hlhdf_attribute("node", "int", (int)1);
     EXPECT_NO_THROW(v = conv.convert(*node)); 
-    EXPECT_EQ(Variant(1), v);
+    EXPECT_EQ(Scalar(1), v);
 
     node = create_hlhdf_attribute("node", "long", (long)1);
     EXPECT_NO_THROW(v = conv.convert(*node)); 
-    EXPECT_EQ(Variant(1), v);
+    EXPECT_EQ(Scalar(1), v);
 
     node = create_hlhdf_attribute("node", "llong", (long long)1);
     EXPECT_NO_THROW(v = conv.convert(*node)); 
-    EXPECT_EQ(Variant(1), v);
+    EXPECT_EQ(Scalar(1), v);
 
     node = create_hlhdf_attribute("node", "double", 1.1);
     EXPECT_THROW(conv.convert(*node), value_error);
@@ -139,32 +137,31 @@ TEST(oh5_Int64Converter_test, test_convert_hlnode) {
 
 TEST(oh5_Int64Converter_test, test_convert_variant) {
     Int64Converter conv;
-    Variant v;
 
-    HL_Data d = conv.convert(Variant(1));
+    HL_Data d = conv.convert(Scalar(1));
     EXPECT_STREQ("llong", d.type());
     EXPECT_EQ(1, *reinterpret_cast<long long*>(d.data()));
 
-    EXPECT_THROW(conv.convert(Variant(1.1)), value_error);
-    EXPECT_THROW(conv.convert(Variant("asd")), value_error);
+    EXPECT_THROW(conv.convert(Scalar(1.1)), value_error);
+    EXPECT_THROW(conv.convert(Scalar("asd")), value_error);
 }
 
 TEST(oh5_DoubleConverter_test, test_convert_hlnode) {
     DoubleConverter conv;
     shared_ptr<HL_Node> node;
-    Variant v;
+    Scalar v(0);
     
     node = create_hlhdf_attribute("node", "float", (float)1.1);
     EXPECT_NO_THROW(v = conv.convert(*node)); 
-    EXPECT_EQ(Variant((float)1.1), v);
+    EXPECT_EQ(Scalar((float)1.1), v);
 
     node = create_hlhdf_attribute("node", "double", (double)1.1);
     EXPECT_NO_THROW(v = conv.convert(*node)); 
-    EXPECT_EQ(Variant(1.1), v);
+    EXPECT_EQ(Scalar(1.1), v);
 
     node = create_hlhdf_attribute("node", "ldouble", (long double)1.1);
     EXPECT_NO_THROW(v = conv.convert(*node)); 
-    EXPECT_EQ(Variant(1.1), v);
+    EXPECT_EQ(Scalar(1.1), v);
     
     node = create_hlhdf_attribute("node", "llong", (long long)1);
     EXPECT_THROW(conv.convert(*node), value_error);
@@ -175,24 +172,23 @@ TEST(oh5_DoubleConverter_test, test_convert_hlnode) {
 
 TEST(oh5_DoubleConverter_test, test_convert_variant) {
     DoubleConverter conv;
-    Variant v;
 
-    HL_Data d = conv.convert(Variant(1.1));
+    HL_Data d = conv.convert(Scalar(1.1));
     EXPECT_STREQ("double", d.type());
     EXPECT_EQ(1.1, *reinterpret_cast<double*>(d.data()));
 
-    EXPECT_THROW(conv.convert(Variant(1)), value_error);
-    EXPECT_THROW(conv.convert(Variant("asd")), value_error);
+    EXPECT_THROW(conv.convert(Scalar(1)), value_error);
+    EXPECT_THROW(conv.convert(Scalar("asd")), value_error);
 }
 
 TEST(oh5_StringConverter_test, test_convert_hlnode) {
     StringConverter conv;
     shared_ptr<HL_Node> node;
-    Variant v;
+    Scalar v(0);
     
     node = create_hlhdf_attribute("node", "string", "foo");
     EXPECT_NO_THROW(v = conv.convert(*node)); 
-    EXPECT_EQ(Variant("foo"), v);
+    EXPECT_EQ(Scalar("foo"), v);
 
     node = create_hlhdf_attribute("node", "llong", (long long)1);
     EXPECT_THROW(conv.convert(*node), value_error);
@@ -203,14 +199,13 @@ TEST(oh5_StringConverter_test, test_convert_hlnode) {
 
 TEST(oh5_StringConverter_test, test_convert_variant) {
     StringConverter conv;
-    Variant v;
 
-    HL_Data d = conv.convert(Variant("foo"));
+    HL_Data d = conv.convert(Scalar("foo"));
     EXPECT_STREQ("string", d.type());
     EXPECT_STREQ("foo", reinterpret_cast<const char*>(d.data()));
 
-    EXPECT_THROW(conv.convert(Variant(1)), value_error);
-    EXPECT_THROW(conv.convert(Variant(1.1)), value_error);
+    EXPECT_THROW(conv.convert(Scalar(1)), value_error);
+    EXPECT_THROW(conv.convert(Scalar(1.1)), value_error);
 }
 
 

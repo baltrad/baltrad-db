@@ -85,7 +85,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
             , query(db) {
     }
 
-    void add_attribute(oh5::File& file, const String& path, const Variant& value) {
+    void add_attribute(oh5::File& file, const String& path, const oh5::Scalar& value) {
         StringList names = path.split("/");
 
         String dsname = names.take_first();
@@ -109,35 +109,35 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
     virtual void SetUp() {
         db->file_hasher(&hasher);
 
-        add_attribute(*td1, "dataset1/where/xsize", Variant(1));
-        add_attribute(*td1, "dataset1/where/ysize", Variant(2));
+        add_attribute(*td1, "dataset1/where/xsize", oh5::Scalar(1));
+        add_attribute(*td1, "dataset1/where/ysize", oh5::Scalar(2));
         tf1.write(*td1);
         td1->path(tf1.path());
         ON_CALL(hasher, do_hash(Ref(*td1))).WillByDefault(Return("td1"));
 
-        add_attribute(*td2, "dataset1/where/xsize", Variant(2));
-        add_attribute(*td2, "dataset1/where/ysize", Variant(2));
+        add_attribute(*td2, "dataset1/where/xsize", oh5::Scalar(2));
+        add_attribute(*td2, "dataset1/where/ysize", oh5::Scalar(2));
         tf2.write(*td2);
         td2->path(tf2.path());
         ON_CALL(hasher, do_hash(Ref(*td2))).WillByDefault(Return("td2"));
 
-        add_attribute(*td3, "dataset1/where/xsize", Variant(3));
-        add_attribute(*td3, "dataset2/where/xsize", Variant(3));
+        add_attribute(*td3, "dataset1/where/xsize", oh5::Scalar(3));
+        add_attribute(*td3, "dataset2/where/xsize", oh5::Scalar(3));
         tf3.write(*td3);
         td3->path(tf3.path());
         ON_CALL(hasher, do_hash(Ref(*td3))).WillByDefault(Return("td3"));
 
-        add_attribute(*td4, "dataset1/where/xsize", Variant(6));
-        add_attribute(*td4, "dataset1/where/ysize", Variant(4));
-        add_attribute(*td4, "dataset2/where/ysize", Variant(5));
+        add_attribute(*td4, "dataset1/where/xsize", oh5::Scalar(6));
+        add_attribute(*td4, "dataset1/where/ysize", oh5::Scalar(4));
+        add_attribute(*td4, "dataset2/where/ysize", oh5::Scalar(5));
         tf4.write(*td4);
         td4->path(tf4.path());
         ON_CALL(hasher, do_hash(Ref(*td4))).WillByDefault(Return("td4"));
 
-        add_attribute(*td5, "dataset1/where/xsize", Variant(5));
-        add_attribute(*td5, "dataset1/where/ysize", Variant(2));
-        add_attribute(*td5, "dataset2/where/xsize", Variant(2));
-        add_attribute(*td5, "dataset2/where/ysize", Variant(5));
+        add_attribute(*td5, "dataset1/where/xsize", oh5::Scalar(5));
+        add_attribute(*td5, "dataset1/where/ysize", oh5::Scalar(2));
+        add_attribute(*td5, "dataset2/where/xsize", oh5::Scalar(2));
+        add_attribute(*td5, "dataset2/where/ysize", oh5::Scalar(5));
         tf5.write(*td5);
         td5->path(tf5.path());
         ON_CALL(hasher, do_hash(Ref(*td5))).WillByDefault(Return("td5"));

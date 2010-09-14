@@ -46,9 +46,6 @@ class Source;
 class File : public boost::noncopyable,
              public boost::enable_shared_from_this<File> {
   public:
-    typedef std::vector<shared_ptr<Attribute> > AttributeVector;
-    typedef std::vector<shared_ptr<const Attribute> > ConstAttributeVector;
-
     /**
      * @brief construct an empty File
      *
@@ -119,20 +116,6 @@ class File : public boost::noncopyable,
      * @brief set /what/source from a Source instance
      */
     void source(const Source& src);
-
-    /**
-     * @brief get full paths of invalid attributes (have no value)
-     */
-    StringList invalid_attribute_paths() const;
-    
-    /**
-     * @brief get invalid attributes attributes (have no value)
-     * @{
-     */
-    AttributeVector invalid_attributes();
-
-    ConstAttributeVector invalid_attributes() const;
-    //@}
 
     /**
      * @{

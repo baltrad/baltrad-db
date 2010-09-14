@@ -182,7 +182,7 @@ TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
     tf.write(*file);
     file->path(tf.path());
     // add an invalid attribute
-    file->root()->add_child(make_shared<oh5::Attribute>("invalid"));
+    file->root()->add_child(make_shared<oh5::Attribute>("invalid", oh5::Scalar(1)));
 
     EXPECT_NO_THROW(db->save_file(*file));
 }

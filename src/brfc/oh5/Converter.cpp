@@ -24,9 +24,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/numeric/conversion/cast.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Variant.hpp>
 
 #include <brfc/oh5/hlhdf.hpp>
+#include <brfc/oh5/Scalar.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -52,20 +52,20 @@ Converter::create_from_hlhdf_node(const HL_Node& node) {
 }
 
 shared_ptr<const Converter>
-Converter::create_from_variant(const Variant& variant) {
+Converter::create_from_variant(const Scalar& variant) {
     switch (variant.type()) {
-        case Variant::INT64:
+        case Scalar::INT64:
             return make_shared<Int64Converter>();
-        case Variant::DOUBLE:
+        case Scalar::DOUBLE:
             return make_shared<DoubleConverter>();
-        case Variant::STRING:
+        case Scalar::STRING:
             return make_shared<StringConverter>();
         default:
             return shared_ptr<Converter>();
     }
 }
 
-Variant
+Scalar
 Converter::convert(const HL_Node& node) const {
     HL_Node* node_ptr = const_cast<HL_Node*>(&node);
     HL_FormatSpecifier fmt = HLNode_getFormat(node_ptr);
@@ -74,11 +74,11 @@ Converter::convert(const HL_Node& node) const {
 }
 
 HL_Data
-Converter::convert(const Variant& value) const {
+Converter::convert(const Scalar& value) const {
     return do_convert(value);
 }
 
-Variant
+Scalar
 DoubleConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     using boost::numeric_cast;
@@ -97,20 +97,20 @@ DoubleConverter::do_convert(HL_FormatSpecifier format,
         default:
             throw value_error("invalid format for conversion to double");
     }
-    return Variant(val);
+    return Scalar(val);
 }
 
 HL_Data
-DoubleConverter::do_convert(const Variant& value) const {
-    if (value.type() != Variant::DOUBLE)
-        throw value_error("invalid Variant conversion to HLHDF double");
+DoubleConverter::do_convert(const Scalar& value) const {
+    if (value.type() != Scalar::DOUBLE)
+        throw value_error("invalid Scalar conversion to HLHDF double");
 
     double v = value.double_();
     return HL_Data(sizeof(double), "double",
                    reinterpret_cast<unsigned char*>(&v));
 }
 
-Variant
+Scalar
 Int64Converter::do_convert(HL_FormatSpecifier format,
                          unsigned char* data) const {
     using boost::numeric_cast;
@@ -128,32 +128,32 @@ Int64Converter::do_convert(HL_FormatSpecifier format,
         default:
             throw value_error("invalid format for conversion to int64");
     }
-    return Variant(val);
+    return Scalar(val);
 }
 
 HL_Data
-Int64Converter::do_convert(const Variant& value) const {
-    if (value.type() != Variant::INT64)
-        throw value_error("invalid Variant conversion to HLHDF llong");
+Int64Converter::do_convert(const Scalar& value) const {
+    if (value.type() != Scalar::INT64)
+        throw value_error("invalid Scalar conversion to HLHDF llong");
     
     long long v = value.int64_();
     return HL_Data(sizeof(long long), "llong",
                    reinterpret_cast<unsigned char*>(&v));
 }
 
-Variant
+Scalar
 StringConverter::do_convert(HL_FormatSpecifier format,
                            unsigned char* data) const {
     if (format != HLHDF_STRING)
         throw value_error("invalid format for conversion to String");
     String s = String::from_utf8(reinterpret_cast<char*>(data));
-    return Variant(s);
+    return Scalar(s);
 }
 
 HL_Data
-StringConverter::do_convert(const Variant& value) const {
-    if (value.type() != Variant::STRING)
-        throw value_error("invalid Variant conversion to HLHDF string");
+StringConverter::do_convert(const Scalar& value) const {
+    if (value.type() != Scalar::STRING)
+        throw value_error("invalid Scalar conversion to HLHDF string");
     std::string v = value.string().to_utf8();
     return HL_Data(v.size() + 1, "string",
                    reinterpret_cast<unsigned char*>(

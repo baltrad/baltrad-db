@@ -23,8 +23,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %import "fc.i"
 
 %{
+    #include <brfc/Date.hpp>
+    #include <brfc/Time.hpp>
     #include <brfc/StringList.hpp>
     #include <brfc/oh5/Node.hpp>
+    #include <brfc/oh5/Scalar.hpp>
     #include <brfc/oh5/Attribute.hpp>
     #include <brfc/oh5/AttributeGroup.hpp>
     #include <brfc/oh5/File.hpp>
@@ -47,6 +50,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %ignore brfc::oh5::Node::begin;
 %ignore brfc::oh5::Node::end;
+
+%ignore brfc::oh5::Scalar::Scalar(const char* value);
 
 SWIG_SHARED_PTR(File, brfc::oh5::File);
 
@@ -74,11 +79,6 @@ SWIG_SHARED_PTR_DERIVED(AttributeGroup,
     import eu.baltrad.fc.StringList;
 %}
 
-%typemap(javaimports) brfc::oh5::Attribute,
-                      brfc::oh5::Attribute* %{
-    import eu.baltrad.fc.Variant;
-%}
-
 %typemap(javaimports) brfc::oh5::Group,
                       brfc::oh5::Group*,
                       brfc::oh5::Source,
@@ -86,10 +86,15 @@ SWIG_SHARED_PTR_DERIVED(AttributeGroup,
     import eu.baltrad.fc.StringList;
 %}
 
+%typemap(javaimports) brfc::oh5::Scalar,
+                      brfc::oh5::Scalar* %{
+    import eu.baltrad.fc.Date;
+    import eu.baltrad.fc.Time;
+%}
+
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.Time;
-    import eu.baltrad.fc.Variant;
     import eu.baltrad.fc.StringList;
 %}
 
@@ -122,6 +127,7 @@ SWIG_SHARED_PTR_DERIVED(AttributeGroup,
   }
 %}
 
+%include <brfc/oh5/Scalar.hpp>
 %include <brfc/oh5/Node.hpp>
 %include <brfc/oh5/Group.hpp>
 %include <brfc/oh5/AttributeGroup.hpp>

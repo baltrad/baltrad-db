@@ -32,6 +32,12 @@ class DateTime;
 class Time;
 class Variant;
 
+namespace oh5 {
+
+class Scalar;
+
+}
+
 namespace test {
 
 class TestRDB;
@@ -67,5 +73,8 @@ operator<<(std::ostream& out, const brfc::DateTime& value);
 
 std::ostream&
 operator<<(std::ostream& out, const brfc::Variant& value);
+
+std::ostream&
+operator<<(std::ostream& out, const brfc::oh5::Scalar& value);
 
 #endif // BRFC_TEST_COMMON_HPP

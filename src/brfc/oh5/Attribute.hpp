@@ -20,8 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_ATTRIBUTE_H
 #define BRFC_OH5_ATTRIBUTE_H
 
-#include <brfc/Variant.hpp>
 #include <brfc/oh5/Node.hpp>
+#include <brfc/oh5/Scalar.hpp>
 
 namespace brfc {
 
@@ -63,19 +63,12 @@ class Attribute : public Node {
     /**
      * @brief attribute value
      */
-    const Variant& value() const { return value_; }
+    const Scalar& value() const { return value_; }
 
     /**
      * @brief set attribute value
      */
-    void value(const Variant& value);
-
-    /**
-     * @brief is the attribute valid
-     *
-     * attribute is considered valid if it has a value (Variant is not null)
-     */
-    bool is_valid() const;
+    void value(const Scalar& value);
 
     /**
      * @brief full name of this attribute
@@ -86,10 +79,6 @@ class Attribute : public Node {
     String full_name() const;
     
   protected:
-    template<class T, class A1>
-    friend
-    shared_ptr<T> boost::make_shared(const A1&);
-
     template<class T, class A1, class A2> 
     friend 
     shared_ptr<T> boost::make_shared(const A1&, const A2&);
@@ -100,7 +89,7 @@ class Attribute : public Node {
      * @param value attribute value
      */
     explicit Attribute(const String& name,
-                       const Variant& value=Variant());
+                       const Scalar& value);
 
     /**
      * @return false
@@ -121,7 +110,7 @@ class Attribute : public Node {
     }
 
   private:
-    Variant value_;
+    Scalar value_;
 };
 
 

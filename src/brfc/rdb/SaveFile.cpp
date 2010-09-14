@@ -79,13 +79,10 @@ SaveFile::operator()(const oh5::File& file) {
     BOOST_FOREACH(const Mapping& mapping, special) {
         if (mapping.attribute.starts_with("file:"))
             continue;
-        const Variant& value = 
-                file.root()->child_attribute(mapping.attribute)->value();
-        stmt->value(mapping.column, xpr.literal(value));
-        // XXX: note that this relies on implicit convertion of attribute value
-        //      in DB (True/False -> bool; ISO 8601 date/time strings)
-        //
-        // XXX: this should be explicit
+        shared_ptr<const oh5::Attribute> attr =
+                file.root()->child_attribute(mapping.attribute);
+            
+        stmt->value(mapping.column, attr_sql_value(*attr));
     }
 
     stmt->value("hash_type", xpr.string(rdb_->file_hasher().name()));

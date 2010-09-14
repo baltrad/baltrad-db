@@ -26,12 +26,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/StringList.hpp>
 #include <brfc/Time.hpp>
-#include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/FileLoader.hpp>
 #include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/Scalar.hpp>
 #include <brfc/oh5/Source.hpp>
 
 namespace brfc {
@@ -67,14 +67,14 @@ File::minimal(const String& object,
               const String& version) {
     shared_ptr<File> f = create();
     f->root_->add_child(make_shared<Attribute>("Conventions",
-                                               Variant("ODIM_H5/V2_0")));
+                                               Scalar("ODIM_H5/V2_0")));
     shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
     f->root_->add_child(what);
-    what->add_child(make_shared<Attribute>("object", Variant(object)));
-    what->add_child(make_shared<Attribute>("version", Variant(version)));
-    what->add_child(make_shared<Attribute>("date", Variant(date)));
-    what->add_child(make_shared<Attribute>("time", Variant(time)));
-    what->add_child(make_shared<Attribute>("source", Variant(source)));
+    what->add_child(make_shared<Attribute>("object", Scalar(object)));
+    what->add_child(make_shared<Attribute>("version", Scalar(version)));
+    what->add_child(make_shared<Attribute>("date", Scalar(date)));
+    what->add_child(make_shared<Attribute>("time", Scalar(time)));
+    what->add_child(make_shared<Attribute>("source", Scalar(source)));
     return f;
 }
 
@@ -91,7 +91,7 @@ void
 File::source(const Source& source) {
     shared_ptr<Group> grp =
         root_->get_or_create_child_group_by_name("what");
-    Variant srcval = Variant(source.to_string());
+    Scalar srcval = Scalar(source.to_string());
     shared_ptr<Attribute> attr = grp->child_attribute("source");
     if (attr)
         attr->value(srcval);
@@ -118,30 +118,12 @@ File::what_object() const {
 
 Date
 File::what_date() const {
-    Variant value = get_child_attribute(*root_, "what/date")->value();
-    switch (value.type()) {
-        case Variant::DATE:
-            return value.date();
-        case Variant::STRING:
-            return Date::from_string(value.string(), "yyyyMMdd");
-        default:
-            throw value_error("invalid value in 'what/date' (" +
-                              value.to_string().to_utf8() + ")");
-    }
+    return get_child_attribute(*root_, "what/date")->value().to_date();
 }
 
 Time
 File::what_time() const {
-    Variant value = get_child_attribute(*root_, "what/time")->value();
-    switch (value.type()) {
-        case Variant::TIME:
-            return value.time();
-        case Variant::STRING:
-            return Time::from_string(value.string(), "hhmmss");
-        default:
-            throw value_error("invalid value in 'what/time' (" +
-                              value.to_string().to_utf8() + ")");
-    }
+    return get_child_attribute(*root_, "what/time")->value().to_time();
 }
 
 String
@@ -152,47 +134,6 @@ File::what_source() const {
 String
 File::name() const {
     return path().section("/", -1);
-}
-
-StringList
-File::invalid_attribute_paths() const {
-    StringList paths;
-    BOOST_FOREACH(shared_ptr<const Attribute> attr, invalid_attributes()) {
-        paths.push_back(attr->path());
-    }
-    return paths;
-}
-
-File::ConstAttributeVector
-File::invalid_attributes() const {
-    ConstAttributeVector attrs;
-
-    const Attribute* attr = 0;
-    BOOST_FOREACH(const Node& node, *root_) {
-        if ((attr = dynamic_cast<const Attribute*>(&node)) == 0)
-            continue;
-        if (not attr->is_valid())
-            attrs.push_back(attr->shared_from_this());
-    }
-    
-    return attrs;
-}
-
-File::AttributeVector
-File::invalid_attributes() {
-    // implement through const
-    const File* self = const_cast<const File*>(this);
-
-    ConstAttributeVector const_attrs = self->invalid_attributes();
-
-    AttributeVector attrs;
-    attrs.reserve(const_attrs.size());
-
-    BOOST_FOREACH(shared_ptr<const Attribute> const_attr, const_attrs) {
-        attrs.push_back(const_pointer_cast<Attribute>(const_attr));
-    }
-
-    return attrs;
 }
 
 shared_ptr<Group>

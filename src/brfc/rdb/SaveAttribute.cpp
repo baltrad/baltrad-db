@@ -88,14 +88,26 @@ SaveAttribute::valid_attribute_query(const oh5::Attribute& attr) {
     if (grp_id)
         stmt->value("group_id", xpr.int64_(grp_id.get()));
     stmt->value("attribute_id", xpr.int64_(mapping.id));
-    stmt->value("value", xpr.literal(attr.value()));
+    stmt->value("value", attr_sql_value(attr));
 
-    // XXX: note that this relies on implicit convertion of attribute value
-    //      in DB (True/False -> bool; ISO 8601 date/time strings)
-    //
-    // XXX: this should be explicit
-    
     return stmt;
+}
+
+sql::LiteralPtr
+attr_sql_value(const oh5::Attribute& attr) {
+    // XXX: note that this relies on implicit conversion of attribute value
+    //      in DB (True/False -> bool; ISO 8601 date/time strings)
+    // XXX: this should be explicit
+
+    switch (attr.value().type()) {
+        case oh5::Scalar::STRING:
+            return sql::Literal::create(Variant(attr.value().string()));
+        case oh5::Scalar::INT64:
+            return sql::Literal::create(Variant(attr.value().int64_()));
+        case oh5::Scalar::DOUBLE:
+            return sql::Literal::create(Variant(attr.value().double_()));
+    }
+    throw std::runtime_error("");
 }
 
 } // namespace rdb

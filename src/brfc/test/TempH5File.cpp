@@ -28,11 +28,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem.hpp>
 
 #include <brfc/visit.hpp>
-#include <brfc/Variant.hpp>
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Converter.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/Scalar.hpp>
 
 namespace fs = boost::filesystem;
 
@@ -105,20 +105,14 @@ class GatherHLNodes {
     }
 
     oh5::HL_Data
-    convert(const Variant& value) {
+    convert(const oh5::Scalar& value) {
         switch (value.type()) {
-            case Variant::DOUBLE:
+            case oh5::Scalar::DOUBLE:
                 return oh5::DoubleConverter().convert(value);
-            case Variant::INT64:
+            case oh5::Scalar::INT64:
                 return oh5::Int64Converter().convert(value);
-            case Variant::STRING:
+            case oh5::Scalar::STRING:
                 return oh5::StringConverter().convert(value);
-            case Variant::DATE:
-                return oh5::StringConverter().convert(Variant(value.date().to_string("yyyyMMdd")));
-            case Variant::TIME:
-                return oh5::StringConverter().convert(Variant(value.time().to_string("hhmmss")));
-            case Variant::BOOL:
-                return oh5::StringConverter().convert(Variant(value.to_string()));
             default:
                 throw std::runtime_error("could not convert");
         }

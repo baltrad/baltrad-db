@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
@@ -34,8 +33,8 @@ namespace oh5 {
 struct oh5_Attribute_test : public ::testing::Test {
   public:
     oh5_Attribute_test()
-            : a1(make_shared<Attribute>("a1", Variant(1)))
-            , a2(make_shared<Attribute>("a2", Variant(2)))
+            : a1(make_shared<Attribute>("a1", Scalar(1)))
+            , a2(make_shared<Attribute>("a2", Scalar(2)))
             , what(make_shared<AttributeGroup>("what"))
             , dataset1(make_shared<Group>("dataset1"))
             , root(make_shared<RootGroup>()) {
@@ -49,13 +48,6 @@ struct oh5_Attribute_test : public ::testing::Test {
     shared_ptr<RootGroup> root;
 };
 
-TEST_F(oh5_Attribute_test, test_is_valid) {
-    shared_ptr<Attribute> empty = make_shared<Attribute>("empty");
-    EXPECT_FALSE(empty->is_valid());
-    empty->value(Variant(1));
-    EXPECT_TRUE(empty->is_valid());
-}
-
 TEST_F(oh5_Attribute_test, test_full_name) {
     EXPECT_EQ(a1->full_name(), "a1");
     root->add_child(a1);
@@ -65,7 +57,7 @@ TEST_F(oh5_Attribute_test, test_full_name) {
 }
 
 TEST_F(oh5_Attribute_test, test_add_child_Attribute) {
-    shared_ptr<Attribute> a = make_shared<Attribute>("a", Variant(1));
+    shared_ptr<Attribute> a = make_shared<Attribute>("a", Scalar(1));
     EXPECT_THROW(a1->add_child(a), value_error);
 }
 
