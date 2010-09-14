@@ -32,12 +32,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-Connection::Connection(shared_ptr<Compiler> compiler)
-        : compiler_(compiler) {
-    if (not compiler_)
-        compiler_.reset(new DefaultCompiler);
-}
-
 Connection::~Connection() {
 
 }
@@ -100,12 +94,12 @@ Connection::execute(const String& statement, const BindMap& binds) {
 
 shared_ptr<Result>
 Connection::execute(const Insert& stmt) {
-    return execute(compiler_->compile(stmt));
+    return execute(compiler().compile(stmt));
 }
 
 shared_ptr<Result>
 Connection::execute(const Select& stmt) {
-    return execute(compiler_->compile(stmt));
+    return execute(compiler().compile(stmt));
 }
 
 shared_ptr<Result>

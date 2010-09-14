@@ -32,7 +32,8 @@ Connection::Connection(const Url& url)
         : url_(url)
         , conn_()
         , transaction_()
-        , dialect_() {
+        , dialect_()
+        , compiler_() {
 }
 
 Connection::~Connection() {

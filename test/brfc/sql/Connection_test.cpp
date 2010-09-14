@@ -50,7 +50,7 @@ class sql_Connection_test : public testing::Test {
     sql_Connection_test()
         : compiler()
         , dialect()
-        , conn(shared_ptr<Compiler>(&compiler, no_delete)) {
+        , conn() {
     }
 
     void SetUp() {
@@ -58,6 +58,8 @@ class sql_Connection_test : public testing::Test {
             .WillByDefault(Return(true));
         ON_CALL(conn, do_dialect())
             .WillByDefault(ReturnRef(dialect));
+        ON_CALL(conn, do_compiler())
+            .WillByDefault(ReturnRef(compiler));
     }
 
     ::testing::NiceMock<MockCompiler> compiler;

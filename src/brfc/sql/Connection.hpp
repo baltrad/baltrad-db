@@ -44,8 +44,6 @@ class Select;
  */
 class Connection {
   public:
-    Connection(shared_ptr<Compiler> compiler=shared_ptr<Compiler>());
-
     /**
      * @brief create a Connection instance from dsn
      * @param dsn dsn (transformed to Url)
@@ -161,6 +159,10 @@ class Connection {
     const Dialect& dialect() const {
         return do_dialect();
     }
+
+    Compiler& compiler() {
+        return do_compiler();
+    }
     
     /**
      * @brief access large object identified by @c id
@@ -193,14 +195,14 @@ class Connection {
     virtual bool do_in_transaction() const = 0;
     
     virtual const Dialect& do_dialect() const = 0;
+
+    virtual Compiler& do_compiler() = 0;
     
     virtual shared_ptr<LargeObject> do_large_object(long long id) = 0;
     virtual shared_ptr<LargeObject> do_large_object(const String& path) = 0;
 
     virtual long long do_last_insert_id() const = 0;
   
-  private:
-    shared_ptr<Compiler> compiler_;
 };
 
 } // namespace sql

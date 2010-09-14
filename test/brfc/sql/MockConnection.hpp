@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 
 #include <brfc/smart_ptr.hpp>
+#include <brfc/sql/Compiler.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
 
@@ -32,10 +33,6 @@ namespace sql {
 
 class MockConnection : public Connection {
   public:
-    MockConnection(shared_ptr<Compiler> c=shared_ptr<Compiler>())
-            : Connection(c) {
-    }
-
     MOCK_METHOD0(do_open, void());
     MOCK_CONST_METHOD0(do_is_open, bool());
     MOCK_METHOD0(do_close, void());
@@ -47,6 +44,7 @@ class MockConnection : public Connection {
     MOCK_METHOD1(do_execute, shared_ptr<Result>(const String&));
     MOCK_CONST_METHOD0(do_in_transaction, bool());
     MOCK_CONST_METHOD0(do_dialect, const Dialect&());
+    MOCK_METHOD0(do_compiler, Compiler&());
     MOCK_METHOD1(do_large_object, shared_ptr<LargeObject>(long long));
     MOCK_METHOD1(do_large_object, shared_ptr<LargeObject>(const String&));
 
