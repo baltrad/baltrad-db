@@ -19,7 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/SHA1.hpp>
+#include <brfc/util/SHA1.hpp>
 
 class SHA1_test : public ::testing::Test {
   public:
