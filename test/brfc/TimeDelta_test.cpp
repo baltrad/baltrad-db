@@ -17,34 +17,30 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-package eu.baltrad.fc;
+#include <gtest/gtest.h>
 
-import eu.baltrad.fc.Date;
+#include <brfc/TimeDelta.hpp>
 
-import junit.framework.TestCase;
+namespace brfc {
 
-public class TestDate extends TestCase {
+TEST(TimeDelta_test, test_add) {
+    TimeDelta td;
+    EXPECT_EQ(0, td.msecs());
+    EXPECT_EQ(0, td.days());
 
-  public void test_to_string() {
-    Date d = new Date(2000, 5, 1);
-    assertEquals(d.to_string("yyyyMMdd"), "20000501");
-  }
-
-  public void test_equals() {
-    Date d1 = new Date(2000, 5, 1);
-    Date d2 = new Date(2000, 6, 1);
-    Date d3 = new Date(2000, 5, 1);
-
-    assertTrue(d1.equals(d1));
-    assertFalse(d1.equals(d2));
-    assertTrue(d1.equals(d3));
-  }
-
-  public void test_add() {
-    Date d = new Date(2000, 1, 1);
-    Date nd = d.add(new TimeDelta().add_days(1));
-
-    assertEquals(new Date(2000, 1, 2), nd);
-  }
-
+    td.add_minutes(1);
+    EXPECT_EQ(60000, td.msecs());
+    EXPECT_EQ(0, td.days());
+    td.add_minutes(-2);
+    EXPECT_EQ(86340000, td.msecs());
+    EXPECT_EQ(-1, td.days());
+    td.add_hours(24);
+    EXPECT_EQ(86340000, td.msecs());
+    EXPECT_EQ(0, td.days());
+    td.add_minutes(1);
+    td.add_hours(48);
+    EXPECT_EQ(0, td.msecs());
+    EXPECT_EQ(2, td.days());
 }
+
+} // namespace brfc

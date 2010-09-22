@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class String;
+class TimeDelta;
 
 /**
  * @brief naive time implementation
@@ -80,58 +81,33 @@ class Time {
      * @brief millisecond (0 - 999)
      */
     int msec() const;
+    
+    /**
+     * @brief milliseconds since midnight
+     */
+    int cumulative_msecs() const { return msec_; }
     ///@}
     
     /**
      * @name mutators
      * @{
      */
-    void hour(int hour);
-    void minute(int minute);
-    void second(int second);
-    void msec(int msec);
-    ///@}
-
-    /**
-     * @name addition
-     * @{
-     */
-    /**
-     * @brief get a new time with hours before/after held time
-     *
-     * @note time wraps at midnight
-     */
-    Time add_hours(int hours) const;
-
-    /**
-     * @brief get a new time with minutes before/after held time
-     *
-     * @note time wraps at midnight
-     */
-    Time add_minutes(int minutes) const;
-
-    /**
-     * @brief get a new time with seconds before/after held time
-     *
-     * @note time wraps at midnight
-     */
-    Time add_seconds(int seconds) const;
-    
-    /**
-     * @brief alias for add_seconds
-     */
-    Time add_secs(int seconds) const {
-        return add_seconds(seconds);
-    }
-
-    /**
-     * @brief get a new time with milliseconds before/after held time
-     *
-     * @note time wraps at midnight
-     */
-    Time add_msecs(int msecs) const;
+    Time& hour(int hour);
+    Time& minute(int minute);
+    Time& second(int second);
+    Time& msec(int msec);
     ///@}
     
+    /**
+     * @note time wraps at midnight
+     */
+    Time& operator+=(const TimeDelta& td);
+    
+    /**
+     * @note time wraps at midnight
+     */
+    Time operator+(const TimeDelta& td) const;
+
     /**
      * @name comparison
      * @{

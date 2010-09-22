@@ -20,8 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/String.hpp>
 #include <brfc/Date.hpp>
+#include <brfc/String.hpp>
+#include <brfc/TimeDelta.hpp>
 
 #include "common.hpp"
 
@@ -140,44 +141,12 @@ TEST(Date_test, test_eq) {
     EXPECT_TRUE(d1 != d2);
 }
 
-TEST(Date_test, test_add_years) {
-    Date d1(2000, 2, 29);
-    EXPECT_EQ(Date(2001, 2, 28), d1.add_years(1));
-    EXPECT_EQ(Date(1999, 2, 28), d1.add_years(-1));
-    EXPECT_EQ(Date(2004, 2, 29), d1.add_years(4));
-    EXPECT_EQ(Date(1996, 2, 29), d1.add_years(-4));
-
-    Date d2(1999, 12, 31);
-    EXPECT_EQ(Date(2000, 12, 31), d2.add_years(1));
-    EXPECT_EQ(Date(2999, 12, 31), d2.add_years(1000));
-    EXPECT_EQ(Date(999, 12, 31), d2.add_years(-1000));
-
-    EXPECT_THROW(d2.add_years(-3000), value_error);
-}
-
-TEST(Date_test, test_add_months) {
-    Date d1(2000, 2, 29);
-    EXPECT_EQ(Date(2000, 3, 29), d1.add_months(1));
-    EXPECT_EQ(Date(1999, 12, 29), d1.add_months(-2));
-    EXPECT_EQ(Date(2004, 2, 29), d1.add_months(48));
-    EXPECT_EQ(Date(1996, 2, 29), d1.add_months(-48));
-
-    Date d2(2000, 1, 31);
-    EXPECT_EQ(Date(2000, 2, 29), d2.add_months(1));
-    EXPECT_EQ(Date(2001, 2, 28), d2.add_months(13));
-    EXPECT_EQ(Date(1999, 2, 28), d2.add_months(-11));
-    EXPECT_EQ(Date(2000, 3, 31), d2.add_months(2));
-    EXPECT_EQ(Date(2000, 4, 30), d2.add_months(3));
-
-    EXPECT_THROW(d2.add_months(-2500000), value_error);
-}
-
 TEST(Date_test, test_add_days) {
     Date d1(2000, 2, 29);
-    EXPECT_EQ(Date(2000, 3, 1), d1.add_days(1));
-    EXPECT_EQ(Date(2000, 2, 28), d1.add_days(-1));
-    EXPECT_EQ(Date(2004, 2, 29), d1.add_days(365 * 4 + 1));
-    EXPECT_EQ(Date(1999, 12, 31), d1.add_days(-60));
+    EXPECT_EQ(Date(2000, 3, 1), d1 + TimeDelta().add_days(1));
+    EXPECT_EQ(Date(2000, 2, 28), d1 + TimeDelta().add_days(-1));
+    EXPECT_EQ(Date(2004, 2, 29), d1 + TimeDelta().add_days(365 * 4 + 1));
+    EXPECT_EQ(Date(1999, 12, 31), d1 + TimeDelta().add_days(-60));
 }
 
 TEST(Date_test, test_to_string) {

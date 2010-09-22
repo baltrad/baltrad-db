@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/String.hpp>
 #include <brfc/Time.hpp>
+#include <brfc/TimeDelta.hpp>
 
 #include "common.hpp"
 
@@ -128,42 +129,42 @@ TEST(Time_test, test_eq) {
 
 TEST(Time_test, test_add_hours) {
     Time t(12, 0);
-    EXPECT_EQ(Time(13, 0), t.add_hours(1));
-    EXPECT_EQ(Time(1, 0), t.add_hours(13));
-    EXPECT_EQ(t, t.add_hours(24));
-    EXPECT_EQ(t, t.add_hours(-24));
-    EXPECT_EQ(Time(13, 0), t.add_hours(49));
-    EXPECT_EQ(Time(11, 0), t.add_hours(-49));
+    EXPECT_EQ(Time(13, 0), t + TimeDelta().add_hours(1));
+    EXPECT_EQ(Time(1, 0), t + TimeDelta().add_hours(13));
+    EXPECT_EQ(t, t + TimeDelta().add_hours(24));
+    EXPECT_EQ(t, t + TimeDelta().add_hours(-24));
+    EXPECT_EQ(Time(13, 0), t + TimeDelta().add_hours(49));
+    EXPECT_EQ(Time(11, 0), t + TimeDelta().add_hours(-49));
 }
 
 TEST(Time_test, test_add_minutes) {
     Time t(12, 0);
-    EXPECT_EQ(Time(12, 35), t.add_minutes(35));
-    EXPECT_EQ(Time(11, 35), t.add_minutes(-25));
-    EXPECT_EQ(t, t.add_minutes(1440));
-    EXPECT_EQ(t, t.add_minutes(-1440));
-    EXPECT_EQ(Time(14, 0), t.add_minutes(3000));
-    EXPECT_EQ(Time(10, 0), t.add_minutes(-3000));
+    EXPECT_EQ(Time(12, 35), t + TimeDelta().add_minutes(35));
+    EXPECT_EQ(Time(11, 35), t + TimeDelta().add_minutes(-25));
+    EXPECT_EQ(t, t + TimeDelta().add_minutes(1440));
+    EXPECT_EQ(t, t + TimeDelta().add_minutes(-1440));
+    EXPECT_EQ(Time(14, 0), t + TimeDelta().add_minutes(3000));
+    EXPECT_EQ(Time(10, 0), t + TimeDelta().add_minutes(-3000));
 }
 
 TEST(Time_test, test_add_seconds) {
     Time t(12, 0);
-    EXPECT_EQ(Time(12, 1, 30), t.add_seconds(90));
-    EXPECT_EQ(Time(11, 58, 30), t.add_seconds(-90));
-    EXPECT_EQ(t, t.add_seconds(86400));
-    EXPECT_EQ(t, t.add_seconds(-86400));
-    EXPECT_EQ(Time(12, 1, 59), t.add_seconds(172919));
-    EXPECT_EQ(Time(11, 58, 1), t.add_seconds(-172919));
+    EXPECT_EQ(Time(12, 1, 30), t + TimeDelta().add_seconds(90));
+    EXPECT_EQ(Time(11, 58, 30), t + TimeDelta().add_seconds(-90));
+    EXPECT_EQ(t, t + TimeDelta().add_seconds(86400));
+    EXPECT_EQ(t, t + TimeDelta().add_seconds(-86400));
+    EXPECT_EQ(Time(12, 1, 59), t + TimeDelta().add_seconds(172919));
+    EXPECT_EQ(Time(11, 58, 1), t + TimeDelta().add_seconds(-172919));
 }
 
 TEST(Time_test, test_add_msecs) {
     Time t(12, 0);
-    EXPECT_EQ(Time(12, 1, 0, 1), t.add_msecs(60001));
-    EXPECT_EQ(Time(11, 59, 59, 999), t.add_msecs(-1));
-    EXPECT_EQ(t, t.add_msecs(86400000));
-    EXPECT_EQ(t, t.add_msecs(-86400000));
-    EXPECT_EQ(Time(12, 1, 59, 1), t.add_msecs(172919001));
-    EXPECT_EQ(Time(11, 58, 0, 999), t.add_msecs(-172919001));
+    EXPECT_EQ(Time(12, 1, 0, 1), t + TimeDelta().add_msecs(60001));
+    EXPECT_EQ(Time(11, 59, 59, 999), t + TimeDelta().add_msecs(-1));
+    EXPECT_EQ(t, t + TimeDelta().add_msecs(86400000));
+    EXPECT_EQ(t, t + TimeDelta().add_msecs(-86400000));
+    EXPECT_EQ(Time(12, 1, 59, 1), t + TimeDelta().add_msecs(172919001));
+    EXPECT_EQ(Time(11, 58, 0, 999), t + TimeDelta().add_msecs(-172919001));
 }
 
 TEST(Time_test, test_from_string) {

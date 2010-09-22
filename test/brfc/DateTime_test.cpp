@@ -17,34 +17,33 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-package eu.baltrad.fc;
+#include <gtest/gtest.h>
 
-import eu.baltrad.fc.Date;
+#include <brfc/exceptions.hpp>
+#include <brfc/DateTime.hpp>
+#include <brfc/String.hpp>
+#include <brfc/TimeDelta.hpp>
 
-import junit.framework.TestCase;
+#include "common.hpp"
 
-public class TestDate extends TestCase {
+namespace brfc {
 
-  public void test_to_string() {
-    Date d = new Date(2000, 5, 1);
-    assertEquals(d.to_string("yyyyMMdd"), "20000501");
-  }
+TEST(DateTime_test, test_eq) {
+    DateTime dt1(2000, 2, 1);
+    EXPECT_TRUE(dt1 == dt1);
+    EXPECT_FALSE(dt1 != dt1);
 
-  public void test_equals() {
-    Date d1 = new Date(2000, 5, 1);
-    Date d2 = new Date(2000, 6, 1);
-    Date d3 = new Date(2000, 5, 1);
-
-    assertTrue(d1.equals(d1));
-    assertFalse(d1.equals(d2));
-    assertTrue(d1.equals(d3));
-  }
-
-  public void test_add() {
-    Date d = new Date(2000, 1, 1);
-    Date nd = d.add(new TimeDelta().add_days(1));
-
-    assertEquals(new Date(2000, 1, 2), nd);
-  }
-
+    DateTime dt2(2000, 2, 1, 0, 0, 0, 1);
+    EXPECT_FALSE(dt1 == dt2);
+    EXPECT_TRUE(dt1 != dt2);
 }
+
+TEST(Datetime_test, test_add) {
+    DateTime dt1(2000, 2, 1, 12);
+    
+    dt1 += TimeDelta().add_days(2).add_hours(13);
+    
+    EXPECT_EQ(DateTime(2000, 2, 4, 1), dt1);
+}
+
+} // namespace brfc

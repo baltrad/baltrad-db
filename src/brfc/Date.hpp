@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class String;
+class TimeDelta;
 
 /**
  * @brief date in a proleptic Gregorian calendar
@@ -67,22 +68,21 @@ class Date {
     /**
      * @throw value_error if resulting date would be invalid
      */
-    void year(int year);
+    Date& year(int year);
 
     /**
      * @throw value_error if resulting date would be invalid
      */
-    void month(int month);
+    Date& month(int month);
 
     /**
      * @throw value_error if resulting date would be invalid
      */
-    void day(int day);
+    Date& day(int day);
 
-    Date add_years(int years) const;
-    Date add_months(int months) const;
-    Date add_days(int days) const;
-    
+    Date& operator+=(const TimeDelta& td);
+    Date operator+(const TimeDelta& td) const;
+
     /**
      * @brief calculate a (proleptic) Gregorian date from Julian Day Number
      */

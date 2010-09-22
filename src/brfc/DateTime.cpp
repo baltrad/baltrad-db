@@ -19,15 +19,53 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/DateTime.hpp>
 
-#include <brfc/DateTimeParser.hpp>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <errno.h>
+#include <sys/time.h>
 
+#include <brfc/exceptions.hpp>
+#include <brfc/DateTimeParser.hpp>
 #include <brfc/String.hpp>
+#include <brfc/TimeDelta.hpp>
 
 namespace brfc {
+
+DateTime
+DateTime::now() {
+    struct timeval tv;
+    if (gettimeofday(&tv, 0) == -1)
+        throw std::runtime_error(strerror(errno));
+    struct tm* tm;
+    if ((tm = std::localtime(&tv.tv_sec)) == 0)
+        throw std::runtime_error("std::localtime failed");
+    Time t(tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec / 1000);
+    Date d(tm->tm_year, tm->tm_mon, tm->tm_mday);
+    return DateTime(d, t);
+}
+
+DateTime
+DateTime::utc_now() {
+    struct timeval tv;
+    if (gettimeofday(&tv, 0) == -1)
+        throw std::runtime_error(strerror(errno));
+    struct tm* tm;
+    if ((tm = std::gmtime(&tv.tv_sec)) == 0)
+        throw std::runtime_error("std::gmtime failed");
+    Time t(tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec / 1000);
+    Date d(tm->tm_year, tm->tm_mon, tm->tm_mday);
+    return DateTime(d, t);
+}
 
 String
 DateTime::to_string(const String& format) const {
     return DateTimeParser(format).to_string(*this);
+}
+
+DateTime
+DateTime::from_string(const String& str, const String& format) {
+    return DateTimeParser(format).from_string(str);
 }
 
 bool
@@ -35,9 +73,18 @@ DateTime::operator==(const DateTime& rhs) const {
     return date_ == rhs.date_ and time_ == rhs.time_;
 }
 
+DateTime&
+DateTime::operator+=(const TimeDelta& td) {
+    date_ += td;
+    if (time_.cumulative_msecs() + td.msecs() >= MSECS_IN_DAY)
+        date_ += TimeDelta().days(1);
+    time_ += td;
+    return *this;
+}
+
 DateTime
-DateTime::from_string(const String& str, const String& format) {
-    return DateTimeParser(format).from_string(str);
+DateTime::operator+(const TimeDelta& td) const {
+    return DateTime(*this) += td;
 }
 
 } // namespace brfc

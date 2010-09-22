@@ -19,27 +19,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/Time.hpp>
 
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <errno.h>
-#include <sys/time.h>
-
 #include <brfc/exceptions.hpp>
 #include <brfc/DateTimeParser.hpp>
 #include <brfc/String.hpp>
+#include <brfc/TimeDelta.hpp>
 
-namespace {
-    enum {
-        HOURS_IN_DAY = 24,
-        MINS_IN_HOUR = 60,
-        SECS_IN_MIN = 60,
-        MSECS_IN_SEC = 1000,
-        MSECS_IN_MIN = 60000,
-        MSECS_IN_HOUR = 3600000,
-        MSECS_IN_DAY = 86400000
-    };
-} // namespace anonymous
+#include <iostream>
 
 namespace brfc {
 
@@ -84,24 +69,12 @@ Time::operator=(const Time& rhs) {
 
 Time
 Time::now() {
-    struct timeval tv;
-    if (gettimeofday(&tv, 0) == -1)
-        throw std::runtime_error(strerror(errno));
-    struct tm* tm;
-    if ((tm = std::localtime(&tv.tv_sec)) == 0)
-        throw std::runtime_error("std::localtime failed");
-    return Time(tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec / 1000);
+    return DateTime::now().time();
 }
 
 Time
 Time::utc_now() {
-    struct timeval tv;
-    if (gettimeofday(&tv, 0) == -1)
-        throw std::runtime_error(strerror(errno));
-    struct tm* tm;
-    if ((tm = std::gmtime(&tv.tv_sec)) == 0)
-        throw std::runtime_error("std::gmtime failed");
-    return Time(tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec / 1000);
+    return DateTime::utc_now().time();
 }
 
 int
@@ -124,56 +97,48 @@ Time::msec() const {
     return msec_ % MSECS_IN_SEC;
 }
 
-void
+Time&
 Time::hour(int _hour) {
     if (_hour < 0 or _hour >= HOURS_IN_DAY)
         throw value_error("invalid hour");
     msec_ = msec_ - (hour() * MSECS_IN_HOUR) + (_hour * MSECS_IN_HOUR);
+    return *this;
 }
 
-void
+Time&
 Time::minute(int _minute) {
     if (_minute < 0 or _minute >= MINS_IN_HOUR)
         throw value_error("invalid minute");
     msec_ = msec_ - (minute() * MSECS_IN_MIN) + (_minute * MSECS_IN_MIN);
+    return *this;
 }
 
-void
+Time&
 Time::second(int _second) {
     if (_second < 0 or _second >= SECS_IN_MIN)
         throw value_error("invalid second");
     msec_ = msec_ - (second() * MSECS_IN_SEC) + (_second * MSECS_IN_SEC);
+    return *this;
 }
 
-void
+Time&
 Time::msec(int _msec) {
     if (_msec < 0 or _msec >= MSECS_IN_SEC)
         throw value_error("invalid msec");
     msec_ = msec_ - msec() + _msec;
+    return *this;
+}
+
+Time&
+Time::operator+=(const TimeDelta& td) {
+    // td.msecs() is always positive
+    msec_ = (td.msecs() + msec_) % MSECS_IN_DAY;
+    return *this;
 }
 
 Time
-Time::add_hours(int hours) const {
-    return add_msecs(hours * MSECS_IN_HOUR);
-}
-
-Time
-Time::add_minutes(int minutes) const {
-    return add_msecs(minutes * MSECS_IN_MIN);
-}
-
-Time
-Time::add_seconds(int seconds) const {
-    return add_msecs(seconds * MSECS_IN_SEC);
-}
-
-Time
-Time::add_msecs(int msecs) const {
-    if (msecs < 0) {
-        int negdays = (MSECS_IN_DAY - msecs) / MSECS_IN_DAY;
-        msecs = msecs + negdays * MSECS_IN_DAY;
-    }
-    return Time((msec_ + msecs) % MSECS_IN_DAY);
+Time::operator+(const TimeDelta& td) const {
+    return Time(*this) += td;
 }
 
 Time
