@@ -46,8 +46,8 @@ class CacheDirStorage : public LocalStorage {
     String entry_path(const FileEntry& entry) const;
  
   protected:
-    virtual shared_ptr<const oh5::File> do_store(const FileEntry& entry);
-    virtual shared_ptr<const oh5::File> do_prestore(const FileEntry& entry);
+    virtual String do_prestore(const FileEntry& entry, const String& path);
+    virtual String do_store(const FileEntry& entry);
     virtual bool do_remove(const FileEntry& entry);
     virtual void do_clean();
   

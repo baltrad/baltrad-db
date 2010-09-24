@@ -89,18 +89,14 @@ TEST_F(FileCatalog_test, test_catalog_nx_file_by_path) {
 }
 
 TEST_F(FileCatalog_test, test_catalog) {
-    shared_ptr<oh5::File> newfile = oh5::File::create();
-
     EXPECT_CALL(*db, do_save_file(Ref(*minfile)))
         .WillOnce(Return(entry));
-    EXPECT_CALL(*storage, do_prestore(Ref(*entry)))
-        .WillOnce(Return(newfile));
+    EXPECT_CALL(*storage, do_prestore(Ref(*entry), minfile->path()))
+        .WillOnce(Return("/path/to/file"));
     
     shared_ptr<const FileEntry> e;
     EXPECT_NO_THROW(e = fc.catalog(*minfile));
-
-    // substitutes prestore return value to FileEntry
-    EXPECT_EQ(newfile, e->file());
+    EXPECT_TRUE(e);
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
@@ -118,13 +114,12 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
 TEST_F(FileCatalog_test, test_catalog_on_prestore_failure) {
     EXPECT_CALL(*db, do_save_file(Ref(*minfile)))
         .WillOnce(Return(entry));
-    EXPECT_CALL(*storage, do_prestore(Ref(*entry)))
+    EXPECT_CALL(*storage, do_prestore(Ref(*entry), minfile->path()))
         .WillOnce(Throw(std::runtime_error("error")));
     
     shared_ptr<const FileEntry> e;
     EXPECT_NO_THROW(e = fc.catalog(*minfile));
-    // retains imported file
-    EXPECT_EQ(minfile, e->file());
+    EXPECT_TRUE(e);
 }
 
 /*

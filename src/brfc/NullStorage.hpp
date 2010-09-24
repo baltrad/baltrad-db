@@ -22,22 +22,24 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/LocalStorage.hpp>
 
+#include <brfc/exceptions.hpp>
+
 namespace brfc {
 
 class NullStorage : public LocalStorage {
   protected:
     /**
-     * @return always null pointer
+     * no-op
      */
-    virtual shared_ptr<const oh5::File> do_prestore(const FileEntry&) {
-        return shared_ptr<const oh5::File>();
-    }
+    virtual String do_prestore(const FileEntry&, const String&) {
+        return "";
+    } 
     
     /**
-     * @return always null pointer
+     * @throw fs_error always
      */
-    virtual shared_ptr<const oh5::File> do_store(const FileEntry&) {
-        return shared_ptr<const oh5::File>();
+    virtual String do_store(const FileEntry&) {
+        throw fs_error("null storage");
     }
     
     /**

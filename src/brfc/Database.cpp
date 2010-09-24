@@ -26,9 +26,7 @@ namespace brfc {
 
 shared_ptr<FileEntry>
 Database::save_file(const oh5::File& file) {
-    shared_ptr<FileEntry> e = do_save_file(file);
-    e->file(file.shared_from_this());
-    return e;
+    return do_save_file(file);
 }
 
 } // namespace brfc

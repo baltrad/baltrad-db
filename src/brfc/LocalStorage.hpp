@@ -20,18 +20,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_LOCAL_STORAGE_HPP
 #define BRFC_LOCAL_STORAGE_HPP
 
-#include <brfc/smart_ptr.hpp>
+#include <brfc/String.hpp>
 
 namespace brfc {
 
 class FileEntry;
-class String;
-
-namespace oh5 {
-
-class File;
-
-} // namespace oh5
 
 /**
  * @brief ABC for classes implementing node-local oh5::File storage
@@ -42,17 +35,20 @@ class LocalStorage {
 
     /**
      * @brief write the (local) file to storage
-     * @return oh5::File instance of the stored file
+     * @param entry fileentry the file was associated with
+     * @param path absolute path to the file in filesystem
+     * @return absolute path to the stored file
      */
-    shared_ptr<const oh5::File> prestore(const FileEntry& entry) {
-        return do_prestore(entry);
+    String prestore(const FileEntry& entry, const String& path) {
+        return do_prestore(entry, path);
     }
 
     /**
      * @brief write the file to storage from FileEntry content stream
-     * @return oh5::File instance of the stored file
+     * @return absolute path to the stored file
      */
-    shared_ptr<const oh5::File> store(const FileEntry& entry) {
+
+    String store(const FileEntry& entry) {
         return do_store(entry);
     }
     
@@ -75,12 +71,12 @@ class LocalStorage {
     /**
      * @return stored oh5::File instance
      */
-    virtual shared_ptr<const oh5::File> do_prestore(const FileEntry& entry) = 0;
+    virtual String do_prestore(const FileEntry& entry, const String& path) = 0;
 
     /**
      * @return stored oh5::File instance
      */
-    virtual shared_ptr<const oh5::File> do_store(const FileEntry& entry) = 0;
+    virtual String do_store(const FileEntry& entry) = 0;
  
     /**
      * @return true if the file no longer exists

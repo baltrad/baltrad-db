@@ -38,18 +38,4 @@ class Database_test : public ::testing::Test {
     MockDatabase db;
 };
 
-TEST_F(Database_test, test_save_associates_file_with_entry) {
-    shared_ptr<FileEntry> e(new MockFileEntry());
-
-    shared_ptr<oh5::File> f(oh5::File::create());
-
-    EXPECT_CALL(db, do_save_file(Ref(*f)))
-        .WillOnce(Return(e));
-    
-    e = db.save_file(*f);
-    
-    EXPECT_TRUE(e->file());
-    EXPECT_EQ(f, e->file());
-}
-
 } // namespace brfc

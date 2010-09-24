@@ -36,10 +36,6 @@ class File;
  */
 class FileEntry {
   public:
-    FileEntry()
-            : file_() {
-    }
-
     virtual ~FileEntry() { }
 
     /**
@@ -49,19 +45,6 @@ class FileEntry {
         return do_id();
     }
     
-    /**
-     * @brief node-local file
-     * @return pointer to File instance or null pointer if file is not
-     *         known to be accessible in local node
-     */
-    shared_ptr<const oh5::File> file() const {
-        return file_;
-    }
-
-    void file(shared_ptr<const oh5::File> file) {
-        file_ = file;
-    }
-
     void write_to_file(const String& path) const {
         do_write_to_file(path);
     }
@@ -70,9 +53,6 @@ class FileEntry {
     virtual long long do_id() const = 0;
 
     virtual void do_write_to_file(const String& path) const = 0;
-  
-  private:
-    shared_ptr<const oh5::File> file_;
 };
 
 } // namespace brfc

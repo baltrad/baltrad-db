@@ -65,33 +65,34 @@ class CacheDirStorage_test : public ::testing::Test {
 };
 
 TEST_F(CacheDirStorage_test, test_prestore) {
-    entry.file(file); // associate with local file
+    const String& fpath = file->path();
+    const String& rpath = storage.prestore(entry, fpath);
 
-    shared_ptr<const oh5::File> rfile = storage.prestore(entry);
-
-    EXPECT_NE(rfile->path().to_utf8(), file->path().to_utf8());
-    EXPECT_TRUE(fs::exists(rfile->path().to_utf8()));
-    EXPECT_TRUE(fs::exists(file->path().to_utf8()));
+    EXPECT_NE(rpath, fpath);
+    EXPECT_TRUE(fs::exists(rpath.to_utf8()));
+    EXPECT_TRUE(fs::exists(fpath.to_utf8()));
 }
 
 TEST_F(CacheDirStorage_test, test_store) {
     EXPECT_CALL(entry, do_write_to_file(_))
         .WillOnce(Invoke(&tmpfile, &test::TempH5File::copy));
 
-    shared_ptr<const oh5::File> rf = storage.store(entry);
+    const String& rpath = storage.store(entry);
+
+    EXPECT_TRUE(fs::exists(rpath.to_utf8()));
 }
 
 TEST_F(CacheDirStorage_test, test_double_store) {
     EXPECT_CALL(entry, do_write_to_file(_))
         .WillOnce(Invoke(&tmpfile, &test::TempH5File::copy));
     
-    shared_ptr<const oh5::File> rfile1 = storage.store(entry);
-    EXPECT_TRUE(fs::exists(rfile1->path().to_utf8()));
+    const String& rpath1 = storage.store(entry);
+    EXPECT_TRUE(fs::exists(rpath1.to_utf8()));
     
-    shared_ptr<const oh5::File> rfile2 = storage.store(entry);
-    EXPECT_TRUE(fs::exists(rfile2->path().to_utf8()));
+    const String& rpath2 = storage.store(entry);
+    EXPECT_TRUE(fs::exists(rpath2.to_utf8()));
     
-    EXPECT_EQ(rfile1->path(), rfile2->path());
+    EXPECT_EQ(rpath1, rpath2);
 }
 
 TEST_F(CacheDirStorage_test, test_remove) {

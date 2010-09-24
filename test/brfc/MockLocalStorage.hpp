@@ -28,8 +28,8 @@ namespace brfc {
 
 class MockLocalStorage : public LocalStorage {
   public:
-    MOCK_METHOD1(do_store, shared_ptr<const oh5::File>(const FileEntry&));
-    MOCK_METHOD1(do_prestore, shared_ptr<const oh5::File>(const FileEntry&));
+    MOCK_METHOD1(do_store, String(const FileEntry&));
+    MOCK_METHOD2(do_prestore, String(const FileEntry&, const String&));
     MOCK_METHOD1(do_remove, bool(const FileEntry&));
     MOCK_METHOD0(do_clean, void());
 };

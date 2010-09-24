@@ -82,15 +82,12 @@ FileCatalog::catalog(const String& path) {
 shared_ptr<const FileEntry>
 FileCatalog::catalog(const oh5::File& file) {
     shared_ptr<FileEntry> e = db_->save_file(file);
-    shared_ptr<const oh5::File> stored_file;
     try {
-        stored_file = storage_->prestore(*e);
+        storage_->prestore(*e, file.path());
     } catch (const std::runtime_error& e) {
         std::cerr << "IGNORED EXCEPTION: LocalStorage::prestore: "
                   << e.what() << std::endl << std::flush;
     }
-    if (stored_file)
-        e->file(stored_file);
     return e;
 }
 

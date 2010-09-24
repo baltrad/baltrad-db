@@ -60,25 +60,21 @@ CacheDirStorage::entry_path(const FileEntry& entry) const {
     return dir_ + "/" + String::number(entry.id()) + ".h5";
 }
 
-shared_ptr<const oh5::File>
+String
 CacheDirStorage::do_store(const FileEntry& entry) {
     const String& path = entry_path(entry);
     if (not fs::exists(path.to_utf8())) {
         entry.write_to_file(path);
     }
-    return oh5::File::from_filesystem(path);
+    return path;
 }
 
-shared_ptr<const oh5::File>
-CacheDirStorage::do_prestore(const FileEntry& entry) {
-    const String& path = entry_path(entry);
+String
+CacheDirStorage::do_prestore(const FileEntry& entry, const String& path) {
+    const String& new_path = entry_path(entry);
     
-    fs::copy_file(entry.file()->path().to_utf8(), path.to_utf8());
-    
-    //XXX: note that this is very inefficient. The content remains the same,
-    //     only the path changes, so the loaded structures should be reused
-    //     instead of reading the file from the filesystem again.
-    return oh5::File::from_filesystem(path);
+    fs::copy_file(path.to_utf8(), new_path.to_utf8());
+    return new_path;
 }
 
 bool
