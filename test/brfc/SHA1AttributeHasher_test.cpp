@@ -70,20 +70,19 @@ class SHA1AttributeHasher_test : public ::testing::Test {
 };
 
 TEST_F(SHA1AttributeHasher_test, attribute_string) {
-    shared_ptr<oh5::Attribute> a1 = make_shared<oh5::Attribute>("a1", oh5::Scalar(1));
-    EXPECT_EQ("/a1=1", SHA1AttributeHasher::attribute_string(*a1));
+    oh5::Attribute a1(0, "a1", oh5::Scalar(1));
+    EXPECT_EQ("/a1=1", SHA1AttributeHasher::attribute_string(a1));
 
-    shared_ptr<oh5::Group> dataset1 = make_shared<oh5::Group>("dataset1");
-    shared_ptr<oh5::AttributeGroup> what = make_shared<oh5::AttributeGroup>("what");
-    dataset1->add_child(what);
-    what->add_child(a1);
-    EXPECT_EQ("/dataset1/what/a1=1", SHA1AttributeHasher::attribute_string(*a1));
+    oh5::Group dataset1(0, "dataset1");
+    oh5::Group& what = dataset1.create_child_group("what");
+    oh5::Attribute& a2 = what.create_child_attribute("a2", oh5::Scalar(1));
+    EXPECT_EQ("/dataset1/what/a2=1", SHA1AttributeHasher::attribute_string(a2));
 
-    a1->value(oh5::Scalar(Date(2000, 12, 13)));
-    EXPECT_EQ("/dataset1/what/a1=20001213", SHA1AttributeHasher::attribute_string(*a1));
+    a2.value(oh5::Scalar(Date(2000, 12, 13)));
+    EXPECT_EQ("/dataset1/what/a2=20001213", SHA1AttributeHasher::attribute_string(a2));
 
-    a1->value(oh5::Scalar(Time(12, 13, 14)));
-    EXPECT_EQ("/dataset1/what/a1=121314", SHA1AttributeHasher::attribute_string(*a1));
+    a2.value(oh5::Scalar(Time(12, 13, 14)));
+    EXPECT_EQ("/dataset1/what/a2=121314", SHA1AttributeHasher::attribute_string(a2));
 }
 
 TEST_F(SHA1AttributeHasher_test, check_concrete_digests) {
@@ -102,9 +101,9 @@ TEST_F(SHA1AttributeHasher_test, hash_different_meta) {
 
 TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
     String hash1 = hasher.hash(*f1);
-    f1->root()->add_child(make_shared<oh5::Attribute>("ignore", oh5::Scalar("val")));
+    f1->root().create_child_attribute("ignore", oh5::Scalar("val"));
     String hash2 = hasher.hash(*f1);
-    f1->root()->attribute("ignore")->value(oh5::Scalar("val2"));
+    f1->root().attribute("ignore")->value(oh5::Scalar("val2"));
     String hash3 = hasher.hash(*f1);
 
     EXPECT_EQ(hash1, hash2);
@@ -114,9 +113,9 @@ TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
 
 TEST_F(SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
     String hash1 = hasher.hash(*f1);
-    f1->root()->add_child(make_shared<oh5::Attribute>("attr", oh5::Scalar("val")));
+    f1->root().create_child_attribute("attr", oh5::Scalar("val"));
     String hash2 = hasher.hash(*f1);
-    f1->root()->attribute("attr")->value(oh5::Scalar("val2"));
+    f1->root().attribute("attr")->value(oh5::Scalar("val2"));
     String hash3 = hasher.hash(*f1);
 
     EXPECT_NE(hash1, hash2);

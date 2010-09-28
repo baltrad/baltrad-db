@@ -33,42 +33,36 @@ namespace oh5 {
 struct oh5_Attribute_test : public ::testing::Test {
   public:
     oh5_Attribute_test()
-            : a1(make_shared<Attribute>("a1", Scalar(1)))
-            , a2(make_shared<Attribute>("a2", Scalar(2)))
-            , what(make_shared<AttributeGroup>("what"))
-            , dataset1(make_shared<Group>("dataset1"))
-            , root(make_shared<RootGroup>()) {
+            : attr(0, "attr", Scalar(1)) {
 
     }
     
-    shared_ptr<Attribute> a1;
-    shared_ptr<Attribute> a2;
-    shared_ptr<AttributeGroup> what;
-    shared_ptr<Group> dataset1;
-    shared_ptr<RootGroup> root;
+    Attribute attr;
 };
 
 TEST_F(oh5_Attribute_test, test_full_name) {
-    EXPECT_EQ(a1->full_name(), "a1");
-    root->add_child(a1);
-    EXPECT_EQ(a1->full_name(), "a1");
-    what->add_child(a2);
-    EXPECT_EQ(a2->full_name(), "what/a2");
+    RootGroup root;
+    Attribute& a1 = root.create_child_attribute("a1", Scalar(1));
+    EXPECT_EQ("a1", a1.full_name());
+
+    AttributeGroup what(0, "what");
+    Attribute& a2 = what.create_child_attribute("a2", Scalar(1));
+    EXPECT_EQ("what/a2", a2.full_name());
 }
 
 TEST_F(oh5_Attribute_test, test_add_child_Attribute) {
-    shared_ptr<Attribute> a = make_shared<Attribute>("a", Scalar(1));
-    EXPECT_THROW(a1->add_child(a), value_error);
+    auto_ptr<Node> a(new Attribute(0, "a", Scalar(1)));
+    EXPECT_THROW(attr.add_child(a), value_error);
 }
 
 TEST_F(oh5_Attribute_test, test_add_child_AttributeGroup) {
-    shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
-    EXPECT_THROW(a1->add_child(what), value_error);
+    auto_ptr<Node> what(new AttributeGroup(0, "what"));
+    EXPECT_THROW(attr.add_child(what), value_error);
 }
 
 TEST_F(oh5_Attribute_test, test_add_child_RootGroup) {
-    shared_ptr<RootGroup> root = make_shared<RootGroup>();
-    EXPECT_THROW(a1->add_child(root), value_error);
+    auto_ptr<Node> root(new RootGroup());
+    EXPECT_THROW(attr.add_child(root), value_error);
 }
 
 } // namepsace oh5

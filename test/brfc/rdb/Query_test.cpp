@@ -87,23 +87,11 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
 
     void add_attribute(oh5::File& file, const String& path, const oh5::Scalar& value) {
         StringList names = path.split("/");
+        String attr_name = names.take_last();
 
-        String dsname = names.take_first();
-        shared_ptr<oh5::Group> ds = dynamic_pointer_cast<oh5::Group>(file.root()->child_by_name(dsname));
-        if (not ds) {
-            ds = make_shared<oh5::Group>(dsname);
-            file.root()->add_child(ds);
-        }
+        oh5::Group& g = file.root().get_or_create_child_group_by_path(names);
+        g.create_child_attribute(attr_name, value);
 
-        String groupname = names.take_first();
-        shared_ptr<oh5::AttributeGroup> group = dynamic_pointer_cast<oh5::AttributeGroup>(ds->child_by_name(groupname));
-        if (not group) {
-            group = make_shared<oh5::AttributeGroup>(groupname);
-            ds->add_child(group);
-        }
-
-        shared_ptr<oh5::Attribute> attr = make_shared<oh5::Attribute>(names.take_last(), value);
-        group->add_child(attr);
     }
 
     virtual void SetUp() {

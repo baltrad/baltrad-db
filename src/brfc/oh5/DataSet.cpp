@@ -24,8 +24,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-DataSet::DataSet(const String& name)
-        : Node(name) { 
+DataSet::DataSet(Node* parent, const String& name)
+        : Node(parent, name) { 
 
 }
 

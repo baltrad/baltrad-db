@@ -51,16 +51,11 @@ void add_attribute_from_node(RootGroup& root, HL_Node* node) {
                                  nodename.to_utf8() + 
                                  " value");
 
-    Scalar value = converter->convert(*node);
-
-    // create attribute with empty value
-    shared_ptr<Attribute> attr = make_shared<Attribute>(attr_name, value);
+    const Scalar& value = converter->convert(*node);
 
     path.take_first(); // discard the root element
-    shared_ptr<Group> group =
-        root.get_or_create_child_group_by_path(path);
-
-    group->add_child(attr);
+    Group& group = root.get_or_create_child_group_by_path(path);
+    group.create_child_attribute(attr_name, value);
 }
 
 } // namespace anonymous
@@ -80,7 +75,7 @@ FileLoader::load(const String& path) {
 
     shared_ptr<File> file = File::create();
     file->path(path);
-    RootGroup& root = *file->root();
+    RootGroup& root = file->root();
 
     for (int i=0; i < HLNodeList_getNumberOfNodes(nodes.get()); ++i) {
         HL_Node* node = HLNodeList_getNodeByIndex(nodes.get(), i);

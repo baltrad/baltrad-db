@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <brfc/smart_ptr.hpp>
 #include <brfc/String.hpp>
@@ -32,7 +33,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
+class Attribute;
 class File;
+class Group;
+class Scalar;
 
 template<typename T>
 class NodeIterator;
@@ -46,12 +50,15 @@ class NodeIterator;
  * A node can be associated with one parent only, so reassociating a node is
  * logically equivalent to moving it.
  */
-class Node : public boost::noncopyable,
-             public enable_shared_from_this<Node> {
+class Node : public boost::noncopyable {
   public:
-    typedef std::vector<shared_ptr<Node> > ChildVector;
     typedef NodeIterator<Node> iterator;
     typedef NodeIterator<const Node> const_iterator;
+
+    /**
+     * @brief constructor
+     */
+    Node(Node* parent, const String& name);
 
     /**
      * @brief destructor
@@ -62,8 +69,6 @@ class Node : public boost::noncopyable,
      * @{
      */
     const String& name() const { return name_; }
-
-    void name(const String& name);
     ///@}
     
     /**
@@ -79,12 +84,12 @@ class Node : public boost::noncopyable,
      * @return pointer to a parent or null pointer if this node has no parent
      * @{
      */
-    shared_ptr<Node> parent() {
-        return parent_.lock();
+    Node* parent() {
+        return parent_;
     }
 
-    shared_ptr<const Node> parent() const {
-        return parent_.lock();
+    const Node* parent() const {
+        return parent_;
     }
     ///@}
     
@@ -96,13 +101,13 @@ class Node : public boost::noncopyable,
      * @{
      */
     template<typename T>
-    shared_ptr<T> parent() {
-        return dynamic_pointer_cast<T>(parent_.lock());
+    T* parent() {
+        return dynamic_cast<T*>(parent_);
     }
 
     template<typename T>
-    shared_ptr<const T> parent() const {
-        return dynamic_pointer_cast<const T>(parent_.lock());
+    const T* parent() const {
+        return dynamic_cast<const T*>(parent_);
     }
     ///@}
 
@@ -110,20 +115,25 @@ class Node : public boost::noncopyable,
      * @brief is this node the root node
      */
     bool is_root() const {
-        return parent_.expired();
+        return parent_ == 0;
     }
     
     /**
      * @{
      * @brief get root node
      */
-    shared_ptr<Node> root();
+    Node& root();
 
-    shared_ptr<const Node> root() const;
+    const Node& root() const;
     ///@}
 
+    Attribute& create_child_attribute(const String& name,
+                                      const Scalar& value);
+    
+    Group& create_child_group(const String& name);
+
     /**
-     * @brief add a child node
+     * @brief add a child Node
      * @throw duplicate_entry if a child with that name already exists
      * @throw value_error if child is not accepted or null
      *
@@ -135,8 +145,10 @@ class Node : public boost::noncopyable,
      * removed from that parents children.
      *
      * @sa accepts_child, accepts_parent
+     *
+     * @note this node takes ownership of the child
      */
-    void add_child(shared_ptr<Node> child);
+    Node& add_child(auto_ptr<Node> node);
 
     /**
      * @brief test for a child by name
@@ -149,22 +161,14 @@ class Node : public boost::noncopyable,
     bool has_child(const Node& node) const;
 
     /**
-     * @brief remove a child node
-     * @throw lookup_error if child is not found
-     *
-     * on removing a node, its parent is set to null.
-     */
-    void remove_child(Node& node);
-    
-    /**
      * @{
      * @brief access child by name
      * @return pointer to Node or null if not found.
      */
-    shared_ptr<Node>
+    Node*
     child_by_name(const String& name);
 
-    shared_ptr<const Node>
+    const Node*
     child_by_name(const String& name) const;
     ///@}
     
@@ -173,10 +177,10 @@ class Node : public boost::noncopyable,
      * @brief access child by path
      * @return pointer to Node or null if not found.
      */
-    shared_ptr<Node>
+    Node*
     child_by_path(const String& path);
 
-    shared_ptr<const Node>
+    const Node*
     child_by_path(const String& path) const;
     ///@}
 
@@ -197,9 +201,9 @@ class Node : public boost::noncopyable,
     /**
      * @brief access children
      */
-    const ChildVector& children() const {
-        return children_;
-    }
+    std::vector<const Node*> children() const;
+
+    std::vector<Node*> children();
 
     /**
      * @brief file this node is associated with
@@ -226,40 +230,20 @@ class Node : public boost::noncopyable,
     const_iterator end() const;
 
   protected:
-    // allow make_shared access to constructor
-    /*
-     * could use this for gcc >= 4.3 with -std=c++x0
-    template<typename T, typename... Args> 
-    friend shared_ptr<T> boost::make_shared(Args&& ...); 
-    */
-
-    template<class T, class A1> 
-    friend 
-    shared_ptr<T> boost::make_shared(const A1& a1);
-
-    /**
-     * @brief constructor
-     *
-     * use make_shared<Node> to call
-     */
-    Node(const String& name);
-
-    void parent(shared_ptr<Node> node);
-    
     virtual bool do_accepts_child(const Node& node) const = 0;
 
     virtual bool do_accepts_parent(const Node& node) const = 0;
 
     virtual shared_ptr<const File> do_file() const;
 
+    void parent(Node* parent) { parent_ = parent; }
+
   private:
-    friend class NodeIterator<Node>;
-    friend class NodeIterator<const Node>;
+    typedef boost::ptr_vector<Node> ChildVector;
 
+    Node* parent_;
     String name_;
-    weak_ptr<Node> parent_;
     ChildVector children_;
-
 };
 
 template<typename T>
@@ -268,9 +252,7 @@ class NodeIterator :
                                       T,
                                       boost::forward_traversal_tag> {
   public:
-    NodeIterator();
-
-    explicit NodeIterator(T& node);
+    explicit NodeIterator(T* node=0);
 
     template<typename OtherT>
     NodeIterator(const NodeIterator<OtherT>& other);
@@ -287,7 +269,7 @@ class NodeIterator :
     template<typename OtherT>
     bool equal(const NodeIterator<OtherT>& rhs) const;
 
-    std::deque<shared_ptr<T> > stack_;
+    std::deque<T*> stack_;
 };
 
 } // namespace oh5

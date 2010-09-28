@@ -79,8 +79,8 @@ SaveFile::operator()(const oh5::File& file) {
     BOOST_FOREACH(const Mapping& mapping, special) {
         if (mapping.attribute.starts_with("file:"))
             continue;
-        shared_ptr<const oh5::Attribute> attr =
-                file.root()->child_attribute(mapping.attribute);
+        const oh5::Attribute* attr =
+                file.root().child_attribute(mapping.attribute);
             
         stmt->value(mapping.column, attr_sql_value(*attr));
     }
@@ -102,7 +102,7 @@ SaveFile::operator()(const oh5::File& file) {
 
     save_group_.file_id(file_id);
 
-    BOOST_FOREACH(const oh5::Node& node, *file.root()) {
+    BOOST_FOREACH(const oh5::Node& node, file.root()) {
         visit(node, *this);
     }
 

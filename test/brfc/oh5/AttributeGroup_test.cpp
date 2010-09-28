@@ -32,25 +32,25 @@ namespace oh5 {
 
 struct oh5_AttributeGroup_test : public ::testing::Test {
     oh5_AttributeGroup_test()
-            : what(make_shared<AttributeGroup>("what")) {
+            : what(0, "what") {
     }
 
-    shared_ptr<AttributeGroup> what;
+    AttributeGroup what;
 };
 
 TEST_F(oh5_AttributeGroup_test, test_add_child_Attribute) {
-    shared_ptr<Attribute> a = make_shared<Attribute>("a", Scalar(1));
-    EXPECT_NO_THROW(what->add_child(a));
+    auto_ptr<Node> a(new Attribute(0, "a", Scalar(1)));
+    EXPECT_NO_THROW(what.add_child(a));
 }
 
 TEST_F(oh5_AttributeGroup_test, test_add_child_AttributeGroup) {
-    shared_ptr<AttributeGroup> where = make_shared<AttributeGroup>("where");
-    EXPECT_THROW(what->add_child(where), value_error);
+    auto_ptr<Node> where(new AttributeGroup(0, "where"));
+    EXPECT_THROW(what.add_child(where), value_error);
 }
 
 TEST_F(oh5_AttributeGroup_test, test_add_child_RootGroup) {
-    shared_ptr<RootGroup> root = make_shared<RootGroup>();
-    EXPECT_THROW(what->add_child(root), value_error);
+    auto_ptr<Node> root(new RootGroup());
+    EXPECT_THROW(what.add_child(root), value_error);
 }
 
 } // namespace oh5

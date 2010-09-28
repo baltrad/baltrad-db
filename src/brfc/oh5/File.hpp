@@ -27,6 +27,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/smart_ptr.hpp>
 #include <brfc/String.hpp>
 
+#include <brfc/oh5/RootGroup.hpp>
+
 namespace brfc {
 
 class Date;
@@ -37,7 +39,6 @@ namespace oh5 {
 
 class Attribute;
 class Group;
-class RootGroup;
 class Source;
 
 /**
@@ -92,18 +93,18 @@ class File : public boost::noncopyable,
      * group("path/to/group")
      * @{
      */
-    shared_ptr<const Group> group(const String& path) const;
+    const Group* group(const String& path) const;
 
-    shared_ptr<Group> group(const String& path);
+    Group* group(const String& path);
     ///@}
     
     /**
      * @brief get the root group
      * @{
      */
-    shared_ptr<const RootGroup> root() const { return root_; }
+    const RootGroup& root() const { return root_; }
 
-    shared_ptr<RootGroup> root() { return root_; }
+    RootGroup& root() { return root_; }
     ///@}
     
     /**
@@ -176,8 +177,7 @@ class File : public boost::noncopyable,
     File();
     
   private:
-
-    shared_ptr<RootGroup> root_;
+    RootGroup root_;
     String path_;
 };
 

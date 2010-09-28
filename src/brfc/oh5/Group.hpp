@@ -36,6 +36,13 @@ class Attribute;
 class Group : public Node {
   public:
     /**
+     * @brief constructor
+     */
+    Group(Node* parent, const String& name)
+        : Node(parent, name) {
+    }
+
+    /**
      * @brief create a Group subclass instance from name
      * @return pointer to instance or null pointer if name is not a group
      *
@@ -44,21 +51,13 @@ class Group : public Node {
      *  - (what|where|how) -> @ref AttributeGroup
      *  - everything else -> null pointer
      */
-    static shared_ptr<Group> create_by_name(const String& name);
+    static auto_ptr<Group> create_by_name(const String& name);
 
     /**
      * @brief destructor
      */
     virtual ~Group();
 
-    shared_ptr<Group> shared_from_this() {
-        return static_pointer_cast<Group>(Node::shared_from_this());
-    }
-
-    shared_ptr<const Group> shared_from_this() const {
-        return static_pointer_cast<const Group>(Node::shared_from_this());
-    }
-    
     /**
      * @{
      * @brief access a child attribute
@@ -69,9 +68,9 @@ class Group : public Node {
      * If the name is prefixed with a group, the search is performed in
      * the respective AttributeGroup.
      */
-    shared_ptr<Attribute> child_attribute(const String& name);
+    Attribute* child_attribute(const String& name);
 
-    shared_ptr<const Attribute> child_attribute(const String& name) const;
+    const Attribute* child_attribute(const String& name) const;
     ///@}
     
     /**
@@ -108,9 +107,9 @@ class Group : public Node {
      * - and so on ...
      * 
      */
-    shared_ptr<Attribute> attribute(const String& name);
+    Attribute* attribute(const String& name);
 
-    shared_ptr<const Attribute> attribute(const String& name) const;
+    const Attribute* attribute(const String& name) const;
     ///@}
     
     /**
@@ -121,46 +120,32 @@ class Group : public Node {
      *
      * The search for the group is performed among immediate children.
      */
-    shared_ptr<Group> child_group_by_name(const String& name);
+    Group* child_group_by_name(const String& name);
 
-    shared_ptr<const Group> child_group_by_name(const String& name) const;
+    const Group* child_group_by_name(const String& name) const;
     ///@}
     
     /**
      * @brief access child group by name, trying to create one if missing
-     * @return pointer to group or null if group can not be created
-     *
-     * @sa create_by_name()
+     * @return reference to created group
      */
-    shared_ptr<Group>
+    Group&
     get_or_create_child_group_by_name(const String& name);
     
     /**
      * @brief access child group by path, trying to create missing groups
      * @throw value_error if an invalid name is encountered in @c path
-     * @return pointer to the last group in path or null if the path could
-     *         not be created
+     * @return reference to the last created group
      *
      * if a group in path can not be created, none of the groups are
      * attached to this group.
      * 
      * @sa get_or_create_child_group_by_name()
      */
-    shared_ptr<Group>
+    Group&
     get_or_create_child_group_by_path(const StringList& path);
     
   protected:
-    template<class T, class A1> 
-    friend 
-    shared_ptr<T> boost::make_shared(const A1& a1);
-
-    /**
-     * @brief constructor
-     */
-    Group(const String& name)
-        : Node(name) {
-    }
-
     virtual bool do_accepts_child(const Node& node) const;
 
     virtual bool do_accepts_parent(const Node& node) const;

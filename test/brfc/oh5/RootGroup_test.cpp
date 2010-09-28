@@ -32,42 +32,41 @@ namespace oh5 {
 
 struct oh5_RootGroup_test : public ::testing::Test {
     oh5_RootGroup_test()
-            : root(make_shared<RootGroup>()) {
+            : root() {
     }
 
-    shared_ptr<RootGroup> root;
+    RootGroup root;
 };
 
 TEST_F(oh5_RootGroup_test, test_add_child_Attribute) {
-    shared_ptr<Attribute> a = make_shared<Attribute>("a", Scalar(1));
-    EXPECT_NO_THROW(root->add_child(a));
+    auto_ptr<Node> a(new Attribute(0, "a", Scalar(1)));
+    EXPECT_NO_THROW(root.add_child(a));
 }
 
 TEST_F(oh5_RootGroup_test, test_add_child_AttributeGroup) {
-    shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
-    EXPECT_NO_THROW(root->add_child(what));
+    auto_ptr<Node> what(new AttributeGroup(0, "what"));
+    EXPECT_NO_THROW(root.add_child(what));
 }
 
 TEST_F(oh5_RootGroup_test, test_add_child_RootGroup) {
-    shared_ptr<RootGroup> root2 = make_shared<RootGroup>();
-    EXPECT_THROW(root->add_child(root2), value_error);
+    auto_ptr<Node> root2(new RootGroup());
+    EXPECT_THROW(root.add_child(root2), value_error);
 }
 
 TEST_F(oh5_RootGroup_test, test_file) {
-    EXPECT_FALSE(root->file());
+    EXPECT_FALSE(root.file());
     shared_ptr<File> f = File::create();
-    root->file(f);
-    EXPECT_EQ(f, root->file());
+    root.file(f);
+    EXPECT_EQ(f, root.file());
 }
 
 // tests functionality implemented at Node level
 TEST_F(oh5_RootGroup_test, test_file_through_child_node) {
-    shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
-    root->add_child(what);
-    EXPECT_FALSE(what->file());
+    Group& what = root.create_child_group("what");
+    EXPECT_FALSE(what.file());
     shared_ptr<File> f = File::create();
-    root->file(f);
-    EXPECT_EQ(f, what->file());
+    root.file(f);
+    EXPECT_EQ(f, what.file());
 }
 
 } // namespace oh5

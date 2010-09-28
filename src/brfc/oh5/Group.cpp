@@ -19,7 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Group.hpp>
 
-#include <brfc/RegExp.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -32,72 +31,68 @@ Group::~Group() {
 
 }
 
-shared_ptr<Group>
+auto_ptr<Group>
 Group::create_by_name(const String& name) {
-    RegExp re("(data|dataset|quality)([0-9]+)");
-    
-    if (re.match(name)) {
-        return make_shared<Group>(name);
+    auto_ptr<Group> node;
+    if (name == "what" or name == "where" or name == "how") {
+        node.reset(new AttributeGroup(0, name));
+    } else {
+        node.reset(new Group(0, name));
     }
-    if (name == "what" or name == "where" or name == "how")
-        return make_shared<AttributeGroup>(name);
-
-    return shared_ptr<Group>();
+    return node;
 }
 
-shared_ptr<Attribute>
+Attribute*
 Group::child_attribute(const String& name) {
     const Group* self = const_cast<const Group*>(this);
-    return const_pointer_cast<Attribute>(self->child_attribute(name));
+    return const_cast<Attribute*>(self->child_attribute(name));
 }
 
-shared_ptr<const Attribute>
+const Attribute*
 Group::child_attribute(const String& name) const {
-    return dynamic_pointer_cast<const Attribute>(child_by_path(name));
+    return dynamic_cast<const Attribute*>(child_by_path(name));
 }
 
-shared_ptr<Attribute>
+Attribute*
 Group::attribute(const String& name) {
     const Group* self = const_cast<const Group*>(this);
-    return const_pointer_cast<Attribute>(self->attribute(name));
+    return const_cast<Attribute*>(self->attribute(name));
 }
 
-shared_ptr<const Attribute>
+const Attribute*
 Group::attribute(const String& name) const {
-    shared_ptr<const Attribute> child = child_attribute(name);
+    const Attribute* child = child_attribute(name);
     if (child)
         return child;
-    shared_ptr<const Group> pgroup = parent<Group>();
+    const Group* pgroup = parent<Group>();
     if (pgroup)
         return pgroup->attribute(name);
-    return shared_ptr<const Attribute>();
+    return 0;
 }
 
-shared_ptr<Group>
+Group*
 Group::child_group_by_name(const String& name) {
-    return dynamic_pointer_cast<Group>(child_by_name(name));
+    return dynamic_cast<Group*>(child_by_name(name));
 }
 
-shared_ptr<const Group>
+const Group*
 Group::child_group_by_name(const String& name) const {
-    return dynamic_pointer_cast<const Group>(child_by_name(name));
+    return dynamic_cast<const Group*>(child_by_name(name));
 }
 
-shared_ptr<Group>
+Group&
 Group::get_or_create_child_group_by_name(const String& name) {
-    shared_ptr<Group> child = child_group_by_name(name);
+    Group* child = child_group_by_name(name);
     if (not child) {
-        child = create_by_name(name);
-        if (child)
-            add_child(child);
+        child = &create_child_group(name);
     }
-    return child;
+    return *child;
 }
 
-shared_ptr<Group>
+Group&
 Group::get_or_create_child_group_by_path(const StringList& path) {
-    shared_ptr<Group> last_existing = shared_from_this();
-    shared_ptr<Group> node;
+    Group* last_existing = this;
+    Group* node = 0;
 
     StringList::const_iterator iter = path.begin();
 
@@ -112,24 +107,24 @@ Group::get_or_create_child_group_by_path(const StringList& path) {
     
     // no nodes need to be created
     if (iter == path.end())
-        return last_existing;
+        return *last_existing;
     
-    shared_ptr<Group> created_root = create_by_name(*(iter++));
-    shared_ptr<Group> last_created = created_root;
+    auto_ptr<Group> created_root(create_by_name(*(iter++)));
+    Group* last_created = created_root.get();
 
     // create missing nodes
     while (last_created and iter != path.end()) {
-        node = create_by_name(*iter);
-        if (node)
-            last_created->add_child(node);
-        last_created = node;
+        auto_ptr<Node> n(create_by_name(*iter));
+        last_created = &static_cast<Group&>(last_created->add_child(n));
         ++iter;
     }
 
     // all children created, attach created nodes to last pre-existing node
-    if (last_created)
-        last_existing->add_child(created_root);
-    return last_created;
+    if (last_created) {
+        auto_ptr<Node> n(created_root);
+        last_existing->add_child(n);
+    }
+    return *last_created;
 }
 
 bool

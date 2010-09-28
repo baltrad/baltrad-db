@@ -32,14 +32,11 @@ namespace oh5 {
  */
 class DataSet : public Node {
   public:
+    explicit DataSet(Node* parent, const String& name="data");
+
     virtual ~DataSet();
 
   protected:
-    template<class T, class A1>
-    friend
-    shared_ptr<T> boost::make_shared(const A1&);
-
-    explicit DataSet(const String& name="data");
 
     virtual bool do_accepts_child(const Node& node) const;
 };

@@ -27,9 +27,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-Attribute::Attribute(const String& name,
+Attribute::Attribute(Node* parent,
+                     const String& name,
                      const Scalar& value)
-        : Node(name)
+        : Node(parent, name)
         , value_(value) {
 }
 
@@ -37,29 +38,24 @@ Attribute::~Attribute() {
 
 }
 
-shared_ptr<Group>
+Group*
 Attribute::parent_group() {
     const Attribute* self = const_cast<const Attribute*>(this);
-    return const_pointer_cast<Group>(self->parent_group());
+    return const_cast<Group*>(self->parent_group());
 }
 
-shared_ptr<const Group>
+const Group*
 Attribute::parent_group() const {
-    shared_ptr<const AttributeGroup> parent_p = parent<AttributeGroup>();
+    const AttributeGroup* parent_p = parent<AttributeGroup>();
     if (parent_p)
-        return dynamic_pointer_cast<const Group>(parent_p->parent());
+        return dynamic_cast<const Group*>(parent_p->parent());
     else
-        return dynamic_pointer_cast<const Group>(parent());
-}
-
-void
-Attribute::value(const Scalar& value) {
-    value_ = value;
+        return dynamic_cast<const Group*>(parent());
 }
 
 String
 Attribute::full_name() const {
-    shared_ptr<const AttributeGroup> grp = parent<AttributeGroup>();
+    const AttributeGroup* grp = parent<AttributeGroup>();
     if (grp) {
         return grp->name() + "/" + name();
     } else {

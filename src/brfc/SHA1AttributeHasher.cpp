@@ -48,7 +48,7 @@ SHA1AttributeHasher::do_hash(const oh5::File& file) {
     StringList strs;
     const oh5::Attribute* attr = 0;
 
-    BOOST_FOREACH(const oh5::Node& node, *file.root()) {
+    BOOST_FOREACH(const oh5::Node& node, file.root()) {
         attr = dynamic_cast<const oh5::Attribute*>(&node);
         if (attr and not ignored().contains(attr->full_name())) {
             strs.append(attribute_string(*attr));

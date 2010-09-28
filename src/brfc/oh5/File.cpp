@@ -39,7 +39,7 @@ namespace oh5 {
 
 File::File()
         : enable_shared_from_this<File>()
-        , root_(make_shared<RootGroup>())
+        , root_()
         , path_() {
 }
 
@@ -50,7 +50,7 @@ File::~File() {
 shared_ptr<File>
 File::create() {
     shared_ptr<File> f(new File());
-    f->root_->file(f);
+    f->root_.file(f);
     return f;
 }
 
@@ -66,22 +66,20 @@ File::minimal(const String& object,
               const String& source,
               const String& version) {
     shared_ptr<File> f = create();
-    f->root_->add_child(make_shared<Attribute>("Conventions",
-                                               Scalar("ODIM_H5/V2_0")));
-    shared_ptr<AttributeGroup> what = make_shared<AttributeGroup>("what");
-    f->root_->add_child(what);
-    what->add_child(make_shared<Attribute>("object", Scalar(object)));
-    what->add_child(make_shared<Attribute>("version", Scalar(version)));
-    what->add_child(make_shared<Attribute>("date", Scalar(date)));
-    what->add_child(make_shared<Attribute>("time", Scalar(time)));
-    what->add_child(make_shared<Attribute>("source", Scalar(source)));
+    f->root().create_child_attribute("Conventions", Scalar("ODIM_H5/V2_0"));
+    Group& what = f->root().create_child_group("what");
+    what.create_child_attribute("object", Scalar(object));
+    what.create_child_attribute("version", Scalar(version));
+    what.create_child_attribute("date", Scalar(date));
+    what.create_child_attribute("time", Scalar(time));
+    what.create_child_attribute("source", Scalar(source));
     return f;
 }
 
 Source
 File::source() const {
-    shared_ptr<const Attribute> attr =
-        dynamic_pointer_cast<const Attribute>(root_->child_by_path("what/source"));
+    const Attribute* attr =
+        dynamic_cast<const Attribute*>(root_.child_by_path("what/source"));
     if (attr)
         return Source::from_string(attr->value().to_string());
     return Source();
@@ -89,46 +87,45 @@ File::source() const {
 
 void
 File::source(const Source& source) {
-    shared_ptr<Group> grp =
-        root_->get_or_create_child_group_by_name("what");
+    Group& grp = root_.get_or_create_child_group_by_name("what");
     Scalar srcval = Scalar(source.to_string());
-    shared_ptr<Attribute> attr = grp->child_attribute("source");
+    Attribute* attr = grp.child_attribute("source");
     if (attr)
         attr->value(srcval);
     else
-        grp->add_child(make_shared<Attribute>("source", srcval));
+        grp.create_child_attribute("source", srcval);
 }
 
 namespace {
 
-shared_ptr<const Attribute>
+const Attribute&
 get_child_attribute(const Group& grp, const String& name) {
-    shared_ptr<const Attribute> attr = grp.child_attribute(name);
+    const Attribute* attr = grp.child_attribute(name);
     if (not attr)
         throw lookup_error("missing attribute: " + name.to_utf8());
-    return attr;
+    return *attr;
 }
 
 } // namespace anonymous
 
 String
 File::what_object() const {
-    return get_child_attribute(*root_, "what/object")->value().string();
+    return get_child_attribute(root_, "what/object").value().string();
 }
 
 Date
 File::what_date() const {
-    return get_child_attribute(*root_, "what/date")->value().to_date();
+    return get_child_attribute(root_, "what/date").value().to_date();
 }
 
 Time
 File::what_time() const {
-    return get_child_attribute(*root_, "what/time")->value().to_time();
+    return get_child_attribute(root_, "what/time").value().to_time();
 }
 
 String
 File::what_source() const {
-    return get_child_attribute(*root_, "what/source")->value().string();
+    return get_child_attribute(root_, "what/source").value().string();
 }
 
 String
@@ -136,21 +133,21 @@ File::name() const {
     return path().section("/", -1);
 }
 
-shared_ptr<Group>
+Group*
 File::group(const String& path) {
     const File* self = const_cast<const File*>(this);
-    return const_pointer_cast<Group>(self->group(path));
+    return const_cast<Group*>(self->group(path));
 }
 
-shared_ptr<const Group>
+const Group*
 File::group(const String& path) const {
     String path_copy = path;
     if (path_copy.starts_with("/"))
         path_copy.remove(0, 1);
     if (path_copy == "")
-        return root_;
-    shared_ptr<const Node> node = root_->child_by_path(path_copy);
-    return const_pointer_cast<Group>(dynamic_pointer_cast<const Group>(node));
+        return &root_;
+    const Node* node = root_.child_by_path(path_copy);
+    return const_cast<Group*>(dynamic_cast<const Group*>(node));
 }
 
 } // namespace oh5

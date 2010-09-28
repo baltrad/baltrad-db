@@ -149,7 +149,7 @@ void
 TempH5File::write(const oh5::File& file) {
     GatherHLNodes node_gather;
 
-    BOOST_FOREACH(const oh5::Node& node, *file.root()) {
+    BOOST_FOREACH(const oh5::Node& node, file.root()) {
         visit(node, node_gather);
     }
     

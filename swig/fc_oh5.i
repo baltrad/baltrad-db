@@ -50,24 +50,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %ignore brfc::oh5::Node::begin;
 %ignore brfc::oh5::Node::end;
+%ignore brfc::oh5::Node::add_child;
+
+%ignore brfc::oh5::Group::create_by_name;
 
 %ignore brfc::oh5::Scalar::Scalar(const char* value);
 
 SWIG_SHARED_PTR(File, brfc::oh5::File);
-
-SWIG_SHARED_PTR(Node, brfc::oh5::Node)
-SWIG_SHARED_PTR_DERIVED(Attribute,
-                        brfc::oh5::Node,
-                        brfc::oh5::Attribute);
-SWIG_SHARED_PTR_DERIVED(Group,
-                        brfc::oh5::Node,
-                        brfc::oh5::Group);
-SWIG_SHARED_PTR_DERIVED(RootGroup,
-                        brfc::oh5::Group,
-                        brfc::oh5::RootGroup);
-SWIG_SHARED_PTR_DERIVED(AttributeGroup,
-                        brfc::oh5::Group,
-                        brfc::oh5::AttributeGroup);
 
 %template(NodeVector) std::vector<brfc::shared_ptr<brfc::oh5::Node> >;
 %template(AttributeVector) std::vector<brfc::shared_ptr<brfc::oh5::Attribute> >;

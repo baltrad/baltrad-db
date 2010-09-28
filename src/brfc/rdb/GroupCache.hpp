@@ -33,7 +33,7 @@ class RelationalDatabase;
 /**
  * @brief cache for stored oh5::Group instances
  */
-class GroupCache : public Cache<long long, weak_ptr<const oh5::Group> > {
+class GroupCache : public Cache<long long, const oh5::Group*> {
   public:
     /**
      * @brief constructor
@@ -46,7 +46,7 @@ class GroupCache : public Cache<long long, weak_ptr<const oh5::Group> > {
     /**
      * @brief query for existing id from database
      */
-    virtual OptionalKey do_lookup_key(weak_ptr<const oh5::Group> group);
+    virtual OptionalKey do_lookup_key(const oh5::Group* group);
 
   private:
     RelationalDatabase* rdb_;

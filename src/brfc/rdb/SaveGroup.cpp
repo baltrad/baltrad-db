@@ -64,14 +64,14 @@ SaveGroup::operator()(const oh5::Group& group) {
 
     shared_ptr<sql::Result> result = rdb_->connection().execute(*stmt_);
 
-    cache_->insert(last_id(*result), group.shared_from_this());
+    cache_->insert(last_id(*result), &group);
 }
 
 
 void
 SaveGroup::bind_plain(const oh5::Group& group) {
     GroupCache::OptionalKey parent_id;
-    shared_ptr<const oh5::Group> parent = group.parent<oh5::Group>();
+    const oh5::Group* parent = group.parent<oh5::Group>();
     if (parent) {
         parent_id = cache_->key(parent);
     }
@@ -86,7 +86,7 @@ SaveGroup::bind_plain(const oh5::Group& group) {
 void
 SaveGroup::bind_specializations(const oh5::Group& group) {
     BOOST_FOREACH(const Mapping& mapping, special_) {
-        shared_ptr<const oh5::Attribute> attr =
+        const oh5::Attribute* attr =
             group.child_attribute(mapping.attribute);
         if (attr)
             stmt_->value(mapping.column, attr_sql_value(*attr));

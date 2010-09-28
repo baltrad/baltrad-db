@@ -23,33 +23,26 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/StringList.hpp>
+
+#include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/Group.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-Node::Node(const String& name)
+Node::Node(Node* parent, const String& name)
         : boost::noncopyable()
-        , enable_shared_from_this<Node>()
+        , parent_(parent)
         , name_(name)
-        , parent_()
         , children_() {
-    BRFC_ASSERT(not name.contains("/"));
+    if (name.contains("/"))
+        throw value_error("invalid node name: " + name.to_std_string());
 }
 
 Node::~Node() {
 
-}
-
-void
-Node::name(const String& name) {
-    shared_ptr<Node> p = parent_.lock();
-    if (p and p->has_child_by_name(name)) {
-       throw duplicate_entry("changing name results in duplicate child");
-    }
-    name_ = name;
 }
 
 String
@@ -58,7 +51,7 @@ Node::path() const {
     const Node* node = this;
     while (node != 0) {
         names.push_front(node->name());
-        node = node->parent().get();
+        node = node->parent();
     }
 
     // ensure we get a / at the beginning
@@ -68,90 +61,77 @@ Node::path() const {
     return names.join("/");
 }
 
-void
-Node::parent(shared_ptr<Node> node) {
-    parent_ = node;
+Attribute&
+Node::create_child_attribute(const String& name, const Scalar& value) {
+    auto_ptr<Node> node(new Attribute(this, name, value));
+    return static_cast<Attribute&>(add_child(node));
 }
 
-void
-Node::add_child(shared_ptr<Node> node) {
-    if (not node) {
+Group&
+Node::create_child_group(const String& name) {
+    auto_ptr<Node> node(Group::create_by_name(name));
+    return static_cast<Group&>(add_child(node));
+}
+
+Node&
+Node::add_child(auto_ptr<Node> node) {
+    if (node.get() == 0)
         throw value_error("null pointer");
-    } else if (has_child_by_name(node->name())) {
+    if (has_child_by_name(node->name()))
         throw duplicate_entry(node->name().to_utf8());
-    } else if (not accepts_child(*node)) {
+    if (not accepts_child(*node))
         throw value_error("node '" + node->name().to_utf8() + "' not accepted as child of '" + name().to_utf8() + "'");
-    } else if (not node->accepts_parent(*this)) {
+    if (not node->accepts_parent(*this))
         throw value_error("node does not accept this as parent");
-    }
 
-    shared_ptr<Node> old_parent = node->parent();
-    if (old_parent) {
-        old_parent->remove_child(*node);
-    }
-
+    node->parent(this);
     children_.push_back(node);
-    node->parent(shared_from_this());
-}
-
-void
-Node::remove_child(Node& node) {
-    ChildVector::iterator iter = std::find(children_.begin(),
-                                           children_.end(),
-                                           node.shared_from_this());
-    if (iter != children_.end()) {
-        children_.erase(iter);
-    } else {
-        throw lookup_error("child not found");
-    }
-
-    node.parent(shared_ptr<Node>());
+    return children_.back();
 }
 
 bool
 Node::has_child(const Node& node) const {
-    ChildVector::const_iterator iter = std::find(children_.begin(),
-                                                 children_.end(),
-                                                 node.shared_from_this());
-    return iter != children_.end();
+    if (node.parent() != this)
+        return false;
+    return has_child_by_name(node.name());
 }
 
 bool
 Node::has_child_by_name(const String& name) const {
-    BOOST_FOREACH(shared_ptr<Node> node, children_) {
-        if (node->name() == name) {
+    BOOST_FOREACH(const Node& node, children_) {
+        if (node.name() == name) {
             return true;
         }
     }
     return false;
 }
 
-shared_ptr<Node>
+Node*
 Node::child_by_name(const String& name) {
     const Node* self = const_cast<const Node*>(this);
-    return const_pointer_cast<Node>(self->child_by_name(name));
+    return const_cast<Node*>(self->child_by_name(name));
 }
 
-shared_ptr<const Node>
+const Node*
 Node::child_by_name(const String& name) const {
-    BOOST_FOREACH(shared_ptr<Node> node, children_) {
-        if (node->name() == name) {
-            return node;
+    BOOST_FOREACH(const Node& node, children_) {
+        if (node.name() == name) {
+            return &node;
         }
     }
-    return shared_ptr<Node>();
+    return 0;
 }
 
-shared_ptr<Node>
+Node*
 Node::child_by_path(const String& path) {
     const Node* self = const_cast<const Node*>(this);
-    return const_pointer_cast<Node>(self->child_by_path(path));
+    return const_cast<Node*>(self->child_by_path(path));
 }
 
-shared_ptr<const Node>
+const Node*
 Node::child_by_path(const String& path) const {
     StringList names = path.split("/");
-    shared_ptr<const Node> cur = shared_from_this();
+    const Node* cur = this;
     BOOST_FOREACH(const String& name, names) {
         cur = cur->child_by_name(name);
         if (not cur)
@@ -162,12 +142,12 @@ Node::child_by_path(const String& path) const {
 
 Node::iterator
 Node::begin() {
-    return iterator(*this);
+    return iterator(this);
 }
 
 Node::const_iterator
 Node::begin() const {
-    return const_iterator(*this);
+    return const_iterator(this);
 }
 
 Node::iterator
@@ -180,19 +160,37 @@ Node::end() const {
     return const_iterator();
 }
 
-shared_ptr<const Node>
+const Node&
 Node::root() const {
-    shared_ptr<const Node> root = shared_from_this();
+    const Node* root = this;
     while (root->parent()) {
         root = root->parent();
     }
-    return root;
+    return *root;
 }
 
-shared_ptr<Node>
+Node&
 Node::root() {
     const Node* self = const_cast<const Node*>(this);
-    return const_pointer_cast<Node>(self->root());
+    return const_cast<Node&>(self->root());
+}
+
+std::vector<const Node*>
+Node::children() const {
+    std::vector<const Node*> vec;
+    BOOST_FOREACH(const Node& node, children_) {
+        vec.push_back(&node);
+    }
+    return vec;
+}
+
+std::vector<Node*>
+Node::children() {
+    std::vector<Node*> vec;
+    BOOST_FOREACH(Node& node, children_) {
+        vec.push_back(&node);
+    }
+    return vec;
 }
 
 shared_ptr<const File>
@@ -200,7 +198,7 @@ Node::do_file() const {
     if (is_root()) {
         return shared_ptr<const File>();
     } else {
-        return root()->file();
+        return root().file();
     }
 }
 
@@ -209,15 +207,10 @@ Node::do_file() const {
  */
 
 template<typename T>
-NodeIterator<T>::NodeIterator()
+NodeIterator<T>::NodeIterator(T* node)
         : stack_() {
-
-}
-
-template<typename T>
-NodeIterator<T>::NodeIterator(T& node)
-        : stack_() {
-    stack_.push_back(node.shared_from_this());
+    if (node != 0)
+        stack_.push_back(node);
 }
 
 template<typename T>
@@ -231,9 +224,9 @@ template<typename T>
 void
 NodeIterator<T>::increment() {
     if (not stack_.empty()) {
-        shared_ptr<T> cur = stack_.front();
+        T* cur = stack_.front();
         stack_.pop_front();
-        BOOST_FOREACH(shared_ptr<T> child, cur->children_) {
+        BOOST_FOREACH(T* child, cur->children()) {
             stack_.push_back(child);
         }
     }

@@ -29,20 +29,15 @@ namespace oh5 {
  * @brief a Group that contains only Attributes
  */
 class AttributeGroup : public Group {
-  protected:
-    template<class T, class A1> 
-    friend 
-    shared_ptr<T> boost::make_shared(const A1& a1);
-
+  public:
     /**
      * @brief constructor
-     *
-     * use make_shared<Node> to call
      */
-    AttributeGroup(const String& name)
-        : Group(name) {
+    AttributeGroup(Node* parent, const String& name)
+        : Group(parent, name) {
     }
 
+  protected:
     virtual bool do_accepts_child(const Node& node) const;
 
 };

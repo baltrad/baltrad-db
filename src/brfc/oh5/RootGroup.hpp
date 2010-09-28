@@ -33,6 +33,11 @@ namespace oh5 {
  */
 class RootGroup : public Group {
   public:
+    /**
+     * @brief constructor
+     */
+    RootGroup();
+
     virtual ~RootGroup();
 
     using Group::file;
@@ -45,15 +50,6 @@ class RootGroup : public Group {
     }
 
   protected:
-    template<class T>
-    friend
-    shared_ptr<T> boost::make_shared();
-
-    /**
-     * @brief constructor
-     */
-    RootGroup();
-
     /**
      * @return false
      */

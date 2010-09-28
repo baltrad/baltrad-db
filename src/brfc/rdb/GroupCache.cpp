@@ -30,17 +30,16 @@ namespace brfc {
 namespace rdb {
 
 GroupCache::GroupCache(RelationalDatabase* rdb)
-        : Cache<long long, weak_ptr<const oh5::Group> >()
+        : Cache<long long, const oh5::Group*>()
         , rdb_(rdb) {
 
 }
 
 GroupCache::OptionalKey
-GroupCache::do_lookup_key(weak_ptr<const oh5::Group> weak_group) {
+GroupCache::do_lookup_key(const oh5::Group* group) {
     const Model& m = Model::instance();
     sql::Factory xpr;
 
-    shared_ptr<const oh5::Group> group = weak_group.lock();
     sql::SelectPtr qry = sql::Select::create();
     qry->what(m.groups->column("id"));
 
@@ -50,7 +49,7 @@ GroupCache::do_lookup_key(weak_ptr<const oh5::Group> weak_group) {
     if (file_id)
         qry->where(qry->where()->and_(m.groups->column("file_id")->eq(xpr.int64_(file_id))));
 
-    shared_ptr<const oh5::Group> parent = group->parent<const oh5::Group>();
+    const oh5::Group* parent = group->parent<const oh5::Group>();
     if (parent) {
         OptionalKey id = key(parent);
         if (id)

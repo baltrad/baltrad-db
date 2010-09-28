@@ -35,18 +35,19 @@ class Group;
 class Attribute : public Node {
   public:
     /**
+     * @brief constructor
+     * @param name name of the attribute
+     * @param value attribute value
+     */
+    explicit Attribute(Node* parent,
+                       const String& name,
+                       const Scalar& value);
+
+    /**
      * @brief destructor
      */
     virtual ~Attribute();
 
-    shared_ptr<Attribute> shared_from_this() {
-        return static_pointer_cast<Attribute>(Node::shared_from_this());
-    }
-
-    shared_ptr<const Attribute> shared_from_this() const {
-        return static_pointer_cast<const Attribute>(Node::shared_from_this());
-    }
-    
     /**
      * @brief return nearest parent Group that is not AttributeGroup
      * @return Group or null if not found
@@ -55,9 +56,9 @@ class Attribute : public Node {
      *
      * @{
      */
-    shared_ptr<const Group> parent_group() const;
+    const Group* parent_group() const;
 
-    shared_ptr<Group> parent_group();
+    Group* parent_group();
     /// @}
     
     /**
@@ -68,7 +69,7 @@ class Attribute : public Node {
     /**
      * @brief set attribute value
      */
-    void value(const Scalar& value);
+    void value(const Scalar& value) { value_ = value; }
 
     /**
      * @brief full name of this attribute
@@ -79,18 +80,6 @@ class Attribute : public Node {
     String full_name() const;
     
   protected:
-    template<class T, class A1, class A2> 
-    friend 
-    shared_ptr<T> boost::make_shared(const A1&, const A2&);
-
-    /**
-     * @brief constructor
-     * @param name name of the attribute
-     * @param value attribute value
-     */
-    explicit Attribute(const String& name,
-                       const Scalar& value);
-
     /**
      * @return false
      *

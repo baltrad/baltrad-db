@@ -54,8 +54,8 @@ TEST_F(oh5_File_test, get_nx_node) {
 
 TEST_F(oh5_File_test, root) {
     shared_ptr<File> f = File::create();
-    EXPECT_EQ(f->root(), f->group("/"));
-    EXPECT_EQ(f, f->root()->file());
+    EXPECT_EQ(&f->root(), f->group("/"));
+    EXPECT_EQ(f, f->root().file());
 }
 
 TEST_F(oh5_File_test, required_attribute_shortcuts) {
@@ -75,16 +75,16 @@ TEST_F(oh5_File_test, required_attribute_shortcuts_when_missing) {
 
 TEST_F(oh5_File_test, required_attribute_shortcuts_conversion) {
     shared_ptr<File> f = File::create();
-    shared_ptr<Group> what = f->root()->get_or_create_child_group_by_name("what");
-    what->add_child(make_shared<Attribute>("date", Scalar("20001213")));
-    what->add_child(make_shared<Attribute>("time", Scalar("123456")));
+    Group& what = f->root().get_or_create_child_group_by_name("what");
+    what.create_child_attribute("date", Scalar("20001213"));
+    what.create_child_attribute("time", Scalar("123456"));
     EXPECT_EQ(Date(2000, 12, 13), f->what_date());
     EXPECT_EQ(Time(12, 34, 56), f->what_time());
 
-    what->child_attribute("date")->value(Scalar("foo"));
+    what.child_attribute("date")->value(Scalar("foo"));
     EXPECT_THROW(f->what_date(), value_error);
 
-    what->child_attribute("time")->value(Scalar("bar"));
+    what.child_attribute("time")->value(Scalar("bar"));
     EXPECT_THROW(f->what_time(), value_error);
 }
 

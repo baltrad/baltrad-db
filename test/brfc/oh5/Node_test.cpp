@@ -34,14 +34,10 @@ namespace oh5 {
 class FakeNode : public Node {
   public:
     FakeNode(const String& name)
-            : Node(name) {
+            : Node(0, name) {
     }
   
   protected:
-    template<class T, class A1> 
-    friend 
-    shared_ptr<T> boost::make_shared(const A1& a1);
-
     virtual bool do_accepts_child(const Node& node) const {
         return true;
     }
@@ -53,15 +49,17 @@ class FakeNode : public Node {
 
 struct oh5_Node_test : public ::testing::Test {
     oh5_Node_test()
-            : a(make_shared<FakeNode>("a"))
-            , b(make_shared<FakeNode>("b"))
-            , c(make_shared<FakeNode>("c"))
-            , f(make_shared<FakeNode>("f")) {
-        a->add_child(b);
-        b->add_child(c);
+            : a_(new FakeNode("a"))
+            , b_(new FakeNode("b"))
+            , c_(new FakeNode("c"))
+            , f_(new FakeNode("f")) {
+        a = a_.get();
+        c = &b_->add_child(c_);
+        b = &a_->add_child(b_);
     }
 
-    shared_ptr<FakeNode> a, b, c, f;
+    auto_ptr<Node> a_, b_, c_, f_;
+    Node* a, *b, *c;
 };
 
 TEST_F(oh5_Node_test, test_has_child) {
@@ -72,31 +70,25 @@ TEST_F(oh5_Node_test, test_has_child_by_name) {
     EXPECT_TRUE(a->has_child_by_name("b"));
 }
 
-TEST_F(oh5_Node_test, test_add_child) {
-    a->add_child(f);
-    EXPECT_TRUE(a->has_child(*f));
-    EXPECT_EQ(f->parent(), a);
+TEST_F(oh5_Node_test, test_children) {
+    std::vector<Node*> nodes = a->children();
+
+    ASSERT_EQ(1, nodes.size());
+    EXPECT_EQ(b, nodes.at(0));
 }
 
-TEST_F(oh5_Node_test, remove_child) {
-    a->remove_child(*b);
-    EXPECT_FALSE(a->has_child(*b));
-    EXPECT_TRUE(b->is_root());
+TEST_F(oh5_Node_test, test_add_child) {
+    Node& f = a->add_child(f_);
+    EXPECT_TRUE(a->has_child(f));
+    EXPECT_EQ(f.parent(), a);
 }
 
 TEST_F(oh5_Node_test, test_add_child_null_pointer) {
-    EXPECT_THROW(a->add_child(shared_ptr<Node>()), value_error);
+    EXPECT_THROW(a->add_child(auto_ptr<Node>()), value_error);
 }
 
 TEST_F(oh5_Node_test, test_parent) {
     EXPECT_EQ(b->parent(), a);
-}
-
-TEST_F(oh5_Node_test, test_reparent) {
-    a->add_child(c);
-    EXPECT_TRUE(a->has_child(*c));
-    EXPECT_EQ(c->parent(), a);
-    EXPECT_FALSE(b->has_child(*c));
 }
 
 TEST_F(oh5_Node_test, path) {
@@ -105,19 +97,15 @@ TEST_F(oh5_Node_test, path) {
 }
 
 TEST_F(oh5_Node_test, throws_on_duplicate_child) {
-    EXPECT_THROW(a->add_child(b), duplicate_entry);
-}
-
-TEST_F(oh5_Node_test, changing_child_name_throws_when_parent_has_entry) {
-    a->add_child(f);
-    EXPECT_THROW(f->name("b"), duplicate_entry);
+    auto_ptr<Node> b2(new FakeNode("b"));
+    EXPECT_THROW(a->add_child(b2), duplicate_entry);
 }
 
 TEST_F(oh5_Node_test, root) {
-    EXPECT_EQ(a, c->root());
-    EXPECT_EQ(a, b->root());
-    EXPECT_EQ(a, a->root());
-    EXPECT_EQ(f, f->root());
+    EXPECT_EQ(a, &c->root());
+    EXPECT_EQ(a, &b->root());
+    EXPECT_EQ(a, &a->root());
+    EXPECT_EQ(f_.get(), &f_->root());
 }
 
 TEST_F(oh5_Node_test, is_root) {
@@ -127,20 +115,20 @@ TEST_F(oh5_Node_test, is_root) {
 
 TEST_F(oh5_Node_test, iterator) {
     Node::iterator i = a->begin();
-    EXPECT_EQ(&(*i), a.get());
+    EXPECT_EQ(&(*i), a);
     ++i;
-    EXPECT_EQ(&(*i), b.get());
+    EXPECT_EQ(&(*i), b);
 }
 
 TEST_F(oh5_Node_test, iterator_end) {
-    Node::iterator i = f->begin();
-    EXPECT_TRUE(i != f->end());
+    Node::iterator i = f_->begin();
+    EXPECT_TRUE(i != f_->end());
     ++i;
-    EXPECT_TRUE(i == f->end());
+    EXPECT_TRUE(i == f_->end());
 }
 
 TEST_F(oh5_Node_test, iterate_tree) {
-    a->add_child(f);
+    a->add_child(f_);
 
     StringList names;
     BOOST_FOREACH(Node& node, *a) {
@@ -151,13 +139,13 @@ TEST_F(oh5_Node_test, iterate_tree) {
 }
 
 TEST_F(oh5_Node_test, child_by_name) {
-    EXPECT_EQ(a->child_by_name("b"), b);
-    EXPECT_FALSE(a->child_by_name("c"));
+    EXPECT_EQ(b, a->child_by_name("b"));
+    EXPECT_EQ(0, a->child_by_name("c"));
 }
 
 TEST_F(oh5_Node_test, child_by_path) {
-    EXPECT_EQ(a->child_by_path("b/c"), c);
-    EXPECT_EQ(a->child_by_path("b"), b);
+    EXPECT_EQ(c, a->child_by_path("b/c"));
+    EXPECT_EQ(b, a->child_by_path("b"));
     EXPECT_FALSE(a->child_by_path("b/q"));
 }
 
