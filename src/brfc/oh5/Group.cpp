@@ -132,14 +132,5 @@ Group::do_accepts_child(const Node& node) const {
     return true;
 }
 
-bool
-Group::do_accepts_parent(const Node& node) const {
-    if (dynamic_cast<const Group*>(&node) != 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 } // namespace oh5
 } // namespace brfc

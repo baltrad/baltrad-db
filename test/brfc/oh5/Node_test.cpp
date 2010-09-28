@@ -41,10 +41,6 @@ class FakeNode : public Node {
     virtual bool do_accepts_child(const Node& node) const {
         return true;
     }
-
-    virtual bool do_accepts_parent(const Node& node) const {
-        return true;
-    }
 };
 
 struct oh5_Node_test : public ::testing::Test {

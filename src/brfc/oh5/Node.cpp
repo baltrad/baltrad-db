@@ -81,8 +81,6 @@ Node::add_child(auto_ptr<Node> node) {
         throw duplicate_entry(node->name().to_utf8());
     if (not accepts_child(*node))
         throw value_error("node '" + node->name().to_utf8() + "' not accepted as child of '" + name().to_utf8() + "'");
-    if (not node->accepts_parent(*this))
-        throw value_error("node does not accept this as parent");
 
     node->parent(this);
     children_.push_back(node);

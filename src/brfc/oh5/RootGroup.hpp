@@ -51,13 +51,6 @@ class RootGroup : public Group {
 
   protected:
     /**
-     * @return false
-     */
-    virtual bool do_accepts_parent(const Node& node) const {
-        return false;
-    }
-
-    /**
      * accepts Attribute, AttributeGroup and Dataset as children
      */
     virtual bool do_accepts_child(const Node& node) const;

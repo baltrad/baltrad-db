@@ -89,15 +89,6 @@ class Attribute : public Node {
         return false;
     }
 
-    /**
-     * @return true
-     *
-     * relies on the parent node to deny it
-     */
-    virtual bool do_accepts_parent(const Node& node) const {
-        return true;
-    }
-
   private:
     Scalar value_;
 };

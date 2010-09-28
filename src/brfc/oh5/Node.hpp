@@ -144,7 +144,7 @@ class Node : public boost::noncopyable {
      * If the child is previously associated with a parent node, it is
      * removed from that parents children.
      *
-     * @sa accepts_child, accepts_parent
+     * @sa accepts_child
      *
      * @note this node takes ownership of the child
      */
@@ -192,13 +192,6 @@ class Node : public boost::noncopyable {
     }
 
     /**
-     * @sa do_accepts_parent
-     */
-    bool accepts_parent(const Node& node) const {
-        return do_accepts_parent(node);
-    }
-
-    /**
      * @brief access children
      */
     std::vector<const Node*> children() const;
@@ -231,8 +224,6 @@ class Node : public boost::noncopyable {
 
   protected:
     virtual bool do_accepts_child(const Node& node) const = 0;
-
-    virtual bool do_accepts_parent(const Node& node) const = 0;
 
     virtual const File* do_file() const;
 

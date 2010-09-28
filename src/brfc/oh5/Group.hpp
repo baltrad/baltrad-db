@@ -147,8 +147,6 @@ class Group : public Node {
     
   protected:
     virtual bool do_accepts_child(const Node& node) const;
-
-    virtual bool do_accepts_parent(const Node& node) const;
 };
 
 } // namespace oh5

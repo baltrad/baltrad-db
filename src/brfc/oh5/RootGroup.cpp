@@ -33,7 +33,9 @@ RootGroup::RootGroup(File* file)
 
 bool
 RootGroup::do_accepts_child(const Node& node) const {
-    if (dynamic_cast<const Group*>(&node) != 0 or
+    if (dynamic_cast<const RootGroup*>(&node) != 0) {
+        return false;
+    } else if (dynamic_cast<const Group*>(&node) != 0 or
         dynamic_cast<const Attribute*>(&node) != 0) {
         return true;
     } else {
