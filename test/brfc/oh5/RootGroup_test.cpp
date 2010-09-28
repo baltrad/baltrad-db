@@ -55,18 +55,18 @@ TEST_F(oh5_RootGroup_test, test_add_child_RootGroup) {
 
 TEST_F(oh5_RootGroup_test, test_file) {
     EXPECT_FALSE(root.file());
-    shared_ptr<File> f = File::create();
-    root.file(f);
-    EXPECT_EQ(f, root.file());
+    File f;
+    root.file(&f);
+    EXPECT_EQ(&f, root.file());
 }
 
 // tests functionality implemented at Node level
 TEST_F(oh5_RootGroup_test, test_file_through_child_node) {
     Group& what = root.create_child_group("what");
     EXPECT_FALSE(what.file());
-    shared_ptr<File> f = File::create();
-    root.file(f);
-    EXPECT_EQ(f, what.file());
+    File f;
+    root.file(&f);
+    EXPECT_EQ(&f, what.file());
 }
 
 } // namespace oh5

@@ -39,19 +39,10 @@ namespace brfc {
 class SHA1AttributeHasher_test : public ::testing::Test {
   public:
     SHA1AttributeHasher_test()
-            : f1(oh5::File::minimal("pvol",
-                                    Date(2000, 1, 2),
-                                    Time(12, 5),
-                                    "WMO:02606"))
-            , f2(oh5::File::minimal("pvol",
-                                    Date(2001, 1, 2),
-                                    Time(12, 5),
-                                    "WMO:02606"))
+            : f1("pvol", Date(2000, 1, 2), Time(12, 5), "WMO:02606")
+            , f2("pvol", Date(2001, 1, 2), Time(12, 5), "WMO:02606")
             // same as f1
-            , f3(oh5::File::minimal("pvol",
-                                    Date(2000, 1, 2),
-                                    Time(12, 5),
-                                    "WMO:02606")) 
+            , f3("pvol", Date(2000, 1, 2), Time(12, 5), "WMO:02606")
             , hasher() {
         
     }
@@ -65,7 +56,7 @@ class SHA1AttributeHasher_test : public ::testing::Test {
         hasher.ignore(ignored);
     }
     
-    shared_ptr<oh5::File> f1, f2, f3;
+    oh5::File f1, f2, f3;
     SHA1AttributeHasher hasher;
 };
 
@@ -86,25 +77,25 @@ TEST_F(SHA1AttributeHasher_test, attribute_string) {
 }
 
 TEST_F(SHA1AttributeHasher_test, check_concrete_digests) {
-    EXPECT_EQ("0833a94578041a8177afb30ee1e7ac0a660be043", hasher.hash(*f1));
-    EXPECT_EQ("91176508177e2acc5638faec441a925a268700ae", hasher.hash(*f2));
+    EXPECT_EQ("0833a94578041a8177afb30ee1e7ac0a660be043", hasher.hash(f1));
+    EXPECT_EQ("91176508177e2acc5638faec441a925a268700ae", hasher.hash(f2));
 
 }
 
 TEST_F(SHA1AttributeHasher_test, hash_same_meta) {
-    EXPECT_EQ(hasher.hash(*f1), hasher.hash(*f3));
+    EXPECT_EQ(hasher.hash(f1), hasher.hash(f3));
 }
 
 TEST_F(SHA1AttributeHasher_test, hash_different_meta) {
-    EXPECT_NE(hasher.hash(*f1), hasher.hash(*f2));
+    EXPECT_NE(hasher.hash(f1), hasher.hash(f2));
 }
 
 TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
-    String hash1 = hasher.hash(*f1);
-    f1->root().create_child_attribute("ignore", oh5::Scalar("val"));
-    String hash2 = hasher.hash(*f1);
-    f1->root().attribute("ignore")->value(oh5::Scalar("val2"));
-    String hash3 = hasher.hash(*f1);
+    String hash1 = hasher.hash(f1);
+    f1.root().create_child_attribute("ignore", oh5::Scalar("val"));
+    String hash2 = hasher.hash(f1);
+    f1.root().attribute("ignore")->value(oh5::Scalar("val2"));
+    String hash3 = hasher.hash(f1);
 
     EXPECT_EQ(hash1, hash2);
     EXPECT_EQ(hash1, hash3);
@@ -112,11 +103,11 @@ TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
 }
 
 TEST_F(SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
-    String hash1 = hasher.hash(*f1);
-    f1->root().create_child_attribute("attr", oh5::Scalar("val"));
-    String hash2 = hasher.hash(*f1);
-    f1->root().attribute("attr")->value(oh5::Scalar("val2"));
-    String hash3 = hasher.hash(*f1);
+    String hash1 = hasher.hash(f1);
+    f1.root().create_child_attribute("attr", oh5::Scalar("val"));
+    String hash2 = hasher.hash(f1);
+    f1.root().attribute("attr")->value(oh5::Scalar("val2"));
+    String hash3 = hasher.hash(f1);
 
     EXPECT_NE(hash1, hash2);
     EXPECT_NE(hash1, hash3);

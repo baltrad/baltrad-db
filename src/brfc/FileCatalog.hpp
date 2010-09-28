@@ -102,9 +102,7 @@ class FileCatalog {
      * 
      * this is a short-hand for:
      * @code
-     * FileCatalog fc(...);
-     * shared_ptr<oh5::File> f = oh5::File::from_filesystem(path);
-     * fc.is_cataloged(*f);
+     * is_cataloged(oh5::File(path));
      * @endcode
      *
      * @sa File::unique_identifier
@@ -134,9 +132,7 @@ class FileCatalog {
      *
      * this is a short-hand for:
      * @code
-     * FileCatalog fc(...);
-     * shared_ptr<oh5::File> f = oh5::File::from_filesystem(path);
-     * fc.catalog(*f);
+     * catalog(oh5::File(path));
      * @endcode
      *
      * @sa catalog(oh5::File& file)

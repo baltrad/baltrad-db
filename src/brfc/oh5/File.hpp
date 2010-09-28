@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/noncopyable.hpp>
 
-#include <brfc/smart_ptr.hpp>
 #include <brfc/String.hpp>
 
 #include <brfc/oh5/RootGroup.hpp>
@@ -44,23 +43,21 @@ class Source;
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
  */
-class File : public boost::noncopyable,
-             public boost::enable_shared_from_this<File> {
+class File : public boost::noncopyable {
   public:
     /**
      * @brief construct an empty File
      *
      * this is mainly useful for testing purposes
      */
-    static shared_ptr<File> create();
+    File();
 
     /**
      * @brief construct from physical file
      * @param path absolute path to the file
      * @throw fs_error if file can not be opened
      */
-    static shared_ptr<File>
-    from_filesystem(const String& path);
+    explicit File(const String& path);
     
     /**
      * @brief construct with mandatory attributes present
@@ -73,12 +70,11 @@ class File : public boost::noncopyable,
      * this is the minimal "correct" file, given that parameters are
      * correctly formed.
      */
-    static shared_ptr<File>
-    minimal(const String& object,
-            const Date& date,
-            const Time& time,
-            const String& source,
-            const String& version=String("H5rad 2.0"));
+    File(const String& object,
+         const Date& date,
+         const Time& time,
+         const String& source,
+         const String& version=String("H5rad 2.0"));
 
     /**
      * @brief destructor
@@ -173,10 +169,9 @@ class File : public boost::noncopyable,
     String what_source() const;
     ///@}
 
-  protected:
-    File();
-    
   private:
+    void load();
+
     RootGroup root_;
     String path_;
 };

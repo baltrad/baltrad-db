@@ -213,13 +213,13 @@ class Node : public boost::noncopyable {
      * for root returns a null pointer.
      * @{
      */
-    shared_ptr<const File> file() const {
+    const File* file() const {
         return do_file();
     }
 
-    shared_ptr<File> file() {
+    File* file() {
         const Node* self = const_cast<const Node*>(this);
-        return const_pointer_cast<File>(self->file());
+        return const_cast<File*>(self->file());
     }
     ///@}
     
@@ -234,7 +234,7 @@ class Node : public boost::noncopyable {
 
     virtual bool do_accepts_parent(const Node& node) const = 0;
 
-    virtual shared_ptr<const File> do_file() const;
+    virtual const File* do_file() const;
 
     void parent(Node* parent) { parent_ = parent; }
 

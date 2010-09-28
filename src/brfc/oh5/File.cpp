@@ -27,9 +27,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/StringList.hpp>
 #include <brfc/Time.hpp>
 
+#include <brfc/oh5/hlhdf.hpp>
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/FileLoader.hpp>
+#include <brfc/oh5/Converter.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Scalar.hpp>
 #include <brfc/oh5/Source.hpp>
@@ -38,42 +39,82 @@ namespace brfc {
 namespace oh5 {
 
 File::File()
-        : enable_shared_from_this<File>()
-        , root_()
+        : root_(this)
         , path_() {
+}
+
+File::File(const String& path)
+        : root_(this)
+        , path_(path) {
+    load();
+}
+
+File::File(const String& object,
+           const Date& date,
+           const Time& time,
+           const String& source,
+           const String& version)
+        : root_(this)
+        , path_() {
+    root().create_child_attribute("Conventions", Scalar("ODIM_H5/V2_0"));
+    Group& what = root().create_child_group("what");
+    what.create_child_attribute("object", Scalar(object));
+    what.create_child_attribute("version", Scalar(version));
+    what.create_child_attribute("date", Scalar(date));
+    what.create_child_attribute("time", Scalar(time));
+    what.create_child_attribute("source", Scalar(source));
 }
 
 File::~File() {
 
 }
 
-shared_ptr<File>
-File::create() {
-    shared_ptr<File> f(new File());
-    f->root_.file(f);
-    return f;
+namespace {
+
+void add_attribute_from_node(Group& root, HL_Node* node) {
+    String nodename = String::from_utf8(HLNode_getName(node));
+    StringList path = nodename.split("/");
+
+    String attr_name = path.take_last(); // last element is always attribute
+
+    // XXX: don't load if attribute is attached to DataSet
+    if (path.back() == "data")
+        return;
+
+    shared_ptr<const Converter> converter =
+        Converter::create_from_hlhdf_node(*node);
+    if (not converter)
+        throw std::runtime_error("could not convert " +
+                                 nodename.to_utf8() +
+                                 " value");
+    Scalar value = converter->convert(*node);
+
+    path.take_first(); // discard the root element
+    Group& grp = root.get_or_create_child_group_by_path(path);
+    grp.create_child_attribute(attr_name, value);
 }
 
-shared_ptr<File>
-File::from_filesystem(const String& path) {
-    return FileLoader().load(path);
-}
+} // namespace anonymous
 
-shared_ptr<File>
-File::minimal(const String& object,
-              const Date& date,
-              const Time& time,
-              const String& source,
-              const String& version) {
-    shared_ptr<File> f = create();
-    f->root().create_child_attribute("Conventions", Scalar("ODIM_H5/V2_0"));
-    Group& what = f->root().create_child_group("what");
-    what.create_child_attribute("object", Scalar(object));
-    what.create_child_attribute("version", Scalar(version));
-    what.create_child_attribute("date", Scalar(date));
-    what.create_child_attribute("time", Scalar(time));
-    what.create_child_attribute("source", Scalar(source));
-    return f;
+void
+File::load() {
+    init_hlhdflib();
+
+    std::string path_utf8 = path().to_utf8();
+    shared_ptr<HL_NodeList> nodes(HLNodeList_read(path_utf8.c_str()),
+                                  &HLNodeList_free);
+    if (not nodes)
+        throw fs_error("could not open file: " + path_utf8);
+
+    HLNodeList_selectMetadataNodes(nodes.get());
+    HLNodeList_fetchMarkedNodes(nodes.get());
+
+    for (int i=0; i < HLNodeList_getNumberOfNodes(nodes.get()); ++i) {
+        HL_Node* node = HLNodeList_getNodeByIndex(nodes.get(), i);
+        if (HLNode_getType(node) == ATTRIBUTE_ID) {
+            add_attribute_from_node(root_, node);
+        }
+    }
 }
 
 Source

@@ -47,25 +47,25 @@ class CacheDirStorage_test : public ::testing::Test {
             : dir()
             , storage(dir.path())
             , tmpfile()
-            , file(oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo"))
+            , file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo")
             , entry() {
     }
 
     virtual void SetUp() {
-        tmpfile.write(*file);
-        file->path(tmpfile.path());
+        tmpfile.write(file);
+        file.path(tmpfile.path());
         ON_CALL(entry, do_id()).WillByDefault(Return(1));
     }
     
     test::TempDir dir;
     CacheDirStorage storage;
     test::TempH5File tmpfile;
-    shared_ptr<oh5::File> file;
+    oh5::File file;
     ::testing::NiceMock<MockFileEntry> entry;
 };
 
 TEST_F(CacheDirStorage_test, test_prestore) {
-    const String& fpath = file->path();
+    const String& fpath = file.path();
     const String& rpath = storage.prestore(entry, fpath);
 
     EXPECT_NE(rpath, fpath);

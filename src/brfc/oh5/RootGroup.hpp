@@ -36,7 +36,7 @@ class RootGroup : public Group {
     /**
      * @brief constructor
      */
-    RootGroup();
+    explicit RootGroup(File* file=0);
 
     virtual ~RootGroup();
 
@@ -45,7 +45,7 @@ class RootGroup : public Group {
     /**
      * @brief associate with a file
      */
-    void file(shared_ptr<File> file) {
+    void file(File* file) {
         file_ = file;
     }
 
@@ -65,12 +65,12 @@ class RootGroup : public Group {
     /**
      * @return pointer to File or null if not associated
      */
-    virtual shared_ptr<const File> do_file() const {
-        return file_.lock();
+    virtual const File* do_file() const {
+        return file_;
     }
   
   private:
-    weak_ptr<File> file_;
+    File* file_;
 };
 
 } // namespace oh5

@@ -193,10 +193,10 @@ Node::children() {
     return vec;
 }
 
-shared_ptr<const File>
+const File*
 Node::do_file() const {
     if (is_root()) {
-        return shared_ptr<const File>();
+        return 0;
     } else {
         return root().file();
     }

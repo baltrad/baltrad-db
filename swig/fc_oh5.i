@@ -56,8 +56,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %ignore brfc::oh5::Scalar::Scalar(const char* value);
 
-SWIG_SHARED_PTR(File, brfc::oh5::File);
-
 %template(NodeVector) std::vector<brfc::shared_ptr<brfc::oh5::Node> >;
 %template(AttributeVector) std::vector<brfc::shared_ptr<brfc::oh5::Attribute> >;
 
@@ -87,22 +85,9 @@ SWIG_SHARED_PTR(File, brfc::oh5::File);
     import eu.baltrad.fc.StringList;
 %}
 
-// make constructors for SWIG_SHARED_PTR public
-%typemap(javabody) brfc::oh5::File %{
-  private long swigCPtr;
-  private boolean swigCMemOwnBase;
-
-  public $javaclassname(long cPtr, boolean cMemoryOwn) {
-    swigCMemOwnBase = cMemoryOwn;
-    swigCPtr = cPtr;
-  }
-
-  public static long getCPtr($javaclassname obj) {
-    return (obj == null) ? 0 : obj.swigCPtr;
-  }
-%}
-
-%typemap(javabody) brfc::oh5::Source %{
+// make constructors public
+%typemap(javabody) brfc::oh5::File,
+                   brfc::oh5::Source %{
   private long swigCPtr;
   protected boolean swigCMemOwn;
 

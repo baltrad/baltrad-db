@@ -77,11 +77,11 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
             , src1("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , src2("WMO:02666,RAD:SE51,PLC:Karlskrona")
             , db(TestRDBEnv::get_database(GetParam()))
-            , td1(oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 0), src1))
-            , td2(oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 1), src2))
-            , td3(oh5::File::minimal("PVOL", Date(2000, 1, 1), Time(12, 2), src1))
-            , td4(oh5::File::minimal("CVOL", Date(2001, 1, 1), Time(12, 0), src2))
-            , td5(oh5::File::minimal("SCAN", Date(2002, 2, 1), Time(12, 0), src1))
+            , td1("PVOL", Date(2000, 1, 1), Time(12, 0), src1)
+            , td2("PVOL", Date(2000, 1, 1), Time(12, 1), src2)
+            , td3("PVOL", Date(2000, 1, 1), Time(12, 2), src1)
+            , td4("CVOL", Date(2001, 1, 1), Time(12, 0), src2)
+            , td5("SCAN", Date(2002, 2, 1), Time(12, 0), src1)
             , query(db) {
     }
 
@@ -97,44 +97,44 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
     virtual void SetUp() {
         db->file_hasher(&hasher);
 
-        add_attribute(*td1, "dataset1/where/xsize", oh5::Scalar(1));
-        add_attribute(*td1, "dataset1/where/ysize", oh5::Scalar(2));
-        tf1.write(*td1);
-        td1->path(tf1.path());
-        ON_CALL(hasher, do_hash(Ref(*td1))).WillByDefault(Return("td1"));
+        add_attribute(td1, "dataset1/where/xsize", oh5::Scalar(1));
+        add_attribute(td1, "dataset1/where/ysize", oh5::Scalar(2));
+        tf1.write(td1);
+        td1.path(tf1.path());
+        ON_CALL(hasher, do_hash(Ref(td1))).WillByDefault(Return("td1"));
 
-        add_attribute(*td2, "dataset1/where/xsize", oh5::Scalar(2));
-        add_attribute(*td2, "dataset1/where/ysize", oh5::Scalar(2));
-        tf2.write(*td2);
-        td2->path(tf2.path());
-        ON_CALL(hasher, do_hash(Ref(*td2))).WillByDefault(Return("td2"));
+        add_attribute(td2, "dataset1/where/xsize", oh5::Scalar(2));
+        add_attribute(td2, "dataset1/where/ysize", oh5::Scalar(2));
+        tf2.write(td2);
+        td2.path(tf2.path());
+        ON_CALL(hasher, do_hash(Ref(td2))).WillByDefault(Return("td2"));
 
-        add_attribute(*td3, "dataset1/where/xsize", oh5::Scalar(3));
-        add_attribute(*td3, "dataset2/where/xsize", oh5::Scalar(3));
-        tf3.write(*td3);
-        td3->path(tf3.path());
-        ON_CALL(hasher, do_hash(Ref(*td3))).WillByDefault(Return("td3"));
+        add_attribute(td3, "dataset1/where/xsize", oh5::Scalar(3));
+        add_attribute(td3, "dataset2/where/xsize", oh5::Scalar(3));
+        tf3.write(td3);
+        td3.path(tf3.path());
+        ON_CALL(hasher, do_hash(Ref(td3))).WillByDefault(Return("td3"));
 
-        add_attribute(*td4, "dataset1/where/xsize", oh5::Scalar(6));
-        add_attribute(*td4, "dataset1/where/ysize", oh5::Scalar(4));
-        add_attribute(*td4, "dataset2/where/ysize", oh5::Scalar(5));
-        tf4.write(*td4);
-        td4->path(tf4.path());
-        ON_CALL(hasher, do_hash(Ref(*td4))).WillByDefault(Return("td4"));
+        add_attribute(td4, "dataset1/where/xsize", oh5::Scalar(6));
+        add_attribute(td4, "dataset1/where/ysize", oh5::Scalar(4));
+        add_attribute(td4, "dataset2/where/ysize", oh5::Scalar(5));
+        tf4.write(td4);
+        td4.path(tf4.path());
+        ON_CALL(hasher, do_hash(Ref(td4))).WillByDefault(Return("td4"));
 
-        add_attribute(*td5, "dataset1/where/xsize", oh5::Scalar(5));
-        add_attribute(*td5, "dataset1/where/ysize", oh5::Scalar(2));
-        add_attribute(*td5, "dataset2/where/xsize", oh5::Scalar(2));
-        add_attribute(*td5, "dataset2/where/ysize", oh5::Scalar(5));
-        tf5.write(*td5);
-        td5->path(tf5.path());
-        ON_CALL(hasher, do_hash(Ref(*td5))).WillByDefault(Return("td5"));
+        add_attribute(td5, "dataset1/where/xsize", oh5::Scalar(5));
+        add_attribute(td5, "dataset1/where/ysize", oh5::Scalar(2));
+        add_attribute(td5, "dataset2/where/xsize", oh5::Scalar(2));
+        add_attribute(td5, "dataset2/where/ysize", oh5::Scalar(5));
+        tf5.write(td5);
+        td5.path(tf5.path());
+        ON_CALL(hasher, do_hash(Ref(td5))).WillByDefault(Return("td5"));
 
-        fe1 = db->save_file(*td1);
-        fe2 = db->save_file(*td2);
-        fe3 = db->save_file(*td3);
-        fe4 = db->save_file(*td4);
-        fe5 = db->save_file(*td5);
+        fe1 = db->save_file(td1);
+        fe2 = db->save_file(td2);
+        fe3 = db->save_file(td3);
+        fe4 = db->save_file(td4);
+        fe5 = db->save_file(td5);
     }
 
     virtual void TearDown() {
@@ -145,7 +145,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
     ::testing::NiceMock<MockHasher> hasher;
     String src1, src2;
     test::TestRDB* db;
-    shared_ptr<oh5::File> td1, td2, td3, td4, td5;
+    oh5::File td1, td2, td3, td4, td5;
     test::TempH5File tf1, tf2, tf3, tf4, tf5;
     shared_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     Query query;
@@ -294,15 +294,15 @@ TEST_P(rdb_Query_test, test_filter_by_place) {
 
 TEST_P(rdb_Query_test, test_has_file) {
     bool result = false;
-    ASSERT_NO_THROW(result = db->has_file(*td1));
+    ASSERT_NO_THROW(result = db->has_file(td1));
     EXPECT_TRUE(result);
 }
 
 TEST_P(rdb_Query_test, test_has_nx_file) {
     bool result = false;
-    shared_ptr<oh5::File> td = oh5::File::minimal("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
-    EXPECT_CALL(hasher, do_hash(Ref(*td))).WillOnce(Return("td"));
-    ASSERT_NO_THROW(result = db->has_file(*td));
+    oh5::File td("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
+    EXPECT_CALL(hasher, do_hash(Ref(td))).WillOnce(Return("td"));
+    ASSERT_NO_THROW(result = db->has_file(td));
     EXPECT_FALSE(result);
 }
 

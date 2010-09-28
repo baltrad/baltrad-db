@@ -64,8 +64,7 @@ FileCatalog::storage(shared_ptr<LocalStorage> storage) {
 
 bool
 FileCatalog::is_cataloged(const String& path) const {
-    shared_ptr<oh5::File> f = oh5::File::from_filesystem(path);
-    return is_cataloged(*f);
+    return is_cataloged(oh5::File(path));
 }
 
 bool
@@ -75,8 +74,7 @@ FileCatalog::is_cataloged(const oh5::File& f) const {
 
 shared_ptr<const FileEntry>
 FileCatalog::catalog(const String& path) {
-    shared_ptr<oh5::File> f = oh5::File::from_filesystem(path);
-    return catalog(*f); 
+    return catalog(oh5::File(path)); 
 }
 
 shared_ptr<const FileEntry>
