@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_FILE_H
-#define BRFC_FILE_H
+#ifndef BRFC_OH5_FILE_HPP
+#define BRFC_OH5_FILE_HPP
 
 #include <vector>
 
@@ -26,12 +26,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/String.hpp>
 
-#include <brfc/oh5/RootGroup.hpp>
-
 namespace brfc {
 
 class Date;
-class StringList;
 class Time;
 
 namespace oh5 {
@@ -46,40 +43,9 @@ class Source;
 class File : public boost::noncopyable {
   public:
     /**
-     * @brief construct an empty File
-     *
-     * this is mainly useful for testing purposes
-     */
-    File();
-
-    /**
-     * @brief construct from physical file
-     * @param path absolute path to the file
-     * @throw fs_error if file can not be opened
-     */
-    explicit File(const String& path);
-    
-    /**
-     * @brief construct with mandatory attributes present
-     * @param object /what/object
-     * @param date /what/date
-     * @param time /what/time
-     * @param source /what/source
-     * @param version /what/version
-     *
-     * this is the minimal "correct" file, given that parameters are
-     * correctly formed.
-     */
-    File(const String& object,
-         const Date& date,
-         const Time& time,
-         const String& source,
-         const String& version=String("H5rad 2.0"));
-
-    /**
      * @brief destructor
      */
-    ~File();
+    virtual ~File() { }
 
     /**
      * @brief get hold of Group at path
@@ -98,9 +64,9 @@ class File : public boost::noncopyable {
      * @brief get the root group
      * @{
      */
-    const RootGroup& root() const { return root_; }
+    const Group& root() const { return do_root(); }
 
-    RootGroup& root() { return root_; }
+    Group& root() { return const_cast<Group&>(do_root()); }
     ///@}
     
     /**
@@ -119,11 +85,7 @@ class File : public boost::noncopyable {
      * @brief absolute file path
      */
     const String& path() const {
-        return path_;
-    }
-
-    void path(const String& path) {
-        path_ = path;
+        return do_path();
     }
     ///@}
      
@@ -168,14 +130,12 @@ class File : public boost::noncopyable {
      */
     String what_source() const;
     ///@}
-
-  private:
-    void load();
-
-    RootGroup root_;
-    String path_;
+  
+  protected:
+    virtual const Group& do_root() const = 0;
+    virtual const String& do_path() const = 0;
 };
 
 } // namespace oh5
 } // namespace brfc
-#endif // BRFC_FILE_H
+#endif // BRFC_OH5_FILE_HPP

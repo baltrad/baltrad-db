@@ -17,10 +17,11 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/hlhdf.hpp>
+#include <brfc/oh5/hl/hlhdf.hpp>
 
 namespace brfc {
 namespace oh5 {
+namespace hl {
 
 void
 init_hlhdflib() {
@@ -32,5 +33,6 @@ init_hlhdflib() {
     }
 }
 
+}
 } // namespace oh5
 } // namespace brfc

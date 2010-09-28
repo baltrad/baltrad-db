@@ -22,10 +22,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
 #include "../common.hpp"
+#include "MockFile.hpp"
 
 namespace brfc {
 namespace oh5 {
@@ -55,7 +55,7 @@ TEST_F(oh5_RootGroup_test, test_add_child_RootGroup) {
 
 TEST_F(oh5_RootGroup_test, test_file) {
     EXPECT_FALSE(root.file());
-    File f;
+    MockFile f;
     root.file(&f);
     EXPECT_EQ(&f, root.file());
 }
@@ -64,7 +64,7 @@ TEST_F(oh5_RootGroup_test, test_file) {
 TEST_F(oh5_RootGroup_test, test_file_through_child_node) {
     Group& what = root.create_child_group("what");
     EXPECT_FALSE(what.file());
-    File f;
+    MockFile f;
     root.file(&f);
     EXPECT_EQ(&f, what.file());
 }

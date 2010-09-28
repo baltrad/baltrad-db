@@ -31,6 +31,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
 
+#include <brfc/oh5/hl/File.hpp>
+
 #include <brfc/rdb/RelationalFileEntry.hpp>
 
 #include <brfc/sql/BindMap.hpp>
@@ -125,7 +127,7 @@ TEST_P(rdb_RelationalDatabase_test, load_radars_with_same_centre) {
 */
 
 TEST_P(rdb_RelationalDatabase_test, save_file) {
-    oh5::File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    oh5::hl::File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     test::TempH5File tf;
     tf.write(file);
     file.path(tf.path());
@@ -140,7 +142,7 @@ TEST_P(rdb_RelationalDatabase_test, save_file) {
 }
 
 TEST_P(rdb_RelationalDatabase_test, remove_file) {
-    oh5::File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    oh5::hl::File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     test::TempH5File tf;
     tf.write(file);
     file.path(tf.path());
@@ -158,7 +160,7 @@ TEST_P(rdb_RelationalDatabase_test, remove_file) {
 
 //XXX: this should be tested somewhere else?
 TEST_P(rdb_RelationalDatabase_test, write_entry_to_file) {
-    oh5::File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    oh5::hl::File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     test::TempH5File tf;
     tf.write(file);
     file.path(tf.path());
@@ -173,7 +175,7 @@ TEST_P(rdb_RelationalDatabase_test, write_entry_to_file) {
 }
 
 TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
-    oh5::File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    oh5::hl::File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     test::TempH5File tf;
     tf.write(file);
     file.path(tf.path());
@@ -184,7 +186,7 @@ TEST_P(rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
 }
 
 TEST_P(rdb_RelationalDatabase_test, attribute_groups_not_saved) {
-    oh5::File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    oh5::hl::File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     test::TempH5File tf;
     tf.write(file);
     file.path(tf.path());

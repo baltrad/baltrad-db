@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 
-#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/hl/File.hpp>
 
 #include <brfc/test/TempDir.hpp>
 #include <brfc/test/TempH5File.hpp>
@@ -60,7 +60,7 @@ class CacheDirStorage_test : public ::testing::Test {
     test::TempDir dir;
     CacheDirStorage storage;
     test::TempH5File tmpfile;
-    oh5::File file;
+    oh5::hl::File file;
     ::testing::NiceMock<MockFileEntry> entry;
 };
 

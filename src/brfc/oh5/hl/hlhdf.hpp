@@ -17,52 +17,24 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_TEMPORARY_H5_FILE_HPP
-#define BRFC_TEMPORARY_H5_FILE_HPP
+#ifndef BRFC_OH5_HL_HLHDF_HPP
+#define BRFC_OH5_HL_HLHDF_HPP
 
-#include <brfc/smart_ptr.hpp>
-
-namespace brfc {
-
-class String;
-
-namespace oh5 {
-
-class File;
-
+extern "C" {
+    #include <hlhdf.h>
 }
 
-namespace test {
+namespace brfc {
+namespace oh5 {
+namespace hl {
 
-class TempH5File {
-  public:
-    /**
-     * @brief constructor
-     *
-     * creates a temporary file
-     */
-    TempH5File();
+/**
+ * @brief initialize HL-HDF library if not already initialized
+ */
+void init_hlhdflib();
 
-    /**
-     * @brief destructor
-     *
-     * unlinks the file
-     */
-    ~TempH5File();
-
-    void unlink();
-    
-    void write(const oh5::File& f);
-    
-    String path() const;
-
-    void copy(const String& dest) const;
-
-  private:
-    shared_ptr<char> path_;
-};
-
-} // namepsace test
+} // namespace hl
+} // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_TEMPORARY_H5_FILE_HPP
+#endif // BRFC_OH5_HL_HLHDF_HPP

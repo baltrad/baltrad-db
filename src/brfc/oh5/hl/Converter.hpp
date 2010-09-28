@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_OH5_CONVERTER_HPP
-#define BRFC_OH5_CONVERTER_HPP
+#ifndef BRFC_OH5_HL_CONVERTER_HPP
+#define BRFC_OH5_HL_CONVERTER_HPP
 
 extern "C" {
     #include <hlhdf_types.h>
@@ -33,6 +33,8 @@ namespace brfc {
 namespace oh5 {
 
 class Scalar;
+
+namespace hl {
 
 /**
  * @brief HLHDF scalar data as raw byte array
@@ -181,7 +183,8 @@ class DoubleConverter : public Converter {
     virtual HL_Data do_convert(const Scalar& value) const;
 };
 
+} // namespace hl
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_OH5_CONVERTER_HPP
+#endif // BRFC_OH5_HL_CONVERTER_HPP

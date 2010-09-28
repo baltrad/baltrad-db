@@ -27,8 +27,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
+
+#include <brfc/oh5/hl/File.hpp>
 
 #include <brfc/sql/fwd.hpp>
 
@@ -56,7 +57,7 @@ class SHA1AttributeHasher_test : public ::testing::Test {
         hasher.ignore(ignored);
     }
     
-    oh5::File f1, f2, f3;
+    oh5::hl::File f1, f2, f3;
     SHA1AttributeHasher hasher;
 };
 

@@ -23,16 +23,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/oh5/hlhdf.hpp>
-#include <brfc/oh5/Converter.hpp>
+#include <brfc/oh5/hl/hlhdf.hpp>
+#include <brfc/oh5/hl/Converter.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
-#include "../common.hpp"
+#include "../../common.hpp"
 
 namespace brfc {
 namespace oh5 {
-
-
+namespace hl {
 
 namespace {
 
@@ -62,7 +61,7 @@ create_hlhdf_attribute(const char* name, const char* tname, const char* value) {
 
 } // namespace anonymous
 
-TEST(oh5_Converter_test, test_create_converter_from_hlhdf_node) {
+TEST(oh5_hl_Converter_test, test_create_converter_from_hlhdf_node) {
     shared_ptr<HL_Node> node;
     shared_ptr<const Converter> conv;
 
@@ -95,7 +94,7 @@ TEST(oh5_Converter_test, test_create_converter_from_hlhdf_node) {
     EXPECT_TRUE(dynamic_pointer_cast<const StringConverter>(conv));
 }
 
-TEST(oh5_Converter_test, test_create_converter_from_variant) {
+TEST(oh5_hl_Converter_test, test_create_converter_from_variant) {
     shared_ptr<const Converter> conv;
     Scalar v(1);
     conv = Converter::create_from_variant(v);
@@ -209,5 +208,6 @@ TEST(oh5_StringConverter_test, test_convert_variant) {
 }
 
 
-} // namespace
-} // namespace
+} // namespace hl
+} // namespace oh5
+} // namespace brfc

@@ -16,23 +16,23 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef BRFC_OH5_MOCK_FILE_HPP
+#define BRFC_OH5_MOCK_FILE_HPP
 
-#ifndef BRFC_OH5_HLHDF_HPP
-#define BRFC_OH5_HLHDF_HPP
+#include <gmock/gmock.h>
 
-extern "C" {
-    #include <hlhdf.h>
-}
+#include <brfc/oh5/File.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-/**
- * @brief initialize HL-HDF library if not already initialized
- */
-void init_hlhdflib();
+class MockFile : public File {
+  public:
+    MOCK_CONST_METHOD0(do_root, const Group&());
+    MOCK_CONST_METHOD0(do_path, const String&());
+};
 
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_OH5_HLHDF_HPP
+#endif // BRFC_OH5_MOCK_FILE_HPP

@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/Converter.hpp>
+#include <brfc/oh5/hl/Converter.hpp>
 
 #include <string>
 
@@ -25,11 +25,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/oh5/hlhdf.hpp>
 #include <brfc/oh5/Scalar.hpp>
+#include <brfc/oh5/hl/hlhdf.hpp>
 
 namespace brfc {
 namespace oh5 {
+namespace hl {
 
 shared_ptr<const Converter>
 Converter::create_from_hlhdf_node(const HL_Node& node) {
@@ -160,5 +161,6 @@ StringConverter::do_convert(const Scalar& value) const {
                          const_cast<char*>(v.c_str())));
 }
 
+} // namespace hl
 } // namespace oh5
 } // namespace brfc
