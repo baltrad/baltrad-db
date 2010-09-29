@@ -44,12 +44,10 @@ class Group : public Node {
 
     /**
      * @brief create a Group subclass instance from name
-     * @return pointer to instance or null pointer if name is not a group
-     *
-     * ODIM_H5 node names map by name (where N is an integer):
-     *  - datasetN, dataN, qualityN -> @ref Group
-     *  - (what|where|how) -> @ref AttributeGroup
-     *  - everything else -> null pointer
+     * @return pointer to instance
+     * 
+     * if @c name is 'what', 'where' or 'how', create an AttributeGroup,
+     * otherwise create a Group
      */
     static auto_ptr<Group> create_by_name(const String& name);
 
@@ -59,18 +57,19 @@ class Group : public Node {
     virtual ~Group();
 
     /**
-     * @{
      * @brief access a child attribute
      * @param path path to the attribute
      * @return pointer to Attribute or null if not found
      * @sa Node::child()
      */
     Attribute* attribute(const String& name);
-
+    
+    /**
+     * @copydoc attribute()
+     */
     const Attribute* attribute(const String& name) const;
     
     /**
-     * @{
      * @brief access a child attribute "in effect"
      * @param name name of the attribute, can contain a group (e.g what/date)
      * @return pointer to Attribute or null if not found
@@ -117,7 +116,7 @@ class Group : public Node {
     Group* group(const String& path);
     
     /**
-     * @brief copydoc group()
+     * @copydoc group()
      */
     const Group* group(const String& path) const;
     
