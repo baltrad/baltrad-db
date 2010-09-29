@@ -86,7 +86,7 @@ void add_attribute_from_node(Group& root, HL_Node* node) {
     Scalar value = converter->convert(*node);
 
     path.take_first(); // discard the root element
-    Group& grp = root.get_or_create_child_group_by_path(path);
+    Group& grp = root.get_or_create_group(path.join("/"));
     grp.create_attribute(attr_name, value);
 }
 

@@ -53,22 +53,22 @@ TEST_F(oh5_Group_test, test_add_child_group) {
     EXPECT_NO_THROW(g.add_child(d));
 }
 
-TEST_F(oh5_Group_test, test_child_attribute_access) {
+TEST_F(oh5_Group_test, test_attribute_access) {
     Group& what = g.create_group("what");
     Attribute& a1 = what.create_attribute("a1", Scalar(1));
 
-    EXPECT_EQ(&a1, g.child_attribute("what/a1"));
-    EXPECT_FALSE(g.child_attribute("a1"));
-    EXPECT_FALSE(g.child_attribute("what"));
+    EXPECT_EQ(&a1, g.attribute("what/a1"));
+    EXPECT_FALSE(g.attribute("a1"));
+    EXPECT_FALSE(g.attribute("what"));
 }
 
-TEST_F(oh5_Group_test, test_child_group_by_name) {
+TEST_F(oh5_Group_test, test_group_access) {
     Group& g2 = g.create_group("g2");
     Group& g3 = g2.create_group("g3");
     
-    EXPECT_EQ(&g2, g.child_group_by_name("g2"));
-    EXPECT_EQ(&g3, g2.child_group_by_name("g3"));
-    EXPECT_FALSE(g.child_group_by_name("g3"));
+    EXPECT_EQ(&g2, g.group("g2"));
+    EXPECT_EQ(&g3, g2.group("g3"));
+    EXPECT_FALSE(g.group("g3"));
 }
 
 /*
@@ -84,7 +84,7 @@ TEST_F(oh5_Group_test, test_child_group_by_name) {
          - attr2
      - data2
 */
-TEST_F(oh5_Group_test, test_attribute_access) {
+TEST_F(oh5_Group_test, test_effective_attribute_access) {
     Scalar val(1);
 
     Group& w = g.create_group("what");
@@ -99,10 +99,10 @@ TEST_F(oh5_Group_test, test_attribute_access) {
     Group& ds1_d2 = ds1.create_group("data2");
 
 
-    EXPECT_EQ(&ds1_attr1, ds1_d2.attribute("attr1"));
-    EXPECT_EQ(0, ds1_d2.attribute("attr2"));
-    EXPECT_EQ(&w_attr1, ds1_d2.attribute("what/attr1"));
-    EXPECT_EQ(&ds1_d1_w_attr1, ds1_d1.attribute("what/attr1"));
+    EXPECT_EQ(&ds1_attr1, ds1_d2.effective_attribute("attr1"));
+    EXPECT_EQ(0, ds1_d2.effective_attribute("attr2"));
+    EXPECT_EQ(&w_attr1, ds1_d2.effective_attribute("what/attr1"));
+    EXPECT_EQ(&ds1_d1_w_attr1, ds1_d1.effective_attribute("what/attr1"));
 }
 
 TEST_F(oh5_Group_test, test_create_by_name_valid_names) {
@@ -133,37 +133,26 @@ TEST_F(oh5_Group_test, test_create_by_name_invalid_names) {
     EXPECT_THROW(Group::create_by_name("/dataset1"), value_error);
 }
 
-TEST_F(oh5_Group_test, test_get_or_create_child_group_by_name_invalid) {
-    EXPECT_THROW(g.get_or_create_child_group_by_name("/dataset1"), value_error);
-    EXPECT_FALSE(g.has_child("dataset1"));
-    EXPECT_FALSE(g.has_child("/dataset1"));
+TEST_F(oh5_Group_test, test_get_or_create_group_absolute_path_throws) {
+    Group& g2 = g.create_group("g2");
+    EXPECT_THROW(g2.get_or_create_group("/dataset1"), value_error);
+    EXPECT_FALSE(g2.has_child("dataset1"));
 }
 
-TEST_F(oh5_Group_test, test_get_or_create_child_group_by_name_valid) {
-    Group& child1 = g.get_or_create_child_group_by_name("dataset1");
-    EXPECT_TRUE(g.has_child("dataset1"));
-
-    Group& child2 = g.get_or_create_child_group_by_name("dataset1");
-    EXPECT_EQ(&child1, &child2);
-}
-
-
-TEST_F(oh5_Group_test, test_get_or_create_child_group_by_path) {
-    StringList path = String("dataset1/data1").split("/");
-
-    Group& child1 = g.get_or_create_child_group_by_path(path);
+TEST_F(oh5_Group_test, test_get_or_create_group) {
+    Group& child1 = g.get_or_create_group("dataset1/data1");
     EXPECT_EQ("data1", child1.name());
     EXPECT_TRUE(g.has_child("dataset1/data1"));
     
-    Group& child2 = g.get_or_create_child_group_by_path(path);
+    Group& child2 = g.get_or_create_group("dataset1/data1");
 
     EXPECT_EQ(&child1, &child2);
 }
 
-TEST_F(oh5_Group_test, test_get_or_create_child_group_by_path_unaccepted) {
+TEST_F(oh5_Group_test, test_get_or_create_group_unaccepted_throws) {
     StringList path = String("dataset1/what/quality1").split("/");
     
-    EXPECT_THROW(g.get_or_create_child_group_by_path(path), value_error);
+    EXPECT_THROW(g.get_or_create_group("dataset1/what/quality1"), value_error);
     EXPECT_FALSE(g.has_child("dataset1"));
 }
 

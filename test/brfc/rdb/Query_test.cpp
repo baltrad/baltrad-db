@@ -90,7 +90,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
         StringList names = path.split("/");
         String attr_name = names.take_last();
 
-        oh5::Group& g = file.root().get_or_create_child_group_by_path(names);
+        oh5::Group& g = file.root().get_or_create_group(names.join("/"));
         g.create_attribute(attr_name, value);
 
     }

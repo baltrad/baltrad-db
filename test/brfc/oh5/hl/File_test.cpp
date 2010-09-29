@@ -68,13 +68,13 @@ TEST_F(oh5_hl_File_test, test_load_from_filesystem) {
     EXPECT_TRUE(root.has_child("date"));
     EXPECT_TRUE(root.has_child("time"));
     EXPECT_TRUE(root.has_child("what"));
-    ASSERT_TRUE(root.child_attribute("date"));
-    ASSERT_TRUE(root.child_attribute("time"));
-    ASSERT_TRUE(g.group("/what"));
-    ASSERT_TRUE(g.group("/what")->child_attribute("date"));
-    EXPECT_EQ("20000102", root.child_attribute("date")->value().string());
-    EXPECT_EQ("120501", root.child_attribute("time")->value().string());
-    EXPECT_EQ("20000102", g.group("/what")->child_attribute("date")->value().string());
+    ASSERT_TRUE(root.attribute("date"));
+    ASSERT_TRUE(root.attribute("time"));
+    ASSERT_TRUE(root.group("/what"));
+    ASSERT_TRUE(root.attribute("/what/date"));
+    EXPECT_EQ("20000102", root.attribute("date")->value().string());
+    EXPECT_EQ("120501", root.attribute("time")->value().string());
+    EXPECT_EQ("20000102", root.attribute("what/date")->value().string());
 }
 
 } // namespace hl

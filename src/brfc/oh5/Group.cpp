@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Group.hpp>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -43,54 +44,50 @@ Group::create_by_name(const String& name) {
 }
 
 Attribute*
-Group::child_attribute(const String& name) {
+Group::attribute(const String& path) {
     const Group* self = const_cast<const Group*>(this);
-    return const_cast<Attribute*>(self->child_attribute(name));
+    return const_cast<Attribute*>(self->attribute(path));
 }
 
 const Attribute*
-Group::child_attribute(const String& name) const {
-    return dynamic_cast<const Attribute*>(child(name));
+Group::attribute(const String& path) const {
+    return dynamic_cast<const Attribute*>(child(path));
 }
 
 Attribute*
-Group::attribute(const String& name) {
+Group::effective_attribute(const String& name) {
     const Group* self = const_cast<const Group*>(this);
-    return const_cast<Attribute*>(self->attribute(name));
+    return const_cast<Attribute*>(self->effective_attribute(name));
 }
 
 const Attribute*
-Group::attribute(const String& name) const {
-    const Attribute* child = child_attribute(name);
+Group::effective_attribute(const String& name) const {
+    const Attribute* child = attribute(name);
     if (child)
         return child;
     const Group* pgroup = parent<Group>();
     if (pgroup)
-        return pgroup->attribute(name);
+        return pgroup->effective_attribute(name);
     return 0;
 }
 
 Group*
-Group::child_group_by_name(const String& name) {
-    return dynamic_cast<Group*>(child(name));
+Group::group(const String& path) {
+    return dynamic_cast<Group*>(child(path));
 }
 
 const Group*
-Group::child_group_by_name(const String& name) const {
+Group::group(const String& name) const {
     return dynamic_cast<const Group*>(child(name));
 }
 
 Group&
-Group::get_or_create_child_group_by_name(const String& name) {
-    Group* child = child_group_by_name(name);
-    if (not child) {
-        child = &create_group(name);
-    }
-    return *child;
-}
+Group::get_or_create_group(const String& pathstr) {
+    if (pathstr.starts_with("/") and not is_root())
+        throw value_error("path must not be absolute");
 
-Group&
-Group::get_or_create_child_group_by_path(const StringList& path) {
+    StringList path = pathstr.split("/", String::SKIP_EMPTY_PARTS);
+
     Group* last_existing = this;
     Group* node = 0;
 
@@ -98,7 +95,7 @@ Group::get_or_create_child_group_by_path(const StringList& path) {
 
     // seek existing nodes
     while (iter != path.end()) {
-        node = last_existing->child_group_by_name(*iter);
+        node = last_existing->group(*iter);
         if (not node)
             break;
         last_existing = node;

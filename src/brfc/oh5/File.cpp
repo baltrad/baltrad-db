@@ -34,8 +34,7 @@ namespace oh5 {
 
 Source
 File::source() const {
-    const Attribute* attr =
-        dynamic_cast<const Attribute*>(root().child("what/source"));
+    const Attribute* attr = root().attribute("what/source");
     if (attr)
         return Source::from_string(attr->value().to_string());
     return Source();
@@ -43,9 +42,9 @@ File::source() const {
 
 void
 File::source(const Source& source) {
-    Group& grp = root().get_or_create_child_group_by_name("what");
+    Group& grp = root().get_or_create_group("what");
     Scalar srcval = Scalar(source.to_string());
-    Attribute* attr = grp.child_attribute("source");
+    Attribute* attr = grp.attribute("source");
     if (attr)
         attr->value(srcval);
     else
@@ -55,8 +54,8 @@ File::source(const Source& source) {
 namespace {
 
 const Attribute&
-get_child_attribute(const Group& grp, const String& name) {
-    const Attribute* attr = grp.child_attribute(name);
+get_attribute(const Group& grp, const String& name) {
+    const Attribute* attr = grp.attribute(name);
     if (not attr)
         throw lookup_error("missing attribute: " + name.to_utf8());
     return *attr;
@@ -66,22 +65,22 @@ get_child_attribute(const Group& grp, const String& name) {
 
 String
 File::what_object() const {
-    return get_child_attribute(root(), "what/object").value().string();
+    return get_attribute(root(), "what/object").value().string();
 }
 
 Date
 File::what_date() const {
-    return get_child_attribute(root(), "what/date").value().to_date();
+    return get_attribute(root(), "what/date").value().to_date();
 }
 
 Time
 File::what_time() const {
-    return get_child_attribute(root(), "what/time").value().to_time();
+    return get_attribute(root(), "what/time").value().to_time();
 }
 
 String
 File::what_source() const {
-    return get_child_attribute(root(), "what/source").value().string();
+    return get_attribute(root(), "what/source").value().string();
 }
 
 String

@@ -80,7 +80,7 @@ SaveFile::operator()(const oh5::File& file) {
         if (mapping.attribute.starts_with("file:"))
             continue;
         const oh5::Attribute* attr =
-                file.root().child_attribute(mapping.attribute);
+                file.root().attribute(mapping.attribute);
             
         stmt->value(mapping.column, attr_sql_value(*attr));
     }

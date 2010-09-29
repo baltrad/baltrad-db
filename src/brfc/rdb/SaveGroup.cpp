@@ -87,7 +87,7 @@ void
 SaveGroup::bind_specializations(const oh5::Group& group) {
     BOOST_FOREACH(const Mapping& mapping, special_) {
         const oh5::Attribute* attr =
-            group.child_attribute(mapping.attribute);
+            group.attribute(mapping.attribute);
         if (attr)
             stmt_->value(mapping.column, attr_sql_value(*attr));
     }

@@ -61,17 +61,13 @@ class Group : public Node {
     /**
      * @{
      * @brief access a child attribute
-     * @param name name of the attribute, can contain a group (e.g what/date)
+     * @param path path to the attribute
      * @return pointer to Attribute or null if not found
-     * 
-     * The search for the attribute is performed among immediate children.
-     * If the name is prefixed with a group, the search is performed in
-     * the respective AttributeGroup.
+     * @sa Node::child()
      */
-    Attribute* child_attribute(const String& name);
+    Attribute* attribute(const String& name);
 
-    const Attribute* child_attribute(const String& name) const;
-    ///@}
+    const Attribute* attribute(const String& name) const;
     
     /**
      * @{
@@ -104,46 +100,37 @@ class Group : public Node {
      * - search for attr2 @ data2 would return null
      * - search for what/attr1 @ data2 would return /what/attr1
      * - search for what/attr1 @ data1 would return /dataset1/data1/what/attr1
-     * - and so on ...
-     * 
      */
-    Attribute* attribute(const String& name);
-
-    const Attribute* attribute(const String& name) const;
-    ///@}
+    Attribute* effective_attribute(const String& name);
     
     /**
-     * @{
-     * @brief access child group by name
-     * @param name name of the group
+     * @copydoc effective_attribute()
+     */
+    const Attribute* effective_attribute(const String& name) const;
+    
+    /**
+     * @brief access child group
+     * @param path path to the group
      * @return pointer to Group or null if not found
-     *
-     * The search for the group is performed among immediate children.
+     * @sa Node::child()
      */
-    Group* child_group_by_name(const String& name);
-
-    const Group* child_group_by_name(const String& name) const;
-    ///@}
+    Group* group(const String& path);
     
     /**
-     * @brief access child group by name, trying to create one if missing
-     * @return reference to created group
+     * @brief copydoc group()
      */
-    Group&
-    get_or_create_child_group_by_name(const String& name);
+    const Group* group(const String& path) const;
     
     /**
      * @brief access child group by path, trying to create missing groups
      * @throw value_error if an invalid name is encountered in @c path
+     * @throw value_error if the path is absolute and this not is not root
      * @return reference to the last created group
      *
      * if a group in path can not be created, none of the groups are
      * attached to this group.
-     * 
-     * @sa get_or_create_child_group_by_name()
      */
-    Group&
-    get_or_create_child_group_by_path(const StringList& path);
+    Group& get_or_create_group(const String& path);
     
   protected:
     virtual bool do_accepts_child(const Node& node) const;

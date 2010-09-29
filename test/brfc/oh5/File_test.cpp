@@ -84,18 +84,18 @@ TEST_F(oh5_File_test, required_attribute_shortcuts_when_missing) {
 }
 
 TEST_F(oh5_File_test, what_date_conversion) {
-    what.child_attribute("date")->value(Scalar("20001213"));
+    what.attribute("date")->value(Scalar("20001213"));
     EXPECT_EQ(Date(2000, 12, 13), file.what_date());
 
-    what.child_attribute("date")->value(Scalar("foo"));
+    what.attribute("date")->value(Scalar("foo"));
     EXPECT_THROW(file.what_date(), value_error);
 }
 
 TEST_F(oh5_File_test, what_time_conversion) {
-    what.child_attribute("time")->value(Scalar("123456"));
+    what.attribute("time")->value(Scalar("123456"));
     EXPECT_EQ(Time(12, 34, 56), file.what_time());
 
-    what.child_attribute("time")->value(Scalar("bar"));
+    what.attribute("time")->value(Scalar("bar"));
     EXPECT_THROW(file.what_time(), value_error);
 }
 
