@@ -62,7 +62,7 @@ TEST_F(oh5_RootGroup_test, test_file) {
 
 // tests functionality implemented at Node level
 TEST_F(oh5_RootGroup_test, test_file_through_child_node) {
-    Group& what = root.create_child_group("what");
+    Group& what = root.create_group("what");
     EXPECT_FALSE(what.file());
     MockFile f;
     root.file(&f);

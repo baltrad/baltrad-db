@@ -57,6 +57,8 @@ class Node : public boost::noncopyable {
 
     /**
      * @brief constructor
+     * @param parent pointer to parent node
+     * @param name name of this node
      */
     Node(Node* parent, const String& name);
 
@@ -66,10 +68,9 @@ class Node : public boost::noncopyable {
     virtual ~Node();
 
     /**
-     * @{
+     * @brief access node name
      */
     const String& name() const { return name_; }
-    ///@}
     
     /**
      * @brief absolute path of this node
@@ -82,34 +83,39 @@ class Node : public boost::noncopyable {
     /**
      * @brief parent node
      * @return pointer to a parent or null pointer if this node has no parent
-     * @{
      */
     Node* parent() {
         return parent_;
     }
-
+    
+    /**
+     * @copydoc parent()
+     */
     const Node* parent() const {
         return parent_;
     }
-    ///@}
     
     /**
      * @brief parent node of type T
      * @tparam T type to test parent against
      * @return pointer to a parent node of type T or null pointer if this
      *         node has no parent or parent is not of type T
-     * @{
      */
     template<typename T>
     T* parent() {
         return dynamic_cast<T*>(parent_);
     }
 
+    /**
+     * @brief parent node of type T
+     * @tparam T type to test parent against
+     * @return pointer to a parent node of type T or null pointer if this
+     *         node has no parent or parent is not of type T
+     */
     template<typename T>
     const T* parent() const {
         return dynamic_cast<const T*>(parent_);
     }
-    ///@}
 
     /**
      * @brief is this node the root node
@@ -119,18 +125,29 @@ class Node : public boost::noncopyable {
     }
     
     /**
-     * @{
      * @brief get root node
      */
     Node& root();
-
-    const Node& root() const;
-    ///@}
-
-    Attribute& create_child_attribute(const String& name,
-                                      const Scalar& value);
     
-    Group& create_child_group(const String& name);
+    /**
+     * @copydoc root()
+     */
+    const Node& root() const;
+    
+    /**
+     * @brief create a child attribute
+     * @param name attribute name
+     * @param value attribute value
+     * @return reference to the created attribute
+     */
+    Attribute& create_attribute(const String& name, const Scalar& value);
+    
+    /**
+     * @brief create a child group
+     * @param name group name
+     * @return reference to the created group
+     */
+    Group& create_group(const String& path);
 
     /**
      * @brief add a child Node
@@ -151,52 +168,43 @@ class Node : public boost::noncopyable {
     Node& add_child(auto_ptr<Node> node);
 
     /**
-     * @brief test for a child by name
-     */
-    bool has_child_by_name(const String& name) const;
-
-    /**
      * @brief test for a child node
+     * @param path path to the child, relative to this node
+     * @throw value_error if the path is absolute and this node is not root
+     * @return true if the child exists
      */
-    bool has_child(const Node& node) const;
+    bool has_child(const String& path) const;
 
     /**
-     * @{
-     * @brief access child by name
+     * @brief access child node at @c path
+     * @param path path to the child, relative to this node
+     * @throw value_error if the path is absolute and this node is not root
      * @return pointer to Node or null if not found.
      */
-    Node*
-    child_by_name(const String& name);
-
-    const Node*
-    child_by_name(const String& name) const;
-    ///@}
+    Node* child(const String& path);
     
     /**
-     * @{
-     * @brief access child by path
-     * @return pointer to Node or null if not found.
+     * @copydoc child()
      */
-    Node*
-    child_by_path(const String& path);
-
-    const Node*
-    child_by_path(const String& path) const;
-    ///@}
+    const Node* child(const String& path) const;
 
     /**
+     * @brief test if this node can have @c node as a child
      * @sa do_accepts_child
      */
     bool accepts_child(const Node& node) const {
         return do_accepts_child(node);
     }
-
+    
     /**
      * @brief access children
      */
-    std::vector<const Node*> children() const;
-
     std::vector<Node*> children();
+
+    /**
+     * @copydoc children()
+     */
+    std::vector<const Node*> children() const;
 
     /**
      * @brief file this node is associated with
@@ -204,18 +212,19 @@ class Node : public boost::noncopyable {
      *
      * default implementation returns the file associated with root and
      * for root returns a null pointer.
-     * @{
      */
-    const File* file() const {
-        return do_file();
-    }
-
     File* file() {
         const Node* self = const_cast<const Node*>(this);
         return const_cast<File*>(self->file());
     }
-    ///@}
-    
+
+    /**
+     * @copydoc file()
+     */
+    const File* file() const {
+        return do_file();
+    }
+        
     iterator begin();
     const_iterator begin() const;
     
@@ -230,11 +239,9 @@ class Node : public boost::noncopyable {
     void parent(Node* parent) { parent_ = parent; }
 
   private:
-    typedef boost::ptr_vector<Node> ChildVector;
-
     Node* parent_;
     String name_;
-    ChildVector children_;
+    boost::ptr_vector<Node> children_;
 };
 
 template<typename T>

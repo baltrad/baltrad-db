@@ -50,7 +50,7 @@ Group::child_attribute(const String& name) {
 
 const Attribute*
 Group::child_attribute(const String& name) const {
-    return dynamic_cast<const Attribute*>(child_by_path(name));
+    return dynamic_cast<const Attribute*>(child(name));
 }
 
 Attribute*
@@ -72,19 +72,19 @@ Group::attribute(const String& name) const {
 
 Group*
 Group::child_group_by_name(const String& name) {
-    return dynamic_cast<Group*>(child_by_name(name));
+    return dynamic_cast<Group*>(child(name));
 }
 
 const Group*
 Group::child_group_by_name(const String& name) const {
-    return dynamic_cast<const Group*>(child_by_name(name));
+    return dynamic_cast<const Group*>(child(name));
 }
 
 Group&
 Group::get_or_create_child_group_by_name(const String& name) {
     Group* child = child_group_by_name(name);
     if (not child) {
-        child = &create_child_group(name);
+        child = &create_group(name);
     }
     return *child;
 }

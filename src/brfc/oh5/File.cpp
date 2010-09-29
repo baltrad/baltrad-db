@@ -35,7 +35,7 @@ namespace oh5 {
 Source
 File::source() const {
     const Attribute* attr =
-        dynamic_cast<const Attribute*>(root().child_by_path("what/source"));
+        dynamic_cast<const Attribute*>(root().child("what/source"));
     if (attr)
         return Source::from_string(attr->value().to_string());
     return Source();
@@ -49,7 +49,7 @@ File::source(const Source& source) {
     if (attr)
         attr->value(srcval);
     else
-        grp.create_child_attribute("source", srcval);
+        grp.create_attribute("source", srcval);
 }
 
 namespace {
@@ -97,13 +97,10 @@ File::group(const String& path) {
 
 const Group*
 File::group(const String& path) const {
-    String path_copy = path;
-    if (path_copy.starts_with("/"))
-        path_copy.remove(0, 1);
-    if (path_copy == "")
+    if (path == "/")
         return &root();
-    const Node* node = root().child_by_path(path_copy);
-    return const_cast<Group*>(dynamic_cast<const Group*>(node));
+    const Node* node = root().child(path);
+    return dynamic_cast<const Group*>(node);
 }
 
 } // namespace oh5

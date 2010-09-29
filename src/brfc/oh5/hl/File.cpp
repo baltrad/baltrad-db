@@ -52,13 +52,13 @@ File::File(const String& object,
            const String& version)
         : root_(this)
         , path_() {
-    root().create_child_attribute("Conventions", Scalar("ODIM_H5/V2_0"));
-    Group& what = root().create_child_group("what");
-    what.create_child_attribute("object", Scalar(object));
-    what.create_child_attribute("version", Scalar(version));
-    what.create_child_attribute("date", Scalar(date));
-    what.create_child_attribute("time", Scalar(time));
-    what.create_child_attribute("source", Scalar(source));
+    root().create_attribute("Conventions", Scalar("ODIM_H5/V2_0"));
+    Group& what = root().create_group("what");
+    what.create_attribute("object", Scalar(object));
+    what.create_attribute("version", Scalar(version));
+    what.create_attribute("date", Scalar(date));
+    what.create_attribute("time", Scalar(time));
+    what.create_attribute("source", Scalar(source));
 }
 
 File::~File() {
@@ -87,7 +87,7 @@ void add_attribute_from_node(Group& root, HL_Node* node) {
 
     path.take_first(); // discard the root element
     Group& grp = root.get_or_create_child_group_by_path(path);
-    grp.create_child_attribute(attr_name, value);
+    grp.create_attribute(attr_name, value);
 }
 
 } // namespace anonymous

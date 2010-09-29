@@ -41,17 +41,17 @@ struct oh5_File_test : public testing::Test {
             : file()
             , root()
             , emptyroot()
-            , what(root.create_child_group("what")) {
+            , what(root.create_group("what")) {
     }
 
     virtual void SetUp() {
         ON_CALL(file, do_root())
             .WillByDefault(ReturnRef(root));
 
-        what.create_child_attribute("object", Scalar("pvol"));
-        what.create_child_attribute("date", Scalar(Date(2000, 1, 2)));
-        what.create_child_attribute("time", Scalar(Time(12, 5)));
-        what.create_child_attribute("source", Scalar("WMO:02606"));
+        what.create_attribute("object", Scalar("pvol"));
+        what.create_attribute("date", Scalar(Date(2000, 1, 2)));
+        what.create_attribute("time", Scalar(Time(12, 5)));
+        what.create_attribute("source", Scalar("WMO:02606"));
     }
 
     ::testing::NiceMock<MockFile> file;

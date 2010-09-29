@@ -29,6 +29,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Group.hpp>
 
+#include <iostream>
+
 namespace brfc {
 namespace oh5 {
 
@@ -62,13 +64,13 @@ Node::path() const {
 }
 
 Attribute&
-Node::create_child_attribute(const String& name, const Scalar& value) {
+Node::create_attribute(const String& name, const Scalar& value) {
     auto_ptr<Node> node(new Attribute(this, name, value));
     return static_cast<Attribute&>(add_child(node));
 }
 
 Group&
-Node::create_child_group(const String& name) {
+Node::create_group(const String& name) {
     auto_ptr<Node> node(Group::create_by_name(name));
     return static_cast<Group&>(add_child(node));
 }
@@ -77,7 +79,7 @@ Node&
 Node::add_child(auto_ptr<Node> node) {
     if (node.get() == 0)
         throw value_error("null pointer");
-    if (has_child_by_name(node->name()))
+    if (has_child(node->name()))
         throw duplicate_entry(node->name().to_utf8());
     if (not accepts_child(*node))
         throw value_error("node '" + node->name().to_utf8() + "' not accepted as child of '" + name().to_utf8() + "'");
@@ -88,54 +90,36 @@ Node::add_child(auto_ptr<Node> node) {
 }
 
 bool
-Node::has_child(const Node& node) const {
-    if (node.parent() != this)
-        return false;
-    return has_child_by_name(node.name());
-}
-
-bool
-Node::has_child_by_name(const String& name) const {
-    BOOST_FOREACH(const Node& node, children_) {
-        if (node.name() == name) {
-            return true;
-        }
-    }
-    return false;
+Node::has_child(const String& path) const {
+    return child(path) != 0;
 }
 
 Node*
-Node::child_by_name(const String& name) {
+Node::child(const String& path) {
     const Node* self = const_cast<const Node*>(this);
-    return const_cast<Node*>(self->child_by_name(name));
+    return const_cast<Node*>(self->child(path));
 }
 
 const Node*
-Node::child_by_name(const String& name) const {
-    BOOST_FOREACH(const Node& node, children_) {
-        if (node.name() == name) {
-            return &node;
-        }
-    }
-    return 0;
-}
-
-Node*
-Node::child_by_path(const String& path) {
-    const Node* self = const_cast<const Node*>(this);
-    return const_cast<Node*>(self->child_by_path(path));
-}
-
-const Node*
-Node::child_by_path(const String& path) const {
-    StringList names = path.split("/");
+Node::child(const String& path) const {
+    if (path.starts_with("/") and not is_root())
+        throw value_error("path must not be absolute");
+    StringList names = path.split("/", String::SKIP_EMPTY_PARTS);
     const Node* cur = this;
+    const Node* child = 0;
     BOOST_FOREACH(const String& name, names) {
-        cur = cur->child_by_name(name);
-        if (not cur)
+        child = 0;
+        BOOST_FOREACH(const Node* node, cur->children()) {
+            if (node->name() == name) {
+                child = node;
+                break;
+            }
+        }
+        if (not child)
             break;
+        cur = child;
     }
-    return cur;
+    return child;
 }
 
 Node::iterator

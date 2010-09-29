@@ -58,12 +58,26 @@ struct oh5_Node_test : public ::testing::Test {
     Node* a, *b, *c;
 };
 
-TEST_F(oh5_Node_test, test_has_child) {
-    EXPECT_TRUE(a->has_child(*b));
+TEST_F(oh5_Node_test, test_construct_with_path) {
+    EXPECT_THROW(FakeNode("a/b"), value_error);
 }
 
-TEST_F(oh5_Node_test, test_has_child_by_name) {
-    EXPECT_TRUE(a->has_child_by_name("b"));
+TEST_F(oh5_Node_test, test_has_child) {
+    EXPECT_TRUE(a->has_child("b"));
+    EXPECT_TRUE(a->has_child("b/c"));
+    EXPECT_FALSE(a->has_child("c"));
+}
+
+TEST_F(oh5_Node_test, test_child) {
+    EXPECT_EQ(b, a->child("b"));
+    EXPECT_EQ(0, a->child("c"));
+    EXPECT_EQ(c, a->child("b/c"));
+    EXPECT_EQ(0, a->child("b/q"));
+}
+
+TEST_F(oh5_Node_test, test_has_child_absolute_path_throws) {
+    EXPECT_NO_THROW(a->has_child("/b")); // can access by absolute path on root
+    EXPECT_THROW(b->has_child("/c"), value_error);
 }
 
 TEST_F(oh5_Node_test, test_children) {
@@ -75,11 +89,11 @@ TEST_F(oh5_Node_test, test_children) {
 
 TEST_F(oh5_Node_test, test_add_child) {
     Node& f = a->add_child(f_);
-    EXPECT_TRUE(a->has_child(f));
+    EXPECT_TRUE(a->has_child(f.name()));
     EXPECT_EQ(f.parent(), a);
 }
 
-TEST_F(oh5_Node_test, test_add_child_null_pointer) {
+TEST_F(oh5_Node_test, test_add_child_null_pointer_throws) {
     EXPECT_THROW(a->add_child(auto_ptr<Node>()), value_error);
 }
 
@@ -92,38 +106,38 @@ TEST_F(oh5_Node_test, path) {
     EXPECT_EQ(c->path(), "/a/b/c");
 }
 
-TEST_F(oh5_Node_test, throws_on_duplicate_child) {
+TEST_F(oh5_Node_test, test_add_child_duplicate_throws) {
     auto_ptr<Node> b2(new FakeNode("b"));
     EXPECT_THROW(a->add_child(b2), duplicate_entry);
 }
 
-TEST_F(oh5_Node_test, root) {
+TEST_F(oh5_Node_test, test_root) {
     EXPECT_EQ(a, &c->root());
     EXPECT_EQ(a, &b->root());
     EXPECT_EQ(a, &a->root());
     EXPECT_EQ(f_.get(), &f_->root());
 }
 
-TEST_F(oh5_Node_test, is_root) {
+TEST_F(oh5_Node_test, test_is_root) {
     EXPECT_TRUE(a->is_root());
     EXPECT_FALSE(b->is_root());
 }
 
-TEST_F(oh5_Node_test, iterator) {
+TEST_F(oh5_Node_test, test_iterator) {
     Node::iterator i = a->begin();
     EXPECT_EQ(&(*i), a);
     ++i;
     EXPECT_EQ(&(*i), b);
 }
 
-TEST_F(oh5_Node_test, iterator_end) {
+TEST_F(oh5_Node_test, test_iterator_end) {
     Node::iterator i = f_->begin();
     EXPECT_TRUE(i != f_->end());
     ++i;
     EXPECT_TRUE(i == f_->end());
 }
 
-TEST_F(oh5_Node_test, iterate_tree) {
+TEST_F(oh5_Node_test, test_iterate_tree) {
     a->add_child(f_);
 
     StringList names;
@@ -132,17 +146,6 @@ TEST_F(oh5_Node_test, iterate_tree) {
     }
 
     EXPECT_EQ(names.join(""), "abfc");
-}
-
-TEST_F(oh5_Node_test, child_by_name) {
-    EXPECT_EQ(b, a->child_by_name("b"));
-    EXPECT_EQ(0, a->child_by_name("c"));
-}
-
-TEST_F(oh5_Node_test, child_by_path) {
-    EXPECT_EQ(c, a->child_by_path("b/c"));
-    EXPECT_EQ(b, a->child_by_path("b"));
-    EXPECT_FALSE(a->child_by_path("b/q"));
 }
 
 } // namespace oh5

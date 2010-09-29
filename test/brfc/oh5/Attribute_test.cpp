@@ -42,11 +42,11 @@ struct oh5_Attribute_test : public ::testing::Test {
 
 TEST_F(oh5_Attribute_test, test_full_name) {
     RootGroup root;
-    Attribute& a1 = root.create_child_attribute("a1", Scalar(1));
+    Attribute& a1 = root.create_attribute("a1", Scalar(1));
     EXPECT_EQ("a1", a1.full_name());
 
     AttributeGroup what(0, "what");
-    Attribute& a2 = what.create_child_attribute("a2", Scalar(1));
+    Attribute& a2 = what.create_attribute("a2", Scalar(1));
     EXPECT_EQ("what/a2", a2.full_name());
 }
 

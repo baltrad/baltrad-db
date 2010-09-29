@@ -53,10 +53,10 @@ TEST_F(oh5_hl_File_test, test_load_from_filesystem) {
     Scalar t_12_05_01(Time(12, 5, 1));
     Scalar d_2000_01_02(Date(2000, 1, 2));
 
-    file.root().create_child_attribute("date", d_2000_01_02);
-    file.root().create_child_attribute("time", t_12_05_01);
-    Group& what = file.root().create_child_group("what");
-    what.create_child_attribute("date", d_2000_01_02);
+    file.root().create_attribute("date", d_2000_01_02);
+    file.root().create_attribute("time", t_12_05_01);
+    Group& what = file.root().create_group("what");
+    what.create_attribute("date", d_2000_01_02);
 
     test::TempH5File tempfile;
     tempfile.write(file);
@@ -65,9 +65,9 @@ TEST_F(oh5_hl_File_test, test_load_from_filesystem) {
     EXPECT_EQ(g.path(), tempfile.path());
     Group& root = g.root();
     EXPECT_EQ((size_t)3, root.children().size());
-    EXPECT_TRUE(root.has_child_by_name("date"));
-    EXPECT_TRUE(root.has_child_by_name("time"));
-    EXPECT_TRUE(root.has_child_by_name("what"));
+    EXPECT_TRUE(root.has_child("date"));
+    EXPECT_TRUE(root.has_child("time"));
+    EXPECT_TRUE(root.has_child("what"));
     ASSERT_TRUE(root.child_attribute("date"));
     ASSERT_TRUE(root.child_attribute("time"));
     ASSERT_TRUE(g.group("/what"));

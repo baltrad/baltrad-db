@@ -66,8 +66,8 @@ TEST_F(SHA1AttributeHasher_test, attribute_string) {
     EXPECT_EQ("/a1=1", SHA1AttributeHasher::attribute_string(a1));
 
     oh5::Group dataset1(0, "dataset1");
-    oh5::Group& what = dataset1.create_child_group("what");
-    oh5::Attribute& a2 = what.create_child_attribute("a2", oh5::Scalar(1));
+    oh5::Group& what = dataset1.create_group("what");
+    oh5::Attribute& a2 = what.create_attribute("a2", oh5::Scalar(1));
     EXPECT_EQ("/dataset1/what/a2=1", SHA1AttributeHasher::attribute_string(a2));
 
     a2.value(oh5::Scalar(Date(2000, 12, 13)));
@@ -93,7 +93,7 @@ TEST_F(SHA1AttributeHasher_test, hash_different_meta) {
 
 TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
     String hash1 = hasher.hash(f1);
-    f1.root().create_child_attribute("ignore", oh5::Scalar("val"));
+    f1.root().create_attribute("ignore", oh5::Scalar("val"));
     String hash2 = hasher.hash(f1);
     f1.root().attribute("ignore")->value(oh5::Scalar("val2"));
     String hash3 = hasher.hash(f1);
@@ -105,7 +105,7 @@ TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
 
 TEST_F(SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
     String hash1 = hasher.hash(f1);
-    f1.root().create_child_attribute("attr", oh5::Scalar("val"));
+    f1.root().create_attribute("attr", oh5::Scalar("val"));
     String hash2 = hasher.hash(f1);
     f1.root().attribute("attr")->value(oh5::Scalar("val2"));
     String hash3 = hasher.hash(f1);
