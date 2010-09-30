@@ -96,17 +96,21 @@ SaveFile::operator()(const oh5::File& file,
     stmt->value("filename_version", xpr.int64_(filename_version));
 
     shared_ptr<sql::Result> result = rdb_->connection().execute(*stmt);
+    
+    long long file_id = 0;
+    if (rdb_->connection().has_feature(sql::Connection::RETURNING) and result->next()) {
+        file_id = result->value_at(0).int64_();
+    } else {
+        // XXX: last insert id!
+    }
+
+    save_group_.file_id(file_id);
 
     BOOST_FOREACH(const oh5::Node& node, *file.root()) {
         visit(node, *this);
     }
 
-    if (rdb_->connection().has_feature(sql::Connection::RETURNING) and result->next()) {
-        return result->value_at(0).int64_();
-    } else {
-        // XXX: last insert id!
-        return 0;
-    }
+    return file_id;
 }
 
 
