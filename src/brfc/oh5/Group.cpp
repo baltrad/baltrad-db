@@ -88,40 +88,26 @@ Group::get_or_create_group(const String& pathstr) {
 
     StringList path = pathstr.split("/", String::SKIP_EMPTY_PARTS);
 
-    Group* last_existing = this;
+    Group* last = this;
     Group* node = 0;
 
     StringList::const_iterator iter = path.begin();
 
     // seek existing nodes
     while (iter != path.end()) {
-        node = last_existing->group(*iter);
+        node = last->group(*iter);
         if (not node)
             break;
-        last_existing = node;
+        last = node;
         ++iter;
     }
     
-    // no nodes need to be created
-    if (iter == path.end())
-        return *last_existing;
-    
-    auto_ptr<Group> created_root(create_by_name(*(iter++)));
-    Group* last_created = created_root.get();
-
     // create missing nodes
-    while (last_created and iter != path.end()) {
-        auto_ptr<Node> n(create_by_name(*iter));
-        last_created = &static_cast<Group&>(last_created->add_child(n));
-        ++iter;
+    while (iter != path.end()) {
+        last = &last->create_group(*(iter++));
     }
 
-    // all children created, attach created nodes to last pre-existing node
-    if (last_created) {
-        auto_ptr<Node> n(created_root);
-        last_existing->add_child(n);
-    }
-    return *last_created;
+    return *last;
 }
 
 bool

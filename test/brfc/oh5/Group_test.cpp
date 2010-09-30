@@ -153,7 +153,9 @@ TEST_F(oh5_Group_test, test_get_or_create_group_unaccepted_throws) {
     StringList path = String("dataset1/what/quality1").split("/");
     
     EXPECT_THROW(g.get_or_create_group("dataset1/what/quality1"), value_error);
-    EXPECT_FALSE(g.has_child("dataset1"));
+    EXPECT_TRUE(g.has_child("dataset1"));
+    EXPECT_TRUE(g.has_child("dataset1/what"));
+    EXPECT_FALSE(g.has_child("dataset1/what/quality1"));
 }
 
 

@@ -126,8 +126,9 @@ class Group : public Node {
      * @throw value_error if the path is absolute and this not is not root
      * @return reference to the last created group
      *
-     * if a group in path can not be created, none of the groups are
-     * attached to this group.
+     * @note this is not atomic. If an error occurs when creating missing
+     *       groups after the first, the groups that have already been
+     *       created, stay.
      */
     Group& get_or_create_group(const String& path);
     
