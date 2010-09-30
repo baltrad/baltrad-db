@@ -70,6 +70,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::FileCatalog::file_namer(shared_ptr<FileNamer>);
 
 %ignore brfc::Query::Query;
+%ignore brfc::Query::order;
 %ignore brfc::ResultSet::ResultSet;
 // deprecated 
 %ignore brfc::ResultSet::integer;

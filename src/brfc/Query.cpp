@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/Query.hpp>
 
+#include <utility>
+
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
@@ -69,6 +71,12 @@ Query::fetch(expr::AttributePtr attribute) {
 Query&
 Query::filter(expr::ExpressionPtr expr) {
     filter_ = filter_ ? filter_->and_(expr) : expr;
+    return *this;
+}
+
+Query&
+Query::order_by(expr::ExpressionPtr expr, SortDirection dir) {
+    order_.push_back(std::make_pair(expr, dir));
     return *this;
 }
 

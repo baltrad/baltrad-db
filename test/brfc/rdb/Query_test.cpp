@@ -356,6 +356,22 @@ TEST_P(rdb_Query_test, test_query_like) {
     EXPECT_TRUE(v.contains("td5"));
 }
 
+TEST_P(rdb_Query_test, test_order_by) {
+    expr::ExpressionPtr dt =
+        xpr.attribute("what/date")->add(xpr.attribute("what/time"));
+    shared_ptr<ResultSet> r =
+        query.fetch(xpr.attribute("file:path"))
+             .order_by(dt, Query::DESCENDING)
+             .execute();
+    EXPECT_EQ(5, r->size());
+    const StringList& v = extract_strings_at(*r, 0);
+    EXPECT_EQ("td5", v.at(0));
+    EXPECT_EQ("td4", v.at(1));
+    EXPECT_EQ("td3", v.at(2));
+    EXPECT_EQ("td2", v.at(3));
+    EXPECT_EQ("td1", v.at(4));
+}
+
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(rdb_Query_test_p,
                         rdb_Query_test,

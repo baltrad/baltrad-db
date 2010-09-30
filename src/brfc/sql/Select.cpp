@@ -35,6 +35,7 @@ Select::Select(SelectablePtr from)
         : what_()
         , from_(from)
         , where_()
+        , order_()
         , distinct_(false) {
     if (from) {
         const std::vector<ColumnPtr>& cols = from->columns();
@@ -70,6 +71,11 @@ Select::columns() const {
 void
 Select::append_where(ExpressionPtr expr) {
     where_ = where_ ? where_->and_(expr) : expr;
+}
+
+void
+Select::append_order_by(ExpressionPtr expr, SortDirection dir) {
+    order_.push_back(std::make_pair(expr, dir));
 }
 
 } // namespace sql

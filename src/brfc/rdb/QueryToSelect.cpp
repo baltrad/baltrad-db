@@ -84,6 +84,12 @@ QueryToSelect::transform(const Query& query,
         visit(*query.filter(), rpl);
         select->where(rpl.pop());
     } 
+
+    // replace attributes in order by
+    BOOST_FOREACH(Query::OrderPair op, query.order()) {
+        visit(*op.first, rpl);
+        select->append_order_by(rpl.pop(), sql::Select::SortDirection(op.second));
+    }
     
     // add the built join as from clause
     select->from(rpl.from_);

@@ -34,7 +34,14 @@ class ResultSet;
  */
 class Query {
   public:
+    enum SortDirection {
+        ASCENDING = 1,
+        DESCENDING = 2
+    };
+
     typedef std::vector<expr::AttributePtr> AttributeVector;
+    typedef std::pair<expr::ExpressionPtr, SortDirection> OrderPair;
+    typedef std::vector<OrderPair> OrderVector;
 
     /**
      * @brief constructor
@@ -88,6 +95,13 @@ class Query {
     }
 
     /**
+     * @brief append sort order
+     */
+    Query& order_by(expr::ExpressionPtr expr, SortDirection dir);
+
+    OrderVector order() const { return order_; }
+
+    /**
      * @brief execute this query
      * @return ResultSet containing executed query results
      *
@@ -95,12 +109,13 @@ class Query {
      * for fetching, in the order they were marked.
      */
     shared_ptr<ResultSet> execute();
-
+    
   private:
     Database* db_;
     bool distinct_;
     AttributeVector fetch_;
     expr::ExpressionPtr filter_;
+    OrderVector order_;
 };
 
 } // namespace brfc

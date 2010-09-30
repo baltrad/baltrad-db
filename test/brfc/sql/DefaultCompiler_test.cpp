@@ -166,6 +166,18 @@ TEST_F(sql_DefaultCompiler_test, test_select) {
     EXPECT_EQ(Variant(1), bind(q, ":lit_0"));
 }
 
+TEST_F(sql_DefaultCompiler_test, test_select_order_by) {
+    SelectPtr select = Select::create();
+    select->from(t1);
+    select->what(t1->column("c1"));
+    select->what(t1->column("c2"));
+    select->append_order_by(t1->column("c1"), Select::ASC);
+    select->append_order_by(t1->column("c3"), Select::DESC);
+    const Query& q = compiler.compile(*select);
+    String expected = "SELECT t1.c1, t1.c2\nFROM t1\nORDER BY t1.c1 ASC, t1.c3 DESC";
+    EXPECT_EQ(expected, q.statement());
+}
+
 TEST_F(sql_DefaultCompiler_test, test_insert) {
     InsertPtr insert = Insert::create(t1);
     insert->value("c1", xpr.int64_(1));
