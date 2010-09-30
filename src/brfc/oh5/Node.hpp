@@ -31,9 +31,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 
 namespace brfc {
-
-class StringList;
-
 namespace oh5 {
 
 class Attribute;
@@ -139,24 +136,16 @@ class Node : public boost::noncopyable {
     
     /**
      * @brief create a child attribute
-     * @param path relative path to attribute
+     * @param name attribute name
      * @param value attribute value
-     * @throw duplicate_entry if the first element in path already exists
-     * @throw value_error if path is invalid
      * @return reference to the created attribute
-     *
-     * if @c path consists of multiple elements, the last element
-     * is taken to be the attribute name and preceding elements group
-     * names.
      */
-    Attribute& create_attribute(const String& path, const Scalar& value);
+    Attribute& create_attribute(const String& name, const Scalar& value);
     
     /**
      * @brief create a child group
-     * @param path relative path to group
-     * @throw duplicate_entry if the first element in path already exists
-     * @throw value_error if path is invalid
-     * @return reference to the (last) created group
+     * @param name group name
+     * @return reference to the created group
      */
     Group& create_group(const String& path);
 
@@ -250,9 +239,6 @@ class Node : public boost::noncopyable {
     void parent(Node* parent) { parent_ = parent; }
 
   private:
-    auto_ptr<Group> create_groups(const StringList& path,
-                                  Group*& last_created);
-
     Node* parent_;
     String name_;
     boost::ptr_vector<Node> children_;

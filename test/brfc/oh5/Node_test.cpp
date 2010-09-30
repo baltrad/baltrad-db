@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/StringList.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Node.hpp>
 
 namespace brfc {
@@ -147,59 +146,6 @@ TEST_F(oh5_Node_test, test_iterate_tree) {
     }
 
     EXPECT_EQ(names.join(""), "abfc");
-}
-
-TEST_F(oh5_Node_test, test_create_attribute_invalid) {
-    Scalar val(1);
-    EXPECT_THROW(a->create_attribute("", val), value_error);
-    EXPECT_THROW(a->create_attribute("/", val), value_error);
-    EXPECT_THROW(b->create_attribute("/asdasd", val), value_error);
-}
-
-TEST_F(oh5_Node_test, test_create_attribute) {
-    Scalar val(1);
-    EXPECT_NO_THROW(a->create_attribute("/qwe", val));
-    EXPECT_TRUE(a->has_child("qwe"));
-
-    EXPECT_THROW(a->create_attribute("qwe", val), duplicate_entry);
-}
-
-TEST_F(oh5_Node_test, test_create_attribute_path) {
-    Scalar val(1);
-    EXPECT_NO_THROW(a->create_attribute("path/to/attr", val));
-    EXPECT_TRUE(a->has_child("path/to/attr"));
-    
-    // 'path' is duplicate
-    EXPECT_THROW(a->create_attribute("path/another/attr", val), duplicate_entry);
-
-    // 'another' not created
-    EXPECT_FALSE(a->has_child("path/another"));
-
-}
-
-TEST_F(oh5_Node_test, test_create_group_invalid) {
-    EXPECT_THROW(a->create_group(""), value_error);
-    EXPECT_THROW(a->create_group("/"), value_error);
-    EXPECT_THROW(b->create_group("/asdasd"), value_error);
-}
-
-TEST_F(oh5_Node_test, test_create_group) {
-    EXPECT_NO_THROW(a->create_group("/qwe"));
-    EXPECT_TRUE(a->has_child("qwe"));
-
-    EXPECT_THROW(a->create_group("qwe"), duplicate_entry);
-}
-
-TEST_F(oh5_Node_test, test_create_group_path) {
-    EXPECT_NO_THROW(a->create_group("path/to/group"));
-    EXPECT_TRUE(a->has_child("path/to/group"));
-    
-    // 'path' is duplicate
-    EXPECT_THROW(a->create_group("path/another/group"), duplicate_entry);
-
-    // 'another' not created
-    EXPECT_FALSE(a->has_child("path/another"));
-
 }
 
 } // namespace oh5

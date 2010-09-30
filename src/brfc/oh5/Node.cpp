@@ -63,66 +63,16 @@ Node::path() const {
     return names.join("/");
 }
 
-auto_ptr<Group>
-Node::create_groups(const StringList& path, Group*& last_created) {
-    BRFC_ASSERT(path.size() > 0);
-    StringList::const_iterator iter = path.begin();
-
-    auto_ptr<Group> created_root(Group::create_by_name(*(iter++)));
-    last_created = created_root.get();
-
-    // create missing nodes
-    while (last_created and iter != path.end()) {
-        auto_ptr<Node> n(Group::create_by_name(*iter++));
-        last_created = static_cast<Group*>(&last_created->add_child(n));
-    }
-    return created_root;
-}
-
 Attribute&
-Node::create_attribute(const String& pathstr, const Scalar& value) {
-    if (pathstr.starts_with("/") and not is_root())
-        throw value_error("path must not be absolute");
-    StringList path = pathstr.split("/", String::SKIP_EMPTY_PARTS);
-    if (path.empty())
-        throw value_error("can't create attribute without a name");
-
-    String attr_name = path.take_last();
-     
-    // create groups
-    auto_ptr<Node> first_created;
-    Attribute* attr = 0;
-    if (path.size() > 0) {
-        Group* last_created = 0;
-        first_created.reset(create_groups(path, last_created).release());
-        // add attribute to last group
-        auto_ptr<Node> node(new Attribute(last_created, attr_name, value));
-        attr = static_cast<Attribute*>(&last_created->add_child(node));
-    } else {
-        // first created is the attribute itself
-        first_created.reset(new Attribute(this, attr_name, value));
-        attr = static_cast<Attribute*>(first_created.get());
-    }
-    
-    // add first created group to this node
-    add_child(first_created);
-
-    return *attr;
+Node::create_attribute(const String& name, const Scalar& value) {
+    auto_ptr<Node> node(new Attribute(this, name, value));
+    return static_cast<Attribute&>(add_child(node));
 }
 
 Group&
-Node::create_group(const String& pathstr) {
-    if (pathstr.starts_with("/") and not is_root())
-        throw value_error("path must not be absolute");
-    StringList path = pathstr.split("/", String::SKIP_EMPTY_PARTS);
-    if (path.empty())
-        throw value_error("can't create group without a name");
-
-    Group* last_created = 0;
-    auto_ptr<Node> first_created(create_groups(path, last_created));
-    add_child(first_created);
-
-    return *last_created;
+Node::create_group(const String& name) {
+    auto_ptr<Node> node(Group::create_by_name(name));
+    return static_cast<Group&>(add_child(node));
 }
 
 Node&
