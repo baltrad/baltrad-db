@@ -101,6 +101,10 @@ class Select : public Selectable {
     void append_order_by(ExpressionPtr expr, SortDirection dir);
 
     OrderVector order() const { return order_; }
+    
+    void limit(int limit) { limit_ = limit; }
+
+    int limit() const { return limit_; }
 
   protected:
     /**
@@ -117,6 +121,7 @@ class Select : public Selectable {
     SelectablePtr from_;
     ExpressionPtr where_;
     OrderVector order_;
+    int limit_;
     bool distinct_;
 };
 

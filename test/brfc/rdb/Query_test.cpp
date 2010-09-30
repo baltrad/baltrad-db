@@ -372,6 +372,14 @@ TEST_P(rdb_Query_test, test_order_by) {
     EXPECT_EQ("td1", v.at(4));
 }
 
+TEST_P(rdb_Query_test, test_limit) {
+    shared_ptr<ResultSet> r =
+        query.fetch(xpr.attribute("file:path"))
+             .limit(2)
+             .execute();
+    EXPECT_EQ(2, r->size());
+}
+
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(rdb_Query_test_p,
                         rdb_Query_test,

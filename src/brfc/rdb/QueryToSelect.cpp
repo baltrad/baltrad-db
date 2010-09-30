@@ -72,6 +72,7 @@ QueryToSelect::transform(const Query& query,
 
     sql::SelectPtr select = sql::Select::create();
     select->distinct(query.distinct());
+    select->limit(query.limit());
 
     // replace attributes with columns
     BOOST_FOREACH(expr::AttributePtr expr, query.fetch()) {

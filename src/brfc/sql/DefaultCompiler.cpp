@@ -188,6 +188,11 @@ DefaultCompiler::operator()(const Select& select) {
     if (order.size() > 0)
         order_clause = "\nORDER BY " + order_elm.join(", ");
 
+    String limit_clause;
+    if (select.limit() > 0) {
+        limit_clause = "\nLIMIT " + String::number(select.limit());
+    }
+
     StringList result_column_elm;
     for (size_t i = 0; i < select.what().size(); ++i) {
         result_column_elm.push_back(pop());
@@ -201,7 +206,8 @@ DefaultCompiler::operator()(const Select& select) {
                               + result_columns
                               + from_clause
                               + where_clause
-                              + order_clause;
+                              + order_clause
+                              + limit_clause;
     push(clause);
 }
 

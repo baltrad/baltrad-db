@@ -100,6 +100,13 @@ class Query {
     Query& order_by(expr::ExpressionPtr expr, SortDirection dir);
 
     OrderVector order() const { return order_; }
+    
+    /**
+     * @brief limit query results
+     */
+    Query& limit(int limit) { limit_ = limit; return *this; }
+
+    int limit() const { return limit_; }
 
     /**
      * @brief execute this query
@@ -116,6 +123,7 @@ class Query {
     AttributeVector fetch_;
     expr::ExpressionPtr filter_;
     OrderVector order_;
+    int limit_;
 };
 
 } // namespace brfc

@@ -37,14 +37,18 @@ Query::Query(Database* db)
         : db_(db)
         , distinct_()
         , fetch_()
-        , filter_() {
+        , filter_()
+        , order_()
+        , limit_(0) {
 }
 
 Query::Query(const Query& other)
         : db_(other.db_)
         , distinct_(other.distinct_)
         , fetch_(other.fetch_)
-        , filter_(other.filter_) {
+        , filter_(other.filter_)
+        , order_(other.order_)
+        , limit_(other.limit_) {
 
 }
 

@@ -178,6 +178,16 @@ TEST_F(sql_DefaultCompiler_test, test_select_order_by) {
     EXPECT_EQ(expected, q.statement());
 }
 
+TEST_F(sql_DefaultCompiler_test, test_select_limit) {
+    SelectPtr select = Select::create();
+    select->from(t1);
+    select->what(t1->column("c1"));
+    select->limit(1);
+    const Query& q = compiler.compile(*select);
+    String expected("SELECT t1.c1\nFROM t1\nLIMIT 1");
+    EXPECT_EQ(expected, q.statement());
+}
+
 TEST_F(sql_DefaultCompiler_test, test_insert) {
     InsertPtr insert = Insert::create(t1);
     insert->value("c1", xpr.int64_(1));
