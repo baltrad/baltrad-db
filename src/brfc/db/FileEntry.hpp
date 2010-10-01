@@ -16,24 +16,48 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef BRFC_DB_FILE_ENTRY_HPP
+#define BRFC_DB_FILE_ENTRY_HPP
 
-#ifndef BRFC_MOCK_LOCAL_STORAGE_HPP
-#define BRFC_MOCK_LOCAL_STORAGE_HPP
-
-#include <gmock/gmock.h>
-
-#include <brfc/LocalStorage.hpp>
+#include <brfc/smart_ptr.hpp>
 
 namespace brfc {
 
-class MockLocalStorage : public LocalStorage {
+class String;
+
+namespace oh5 {
+
+class File;
+
+} // namespace oh5
+
+namespace db {
+
+/**
+ * @brief oh5::File entry in Database
+ */
+class FileEntry {
   public:
-    MOCK_METHOD1(do_store, String(const db::FileEntry&));
-    MOCK_METHOD2(do_prestore, String(const db::FileEntry&, const String&));
-    MOCK_METHOD1(do_remove, bool(const db::FileEntry&));
-    MOCK_METHOD0(do_clean, void());
+    virtual ~FileEntry() { }
+
+    /**
+     * @brief file id
+     */
+    long long id() const {
+        return do_id();
+    }
+    
+    void write_to_file(const String& path) const {
+        do_write_to_file(path);
+    }
+
+  protected:
+    virtual long long do_id() const = 0;
+
+    virtual void do_write_to_file(const String& path) const = 0;
 };
 
+} // namespace db
 } // namespace brfc
 
-#endif // BRFC_MOCK_LOCAL_STORAGE_HPP
+#endif // BRFC_DB_FILE_ENTRY_HPP

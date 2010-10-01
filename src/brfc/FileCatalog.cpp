@@ -22,29 +22,28 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Database.hpp>
 #include <brfc/DefaultFileNamer.hpp>
-#include <brfc/FileEntry.hpp>
 #include <brfc/NullStorage.hpp>
-#include <brfc/Query.hpp>
 
-#include <brfc/expr/Attribute.hpp>
+#include <brfc/db/Database.hpp>
+#include <brfc/db/FileEntry.hpp>
+#include <brfc/db/Query.hpp>
+#include <brfc/db/rdb/RelationalDatabase.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
-#include <brfc/rdb/RelationalDatabase.hpp>
 
 namespace brfc {
     
 FileCatalog::FileCatalog(const String& dsn,
                          shared_ptr<LocalStorage> storage)
-        : db_(new rdb::RelationalDatabase(dsn)) 
+        : db_(new db::rdb::RelationalDatabase(dsn)) 
         , storage_() {
     this->storage(storage);
-    static_pointer_cast<rdb::RelationalDatabase>(db_)->populate_mapper();
+    static_pointer_cast<db::rdb::RelationalDatabase>(db_)->populate_mapper();
 }
 
-FileCatalog::FileCatalog(shared_ptr<Database> db,
+FileCatalog::FileCatalog(shared_ptr<db::Database> db,
                          shared_ptr<LocalStorage> storage)
         : db_(db)
         , storage_() {
@@ -72,14 +71,14 @@ FileCatalog::is_cataloged(const oh5::PhysicalFile& f) const {
     return db_->has_file(f);
 }
 
-shared_ptr<const FileEntry>
+shared_ptr<const db::FileEntry>
 FileCatalog::catalog(const String& path) {
     return catalog(oh5::hl::HlFile(path)); 
 }
 
-shared_ptr<const FileEntry>
+shared_ptr<const db::FileEntry>
 FileCatalog::catalog(const oh5::PhysicalFile& file) {
-    shared_ptr<FileEntry> e = db_->save_file(file);
+    shared_ptr<db::FileEntry> e = db_->save_file(file);
     try {
         storage_->prestore(*e, file.path());
     } catch (const std::runtime_error& e) {
@@ -90,7 +89,7 @@ FileCatalog::catalog(const oh5::PhysicalFile& file) {
 }
 
 bool
-FileCatalog::remove(const FileEntry& entry) {
+FileCatalog::remove(const db::FileEntry& entry) {
     bool removed = db_->remove_file(entry);
     try {
         storage_->remove(entry);
@@ -101,9 +100,9 @@ FileCatalog::remove(const FileEntry& entry) {
     return removed;
 }
 
-Query
+db::Query
 FileCatalog::query() const {
-    return Query(db_.get());
+    return db::Query(db_.get());
 }
 
 } // namespace brfc

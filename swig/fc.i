@@ -19,26 +19,22 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %module(directors="1") fc
 
-#define SWIG_SHARED_PTR_NAMESPACE brfc
 %include "common.i"
 %import "fc_oh5.i"
+%import "fc_db.i"
 %import "fc_expr.i"
 
 %{
     #include <brfc/exceptions.hpp>
-    #include <brfc/smart_ptr.hpp>
     #include <brfc/FileCatalog.hpp>
-    #include <brfc/FileEntry.hpp>
     #include <brfc/FileNamer.hpp>
-    #include <brfc/Query.hpp>
-    #include <brfc/ResultSet.hpp>
-    #include <brfc/Database.hpp>
     #include <brfc/Date.hpp>
     #include <brfc/DateTime.hpp>
     #include <brfc/StringList.hpp>
     #include <brfc/Time.hpp>
     #include <brfc/TimeDelta.hpp>
     #include <brfc/Variant.hpp>
+    #include <brfc/db/Query.hpp>
 %}
 
 %typemap("javapackage") brfc::oh5::File,
@@ -70,16 +66,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
                                        shared_ptr<FileNamer>,
                                        const String&);
 %ignore brfc::FileCatalog::file_namer(shared_ptr<FileNamer>);
-
-%ignore brfc::Query::Query;
-
-/***
- * brfc::ResultSet
- */
-
-%ignore brfc::ResultSet::ResultSet;
-%ignore brfc::ResultSet::operator=;
-
 
 /***
  * brfc::Date
@@ -173,36 +159,23 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   }
 %}
 
-SWIG_SHARED_PTR(Database, brfc::Database);
-SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
-SWIG_SHARED_PTR(FileEntry, brfc::FileEntry);
-
 %pragma(java) jniclassimports=%{
-    import eu.baltrad.fc.expr.Expression;
-    import eu.baltrad.fc.expr.AttributeExpr;
-    import eu.baltrad.fc.expr.AttributeExprVector;
+    import eu.baltrad.fc.db.Database;
+    import eu.baltrad.fc.db.FileEntry;
     import eu.baltrad.fc.oh5.File;
     import eu.baltrad.fc.oh5.PhysicalFile;
     import eu.baltrad.fc.oh5.Source;
 %}
 
-%typemap(javaimports) brfc::Query, brfc::Query* %{
-    import eu.baltrad.fc.expr.Expression;
-    import eu.baltrad.fc.expr.AttributeExpr;
-    import eu.baltrad.fc.expr.AttributeExprVector;
-%}
-
 %typemap(javaimports) brfc::FileCatalog, brfc::FileCatalog* %{
+    import eu.baltrad.fc.db.Database;
+    import eu.baltrad.fc.db.FileEntry;
+    import eu.baltrad.fc.db.Query;
     import eu.baltrad.fc.oh5.PhysicalFile;
 %}
 
 %typemap(javaimports) brfc::FileNamer, brfc::FileNamer* %{
     import eu.baltrad.fc.oh5.File;
-%}
-
-%typemap(javaimports) brfc::Database, brfc::Database* %{
-    import eu.baltrad.fc.oh5.PhysicalFile;
-    import eu.baltrad.fc.oh5.Source;
 %}
 
 // Enable the JNI class to load the required native library.
@@ -217,12 +190,8 @@ SWIG_SHARED_PTR(FileEntry, brfc::FileEntry);
   }
 %}
 
-%include <brfc/ResultSet.hpp>
-%include <brfc/Database.hpp>
-%include <brfc/FileEntry.hpp>
 %include <brfc/FileNamer.hpp>
 %include <brfc/FileCatalog.hpp>
-%include <brfc/Query.hpp>
 %include <brfc/TimeDelta.hpp>
 %include <brfc/Date.hpp>
 %include <brfc/Time.hpp>

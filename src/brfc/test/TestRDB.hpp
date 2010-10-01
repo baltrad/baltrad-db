@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_TEST_TEST_RDB_HPP
 
 #include <brfc/String.hpp>
-#include <brfc/rdb/RelationalDatabase.hpp>
+#include <brfc/db/rdb/RelationalDatabase.hpp>
 
 class StringList;
 
@@ -33,7 +33,7 @@ namespace test {
  *
  * add methods for creating/dropping database schema in a relational database
  */
-class TestRDB : public rdb::RelationalDatabase {
+class TestRDB : public db::rdb::RelationalDatabase {
   public:
     /**
      * @brief constructor

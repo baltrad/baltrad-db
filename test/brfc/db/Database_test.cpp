@@ -17,23 +17,27 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_MOCK_LOCAL_STORAGE_HPP
-#define BRFC_MOCK_LOCAL_STORAGE_HPP
+#include <gtest/gtest.h>
 
-#include <gmock/gmock.h>
+#include <brfc/oh5/PhysicalFile.hpp>
 
-#include <brfc/LocalStorage.hpp>
+#include "MockDatabase.hpp"
+#include "MockFileEntry.hpp"
+
+using ::testing::Ref;
+using ::testing::Return;
 
 namespace brfc {
+namespace db {
 
-class MockLocalStorage : public LocalStorage {
+class db_Database_test : public ::testing::Test {
   public:
-    MOCK_METHOD1(do_store, String(const db::FileEntry&));
-    MOCK_METHOD2(do_prestore, String(const db::FileEntry&, const String&));
-    MOCK_METHOD1(do_remove, bool(const db::FileEntry&));
-    MOCK_METHOD0(do_clean, void());
+    db_Database_test()
+        : db() {
+    }
+
+    MockDatabase db;
 };
 
+} // namepsace db
 } // namespace brfc
-
-#endif // BRFC_MOCK_LOCAL_STORAGE_HPP

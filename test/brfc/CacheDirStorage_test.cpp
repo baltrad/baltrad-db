@@ -31,7 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test/TempH5File.hpp>
 
 #include "common.hpp"
-#include "MockFileEntry.hpp"
+#include "db/MockFileEntry.hpp"
 
 using ::testing::Return;
 using ::testing::_;
@@ -61,7 +61,7 @@ class CacheDirStorage_test : public ::testing::Test {
     CacheDirStorage storage;
     test::TempH5File tmpfile;
     oh5::hl::HlFile file;
-    ::testing::NiceMock<MockFileEntry> entry;
+    ::testing::NiceMock<db::MockFileEntry> entry;
 };
 
 TEST_F(CacheDirStorage_test, test_prestore) {

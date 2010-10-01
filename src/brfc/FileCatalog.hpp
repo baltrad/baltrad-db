@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_FILE_CATALOGER_H
-#define BRFC_FILE_CATALOGER_H
+#ifndef BRFC_FILE_CATALOG_HPP
+#define BRFC_FILE_CATALOG_HPP
 
 #include <brfc/smart_ptr.hpp>
 
@@ -29,10 +29,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
  */
 namespace brfc {
     
+class LocalStorage;
+
+namespace db {
+
 class Database;
 class FileEntry;
-class LocalStorage;
 class Query;
+
+} // namespace db
 
 namespace oh5 {
     class PhysicalFile;
@@ -66,7 +71,7 @@ class FileCatalog {
      * @param db database instance
      */
     explicit
-    FileCatalog(shared_ptr<Database> db,
+    FileCatalog(shared_ptr<db::Database> db,
                 shared_ptr<LocalStorage> storage=shared_ptr<LocalStorage>());
     
     /**
@@ -77,7 +82,7 @@ class FileCatalog {
     /**
      * @brief access bound Database instance
      */
-    shared_ptr<Database> database() {
+    shared_ptr<db::Database> database() {
         return db_;
     }
     
@@ -137,7 +142,7 @@ class FileCatalog {
      *
      * @sa catalog(oh5::PhysicalFile& file)
      */
-    shared_ptr<const FileEntry> catalog(const String& path);
+    shared_ptr<const db::FileEntry> catalog(const String& path);
     
     /**
      * @brief import file to catalog
@@ -152,7 +157,7 @@ class FileCatalog {
      * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
      * is considered failed.
      */
-    shared_ptr<const FileEntry> catalog(const oh5::PhysicalFile& file);
+    shared_ptr<const db::FileEntry> catalog(const oh5::PhysicalFile& file);
     
     /**
      * @brief remove file from catalog
@@ -166,18 +171,18 @@ class FileCatalog {
      * Exceptions thrown by LocalStorage::remove are ignored and removing from
      * local storage is considered failed.
      */
-    bool remove(const FileEntry& entry);
+    bool remove(const db::FileEntry& entry);
 
     /**
      * @brief get a query object bound to owned database
      */
-    Query query() const;
+    db::Query query() const;
     
   private:
-    shared_ptr<Database> db_;
+    shared_ptr<db::Database> db_;
     shared_ptr<LocalStorage> storage_;
 };
 
 }
 
-#endif // BRFC_FILE_CATALOGER_H
+#endif // BRFC_FILE_CATALOG_HPP

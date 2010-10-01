@@ -31,21 +31,21 @@ class NullStorage : public LocalStorage {
     /**
      * no-op
      */
-    virtual String do_prestore(const FileEntry&, const String&) {
+    virtual String do_prestore(const db::FileEntry&, const String&) {
         return "";
     } 
     
     /**
      * @throw fs_error always
      */
-    virtual String do_store(const FileEntry&) {
+    virtual String do_store(const db::FileEntry&) {
         throw fs_error("null storage");
     }
     
     /**
      * @return always true
      */
-    virtual bool do_remove(const FileEntry&) {
+    virtual bool do_remove(const db::FileEntry&) {
         return true;
     }
 

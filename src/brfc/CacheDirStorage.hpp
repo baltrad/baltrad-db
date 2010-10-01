@@ -43,12 +43,12 @@ class CacheDirStorage : public LocalStorage {
     /**
      * @brief absolute path this entry should be stored to
      */
-    String entry_path(const FileEntry& entry) const;
+    String entry_path(const db::FileEntry& entry) const;
  
   protected:
-    virtual String do_prestore(const FileEntry& entry, const String& path);
-    virtual String do_store(const FileEntry& entry);
-    virtual bool do_remove(const FileEntry& entry);
+    virtual String do_prestore(const db::FileEntry& entry, const String& path);
+    virtual String do_store(const db::FileEntry& entry);
+    virtual bool do_remove(const db::FileEntry& entry);
     virtual void do_clean();
   
   private:

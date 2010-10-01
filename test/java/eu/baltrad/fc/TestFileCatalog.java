@@ -20,11 +20,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 package eu.baltrad.fc;
 
 import eu.baltrad.fc.FileCatalog;
-import eu.baltrad.fc.FileEntry;
 import eu.baltrad.fc.Date;
 import eu.baltrad.fc.Time;
 import eu.baltrad.fc.Variant;
 import eu.baltrad.fc.FileSystemError;
+
+import eu.baltrad.fc.db.FileEntry;
 
 import eu.baltrad.fc.oh5.hl.HlFile;
 

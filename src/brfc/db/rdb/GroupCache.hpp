@@ -17,23 +17,43 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_MOCK_LOCAL_STORAGE_HPP
-#define BRFC_MOCK_LOCAL_STORAGE_HPP
+#ifndef BRFC_DB_RDB_GROUP_ID_CACHE_HPP
+#define BRFC_DB_RDB_GROUP_ID_CACHE_HPP
 
-#include <gmock/gmock.h>
-
-#include <brfc/LocalStorage.hpp>
+#include <brfc/smart_ptr.hpp>
+#include <brfc/db/rdb/Cache.hpp>
+#include <brfc/oh5/Group.hpp>
 
 namespace brfc {
+namespace db {
+namespace rdb {
 
-class MockLocalStorage : public LocalStorage {
+class RelationalDatabase;
+
+/**
+ * @brief cache for stored oh5::Group instances
+ */
+class GroupCache : public Cache<long long, const oh5::Group*> {
   public:
-    MOCK_METHOD1(do_store, String(const db::FileEntry&));
-    MOCK_METHOD2(do_prestore, String(const db::FileEntry&, const String&));
-    MOCK_METHOD1(do_remove, bool(const db::FileEntry&));
-    MOCK_METHOD0(do_clean, void());
+    /**
+     * @brief constructor
+     *
+     * @param rdb database this cache operates on
+     */
+    GroupCache(RelationalDatabase* rdb);
+
+  protected:
+    /**
+     * @brief query for existing id from database
+     */
+    virtual OptionalKey do_lookup_key(const oh5::Group* group);
+
+  private:
+    RelationalDatabase* rdb_;
 };
 
+} // namespace rdb
+} // namespace db
 } // namespace brfc
 
-#endif // BRFC_MOCK_LOCAL_STORAGE_HPP
+#endif // BRFC_DB_RDB_GROUP_ID_CACHE_HPP

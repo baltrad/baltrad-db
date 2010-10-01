@@ -17,23 +17,46 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_MOCK_LOCAL_STORAGE_HPP
-#define BRFC_MOCK_LOCAL_STORAGE_HPP
+#ifndef BRFC_DB_RDB_MODEL_HPP
+#define BRFC_DB_RDB_MODEL_HPP
 
-#include <gmock/gmock.h>
+#include <map>
 
-#include <brfc/LocalStorage.hpp>
+#include <brfc/String.hpp>
+#include <brfc/sql/fwd.hpp>
 
 namespace brfc {
+namespace db {
+namespace rdb {
 
-class MockLocalStorage : public LocalStorage {
+class Model {
   public:
-    MOCK_METHOD1(do_store, String(const db::FileEntry&));
-    MOCK_METHOD2(do_prestore, String(const db::FileEntry&, const String&));
-    MOCK_METHOD1(do_remove, bool(const db::FileEntry&));
-    MOCK_METHOD0(do_clean, void());
+    static Model& instance();
+
+    sql::TablePtr sources;
+    sql::TablePtr source_kvs;
+    sql::TablePtr files;
+    sql::TablePtr file_content;
+    sql::TablePtr groups;
+    sql::TablePtr attrs;
+    sql::TablePtr invalid_attrs;
+    sql::TablePtr attrvals_int;
+    sql::TablePtr attrvals_str;
+    sql::TablePtr attrvals_real;
+    sql::TablePtr attrvals_bool;
+
+    sql::TablePtr table_by_name(const String& name) const;
+
+  private:
+    Model();
+
+    typedef std::map<String, sql::TablePtr> TableMap;
+    
+    TableMap tables_;
 };
 
+} // namespace rdb
+} // namespace db
 } // namespace brfc
 
-#endif // BRFC_MOCK_LOCAL_STORAGE_HPP
+#endif // BRFC_DB_RDB_MODEL_HPP

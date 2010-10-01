@@ -22,10 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Database.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/FileCatalog.hpp>
-#include <brfc/FileEntry.hpp>
 #include <brfc/Time.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
@@ -34,9 +32,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test/TempDir.hpp>
 
 #include "common.hpp"
-#include "MockDatabase.hpp"
-#include "MockFileEntry.hpp"
 #include "MockLocalStorage.hpp"
+#include "db/MockDatabase.hpp"
+#include "db/MockFileEntry.hpp"
 
 using testing::_;
 using testing::Eq;
@@ -53,8 +51,8 @@ namespace brfc {
 struct FileCatalog_test : public testing::Test {
     FileCatalog_test()
             : tempdir(new test::TempDir())
-            , db(new MockDatabase())
-            , entry(new MockFileEntry())
+            , db(new db::MockDatabase())
+            , entry(new db::MockFileEntry())
             , storage(new MockLocalStorage())
             , fc(db, storage)
             , tempfile()
@@ -67,8 +65,8 @@ struct FileCatalog_test : public testing::Test {
     }
 
     auto_ptr<test::TempDir> tempdir;
-    shared_ptr<MockDatabase> db;
-    shared_ptr<MockFileEntry> entry;
+    shared_ptr<db::MockDatabase> db;
+    shared_ptr<db::MockFileEntry> entry;
     shared_ptr<MockLocalStorage> storage;
     FileCatalog fc;
     test::TempH5File tempfile;
@@ -89,7 +87,7 @@ TEST_F(FileCatalog_test, test_catalog) {
     EXPECT_CALL(*storage, do_prestore(Ref(*entry), minfile.path()))
         .WillOnce(Return("/path/to/file"));
     
-    shared_ptr<const FileEntry> e;
+    shared_ptr<const db::FileEntry> e;
     EXPECT_NO_THROW(e = fc.catalog(minfile));
     EXPECT_TRUE(e);
 }
@@ -112,7 +110,7 @@ TEST_F(FileCatalog_test, test_catalog_on_prestore_failure) {
     EXPECT_CALL(*storage, do_prestore(Ref(*entry), minfile.path()))
         .WillOnce(Throw(std::runtime_error("error")));
     
-    shared_ptr<const FileEntry> e;
+    shared_ptr<const db::FileEntry> e;
     EXPECT_NO_THROW(e = fc.catalog(minfile));
     EXPECT_TRUE(e);
 }

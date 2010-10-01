@@ -385,6 +385,7 @@ def _build_java_wrapper(bld):
 
     swig_files = [
         "fc.i",
+        "fc_db.i",
         "fc_expr.i",
         "fc_oh5.i",
         "fc_oh5_hl.i",

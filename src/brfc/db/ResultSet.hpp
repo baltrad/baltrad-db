@@ -17,23 +17,54 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_MOCK_LOCAL_STORAGE_HPP
-#define BRFC_MOCK_LOCAL_STORAGE_HPP
+#ifndef BRFC_DB_RESULT_SET_HPP
+#define BRFC_DB_RESULT_SET_HPP
 
-#include <gmock/gmock.h>
+#include <vector>
 
-#include <brfc/LocalStorage.hpp>
+#include <boost/noncopyable.hpp>
+
+#include <brfc/smart_ptr.hpp>
 
 namespace brfc {
+namespace db {
 
-class MockLocalStorage : public LocalStorage {
+class FileEntry;
+
+/**
+ * @brief ABC for Query results
+ */
+class ResultSet : public boost::noncopyable {
   public:
-    MOCK_METHOD1(do_store, String(const db::FileEntry&));
-    MOCK_METHOD2(do_prestore, String(const db::FileEntry&, const String&));
-    MOCK_METHOD1(do_remove, bool(const db::FileEntry&));
-    MOCK_METHOD0(do_clean, void());
+    ResultSet()
+        : entries_() {
+    }
+
+    /**
+     * @brief destructor
+     */
+    virtual ~ResultSet() { }
+
+    /**
+     * @brief get number of rows in result
+     */
+    int size() {
+        return entries_.size();
+    }
+
+    shared_ptr<FileEntry> get(int i) {
+        return entries_.at(i);
+    }
+
+    void add(shared_ptr<FileEntry> e) {
+        entries_.push_back(e);
+    }
+    
+  private:
+    std::vector<shared_ptr<FileEntry> > entries_;
 };
 
+} // namespace db
 } // namespace brfc
 
-#endif // BRFC_MOCK_LOCAL_STORAGE_HPP
+#endif // BRFC_RESULT_SET_HPP

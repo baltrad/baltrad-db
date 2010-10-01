@@ -22,7 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/FileEntry.hpp>
+
+#include <brfc/db/FileEntry.hpp>
 
 #include <brfc/oh5/File.hpp>
 
@@ -56,12 +57,12 @@ CacheDirStorage::check_dir() const {
 }
 
 String
-CacheDirStorage::entry_path(const FileEntry& entry) const {
+CacheDirStorage::entry_path(const db::FileEntry& entry) const {
     return dir_ + "/" + String::number(entry.id()) + ".h5";
 }
 
 String
-CacheDirStorage::do_store(const FileEntry& entry) {
+CacheDirStorage::do_store(const db::FileEntry& entry) {
     const String& path = entry_path(entry);
     if (not fs::exists(path.to_utf8())) {
         entry.write_to_file(path);
@@ -70,7 +71,7 @@ CacheDirStorage::do_store(const FileEntry& entry) {
 }
 
 String
-CacheDirStorage::do_prestore(const FileEntry& entry, const String& path) {
+CacheDirStorage::do_prestore(const db::FileEntry& entry, const String& path) {
     const String& new_path = entry_path(entry);
     
     fs::copy_file(path.to_utf8(), new_path.to_utf8());
@@ -78,7 +79,7 @@ CacheDirStorage::do_prestore(const FileEntry& entry, const String& path) {
 }
 
 bool
-CacheDirStorage::do_remove(const FileEntry& entry) {
+CacheDirStorage::do_remove(const db::FileEntry& entry) {
     fs::path fs_path(entry_path(entry).to_utf8());
 
     if (fs::exists(fs_path)) {
