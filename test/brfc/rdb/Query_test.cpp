@@ -42,7 +42,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
 
-#include <brfc/oh5/hl/File.hpp>
+#include <brfc/oh5/hl/HlFile.hpp>
 
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/test/TempH5File.hpp>
@@ -146,7 +146,7 @@ struct rdb_Query_test : public testing::TestWithParam<const char*> {
     ::testing::NiceMock<MockHasher> hasher;
     String src1, src2;
     test::TestRDB* db;
-    oh5::hl::File td1, td2, td3, td4, td5;
+    oh5::hl::HlFile td1, td2, td3, td4, td5;
     test::TempH5File tf1, tf2, tf3, tf4, tf5;
     shared_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     Query query;
@@ -301,7 +301,7 @@ TEST_P(rdb_Query_test, test_has_file) {
 
 TEST_P(rdb_Query_test, test_has_nx_file) {
     bool result = false;
-    oh5::hl::File td("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
+    oh5::hl::HlFile td("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
     EXPECT_CALL(hasher, do_hash(Ref(td))).WillOnce(Return("td"));
     ASSERT_NO_THROW(result = db->has_file(td));
     EXPECT_FALSE(result);

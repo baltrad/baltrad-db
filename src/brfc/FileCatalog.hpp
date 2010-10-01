@@ -102,7 +102,7 @@ class FileCatalog {
      * 
      * this is a short-hand for:
      * @code
-     * is_cataloged(oh5::hl::File(path));
+     * is_cataloged(oh5::hl::HlFile(path));
      * @endcode
      *
      * @sa File::unique_identifier
@@ -132,7 +132,7 @@ class FileCatalog {
      *
      * this is a short-hand for:
      * @code
-     * catalog(oh5::hl::File(path));
+     * catalog(oh5::hl::HlFile(path));
      * @endcode
      *
      * @sa catalog(oh5::File& file)

@@ -28,7 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileEntry.hpp>
 #include <brfc/Time.hpp>
 
-#include <brfc/oh5/hl/File.hpp>
+#include <brfc/oh5/hl/HlFile.hpp>
 
 #include <brfc/test/TempH5File.hpp>
 #include <brfc/test/TempDir.hpp>
@@ -72,7 +72,7 @@ struct FileCatalog_test : public testing::Test {
     shared_ptr<MockLocalStorage> storage;
     FileCatalog fc;
     test::TempH5File tempfile;
-    oh5::hl::File minfile;
+    oh5::hl::HlFile minfile;
 };
 
 TEST_F(FileCatalog_test, test_invalid_dsn_throws) {

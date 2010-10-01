@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_OH5_HL_FILE_H
-#define BRFC_OH5_HL_FILE_H
+#ifndef BRFC_OH5_HL_HL_FILE_H
+#define BRFC_OH5_HL_HL_FILE_H
 
 #include <vector>
 
@@ -46,21 +46,21 @@ namespace hl {
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
  */
-class File : public oh5::File {
+class HlFile : public File {
   public:
     /**
      * @brief construct an empty File
      *
      * this is mainly useful for testing purposes
      */
-    File();
+    HlFile();
 
     /**
      * @brief construct from physical file
      * @param path absolute path to the file
      * @throw fs_error if file can not be opened
      */
-    explicit File(const String& path);
+    explicit HlFile(const String& path);
     
     /**
      * @brief construct with mandatory attributes present
@@ -73,16 +73,16 @@ class File : public oh5::File {
      * this is the minimal "correct" file, given that parameters are
      * correctly formed.
      */
-    File(const String& object,
-         const Date& date,
-         const Time& time,
-         const String& source,
-         const String& version=String("H5rad 2.0"));
+    HlFile(const String& object,
+           const Date& date,
+           const Time& time,
+           const String& source,
+           const String& version=String("H5rad 2.0"));
 
     /**
      * @brief destructor
      */
-    virtual ~File();
+    virtual ~HlFile();
 
     using oh5::File::path;
 
@@ -110,4 +110,4 @@ class File : public oh5::File {
 } // namesapce hl
 } // namespace oh5
 } // namespace brfc
-#endif // BRFC_OH5_HL_FILE_H
+#endif // BRFC_OH5_HL_HL_FILE_H

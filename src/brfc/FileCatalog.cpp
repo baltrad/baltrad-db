@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Attribute.hpp>
 
-#include <brfc/oh5/hl/File.hpp>
+#include <brfc/oh5/hl/HlFile.hpp>
 
 #include <brfc/rdb/RelationalDatabase.hpp>
 
@@ -64,7 +64,7 @@ FileCatalog::storage(shared_ptr<LocalStorage> storage) {
 
 bool
 FileCatalog::is_cataloged(const String& path) const {
-    return is_cataloged(oh5::hl::File(path));
+    return is_cataloged(oh5::hl::HlFile(path));
 }
 
 bool
@@ -74,7 +74,7 @@ FileCatalog::is_cataloged(const oh5::File& f) const {
 
 shared_ptr<const FileEntry>
 FileCatalog::catalog(const String& path) {
-    return catalog(oh5::hl::File(path)); 
+    return catalog(oh5::hl::HlFile(path)); 
 }
 
 shared_ptr<const FileEntry>

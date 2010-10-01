@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/hl/File.hpp>
+#include <brfc/oh5/hl/HlFile.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
@@ -34,18 +34,18 @@ namespace brfc {
 namespace oh5 {
 namespace hl {
 
-File::File()
+HlFile::HlFile()
         : root_(this)
         , path_() {
 }
 
-File::File(const String& path)
+HlFile::HlFile(const String& path)
         : root_(this)
         , path_(path) {
     load();
 }
 
-File::File(const String& object,
+HlFile::HlFile(const String& object,
            const Date& date,
            const Time& time,
            const String& source,
@@ -61,7 +61,7 @@ File::File(const String& object,
     what.create_attribute("source", Scalar(source));
 }
 
-File::~File() {
+HlFile::~HlFile() {
 
 }
 
@@ -93,7 +93,7 @@ void add_attribute_from_node(Group& root, HL_Node* node) {
 } // namespace anonymous
 
 void
-File::load() {
+HlFile::load() {
     init_hlhdflib();
 
     std::string path_utf8 = path().to_utf8();

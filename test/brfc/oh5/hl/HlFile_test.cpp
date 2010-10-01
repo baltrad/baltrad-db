@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
-#include <brfc/oh5/hl/File.hpp>
+#include <brfc/oh5/hl/HlFile.hpp>
 
 #include <brfc/test/TempH5File.hpp>
 
@@ -37,19 +37,19 @@ namespace brfc {
 namespace oh5 {
 namespace hl {
 
-struct oh5_hl_File_test : public testing::Test {
-    oh5_hl_File_test() {
+struct oh5_hl_HlFile_test : public testing::Test {
+    oh5_hl_HlFile_test() {
 
     }
 
-    File file;
+    HlFile file;
 };
 
-TEST_F(oh5_hl_File_test, test_open_nx_file) {
-    EXPECT_THROW(File("/path/to/nxfile"), fs_error);
+TEST_F(oh5_hl_HlFile_test, test_open_nx_file) {
+    EXPECT_THROW(HlFile("/path/to/nxfile"), fs_error);
 }
 
-TEST_F(oh5_hl_File_test, test_load_from_filesystem) {
+TEST_F(oh5_hl_HlFile_test, test_load_from_filesystem) {
     Scalar t_12_05_01(Time(12, 5, 1));
     Scalar d_2000_01_02(Date(2000, 1, 2));
 
@@ -61,7 +61,7 @@ TEST_F(oh5_hl_File_test, test_load_from_filesystem) {
     test::TempH5File tempfile;
     tempfile.write(file);
 
-    File g(tempfile.path());
+    HlFile g(tempfile.path());
     EXPECT_EQ(g.path(), tempfile.path());
     Group& root = g.root();
     EXPECT_EQ((size_t)3, root.children().size());
