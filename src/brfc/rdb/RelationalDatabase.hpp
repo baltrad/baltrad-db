@@ -34,6 +34,7 @@ class Variant;
 
 namespace oh5 {
 
+class File;
 class Source;
 
 } // namespace oh5
@@ -105,10 +106,10 @@ class RelationalDatabase : public Database {
     /**
      * @brief check if file hash is unique in database
      */
-    virtual bool do_has_file(const oh5::File& file);
+    virtual bool do_has_file(const oh5::PhysicalFile& file);
     virtual bool do_remove_file(const FileEntry& entry);
 
-    virtual shared_ptr<FileEntry> do_save_file(const oh5::File& file);
+    virtual shared_ptr<FileEntry> do_save_file(const oh5::PhysicalFile& file);
     
     virtual shared_ptr<ResultSet> do_query(const Query& query);
 

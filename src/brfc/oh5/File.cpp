@@ -83,11 +83,6 @@ File::what_source() const {
     return get_attribute(root(), "what/source").value().string();
 }
 
-String
-File::name() const {
-    return path().section("/", -1);
-}
-
 Group*
 File::group(const String& path) {
     const File* self = const_cast<const File*>(this);

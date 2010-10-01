@@ -19,7 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/PhysicalFile.hpp>
 
 #include "MockDatabase.hpp"
 #include "MockFileEntry.hpp"

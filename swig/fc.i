@@ -182,6 +182,7 @@ SWIG_SHARED_PTR(FileEntry, brfc::FileEntry);
     import eu.baltrad.fc.expr.AttributeExpr;
     import eu.baltrad.fc.expr.AttributeExprVector;
     import eu.baltrad.fc.oh5.File;
+    import eu.baltrad.fc.oh5.PhysicalFile;
     import eu.baltrad.fc.oh5.Source;
 %}
 
@@ -192,11 +193,7 @@ SWIG_SHARED_PTR(FileEntry, brfc::FileEntry);
 %}
 
 %typemap(javaimports) brfc::FileCatalog, brfc::FileCatalog* %{
-    import eu.baltrad.fc.oh5.File;
-%}
-
-%typemap(javaimports) brfc::FileEntry, brfc::FileEntry* %{
-    import eu.baltrad.fc.oh5.File;
+    import eu.baltrad.fc.oh5.PhysicalFile;
 %}
 
 %typemap(javaimports) brfc::FileNamer, brfc::FileNamer* %{
@@ -204,7 +201,7 @@ SWIG_SHARED_PTR(FileEntry, brfc::FileEntry);
 %}
 
 %typemap(javaimports) brfc::Database, brfc::Database* %{
-    import eu.baltrad.fc.oh5.File;
+    import eu.baltrad.fc.oh5.PhysicalFile;
     import eu.baltrad.fc.oh5.Source;
 %}
 

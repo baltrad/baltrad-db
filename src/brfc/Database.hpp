@@ -33,7 +33,7 @@ class FileEntry;
 
 namespace oh5 {
 
-class File;
+class PhysicalFile;
 
 } // namespace oh5
 
@@ -50,7 +50,7 @@ class Database : public boost::noncopyable {
     /**
      * @brief is file stored
      */
-    bool has_file(const oh5::File& file) {
+    bool has_file(const oh5::PhysicalFile& file) {
         return do_has_file(file);
     }
     
@@ -69,10 +69,8 @@ class Database : public boost::noncopyable {
      * @return a FileEntry instance for the saved file
      * @throw db_error if a database error occurs
      * @throw duplicate_entry if file is already stored to database
-     *
-     * associates oh5::File with FileEntry instance
      */
-    shared_ptr<FileEntry> save_file(const oh5::File& file);
+    shared_ptr<FileEntry> save_file(const oh5::PhysicalFile& file);
 
     /**
      * @brief execute a select query
@@ -82,9 +80,9 @@ class Database : public boost::noncopyable {
     }
 
   protected:
-    virtual bool do_has_file(const oh5::File& file) = 0;
+    virtual bool do_has_file(const oh5::PhysicalFile& file) = 0;
     virtual bool do_remove_file(const FileEntry& entry) = 0;
-    virtual shared_ptr<FileEntry> do_save_file(const oh5::File& file) = 0;
+    virtual shared_ptr<FileEntry> do_save_file(const oh5::PhysicalFile& file) = 0;
 
     virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
 };

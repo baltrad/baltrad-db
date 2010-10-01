@@ -16,25 +16,23 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-
-#ifndef BRFC_MOCK_DATABASE_HPP
-#define BRFC_MOCK_DATABASE_HPP
+#ifndef BRFC_OH5_MOCK_PHYSICAL_FILE_HPP
+#define BRFC_OH5_MOCK_PHYSICAL_FILE_HPP
 
 #include <gmock/gmock.h>
 
-#include <brfc/Database.hpp>
-#include <brfc/Query.hpp>
+#include <brfc/oh5/PhysicalFile.hpp>
 
 namespace brfc {
+namespace oh5 {
 
-class MockDatabase : public Database {
+class MockPhysicalFile : public PhysicalFile {
   public:
-    MOCK_METHOD1(do_has_file, bool(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_remove_file, bool(const FileEntry&));
-    MOCK_METHOD1(do_save_file, shared_ptr<FileEntry>(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
+    MOCK_CONST_METHOD0(do_root, const Group&());
+    MOCK_CONST_METHOD0(do_path, const String&());
 };
 
+} // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_MOCK_DATABASE_HPP
+#endif // BRFC_OH5_MOCK_PHYSICAL_FILE_HPP

@@ -79,21 +79,7 @@ class File : public boost::noncopyable {
      * @brief set /what/source from a Source instance
      */
     void source(const Source& src);
-
-    /**
-     * @{
-     * @brief absolute file path
-     */
-    const String& path() const {
-        return do_path();
-    }
-    ///@}
      
-    /**
-     * @brief filename part of the file path
-     */
-    String name() const;
-    
     /**
      * @name mandatory attribute access shorthands
      * @{
@@ -133,7 +119,6 @@ class File : public boost::noncopyable {
   
   protected:
     virtual const Group& do_root() const = 0;
-    virtual const String& do_path() const = 0;
 };
 
 } // namespace oh5

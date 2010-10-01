@@ -20,12 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Database.hpp>
 #include <brfc/FileEntry.hpp>
 
-#include <brfc/oh5/File.hpp>
-
 namespace brfc {
 
 shared_ptr<FileEntry>
-Database::save_file(const oh5::File& file) {
+Database::save_file(const oh5::PhysicalFile& file) {
     return do_save_file(file);
 }
 

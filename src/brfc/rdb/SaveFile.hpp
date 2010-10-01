@@ -30,7 +30,7 @@ namespace brfc {
 
 namespace oh5 {
 
-class File;
+class PhysicalFile;
 class AttributeGroup;
 class Group;
 class Attribute;
@@ -42,7 +42,7 @@ namespace rdb {
 class RelationalFileEntry;
 
 /**
- * @brief save oh5::File instances to database
+ * @brief save oh5::PhysicalFile instances to database
  */
 class SaveFile {
   public:
@@ -85,11 +85,11 @@ class SaveFile {
     void operator()(const oh5::Attribute& attribute);
     
     /**
-     * @brief save a oh5::File instance to database
+     * @brief save a oh5::PhysicalFile instance to database
      * @param file the file to be saved
      * @return database id of the saved file
      */
-    shared_ptr<RelationalFileEntry> operator()(const oh5::File& file);
+    shared_ptr<RelationalFileEntry> operator()(const oh5::PhysicalFile& file);
 
   private:
     RelationalDatabase* rdb_;

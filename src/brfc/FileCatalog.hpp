@@ -35,18 +35,18 @@ class LocalStorage;
 class Query;
 
 namespace oh5 {
-    class File;
+    class PhysicalFile;
 }
 
 /**
  * @brief indexes and stores ODIM_H5 File instances
  *
  * @note there are several similar methods accepting file as as a path string
- *       or oh5::File instance. Methods accepting file path are mostly just
- *       short-hands for loading the file from filesystem and then passing
- *       it to the method accepting oh5::File instance. If you want to call
- *       several methods on the same file, it's more efficient to create the
- *       oh5::File instance yourself.
+ *       or oh5::PhysicalFile instance. Methods accepting file path are mostly
+ *       just short-hands for loading the file from filesystem and then passing
+ *       it to the method accepting oh5::PhysicalFile instance. If you want to
+ *       call several methods on the same file, it's more efficient to create
+ *       the oh5::PhysicalFile instance yourself.
  */
 class FileCatalog {
   public:
@@ -106,13 +106,13 @@ class FileCatalog {
      * @endcode
      *
      * @sa File::unique_identifier
-     * @sa is_cataloged(const oh5::File&) const
+     * @sa is_cataloged(const oh5::PhysicalFile&) const
      */
     bool is_cataloged(const String& path) const;
     
     /**
      * @brief has file been imported to this catalog
-     * @param file oh5::File instance to test
+     * @param file oh5::PhysicalFile instance to test
      * @throw db_error if database query fails
      * @return true if file is cataloged
      *
@@ -120,7 +120,7 @@ class FileCatalog {
      * already present in database. For the exact rules on how the unique id
      * is determined, refer to File documentation.
      */
-    bool is_cataloged(const oh5::File& f) const;
+    bool is_cataloged(const oh5::PhysicalFile& f) const;
     
     /**
      * @brief import file to catalog
@@ -135,24 +135,24 @@ class FileCatalog {
      * catalog(oh5::hl::HlFile(path));
      * @endcode
      *
-     * @sa catalog(oh5::File& file)
+     * @sa catalog(oh5::PhysicalFile& file)
      */
     shared_ptr<const FileEntry> catalog(const String& path);
     
     /**
      * @brief import file to catalog
-     * @param file oh5::File instance to import
+     * @param file oh5::PhysicalFile instance to import
      * @return FileEntry instance of the stored file
      * @throw db_error if storing file to database fails
      * @throw duplicate_entry if file has already been cataloged
      * 
      * the FileEntry is passed to LocalStorage::prestore and if successful,
-     * the resulting oh5::File will replace FileEntry::file.
+     * the resulting oh5::PhysialFile will replace FileEntry::file.
      *
      * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
      * is considered failed.
      */
-    shared_ptr<const FileEntry> catalog(const oh5::File& file);
+    shared_ptr<const FileEntry> catalog(const oh5::PhysicalFile& file);
     
     /**
      * @brief remove file from catalog

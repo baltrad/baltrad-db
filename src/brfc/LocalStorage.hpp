@@ -27,7 +27,7 @@ namespace brfc {
 class FileEntry;
 
 /**
- * @brief ABC for classes implementing node-local oh5::File storage
+ * @brief ABC for classes implementing node-local oh5::PhysicalFile storage
  */
 class LocalStorage {
   public:
@@ -69,12 +69,12 @@ class LocalStorage {
 
   protected:
     /**
-     * @return stored oh5::File instance
+     * @return absolute path to the stored file
      */
     virtual String do_prestore(const FileEntry& entry, const String& path) = 0;
 
     /**
-     * @return stored oh5::File instance
+     * @return absolute path to the stored file
      */
     virtual String do_store(const FileEntry& entry) = 0;
  

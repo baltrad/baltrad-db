@@ -17,24 +17,39 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_MOCK_DATABASE_HPP
-#define BRFC_MOCK_DATABASE_HPP
+#include <gtest/gtest.h>
 
-#include <gmock/gmock.h>
+#include <brfc/oh5/Group.hpp>
 
-#include <brfc/Database.hpp>
-#include <brfc/Query.hpp>
+#include "../common.hpp"
+#include "MockPhysicalFile.hpp"
+
+using ::testing::ReturnRef;
 
 namespace brfc {
+namespace oh5 {
 
-class MockDatabase : public Database {
-  public:
-    MOCK_METHOD1(do_has_file, bool(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_remove_file, bool(const FileEntry&));
-    MOCK_METHOD1(do_save_file, shared_ptr<FileEntry>(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_query, shared_ptr<ResultSet>(const Query&));
+struct oh5_PhysicalFile_test : public testing::Test {
+    oh5_PhysicalFile_test()
+            : file() {
+    }
+
+    ::testing::NiceMock<MockPhysicalFile> file;
 };
 
-} // namespace brfc
+TEST_F(oh5_PhysicalFile_test, test_name) {
+    String path;
+    EXPECT_CALL(file, do_path())
+        .WillRepeatedly(ReturnRef(path));
+    
+    EXPECT_EQ(file.name(), "");
 
-#endif // BRFC_MOCK_DATABASE_HPP
+    path = "/path/to/filename";
+    EXPECT_EQ(file.name(), "filename");
+
+    path = "filename2";
+    EXPECT_EQ(file.name(), "filename2");
+}
+
+} // namespace oh5
+} // namespace brfc

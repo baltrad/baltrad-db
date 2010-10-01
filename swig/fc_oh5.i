@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/oh5/Scalar.hpp>
     #include <brfc/oh5/Attribute.hpp>
     #include <brfc/oh5/AttributeGroup.hpp>
-    #include <brfc/oh5/File.hpp>
+    #include <brfc/oh5/PhysicalFile.hpp>
     #include <brfc/oh5/Group.hpp>
     #include <brfc/oh5/RootGroup.hpp>
     #include <brfc/oh5/Source.hpp>
@@ -115,6 +115,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %include <brfc/oh5/Attribute.hpp>
 %include <brfc/oh5/Source.hpp>
 %include <brfc/oh5/File.hpp>
+%include <brfc/oh5/PhysicalFile.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:
 */

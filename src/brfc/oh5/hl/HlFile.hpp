@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/String.hpp>
 
-#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/PhysicalFile.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
 namespace brfc {
@@ -46,7 +46,7 @@ namespace hl {
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
  */
-class HlFile : public File {
+class HlFile : public PhysicalFile {
   public:
     /**
      * @brief construct an empty File
@@ -84,16 +84,14 @@ class HlFile : public File {
      */
     virtual ~HlFile();
 
-    using oh5::File::path;
+    using oh5::PhysicalFile::path;
 
     void path(const String& path) {
         path_ = path;
     }
-    ///@}
      
   protected:
     /**
-     * @{
      * @brief absolute file path
      */
     virtual const String& do_path() const { return path_; }

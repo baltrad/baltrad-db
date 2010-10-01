@@ -18,7 +18,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
@@ -98,20 +97,6 @@ TEST_F(oh5_File_test, what_time_conversion) {
 
     what.attribute("time")->value(Scalar("bar"));
     EXPECT_THROW(file.what_time(), value_error);
-}
-
-TEST_F(oh5_File_test, test_name) {
-    String path;
-    EXPECT_CALL(file, do_path())
-        .WillRepeatedly(ReturnRef(path));
-    
-    EXPECT_EQ(file.name(), "");
-
-    path = "/path/to/filename";
-    EXPECT_EQ(file.name(), "filename");
-
-    path = "filename2";
-    EXPECT_EQ(file.name(), "filename2");
 }
 
 TEST_F(oh5_File_test, test_source_get) {

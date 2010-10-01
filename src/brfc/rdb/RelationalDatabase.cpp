@@ -32,7 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/SHA1AttributeHasher.hpp>
 #include <brfc/StringList.hpp>
 
-#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/PhysicalFile.hpp>
 #include <brfc/oh5/Source.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
@@ -85,7 +85,7 @@ RelationalDatabase::file_hasher(FileHasher* hasher) {
 }
 
 bool
-RelationalDatabase::do_has_file(const oh5::File& file) {
+RelationalDatabase::do_has_file(const oh5::PhysicalFile& file) {
     const Model& m = Model::instance();
 
     const String& hash = file_hasher().hash(file);
@@ -107,7 +107,7 @@ RelationalDatabase::do_has_file(const oh5::File& file) {
 }
 
 shared_ptr<FileEntry>
-RelationalDatabase::do_save_file(const oh5::File& file) {
+RelationalDatabase::do_save_file(const oh5::PhysicalFile& file) {
     SaveFile save(this);
     shared_ptr<FileEntry> entry;
     connection().begin();

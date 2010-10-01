@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
-#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/PhysicalFile.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
 
@@ -65,7 +65,7 @@ SaveFile::operator()(const oh5::Attribute& attribute) {
 }
 
 shared_ptr<RelationalFileEntry>
-SaveFile::operator()(const oh5::File& file) {
+SaveFile::operator()(const oh5::PhysicalFile& file) {
     sql::TablePtr files = Model::instance().files;
     const sql::Dialect& dialect = rdb_->connection().dialect();
     const MappingVector& special = rdb_->mapper()->specializations_on(files);

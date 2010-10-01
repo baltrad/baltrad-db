@@ -68,7 +68,7 @@ FileCatalog::is_cataloged(const String& path) const {
 }
 
 bool
-FileCatalog::is_cataloged(const oh5::File& f) const {
+FileCatalog::is_cataloged(const oh5::PhysicalFile& f) const {
     return db_->has_file(f);
 }
 
@@ -78,7 +78,7 @@ FileCatalog::catalog(const String& path) {
 }
 
 shared_ptr<const FileEntry>
-FileCatalog::catalog(const oh5::File& file) {
+FileCatalog::catalog(const oh5::PhysicalFile& file) {
     shared_ptr<FileEntry> e = db_->save_file(file);
     try {
         storage_->prestore(*e, file.path());

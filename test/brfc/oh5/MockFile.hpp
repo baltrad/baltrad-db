@@ -29,7 +29,6 @@ namespace oh5 {
 class MockFile : public File {
   public:
     MOCK_CONST_METHOD0(do_root, const Group&());
-    MOCK_CONST_METHOD0(do_path, const String&());
 };
 
 } // namespace oh5
