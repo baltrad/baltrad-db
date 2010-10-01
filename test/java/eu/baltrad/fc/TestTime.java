@@ -19,8 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.fc;
 
-import eu.baltrad.fc.Date;
-
 import junit.framework.TestCase;
 
 public class TestTime extends TestCase {
@@ -30,19 +28,21 @@ public class TestTime extends TestCase {
     assertEquals(t.to_string("hhmmss"), "120001");
   }
 
-  public void test_add_secs_positive() {
-    Time t = new Time(0, 0, 1);
-    Time nt = t.add_secs(60);
-    assertEquals(nt.hour(), 0);
-    assertEquals(nt.minute(), 1);
-    assertEquals(nt.second(), 1);
+  public void test_equals() {
+    Time t1 = new Time(0, 0, 1);
+    Time t2 = new Time(1, 1, 1);
+    Time t3 = new Time(0, 0, 1);
+
+    assertTrue(t1.equals(t1));
+    assertFalse(t1.equals(t2));
+    assertTrue(t1.equals(t3));
   }
 
-  public void test_add_secs_negatvie() {
+  public void test_add() {
     Time t = new Time(0, 0, 1);
-    Time nt = t.add_secs(-60);
-    assertEquals(nt.hour(), 23);
-    assertEquals(nt.minute(), 59);
-    assertEquals(nt.second(), 1);
+    Time nt = t.add(new TimeDelta().add_seconds(60));
+
+    assertEquals(new Time(0, 1, 1), nt);
+    assertFalse(t.equals(nt));
   }
 }

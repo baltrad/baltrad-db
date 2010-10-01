@@ -203,7 +203,7 @@ class Msec : public TimeToken {
     }
 
     virtual void set_value(DateTime& dt, int value) const {
-        return dt.time().msec(value);
+        dt.time().msec(value);
     }
 };
 

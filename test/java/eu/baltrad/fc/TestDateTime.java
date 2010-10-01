@@ -19,32 +19,30 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.fc;
 
-import eu.baltrad.fc.Date;
-
 import junit.framework.TestCase;
 
-public class TestDate extends TestCase {
+public class TestDateTime extends TestCase {
 
   public void test_to_string() {
-    Date d = new Date(2000, 5, 1);
-    assertEquals(d.to_string("yyyyMMdd"), "20000501");
+    DateTime dt = new DateTime(2000, 5, 6, 12, 0, 1);
+    assertEquals(dt.to_string("hhmmss yyyyMMdd"), "120001 20000506");
   }
 
   public void test_equals() {
-    Date d1 = new Date(2000, 5, 1);
-    Date d2 = new Date(2000, 6, 1);
-    Date d3 = new Date(2000, 5, 1);
+    DateTime dt1 = new DateTime(2000, 5, 6, 0, 0, 1);
+    DateTime dt2 = new DateTime(2000, 5, 6, 1, 1, 1);
+    DateTime dt3 = new DateTime(2000, 5, 6, 0, 0, 1);
 
-    assertTrue(d1.equals(d1));
-    assertFalse(d1.equals(d2));
-    assertTrue(d1.equals(d3));
+    assertTrue(dt1.equals(dt1));
+    assertFalse(dt1.equals(dt2));
+    assertTrue(dt1.equals(dt3));
   }
 
   public void test_add() {
-    Date d = new Date(2000, 1, 1);
-    Date nd = d.add(new TimeDelta().add_days(1));
+    DateTime dt = new DateTime(2000, 5, 6, 0, 0, 1);
+    DateTime ndt = dt.add(new TimeDelta().add_days(1).add_seconds(60));
 
-    assertEquals(new Date(2000, 1, 2), nd);
+    assertEquals(new DateTime(2000, 5, 7, 0, 1, 1), ndt);
+    assertFalse(dt.equals(ndt));
   }
-
 }

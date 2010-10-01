@@ -25,6 +25,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+/**
+ * @brief combined Date and Time
+ */
 class DateTime {
   public:
     explicit DateTime(int year=1, int month=1, int day=1,
@@ -32,7 +35,10 @@ class DateTime {
             : date_(year, month, day)
             , time_(hour, minute, second, msec) {
     }
-
+    
+    /**
+     * @brief construct from Date and Time
+     */
     DateTime(const Date& date, const Time& time)
             : date_(date)
             , time_(time) {
@@ -48,17 +54,57 @@ class DateTime {
             , time_(time) {
     }
 
-    const Date& date() const { return date_; }
-    Date& date() { return date_; }
+    /**
+     * @brief copy constructor
+     */
+    DateTime(const DateTime& other)
+            : date_(other.date_)
+            , time_(other.time_) {
+    }
 
+    /**
+     * @brief copy assignment
+     */
+    DateTime& operator=(const DateTime& rhs) {
+        if (this != &rhs) {
+            date_ = rhs.date_;
+            time_ = rhs.time_;
+        }
+        return *this;
+    }
+    
+    /**
+     * @brief construct containing current local time
+     */
+    static DateTime now();
+
+    /**
+     * @brief construct containing current UTC time
+     */
+    static DateTime utc_now();
+    
+    const Date& date() const { return date_; }
     const Time& time() const { return time_; }
+
+    Date& date() { return date_; }
     Time& time() { return time_; }
+
+    DateTime& date(const Date& date) { date_ = date; return *this; }
+    DateTime& time(const Time& time) { time_ = time; return *this; }
 
     String to_string(const String& format) const;
 
     static DateTime from_string(const String& str, const String& format);
 
     bool operator==(const DateTime& rhs) const;
+
+    bool operator!=(const DateTime& rhs) const {
+        return not (*this == rhs);
+    }
+
+    DateTime& operator+=(const TimeDelta& td);
+    
+    DateTime operator+(const TimeDelta& td) const;
 
   private:
     Date date_;

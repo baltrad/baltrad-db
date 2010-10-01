@@ -27,6 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/DateTimeParser.hpp>
 #include <brfc/String.hpp>
+#include <brfc/TimeDelta.hpp>
 
 namespace brfc {
 
@@ -97,12 +98,12 @@ Date::days_in_month(int year, int month) {
 
 Date
 Date::today() {
-    return Date(1, 1, 1);
+    return DateTime::now().date();
 }
 
 Date
 Date::utc_today() {
-    return Date(1, 1, 1);
+    return DateTime::utc_now().date();
 }
 
 int
@@ -126,75 +127,45 @@ Date::day() const {
     return day;
 }
 
-void
+Date&
 Date::year(int year) {
     int _, month, day;
     date_from_jdn(jdn_, _, month, day);
     if (days_in_month(year, month) < day)
         throw value_error("setting year would result in invalid date");
     jdn_ = jdn_from_date(year, month, day);
+    return *this;
 }
 
-void
+Date&
 Date::month(int month) {
     int year, _, day;
     date_from_jdn(jdn_, year, _, day);
     if (days_in_month(year, month) < day)
         throw value_error("setting month would result in invalid date");
     jdn_ = jdn_from_date(year, month, day);
+    return *this;
 }
 
-void
+Date&
 Date::day(int day) {
     int year, month, _;
     date_from_jdn(jdn_, year, month, _);
     if (day < 1 or days_in_month(year, month) < day)
         throw value_error("setting month would result in invalid date");
     jdn_ = jdn_from_date(year, month, day);
+    return *this;
+}
+
+Date&
+Date::operator+=(const TimeDelta& td) {
+    jdn_ += td.days();
+    return *this;
 }
 
 Date
-Date::add_years(int years) const {
-    int year, month, day;
-    date_from_jdn(jdn_, year, month, day);
-    year += years;
-    day = std::min(day, (int)days_in_month(year, month));
-    return Date(year, month, day);
-}
-
-Date
-Date::add_months(int months) const {
-    int year, month, day;
-    date_from_jdn(jdn_, year, month, day);
-
-    bool negative = months < 0;
-    int ayears = std::abs(months) / 12;
-    int amonths = std::abs(months) % 12;
-    
-    year += negative ? -ayears : ayears;
-
-    if (negative) {
-        month -= amonths;
-        // underflow
-        if (month <= 0) {
-            year--;
-            month = 12 + month;
-        }
-    } else {
-        month += amonths;
-        // overflow
-        if (month >= 13) {
-            year++;
-            month -= 12;
-        }
-    }
-    day = std::min(day, (int)days_in_month(year, month));
-    return Date(year, month, day);
-}
-
-Date
-Date::add_days(int days) const {
-    return Date(jdn_ + days);
+Date::operator+(const TimeDelta& td) const {
+    return Date(*this) += td;
 }
 
 Date

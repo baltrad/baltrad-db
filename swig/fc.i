@@ -36,6 +36,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/DateTime.hpp>
     #include <brfc/StringList.hpp>
     #include <brfc/Time.hpp>
+    #include <brfc/TimeDelta.hpp>
     #include <brfc/Variant.hpp>
 %}
 
@@ -96,8 +97,67 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   }
 %}
 
-// uses int references
-%ignore brfc::Date::date_from_jdn;
+/***
+ * brfc::Date
+ */
+%ignore brfc::Date::date_from_jdn; // uses int references
+%ignore brfc::Date::operator=;
+%ignore brfc::Date::operator+=;
+%ignore brfc::Date::operator!=;
+
+%rename(add) brfc::Date::operator+;
+
+// brfc::Date::operator==() -> eu.baltrad.fc.Date.equals
+%rename(_op_eq) brfc::Date::operator==;
+%typemap(javacode) brfc::Date %{
+  public boolean equals(Object other) {
+    if (other instanceof Date && other.getClass() == Date.class) {
+      return _op_eq((Date)other);
+    }
+    return false;
+  }
+%}
+
+/***
+ * brfc::DateTime
+ */
+%ignore brfc::DateTime::operator=;
+%ignore brfc::DateTime::operator+=;
+%ignore brfc::DateTime::operator!=;
+
+%rename(add) brfc::DateTime::operator+;
+
+// brfc::Datetime::operator==() -> eu.baltrad.fc.DateTime.equals
+%rename(_op_eq) brfc::DateTime::operator==;
+%typemap(javacode) brfc::DateTime %{
+  public boolean equals(Object other) {
+    if (other instanceof DateTime && other.getClass() == DateTime.class) {
+      return _op_eq((DateTime)other);
+    }
+    return false;
+  }
+%}
+
+/***
+ * brfc::Time
+ */
+%ignore brfc::Time::operator=;
+%ignore brfc::Time::operator+=;
+%ignore brfc::Time::operator!=;
+
+%rename(add) brfc::Time::operator+;
+
+// brfc::Time::operator==() -> eu.baltrad.fc.Time.equals
+%rename(_op_eq) brfc::Time::operator==;
+%typemap(javacode) brfc::Time %{
+  public boolean equals(Object other) {
+    if (other instanceof Time && other.getClass() == Time.class) {
+      return _op_eq((Time)other);
+    }
+    return false;
+  }
+%}
+
 
 %ignore brfc::StringList::iterator;
 %ignore brfc::StringList::const_iterator;
@@ -172,6 +232,7 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
 %include <brfc/FileNamer.hpp>
 %include <brfc/FileCatalog.hpp>
 %include <brfc/Query.hpp>
+%include <brfc/TimeDelta.hpp>
 %include <brfc/Date.hpp>
 %include <brfc/Time.hpp>
 %include <brfc/DateTime.hpp>

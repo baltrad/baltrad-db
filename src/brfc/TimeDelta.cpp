@@ -17,34 +17,22 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-package eu.baltrad.fc;
+#include <brfc/TimeDelta.hpp>
 
-import eu.baltrad.fc.Date;
+namespace brfc {
 
-import junit.framework.TestCase;
-
-public class TestDate extends TestCase {
-
-  public void test_to_string() {
-    Date d = new Date(2000, 5, 1);
-    assertEquals(d.to_string("yyyyMMdd"), "20000501");
-  }
-
-  public void test_equals() {
-    Date d1 = new Date(2000, 5, 1);
-    Date d2 = new Date(2000, 6, 1);
-    Date d3 = new Date(2000, 5, 1);
-
-    assertTrue(d1.equals(d1));
-    assertFalse(d1.equals(d2));
-    assertTrue(d1.equals(d3));
-  }
-
-  public void test_add() {
-    Date d = new Date(2000, 1, 1);
-    Date nd = d.add(new TimeDelta().add_days(1));
-
-    assertEquals(new Date(2000, 1, 2), nd);
-  }
-
+TimeDelta&
+TimeDelta::add_msecs(int msecs) {
+    msecs_ += msecs;
+    if (msecs_ < 0) {
+        int negdays = (MSECS_IN_DAY - msecs_) / MSECS_IN_DAY;
+        days_ -= negdays;
+        msecs_ = msecs_ + negdays * MSECS_IN_DAY;
+    } else {
+        days_ += msecs / MSECS_IN_DAY;
+        msecs_ = msecs_ % MSECS_IN_DAY;
+    }
+    return *this;
 }
+
+} // namespace brfc
