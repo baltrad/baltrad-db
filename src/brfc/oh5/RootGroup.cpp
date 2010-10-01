@@ -18,15 +18,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <brfc/oh5/RootGroup.hpp>
+
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/NodeImpl.hpp>
 
 namespace brfc {
 namespace oh5 {
 
 RootGroup::~RootGroup() { }
 
-RootGroup::RootGroup(File* file)
-        : Group(0, "")
+RootGroup::RootGroup(auto_ptr<NodeImpl> impl, File* file)
+        : Group(impl)
         , file_(file) {
 
 }

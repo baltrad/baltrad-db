@@ -39,9 +39,7 @@ class Attribute : public Node {
      * @param name name of the attribute
      * @param value attribute value
      */
-    explicit Attribute(Node* parent,
-                       const String& name,
-                       const Scalar& value);
+    Attribute(auto_ptr<NodeImpl> impl, const Scalar& value);
 
     /**
      * @brief destructor

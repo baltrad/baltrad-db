@@ -34,6 +34,7 @@ namespace brfc {
 namespace oh5 {
 
 class Attribute;
+class NodeImpl;
 class File;
 class Group;
 class Scalar;
@@ -57,20 +58,25 @@ class Node : public boost::noncopyable {
 
     /**
      * @brief constructor
-     * @param parent pointer to parent node
-     * @param name name of this node
+     * @param impl implementation for this node (this node takes ownership)
+     * @throw value_error if impl is null
      */
-    Node(Node* parent, const String& name);
+    Node(auto_ptr<NodeImpl> impl);
 
     /**
      * @brief destructor
      */
     virtual ~Node();
-
+    
+    const NodeImpl& impl() const { return *impl_; }
+    NodeImpl& impl() { return *impl_; }
+    
     /**
      * @brief access node name
+     *
+     * forwards to NodeImpl::name()
      */
-    const String& name() const { return name_; }
+    const String& name() const;
     
     /**
      * @brief absolute path of this node
@@ -83,17 +89,15 @@ class Node : public boost::noncopyable {
     /**
      * @brief parent node
      * @return pointer to a parent or null pointer if this node has no parent
+     *
+     * forwards to NodeImpl::parent()
      */
-    Node* parent() {
-        return parent_;
-    }
+    Node* parent();
     
     /**
      * @copydoc parent()
      */
-    const Node* parent() const {
-        return parent_;
-    }
+    const Node* parent() const;
     
     /**
      * @brief parent node of type T
@@ -103,7 +107,7 @@ class Node : public boost::noncopyable {
      */
     template<typename T>
     T* parent() {
-        return dynamic_cast<T*>(parent_);
+        return dynamic_cast<T*>(parent());
     }
 
     /**
@@ -114,14 +118,14 @@ class Node : public boost::noncopyable {
      */
     template<typename T>
     const T* parent() const {
-        return dynamic_cast<const T*>(parent_);
+        return dynamic_cast<const T*>(parent());
     }
 
     /**
      * @brief is this node the root node
      */
     bool is_root() const {
-        return parent_ == 0;
+        return parent() == 0;
     }
     
     /**
@@ -139,6 +143,8 @@ class Node : public boost::noncopyable {
      * @param name attribute name
      * @param value attribute value
      * @return reference to the created attribute
+     *
+     * forwards to NodeImpl::create_attribute()
      */
     Attribute& create_attribute(const String& name, const Scalar& value);
     
@@ -146,26 +152,10 @@ class Node : public boost::noncopyable {
      * @brief create a child group
      * @param name group name
      * @return reference to the created group
+     *
+     * forwards to NodeImpl::create_group()
      */
-    Group& create_group(const String& path);
-
-    /**
-     * @brief add a child Node
-     * @throw duplicate_entry if a child with that name already exists
-     * @throw value_error if child is not accepted or null
-     *
-     * First, a check for a null pointer is made, followed by a check for
-     * duplicate name. Then this node has a chance to deny a child and
-     * finally the child node has a change to deny the parent.
-     *
-     * If the child is previously associated with a parent node, it is
-     * removed from that parents children.
-     *
-     * @sa accepts_child
-     *
-     * @note this node takes ownership of the child
-     */
-    Node& add_child(auto_ptr<Node> node);
+    Group& create_group(const String& name);
 
     /**
      * @brief test for a child node
@@ -198,13 +188,17 @@ class Node : public boost::noncopyable {
     
     /**
      * @brief access children
-     */
-    std::vector<Node*> children();
-
-    /**
-     * @copydoc children()
+     *
+     * forwards to NodeImpl::children()
      */
     std::vector<const Node*> children() const;
+    
+    /**
+     * @brief access children
+     *
+     * forwards to NodeImpl::children() const
+     */
+    std::vector<Node*> children();
 
     /**
      * @brief file this node is associated with
@@ -236,12 +230,8 @@ class Node : public boost::noncopyable {
 
     virtual const File* do_file() const;
 
-    void parent(Node* parent) { parent_ = parent; }
-
   private:
-    Node* parent_;
-    String name_;
-    boost::ptr_vector<Node> children_;
+    scoped_ptr<NodeImpl> impl_;
 };
 
 template<typename T>

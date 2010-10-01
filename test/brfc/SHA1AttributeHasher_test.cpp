@@ -62,10 +62,10 @@ class SHA1AttributeHasher_test : public ::testing::Test {
 };
 
 TEST_F(SHA1AttributeHasher_test, attribute_string) {
-    oh5::Attribute a1(0, "a1", oh5::Scalar(1));
+    oh5::Attribute& a1 = f1.root().create_attribute("a1", oh5::Scalar(1));
     EXPECT_EQ("/a1=1", SHA1AttributeHasher::attribute_string(a1));
 
-    oh5::Group dataset1(0, "dataset1");
+    oh5::Group& dataset1 = f1.root().create_group("dataset1");
     oh5::Group& what = dataset1.create_group("what");
     oh5::Attribute& a2 = what.create_attribute("a2", oh5::Scalar(1));
     EXPECT_EQ("/dataset1/what/a2=1", SHA1AttributeHasher::attribute_string(a2));

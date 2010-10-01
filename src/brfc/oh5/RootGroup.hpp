@@ -36,7 +36,7 @@ class RootGroup : public Group {
     /**
      * @brief constructor
      */
-    explicit RootGroup(File* file=0);
+    explicit RootGroup(auto_ptr<NodeImpl> impl, File* file=0);
 
     virtual ~RootGroup();
 

@@ -33,9 +33,7 @@ class AttributeGroup : public Group {
     /**
      * @brief constructor
      */
-    AttributeGroup(Node* parent, const String& name)
-        : Group(parent, name) {
-    }
+    explicit AttributeGroup(auto_ptr<NodeImpl> impl);
 
   protected:
     virtual bool do_accepts_child(const Node& node) const;

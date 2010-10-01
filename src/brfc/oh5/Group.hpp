@@ -38,18 +38,7 @@ class Group : public Node {
     /**
      * @brief constructor
      */
-    Group(Node* parent, const String& name)
-        : Node(parent, name) {
-    }
-
-    /**
-     * @brief create a Group subclass instance from name
-     * @return pointer to instance
-     * 
-     * if @c name is 'what', 'where' or 'how', create an AttributeGroup,
-     * otherwise create a Group
-     */
-    static auto_ptr<Group> create_by_name(const String& name);
+    explicit Group(auto_ptr<NodeImpl> impl);
 
     /**
      * @brief destructor

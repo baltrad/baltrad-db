@@ -26,31 +26,32 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include "../common.hpp"
 #include "MockFile.hpp"
+#include "MockNodeImpl.hpp"
 
 namespace brfc {
 namespace oh5 {
 
 struct oh5_RootGroup_test : public ::testing::Test {
     oh5_RootGroup_test()
-            : root() {
+            : root(auto_ptr<NodeImpl>(new MockNodeImpl())) {
     }
-
+    
     RootGroup root;
 };
 
-TEST_F(oh5_RootGroup_test, test_add_child_Attribute) {
-    auto_ptr<Node> a(new Attribute(0, "a", Scalar(1)));
-    EXPECT_NO_THROW(root.add_child(a));
+TEST_F(oh5_RootGroup_test, test_accepts_child_Attribute) {
+    Attribute node(MockNodeImpl::create(), Scalar(1));
+    EXPECT_TRUE(root.accepts_child(node));
 }
 
 TEST_F(oh5_RootGroup_test, test_add_child_AttributeGroup) {
-    auto_ptr<Node> what(new AttributeGroup(0, "what"));
-    EXPECT_NO_THROW(root.add_child(what));
+    AttributeGroup node(MockNodeImpl::create());
+    EXPECT_TRUE(root.accepts_child(node));
 }
 
 TEST_F(oh5_RootGroup_test, test_add_child_RootGroup) {
-    auto_ptr<Node> root2(new RootGroup());
-    EXPECT_THROW(root.add_child(root2), value_error);
+    RootGroup node(MockNodeImpl::create());
+    EXPECT_FALSE(root.accepts_child(node));
 }
 
 TEST_F(oh5_RootGroup_test, test_file) {
@@ -60,6 +61,7 @@ TEST_F(oh5_RootGroup_test, test_file) {
     EXPECT_EQ(&f, root.file());
 }
 
+/*
 // tests functionality implemented at Node level
 TEST_F(oh5_RootGroup_test, test_file_through_child_node) {
     Group& what = root.create_group("what");
@@ -68,6 +70,7 @@ TEST_F(oh5_RootGroup_test, test_file_through_child_node) {
     root.file(&f);
     EXPECT_EQ(&f, what.file());
 }
+*/
 
 } // namespace oh5
 } // namespace brfc

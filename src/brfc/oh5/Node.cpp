@@ -19,8 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Node.hpp>
 
-#include <algorithm>
-
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
@@ -28,19 +26,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Group.hpp>
-
-#include <iostream>
+#include <brfc/oh5/NodeImpl.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-Node::Node(Node* parent, const String& name)
+Node::Node(auto_ptr<NodeImpl> impl)
         : boost::noncopyable()
-        , parent_(parent)
-        , name_(name)
-        , children_() {
-    if (name.contains("/"))
-        throw value_error("invalid node name: " + name.to_std_string());
+        , impl_(impl.release()) {
+    if (impl_.get() == 0)
+        throw value_error("null node impl");
+    impl_->front(this);
 }
 
 Node::~Node() {
@@ -65,29 +61,29 @@ Node::path() const {
 
 Attribute&
 Node::create_attribute(const String& name, const Scalar& value) {
-    auto_ptr<Node> node(new Attribute(this, name, value));
-    return static_cast<Attribute&>(add_child(node));
+    return impl().create_attribute(name, value);
 }
 
 Group&
 Node::create_group(const String& name) {
-    auto_ptr<Node> node(Group::create_by_name(name));
-    return static_cast<Group&>(add_child(node));
+    return impl().create_group(name);
 }
 
-Node&
-Node::add_child(auto_ptr<Node> node) {
-    if (node.get() == 0)
-        throw value_error("null pointer");
-    if (has_child(node->name()))
-        throw duplicate_entry(node->name().to_utf8());
-    if (not accepts_child(*node))
-        throw value_error("node '" + node->name().to_utf8() + "' not accepted as child of '" + name().to_utf8() + "'");
-
-    node->parent(this);
-    children_.push_back(node);
-    return children_.back();
+const String&
+Node::name() const {
+    return impl().name();
 }
+
+Node*
+Node::parent() {
+    return impl().parent();
+}
+
+const Node*
+Node::parent() const {
+    return impl().parent();
+}
+
 
 bool
 Node::has_child(const String& path) const {
@@ -159,20 +155,12 @@ Node::root() {
 
 std::vector<const Node*>
 Node::children() const {
-    std::vector<const Node*> vec;
-    BOOST_FOREACH(const Node& node, children_) {
-        vec.push_back(&node);
-    }
-    return vec;
+    return impl().children();
 }
 
 std::vector<Node*>
 Node::children() {
-    std::vector<Node*> vec;
-    BOOST_FOREACH(Node& node, children_) {
-        vec.push_back(&node);
-    }
-    return vec;
+    return impl().children();
 }
 
 const File*

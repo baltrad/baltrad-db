@@ -24,33 +24,41 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/MemoryNodeImpl.hpp>
+#include <brfc/oh5/RootGroup.hpp>
 
 #include "../common.hpp"
+#include "MockNodeImpl.hpp"
 
 namespace brfc {
 namespace oh5 {
 
 struct oh5_Group_test : public ::testing::Test {
     oh5_Group_test()
-            : g(0, "g") {
+            : g(auto_ptr<NodeImpl>(new MemoryNodeImpl("g"))) {
     }
-
+    
     Group g;
 };
 
-TEST_F(oh5_Group_test, test_add_child_attribute) {
-    auto_ptr<Node> a(new Attribute(0, "a", Scalar(1)));
-    EXPECT_NO_THROW(g.add_child(a));
+TEST_F(oh5_Group_test, test_accepts_child_Attribute) {
+    Attribute node(MockNodeImpl::create(), Scalar(1));
+    EXPECT_TRUE(g.accepts_child(node));
 }
 
-TEST_F(oh5_Group_test, test_add_child_attributegroup) {
-    auto_ptr<Node> g2(new AttributeGroup(0, "g2"));
-    EXPECT_NO_THROW(g.add_child(g2));
+TEST_F(oh5_Group_test, test_accepts_child_Group) {
+    Group node(MockNodeImpl::create());
+    EXPECT_TRUE(g.accepts_child(node));
 }
 
-TEST_F(oh5_Group_test, test_add_child_group) {
-    auto_ptr<Node> d(new Group(0, "d"));
-    EXPECT_NO_THROW(g.add_child(d));
+TEST_F(oh5_Group_test, test_accepts_child_AttributeGroup) {
+    AttributeGroup node(MockNodeImpl::create());
+    EXPECT_TRUE(g.accepts_child(node));
+}
+
+TEST_F(oh5_Group_test, test_accepts_child_RootGroup) {
+    RootGroup node(MockNodeImpl::create());
+    EXPECT_FALSE(g.accepts_child(node));
 }
 
 TEST_F(oh5_Group_test, test_attribute_access) {
@@ -103,34 +111,6 @@ TEST_F(oh5_Group_test, test_effective_attribute_access) {
     EXPECT_EQ(0, ds1_d2.effective_attribute("attr2"));
     EXPECT_EQ(&w_attr1, ds1_d2.effective_attribute("what/attr1"));
     EXPECT_EQ(&ds1_d1_w_attr1, ds1_d1.effective_attribute("what/attr1"));
-}
-
-TEST_F(oh5_Group_test, test_create_by_name_valid_names) {
-    auto_ptr<Group> grp;
-
-    grp = Group::create_by_name("dataset1");
-    EXPECT_TRUE(grp.get());
-    EXPECT_EQ(0, dynamic_cast<AttributeGroup*>(grp.get()));
-
-    grp = Group::create_by_name("data2");
-    EXPECT_TRUE(grp.get());
-    EXPECT_EQ(0, dynamic_cast<AttributeGroup*>(grp.get()));
-
-    grp = Group::create_by_name("quality3");
-    EXPECT_TRUE(grp.get());
-    EXPECT_EQ(0, dynamic_cast<AttributeGroup*>(grp.get()));
-
-    grp = Group::create_by_name("what");
-    EXPECT_TRUE(dynamic_cast<AttributeGroup*>(grp.get()));
-    grp = Group::create_by_name("where");
-    EXPECT_TRUE(dynamic_cast<AttributeGroup*>(grp.get()));
-    grp = Group::create_by_name("how");
-    EXPECT_TRUE(dynamic_cast<AttributeGroup*>(grp.get()));
-}
-
-TEST_F(oh5_Group_test, test_create_by_name_invalid_names) {
-    EXPECT_THROW(Group::create_by_name("what/bla"), value_error);
-    EXPECT_THROW(Group::create_by_name("/dataset1"), value_error);
 }
 
 TEST_F(oh5_Group_test, test_get_or_create_group_absolute_path_throws) {

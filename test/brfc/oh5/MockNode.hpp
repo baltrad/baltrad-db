@@ -17,31 +17,30 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/DataSet.hpp>
+#ifndef BRFC_OH5_MOCK_NODE_HPP
+#define BRFC_OH5_MOCK_NODE_HPP
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/NodeImpl.hpp>
+#include <gmock/gmock.h>
+
+#include <brfc/oh5/Node.hpp>
+
+#include "MockNodeImpl.hpp"
 
 namespace brfc {
 namespace oh5 {
 
-DataSet::DataSet(auto_ptr<NodeImpl> impl)
-        : Node(impl) { 
-
-}
-
-DataSet::~DataSet() {
-
-}
-
-bool
-DataSet::do_accepts_child(const Node& node) const {
-    if (dynamic_cast<const Attribute*>(&node) != 0) {
-        return true;
-    } else {
-        return false;
+class MockNode : public Node {
+  public:
+    MockNode()
+            : Node(MockNodeImpl::create()) {
+        
     }
-}
+
+    MOCK_CONST_METHOD1(do_accepts_child, bool(const Node&));
+    MOCK_CONST_METHOD0(do_file, const File*());
+};
 
 } // namespace oh5
 } // namespace brfc
+
+#endif // BRFC_OH5_MOCK_NODE_HPP

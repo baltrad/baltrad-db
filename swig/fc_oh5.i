@@ -52,7 +52,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::oh5::Node::end;
 %ignore brfc::oh5::Node::add_child;
 
-%ignore brfc::oh5::Group::create_by_name;
+// ignore Node constructors (std::auto_ptr)
+%ignore brfc::oh5::Attribute::Attribute;
+%ignore brfc::oh5::AttributeGroup::AttributeGroup;
+%ignore brfc::oh5::Dataset::Dataset;
+%ignore brfc::oh5::Group::Group;
+%ignore brfc::oh5::Node::Node;
+%ignore brfc::oh5::RootGroup::RootGroup;
 
 %ignore brfc::oh5::Scalar::Scalar(const char* value);
 

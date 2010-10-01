@@ -19,10 +19,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/AttributeGroup.hpp>
 
+#include <brfc/oh5/NodeImpl.hpp>
 #include <brfc/oh5/Attribute.hpp>
 
 namespace brfc {
 namespace oh5 {
+
+AttributeGroup::AttributeGroup(auto_ptr<NodeImpl> impl)
+        : Group(impl) {
+}
+
 
 bool
 AttributeGroup::do_accepts_child(const Node& node) const {

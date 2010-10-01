@@ -24,23 +24,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/NodeImpl.hpp>
+#include <brfc/oh5/RootGroup.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-Group::~Group() {
+Group::Group(auto_ptr<NodeImpl> impl)
+    : Node(impl) {
 
 }
 
-auto_ptr<Group>
-Group::create_by_name(const String& name) {
-    auto_ptr<Group> node;
-    if (name == "what" or name == "where" or name == "how") {
-        node.reset(new AttributeGroup(0, name));
-    } else {
-        node.reset(new Group(0, name));
-    }
-    return node;
+Group::~Group() {
+
 }
 
 Attribute*
@@ -104,7 +100,7 @@ Group::get_or_create_group(const String& pathstr) {
     
     // create missing nodes
     while (iter != path.end()) {
-        last = &last->create_group(*(iter++));
+        last = &last->impl().create_group(*(iter++));
     }
 
     return *last;
@@ -112,6 +108,8 @@ Group::get_or_create_group(const String& pathstr) {
 
 bool
 Group::do_accepts_child(const Node& node) const {
+    if (dynamic_cast<const RootGroup*>(&node))
+        return false;
     return true;
 }
 

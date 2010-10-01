@@ -17,31 +17,35 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/DataSet.hpp>
+#ifndef BRFC_OH5_MOCK_NODE_IMPL_HPP
+#define BRFC_OH5_MOCK_NODE_IMPL_HPP
+
+#include <gmock/gmock.h>
 
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/NodeImpl.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-DataSet::DataSet(auto_ptr<NodeImpl> impl)
-        : Node(impl) { 
-
-}
-
-DataSet::~DataSet() {
-
-}
-
-bool
-DataSet::do_accepts_child(const Node& node) const {
-    if (dynamic_cast<const Attribute*>(&node) != 0) {
-        return true;
-    } else {
-        return false;
+class MockNodeImpl : public NodeImpl {
+  public:
+    static auto_ptr<NodeImpl> create() {
+        return auto_ptr<NodeImpl>(new MockNodeImpl());
     }
-}
+
+    MOCK_METHOD1(do_create_group, Group&(const String&));
+    MOCK_METHOD2(do_create_attribute,
+                 Attribute&(const String&, const Scalar&));
+    MOCK_CONST_METHOD0(do_name, String&());
+    MOCK_METHOD0(do_parent, Node*());
+    MOCK_CONST_METHOD0(do_parent, Node*());
+    MOCK_METHOD0(do_children, std::vector<Node*>());
+    MOCK_CONST_METHOD0(do_children, std::vector<const Node*>());
+};
 
 } // namespace oh5
 } // namespace brfc
+
+#endif // BRFC_OH5_MOCK_NODE_IMPL_HPP

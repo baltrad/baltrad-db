@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/MemoryNodeImpl.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
 #include <brfc/oh5/hl/hlhdf.hpp>
@@ -35,22 +36,22 @@ namespace oh5 {
 namespace hl {
 
 HlFile::HlFile()
-        : root_(this)
+        : root_(auto_ptr<NodeImpl>(new MemoryNodeImpl("")), this)
         , path_() {
 }
 
 HlFile::HlFile(const String& path)
-        : root_(this)
+        : root_(auto_ptr<NodeImpl>(new MemoryNodeImpl("")), this)
         , path_(path) {
     load();
 }
 
 HlFile::HlFile(const String& object,
-           const Date& date,
-           const Time& time,
-           const String& source,
-           const String& version)
-        : root_(this)
+               const Date& date,
+               const Time& time,
+               const String& source,
+               const String& version)
+        : root_(auto_ptr<NodeImpl>(new MemoryNodeImpl("")), this)
         , path_() {
     root().create_attribute("Conventions", Scalar("ODIM_H5/V2_0"));
     Group& what = root().create_group("what");

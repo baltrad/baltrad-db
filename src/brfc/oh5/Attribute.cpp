@@ -22,15 +22,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/NodeImpl.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-Attribute::Attribute(Node* parent,
-                     const String& name,
-                     const Scalar& value)
-        : Node(parent, name)
+Attribute::Attribute(auto_ptr<NodeImpl> impl, const Scalar& value)
+        : Node(impl)
         , value_(value) {
 }
 
