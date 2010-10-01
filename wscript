@@ -387,6 +387,7 @@ def _build_java_wrapper(bld):
         "fc.i",
         "fc_expr.i",
         "fc_oh5.i",
+        "fc_oh5_hl.i",
         "fc_test.i"
     ]
     

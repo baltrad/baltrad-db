@@ -26,7 +26,7 @@ import eu.baltrad.fc.Time;
 import eu.baltrad.fc.Variant;
 import eu.baltrad.fc.FileSystemError;
 
-import eu.baltrad.fc.oh5.File;
+import eu.baltrad.fc.oh5.hl.HlFile;
 
 import eu.baltrad.fc.test.TestRDB;
 import eu.baltrad.fc.test.TempH5File;
@@ -39,7 +39,7 @@ public class TestFileCatalog extends TestCase {
   private String dsn;
   private String schema_dir;
   private FileCatalog fc;
-  private File file;
+  private HlFile file;
   private TempH5File tempfile;
   private TempDir tempdir;
 
@@ -50,10 +50,10 @@ public class TestFileCatalog extends TestCase {
     rdb = new TestRDB(dsn, schema_dir);
     fc = new FileCatalog(dsn);
 
-    file = File.minimal("pvol",
-                        new Date(2000, 05, 01),
-                        new Time(12, 01, 05),
-                        "RAD:SE50");
+    file = new HlFile("pvol",
+                      new Date(2000, 05, 01),
+                      new Time(12, 01, 05),
+                      "RAD:SE50");
     tempfile = new TempH5File();
     tempfile.write(file);
   }
