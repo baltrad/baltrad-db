@@ -80,7 +80,7 @@ class db_rdb_RelationalDatabase_test : public testing::TestWithParam<const char*
 
 
 TEST_P(db_rdb_RelationalDatabase_test, load_source_by_plc) {
-    EXPECT_NO_THROW(src = db->load_source("PLC:Legionowo"));
+    EXPECT_NO_THROW(src = load_source(db->connection(), "PLC:Legionowo"));
     ASSERT_TRUE(src.has("PLC"));
     EXPECT_EQ("Legionowo", src.at("PLC"));
     ASSERT_TRUE(src.has("RAD"));
@@ -90,7 +90,7 @@ TEST_P(db_rdb_RelationalDatabase_test, load_source_by_plc) {
 }
 
 TEST_P(db_rdb_RelationalDatabase_test, load_source_by_plc_unicode) {
-    EXPECT_NO_THROW(src = db->load_source(String::from_utf8("PLC:Świdwin")));
+    EXPECT_NO_THROW(src = load_source(db->connection(), String::from_utf8("PLC:Świdwin")));
     ASSERT_TRUE(src.has("PLC"));
     EXPECT_EQ(String::from_utf8("Świdwin"), src.at("PLC"));
     ASSERT_TRUE(src.has("RAD"));

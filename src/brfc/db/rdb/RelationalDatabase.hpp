@@ -99,10 +99,6 @@ class RelationalDatabase : public Database {
     FileHasher& file_hasher() { return *file_hasher_; }
 
     long long db_id(const oh5::File& file);
-    
-    long long db_id(const oh5::Source& source);
-
-    oh5::Source load_source(const String& srcstr);
 
   protected:
     /**
@@ -120,6 +116,13 @@ class RelationalDatabase : public Database {
     shared_ptr<AttributeMapper> mapper_;
     shared_ptr<FileHasher> file_hasher_;
 };
+
+oh5::Source
+load_source(sql::Connection& conn, const String& srcstr);
+
+long long
+source_id(sql::Connection& conn, const oh5::Source& source);
+
 
 } // namespace rdb
 } // namespace db

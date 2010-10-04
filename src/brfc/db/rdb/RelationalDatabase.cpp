@@ -89,7 +89,7 @@ RelationalDatabase::do_has_file(const oh5::PhysicalFile& file) {
     const Model& m = Model::instance();
 
     const String& hash = file_hasher().hash(file);
-    long long src_id = db_id(file.source());
+    long long src_id = source_id(connection(), file.source());
 
     sql::Factory xpr;
     sql::SelectPtr qry = sql::Select::create();
@@ -138,8 +138,9 @@ RelationalDatabase::do_query(const Query& query) {
 long long
 RelationalDatabase::db_id(const oh5::File& file) {
     const Model& m = Model::instance();
-
-    oh5::Source src = load_source(file.what_source());
+    
+    // XXX: this is invalid, identified by (unique_id, source_id)
+    oh5::Source src = load_source(connection(), file.what_source());
     const String& hash = file_hasher().hash(file);
 
     sql::Factory xpr;
@@ -154,7 +155,7 @@ RelationalDatabase::db_id(const oh5::File& file) {
 }
 
 long long
-RelationalDatabase::db_id(const oh5::Source& src) {
+source_id(sql::Connection& conn, const oh5::Source& src) {
     const Model& m = Model::instance();
     sql::Factory xpr;
 
@@ -171,7 +172,7 @@ RelationalDatabase::db_id(const oh5::Source& src) {
         qry->where(qry->where()->or_(x->parentheses()));
     }
 
-    shared_ptr<sql::Result> r = connection().execute(*qry);
+    shared_ptr<sql::Result> r = conn.execute(*qry);
     if (r->size() == 1 and r->next())
         return r->value_at(0).int64_();
     else
@@ -179,18 +180,18 @@ RelationalDatabase::db_id(const oh5::Source& src) {
 }
 
 oh5::Source
-RelationalDatabase::load_source(const String& srcstr) {
+load_source(sql::Connection& conn, const String& srcstr) {
     const Model& m = Model::instance();
     sql::Factory xpr;
 
     oh5::Source src = oh5::Source::from_string(srcstr);
 
-    long long id = db_id(src);
+    long long id = source_id(conn, src);
 
     sql::SelectPtr qry = sql::Select::create(m.source_kvs);
     qry->where(m.source_kvs->column("source_id")->eq(xpr.int64_(id)));
 
-    shared_ptr<sql::Result> r = connection().execute(*qry);
+    shared_ptr<sql::Result> r = conn.execute(*qry);
 
     src.clear();
     
@@ -201,7 +202,7 @@ RelationalDatabase::load_source(const String& srcstr) {
     qry = sql::Select::create(m.sources);
     qry->where(m.sources->column("id")->eq(xpr.int64_(id)));
 
-    r = connection().execute(*qry);
+    r = conn.execute(*qry);
 
     r->next();
     src.add("name", r->value_at("name").string());
