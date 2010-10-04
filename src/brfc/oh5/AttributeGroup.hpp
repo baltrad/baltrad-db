@@ -33,7 +33,7 @@ class AttributeGroup : public Group {
     /**
      * @brief constructor
      */
-    explicit AttributeGroup(auto_ptr<NodeImpl> impl);
+    explicit AttributeGroup(NodeImpl* impl);
 
   protected:
     virtual bool do_accepts_child(const Node& node) const;

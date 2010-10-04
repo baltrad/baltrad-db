@@ -27,7 +27,7 @@ namespace oh5 {
 
 RootGroup::~RootGroup() { }
 
-RootGroup::RootGroup(auto_ptr<NodeImpl> impl, File* file)
+RootGroup::RootGroup(NodeImpl* impl, File* file)
         : Group(impl)
         , file_(file) {
 

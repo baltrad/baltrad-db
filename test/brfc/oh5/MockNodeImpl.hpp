@@ -31,16 +31,17 @@ namespace oh5 {
 
 class MockNodeImpl : public NodeImpl {
   public:
-    static auto_ptr<NodeImpl> create() {
-        return auto_ptr<NodeImpl>(new MockNodeImpl());
+    static NodeImpl* create() {
+        return new MockNodeImpl();
     }
 
-    MOCK_METHOD1(do_create_group, Group&(const String&));
+    MOCK_METHOD1(do_create_group, Group*(const String&));
     MOCK_METHOD2(do_create_attribute,
-                 Attribute&(const String&, const Scalar&));
+                 Attribute*(const String&, const Scalar&));
     MOCK_CONST_METHOD0(do_name, String&());
     MOCK_METHOD0(do_parent, Node*());
     MOCK_CONST_METHOD0(do_parent, Node*());
+    MOCK_METHOD1(do_add_child, Node&(Node* node));
     MOCK_METHOD0(do_children, std::vector<Node*>());
     MOCK_CONST_METHOD0(do_children, std::vector<const Node*>());
 };

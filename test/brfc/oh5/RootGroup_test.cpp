@@ -33,7 +33,7 @@ namespace oh5 {
 
 struct oh5_RootGroup_test : public ::testing::Test {
     oh5_RootGroup_test()
-            : root(auto_ptr<NodeImpl>(new MockNodeImpl())) {
+            : root(new MockNodeImpl()) {
     }
     
     RootGroup root;

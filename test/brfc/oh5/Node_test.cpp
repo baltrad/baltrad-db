@@ -57,18 +57,14 @@ class FakeNodeImpl : public NodeImpl {
 
     }
 
-    void add_child(FakeNode* node) {
-        children_.push_back(node);
-    }
-
     void parent(FakeNode* node) { parent_ = node; }
 
   protected:
-    virtual Group& do_create_group(const String& path) {
+    virtual Group* do_create_group(const String& path) {
         throw std::runtime_error("not implemented");
     }
 
-    virtual Attribute& do_create_attribute(const String& path,
+    virtual Attribute* do_create_attribute(const String& path,
                                            const Scalar& value) {
         throw std::runtime_error("not implemented");
     }
@@ -91,6 +87,11 @@ class FakeNodeImpl : public NodeImpl {
         std::vector<const Node*> vec(children_.begin(), children_.end());
         return vec;
     }
+
+    virtual Node& do_add_child(Node* node) {
+        children_.push_back(node);
+        return *node;
+    }
   
   private:
     String name_;
@@ -99,7 +100,7 @@ class FakeNodeImpl : public NodeImpl {
 };
 
 FakeNode::FakeNode(const String& name)
-        : Node(auto_ptr<NodeImpl>(new FakeNodeImpl(name))) {
+        : Node(new FakeNodeImpl(name)) {
 }
 
 void

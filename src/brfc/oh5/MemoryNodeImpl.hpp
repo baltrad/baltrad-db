@@ -45,8 +45,8 @@ class MemoryNodeImpl : public NodeImpl {
     virtual ~MemoryNodeImpl();
   
   protected:
-    virtual Group& do_create_group(const String& name);
-    virtual Attribute& do_create_attribute(const String& name,
+    virtual Group* do_create_group(const String& name);
+    virtual Attribute* do_create_attribute(const String& name,
                                            const Scalar& value);
 
     virtual const String& do_name() const { return name_; }
@@ -54,11 +54,12 @@ class MemoryNodeImpl : public NodeImpl {
     virtual Node* do_parent() { return parent_; }
     virtual const Node* do_parent() const { return parent_; }
 
+    virtual Node& do_add_child(Node* node);
+
     virtual std::vector<const Node*> do_children() const;
     virtual std::vector<Node*> do_children();
 
   private:
-    Node& add_child(auto_ptr<Node> node);
 
     String name_;
     Node* parent_;

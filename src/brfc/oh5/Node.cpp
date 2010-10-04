@@ -31,9 +31,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-Node::Node(auto_ptr<NodeImpl> impl)
+Node::Node(NodeImpl* impl)
         : boost::noncopyable()
-        , impl_(impl.release()) {
+        , impl_(impl) {
     if (impl_.get() == 0)
         throw value_error("null node impl");
     impl_->front(this);

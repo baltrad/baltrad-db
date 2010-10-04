@@ -34,7 +34,7 @@ namespace oh5 {
 class oh5_MemoryNodeImpl_test : public ::testing::Test {
   public:
     oh5_MemoryNodeImpl_test()
-            : root(auto_ptr<NodeImpl>(new MemoryNodeImpl(""))) {
+            : root(new MemoryNodeImpl("")) {
 
     }
   

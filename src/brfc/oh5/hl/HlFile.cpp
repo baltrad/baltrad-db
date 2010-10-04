@@ -36,12 +36,12 @@ namespace oh5 {
 namespace hl {
 
 HlFile::HlFile()
-        : root_(auto_ptr<NodeImpl>(new MemoryNodeImpl("")), this)
+        : root_(new MemoryNodeImpl(""), this)
         , path_() {
 }
 
 HlFile::HlFile(const String& path)
-        : root_(auto_ptr<NodeImpl>(new MemoryNodeImpl("")), this)
+        : root_(new MemoryNodeImpl(""), this)
         , path_(path) {
     load();
 }
@@ -51,7 +51,7 @@ HlFile::HlFile(const String& object,
                const Time& time,
                const String& source,
                const String& version)
-        : root_(auto_ptr<NodeImpl>(new MemoryNodeImpl("")), this)
+        : root_(new MemoryNodeImpl(""), this)
         , path_() {
     root().create_attribute("Conventions", Scalar("ODIM_H5/V2_0"));
     Group& what = root().create_group("what");

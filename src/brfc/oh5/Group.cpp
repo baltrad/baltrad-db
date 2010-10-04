@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-Group::Group(auto_ptr<NodeImpl> impl)
+Group::Group(NodeImpl* impl)
     : Node(impl) {
 
 }

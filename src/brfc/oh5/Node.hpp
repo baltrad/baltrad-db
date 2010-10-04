@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <brfc/smart_ptr.hpp>
 #include <brfc/String.hpp>
@@ -61,7 +60,7 @@ class Node : public boost::noncopyable {
      * @param impl implementation for this node (this node takes ownership)
      * @throw value_error if impl is null
      */
-    Node(auto_ptr<NodeImpl> impl);
+    Node(NodeImpl* impl);
 
     /**
      * @brief destructor

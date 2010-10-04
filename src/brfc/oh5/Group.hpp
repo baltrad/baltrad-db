@@ -38,7 +38,7 @@ class Group : public Node {
     /**
      * @brief constructor
      */
-    explicit Group(auto_ptr<NodeImpl> impl);
+    explicit Group(NodeImpl* impl);
 
     /**
      * @brief destructor

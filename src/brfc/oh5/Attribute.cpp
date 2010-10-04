@@ -28,7 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-Attribute::Attribute(auto_ptr<NodeImpl> impl, const Scalar& value)
+Attribute::Attribute(NodeImpl* impl, const Scalar& value)
         : Node(impl)
         , value_(value) {
 }

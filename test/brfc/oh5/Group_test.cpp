@@ -35,7 +35,7 @@ namespace oh5 {
 
 struct oh5_Group_test : public ::testing::Test {
     oh5_Group_test()
-            : g(auto_ptr<NodeImpl>(new MemoryNodeImpl("g"))) {
+            : g(new MemoryNodeImpl("g")) {
     }
     
     Group g;
@@ -98,12 +98,14 @@ TEST_F(oh5_Group_test, test_effective_attribute_access) {
     Group& w = g.create_group("what");
     Attribute& w_attr1 = w.create_attribute("attr1", val);
     Attribute& w_attr2 = w.create_attribute("attr2", val);
+    (void)w_attr2;
     Group& ds1 = g.create_group("dataset1");
     Attribute& ds1_attr1 = ds1.create_attribute("attr1", val);
     Group& ds1_d1 = ds1.create_group("data1");
     Group& ds1_d1_w = ds1_d1.create_group("what");
     Attribute& ds1_d1_w_attr1 = ds1_d1_w.create_attribute("attr1", val);
     Attribute& ds1_d1_w_attr2 = ds1_d1_w.create_attribute("attr2", val);
+    (void)ds1_d1_w_attr2;
     Group& ds1_d2 = ds1.create_group("data2");
 
 

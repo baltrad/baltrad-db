@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-AttributeGroup::AttributeGroup(auto_ptr<NodeImpl> impl)
+AttributeGroup::AttributeGroup(NodeImpl* impl)
         : Group(impl) {
 }
 

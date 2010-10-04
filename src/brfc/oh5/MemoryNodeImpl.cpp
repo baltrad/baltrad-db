@@ -36,51 +36,37 @@ MemoryNodeImpl::MemoryNodeImpl(const String& name)
         : name_(name)
         , parent_(0)
         , children_() {
-    if (name.contains("/"))
-        throw value_error("invalid node name: " + name.to_std_string());
 }
 
 MemoryNodeImpl::~MemoryNodeImpl() {
 
 }
 
-Group&
+Group*
 MemoryNodeImpl::do_create_group(const String& name) {
     auto_ptr<NodeImpl> impl(new MemoryNodeImpl(name));
 
-    auto_ptr<Node> group;
+    auto_ptr<Group> group;
     if (name == "what" or name == "where" or name == "how") {
-        group.reset(new AttributeGroup(impl));
+        group.reset(new AttributeGroup(impl.release()));
     } else {
-        group.reset(new Group(impl));
+        group.reset(new Group(impl.release()));
     }
-
-    return static_cast<Group&>(add_child(group));
+    return group.release();
 }
 
-Attribute&
+Attribute*
 MemoryNodeImpl::do_create_attribute(const String& name,
                                     const Scalar& value) {
     auto_ptr<NodeImpl> impl(new MemoryNodeImpl(name));
-    auto_ptr<Node> attr(new Attribute(impl, value));
-
-    return static_cast<Attribute&>(add_child(attr));
+    auto_ptr<Attribute> attr(new Attribute(impl.release(), value));
+    
+    return attr.release();
 }
 
 Node&
-MemoryNodeImpl::add_child(auto_ptr<Node> node) {
-    const String& name = node->name();
-
-    BOOST_FOREACH(const Node& child, children_) {
-        if (child.name() == name)
-            throw duplicate_entry(name.to_std_string());
-    }
-
-    if (name == "" and not dynamic_cast<RootGroup*>(node.get()))
-        throw value_error("invalid_name");
-    if (not front()->accepts_child(*node))
-        throw value_error("node not accepted as child");
-
+MemoryNodeImpl::do_add_child(Node* _node) {
+    auto_ptr<Node> node(_node);
     static_cast<MemoryNodeImpl&>(node->impl()).parent_ = front();
     children_.push_back(node);
     return children_.back();

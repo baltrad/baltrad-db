@@ -39,8 +39,8 @@ namespace oh5 {
 struct oh5_File_test : public testing::Test {
     oh5_File_test()
             : file()
-            , root(auto_ptr<NodeImpl>(new MemoryNodeImpl("")))
-            , emptyroot(auto_ptr<NodeImpl>(new MemoryNodeImpl("")))
+            , root(new MemoryNodeImpl(""))
+            , emptyroot(new MemoryNodeImpl(""))
             , what(root.create_group("what")) {
     }
 

@@ -56,7 +56,7 @@ struct oh5_Attribute_test : public ::testing::Test {
 };
 
 TEST_F(oh5_Attribute_test, test_full_name) {
-    RootGroup root(auto_ptr<NodeImpl>(new MemoryNodeImpl("")));
+    RootGroup root(new MemoryNodeImpl(""));
 
     Attribute& a1 = root.create_attribute("a1", Scalar(1));
     EXPECT_EQ("a1", a1.full_name());

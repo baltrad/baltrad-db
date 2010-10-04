@@ -20,10 +20,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_NODE_IMPL_HPP
 #define BRFC_OH5_NODE_IMPL_HPP
 
-#include <deque>
 #include <vector>
 
 #include <boost/noncopyable.hpp>
+
+#include <brfc/smart_ptr.hpp>
 
 namespace brfc {
 
@@ -45,7 +46,7 @@ class NodeImpl : public boost::noncopyable {
     /**
      * @brief destructor
      */
-    virtual ~NodeImpl() { }
+    virtual ~NodeImpl();
 
     /**
      * @brief add a child group
@@ -54,19 +55,16 @@ class NodeImpl : public boost::noncopyable {
      *
      * @sa do_create_child_group
      */
-    Group& create_group(const String& name) {
-        return do_create_group(name);
-    }
-    
+    Group& create_group(const String& name);    
+
     /**
      * @brief add a child attribute
      * @throw duplicate_entry if a child with that name already exists
      * @throw value_error if Attribute can not be created as child
      *
      */
-    Attribute& create_attribute(const String& name, const Scalar& value) {
-        return do_create_attribute(name, value);
-    }
+    Attribute& create_attribute(const String& name, const Scalar& value);
+
     /**
      * @brief access node name
      */
@@ -87,6 +85,8 @@ class NodeImpl : public boost::noncopyable {
         return do_parent();
     }
 
+    Node& add_child(Node* node);
+
     /**
      * @brief access children
      */
@@ -103,14 +103,16 @@ class NodeImpl : public boost::noncopyable {
     Node* front() const { return front_; }
 
   protected:
-    virtual Group& do_create_group(const String& path) = 0;
-    virtual Attribute& do_create_attribute(const String& path,
+    virtual Group* do_create_group(const String& path) = 0;
+    virtual Attribute* do_create_attribute(const String& path,
                                            const Scalar& value) = 0;
 
     virtual const String& do_name() const = 0;
 
     virtual Node* do_parent() = 0;
     virtual const Node* do_parent() const = 0;
+
+    virtual Node& do_add_child(Node* node) = 0;
 
     virtual std::vector<Node*> do_children() = 0;
     virtual std::vector<const Node*> do_children() const = 0;
