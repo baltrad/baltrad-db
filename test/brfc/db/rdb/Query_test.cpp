@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/Query.hpp>
 #include <brfc/db/ResultSet.hpp>
 
-#include <brfc/db/rdb/RelationalFileEntry.hpp>
+#include <brfc/db/rdb/RdbFileEntry.hpp>
 
 #include <brfc/expr/Factory.hpp>
 #include <brfc/expr/Attribute.hpp>
@@ -160,10 +160,10 @@ TEST_P(db_rdb_Query_test, test_queried_entry_has_lob) {
                  .execute();
     ASSERT_EQ(1, r->size());
 
-    shared_ptr<RelationalFileEntry> qre =
-        dynamic_pointer_cast<RelationalFileEntry>(r->get(0));
-    shared_ptr<RelationalFileEntry> fre1 =
-        dynamic_pointer_cast<RelationalFileEntry>(fe1);
+    shared_ptr<RdbFileEntry> qre =
+        dynamic_pointer_cast<RdbFileEntry>(r->get(0));
+    shared_ptr<RdbFileEntry> fre1 =
+        dynamic_pointer_cast<RdbFileEntry>(fe1);
     
     ASSERT_TRUE(qre);
     ASSERT_TRUE(fre1);

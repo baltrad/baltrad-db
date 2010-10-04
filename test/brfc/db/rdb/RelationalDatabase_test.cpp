@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/ResultSet.hpp>
 
-#include <brfc/db/rdb/RelationalFileEntry.hpp>
+#include <brfc/db/rdb/RdbFileEntry.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/File.hpp>
@@ -137,8 +137,8 @@ TEST_P(db_rdb_RelationalDatabase_test, save_file) {
     
     shared_ptr<FileEntry> e;
     EXPECT_NO_THROW(e = db->save_file(file));
-    shared_ptr<RelationalFileEntry> re =
-        dynamic_pointer_cast<RelationalFileEntry>(e);
+    shared_ptr<RdbFileEntry> re =
+        dynamic_pointer_cast<RdbFileEntry>(e);
     ASSERT_TRUE(re);
     EXPECT_TRUE(re->id() > 0);
     EXPECT_TRUE(re->lo_id() > 0);

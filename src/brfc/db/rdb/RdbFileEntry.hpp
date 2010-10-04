@@ -31,13 +31,13 @@ namespace sql {
 namespace db {
 namespace rdb {
 
-class RelationalFileEntry : public FileEntry {
+class RdbFileEntry : public FileEntry {
   public:
-    explicit RelationalFileEntry(shared_ptr<sql::Connection> conn,
+    explicit RdbFileEntry(shared_ptr<sql::Connection> conn,
                                   long long id=0,
                                   long long lo_id=0);
 
-    virtual ~RelationalFileEntry();
+    virtual ~RdbFileEntry();
 
     using FileEntry::id;
 

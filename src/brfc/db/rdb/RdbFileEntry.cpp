@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/db/rdb/RelationalFileEntry.hpp>
+#include <brfc/db/rdb/RdbFileEntry.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/String.hpp>
@@ -29,7 +29,7 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
-RelationalFileEntry::RelationalFileEntry(shared_ptr<sql::Connection> conn,
+RdbFileEntry::RdbFileEntry(shared_ptr<sql::Connection> conn,
                                          long long id,
                                          long long lo_id)
         : conn_(conn)
@@ -38,12 +38,12 @@ RelationalFileEntry::RelationalFileEntry(shared_ptr<sql::Connection> conn,
     BRFC_ASSERT(conn);
 }
 
-RelationalFileEntry::~RelationalFileEntry() {
+RdbFileEntry::~RdbFileEntry() {
 
 }
 
 void
-RelationalFileEntry::do_write_to_file(const String& path) const {
+RdbFileEntry::do_write_to_file(const String& path) const {
     conn_->begin();
     try {
         conn_->large_object(lo_id_)->write_to_file(path);

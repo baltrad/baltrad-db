@@ -36,7 +36,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/AttributeMapper.hpp>
 #include <brfc/db/rdb/Model.hpp>
 #include <brfc/db/rdb/QueryToSelect.hpp>
-#include <brfc/db/rdb/RelationalFileEntry.hpp>
+#include <brfc/db/rdb/RdbFileEntry.hpp>
 #include <brfc/db/rdb/SaveFile.hpp>
 
 #include <brfc/oh5/PhysicalFile.hpp>
@@ -129,7 +129,7 @@ RelationalDatabase::do_query(const Query& query) {
     while (res->next()) {
         long long id = res->value_at(0).int64_();
         long long lo_id = res->value_at(1).int64_();
-        shared_ptr<FileEntry> entry(new RelationalFileEntry(conn_, id, lo_id));
+        shared_ptr<FileEntry> entry(new RdbFileEntry(conn_, id, lo_id));
         rset->add(entry);
     }
     return rset;
