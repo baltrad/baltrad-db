@@ -57,7 +57,7 @@ class FileHasher {
     /**
      * @brief hash a file
      */
-    String hash(const oh5::File& file) {
+    String hash(const oh5::File& file) const {
         return do_hash(file);
     }
 
@@ -75,7 +75,7 @@ class FileHasher {
 
 
   protected:
-    virtual String do_hash(const oh5::File& file) = 0;
+    virtual String do_hash(const oh5::File& file) const = 0;
   
   private:
     String name_;

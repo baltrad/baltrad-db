@@ -53,7 +53,7 @@ class SHA1AttributeHasher : public FileHasher {
      * @note changes to this algorithm most probably trigger the need to
      *       re-evaluate all files in the database hashed using this hasher.
      */
-    virtual String do_hash(const oh5::File& file);
+    virtual String do_hash(const oh5::File& file) const;
 };
 
 } // namespace brfc

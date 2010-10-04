@@ -44,7 +44,7 @@ SHA1AttributeHasher::attribute_string(const oh5::Attribute& attr) {
 }
 
 String
-SHA1AttributeHasher::do_hash(const oh5::File& file) {
+SHA1AttributeHasher::do_hash(const oh5::File& file) const {
     StringList strs;
     const oh5::Attribute* attr = 0;
 

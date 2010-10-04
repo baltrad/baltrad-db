@@ -13,7 +13,7 @@ class MockHasher : public FileHasher {
         : FileHasher("mock") {
     }
 
-    MOCK_METHOD1(do_hash, String(const oh5::File&));
+    MOCK_CONST_METHOD1(do_hash, String(const oh5::File&));
 };
 
 } // namespace brfc
