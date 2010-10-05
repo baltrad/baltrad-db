@@ -31,7 +31,6 @@ namespace brfc {
 namespace oh5 {
 
 class PhysicalFile;
-class AttributeGroup;
 class Group;
 class Attribute;
 
@@ -50,8 +49,7 @@ class SaveFile {
     /**
      * @brief types accepted for visit()
      */
-    typedef mpl::vector<const oh5::AttributeGroup,
-                        const oh5::Group,
+    typedef mpl::vector<const oh5::Group,
                         const oh5::Attribute> accepted_types;
     
     /**
@@ -61,20 +59,9 @@ class SaveFile {
     SaveFile(RelationalDatabase* rdb);
     
     /**
-     * @brief save a oh5::AttributeGroup instance to database
-     * 
-     * this method does nothing, the group is contained in the
-     * full name of the attribute.
-     */
-    void operator()(const oh5::AttributeGroup& group) {
-        // no-op
-    }
-    
-    /**
      * @brief save a oh5::Group instance to database
      *
-     * save a group other than a oh5::AttributeGroup using a SaveGroup
-     * functor.
+     * save a group using a SaveGroup functor.
      */
     void operator()(const oh5::Group& group);    
     

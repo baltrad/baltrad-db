@@ -65,8 +65,8 @@ SaveAttribute::invalid_attribute_query(const oh5::Attribute& attr) {
     sql::InsertPtr stmt = sql::Insert::create(Model::instance().invalid_attrs);
 
     GroupCache::OptionalKey grp_id;
-    if (attr.parent_group())
-        grp_id = group_cache_->key(attr.parent_group());
+    if (attr.parent<oh5::Group>())
+        grp_id = group_cache_->key(attr.parent<oh5::Group>());
     
     sql::Factory xpr;
     stmt->value("name", xpr.string(attr.full_name()));
@@ -82,8 +82,8 @@ SaveAttribute::valid_attribute_query(const oh5::Attribute& attr) {
         dynamic_pointer_cast<sql::Table>(mapping.column->selectable()));
 
     GroupCache::OptionalKey grp_id;
-    if (attr.parent_group())
-        grp_id = group_cache_->key(attr.parent_group());
+    if (attr.parent<oh5::Group>())
+        grp_id = group_cache_->key(attr.parent<oh5::Group>());
     
     sql::Factory xpr;
     if (grp_id)
