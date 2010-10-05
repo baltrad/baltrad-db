@@ -39,7 +39,9 @@ Model::Model()
         , attrvals_int(sql::Table::create("bdb_attribute_values_int"))
         , attrvals_str(sql::Table::create("bdb_attribute_values_str"))
         , attrvals_real(sql::Table::create("bdb_attribute_values_real"))
-        , attrvals_bool(sql::Table::create("bdb_attribute_values_bool")) {
+        , attrvals_bool(sql::Table::create("bdb_attribute_values_bool"))
+        , attrvals_date(sql::Table::create("bdb_attribute_values_date")) 
+        , attrvals_time(sql::Table::create("bdb_attribute_values_time")) {
 
     sources->add_column("id");
     sources->add_column("name");
@@ -64,11 +66,6 @@ Model::Model()
     groups->add_column("id");
     groups->add_column("parent_id");
     groups->add_column("name");
-    groups->add_column("product");
-    groups->add_column("startdate");
-    groups->add_column("starttime");
-    groups->add_column("enddate");
-    groups->add_column("endtime");
     groups->add_column("file_id");
     groups->column("file_id")->references(files->column("id"));
 
@@ -107,6 +104,18 @@ Model::Model()
     attrvals_bool->column("attribute_id")->references(attrs->column("id"));
     attrvals_bool->column("group_id")->references(groups->column("id"));
 
+    attrvals_date->add_column("attribute_id");
+    attrvals_date->add_column("group_id");
+    attrvals_date->add_column("value");
+    attrvals_date->column("attribute_id")->references(attrs->column("id"));
+    attrvals_date->column("group_id")->references(groups->column("id"));
+
+    attrvals_time->add_column("attribute_id");
+    attrvals_time->add_column("group_id");
+    attrvals_time->add_column("value");
+    attrvals_time->column("attribute_id")->references(attrs->column("id"));
+    attrvals_time->column("group_id")->references(groups->column("id"));
+
     tables_.insert(std::make_pair(sources->name(), sources));
     tables_.insert(std::make_pair(source_kvs->name(), source_kvs));
     tables_.insert(std::make_pair(files->name(), files));
@@ -115,6 +124,8 @@ Model::Model()
     tables_.insert(std::make_pair(attrvals_str->name(), attrvals_str));
     tables_.insert(std::make_pair(attrvals_real->name(), attrvals_real));
     tables_.insert(std::make_pair(attrvals_bool->name(), attrvals_bool));
+    tables_.insert(std::make_pair(attrvals_date->name(), attrvals_date));
+    tables_.insert(std::make_pair(attrvals_time->name(), attrvals_time));
 
 }
 

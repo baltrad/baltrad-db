@@ -44,6 +44,8 @@ class Model {
     sql::TablePtr attrvals_str;
     sql::TablePtr attrvals_real;
     sql::TablePtr attrvals_bool;
+    sql::TablePtr attrvals_date;
+    sql::TablePtr attrvals_time;
 
     sql::TablePtr table_by_name(const String& name) const;
 

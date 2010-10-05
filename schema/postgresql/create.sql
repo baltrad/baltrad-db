@@ -1,4 +1,25 @@
 
+CREATE TABLE bdb_attribute_groups (
+	id SERIAL NOT NULL, 
+	name INTEGER NOT NULL, 
+	PRIMARY KEY (id)
+)
+
+;
+
+CREATE TABLE bdb_attributes (
+	id SERIAL NOT NULL, 
+	name TEXT NOT NULL, 
+	converter TEXT NOT NULL, 
+	storage_table TEXT NOT NULL, 
+	storage_column TEXT NOT NULL, 
+	ignore_in_hash BOOLEAN NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (name)
+)
+
+;
+
 CREATE TABLE bdb_sources (
 	id SERIAL NOT NULL, 
 	name TEXT NOT NULL, 
@@ -17,8 +38,8 @@ CREATE TABLE bdb_files (
 	n_time TIME WITHOUT TIME ZONE NOT NULL, 
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id), 
-	 UNIQUE (unique_id, source_id)
+	 UNIQUE (unique_id, source_id), 
+	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
 )
 
 ;
@@ -37,11 +58,6 @@ CREATE TABLE bdb_groups (
 	id SERIAL NOT NULL, 
 	parent_id INTEGER, 
 	name TEXT NOT NULL, 
-	product TEXT, 
-	startdate DATE, 
-	starttime TIME WITHOUT TIME ZONE, 
-	enddate DATE, 
-	endtime TIME WITHOUT TIME ZONE, 
 	file_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
 	 FOREIGN KEY(parent_id) REFERENCES bdb_groups (id), 
@@ -50,67 +66,13 @@ CREATE TABLE bdb_groups (
 
 ;
 
-CREATE TABLE bdb_invalid_attributes (
-	name TEXT NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	PRIMARY KEY (name, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_source_kvs (
-	source_id INTEGER, 
-	key VARCHAR NOT NULL, 
-	value VARCHAR NOT NULL, 
-	PRIMARY KEY (source_id, key), 
-	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
-)
-
-;
-
-CREATE TABLE bdb_attributes (
-	id SERIAL NOT NULL, 
-	name TEXT NOT NULL, 
-	converter TEXT NOT NULL, 
-	storage_table TEXT NOT NULL, 
-	storage_column TEXT NOT NULL, 
-	ignore_in_hash BOOLEAN NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (name)
-)
-
-;
-
-CREATE TABLE bdb_attribute_values_str (
+CREATE TABLE bdb_attribute_values_int (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
-	value TEXT NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
-)
-
-;
-
-CREATE TABLE bdb_attribute_values_time (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value TIME WITHOUT TIME ZONE NOT NULL, 
+	value BIGINT NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
 	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_attribute_values_date (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value DATE NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
 )
 
 ;
@@ -126,13 +88,13 @@ CREATE TABLE bdb_attribute_values_real (
 
 ;
 
-CREATE TABLE bdb_attribute_values_int (
+CREATE TABLE bdb_attribute_values_date (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
-	value BIGINT NOT NULL, 
+	value DATE NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
 )
 
 ;
@@ -142,16 +104,49 @@ CREATE TABLE bdb_attribute_values_bool (
 	group_id INTEGER NOT NULL, 
 	value BOOLEAN NOT NULL, 
 	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
 )
 
 ;
 
-CREATE TABLE bdb_attribute_groups (
-	id SERIAL NOT NULL, 
-	name INTEGER NOT NULL, 
-	PRIMARY KEY (id)
+CREATE TABLE bdb_invalid_attributes (
+	name TEXT NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	PRIMARY KEY (name, group_id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE bdb_attribute_values_str (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value TEXT NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE bdb_attribute_values_time (
+	attribute_id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	value TIME WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (attribute_id, group_id), 
+	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
+	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE TABLE bdb_source_kvs (
+	source_id INTEGER, 
+	key VARCHAR NOT NULL, 
+	value VARCHAR NOT NULL, 
+	PRIMARY KEY (source_id, key), 
+	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
 )
 
 ;
@@ -253,12 +248,12 @@ INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, 
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (96, 'how/PAC', 'real', 'bdb_attribute_values_real', 'value', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (97, 'how/S2N', 'real', 'bdb_attribute_values_real', 'value', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (98, 'how/polarization', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (99, 'what/product', 'string', 'bdb_groups', 'product', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (99, 'what/product', 'string', 'bdb_attribute_values_str', 'value', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (100, 'what/quantity', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (101, 'what/startdate', 'date', 'bdb_groups', 'startdate', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (102, 'what/starttime', 'time', 'bdb_groups', 'starttime', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (103, 'what/enddate', 'date', 'bdb_groups', 'enddate', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (104, 'what/endtime', 'time', 'bdb_groups', 'endtime', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (101, 'what/startdate', 'date', 'bdb_attribute_values_date', 'value', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (102, 'what/starttime', 'time', 'bdb_attribute_values_time', 'value', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (103, 'what/enddate', 'date', 'bdb_attribute_values_date', 'value', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (104, 'what/endtime', 'time', 'bdb_attribute_values_time', 'value', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (105, 'what/gain', 'real', 'bdb_attribute_values_real', 'value', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (106, 'what/offset', 'real', 'bdb_attribute_values_real', 'value', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (107, 'what/nodata', 'real', 'bdb_attribute_values_real', 'value', False);

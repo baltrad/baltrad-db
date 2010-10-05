@@ -91,11 +91,6 @@ groups = Table("bdb_groups", meta,
     Column("id", Integer, primary_key=True),
     Column("parent_id", Integer, ForeignKey("bdb_groups.id")),
     Column("name", Text, nullable=False),
-    Column("product", Text),
-    Column("startdate", Date),
-    Column("starttime", Time),
-    Column("enddate", Date),
-    Column("endtime", Time),
     Column("file_id", Integer, nullable=False),
     ForeignKeyConstraint(["file_id"], [files.c.id],
                          ondelete="CASCADE")
@@ -200,11 +195,6 @@ special_storage = {
     "object":    files.c.object,
     "date":      files.c.n_date,
     "time":      files.c.n_time,
-    "product":   groups.c.product,
-    "startdate": groups.c.startdate,
-    "starttime": groups.c.starttime,
-    "enddate":   groups.c.enddate,
-    "endtime":   groups.c.endtime,
 }
 
 # name, group, type
