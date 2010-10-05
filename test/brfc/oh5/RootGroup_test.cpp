@@ -21,7 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
 #include "../common.hpp"
@@ -41,11 +40,6 @@ struct oh5_RootGroup_test : public ::testing::Test {
 
 TEST_F(oh5_RootGroup_test, test_accepts_child_Attribute) {
     Attribute node(MockNodeImpl::create(), Scalar(1));
-    EXPECT_TRUE(root.accepts_child(node));
-}
-
-TEST_F(oh5_RootGroup_test, test_add_child_AttributeGroup) {
-    AttributeGroup node(MockNodeImpl::create());
     EXPECT_TRUE(root.accepts_child(node));
 }
 

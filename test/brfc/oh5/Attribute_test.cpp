@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/MemoryNodeImpl.hpp>
 
@@ -68,11 +67,6 @@ TEST_F(oh5_Attribute_test, test_full_name) {
 
 TEST_F(oh5_Attribute_test, test_accepts_child_Attribute) {
     Attribute node(MockNodeImpl::create(), Scalar(1));
-    EXPECT_FALSE(attr.accepts_child(node));
-}
-
-TEST_F(oh5_Attribute_test, test_accepts_child_AttributeGroup) {
-    AttributeGroup node(MockNodeImpl::create());
     EXPECT_FALSE(attr.accepts_child(node));
 }
 

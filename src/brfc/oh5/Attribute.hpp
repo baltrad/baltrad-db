@@ -47,19 +47,6 @@ class Attribute : public Node {
     virtual ~Attribute();
 
     /**
-     * @brief return nearest parent Group that is not AttributeGroup
-     * @return Group or null if not found
-     *
-     * if the attribute is in an AttributeGroup, bypass it
-     *
-     * @{
-     */
-    const Group* parent_group() const;
-
-    Group* parent_group();
-    /// @}
-    
-    /**
      * @brief attribute value
      */
     const Scalar& value() const { return value_; }
@@ -72,8 +59,8 @@ class Attribute : public Node {
     /**
      * @brief full name of this attribute
      *
-     * if the attribute is in an AttributeGroup, return the name with
-     * group name prepended.
+     * if the parent group is named "what", "where" or "how", return
+     * name prefixed with parent group, otherwise return name
      */
     String full_name() const;
     

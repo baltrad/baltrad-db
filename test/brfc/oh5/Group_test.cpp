@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/MemoryNodeImpl.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
@@ -48,11 +47,6 @@ TEST_F(oh5_Group_test, test_accepts_child_Attribute) {
 
 TEST_F(oh5_Group_test, test_accepts_child_Group) {
     Group node(MockNodeImpl::create());
-    EXPECT_TRUE(g.accepts_child(node));
-}
-
-TEST_F(oh5_Group_test, test_accepts_child_AttributeGroup) {
-    AttributeGroup node(MockNodeImpl::create());
     EXPECT_TRUE(g.accepts_child(node));
 }
 
@@ -130,16 +124,6 @@ TEST_F(oh5_Group_test, test_get_or_create_group) {
 
     EXPECT_EQ(&child1, &child2);
 }
-
-TEST_F(oh5_Group_test, test_get_or_create_group_unaccepted_throws) {
-    StringList path = String("dataset1/what/quality1").split("/");
-    
-    EXPECT_THROW(g.get_or_create_group("dataset1/what/quality1"), value_error);
-    EXPECT_TRUE(g.has_child("dataset1"));
-    EXPECT_TRUE(g.has_child("dataset1/what"));
-    EXPECT_FALSE(g.has_child("dataset1/what/quality1"));
-}
-
 
 } // namespace oh5
 } // namespace brfc

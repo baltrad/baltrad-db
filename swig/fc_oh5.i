@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/oh5/Node.hpp>
     #include <brfc/oh5/Scalar.hpp>
     #include <brfc/oh5/Attribute.hpp>
-    #include <brfc/oh5/AttributeGroup.hpp>
     #include <brfc/oh5/PhysicalFile.hpp>
     #include <brfc/oh5/Group.hpp>
     #include <brfc/oh5/RootGroup.hpp>
@@ -54,7 +53,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 // ignore Node constructors (std::auto_ptr)
 %ignore brfc::oh5::Attribute::Attribute;
-%ignore brfc::oh5::AttributeGroup::AttributeGroup;
 %ignore brfc::oh5::Dataset::Dataset;
 %ignore brfc::oh5::Group::Group;
 %ignore brfc::oh5::Node::Node;
@@ -110,7 +108,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %include <brfc/oh5/Scalar.hpp>
 %include <brfc/oh5/Node.hpp>
 %include <brfc/oh5/Group.hpp>
-%include <brfc/oh5/AttributeGroup.hpp>
 %include <brfc/oh5/RootGroup.hpp>
 %include <brfc/oh5/Attribute.hpp>
 %include <brfc/oh5/Source.hpp>

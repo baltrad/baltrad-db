@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/oh5/AttributeGroup.hpp>
+#include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/NodeImpl.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
@@ -37,29 +37,15 @@ Attribute::~Attribute() {
 
 }
 
-Group*
-Attribute::parent_group() {
-    const Attribute* self = const_cast<const Attribute*>(this);
-    return const_cast<Group*>(self->parent_group());
-}
-
-const Group*
-Attribute::parent_group() const {
-    const AttributeGroup* parent_p = parent<AttributeGroup>();
-    if (parent_p)
-        return dynamic_cast<const Group*>(parent_p->parent());
-    else
-        return dynamic_cast<const Group*>(parent());
-}
-
 String
 Attribute::full_name() const {
-    const AttributeGroup* grp = parent<AttributeGroup>();
+    const Group* grp = parent<Group>();
     if (grp) {
-        return grp->name() + "/" + name();
-    } else {
-        return name();
+        const String& grpname = grp->name();
+        if (grpname == "what" or grpname == "where" or grpname == "how")
+            return grpname + "/" + name();
     }
+    return name();
 }
 
 } // namespace oh5

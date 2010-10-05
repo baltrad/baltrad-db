@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/smart_ptr.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
@@ -45,13 +44,8 @@ MemoryNodeImpl::~MemoryNodeImpl() {
 Group*
 MemoryNodeImpl::do_create_group(const String& name) {
     auto_ptr<NodeImpl> impl(new MemoryNodeImpl(name));
+    auto_ptr<Group> group(new Group(impl.release()));
 
-    auto_ptr<Group> group;
-    if (name == "what" or name == "where" or name == "how") {
-        group.reset(new AttributeGroup(impl.release()));
-    } else {
-        group.reset(new Group(impl.release()));
-    }
     return group.release();
 }
 

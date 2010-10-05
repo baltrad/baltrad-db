@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/AttributeGroup.hpp>
 #include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/MemoryNodeImpl.hpp>
 #include <brfc/oh5/RootGroup.hpp>
@@ -53,17 +52,9 @@ TEST_F(oh5_MemoryNodeImpl_test, test_create_group) {
     Group* node = 0;
     EXPECT_NO_THROW(node = &root.create_group("dataset1"));
     EXPECT_TRUE(node);
-    EXPECT_FALSE(dynamic_cast<AttributeGroup*>(node));
 
     EXPECT_THROW(root.create_attribute("dataset1", Scalar(1)), duplicate_entry);
     EXPECT_THROW(root.create_group("dataset1"), duplicate_entry);
-}
-
-TEST_F(oh5_MemoryNodeImpl_test, test_create_group_attributegroup) {
-    Group* node = 0;
-    EXPECT_NO_THROW(node = &root.create_group("what"));
-    EXPECT_TRUE(node);
-    EXPECT_TRUE(dynamic_cast<AttributeGroup*>(node));
 }
 
 TEST_F(oh5_MemoryNodeImpl_test, test_create_attribute_invalid_names) {

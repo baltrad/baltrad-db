@@ -27,9 +27,6 @@ namespace oh5 {
 
 /**
  * @brief the root group
- *
- * can have no parent
- * can have Attribute, AttributeGroup or DataSet as child
  */
 class RootGroup : public Group {
   public:
@@ -51,7 +48,7 @@ class RootGroup : public Group {
 
   protected:
     /**
-     * accepts Attribute, AttributeGroup and Dataset as children
+     * accepts Attribute, Group and Dataset as children
      */
     virtual bool do_accepts_child(const Node& node) const;
 
