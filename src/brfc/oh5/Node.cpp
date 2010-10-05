@@ -52,11 +52,10 @@ Node::path() const {
         node = node->parent();
     }
 
-    // ensure we get a / at the beginning
-    if (names.front() != "")
-        names.push_front("");
-
-    return names.join("/");
+    String path = names.join("/");
+    if (not path.starts_with("/"))
+        path = "/" + path;
+    return path;
 }
 
 Attribute&

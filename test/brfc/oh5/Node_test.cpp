@@ -148,8 +148,11 @@ TEST_F(oh5_Node_test, test_parent) {
 }
 
 TEST_F(oh5_Node_test, path) {
-    EXPECT_EQ(a.path(), "/a");
-    EXPECT_EQ(c.path(), "/a/b/c");
+    EXPECT_EQ("/a", a.path());
+    EXPECT_EQ("/a/b/c", c.path());
+
+    FakeNode root("");
+    EXPECT_EQ("/", root.path());
 }
 
 TEST_F(oh5_Node_test, test_root) {
