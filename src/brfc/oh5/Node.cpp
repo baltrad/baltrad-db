@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/NodeImpl.hpp>
+#include <brfc/oh5/NodeBackend.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -35,7 +35,7 @@ Node::Node(const String& name)
         : boost::noncopyable()
         , name_(name)
         , parent_(0)
-        , impl_(0) {
+        , backend_(0) {
     if (name.contains("/"))
         throw value_error("invalid node name: " + name.to_std_string());
 }
@@ -44,24 +44,24 @@ Node::~Node() {
 
 }
 
-NodeImpl&
-Node::impl() {
-    if (not has_impl())
-        throw std::runtime_error("no impl associated with node");
-    return *impl_;
+NodeBackend&
+Node::backend() {
+    if (not has_backend())
+        throw std::runtime_error("no backend associated with node");
+    return *backend_;
 }
 
-const NodeImpl&
-Node::impl() const {
-    if (not has_impl())
-        throw std::runtime_error("no impl associated with node");
-    return *impl_;
+const NodeBackend&
+Node::backend() const {
+    if (not has_backend())
+        throw std::runtime_error("no backend associated with node");
+    return *backend_;
 }
 
 void
-Node::impl(NodeImpl* impl) {
-    impl_.reset(impl);
-    impl_->front(this);
+Node::backend(NodeBackend* backend) {
+    backend_.reset(backend);
+    backend_->front(this);
 }
 
 String
@@ -99,7 +99,7 @@ Node::add_child(Node* node) {
         throw duplicate_entry(node->name().to_std_string());
 
     node->parent(this);
-    return impl().add_child(node);
+    return backend().add_child(node);
 }
 
 bool
@@ -177,12 +177,12 @@ Node::accepts_child(const Node& node) const {
 
 std::vector<const Node*>
 Node::children() const {
-    return impl().children();
+    return backend().children();
 }
 
 std::vector<Node*>
 Node::children() {
-    return impl().children();
+    return backend().children();
 }
 
 const File*

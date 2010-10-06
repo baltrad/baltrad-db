@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Node.hpp>
 
-#include "MockNodeImpl.hpp"
-
 namespace brfc {
 namespace oh5 {
 

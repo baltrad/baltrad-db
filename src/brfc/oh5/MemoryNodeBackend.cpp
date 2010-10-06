@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/MemoryNodeImpl.hpp>
+#include <brfc/oh5/MemoryNodeBackend.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -31,25 +31,25 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-MemoryNodeImpl::MemoryNodeImpl(Node* front)
-        : NodeImpl(front)
+MemoryNodeBackend::MemoryNodeBackend(Node* front)
+        : NodeBackend(front)
         , children_() {
 }
 
-MemoryNodeImpl::~MemoryNodeImpl() {
+MemoryNodeBackend::~MemoryNodeBackend() {
 
 }
 
 Node&
-MemoryNodeImpl::do_add_child(Node* _node) {
+MemoryNodeBackend::do_add_child(Node* _node) {
     auto_ptr<Node> node(_node);
-    node->impl(new MemoryNodeImpl());
+    node->backend(new MemoryNodeBackend());
     children_.push_back(node);
     return children_.back();
 }
 
 std::vector<const Node*>
-MemoryNodeImpl::do_children() const {
+MemoryNodeBackend::do_children() const {
     std::vector<const Node*> vec;
     BOOST_FOREACH(const Node& node, children_) {
         vec.push_back(&node);
@@ -58,7 +58,7 @@ MemoryNodeImpl::do_children() const {
 }
 
 std::vector<Node*>
-MemoryNodeImpl::do_children() {
+MemoryNodeBackend::do_children() {
     std::vector<Node*> vec;
     BOOST_FOREACH(Node& node, children_) {
         vec.push_back(&node);

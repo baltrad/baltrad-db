@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
-#include <brfc/oh5/MemoryNodeImpl.hpp>
+#include <brfc/oh5/MemoryNodeBackend.hpp>
 
 #include "../common.hpp"
 #include "MockFile.hpp"
@@ -45,8 +45,8 @@ struct oh5_File_test : public testing::Test {
     }
 
     virtual void SetUp() {
-        root.impl(new MemoryNodeImpl());
-        emptyroot.impl(new MemoryNodeImpl());
+        root.backend(new MemoryNodeBackend());
+        emptyroot.backend(new MemoryNodeBackend());
         what = &root.create_group("what");
 
         ON_CALL(file, do_root())

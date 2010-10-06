@@ -23,24 +23,24 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/DataSet.hpp>
-#include <brfc/oh5/MemoryNodeImpl.hpp>
+#include <brfc/oh5/MemoryNodeBackend.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-class oh5_MemoryNodeImpl_test : public ::testing::Test {
+class oh5_MemoryNodeBackend_test : public ::testing::Test {
   public:
-    oh5_MemoryNodeImpl_test()
+    oh5_MemoryNodeBackend_test()
             : root() {
-        root.impl(new MemoryNodeImpl());
+        root.backend(new MemoryNodeBackend());
     }
   
   RootGroup root;
 };
 
-TEST_F(oh5_MemoryNodeImpl_test, test_root_create_Attribute) {
+TEST_F(oh5_MemoryNodeBackend_test, test_root_create_Attribute) {
     Attribute* node = 0;
     EXPECT_NO_THROW(node = &root.create_attribute("attr", Scalar(1)));
     EXPECT_TRUE(node);
@@ -48,7 +48,7 @@ TEST_F(oh5_MemoryNodeImpl_test, test_root_create_Attribute) {
     EXPECT_THROW(root.create_group("attr"), duplicate_entry);
 }
 
-TEST_F(oh5_MemoryNodeImpl_test, test_create_group) {
+TEST_F(oh5_MemoryNodeBackend_test, test_create_group) {
     Group* node = 0;
     EXPECT_NO_THROW(node = &root.create_group("dataset1"));
     EXPECT_TRUE(node);
@@ -57,13 +57,13 @@ TEST_F(oh5_MemoryNodeImpl_test, test_create_group) {
     EXPECT_THROW(root.create_group("dataset1"), duplicate_entry);
 }
 
-TEST_F(oh5_MemoryNodeImpl_test, test_create_attribute_invalid_names) {
+TEST_F(oh5_MemoryNodeBackend_test, test_create_attribute_invalid_names) {
 //    EXPECT_THROW(root.create_attribute("", Scalar(1)), value_error);
     EXPECT_THROW(root.create_attribute("qwe/asd", Scalar(1)), value_error);
     EXPECT_THROW(root.create_attribute("/", Scalar(1)), value_error);
 }
 
-TEST_F(oh5_MemoryNodeImpl_test, test_create_group_invalid_names) {
+TEST_F(oh5_MemoryNodeBackend_test, test_create_group_invalid_names) {
 //    EXPECT_THROW(root.create_group(""), value_error);
     EXPECT_THROW(root.create_group("qwe/asd"), value_error);
     EXPECT_THROW(root.create_group("/"), value_error);

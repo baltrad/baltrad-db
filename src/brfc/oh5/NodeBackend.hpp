@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_OH5_NODE_IMPL_HPP
-#define BRFC_OH5_NODE_IMPL_HPP
+#ifndef BRFC_OH5_NODE_BACKEND_HPP
+#define BRFC_OH5_NODE_BACKEND_HPP
 
 #include <vector>
 
@@ -37,16 +37,16 @@ class Node;
 /**
  * @brief ABC for Node implementations
  */
-class NodeImpl : public boost::noncopyable {
+class NodeBackend : public boost::noncopyable {
   public:
-    explicit NodeImpl(Node* front=0)
+    explicit NodeBackend(Node* front=0)
             : front_(front) {
     }
 
     /**
      * @brief destructor
      */
-    virtual ~NodeImpl();
+    virtual ~NodeBackend();
 
     void front(Node* front) { front_ = front; }
 
@@ -76,4 +76,4 @@ class NodeImpl : public boost::noncopyable {
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_OH5_NODE_IMPL_HPP
+#endif // BRFC_OH5_NODE_BACKEND_HPP

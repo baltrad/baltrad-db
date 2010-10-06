@@ -17,36 +17,23 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_OH5_MOCK_NODE_IMPL_HPP
-#define BRFC_OH5_MOCK_NODE_IMPL_HPP
+#include <brfc/oh5/NodeBackend.hpp>
 
-#include <gmock/gmock.h>
+#include <boost/foreach.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/NodeImpl.hpp>
+#include <brfc/exceptions.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-class MockNodeImpl : public NodeImpl {
-  public:
-    static NodeImpl* create() {
-        return new MockNodeImpl();
-    }
+NodeBackend::~NodeBackend() {
 
-    MOCK_METHOD1(do_create_group, Group*(const String&));
-    MOCK_METHOD2(do_create_attribute,
-                 Attribute*(const String&, const Scalar&));
-    MOCK_CONST_METHOD0(do_name, String&());
-    MOCK_METHOD0(do_parent, Node*());
-    MOCK_CONST_METHOD0(do_parent, Node*());
-    MOCK_METHOD1(do_add_child, Node&(Node* node));
-    MOCK_METHOD0(do_children, std::vector<Node*>());
-    MOCK_CONST_METHOD0(do_children, std::vector<const Node*>());
-};
+}
+
+Node&
+NodeBackend::add_child(Node* _node) {
+    return do_add_child(_node);
+}
 
 } // namespace oh5
 } // namespace brfc
-
-#endif // BRFC_OH5_MOCK_NODE_IMPL_HPP

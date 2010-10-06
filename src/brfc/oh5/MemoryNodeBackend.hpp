@@ -17,32 +17,32 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_OH5_MEMORY_NODE_IMPL_HPP
-#define BRFC_OH5_MEMORY_NODE_IMPL_HPP
+#ifndef BRFC_OH5_MEMORY_NODE_BACKEND_HPP
+#define BRFC_OH5_MEMORY_NODE_BACKEND_HPP
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <brfc/smart_ptr.hpp>
 #include <brfc/String.hpp>
 
-#include <brfc/oh5/NodeImpl.hpp>
+#include <brfc/oh5/NodeBackend.hpp>
 
 namespace brfc {
 namespace oh5 {
 
 /**
- * @brief NodeImpl storing nodes in memory
+ * @brief NodeBackend storing nodes in memory
  */
-class MemoryNodeImpl : public NodeImpl {
+class MemoryNodeBackend : public NodeBackend {
   public:
     /**
      * @brief constructor
      * @param name name of this node
      * @throw value_error if name contains "/"
      */
-    explicit MemoryNodeImpl(Node* front=0);
+    explicit MemoryNodeBackend(Node* front=0);
 
-    virtual ~MemoryNodeImpl();
+    virtual ~MemoryNodeBackend();
   
   protected:
     virtual Node& do_add_child(Node* node);
@@ -57,4 +57,4 @@ class MemoryNodeImpl : public NodeImpl {
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_OH5_MEMORY_NODE_IMPL_HPP
+#endif // BRFC_OH5_MEMORY_NODE_BACKEND_HPP

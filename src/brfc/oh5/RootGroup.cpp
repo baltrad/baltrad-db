@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/RootGroup.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/NodeImpl.hpp>
 
 namespace brfc {
 namespace oh5 {

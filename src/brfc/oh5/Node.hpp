@@ -33,7 +33,7 @@ namespace brfc {
 namespace oh5 {
 
 class Attribute;
-class NodeImpl;
+class NodeBackend;
 class File;
 class Group;
 class Scalar;
@@ -56,7 +56,7 @@ class Node : public boost::noncopyable {
      * @brief constructor
      * @param name name of this node
      *
-     * the node has no parent and no implementation
+     * the node has no parent and no backend
      */
     Node(const String& name);
 
@@ -65,23 +65,21 @@ class Node : public boost::noncopyable {
      */
     virtual ~Node();
 
-    bool has_impl() const { return impl_.get() != 0; }
+    bool has_backend() const { return backend_.get() != 0; }
     
-    NodeImpl& impl();
-    const NodeImpl& impl() const;
+    NodeBackend& backend();
+    const NodeBackend& backend() const;
     
     /**
-     * @brief associate with impl
+     * @brief associate with backend
      *
-     * ownership of @c impl is transfered
-     * impl.front() is set to this node
+     * ownership of @c backend is transfered
+     * backend.front() is set to this node
      */
-    void impl(NodeImpl* impl);
+    void backend(NodeBackend* backend);
     
     /**
      * @brief access node name
-     *
-     * forwards to NodeImpl::name()
      */
     const String& name() const { return name_; }
     
@@ -96,8 +94,6 @@ class Node : public boost::noncopyable {
     /**
      * @brief parent node
      * @return pointer to a parent or null pointer if this node has no parent
-     *
-     * forwards to NodeImpl::parent()
      */
     Node* parent() { return parent_; }
     
@@ -152,8 +148,6 @@ class Node : public boost::noncopyable {
      * @param name attribute name
      * @param value attribute value
      * @return reference to the created attribute
-     *
-     * forwards to NodeImpl::create_attribute()
      */
     Attribute& create_attribute(const String& name, const Scalar& value);
     
@@ -161,8 +155,6 @@ class Node : public boost::noncopyable {
      * @brief create a child group
      * @param name group name
      * @return reference to the created group
-     *
-     * forwards to NodeImpl::create_group()
      */
     Group& create_group(const String& name);
 
@@ -198,14 +190,14 @@ class Node : public boost::noncopyable {
     /**
      * @brief access children
      *
-     * forwards to NodeImpl::children()
+     * forwards to NodeBackend::children()
      */
     std::vector<const Node*> children() const;
     
     /**
      * @brief access children
      *
-     * forwards to NodeImpl::children() const
+     * forwards to NodeBackend::children() const
      */
     std::vector<Node*> children();
 
@@ -242,7 +234,7 @@ class Node : public boost::noncopyable {
   private:
     String name_;
     Node* parent_;
-    scoped_ptr<NodeImpl> impl_;
+    scoped_ptr<NodeBackend> backend_;
 };
 
 template<typename T>

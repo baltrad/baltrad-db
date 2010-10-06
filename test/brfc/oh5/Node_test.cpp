@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Node.hpp>
-#include <brfc/oh5/NodeImpl.hpp>
+#include <brfc/oh5/NodeBackend.hpp>
 
 #include "../common.hpp"
 #include "MockNode.hpp"
@@ -38,10 +38,10 @@ using ::testing::Return;
 namespace brfc {
 namespace oh5 {
 
-class FakeNodeImpl : public NodeImpl {
+class FakeNodeBackend : public NodeBackend {
   public:
-    FakeNodeImpl(Node* front=0)
-            : NodeImpl(front)
+    FakeNodeBackend(Node* front=0)
+            : NodeBackend(front)
             , children_() {
     }
 
@@ -68,7 +68,7 @@ class FakeNode : public Node {
   public:
     FakeNode(const String& name)
             : Node(name) {
-        impl(new FakeNodeImpl());
+        backend(new FakeNodeBackend());
     }
   
   protected:

@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/NodeImpl.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
 namespace brfc {

@@ -23,11 +23,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/MemoryNodeImpl.hpp>
+#include <brfc/oh5/MemoryNodeBackend.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
 #include "../common.hpp"
-#include "MockNodeImpl.hpp"
 
 namespace brfc {
 namespace oh5 {
@@ -35,7 +34,7 @@ namespace oh5 {
 struct oh5_Group_test : public ::testing::Test {
     oh5_Group_test()
             : g("g") {
-        g.impl(new MemoryNodeImpl());
+        g.backend(new MemoryNodeBackend());
     }
     
     Group g;
