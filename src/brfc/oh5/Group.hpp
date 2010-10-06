@@ -38,7 +38,7 @@ class Group : public Node {
     /**
      * @brief constructor
      */
-    explicit Group(NodeImpl* impl);
+    explicit Group(const String& name);
 
     /**
      * @brief destructor

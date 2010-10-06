@@ -40,29 +40,17 @@ class MemoryNodeImpl : public NodeImpl {
      * @param name name of this node
      * @throw value_error if name contains "/"
      */
-    explicit MemoryNodeImpl(const String& name);
+    explicit MemoryNodeImpl(Node* front=0);
 
     virtual ~MemoryNodeImpl();
   
   protected:
-    virtual Group* do_create_group(const String& name);
-    virtual Attribute* do_create_attribute(const String& name,
-                                           const Scalar& value);
-
-    virtual const String& do_name() const { return name_; }
-
-    virtual Node* do_parent() { return parent_; }
-    virtual const Node* do_parent() const { return parent_; }
-
     virtual Node& do_add_child(Node* node);
 
     virtual std::vector<const Node*> do_children() const;
     virtual std::vector<Node*> do_children();
 
   private:
-
-    String name_;
-    Node* parent_;
     boost::ptr_vector<Node> children_;
 };
 

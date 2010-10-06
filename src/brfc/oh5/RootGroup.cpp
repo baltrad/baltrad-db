@@ -27,8 +27,8 @@ namespace oh5 {
 
 RootGroup::~RootGroup() { }
 
-RootGroup::RootGroup(NodeImpl* impl, File* file)
-        : Group(impl)
+RootGroup::RootGroup(File* file)
+        : Group("")
         , file_(file) {
 
 }

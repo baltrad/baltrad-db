@@ -30,55 +30,22 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/NodeImpl.hpp>
 
 #include "../common.hpp"
+#include "MockNode.hpp"
+
+using ::testing::_;
+using ::testing::Return;
 
 namespace brfc {
 namespace oh5 {
 
-class FakeNodeImpl;
-
-class FakeNode : public Node {
-  public:
-    FakeNode(const String& name);
-
-    void add_child(FakeNode* node);
-  
-  protected:
-    virtual bool do_accepts_child(const Node& node) const {
-        return true;
-    }
-};
-
 class FakeNodeImpl : public NodeImpl {
   public:
-    FakeNodeImpl(const String& name)
-            : name_(name)
-            , children_()
-            , parent_(0) {
-
+    FakeNodeImpl(Node* front=0)
+            : NodeImpl(front)
+            , children_() {
     }
-
-    void parent(FakeNode* node) { parent_ = node; }
 
   protected:
-    virtual Group* do_create_group(const String& path) {
-        throw std::runtime_error("not implemented");
-    }
-
-    virtual Attribute* do_create_attribute(const String& path,
-                                           const Scalar& value) {
-        throw std::runtime_error("not implemented");
-    }
-
-    virtual const String& do_name() const { return name_; }
-
-    virtual Node* do_parent() {
-        return parent_;
-    }
-
-    virtual const Node* do_parent() const {
-        return parent_;
-    }
-
     virtual std::vector<Node*> do_children() {
         return children_;
     }
@@ -94,34 +61,30 @@ class FakeNodeImpl : public NodeImpl {
     }
   
   private:
-    String name_;
     std::vector<Node*> children_;
-    Node* parent_;
 };
 
-FakeNode::FakeNode(const String& name)
-        : Node(new FakeNodeImpl(name)) {
-}
-
-void
-FakeNode::add_child(FakeNode* node) {
-    static_cast<FakeNodeImpl&>(impl()).add_child(node);
-    static_cast<FakeNodeImpl&>(node->impl()).parent(this);
-}
-
+class FakeNode : public Node {
+  public:
+    FakeNode(const String& name)
+            : Node(name) {
+        impl(new FakeNodeImpl());
+    }
+  
+  protected:
+    virtual bool do_accepts_child(const Node&) const { return true; }
+};
 
 struct oh5_Node_test : public ::testing::Test {
     oh5_Node_test()
             : a("a")
-            , b("b")
-            , c("c")
-            , f("f") {
-        b.add_child(&c);
-        a.add_child(&b);
+            , f("f")
+            , b(a.add_child(new FakeNode("b")))
+            , c(b.add_child(new FakeNode("c"))) {
     }
-    
-    FakeNode a, b, c, f;
 
+    FakeNode a, f;
+    Node& b, &c;
 };
 
 TEST_F(oh5_Node_test, test_has_child) {
@@ -151,7 +114,7 @@ TEST_F(oh5_Node_test, path) {
     EXPECT_EQ("/a", a.path());
     EXPECT_EQ("/a/b/c", c.path());
 
-    FakeNode root("");
+    MockNode root("");
     EXPECT_EQ("/", root.path());
 }
 
@@ -182,7 +145,7 @@ TEST_F(oh5_Node_test, test_iterator_end) {
 }
 
 TEST_F(oh5_Node_test, test_iterate_tree) {
-    a.add_child(&f);
+    a.add_child(new FakeNode("f"));
 
     StringList names;
     BOOST_FOREACH(Node& node, a) {

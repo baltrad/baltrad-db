@@ -39,7 +39,7 @@ class Attribute : public Node {
      * @param name name of the attribute
      * @param value attribute value
      */
-    Attribute(NodeImpl* impl, const Scalar& value);
+    Attribute(const String& name, const Scalar& value);
 
     /**
      * @brief destructor

@@ -31,9 +31,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-MemoryNodeImpl::MemoryNodeImpl(const String& name)
-        : name_(name)
-        , parent_(0)
+MemoryNodeImpl::MemoryNodeImpl(Node* front)
+        : NodeImpl(front)
         , children_() {
 }
 
@@ -41,27 +40,10 @@ MemoryNodeImpl::~MemoryNodeImpl() {
 
 }
 
-Group*
-MemoryNodeImpl::do_create_group(const String& name) {
-    auto_ptr<NodeImpl> impl(new MemoryNodeImpl(name));
-    auto_ptr<Group> group(new Group(impl.release()));
-
-    return group.release();
-}
-
-Attribute*
-MemoryNodeImpl::do_create_attribute(const String& name,
-                                    const Scalar& value) {
-    auto_ptr<NodeImpl> impl(new MemoryNodeImpl(name));
-    auto_ptr<Attribute> attr(new Attribute(impl.release(), value));
-    
-    return attr.release();
-}
-
 Node&
 MemoryNodeImpl::do_add_child(Node* _node) {
     auto_ptr<Node> node(_node);
-    static_cast<MemoryNodeImpl&>(node->impl()).parent_ = front();
+    node->impl(new MemoryNodeImpl());
     children_.push_back(node);
     return children_.back();
 }

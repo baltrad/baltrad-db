@@ -46,9 +46,6 @@ class NodeIterator;
  *
  * A node is a single element in the ODIM_H5 hirerchy. It has a name which
  * is unique among the children of one parent.
- *
- * A node can be associated with one parent only, so reassociating a node is
- * logically equivalent to moving it.
  */
 class Node : public boost::noncopyable {
   public:
@@ -57,25 +54,36 @@ class Node : public boost::noncopyable {
 
     /**
      * @brief constructor
-     * @param impl implementation for this node (this node takes ownership)
-     * @throw value_error if impl is null
+     * @param name name of this node
+     *
+     * the node has no parent and no implementation
      */
-    Node(NodeImpl* impl);
+    Node(const String& name);
 
     /**
      * @brief destructor
      */
     virtual ~Node();
+
+    bool has_impl() const { return impl_.get() != 0; }
     
-    const NodeImpl& impl() const { return *impl_; }
-    NodeImpl& impl() { return *impl_; }
+    NodeImpl& impl();
+    const NodeImpl& impl() const;
+    
+    /**
+     * @brief associate with impl
+     *
+     * ownership of @c impl is transfered
+     * impl.front() is set to this node
+     */
+    void impl(NodeImpl* impl);
     
     /**
      * @brief access node name
      *
      * forwards to NodeImpl::name()
      */
-    const String& name() const;
+    const String& name() const { return name_; }
     
     /**
      * @brief absolute path of this node
@@ -91,12 +99,14 @@ class Node : public boost::noncopyable {
      *
      * forwards to NodeImpl::parent()
      */
-    Node* parent();
+    Node* parent() { return parent_; }
     
     /**
      * @copydoc parent()
      */
-    const Node* parent() const;
+    const Node* parent() const { return parent_; }
+
+    void parent(Node* parent) { parent_ = parent; }
     
     /**
      * @brief parent node of type T
@@ -156,6 +166,8 @@ class Node : public boost::noncopyable {
      */
     Group& create_group(const String& name);
 
+    Node& add_child(Node* node);
+
     /**
      * @brief test for a child node
      * @param path path to the child, relative to this node
@@ -181,9 +193,7 @@ class Node : public boost::noncopyable {
      * @brief test if this node can have @c node as a child
      * @sa do_accepts_child
      */
-    bool accepts_child(const Node& node) const {
-        return do_accepts_child(node);
-    }
+    bool accepts_child(const Node& node) const;
     
     /**
      * @brief access children
@@ -230,6 +240,8 @@ class Node : public boost::noncopyable {
     virtual const File* do_file() const;
 
   private:
+    String name_;
+    Node* parent_;
     scoped_ptr<NodeImpl> impl_;
 };
 

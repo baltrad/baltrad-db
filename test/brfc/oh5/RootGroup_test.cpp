@@ -25,26 +25,25 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include "../common.hpp"
 #include "MockFile.hpp"
-#include "MockNodeImpl.hpp"
 
 namespace brfc {
 namespace oh5 {
 
 struct oh5_RootGroup_test : public ::testing::Test {
     oh5_RootGroup_test()
-            : root(new MockNodeImpl()) {
+            : root() {
     }
     
     RootGroup root;
 };
 
 TEST_F(oh5_RootGroup_test, test_accepts_child_Attribute) {
-    Attribute node(MockNodeImpl::create(), Scalar(1));
+    Attribute node("attr", Scalar(1));
     EXPECT_TRUE(root.accepts_child(node));
 }
 
 TEST_F(oh5_RootGroup_test, test_add_child_RootGroup) {
-    RootGroup node(MockNodeImpl::create());
+    RootGroup node;
     EXPECT_FALSE(root.accepts_child(node));
 }
 

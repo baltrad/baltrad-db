@@ -28,8 +28,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-Attribute::Attribute(NodeImpl* impl, const Scalar& value)
-        : Node(impl)
+Attribute::Attribute(const String& name, const Scalar& value)
+        : Node(name)
         , value_(value) {
 }
 

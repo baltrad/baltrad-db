@@ -29,8 +29,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-Group::Group(NodeImpl* impl)
-    : Node(impl) {
+Group::Group(const String& name)
+    : Node(name) {
 
 }
 
@@ -99,7 +99,7 @@ Group::get_or_create_group(const String& pathstr) {
     
     // create missing nodes
     while (iter != path.end()) {
-        last = &last->impl().create_group(*(iter++));
+        last = &last->create_group(*(iter++));
     }
 
     return *last;

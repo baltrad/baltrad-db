@@ -39,29 +39,33 @@ namespace oh5 {
 struct oh5_File_test : public testing::Test {
     oh5_File_test()
             : file()
-            , root(new MemoryNodeImpl(""))
-            , emptyroot(new MemoryNodeImpl(""))
-            , what(root.create_group("what")) {
+            , root()
+            , emptyroot()
+            , what() {
     }
 
     virtual void SetUp() {
+        root.impl(new MemoryNodeImpl());
+        emptyroot.impl(new MemoryNodeImpl());
+        what = &root.create_group("what");
+
         ON_CALL(file, do_root())
             .WillByDefault(ReturnRef(root));
 
-        what.create_attribute("object", Scalar("pvol"));
-        what.create_attribute("date", Scalar(Date(2000, 1, 2)));
-        what.create_attribute("time", Scalar(Time(12, 5)));
-        what.create_attribute("source", Scalar("WMO:02606"));
+        what->create_attribute("object", Scalar("pvol"));
+        what->create_attribute("date", Scalar(Date(2000, 1, 2)));
+        what->create_attribute("time", Scalar(Time(12, 5)));
+        what->create_attribute("source", Scalar("WMO:02606"));
     }
 
     ::testing::NiceMock<MockFile> file;
     RootGroup root, emptyroot;
-    Group& what;
+    Group* what;
 };
 
 TEST_F(oh5_File_test, test_group) {
     EXPECT_EQ(&root, file.group("/"));
-    EXPECT_EQ(&what, file.group("/what"));
+    EXPECT_EQ(what, file.group("/what"));
     EXPECT_FALSE(file.group("/what/source"));
     EXPECT_FALSE(file.group("/nx"));
 }
@@ -84,18 +88,18 @@ TEST_F(oh5_File_test, required_attribute_shortcuts_when_missing) {
 }
 
 TEST_F(oh5_File_test, what_date_conversion) {
-    what.attribute("date")->value(Scalar("20001213"));
+    what->attribute("date")->value(Scalar("20001213"));
     EXPECT_EQ(Date(2000, 12, 13), file.what_date());
 
-    what.attribute("date")->value(Scalar("foo"));
+    what->attribute("date")->value(Scalar("foo"));
     EXPECT_THROW(file.what_date(), value_error);
 }
 
 TEST_F(oh5_File_test, what_time_conversion) {
-    what.attribute("time")->value(Scalar("123456"));
+    what->attribute("time")->value(Scalar("123456"));
     EXPECT_EQ(Time(12, 34, 56), file.what_time());
 
-    what.attribute("time")->value(Scalar("bar"));
+    what->attribute("time")->value(Scalar("bar"));
     EXPECT_THROW(file.what_time(), value_error);
 }
 

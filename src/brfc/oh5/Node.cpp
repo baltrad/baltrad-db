@@ -31,16 +31,37 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-Node::Node(NodeImpl* impl)
+Node::Node(const String& name)
         : boost::noncopyable()
-        , impl_(impl) {
-    if (impl_.get() == 0)
-        throw value_error("null node impl");
-    impl_->front(this);
+        , name_(name)
+        , parent_(0)
+        , impl_(0) {
+    if (name.contains("/"))
+        throw value_error("invalid node name: " + name.to_std_string());
 }
 
 Node::~Node() {
 
+}
+
+NodeImpl&
+Node::impl() {
+    if (not has_impl())
+        throw std::runtime_error("no impl associated with node");
+    return *impl_;
+}
+
+const NodeImpl&
+Node::impl() const {
+    if (not has_impl())
+        throw std::runtime_error("no impl associated with node");
+    return *impl_;
+}
+
+void
+Node::impl(NodeImpl* impl) {
+    impl_.reset(impl);
+    impl_->front(this);
 }
 
 String
@@ -60,29 +81,26 @@ Node::path() const {
 
 Attribute&
 Node::create_attribute(const String& name, const Scalar& value) {
-    return impl().create_attribute(name, value);
+    auto_ptr<Attribute> node(new Attribute(name, value));
+    return static_cast<Attribute&>(add_child(node.release()));
 }
 
 Group&
 Node::create_group(const String& name) {
-    return impl().create_group(name);
+    auto_ptr<Group> node(new Group(name));
+    return static_cast<Group&>(add_child(node.release()));
 }
 
-const String&
-Node::name() const {
-    return impl().name();
-}
+Node&
+Node::add_child(Node* node) {
+    if (not accepts_child(*node))
+        throw value_error("node not accepted as child");
+    if (child(node->name()) != 0)
+        throw duplicate_entry(node->name().to_std_string());
 
-Node*
-Node::parent() {
-    return impl().parent();
+    node->parent(this);
+    return impl().add_child(node);
 }
-
-const Node*
-Node::parent() const {
-    return impl().parent();
-}
-
 
 bool
 Node::has_child(const String& path) const {
@@ -150,6 +168,11 @@ Node&
 Node::root() {
     const Node* self = const_cast<const Node*>(this);
     return const_cast<Node&>(self->root());
+}
+
+bool
+Node::accepts_child(const Node& node) const {
+    return do_accepts_child(node);
 }
 
 std::vector<const Node*>

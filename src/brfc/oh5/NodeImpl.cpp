@@ -23,9 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/RootGroup.hpp>
-
 namespace brfc {
 namespace oh5 {
 
@@ -33,38 +30,9 @@ NodeImpl::~NodeImpl() {
 
 }
 
-Group&
-NodeImpl::create_group(const String& name) {
-    auto_ptr<Node> node(do_create_group(name));
-    return static_cast<Group&>(add_child(node.release()));
-}
-
-Attribute&
-NodeImpl::create_attribute(const String& name, const Scalar& value) {
-    auto_ptr<Node> node(do_create_attribute(name, value));
-    return static_cast<Attribute&>(add_child(node.release()));
-}
-
 Node&
 NodeImpl::add_child(Node* _node) {
-    auto_ptr<Node> node(_node);
-    const String& name = node->name();
-
-    if (name.contains("/"))
-        throw value_error("invalid node name: " + name.to_std_string());
-
-    if (name == "" and not dynamic_cast<RootGroup*>(node.get()))
-        throw value_error("invalid_name");
-
-    if (not front()->accepts_child(*node))
-        throw value_error("node not accepted as child");
-
-    BOOST_FOREACH(const Node* child, children()) {
-        if (child->name() == name)
-            throw duplicate_entry(name.to_std_string());
-    }
-
-    return do_add_child(node.release());
+    return do_add_child(_node);
 }
 
 } // namespace oh5

@@ -26,10 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/MemoryNodeImpl.hpp>
 
 #include "../common.hpp"
-#include "MockNodeImpl.hpp"
-
-using ::testing::Return;
-using ::testing::ReturnRef;
 
 namespace brfc {
 namespace oh5 {
@@ -37,25 +33,19 @@ namespace oh5 {
 struct oh5_Attribute_test : public ::testing::Test {
   public:
     oh5_Attribute_test()
-            : attr(MockNodeImpl::create(), Scalar(1))
-            , impl(static_cast<MockNodeImpl&>(attr.impl()))
-            , name("attr") {
+            : attr("attr", Scalar(1)) {
     }
 
     virtual void SetUp() {
-        ON_CALL(impl, do_name())
-            .WillByDefault(ReturnRef(name));
-        ON_CALL(impl, do_parent())
-            .WillByDefault(Return((Node*)0));
+
     }
     
     Attribute attr;
-    MockNodeImpl& impl;
-    String name;
 };
 
 TEST_F(oh5_Attribute_test, test_full_name) {
-    RootGroup root(new MemoryNodeImpl(""));
+    RootGroup root;
+    root.impl(new MemoryNodeImpl());
 
     Attribute& a1 = root.create_attribute("a1", Scalar(1));
     EXPECT_EQ("a1", a1.full_name());
@@ -66,12 +56,12 @@ TEST_F(oh5_Attribute_test, test_full_name) {
 }
 
 TEST_F(oh5_Attribute_test, test_accepts_child_Attribute) {
-    Attribute node(MockNodeImpl::create(), Scalar(1));
+    Attribute node("attr", Scalar(1));
     EXPECT_FALSE(attr.accepts_child(node));
 }
 
 TEST_F(oh5_Attribute_test, test_accepts_child_RootGroup) {
-    RootGroup node(MockNodeImpl::create());
+    RootGroup node;
     EXPECT_FALSE(attr.accepts_child(node));
 }
 

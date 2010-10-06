@@ -32,7 +32,7 @@ namespace oh5 {
  */
 class DataSet : public Node {
   public:
-    explicit DataSet(NodeImpl* impl);
+    explicit DataSet(const String& name);
 
     virtual ~DataSet();
 

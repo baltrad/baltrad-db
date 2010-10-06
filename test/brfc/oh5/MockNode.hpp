@@ -31,9 +31,8 @@ namespace oh5 {
 
 class MockNode : public Node {
   public:
-    MockNode()
-            : Node(MockNodeImpl::create()) {
-        
+    MockNode(const String& name)
+            : Node(name) {
     }
 
     MOCK_CONST_METHOD1(do_accepts_child, bool(const Node&));

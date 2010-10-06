@@ -34,24 +34,25 @@ namespace oh5 {
 
 struct oh5_Group_test : public ::testing::Test {
     oh5_Group_test()
-            : g(new MemoryNodeImpl("g")) {
+            : g("g") {
+        g.impl(new MemoryNodeImpl());
     }
     
     Group g;
 };
 
 TEST_F(oh5_Group_test, test_accepts_child_Attribute) {
-    Attribute node(MockNodeImpl::create(), Scalar(1));
+    Attribute node("attr", Scalar(1));
     EXPECT_TRUE(g.accepts_child(node));
 }
 
 TEST_F(oh5_Group_test, test_accepts_child_Group) {
-    Group node(MockNodeImpl::create());
+    Group node("group");
     EXPECT_TRUE(g.accepts_child(node));
 }
 
 TEST_F(oh5_Group_test, test_accepts_child_RootGroup) {
-    RootGroup node(MockNodeImpl::create());
+    RootGroup node;
     EXPECT_FALSE(g.accepts_child(node));
 }
 
