@@ -38,8 +38,8 @@ CREATE TABLE bdb_files (
 	n_time TIME WITHOUT TIME ZONE NOT NULL, 
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 UNIQUE (unique_id, source_id), 
-	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
+	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id), 
+	 UNIQUE (unique_id, source_id)
 )
 
 ;
@@ -66,50 +66,6 @@ CREATE TABLE bdb_groups (
 
 ;
 
-CREATE TABLE bdb_attribute_values_int (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value BIGINT NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_attribute_values_real (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value DOUBLE PRECISION NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id)
-)
-
-;
-
-CREATE TABLE bdb_attribute_values_date (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value DATE NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_attribute_values_bool (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value BOOLEAN NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
 CREATE TABLE bdb_invalid_attributes (
 	name TEXT NOT NULL, 
 	group_id INTEGER NOT NULL, 
@@ -119,21 +75,15 @@ CREATE TABLE bdb_invalid_attributes (
 
 ;
 
-CREATE TABLE bdb_attribute_values_str (
+CREATE TABLE bdb_attribute_values (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
-	value TEXT NOT NULL, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_attribute_values_time (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value TIME WITHOUT TIME ZONE NOT NULL, 
+	value_int BIGINT, 
+	value_str TEXT, 
+	value_real DOUBLE PRECISION, 
+	value_bool BOOLEAN, 
+	value_date TIME WITHOUT TIME ZONE, 
+	value_time DATE, 
 	PRIMARY KEY (attribute_id, group_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
 	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
@@ -150,116 +100,116 @@ CREATE TABLE bdb_source_kvs (
 )
 
 ;
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (1, 'Conventions', 'string', 'bdb_attribute_values_str', 'value', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (1, 'Conventions', 'string', 'bdb_attribute_values', 'value_str', True);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (2, 'what/object', 'string', 'bdb_files', 'object', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (3, 'what/version', 'string', 'bdb_attribute_values_str', 'value', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (3, 'what/version', 'string', 'bdb_attribute_values', 'value_str', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (4, 'what/date', 'date', 'bdb_files', 'n_date', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (5, 'what/time', 'time', 'bdb_files', 'n_time', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (6, 'what/source', 'string', 'bdb_attribute_values_str', 'value', True);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (7, 'where/lon', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (8, 'where/lat', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (9, 'where/height', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (10, 'where/elangle', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (11, 'where/nbins', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (12, 'where/rstart', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (13, 'where/rscale', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (14, 'where/nrays', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (15, 'where/a1gate', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (16, 'where/startaz', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (17, 'where/stopaz', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (18, 'where/projdef', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (19, 'where/xsize', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (20, 'where/ysize', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (21, 'where/xscale', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (22, 'where/yscale', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (23, 'where/LL_lon', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (24, 'where/LL_lat', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (25, 'where/UL_lon', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (26, 'where/UL_lat', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (27, 'where/UR_lon', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (28, 'where/UR_lat', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (29, 'where/LR_lon', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (30, 'where/LR_lat', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (31, 'where/minheight', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (32, 'where/maxheight', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (33, 'where/az_angle', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (34, 'where/angles', 'sequence', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (35, 'where/range', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (36, 'where/start_lon', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (37, 'where/start_lat', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (38, 'where/stop_lon', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (39, 'where/stop_lat', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (40, 'where/levels', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (41, 'where/interval', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (42, 'how/task', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (43, 'how/startepochs', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (44, 'how/endepochs', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (45, 'how/system', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (46, 'how/software', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (47, 'how/sw_version', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (48, 'how/zr_a', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (49, 'how/zr_b', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (50, 'how/kr_a', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (51, 'how/kr_b', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (52, 'how/simulated', 'bool', 'bdb_attribute_values_bool', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (53, 'how/beamwidth', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (54, 'how/wavelength', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (55, 'how/rpm', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (56, 'how/pulsewidth', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (57, 'how/lowprf', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (58, 'how/highprf', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (59, 'how/azmethod', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (60, 'how/binmethod', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (61, 'how/azangles', 'sequence', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (62, 'how/elangles', 'sequence', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (63, 'how/aztimes', 'sequence', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (64, 'how/angles', 'sequence', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (65, 'how/arotation', 'sequence', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (66, 'how/camethod', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (67, 'how/nodes', 'sequence', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (68, 'how/ACCnum', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (69, 'how/minrange', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (70, 'how/maxrange', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (71, 'how/NI', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (72, 'how/dealiased', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (73, 'how/pointaccEL', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (74, 'how/pointaccAZ', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (75, 'how/malfunc', 'bool', 'bdb_attribute_values_bool', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (76, 'how/radar_msg', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (77, 'how/radhoriz', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (78, 'how/MDS', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (79, 'how/OUR', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (80, 'how/Dclutter', 'sequence', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (81, 'how/comment', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (82, 'how/SQI', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (83, 'how/CSR', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (84, 'how/LOG', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (85, 'how/VPRCorr', 'bool', 'bdb_attribute_values_bool', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (86, 'how/freeze', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (87, 'how/min', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (88, 'how/max', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (89, 'how/step', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (90, 'how/levels', 'int', 'bdb_attribute_values_int', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (91, 'how/peakpwr', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (92, 'how/avgpwr', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (93, 'how/dynrange', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (94, 'how/RAC', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (95, 'how/BBC', 'bool', 'bdb_attribute_values_bool', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (96, 'how/PAC', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (97, 'how/S2N', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (98, 'how/polarization', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (99, 'what/product', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (100, 'what/quantity', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (101, 'what/startdate', 'date', 'bdb_attribute_values_date', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (102, 'what/starttime', 'time', 'bdb_attribute_values_time', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (103, 'what/enddate', 'date', 'bdb_attribute_values_date', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (104, 'what/endtime', 'time', 'bdb_attribute_values_time', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (105, 'what/gain', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (106, 'what/offset', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (107, 'what/nodata', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (108, 'what/undetect', 'real', 'bdb_attribute_values_real', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (109, 'CLASS', 'string', 'bdb_attribute_values_str', 'value', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (110, 'IMAGE_VERSION', 'string', 'bdb_attribute_values_str', 'value', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (6, 'what/source', 'string', 'bdb_attribute_values', 'value_str', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (7, 'where/lon', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (8, 'where/lat', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (9, 'where/height', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (10, 'where/elangle', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (11, 'where/nbins', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (12, 'where/rstart', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (13, 'where/rscale', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (14, 'where/nrays', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (15, 'where/a1gate', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (16, 'where/startaz', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (17, 'where/stopaz', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (18, 'where/projdef', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (19, 'where/xsize', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (20, 'where/ysize', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (21, 'where/xscale', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (22, 'where/yscale', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (23, 'where/LL_lon', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (24, 'where/LL_lat', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (25, 'where/UL_lon', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (26, 'where/UL_lat', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (27, 'where/UR_lon', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (28, 'where/UR_lat', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (29, 'where/LR_lon', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (30, 'where/LR_lat', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (31, 'where/minheight', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (32, 'where/maxheight', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (33, 'where/az_angle', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (34, 'where/angles', 'sequence', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (35, 'where/range', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (36, 'where/start_lon', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (37, 'where/start_lat', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (38, 'where/stop_lon', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (39, 'where/stop_lat', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (40, 'where/levels', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (41, 'where/interval', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (42, 'how/task', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (43, 'how/startepochs', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (44, 'how/endepochs', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (45, 'how/system', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (46, 'how/software', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (47, 'how/sw_version', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (48, 'how/zr_a', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (49, 'how/zr_b', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (50, 'how/kr_a', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (51, 'how/kr_b', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (52, 'how/simulated', 'bool', 'bdb_attribute_values', 'value_bool', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (53, 'how/beamwidth', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (54, 'how/wavelength', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (55, 'how/rpm', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (56, 'how/pulsewidth', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (57, 'how/lowprf', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (58, 'how/highprf', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (59, 'how/azmethod', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (60, 'how/binmethod', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (61, 'how/azangles', 'sequence', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (62, 'how/elangles', 'sequence', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (63, 'how/aztimes', 'sequence', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (64, 'how/angles', 'sequence', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (65, 'how/arotation', 'sequence', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (66, 'how/camethod', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (67, 'how/nodes', 'sequence', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (68, 'how/ACCnum', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (69, 'how/minrange', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (70, 'how/maxrange', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (71, 'how/NI', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (72, 'how/dealiased', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (73, 'how/pointaccEL', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (74, 'how/pointaccAZ', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (75, 'how/malfunc', 'bool', 'bdb_attribute_values', 'value_bool', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (76, 'how/radar_msg', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (77, 'how/radhoriz', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (78, 'how/MDS', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (79, 'how/OUR', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (80, 'how/Dclutter', 'sequence', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (81, 'how/comment', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (82, 'how/SQI', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (83, 'how/CSR', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (84, 'how/LOG', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (85, 'how/VPRCorr', 'bool', 'bdb_attribute_values', 'value_bool', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (86, 'how/freeze', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (87, 'how/min', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (88, 'how/max', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (89, 'how/step', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (90, 'how/levels', 'int', 'bdb_attribute_values', 'value_int', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (91, 'how/peakpwr', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (92, 'how/avgpwr', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (93, 'how/dynrange', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (94, 'how/RAC', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (95, 'how/BBC', 'bool', 'bdb_attribute_values', 'value_bool', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (96, 'how/PAC', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (97, 'how/S2N', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (98, 'how/polarization', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (99, 'what/product', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (100, 'what/quantity', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (101, 'what/startdate', 'date', 'bdb_attribute_values', 'value_date', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (102, 'what/starttime', 'time', 'bdb_attribute_values', 'value_time', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (103, 'what/enddate', 'date', 'bdb_attribute_values', 'value_date', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (104, 'what/endtime', 'time', 'bdb_attribute_values', 'value_time', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (105, 'what/gain', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (106, 'what/offset', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (107, 'what/nodata', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (108, 'what/undetect', 'real', 'bdb_attribute_values', 'value_real', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (109, 'CLASS', 'string', 'bdb_attribute_values', 'value_str', False);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (110, 'IMAGE_VERSION', 'string', 'bdb_attribute_values', 'value_str', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (111, 'file:id', 'int', 'bdb_files', 'id', True);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (112, 'what/source:name', 'string', 'bdb_sources', 'name', True);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (113, 'what/source:node', 'string', 'bdb_sources', 'name', True);

@@ -36,13 +36,7 @@ Model::Model()
         , groups(sql::Table::create("bdb_groups"))
         , attrs(sql::Table::create("bdb_attributes"))
         , invalid_attrs(sql::Table::create("bdb_invalid_attributes"))
-        , attrvals_int(sql::Table::create("bdb_attribute_values_int"))
-        , attrvals_str(sql::Table::create("bdb_attribute_values_str"))
-        , attrvals_real(sql::Table::create("bdb_attribute_values_real"))
-        , attrvals_bool(sql::Table::create("bdb_attribute_values_bool"))
-        , attrvals_date(sql::Table::create("bdb_attribute_values_date")) 
-        , attrvals_time(sql::Table::create("bdb_attribute_values_time")) {
-
+        , attrvals(sql::Table::create("bdb_attribute_values")) {
     sources->add_column("id");
     sources->add_column("name");
     
@@ -80,53 +74,22 @@ Model::Model()
     invalid_attrs->add_column("group_id");
     invalid_attrs->column("group_id")->references(groups->column("id"));
 
-    attrvals_int->add_column("attribute_id");
-    attrvals_int->add_column("group_id");
-    attrvals_int->add_column("value");
-    attrvals_int->column("attribute_id")->references(attrs->column("id"));
-    attrvals_int->column("group_id")->references(groups->column("id"));
-
-    attrvals_str->add_column("attribute_id");
-    attrvals_str->add_column("group_id");
-    attrvals_str->add_column("value");
-    attrvals_str->column("attribute_id")->references(attrs->column("id"));
-    attrvals_str->column("group_id")->references(groups->column("id"));
-
-    attrvals_real->add_column("attribute_id");
-    attrvals_real->add_column("group_id");
-    attrvals_real->add_column("value");
-    attrvals_real->column("attribute_id")->references(attrs->column("id"));
-    attrvals_real->column("group_id")->references(groups->column("id"));
-
-    attrvals_bool->add_column("attribute_id");
-    attrvals_bool->add_column("group_id");
-    attrvals_bool->add_column("value");
-    attrvals_bool->column("attribute_id")->references(attrs->column("id"));
-    attrvals_bool->column("group_id")->references(groups->column("id"));
-
-    attrvals_date->add_column("attribute_id");
-    attrvals_date->add_column("group_id");
-    attrvals_date->add_column("value");
-    attrvals_date->column("attribute_id")->references(attrs->column("id"));
-    attrvals_date->column("group_id")->references(groups->column("id"));
-
-    attrvals_time->add_column("attribute_id");
-    attrvals_time->add_column("group_id");
-    attrvals_time->add_column("value");
-    attrvals_time->column("attribute_id")->references(attrs->column("id"));
-    attrvals_time->column("group_id")->references(groups->column("id"));
+    attrvals->add_column("attribute_id");
+    attrvals->add_column("group_id");
+    attrvals->add_column("value_int");
+    attrvals->add_column("value_str");
+    attrvals->add_column("value_real");
+    attrvals->add_column("value_bool");
+    attrvals->add_column("value_date");
+    attrvals->add_column("value_time");
+    attrvals->column("attribute_id")->references(attrs->column("id"));
+    attrvals->column("group_id")->references(groups->column("id"));
 
     tables_.insert(std::make_pair(sources->name(), sources));
     tables_.insert(std::make_pair(source_kvs->name(), source_kvs));
     tables_.insert(std::make_pair(files->name(), files));
     tables_.insert(std::make_pair(groups->name(), groups));
-    tables_.insert(std::make_pair(attrvals_int->name(), attrvals_int));
-    tables_.insert(std::make_pair(attrvals_str->name(), attrvals_str));
-    tables_.insert(std::make_pair(attrvals_real->name(), attrvals_real));
-    tables_.insert(std::make_pair(attrvals_bool->name(), attrvals_bool));
-    tables_.insert(std::make_pair(attrvals_date->name(), attrvals_date));
-    tables_.insert(std::make_pair(attrvals_time->name(), attrvals_time));
-
+    tables_.insert(std::make_pair(attrvals->name(), attrvals));
 }
 
 sql::TablePtr

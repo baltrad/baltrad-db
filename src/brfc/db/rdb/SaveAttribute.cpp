@@ -89,7 +89,7 @@ SaveAttribute::valid_attribute_query(const oh5::Attribute& attr) {
     if (grp_id)
         stmt->value("group_id", xpr.int64_(grp_id.get()));
     stmt->value("attribute_id", xpr.int64_(mapping.id));
-    stmt->value("value", attr_sql_value(attr));
+    stmt->value(mapping.column->name(), attr_sql_value(attr));
 
     return stmt;
 }

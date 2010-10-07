@@ -116,61 +116,17 @@ invalid_attributes = Table("bdb_invalid_attributes", meta,
            nullable=False),
     PrimaryKeyConstraint("name", "group_id"))
 
-attribute_values_int = Table("bdb_attribute_values_int", meta,
+attribute_values = Table("bdb_attribute_values", meta,
     Column("attribute_id", Integer, ForeignKey(attributes.c.id),
            nullable=False),
     Column("group_id", Integer, nullable=False),
-    Column("value", Int64, nullable=False),
-    ForeignKeyConstraint(["group_id"], [groups.c.id],
-                         ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "group_id")
-)
+    Column("value_int", Int64),
+    Column("value_str", Text),
+    Column("value_real", Double),
+    Column("value_bool", Boolean),
+    Column("value_date", Time),
+    Column("value_time", Date),
 
-attribute_values_str = Table("bdb_attribute_values_str", meta,
-    Column("attribute_id", Integer, ForeignKey(attributes.c.id),
-           nullable=False),
-    Column("group_id", Integer, nullable=False),
-    Column("value", Text, nullable=False),
-    ForeignKeyConstraint(["group_id"], [groups.c.id],
-                         ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "group_id")
-)
-
-attribute_values_real = Table("bdb_attribute_values_real", meta,
-    Column("attribute_id", Integer, ForeignKey(attributes.c.id),
-           nullable=False),
-    Column("group_id", Integer, nullable=False),
-    Column("value", Double, nullable=False),
-    ForeignKeyConstraint(["group_id"], [groups.c.id],
-                         ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "group_id")
-)
-
-attribute_values_bool = Table("bdb_attribute_values_bool", meta,
-    Column("attribute_id", Integer, ForeignKey(attributes.c.id),
-           nullable=False),
-    Column("group_id", Integer, nullable=False),
-    Column("value", Boolean, nullable=False),
-    ForeignKeyConstraint(["group_id"], [groups.c.id],
-                         ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "group_id")
-)
-
-attribute_values_date = Table("bdb_attribute_values_date", meta,
-    Column("attribute_id", Integer, ForeignKey(attributes.c.id),
-           nullable=False),
-    Column("group_id", Integer, nullable=False),
-    Column("value", Date, nullable=False),
-    ForeignKeyConstraint(["group_id"], [groups.c.id],
-                         ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "group_id")
-)
-
-attribute_values_time = Table("bdb_attribute_values_time", meta,
-    Column("attribute_id", Integer, ForeignKey(attributes.c.id),
-           nullable=False),
-    Column("group_id", Integer, nullable=False),
-    Column("value", Time, nullable=False),
     ForeignKeyConstraint(["group_id"], [groups.c.id],
                          ondelete="CASCADE"),
     PrimaryKeyConstraint("attribute_id", "group_id")
@@ -180,15 +136,21 @@ old_meta = MetaData()
 
 Table("bdb_source_centres", old_meta)
 Table("bdb_source_radars", old_meta)
+Table("bdb_attribute_values_str", old_meta)
+Table("bdb_attribute_values_int", old_meta)
+Table("bdb_attribute_values_real", old_meta)
+Table("bdb_attribute_values_bool", old_meta)
+Table("bdb_attribute_values_date", old_meta)
+Table("bdb_attribute_values_time", old_meta)
 
 default_storage = {
-    "string":   attribute_values_str.c.value,
-    "int":      attribute_values_int.c.value,
-    "real":     attribute_values_real.c.value,
-    "sequence": attribute_values_str.c.value,
-    "bool":     attribute_values_bool.c.value,
-    "date":     attribute_values_date.c.value,
-    "time":     attribute_values_time.c.value,
+    "string":   attribute_values.c.value_str,
+    "int":      attribute_values.c.value_int,
+    "real":     attribute_values.c.value_real,
+    "sequence": attribute_values.c.value_str,
+    "bool":     attribute_values.c.value_bool,
+    "date":     attribute_values.c.value_date,
+    "time":     attribute_values.c.value_time,
 }
 
 special_storage = {
