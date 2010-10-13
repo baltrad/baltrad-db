@@ -65,12 +65,10 @@ class RdbHelper {
 
     const RdbNodeBackend& backend(const oh5::Node& node) const;
 
-    virtual void insert_group(oh5::Group& node);
+    virtual void insert_node(oh5::Node& node);
 
     virtual void insert_attribute(oh5::Attribute& node);
-
-    virtual void insert_node(oh5::Node& node);
-    
+ 
     virtual void insert_file(RdbFileEntry& entry,
                              const oh5::PhysicalFile& file);
 

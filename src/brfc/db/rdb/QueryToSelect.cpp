@@ -53,6 +53,8 @@ QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
         , model_(&Model::instance())
+        , attrs_(model_->nodes->alias("attrs"))
+        , pnode1_(model_->nodes->alias("pnode1"))
         , from_() {
     // always select from files and join sources
     Model* m = model_;
@@ -86,69 +88,101 @@ QueryToSelect::transform(const Query& query,
     return select;
 }
 
-void
-QueryToSelect::operator()(expr::Attribute& attr) {
-    String name = attr.name();
 
-    sql::SelectablePtr value_t;
-
-    if (name.starts_with("what/source:")) {
-        // alias
-        String key = name.split(":").at(1);
-        if (key == "name" or key == "node") {
-            push(model_->sources->column("name"));
-        } else {
-            String alias = "src_" + key;
-            value_t = model_->source_kvs->alias(alias);
-
-            if (not from_->contains(value_t)) {
-                from_ = from_->join(value_t,
-                                    xpr_.and_(xpr_.eq(value_t->column("source_id"),
-                                                      model_->sources->column("id")),
-                                              xpr_.eq(value_t->column("key"),
-                                                      xpr_.string(key))));
-            }
-            push(value_t->column("value"));
-        }
-        return;
-    }
-
-    // query table and column where this value can be found
-    Mapping mapping = mapper_->mapping(name);
-    value_t = mapping.column->selectable();
-    
-    if (not mapper_->is_specialized(name)) {
-        // try to join groups, they have to appear earlier in the join
-        join_groups(); 
-
-        // alias the table (this attribute is always searched on this table)
-        String alias = name.remove("/") + "_values";
-        value_t = value_t->alias(alias);
-
-        // join this table-alias if not already joined
-        if (not from_->contains(value_t)) {
-            from_ = from_->join(value_t,
-                                xpr_.and_(xpr_.eq(value_t->column("group_id"),
-                                                  model_->groups->column("id")),
-                                          xpr_.eq(value_t->column("attribute_id"),
-                                                  xpr_.int64_(mapping.id))));
-        }
+sql::ColumnPtr
+QueryToSelect::source_attr_column(expr::Attribute& attr) {
+    String key = attr.name().split(":").at(1);
+    if (key == "name" or key == "node") {
+        // sources is joined by default
+        // this attribute can be accessed at sources.name
+        return model_->sources->column("name");
     } else {
-        if (value_t->name() == "bdb_groups") {
-            join_groups();
+        String alias = "src_" + key;
+        sql::AliasPtr value_t = model_->source_kvs->alias(alias);
+
+        // join if missing
+        if (not from_->contains(value_t)) {
+            from_ = from_->outerjoin(value_t,
+                        xpr_.and_(
+                            xpr_.eq(
+                                value_t->column("source_id"),
+                                model_->sources->column("id")),
+                            xpr_.eq(
+                                value_t->column("key"),
+                                xpr_.string(key))
+                        )
+            );
         }
+
+        // this attribute can be accessed at src_$KEY.value
+        return value_t->column("value");
     }
+}
+
+sql::ColumnPtr
+QueryToSelect::specialized_attr_column(expr::Attribute& attr) {
+    Mapping mapping = mapper_->mapping(attr.name());
+    // specializations are only in bdb_files, already in from clause
+    return mapping.column;
+}
+
+sql::ColumnPtr
+QueryToSelect::plain_attr_column(expr::Attribute& attr) {
+    String name = attr.name();
+    Mapping mapping = mapper_->mapping(name);
+    
+    StringList path = name.split("/");
+    String attrname = path.take_last();
+    String groupname;
+    if (not path.empty())
+        groupname = path.take_last();
+
+    join_attrs(); 
+
+    // alias the table (this attribute is always searched on this alias)
+    String alias = name.remove("/") + "_values";
+    sql::AliasPtr value_t = model_->attrvals->alias(alias);
+    
+    // join this table-alias if not already joined
+    if (not from_->contains(value_t)) {
+        from_ = from_->outerjoin(value_t,
+                    value_t->column("node_id")->eq(attrs_->column("id"))
+                    ->and_(attrs_->column("name")->eq(xpr_.string(attrname)))
+                    ->and_(pnode1_->column("name")->eq(xpr_.string(groupname)))->parentheses()
+        );
+    }
+
     // replace the attribute with value column
-    push(value_t->column(mapping.column->name()));
+    return value_t->column(mapping.column->name());
 }
 
 void
-QueryToSelect::join_groups() {
-    // join groups if not already joined
-    if (not from_->contains(model_->groups)) {
-        from_ = from_->join(model_->groups,
-                            xpr_.eq(model_->groups->column("file_id"),
+QueryToSelect::operator()(expr::Attribute& attr) {
+    String name = attr.name();
+    
+    sql::ColumnPtr column;
+    if (name.starts_with("what/source:")) {
+        column = source_attr_column(attr);
+    } else if (mapper_->is_specialized(name)) {
+        column = specialized_attr_column(attr);
+    } else {
+        column = plain_attr_column(attr);
+    }
+
+    // replace the attribute with value column
+    push(column);
+}
+
+void
+QueryToSelect::join_attrs() {
+    // join attrs if not already joined
+    if (not from_->contains(attrs_)) {
+        from_ = from_->join(attrs_,
+                            xpr_.eq(attrs_->column("file_id"),
                                     model_->files->column("id")));
+        from_ = from_->join(pnode1_,
+                            xpr_.eq(pnode1_->column("id"),
+                                    attrs_->column("parent_id")));
     }
 }
 

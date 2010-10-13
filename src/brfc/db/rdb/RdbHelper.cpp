@@ -81,6 +81,16 @@ attr_sql_value(const oh5::Attribute& attr) {
     }
 }
 
+long long
+node_sql_type(const oh5::Node& node) {
+    if (dynamic_cast<const oh5::Group*>(&node) != 0)
+        return 1;
+    else if (dynamic_cast<const oh5::Attribute*>(&node) != 0)
+        return 2;
+    else
+        BRFC_ASSERT(false);
+}
+
 sql::ColumnPtr
 attr_sql_column(const oh5::Attribute& attr) {
     const Model& m = Model::instance();
@@ -138,44 +148,44 @@ RdbHelper::last_id(sql::Result& result) {
     } else if (dialect().has_feature(sql::Dialect::LAST_INSERT_ID)) {
         return conn().last_insert_id();
     } else {
-        throw db_error("could not determine inserted group id");
+        throw db_error("could not determine last inserted id");
     }
 }
 
 void
 RdbHelper::insert_node(oh5::Node& node) {
-    if (oh5::Group* grp = dynamic_cast<oh5::Group*>(&node)) {
-        insert_group(*grp);
-    } else if (oh5::Attribute* attr = dynamic_cast<oh5::Attribute*>(&node)) {
+    RdbFileEntry* file = dynamic_cast<RdbFileEntry*>(node.file());
+    BRFC_ASSERT(file != 0);
+
+    sql::InsertPtr qry = sql::Insert::create(m_.nodes);
+    if (dialect().has_feature(sql::Dialect::RETURNING))
+        qry->add_return(m_.nodes->column("id"));
+
+    const oh5::Node* parent = node.parent();
+    if (parent) {
+        long long parent_id = backend(*parent).id();
+        qry->value("parent_id", sql_.int64_(parent_id));
+    }
+
+    qry->value("type", sql_.int64_(node_sql_type(node)));
+    qry->value("file_id", sql_.int64_(file->id()));
+    qry->value("name", sql_.string(node.name()));
+
+    shared_ptr<sql::Result> result = conn().execute(*qry);
+
+    long long db_id = last_id(*result);
+    backend(node).id(db_id);
+
+    if (oh5::Attribute* attr = dynamic_cast<oh5::Attribute*>(&node)) {
         insert_attribute(*attr);
-    } else {
-        throw std::runtime_error("could not determine insert");
     }
 }
 
 void
 RdbHelper::insert_attribute(oh5::Attribute& attr) {
-    // XXX: checking for valid mapping should be eliminated
-    //
-    // this requires saving attributes as nodes in bdb_groups (to store
-    // the name, and dropping reference to bdb_attributes from
-    // bdb_attribute_values
-    //
-    // this would also change how attributes are queried for
-    if (not rdb().mapper().has(attr.full_name()))
-        return;
-
-    const Mapping& mapping = rdb().mapper().mapping(attr.full_name());
-    
     sql::InsertPtr qry = sql::Insert::create(m_.attrvals);
 
-    const oh5::Group* parent = attr.parent<oh5::Group>();
-    if (parent) {
-        long long parent_id = backend(*parent).id();
-        qry->value("group_id", sql_.int64_(parent_id));
-    }
-
-    qry->value("attribute_id", sql_.int64_(mapping.id));
+    qry->value("node_id", sql_.int64_(backend(attr).id()));
     qry->value(attr_sql_column(attr)->name(), attr_sql_value(attr));
 
     if (attr.value().type() == oh5::Scalar::STRING) {
@@ -238,32 +248,6 @@ RdbHelper::insert_file_content(RdbFileEntry& entry, const String& path) {
     entry.lo_id(lo->id());
 }
 
-
-
-void
-RdbHelper::insert_group(oh5::Group& group) {
-    RdbFileEntry* file = dynamic_cast<RdbFileEntry*>(group.file());
-    BRFC_ASSERT(file != 0);
-
-    sql::InsertPtr qry = sql::Insert::create(m_.groups);
-    if (dialect().has_feature(sql::Dialect::RETURNING))
-        qry->add_return(m_.groups->column("id"));
-
-    const oh5::Group* parent = group.parent<oh5::Group>();
-    if (parent) {
-        long long parent_id = backend(*parent).id();
-        qry->value("parent_id", sql_.int64_(parent_id));
-    }
-
-    qry->value("file_id", sql_.int64_(file->id()));
-    qry->value("name", sql_.string(group.name()));
-
-    shared_ptr<sql::Result> result = conn().execute(*qry);
-
-    long long db_id = last_id(*result);
-    backend(group).id(db_id);
-}
-
 void
 RdbHelper::load_file(RdbFileEntry& entry) {
 
@@ -272,12 +256,12 @@ RdbHelper::load_file(RdbFileEntry& entry) {
 long long
 RdbHelper::select_root_id(const RdbFileEntry& entry) {
     sql::SelectPtr qry = sql::Select::create();
-    qry->from(m_.groups);
-    qry->what(m_.groups->column("id"));
+    qry->from(m_.nodes);
+    qry->what(m_.nodes->column("id"));
     qry->where(
         sql_.and_(
-            m_.groups->column("file_id")->eq(sql_.int64_(entry.id())),
-            m_.groups->column("name")->eq(sql_.string(""))
+            m_.nodes->column("file_id")->eq(sql_.int64_(entry.id())),
+            m_.nodes->column("name")->eq(sql_.string(""))
         )
     );
 
@@ -335,47 +319,52 @@ RdbHelper::select_source(long long id) {
 
 void
 RdbHelper::load_children(oh5::Node& node) {
-    // query child groups
     sql::SelectPtr qry = sql::Select::create();
     
-    qry->from(m_.groups);
-    qry->what(m_.groups->column("id"));
-    qry->what(m_.groups->column("name"));
-
-    long long id = backend(node).id();
-
-    qry->where(m_.groups->column("parent_id")->eq(sql_.int64_(id)));
-
-    shared_ptr<sql::Result> r = conn().execute(*qry);
-
-    while (r->next()) {
-        const String& name = r->value_at("name").string();
-        long long id = r->value_at("id").int64_();
-        oh5::Group& grp = node.create_group(name);
-        RdbNodeBackend& backend = static_cast<RdbNodeBackend&>(grp.backend());
-        backend.id(id);
-        backend.loaded(false);
-    }
-    
-    // query child attributes
-    qry = sql::Select::create();
-    qry->from(m_.attrvals->join(m_.attrs));
-    qry->what(m_.attrs->column("name"));
-    qry->what(m_.attrs->column("storage_column"));
+    qry->from(m_.nodes->join(m_.attrvals));
+    qry->what(m_.nodes->column("id"));
+    qry->what(m_.nodes->column("name"));
+    qry->what(m_.nodes->column("type"));
     qry->what(m_.attrvals->column("value_int"));
     qry->what(m_.attrvals->column("value_str"));
     qry->what(m_.attrvals->column("value_real"));
     qry->what(m_.attrvals->column("value_bool"));
     qry->what(m_.attrvals->column("value_date"));
     qry->what(m_.attrvals->column("value_time"));
-    qry->where(m_.attrvals->column("group_id")->eq(sql_.int64_(id)));
-    r = conn().execute(*qry);
+
+    long long id = backend(node).id();
+
+    qry->where(m_.nodes->column("parent_id")->eq(sql_.int64_(id)));
+
+    shared_ptr<sql::Result> r = conn().execute(*qry);
 
     while (r->next()) {
         const String& name = r->value_at("name").string();
-        const String& value_col = r->value_at("storage_column").string();
-        const Variant& value = r->value_at(value_col);
-        node.create_attribute(name, variant_to_oh5_scalar(value));
+        long long id = r->value_at("id").int64_();
+        long long type = r->value_at("type").int64_();
+
+        oh5::Node* child = 0;
+        if (type == 1) { // GROUP
+            child = &node.create_group(name);
+        } else if (type == 2) { // ATTRIBUTE
+            oh5::Scalar value(0);
+            if (not r->value_at("value_str").is_null()) {
+                value = oh5::Scalar(r->value_at("value_str").string());
+            } else if (not r->value_at("value_int").is_null()) {
+                value = oh5::Scalar(r->value_at("value_int").int64_());
+            } else if (not r->value_at("value_real").is_null()) {
+                value = oh5::Scalar(r->value_at("value_real").double_());
+            } else {
+                BRFC_ASSERT(false);
+            }
+            child = &node.create_attribute(name, value);
+        } else {
+            BRFC_ASSERT(false);
+        }
+
+        RdbNodeBackend& backend = static_cast<RdbNodeBackend&>(child->backend());
+        backend.id(id);
+        backend.loaded(false);
     }
 }
 

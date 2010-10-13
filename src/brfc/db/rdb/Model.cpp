@@ -33,9 +33,8 @@ Model::Model()
         , source_kvs(sql::Table::create("bdb_source_kvs"))
         , files(sql::Table::create("bdb_files"))
         , file_content(sql::Table::create("bdb_file_content"))
-        , groups(sql::Table::create("bdb_groups"))
+        , nodes(sql::Table::create("bdb_nodes"))
         , attrs(sql::Table::create("bdb_attributes"))
-        , invalid_attrs(sql::Table::create("bdb_invalid_attributes"))
         , attrvals(sql::Table::create("bdb_attribute_values")) {
     sources->add_column("id");
     sources->add_column("name");
@@ -57,11 +56,12 @@ Model::Model()
     file_content->add_column("file_id");
     file_content->add_column("lo_id");
 
-    groups->add_column("id");
-    groups->add_column("parent_id");
-    groups->add_column("name");
-    groups->add_column("file_id");
-    groups->column("file_id")->references(files->column("id"));
+    nodes->add_column("id");
+    nodes->add_column("parent_id");
+    nodes->add_column("name");
+    nodes->add_column("type");
+    nodes->add_column("file_id");
+    nodes->column("file_id")->references(files->column("id"));
 
     attrs->add_column("id");
     attrs->add_column("name");
@@ -70,25 +70,19 @@ Model::Model()
     attrs->add_column("storage_column");
     attrs->add_column("ignore_in_hash");
 
-    invalid_attrs->add_column("name");
-    invalid_attrs->add_column("group_id");
-    invalid_attrs->column("group_id")->references(groups->column("id"));
-
-    attrvals->add_column("attribute_id");
-    attrvals->add_column("group_id");
+    attrvals->add_column("node_id");
     attrvals->add_column("value_int");
     attrvals->add_column("value_str");
     attrvals->add_column("value_real");
     attrvals->add_column("value_bool");
     attrvals->add_column("value_date");
     attrvals->add_column("value_time");
-    attrvals->column("attribute_id")->references(attrs->column("id"));
-    attrvals->column("group_id")->references(groups->column("id"));
+    attrvals->column("node_id")->references(nodes->column("id"));
 
     tables_.insert(std::make_pair(sources->name(), sources));
     tables_.insert(std::make_pair(source_kvs->name(), source_kvs));
     tables_.insert(std::make_pair(files->name(), files));
-    tables_.insert(std::make_pair(groups->name(), groups));
+    tables_.insert(std::make_pair(nodes->name(), nodes));
     tables_.insert(std::make_pair(attrvals->name(), attrvals));
 }
 

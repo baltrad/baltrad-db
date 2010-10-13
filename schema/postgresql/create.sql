@@ -1,8 +1,13 @@
 
-CREATE TABLE bdb_attribute_groups (
+CREATE TABLE bdb_attributes (
 	id SERIAL NOT NULL, 
-	name INTEGER NOT NULL, 
-	PRIMARY KEY (id)
+	name TEXT NOT NULL, 
+	converter TEXT NOT NULL, 
+	storage_table TEXT NOT NULL, 
+	storage_column TEXT NOT NULL, 
+	ignore_in_hash BOOLEAN NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (name)
 )
 
 ;
@@ -25,8 +30,8 @@ CREATE TABLE bdb_files (
 	n_time TIME WITHOUT TIME ZONE NOT NULL, 
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id), 
-	 UNIQUE (unique_id, source_id)
+	 UNIQUE (unique_id, source_id), 
+	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
 )
 
 ;
@@ -41,23 +46,29 @@ CREATE TABLE bdb_file_content (
 ;
 CREATE RULE remove_lo AS ON DELETE TO bdb_file_content DO SELECT lo_unlink(OLD.lo_id);
 
-CREATE TABLE bdb_groups (
+CREATE TABLE bdb_nodes (
 	id SERIAL NOT NULL, 
 	parent_id INTEGER, 
 	name TEXT NOT NULL, 
+	type INTEGER, 
 	file_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(parent_id) REFERENCES bdb_groups (id), 
+	 FOREIGN KEY(parent_id) REFERENCES bdb_nodes (id), 
 	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE
 )
 
 ;
 
-CREATE TABLE bdb_invalid_attributes (
-	name TEXT NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	PRIMARY KEY (name, group_id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
+CREATE TABLE bdb_attribute_values (
+	node_id INTEGER NOT NULL, 
+	value_int BIGINT, 
+	value_str TEXT, 
+	value_real DOUBLE PRECISION, 
+	value_bool BOOLEAN, 
+	value_date DATE, 
+	value_time TIME WITHOUT TIME ZONE, 
+	PRIMARY KEY (node_id), 
+	 FOREIGN KEY(node_id) REFERENCES bdb_nodes (id) ON DELETE CASCADE
 )
 
 ;
@@ -68,35 +79,6 @@ CREATE TABLE bdb_source_kvs (
 	value VARCHAR NOT NULL, 
 	PRIMARY KEY (source_id, key), 
 	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
-)
-
-;
-
-CREATE TABLE bdb_attributes (
-	id SERIAL NOT NULL, 
-	name TEXT NOT NULL, 
-	converter TEXT NOT NULL, 
-	storage_table TEXT NOT NULL, 
-	storage_column TEXT NOT NULL, 
-	ignore_in_hash BOOLEAN NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (name)
-)
-
-;
-
-CREATE TABLE bdb_attribute_values (
-	attribute_id INTEGER NOT NULL, 
-	group_id INTEGER NOT NULL, 
-	value_int BIGINT, 
-	value_str TEXT, 
-	value_real DOUBLE PRECISION, 
-	value_bool BOOLEAN, 
-	value_date DATE, 
-	value_time TIME WITHOUT TIME ZONE, 
-	PRIMARY KEY (attribute_id, group_id), 
-	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
-	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
 )
 
 ;

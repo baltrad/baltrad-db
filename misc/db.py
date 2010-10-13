@@ -87,18 +87,14 @@ DDL("CREATE RULE remove_lo AS ON DELETE TO %(table)s "
         "DO SELECT lo_unlink(OLD.lo_id)",
     on="postgres").execute_at("after-create", file_content)
 
-groups = Table("bdb_groups", meta,
+nodes = Table("bdb_nodes", meta,
     Column("id", Integer, primary_key=True),
-    Column("parent_id", Integer, ForeignKey("bdb_groups.id")),
+    Column("parent_id", Integer, ForeignKey("bdb_nodes.id")),
     Column("name", Text, nullable=False),
+    Column("type", Integer), # 1 - group, 2 - attribute
     Column("file_id", Integer, nullable=False),
     ForeignKeyConstraint(["file_id"], [files.c.id],
                          ondelete="CASCADE")
-)
-
-attribute_groups = Table("bdb_attribute_groups", meta,
-    Column("id", Integer, primary_key=True),
-    Column("name", Integer, nullable=False)
 )
 
 attributes = Table("bdb_attributes", meta,
@@ -110,38 +106,18 @@ attributes = Table("bdb_attributes", meta,
     Column("ignore_in_hash", Boolean, nullable=False, default=False)
 )
 
-invalid_attributes = Table("bdb_invalid_attributes", meta,
-    Column("name", Text, nullable=False),
-    Column("group_id", Integer, ForeignKey(groups.c.id, ondelete="CASCADE"),
-           nullable=False),
-    PrimaryKeyConstraint("name", "group_id"))
-
 attribute_values = Table("bdb_attribute_values", meta,
-    Column("attribute_id", Integer, ForeignKey(attributes.c.id),
-           nullable=False),
-    Column("group_id", Integer, nullable=False),
+    Column("node_id", Integer, nullable=False),
     Column("value_int", Int64),
     Column("value_str", Text),
     Column("value_real", Double),
     Column("value_bool", Boolean),
     Column("value_date", Date),
     Column("value_time", Time),
-
-    ForeignKeyConstraint(["group_id"], [groups.c.id],
+    ForeignKeyConstraint(["node_id"], [nodes.c.id],
                          ondelete="CASCADE"),
-    PrimaryKeyConstraint("attribute_id", "group_id")
+    PrimaryKeyConstraint("node_id"),
 )
-
-old_meta = MetaData()
-
-Table("bdb_source_centres", old_meta)
-Table("bdb_source_radars", old_meta)
-Table("bdb_attribute_values_str", old_meta)
-Table("bdb_attribute_values_int", old_meta)
-Table("bdb_attribute_values_real", old_meta)
-Table("bdb_attribute_values_bool", old_meta)
-Table("bdb_attribute_values_date", old_meta)
-Table("bdb_attribute_values_time", old_meta)
 
 default_storage = {
     "string":   attribute_values.c.value_str,
@@ -516,7 +492,6 @@ def main():
     populate_attributes_table(engine)
     populate_sources_table(engine)
     executor.write_content(os.path.join(outdir, dialect_name, "create.sql"))
-    old_meta.drop_all(bind=engine)
     meta.drop_all(bind=engine)
     executor.write_content(os.path.join(outdir, dialect_name, "drop.sql"))
     

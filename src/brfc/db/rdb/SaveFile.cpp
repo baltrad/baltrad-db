@@ -44,7 +44,7 @@ SaveFile::SaveFile(RdbFileEntry& entry)
 
 void
 SaveFile::operator()(const oh5::RootGroup& root) {
-    helper_.insert_group(entry_.root());
+    helper_.insert_node(entry_.root());
 }
 
 void

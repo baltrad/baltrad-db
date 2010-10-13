@@ -37,9 +37,8 @@ class Model {
     sql::TablePtr source_kvs;
     sql::TablePtr files;
     sql::TablePtr file_content;
-    sql::TablePtr groups;
+    sql::TablePtr nodes;
     sql::TablePtr attrs;
-    sql::TablePtr invalid_attrs;
     sql::TablePtr attrvals;
 
     sql::TablePtr table_by_name(const String& name) const;

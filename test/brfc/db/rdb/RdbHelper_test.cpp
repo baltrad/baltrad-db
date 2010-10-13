@@ -95,22 +95,15 @@ TEST_P(db_rdb_RdbHelper_test, test_insert_file_content) {
     EXPECT_NO_THROW(db->conn().commit());
 }
 
-TEST_P(db_rdb_RdbHelper_test, test_insert_group) {
+TEST_P(db_rdb_RdbHelper_test, test_insert_node) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
 
     oh5::Group& grp = entry.root();
-    EXPECT_NO_THROW(helper.insert_group(grp));
+    EXPECT_NO_THROW(helper.insert_node(grp));
     EXPECT_GT(helper.backend(grp).id(), 0);
     EXPECT_TRUE(helper.backend(grp).loaded());
 
-    EXPECT_ANY_THROW(helper.insert_group(file.root()));
-}
-
-TEST_P(db_rdb_RdbHelper_test, test_insert_attribute) {
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
-
-    oh5::Group& grp = entry.root();
-
+    EXPECT_ANY_THROW(helper.insert_node(file.root()));
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1

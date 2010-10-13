@@ -99,15 +99,21 @@ class QueryToSelect {
     void push(sql::ExpressionPtr p);
 
     /**
-     * @brief join "groups" table if not already joined
+     * @brief join attributes if not already joined
      */
-    void join_groups();
+    void join_attrs();
+
+    sql::ColumnPtr source_attr_column(expr::Attribute& attr);
+    sql::ColumnPtr specialized_attr_column(expr::Attribute& attr);
+    sql::ColumnPtr plain_attr_column(expr::Attribute& attr);
 
   private:
     const AttributeMapper* mapper_;
     sql::Factory xpr_;
     std::vector<sql::ExpressionPtr> stack_;
     Model* model_;
+    sql::AliasPtr attrs_;
+    sql::AliasPtr pnode1_;
     sql::JoinPtr from_;
 };
 
