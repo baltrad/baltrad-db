@@ -59,13 +59,13 @@ TestRDB::drop() {
 
 void
 TestRDB::clean() {
-    connection().execute(String("DELETE FROM bdb_files"));
+    conn().execute(String("DELETE FROM bdb_files"));
 }
 
 StringList
 TestRDB::load_queries(const String& filename) {
     fs::path qf_path = fs::path(schema_dir_)
-                       / connection().dialect().name().to_utf8()
+                       / conn().dialect().name().to_utf8()
                        / filename.to_utf8();
     
     std::ifstream ifs(qf_path.string().c_str(), std::ios::binary);
@@ -85,14 +85,14 @@ TestRDB::load_queries(const String& filename) {
 void
 TestRDB::exec_queries_from(const String& file) {
     const StringList& queries = load_queries(file);
-    connection().begin();
+    conn().begin();
     try {
         BOOST_FOREACH(const String& stmt, queries) {
-            connection().execute(stmt);
+            conn().execute(stmt);
         }
-        connection().commit();
+        conn().commit();
     } catch (...) {
-        connection().rollback();
+        conn().rollback();
         throw;
     }
 }

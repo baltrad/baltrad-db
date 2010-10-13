@@ -7,19 +7,6 @@ CREATE TABLE bdb_attribute_groups (
 
 ;
 
-CREATE TABLE bdb_attributes (
-	id SERIAL NOT NULL, 
-	name TEXT NOT NULL, 
-	converter TEXT NOT NULL, 
-	storage_table TEXT NOT NULL, 
-	storage_column TEXT NOT NULL, 
-	ignore_in_hash BOOLEAN NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (name)
-)
-
-;
-
 CREATE TABLE bdb_sources (
 	id SERIAL NOT NULL, 
 	name TEXT NOT NULL, 
@@ -75,6 +62,29 @@ CREATE TABLE bdb_invalid_attributes (
 
 ;
 
+CREATE TABLE bdb_source_kvs (
+	source_id INTEGER, 
+	key VARCHAR NOT NULL, 
+	value VARCHAR NOT NULL, 
+	PRIMARY KEY (source_id, key), 
+	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
+)
+
+;
+
+CREATE TABLE bdb_attributes (
+	id SERIAL NOT NULL, 
+	name TEXT NOT NULL, 
+	converter TEXT NOT NULL, 
+	storage_table TEXT NOT NULL, 
+	storage_column TEXT NOT NULL, 
+	ignore_in_hash BOOLEAN NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (name)
+)
+
+;
+
 CREATE TABLE bdb_attribute_values (
 	attribute_id INTEGER NOT NULL, 
 	group_id INTEGER NOT NULL, 
@@ -82,21 +92,11 @@ CREATE TABLE bdb_attribute_values (
 	value_str TEXT, 
 	value_real DOUBLE PRECISION, 
 	value_bool BOOLEAN, 
-	value_date TIME WITHOUT TIME ZONE, 
-	value_time DATE, 
+	value_date DATE, 
+	value_time TIME WITHOUT TIME ZONE, 
 	PRIMARY KEY (attribute_id, group_id), 
 	 FOREIGN KEY(attribute_id) REFERENCES bdb_attributes (id), 
 	 FOREIGN KEY(group_id) REFERENCES bdb_groups (id) ON DELETE CASCADE
-)
-
-;
-
-CREATE TABLE bdb_source_kvs (
-	source_id INTEGER, 
-	key VARCHAR NOT NULL, 
-	value VARCHAR NOT NULL, 
-	PRIMARY KEY (source_id, key), 
-	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
 )
 
 ;

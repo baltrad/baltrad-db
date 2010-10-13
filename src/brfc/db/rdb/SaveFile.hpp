@@ -22,23 +22,23 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/visit.hpp>
 
-#include <brfc/db/rdb/GroupCache.hpp>
-#include <brfc/db/rdb/SaveAttribute.hpp>
-#include <brfc/db/rdb/SaveGroup.hpp>
-
 namespace brfc {
+
+class FileHasher;
 
 namespace oh5 {
 
-class PhysicalFile;
-class Group;
 class Attribute;
+class Group;
+class PhysicalFile;
+class RootGroup;
 
 }
 
 namespace db {
 namespace rdb {
 
+class RdbHelper;
 class RdbFileEntry;
 
 /**
@@ -49,14 +49,17 @@ class SaveFile {
     /**
      * @brief types accepted for visit()
      */
-    typedef mpl::vector<const oh5::Group,
+    typedef mpl::vector<const oh5::RootGroup,
+                        const oh5::Group,
                         const oh5::Attribute> accepted_types;
     
     /**
      * @brief constructor
-     * @param rdb database to save to
+     * @param entry
      */
-    SaveFile(RelationalDatabase* rdb);
+    explicit SaveFile(RdbFileEntry& entry);
+
+    void operator()(const oh5::RootGroup& root);
     
     /**
      * @brief save a oh5::Group instance to database
@@ -77,13 +80,11 @@ class SaveFile {
      * @param file the file to be saved
      * @return database id of the saved file
      */
-    shared_ptr<RdbFileEntry> operator()(const oh5::PhysicalFile& file);
+    void operator()(const oh5::PhysicalFile& file);
 
   private:
-    RelationalDatabase* rdb_;
-    GroupCache group_cache_;
-    SaveAttribute save_attribute_;
-    SaveGroup save_group_;
+    RdbFileEntry& entry_;
+    RdbHelper& helper_;
 };
 
 } // namespace rdb

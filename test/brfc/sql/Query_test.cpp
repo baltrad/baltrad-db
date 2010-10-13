@@ -38,7 +38,7 @@ class sql_Query_test : public testing::Test {
     }
 
     Query query;
-    MockDialect dialect;
+    ::testing::NiceMock<MockDialect> dialect;
 };
 
 TEST_F(sql_Query_test, test_replace_binds_missing_binds) {

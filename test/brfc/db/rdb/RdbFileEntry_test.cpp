@@ -17,43 +17,37 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_DB_RDB_GROUP_ID_CACHE_HPP
-#define BRFC_DB_RDB_GROUP_ID_CACHE_HPP
+#include <gtest/gtest.h>
 
-#include <brfc/smart_ptr.hpp>
-#include <brfc/db/rdb/Cache.hpp>
+#include <brfc/db/rdb/RdbFileEntry.hpp>
+#include <brfc/db/rdb/RelationalDatabase.hpp>
+
 #include <brfc/oh5/Group.hpp>
+
+#include "../../sql/MockConnection.hpp"
 
 namespace brfc {
 namespace db {
 namespace rdb {
 
-class RelationalDatabase;
-
-/**
- * @brief cache for stored oh5::Group instances
- */
-class GroupCache : public Cache<long long, const oh5::Group*> {
+class db_rdb_RdbFileEntry_test : public ::testing::Test {
   public:
-    /**
-     * @brief constructor
-     *
-     * @param rdb database this cache operates on
-     */
-    GroupCache(RelationalDatabase* rdb);
+    db_rdb_RdbFileEntry_test()
+            : db(make_shared<sql::MockConnection>()) {
+    
+    }
 
-  protected:
-    /**
-     * @brief query for existing id from database
-     */
-    virtual OptionalKey do_lookup_key(const oh5::Group* group);
 
-  private:
-    RelationalDatabase* rdb_;
+    RelationalDatabase db;
 };
+
+TEST_F(db_rdb_RdbFileEntry_test, test_ctor) {
+    RdbFileEntry e(&db);
+    
+    EXPECT_EQ(&e, e.root().file());
+    EXPECT_EQ(0, e.root().parent());
+}
 
 } // namespace rdb
 } // namespace db
 } // namespace brfc
-
-#endif // BRFC_DB_RDB_GROUP_ID_CACHE_HPP

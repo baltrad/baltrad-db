@@ -73,6 +73,14 @@ class db_rdb_RelationalDatabase_test : public testing::TestWithParam<const char*
         db->clean();
     }
 
+    oh5::Source
+    load_source(const String& srcstr) {
+        oh5::Source src = oh5::Source::from_string(srcstr);
+        long long id = db->helper().select_source_id(src);
+        src = db->helper().select_source(id);
+        return src;
+    }
+
     test::TestRDB* db;
     ::testing::NiceMock<MockHasher> hasher;
     oh5::Source src;
@@ -80,7 +88,7 @@ class db_rdb_RelationalDatabase_test : public testing::TestWithParam<const char*
 
 
 TEST_P(db_rdb_RelationalDatabase_test, load_source_by_plc) {
-    EXPECT_NO_THROW(src = load_source(db->connection(), "PLC:Legionowo"));
+    EXPECT_NO_THROW(src = load_source("PLC:Legionowo"));
     ASSERT_TRUE(src.has("PLC"));
     EXPECT_EQ("Legionowo", src.at("PLC"));
     ASSERT_TRUE(src.has("RAD"));
@@ -90,7 +98,7 @@ TEST_P(db_rdb_RelationalDatabase_test, load_source_by_plc) {
 }
 
 TEST_P(db_rdb_RelationalDatabase_test, load_source_by_plc_unicode) {
-    EXPECT_NO_THROW(src = load_source(db->connection(), String::from_utf8("PLC:Świdwin")));
+    EXPECT_NO_THROW(src = load_source(String::from_utf8("PLC:Świdwin")));
     ASSERT_TRUE(src.has("PLC"));
     EXPECT_EQ(String::from_utf8("Świdwin"), src.at("PLC"));
     ASSERT_TRUE(src.has("RAD"));
@@ -152,6 +160,7 @@ TEST_P(db_rdb_RelationalDatabase_test, remove_file) {
     
     shared_ptr<FileEntry> e;
     EXPECT_NO_THROW(e = db->save_file(file));
+    ASSERT_TRUE(e);
 
     bool removed = false;
     EXPECT_NO_THROW(removed = db->remove_file(*e));
@@ -170,6 +179,7 @@ TEST_P(db_rdb_RelationalDatabase_test, write_entry_to_file) {
     
     shared_ptr<FileEntry> e;
     EXPECT_NO_THROW(e = db->save_file(file));
+    ASSERT_TRUE(e);
     
     // test writing
     test::TempH5File tef;
@@ -206,7 +216,7 @@ TEST_P(db_rdb_RelationalDatabase_test, resultset_keeps_qsqldatabase_alive) {
     shared_ptr<sql::Result> r;
     {
         RelationalDatabase db(GetParam());
-        r = db.connection().execute("SELECT 1", sql::BindMap());
+        r = db.conn().execute("SELECT 1", sql::BindMap());
     };
     r->size();
 }

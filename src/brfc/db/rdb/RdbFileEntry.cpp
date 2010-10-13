@@ -20,7 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/RdbFileEntry.hpp>
 
 #include <brfc/assert.hpp>
+#include <brfc/FileHasher.hpp>
 #include <brfc/String.hpp>
+
+#include <brfc/db/rdb/AttributeMapper.hpp>
+#include <brfc/db/rdb/RdbNodeBackend.hpp>
+#include <brfc/db/rdb/RdbHelper.hpp>
+#include <brfc/db/rdb/RelationalDatabase.hpp>
 
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/LargeObject.hpp>
@@ -29,27 +35,59 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
-RdbFileEntry::RdbFileEntry(shared_ptr<sql::Connection> conn,
-                                         long long id,
-                                         long long lo_id)
-        : conn_(conn)
+RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb, long long id)
+        : rdb_(rdb)
         , id_(id)
-        , lo_id_(lo_id) {
-    BRFC_ASSERT(conn);
+        , lo_id_(0)
+        , source_id_(0)
+        , source_()
+        , root_(this) {
+    BRFC_ASSERT(rdb_ != 0);
+    auto_ptr<RdbNodeBackend> root_backend(new RdbNodeBackend());
+    if (id != 0)
+        root_backend->id(rdb->helper().select_root_id(*this));
+    root_.backend(root_backend.release());
 }
 
 RdbFileEntry::~RdbFileEntry() {
 
 }
 
+long long
+RdbFileEntry::lo_id() const {
+    if (lo_id_ == 0)
+        load();
+    return lo_id_;
+}
+
+long long
+RdbFileEntry::source_id() const {
+    if (source_id_ == 0)
+        load();
+    return source_id_;
+}
+
+void
+RdbFileEntry::load() const {
+    RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
+    rdb().helper().load_file(*self);
+}
+
+const oh5::Source&
+RdbFileEntry::do_source() const {
+    // load from db
+    return source_;
+}
+
 void
 RdbFileEntry::do_write_to_file(const String& path) const {
-    conn_->begin();
+    sql::Connection& conn = rdb().conn();
+    conn.begin();
     try {
-        conn_->large_object(lo_id_)->write_to_file(path);
-        conn_->commit();
+        conn.large_object(lo_id_)->write_to_file(path);
+        conn.commit();
     } catch (...) {
-        conn_->rollback();
+        conn.rollback();
         throw;
     }
 }

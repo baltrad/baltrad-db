@@ -26,6 +26,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/Database.hpp>
 
+#include <brfc/db/rdb/RdbHelper.hpp>
+
 
 namespace brfc {
 
@@ -42,15 +44,16 @@ class Source;
 
 namespace sql {
 
-class BindMap;
 class Connection;
 
 } // namespace sql
 
 namespace db {
+
 namespace rdb {
 
 class AttributeMapper;
+class RdbHelper;
 
 /**
  * @brief Relational database backend
@@ -67,28 +70,26 @@ class RelationalDatabase : public Database {
      * the only engine currently supported is 'postgresql'
      */
     explicit RelationalDatabase(const String& dsn);
-    
+
+    explicit RelationalDatabase(shared_ptr<sql::Connection> conn);
+
     /**
      * @brief destructor
      */
     virtual ~RelationalDatabase();
 
-    shared_ptr<AttributeMapper> mapper();
+    AttributeMapper& mapper();
     
-    shared_ptr<const AttributeMapper> mapper() const;
+    const AttributeMapper& mapper() const;
 
     void populate_mapper();
 
     void populate_hasher();
 
-    sql::Connection& connection() {
+    sql::Connection& conn() const {
         return *conn_;
     }
     
-    shared_ptr<sql::Connection> connection_ptr() {
-        return conn_;
-    }
-
     void file_hasher(shared_ptr<FileHasher> hasher);
     
     /**
@@ -98,7 +99,7 @@ class RelationalDatabase : public Database {
 
     FileHasher& file_hasher() { return *file_hasher_; }
 
-    long long db_id(const oh5::File& file);
+    RdbHelper& helper() { return helper_; }
 
   protected:
     /**
@@ -115,14 +116,8 @@ class RelationalDatabase : public Database {
     shared_ptr<sql::Connection> conn_;
     shared_ptr<AttributeMapper> mapper_;
     shared_ptr<FileHasher> file_hasher_;
+    RdbHelper helper_;
 };
-
-oh5::Source
-load_source(sql::Connection& conn, const String& srcstr);
-
-long long
-source_id(sql::Connection& conn, const oh5::Source& source);
-
 
 } // namespace rdb
 } // namespace db

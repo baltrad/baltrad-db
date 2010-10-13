@@ -29,99 +29,45 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
 
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/db/rdb/RdbHelper.hpp>
 #include <brfc/db/rdb/RdbFileEntry.hpp>
-#include <brfc/db/rdb/Model.hpp>
-
-#include <brfc/sql/Column.hpp>
-#include <brfc/sql/Connection.hpp>
-#include <brfc/sql/Dialect.hpp>
-#include <brfc/sql/Factory.hpp>
-#include <brfc/sql/Insert.hpp>
-#include <brfc/sql/LargeObject.hpp>
-#include <brfc/sql/Literal.hpp>
-#include <brfc/sql/Result.hpp>
-#include <brfc/sql/Table.hpp>
+#include <brfc/db/rdb/RelationalDatabase.hpp>
 
 namespace brfc {
 namespace db {
 namespace rdb {
 
-SaveFile::SaveFile(RelationalDatabase* rdb)
-        : rdb_(rdb)
-        , group_cache_(rdb)
-        , save_attribute_(rdb, &group_cache_)
-        , save_group_(rdb, &group_cache_) {
+SaveFile::SaveFile(RdbFileEntry& entry)
+        : entry_(entry)
+        , helper_(entry.rdb().helper()) {
+}
+
+void
+SaveFile::operator()(const oh5::RootGroup& root) {
+    helper_.insert_group(entry_.root());
 }
 
 void
 SaveFile::operator()(const oh5::Group& group) {
-    save_group_(group);
+    const oh5::Group* parent = group.parent<oh5::Group>();
+    entry_.group(parent->path())->create_group(group.name());
 }
 
 void
-SaveFile::operator()(const oh5::Attribute& attribute) {
-    save_attribute_(attribute);
+SaveFile::operator()(const oh5::Attribute& attr) {
+    const oh5::Group* parent = attr.parent<oh5::Group>();
+    entry_.group(parent->path())->create_attribute(attr.name(), attr.value());
 }
 
-shared_ptr<RdbFileEntry>
+void
 SaveFile::operator()(const oh5::PhysicalFile& file) {
-    sql::TablePtr files = Model::instance().files;
-    const sql::Dialect& dialect = rdb_->connection().dialect();
-    const MappingVector& special = rdb_->mapper()->specializations_on(files);
-
-    sql::InsertPtr stmt = sql::Insert::create(files);
-
-    if (dialect.has_feature(sql::Dialect::RETURNING))
-        stmt->add_return(files->column("id"));
-    
-    sql::Factory xpr;
-    BOOST_FOREACH(const Mapping& mapping, special) {
-        if (mapping.attribute.starts_with("file:"))
-            continue;
-        const oh5::Attribute* attr =
-                file.root().attribute(mapping.attribute);
-            
-        stmt->value(mapping.column, attr_sql_value(*attr));
-    }
-
-    stmt->value("hash_type", xpr.string(rdb_->file_hasher().name()));
-    stmt->value("unique_id", xpr.string(rdb_->file_hasher().hash(file)));
-    stmt->value("source_id", xpr.int64_(source_id(rdb_->connection(), file.source())));
-
-    shared_ptr<sql::Result> result = rdb_->connection().execute(*stmt);
-
-    long long file_id = 0;
-    if (dialect.has_feature(sql::Dialect::RETURNING) and result->next()) {
-        file_id = result->value_at(0).int64_();
-    } else if (dialect.has_feature(sql::Dialect::LAST_INSERT_ID)) {
-        file_id = rdb_->connection().last_insert_id();
-    } else {
-        throw db_error("could not determine inserted file id");
-    }
-
-    save_group_.file_id(file_id);
+    helper_.insert_file(entry_, file);
+    helper_.insert_file_content(entry_, file.path());
 
     BOOST_FOREACH(const oh5::Node& node, file.root()) {
         visit(node, *this);
     }
-
-    // transfer the file to database
-    shared_ptr<sql::LargeObject> lo = rdb_->connection().large_object(file.path());
-
-    stmt = sql::Insert::create(Model::instance().file_content);
-    stmt->value("file_id", xpr.int64_(file_id));
-    stmt->value("lo_id", xpr.int64_(lo->id()));
-
-    rdb_->connection().execute(*stmt);
-
-    return shared_ptr<RdbFileEntry>(
-                new RdbFileEntry(rdb_->connection_ptr(),
-                                        file_id,
-                                        lo->id()));
 }
-
-
 
 } // namespace rdb
 } // namespace db
