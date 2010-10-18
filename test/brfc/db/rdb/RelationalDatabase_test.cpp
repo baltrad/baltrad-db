@@ -28,11 +28,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/ResultSet.hpp>
 
 #include <brfc/db/rdb/RdbFileEntry.hpp>
+#include <brfc/db/rdb/RdbHelper.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
-#include <brfc/oh5/Source.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
@@ -46,7 +46,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include "config.hpp"
 #include "../../common.hpp"
-#include "../../MockHasher.hpp"
 
 using testing::_;
 using testing::Return;
@@ -60,82 +59,15 @@ namespace rdb {
 class db_rdb_RelationalDatabase_test : public testing::TestWithParam<const char*> {
   public:
     db_rdb_RelationalDatabase_test()
-            : db(TestRDBEnv::get_database(GetParam()))
-            , hasher() {
-    }
-
-    virtual void SetUp() {
-        db->file_hasher(&hasher);
-        ON_CALL(hasher, do_hash(_)).WillByDefault(Return("hash"));
+            : db(TestRDBEnv::get_database(GetParam())) {
     }
 
     virtual void TearDown() {
         db->clean();
     }
 
-    oh5::Source
-    load_source(const String& srcstr) {
-        oh5::Source src = oh5::Source::from_string(srcstr);
-        long long id = db->helper().select_source_id(src);
-        src = db->helper().select_source(id);
-        return src;
-    }
-
     test::TestRDB* db;
-    ::testing::NiceMock<MockHasher> hasher;
-    oh5::Source src;
 };
-
-
-TEST_P(db_rdb_RelationalDatabase_test, load_source_by_plc) {
-    EXPECT_NO_THROW(src = load_source("PLC:Legionowo"));
-    ASSERT_TRUE(src.has("PLC"));
-    EXPECT_EQ("Legionowo", src.at("PLC"));
-    ASSERT_TRUE(src.has("RAD"));
-    EXPECT_EQ("PL41", src.at("RAD"));
-    ASSERT_TRUE(src.has("name"));
-    EXPECT_EQ("plleg", src.at("name"));
-}
-
-TEST_P(db_rdb_RelationalDatabase_test, load_source_by_plc_unicode) {
-    EXPECT_NO_THROW(src = load_source(String::from_utf8("PLC:Świdwin")));
-    ASSERT_TRUE(src.has("PLC"));
-    EXPECT_EQ(String::from_utf8("Świdwin"), src.at("PLC"));
-    ASSERT_TRUE(src.has("RAD"));
-    EXPECT_EQ("PL46", src.at("RAD"));
-    ASSERT_TRUE(src.has("name"));
-    EXPECT_EQ("plswi", src.at("name"));
-}
-
-/*
-TEST_P(db_rdb_RelationalDatabase_test, load_same_source) {
-    shared_ptr<oh5::SourceRadar> src1 =
-        dynamic_pointer_cast<oh5::SourceRadar>(db->load_source("PLC:Legionowo"));
-    shared_ptr<oh5::SourceRadar> src2 =
-        dynamic_pointer_cast<oh5::SourceRadar>(db->load_source("PLC:Legionowo"));
-    ASSERT_TRUE(src1);
-    ASSERT_TRUE(src2);
-    EXPECT_EQ(src1, src2);
-    EXPECT_TRUE(src1->centre());
-    EXPECT_TRUE(src2->centre());
-    EXPECT_EQ(src1->centre(), src2->centre());
-}
-*/
-
-/*
-TEST_P(db_rdb_RelationalDatabase_test, load_radars_with_same_centre) {
-    shared_ptr<oh5::SourceRadar> src1 =
-        dynamic_pointer_cast<oh5::SourceRadar>(db->load_source("PLC:Legionowo"));
-    shared_ptr<oh5::SourceRadar> src2 =
-        dynamic_pointer_cast<oh5::SourceRadar>(db->load_source("PLC:Pastewnik"));
-    ASSERT_TRUE(src1);
-    ASSERT_TRUE(src2);
-    EXPECT_NE(src1, src2);
-    EXPECT_TRUE(src1->centre());
-    EXPECT_TRUE(src2->centre());
-    EXPECT_EQ(src1->centre(), src2->centre());
-}
-*/
 
 TEST_P(db_rdb_RelationalDatabase_test, save_file) {
     oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");

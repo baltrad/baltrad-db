@@ -75,7 +75,10 @@ RdbFileEntry::load() const {
 
 const oh5::Source&
 RdbFileEntry::do_source() const {
-    // load from db
+    if (source_.empty()) {
+        RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
+        self->source_ = rdb().helper().select_source(source_id());
+    }
     return source_;
 }
 

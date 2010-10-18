@@ -105,15 +105,6 @@ class RdbFileEntry : public FileEntry {
     void load() const;
 
   private:
-    
-    void insert_file(const String& hasher_name,
-                     const String& hash,
-                     const String& object,
-                     const Date& n_date,
-                     const Time& n_time);
-    
-    void insert_file_content(const String& path);
-
     RelationalDatabase* rdb_;
 
     long long id_;

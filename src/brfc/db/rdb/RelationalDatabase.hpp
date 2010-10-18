@@ -26,9 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/Database.hpp>
 
-#include <brfc/db/rdb/RdbHelper.hpp>
-
-
 namespace brfc {
 
 class FileHasher;
@@ -71,7 +68,8 @@ class RelationalDatabase : public Database {
      */
     explicit RelationalDatabase(const String& dsn);
 
-    explicit RelationalDatabase(shared_ptr<sql::Connection> conn);
+    RelationalDatabase(shared_ptr<sql::Connection> conn,
+                       shared_ptr<RdbHelper> helper);
 
     /**
      * @brief destructor
@@ -90,16 +88,9 @@ class RelationalDatabase : public Database {
         return *conn_;
     }
     
-    void file_hasher(shared_ptr<FileHasher> hasher);
-    
-    /**
-     * @note caller retains hasher ownership
-     */
-    void file_hasher(FileHasher* hasher);
-
     FileHasher& file_hasher() { return *file_hasher_; }
 
-    RdbHelper& helper() { return helper_; }
+    RdbHelper& helper() { return *helper_; }
 
   protected:
     /**
@@ -116,7 +107,7 @@ class RelationalDatabase : public Database {
     shared_ptr<sql::Connection> conn_;
     shared_ptr<AttributeMapper> mapper_;
     shared_ptr<FileHasher> file_hasher_;
-    RdbHelper helper_;
+    shared_ptr<RdbHelper> helper_;
 };
 
 } // namespace rdb

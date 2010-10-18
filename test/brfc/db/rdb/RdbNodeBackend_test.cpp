@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/PhysicalFile.hpp>
 
 #include "../../sql/MockConnection.hpp"
+#include "../../oh5/MockNode.hpp"
 #include "../../MockHasher.hpp"
 #include "MockRdbHelper.hpp"
 
@@ -39,16 +40,24 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
-class db_rdb_RdbFileEntry_test : public ::testing::Test {
+class db_rdb_RdbNodeBackend_test : public ::testing::Test {
   public:
-    db_rdb_RdbFileEntry_test()
+    db_rdb_RdbNodeBackend_test()
             : conn()
             , hasher()
             , helper(&conn, &hasher)
             , db(shared_ptr<sql::Connection>(&conn, no_delete),
                  shared_ptr<RdbHelper>(&helper, no_delete))
-            , entry(&db) {
+            , entry(&db)
+            , node("mocknode")
+            , backend() {
     
+    }
+
+    virtual void SetUp() {
+        ON_CALL(node, do_file())
+            .WillByDefault(Return(&entry));
+        backend.front(&node);
     }
 
     sql::MockConnection conn;
@@ -56,49 +65,26 @@ class db_rdb_RdbFileEntry_test : public ::testing::Test {
     MockRdbHelper helper;
     RelationalDatabase db;
     RdbFileEntry entry;
+    ::testing::NiceMock<oh5::MockNode> node;
+    RdbNodeBackend backend;
 };
 
-TEST_F(db_rdb_RdbFileEntry_test, test_ctor) {
-    EXPECT_EQ(&entry, entry.root().file());
-    EXPECT_EQ(0, entry.root().parent());
+TEST_F(db_rdb_RdbNodeBackend_test, test_children) {
+    EXPECT_CALL(helper, load_children(Ref(node)));
+
+    backend.children();
 }
 
-
-TEST_F(db_rdb_RdbFileEntry_test, test_ctor_existing) {
-    EXPECT_CALL(helper, select_root_id(_))
-            .WillOnce(Return(1234));
-
-    RdbFileEntry existing(&db, 10);
-    EXPECT_EQ(1234, helper.backend(existing.root()).id());
+TEST_F(db_rdb_RdbNodeBackend_test, test_children_loaded) {
+    backend.loaded(true);
+    EXPECT_EQ(0, backend.children().size());
 }
 
-TEST_F(db_rdb_RdbFileEntry_test, test_source_id) {
-    EXPECT_CALL(helper, load_file(Ref(entry)));
-    entry.source_id();
+TEST_F(db_rdb_RdbNodeBackend_test, test_create_child) {
+    oh5::Node* n = new oh5::MockNode("n");
+    EXPECT_CALL(helper, insert_node(Ref(*n)));
 
-    entry.source_id(10);
-    entry.source_id();
-}
-
-TEST_F(db_rdb_RdbFileEntry_test, test_source) {
-    entry.source_id(10);
-
-    oh5::Source src;
-    src.add("name", "test");
-
-    EXPECT_CALL(helper, select_source(10))
-        .WillOnce(Return(src));
-
-    entry.source();
-    entry.source();
-}
-
-TEST_F(db_rdb_RdbFileEntry_test, test_lo_id) {
-    EXPECT_CALL(helper, load_file(Ref(entry)));
-    entry.lo_id();
-
-    entry.lo_id(10);
-    entry.lo_id();
+    backend.create_child(n);
 }
 
 } // namespace rdb

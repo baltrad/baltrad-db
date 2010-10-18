@@ -37,6 +37,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/Model.hpp>
 #include <brfc/db/rdb/QueryToSelect.hpp>
 #include <brfc/db/rdb/RdbFileEntry.hpp>
+#include <brfc/db/rdb/RdbHelper.hpp>
 #include <brfc/db/rdb/SaveFile.hpp>
 
 #include <brfc/oh5/PhysicalFile.hpp>
@@ -55,15 +56,16 @@ RelationalDatabase::RelationalDatabase(const String& dsn_)
         : conn_(sql::Connection::create(dsn_))
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher())
-        , helper_(this) {
+        , helper_(new RdbHelper(conn_.get(), file_hasher_.get())) {
     conn_->open();
 }
 
-RelationalDatabase::RelationalDatabase(shared_ptr<sql::Connection> conn)
+RelationalDatabase::RelationalDatabase(shared_ptr<sql::Connection> conn,
+                                       shared_ptr<RdbHelper> helper)
         : conn_(conn)
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher())
-        , helper_(this) {
+        , helper_(helper) {
     BRFC_ASSERT(conn);
 }
 
@@ -79,18 +81,6 @@ RelationalDatabase::mapper() {
 const AttributeMapper&
 RelationalDatabase::mapper() const {
     return *mapper_;
-}
-
-void
-RelationalDatabase::file_hasher(shared_ptr<FileHasher> hasher) {
-    file_hasher_.swap(hasher);
-    populate_hasher();
-}
-
-void
-RelationalDatabase::file_hasher(FileHasher* hasher) {
-    file_hasher(shared_ptr<FileHasher>(hasher, no_delete));
-    populate_hasher();
 }
 
 bool

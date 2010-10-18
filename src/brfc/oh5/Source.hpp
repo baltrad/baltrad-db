@@ -100,6 +100,11 @@ class Source {
     void clear();
     
     /**
+     * @brief return true if source is empty
+     */
+    bool empty() const;
+    
+    /**
      * @brief join to key:value pairs separated by comma
      */
     String to_string() const;

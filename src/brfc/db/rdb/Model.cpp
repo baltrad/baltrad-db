@@ -55,6 +55,7 @@ Model::Model()
 
     file_content->add_column("file_id");
     file_content->add_column("lo_id");
+    file_content->column("file_id")->references(files->column("id"));
 
     nodes->add_column("id");
     nodes->add_column("parent_id");

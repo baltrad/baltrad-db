@@ -87,6 +87,11 @@ Source::clear() {
     map_.clear();
 }
 
+bool
+Source::empty() const {
+    return map_.empty();
+}
+
 String
 Source::to_string() const {
     StringList elms;

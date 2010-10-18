@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/Model.hpp>
 #include <brfc/db/rdb/RdbFileEntry.hpp>
 #include <brfc/db/rdb/RdbNodeBackend.hpp>
-#include <brfc/db/rdb/RelationalDatabase.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Group.hpp>
@@ -110,8 +109,9 @@ attr_sql_column(const oh5::Attribute& attr) {
 
 
 
-RdbHelper::RdbHelper(RelationalDatabase* rdb)
-        : rdb_(rdb)
+RdbHelper::RdbHelper(sql::Connection* conn, const FileHasher* hasher)
+        : conn_(conn)
+        , hasher_(hasher)
         , m_(Model::instance())
         , sql_() {
 
@@ -123,12 +123,12 @@ RdbHelper::~RdbHelper() {
 
 const sql::Dialect&
 RdbHelper::dialect() {
-    return rdb().conn().dialect();    
+    return conn().dialect();    
 }
 
 sql::Connection&
 RdbHelper::conn() {
-    return rdb().conn();
+    return *conn_;
 }
 
 RdbNodeBackend&
@@ -179,6 +179,8 @@ RdbHelper::insert_node(oh5::Node& node) {
     if (oh5::Attribute* attr = dynamic_cast<oh5::Attribute*>(&node)) {
         insert_attribute(*attr);
     }
+
+    backend(node).loaded(true);
 }
 
 void
@@ -213,11 +215,11 @@ RdbHelper::insert_file(RdbFileEntry& entry,
                        const oh5::PhysicalFile& file) {
     sql::InsertPtr qry = sql::Insert::create(m_.files);
 
-    const String& hash = rdb().file_hasher().hash(file);
+    const String& hash = hasher_->hash(file);
 
     long long source_id = select_source_id(file.source());
  
-    qry->value("hash_type", sql_.string(rdb().file_hasher().name()));
+    qry->value("hash_type", sql_.string(hasher_->name()));
     qry->value("unique_id", sql_.string(hash)); 
     qry->value("source_id", sql_.int64_(source_id));
     qry->value("object", sql_.string(file.what_object()));
@@ -250,7 +252,18 @@ RdbHelper::insert_file_content(RdbFileEntry& entry, const String& path) {
 
 void
 RdbHelper::load_file(RdbFileEntry& entry) {
+    sql::SelectPtr qry = sql::Select::create();
+    qry->from(m_.files->join(m_.file_content));
+    qry->what(m_.files->column("source_id"));
+    qry->what(m_.file_content->column("lo_id"));
+    qry->where(m_.files->column("id")->eq(sql_.int64_(entry.id())));
+    
+    shared_ptr<sql::Result> result = conn().execute(*qry);
 
+    result->next();
+
+    entry.source_id(result->value_at("source_id").int64_());
+    entry.lo_id(result->value_at("lo_id").int64_());
 }
 
 long long
@@ -311,8 +324,8 @@ RdbHelper::select_source(long long id) {
 
     r = conn().execute(*qry);
 
-    r->next();
-    src.add("name", r->value_at("name").string());
+    if (r->next())
+        src.add("name", r->value_at("name").string());
 
     return src;
 }
@@ -321,7 +334,7 @@ void
 RdbHelper::load_children(oh5::Node& node) {
     sql::SelectPtr qry = sql::Select::create();
     
-    qry->from(m_.nodes->join(m_.attrvals));
+    qry->from(m_.nodes->outerjoin(m_.attrvals));
     qry->what(m_.nodes->column("id"));
     qry->what(m_.nodes->column("name"));
     qry->what(m_.nodes->column("type"));
@@ -343,9 +356,9 @@ RdbHelper::load_children(oh5::Node& node) {
         long long id = r->value_at("id").int64_();
         long long type = r->value_at("type").int64_();
 
-        oh5::Node* child = 0;
+        auto_ptr<oh5::Node> child;
         if (type == 1) { // GROUP
-            child = &node.create_group(name);
+            child.reset(new oh5::Group(name));
         } else if (type == 2) { // ATTRIBUTE
             oh5::Scalar value(0);
             if (not r->value_at("value_str").is_null()) {
@@ -357,15 +370,16 @@ RdbHelper::load_children(oh5::Node& node) {
             } else {
                 BRFC_ASSERT(false);
             }
-            child = &node.create_attribute(name, value);
+            child.reset(new oh5::Attribute(name, value));
         } else {
             BRFC_ASSERT(false);
         }
-
-        RdbNodeBackend& backend = static_cast<RdbNodeBackend&>(child->backend());
-        backend.id(id);
-        backend.loaded(false);
+        
+        oh5::Node& c = backend(node).add_child(child.release());
+        backend(c).id(id);
     }
+
+    backend(node).loaded(true);
 }
 
 } // namespace rdb
