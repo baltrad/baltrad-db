@@ -65,14 +65,14 @@ public class TestFileCatalog extends TestCase {
     rdb.clean();
   }
 
-  public void testImport() {
-    FileEntry f = fc.catalog(tempfile.path());
+  public void testStore() {
+    FileEntry f = fc.store(tempfile.path());
     assertTrue(f.id() > 0);
   }
 
-  public void testImportNXFile() {
+  public void testStoreNXFile() {
     try {
-      FileEntry f = fc.catalog("/path/to/nxfile");
+      FileEntry f = fc.store"/path/to/nxfile");
       fail("expected FileSystemError");
     } catch (FileSystemError e) {
       // pass

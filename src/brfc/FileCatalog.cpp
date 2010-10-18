@@ -61,22 +61,22 @@ FileCatalog::storage(LocalStorage* storage) {
 }
 
 bool
-FileCatalog::is_cataloged(const String& path) const {
-    return is_cataloged(oh5::hl::HlFile(path));
+FileCatalog::is_stored(const String& path) const {
+    return is_stored(oh5::hl::HlFile(path));
 }
 
 bool
-FileCatalog::is_cataloged(const oh5::PhysicalFile& f) const {
+FileCatalog::is_stored(const oh5::PhysicalFile& f) const {
     return db_->has_file(f);
 }
 
 shared_ptr<const db::FileEntry>
-FileCatalog::catalog(const String& path) {
-    return catalog(oh5::hl::HlFile(path)); 
+FileCatalog::store(const String& path) {
+    return store(oh5::hl::HlFile(path)); 
 }
 
 shared_ptr<const db::FileEntry>
-FileCatalog::catalog(const oh5::PhysicalFile& file) {
+FileCatalog::store(const oh5::PhysicalFile& file) {
     shared_ptr<db::FileEntry> e = db_->save_file(file);
     try {
         storage_->prestore(*e, file.path());

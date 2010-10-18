@@ -77,59 +77,59 @@ TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
     EXPECT_THROW(FileCatalog("invalid_dsn"), value_error);
 }
 
-TEST_F(FileCatalog_test, test_catalog_nx_file_by_path) {
-    EXPECT_THROW(fc.catalog("/path/to/nxfile"), fs_error);
+TEST_F(FileCatalog_test, test_store_nx_file_by_path) {
+    EXPECT_THROW(fc.store("/path/to/nxfile"), fs_error);
 }
 
-TEST_F(FileCatalog_test, test_catalog) {
+TEST_F(FileCatalog_test, test_store) {
     EXPECT_CALL(db, do_save_file(Ref(minfile)))
         .WillOnce(Return(entry));
     EXPECT_CALL(storage, do_prestore(Ref(*entry), minfile.path()))
         .WillOnce(Return("/path/to/file"));
     
     shared_ptr<const db::FileEntry> e;
-    EXPECT_NO_THROW(e = fc.catalog(minfile));
+    EXPECT_NO_THROW(e = fc.store(minfile));
     EXPECT_TRUE(e);
 }
 
-TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
+TEST_F(FileCatalog_test, test_store_on_db_failure) {
     String orig_path = minfile.path();
 
     EXPECT_CALL(db, do_save_file(Ref(minfile)))
         .WillOnce(Throw(db_error("")));
 
      // propagates db_error
-    EXPECT_THROW(fc.catalog(minfile), db_error);
+    EXPECT_THROW(fc.store(minfile), db_error);
     // retains original location
     EXPECT_EQ(orig_path, minfile.path());
 }
 
-TEST_F(FileCatalog_test, test_catalog_on_prestore_failure) {
+TEST_F(FileCatalog_test, test_store_on_prestore_failure) {
     EXPECT_CALL(db, do_save_file(Ref(minfile)))
         .WillOnce(Return(entry));
     EXPECT_CALL(storage, do_prestore(Ref(*entry), minfile.path()))
         .WillOnce(Throw(std::runtime_error("error")));
     
     shared_ptr<const db::FileEntry> e;
-    EXPECT_NO_THROW(e = fc.catalog(minfile));
+    EXPECT_NO_THROW(e = fc.store(minfile));
     EXPECT_TRUE(e);
 }
 
 /*
 TEST_F(FileCatalog_test, test_double_import_throws) {
-    EXPECT_THROW(fc.catalog(minfile), duplicate_entry);
+    EXPECT_THROW(fc.store(minfile), duplicate_entry);
 }
 */
 
-TEST_F(FileCatalog_test, test_is_cataloged_nx_file_by_path) {
-    EXPECT_THROW(fc.is_cataloged("/path/to/nxfile"), fs_error);
+TEST_F(FileCatalog_test, test_is_stored_nx_file_by_path) {
+    EXPECT_THROW(fc.is_stored("/path/to/nxfile"), fs_error);
 }
 
-TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
+TEST_F(FileCatalog_test, test_is_stored_on_new_file) {
     EXPECT_CALL(db, do_has_file(Ref(minfile)))
         .WillOnce(Return(false));
 
-    EXPECT_FALSE(fc.is_cataloged(minfile));
+    EXPECT_FALSE(fc.is_stored(minfile));
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {

@@ -100,33 +100,33 @@ class FileCatalog {
     void storage(LocalStorage* storage);
 
     /**
-     * @brief has file been imported to this catalog
+     * @brief has file been stored in this catalog
      * @param path - absolute path to file
      * @throw db_error if database query fails
      * @throw fs_error if file can not be opened
-     * @return true if file is cataloged
+     * @return true if file is stored
      * 
      * this is a short-hand for:
      * @code
-     * is_cataloged(oh5::hl::HlFile(path));
+     * is_stored(oh5::hl::HlFile(path));
      * @endcode
      *
      * @sa File::unique_identifier
-     * @sa is_cataloged(const oh5::PhysicalFile&) const
+     * @sa is_stored(const oh5::PhysicalFile&) const
      */
-    bool is_cataloged(const String& path) const;
+    bool is_stored(const String& path) const;
     
     /**
      * @brief has file been imported to this catalog
      * @param file oh5::PhysicalFile instance to test
      * @throw db_error if database query fails
-     * @return true if file is cataloged
+     * @return true if file is stored
      *
-     * a file is cataloged when a file with the same unique identifier is
+     * a file is stored when a file with the same unique identifier is
      * already present in database. For the exact rules on how the unique id
      * is determined, refer to File documentation.
      */
-    bool is_cataloged(const oh5::PhysicalFile& f) const;
+    bool is_stored(const oh5::PhysicalFile& f) const;
     
     /**
      * @brief import file to catalog
@@ -134,23 +134,23 @@ class FileCatalog {
      * @return FileEntry instance of the stored file
      * @throw db_error if storing file to database fails
      * @throw fs_error if file can not be opened
-     * @throw duplicate_entry if file has already been cataloged
+     * @throw duplicate_entry if file has already been stored
      *
      * this is a short-hand for:
      * @code
-     * catalog(oh5::hl::HlFile(path));
+     * store(oh5::hl::HlFile(path));
      * @endcode
      *
-     * @sa catalog(oh5::PhysicalFile& file)
+     * @sa store(oh5::PhysicalFile& file)
      */
-    shared_ptr<const db::FileEntry> catalog(const String& path);
+    shared_ptr<const db::FileEntry> store(const String& path);
     
     /**
      * @brief import file to catalog
      * @param file oh5::PhysicalFile instance to import
      * @return FileEntry instance of the stored file
      * @throw db_error if storing file to database fails
-     * @throw duplicate_entry if file has already been cataloged
+     * @throw duplicate_entry if file has already been stored
      * 
      * the FileEntry is passed to LocalStorage::prestore and if successful,
      * the resulting oh5::PhysialFile will replace FileEntry::file.
@@ -158,7 +158,7 @@ class FileCatalog {
      * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
      * is considered failed.
      */
-    shared_ptr<const db::FileEntry> catalog(const oh5::PhysicalFile& file);
+    shared_ptr<const db::FileEntry> store(const oh5::PhysicalFile& file);
     
     /**
      * @brief remove file from catalog
