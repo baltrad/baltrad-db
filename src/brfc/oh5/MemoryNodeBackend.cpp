@@ -41,7 +41,7 @@ MemoryNodeBackend::~MemoryNodeBackend() {
 }
 
 Node&
-MemoryNodeBackend::do_add_child(Node* _node) {
+MemoryNodeBackend::do_create_child(Node* _node) {
     auto_ptr<Node> node(_node);
     node->backend(new MemoryNodeBackend());
     children_.push_back(node);

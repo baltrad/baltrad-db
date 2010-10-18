@@ -45,7 +45,7 @@ class MemoryNodeBackend : public NodeBackend {
     virtual ~MemoryNodeBackend();
   
   protected:
-    virtual Node& do_add_child(Node* node);
+    virtual Node& do_create_child(Node* node);
 
     virtual std::vector<const Node*> do_children() const;
     virtual std::vector<Node*> do_children();

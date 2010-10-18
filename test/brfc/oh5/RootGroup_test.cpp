@@ -42,7 +42,7 @@ TEST_F(oh5_RootGroup_test, test_accepts_child_Attribute) {
     EXPECT_TRUE(root.accepts_child(node));
 }
 
-TEST_F(oh5_RootGroup_test, test_add_child_RootGroup) {
+TEST_F(oh5_RootGroup_test, test_accepts_child_RootGroup) {
     RootGroup node;
     EXPECT_FALSE(root.accepts_child(node));
 }

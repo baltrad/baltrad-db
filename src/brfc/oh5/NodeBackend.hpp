@@ -53,17 +53,17 @@ class NodeBackend : public boost::noncopyable {
     Node* front() const { return front_; }
     
     /**
-     * @brief add a child node
+     * @brief add a child node, creating it on backend
      *
      * ownership of @c node is transfered
      */
-    Node& add_child(Node* node);
+    Node& create_child(Node* node);
 
     std::vector<Node*> children() { return do_children(); }
     std::vector<const Node*> children() const { return do_children(); }
 
   protected:
-    virtual Node& do_add_child(Node* node) = 0;
+    virtual Node& do_create_child(Node* node) = 0;
 
     virtual std::vector<Node*> do_children() = 0;
     virtual std::vector<const Node*> do_children() const = 0;

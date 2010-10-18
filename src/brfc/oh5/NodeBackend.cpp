@@ -31,8 +31,8 @@ NodeBackend::~NodeBackend() {
 }
 
 Node&
-NodeBackend::add_child(Node* _node) {
-    return do_add_child(_node);
+NodeBackend::create_child(Node* _node) {
+    return do_create_child(_node);
 }
 
 } // namespace oh5

@@ -82,24 +82,26 @@ Node::path() const {
 Attribute&
 Node::create_attribute(const String& name, const Scalar& value) {
     auto_ptr<Attribute> node(new Attribute(name, value));
-    return static_cast<Attribute&>(add_child(node.release()));
+    return static_cast<Attribute&>(create_child(node.release()));
 }
 
 Group&
 Node::create_group(const String& name) {
     auto_ptr<Group> node(new Group(name));
-    return static_cast<Group&>(add_child(node.release()));
+    return static_cast<Group&>(create_child(node.release()));
 }
 
 Node&
-Node::add_child(Node* node) {
+Node::create_child(Node* node) {
+    // XXX: possible leak. Ownership of node is transfered to backend,
+    //      but if this throws, memory is not released
     if (not accepts_child(*node))
         throw value_error("node not accepted as child");
     if (child(node->name()) != 0)
         throw duplicate_entry(node->name().to_std_string());
 
     node->parent(this);
-    return backend().add_child(node);
+    return backend().create_child(node);
 }
 
 bool

@@ -157,8 +157,11 @@ class Node : public boost::noncopyable {
      * @return reference to the created group
      */
     Group& create_group(const String& name);
-
-    Node& add_child(Node* node);
+    
+    /**
+     * @brief create a child node
+     */
+    Node& create_child(Node* node);
 
     /**
      * @brief test for a child node

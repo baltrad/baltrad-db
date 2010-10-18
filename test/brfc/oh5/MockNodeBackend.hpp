@@ -37,7 +37,7 @@ class MockNodeBackend : public NodeBackend {
     MOCK_CONST_METHOD0(do_name, String&());
     MOCK_METHOD0(do_parent, Node*());
     MOCK_CONST_METHOD0(do_parent, Node*());
-    MOCK_METHOD1(do_add_child, Node&(Node* node));
+    MOCK_METHOD1(do_create_child, Node&(Node* node));
     MOCK_METHOD0(do_children, std::vector<Node*>());
     MOCK_CONST_METHOD0(do_children, std::vector<const Node*>());
 };

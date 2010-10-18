@@ -48,7 +48,7 @@ class RdbNodeBackend : public oh5::NodeBackend {
     void loaded(bool loaded) { loaded_ = loaded; }
 
   protected:
-    virtual oh5::Node& do_add_child(oh5::Node* node);
+    virtual oh5::Node& do_create_child(oh5::Node* node);
 
     virtual std::vector<oh5::Node*> do_children();
     virtual std::vector<const oh5::Node*> do_children() const;

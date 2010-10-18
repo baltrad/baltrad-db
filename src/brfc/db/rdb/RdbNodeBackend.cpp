@@ -43,7 +43,7 @@ RdbNodeBackend::~RdbNodeBackend() {
 }
 
 oh5::Node&
-RdbNodeBackend::do_add_child(oh5::Node* _node) {
+RdbNodeBackend::do_create_child(oh5::Node* _node) {
     auto_ptr<oh5::Node> node(_node);
 
     node->backend(new RdbNodeBackend());

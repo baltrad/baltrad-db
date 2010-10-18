@@ -55,7 +55,7 @@ class FakeNodeBackend : public NodeBackend {
         return vec;
     }
 
-    virtual Node& do_add_child(Node* node) {
+    virtual Node& do_create_child(Node* node) {
         children_.push_back(node);
         return *node;
     }
@@ -79,8 +79,8 @@ struct oh5_Node_test : public ::testing::Test {
     oh5_Node_test()
             : a("a")
             , f("f")
-            , b(a.add_child(new FakeNode("b")))
-            , c(b.add_child(new FakeNode("c"))) {
+            , b(a.create_child(new FakeNode("b")))
+            , c(b.create_child(new FakeNode("c"))) {
     }
 
     FakeNode a, f;
@@ -145,7 +145,7 @@ TEST_F(oh5_Node_test, test_iterator_end) {
 }
 
 TEST_F(oh5_Node_test, test_iterate_tree) {
-    a.add_child(new FakeNode("f"));
+    a.create_child(new FakeNode("f"));
 
     StringList names;
     BOOST_FOREACH(Node& node, a) {
