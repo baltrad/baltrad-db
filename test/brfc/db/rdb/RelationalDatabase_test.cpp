@@ -69,14 +69,14 @@ class db_rdb_RelationalDatabase_test : public testing::TestWithParam<const char*
     test::TestRDB* db;
 };
 
-TEST_P(db_rdb_RelationalDatabase_test, save_file) {
+TEST_P(db_rdb_RelationalDatabase_test, store) {
     oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     test::TempH5File tf;
     tf.write(file);
     file.path(tf.path());
     
     shared_ptr<FileEntry> e;
-    EXPECT_NO_THROW(e = db->save_file(file));
+    EXPECT_NO_THROW(e = db->store(file));
     shared_ptr<RdbFileEntry> re =
         dynamic_pointer_cast<RdbFileEntry>(e);
     ASSERT_TRUE(re);
@@ -84,21 +84,21 @@ TEST_P(db_rdb_RelationalDatabase_test, save_file) {
     EXPECT_TRUE(re->lo_id() > 0);
 }
 
-TEST_P(db_rdb_RelationalDatabase_test, remove_file) {
+TEST_P(db_rdb_RelationalDatabase_test, remove) {
     oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     test::TempH5File tf;
     tf.write(file);
     file.path(tf.path());
     
     shared_ptr<FileEntry> e;
-    EXPECT_NO_THROW(e = db->save_file(file));
+    EXPECT_NO_THROW(e = db->store(file));
     ASSERT_TRUE(e);
 
     bool removed = false;
-    EXPECT_NO_THROW(removed = db->remove_file(*e));
+    EXPECT_NO_THROW(removed = db->remove(*e));
     EXPECT_TRUE(removed);
 
-    EXPECT_NO_THROW(removed = db->remove_file(*e));
+    EXPECT_NO_THROW(removed = db->remove(*e));
     EXPECT_FALSE(removed);
 }
 
@@ -110,7 +110,7 @@ TEST_P(db_rdb_RelationalDatabase_test, write_entry_to_file) {
     file.path(tf.path());
     
     shared_ptr<FileEntry> e;
-    EXPECT_NO_THROW(e = db->save_file(file));
+    EXPECT_NO_THROW(e = db->store(file));
     ASSERT_TRUE(e);
     
     // test writing
@@ -119,7 +119,7 @@ TEST_P(db_rdb_RelationalDatabase_test, write_entry_to_file) {
     EXPECT_EQ(fs::file_size(tef.path().to_utf8()), fs::file_size(tf.path().to_utf8()));
 }
 
-TEST_P(db_rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
+TEST_P(db_rdb_RelationalDatabase_test, store_with_invalid_attributes) {
     oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     test::TempH5File tf;
     tf.write(file);
@@ -127,7 +127,7 @@ TEST_P(db_rdb_RelationalDatabase_test, save_file_with_invalid_attributes) {
     // add an invalid attribute
     file.root().create_attribute("invalid", oh5::Scalar(1));
 
-    EXPECT_NO_THROW(db->save_file(file));
+    EXPECT_NO_THROW(db->store(file));
 }
 
 TEST_P(db_rdb_RelationalDatabase_test, attribute_groups_not_saved) {
@@ -136,7 +136,7 @@ TEST_P(db_rdb_RelationalDatabase_test, attribute_groups_not_saved) {
     tf.write(file);
     file.path(tf.path());
     
-    ASSERT_NO_THROW(db->save_file(file));
+    ASSERT_NO_THROW(db->store(file));
     
     /* XXX: figure out how to test this
     EXPECT_EQ(0, file->root()->child_group_by_name("what")->db_id());

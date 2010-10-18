@@ -84,7 +84,7 @@ RelationalDatabase::mapper() const {
 }
 
 bool
-RelationalDatabase::do_has_file(const oh5::PhysicalFile& file) {
+RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
     const Model& m = Model::instance();
 
     const String& hash = file_hasher().hash(file);
@@ -106,7 +106,7 @@ RelationalDatabase::do_has_file(const oh5::PhysicalFile& file) {
 }
 
 shared_ptr<FileEntry>
-RelationalDatabase::do_save_file(const oh5::PhysicalFile& file) {
+RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
     shared_ptr<RdbFileEntry> entry(new RdbFileEntry(this));
     conn().begin();
     try {
@@ -164,7 +164,7 @@ RelationalDatabase::populate_hasher() {
 }
 
 bool
-RelationalDatabase::do_remove_file(const FileEntry& entry) {
+RelationalDatabase::do_remove(const FileEntry& entry) {
     String qry("DELETE FROM bdb_files WHERE id = :id");
     sql::BindMap binds;
     binds.add(":id", Variant(entry.id()));

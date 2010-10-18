@@ -53,8 +53,8 @@ class Database : public boost::noncopyable {
     /**
      * @brief is file stored
      */
-    bool has_file(const oh5::PhysicalFile& file) {
-        return do_has_file(file);
+    bool is_stored(const oh5::PhysicalFile& file) {
+        return do_is_stored(file);
     }
     
     /**
@@ -62,8 +62,8 @@ class Database : public boost::noncopyable {
      * @throw db_error if a database error occurs
      * @return true if the file was removed, false if it did not exist
      */
-    bool remove_file(const FileEntry& entry) {
-        return do_remove_file(entry);
+    bool remove(const FileEntry& entry) {
+        return do_remove(entry);
     }
 
     /**
@@ -73,7 +73,7 @@ class Database : public boost::noncopyable {
      * @throw db_error if a database error occurs
      * @throw duplicate_entry if file is already stored to database
      */
-    shared_ptr<FileEntry> save_file(const oh5::PhysicalFile& file);
+    shared_ptr<FileEntry> store(const oh5::PhysicalFile& file);
 
     /**
      * @brief execute a select query
@@ -83,9 +83,9 @@ class Database : public boost::noncopyable {
     }
 
   protected:
-    virtual bool do_has_file(const oh5::PhysicalFile& file) = 0;
-    virtual bool do_remove_file(const FileEntry& entry) = 0;
-    virtual shared_ptr<FileEntry> do_save_file(const oh5::PhysicalFile& file) = 0;
+    virtual bool do_is_stored(const oh5::PhysicalFile& file) = 0;
+    virtual bool do_remove(const FileEntry& entry) = 0;
+    virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file) = 0;
 
     virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
 };

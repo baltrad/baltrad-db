@@ -67,7 +67,7 @@ FileCatalog::is_stored(const String& path) const {
 
 bool
 FileCatalog::is_stored(const oh5::PhysicalFile& f) const {
-    return db_->has_file(f);
+    return db_->is_stored(f);
 }
 
 shared_ptr<const db::FileEntry>
@@ -77,7 +77,7 @@ FileCatalog::store(const String& path) {
 
 shared_ptr<const db::FileEntry>
 FileCatalog::store(const oh5::PhysicalFile& file) {
-    shared_ptr<db::FileEntry> e = db_->save_file(file);
+    shared_ptr<db::FileEntry> e = db_->store(file);
     try {
         storage_->prestore(*e, file.path());
     } catch (const std::runtime_error& e) {
@@ -89,7 +89,7 @@ FileCatalog::store(const oh5::PhysicalFile& file) {
 
 bool
 FileCatalog::remove(const db::FileEntry& entry) {
-    bool removed = db_->remove_file(entry);
+    bool removed = db_->remove(entry);
     try {
         storage_->remove(entry);
     } catch (const std::runtime_error& e) {

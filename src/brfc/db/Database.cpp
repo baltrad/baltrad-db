@@ -24,8 +24,8 @@ namespace brfc {
 namespace db {
 
 shared_ptr<FileEntry>
-Database::save_file(const oh5::PhysicalFile& file) {
-    return do_save_file(file);
+Database::store(const oh5::PhysicalFile& file) {
+    return do_store(file);
 }
 
 } // namespace db

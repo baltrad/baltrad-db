@@ -118,11 +118,11 @@ struct db_rdb_Query_test : public testing::TestWithParam<const char*> {
         tf5.write(td5);
         td5.path(tf5.path());
 
-        fe1 = db->save_file(td1);
-        fe2 = db->save_file(td2);
-        fe3 = db->save_file(td3);
-        fe4 = db->save_file(td4);
-        fe5 = db->save_file(td5);
+        fe1 = db->store(td1);
+        fe2 = db->store(td2);
+        fe3 = db->store(td3);
+        fe4 = db->store(td4);
+        fe5 = db->store(td5);
     }
 
     virtual void TearDown() {
@@ -279,16 +279,16 @@ TEST_P(db_rdb_Query_test, test_filter_by_place) {
     EXPECT_EQ(fe5->id(), r->get(2)->id());
 }
 
-TEST_P(db_rdb_Query_test, test_has_file) {
+TEST_P(db_rdb_Query_test, test_is_stored) {
     bool result = false;
-    ASSERT_NO_THROW(result = db->has_file(td1));
+    ASSERT_NO_THROW(result = db->is_stored(td1));
     EXPECT_TRUE(result);
 }
 
 TEST_P(db_rdb_Query_test, test_has_nx_file) {
     bool result = false;
     oh5::hl::HlFile td("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
-    ASSERT_NO_THROW(result = db->has_file(td));
+    ASSERT_NO_THROW(result = db->is_stored(td));
     EXPECT_FALSE(result);
 }
 

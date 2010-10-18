@@ -82,7 +82,7 @@ TEST_F(FileCatalog_test, test_store_nx_file_by_path) {
 }
 
 TEST_F(FileCatalog_test, test_store) {
-    EXPECT_CALL(db, do_save_file(Ref(minfile)))
+    EXPECT_CALL(db, do_store(Ref(minfile)))
         .WillOnce(Return(entry));
     EXPECT_CALL(storage, do_prestore(Ref(*entry), minfile.path()))
         .WillOnce(Return("/path/to/file"));
@@ -95,7 +95,7 @@ TEST_F(FileCatalog_test, test_store) {
 TEST_F(FileCatalog_test, test_store_on_db_failure) {
     String orig_path = minfile.path();
 
-    EXPECT_CALL(db, do_save_file(Ref(minfile)))
+    EXPECT_CALL(db, do_store(Ref(minfile)))
         .WillOnce(Throw(db_error("")));
 
      // propagates db_error
@@ -105,7 +105,7 @@ TEST_F(FileCatalog_test, test_store_on_db_failure) {
 }
 
 TEST_F(FileCatalog_test, test_store_on_prestore_failure) {
-    EXPECT_CALL(db, do_save_file(Ref(minfile)))
+    EXPECT_CALL(db, do_store(Ref(minfile)))
         .WillOnce(Return(entry));
     EXPECT_CALL(storage, do_prestore(Ref(*entry), minfile.path()))
         .WillOnce(Throw(std::runtime_error("error")));
@@ -126,14 +126,14 @@ TEST_F(FileCatalog_test, test_is_stored_nx_file_by_path) {
 }
 
 TEST_F(FileCatalog_test, test_is_stored_on_new_file) {
-    EXPECT_CALL(db, do_has_file(Ref(minfile)))
+    EXPECT_CALL(db, do_is_stored(Ref(minfile)))
         .WillOnce(Return(false));
 
     EXPECT_FALSE(fc.is_stored(minfile));
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {
-    EXPECT_CALL(db, do_remove_file(Ref(*entry)));
+    EXPECT_CALL(db, do_remove(Ref(*entry)));
     EXPECT_CALL(storage, do_remove(Ref(*entry)))
         .WillOnce(Return(true));
 
@@ -141,7 +141,7 @@ TEST_F(FileCatalog_test, test_remove_existing_file) {
 }
 
 TEST_F(FileCatalog_test, test_remove_nx_file) {
-    EXPECT_CALL(db, do_remove_file(Ref(*entry)))
+    EXPECT_CALL(db, do_remove(Ref(*entry)))
         .WillOnce(Return(true));
     EXPECT_CALL(storage, do_remove(Ref(*entry)))
         .WillOnce(Return(true));
