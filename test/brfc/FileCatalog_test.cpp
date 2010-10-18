@@ -51,10 +51,10 @@ namespace brfc {
 struct FileCatalog_test : public testing::Test {
     FileCatalog_test()
             : tempdir(new test::TempDir())
-            , db(new db::MockDatabase())
+            , db()
             , entry(new db::MockFileEntry())
-            , storage(new MockLocalStorage())
-            , fc(db, storage)
+            , storage()
+            , fc(&db, &storage)
             , tempfile()
             , minfile("PVOL", Date(2000, 1, 1), Time(12, 0), "WMO:02606") {
     }
@@ -65,9 +65,9 @@ struct FileCatalog_test : public testing::Test {
     }
 
     auto_ptr<test::TempDir> tempdir;
-    shared_ptr<db::MockDatabase> db;
+    db::MockDatabase db;
     shared_ptr<db::MockFileEntry> entry;
-    shared_ptr<MockLocalStorage> storage;
+    MockLocalStorage storage;
     FileCatalog fc;
     test::TempH5File tempfile;
     oh5::hl::HlFile minfile;
@@ -82,9 +82,9 @@ TEST_F(FileCatalog_test, test_catalog_nx_file_by_path) {
 }
 
 TEST_F(FileCatalog_test, test_catalog) {
-    EXPECT_CALL(*db, do_save_file(Ref(minfile)))
+    EXPECT_CALL(db, do_save_file(Ref(minfile)))
         .WillOnce(Return(entry));
-    EXPECT_CALL(*storage, do_prestore(Ref(*entry), minfile.path()))
+    EXPECT_CALL(storage, do_prestore(Ref(*entry), minfile.path()))
         .WillOnce(Return("/path/to/file"));
     
     shared_ptr<const db::FileEntry> e;
@@ -95,7 +95,7 @@ TEST_F(FileCatalog_test, test_catalog) {
 TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
     String orig_path = minfile.path();
 
-    EXPECT_CALL(*db, do_save_file(Ref(minfile)))
+    EXPECT_CALL(db, do_save_file(Ref(minfile)))
         .WillOnce(Throw(db_error("")));
 
      // propagates db_error
@@ -105,9 +105,9 @@ TEST_F(FileCatalog_test, test_catalog_on_db_failure) {
 }
 
 TEST_F(FileCatalog_test, test_catalog_on_prestore_failure) {
-    EXPECT_CALL(*db, do_save_file(Ref(minfile)))
+    EXPECT_CALL(db, do_save_file(Ref(minfile)))
         .WillOnce(Return(entry));
-    EXPECT_CALL(*storage, do_prestore(Ref(*entry), minfile.path()))
+    EXPECT_CALL(storage, do_prestore(Ref(*entry), minfile.path()))
         .WillOnce(Throw(std::runtime_error("error")));
     
     shared_ptr<const db::FileEntry> e;
@@ -126,24 +126,24 @@ TEST_F(FileCatalog_test, test_is_cataloged_nx_file_by_path) {
 }
 
 TEST_F(FileCatalog_test, test_is_cataloged_on_new_file) {
-    EXPECT_CALL(*db, do_has_file(Ref(minfile)))
+    EXPECT_CALL(db, do_has_file(Ref(minfile)))
         .WillOnce(Return(false));
 
     EXPECT_FALSE(fc.is_cataloged(minfile));
 }
 
 TEST_F(FileCatalog_test, test_remove_existing_file) {
-    EXPECT_CALL(*db, do_remove_file(Ref(*entry)));
-    EXPECT_CALL(*storage, do_remove(Ref(*entry)))
+    EXPECT_CALL(db, do_remove_file(Ref(*entry)));
+    EXPECT_CALL(storage, do_remove(Ref(*entry)))
         .WillOnce(Return(true));
 
     EXPECT_NO_THROW(fc.remove(*entry));
 }
 
 TEST_F(FileCatalog_test, test_remove_nx_file) {
-    EXPECT_CALL(*db, do_remove_file(Ref(*entry)))
+    EXPECT_CALL(db, do_remove_file(Ref(*entry)))
         .WillOnce(Return(true));
-    EXPECT_CALL(*storage, do_remove(Ref(*entry)))
+    EXPECT_CALL(storage, do_remove(Ref(*entry)))
         .WillOnce(Return(true));
     
     EXPECT_TRUE(fc.remove(*entry));

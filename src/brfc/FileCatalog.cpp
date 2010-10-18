@@ -35,17 +35,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
     
-FileCatalog::FileCatalog(const String& dsn,
-                         shared_ptr<LocalStorage> storage)
+FileCatalog::FileCatalog(const String& dsn, LocalStorage* storage)
         : db_(new db::rdb::RelationalDatabase(dsn)) 
         , storage_() {
     this->storage(storage);
     static_pointer_cast<db::rdb::RelationalDatabase>(db_)->populate_mapper();
 }
 
-FileCatalog::FileCatalog(shared_ptr<db::Database> db,
-                         shared_ptr<LocalStorage> storage)
-        : db_(db)
+FileCatalog::FileCatalog(db::Database* db, LocalStorage* storage)
+        : db_(db, no_delete)
         , storage_() {
     this->storage(storage);
 }
@@ -55,10 +53,11 @@ FileCatalog::~FileCatalog() {
 }
 
 void
-FileCatalog::storage(shared_ptr<LocalStorage> storage) {
-    if (not storage)
-        storage.reset(new NullStorage());
-    storage_ = storage;
+FileCatalog::storage(LocalStorage* storage) {
+    if (storage == 0)
+        storage_.reset(new NullStorage());
+    else
+        storage_.reset(storage, no_delete);
 }
 
 bool

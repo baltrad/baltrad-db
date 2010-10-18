@@ -58,21 +58,21 @@ class FileCatalog {
     /**
      * @brief constructor
      * @param dsn database connection string (using URL-like syntax)
+     * @param storage local storage (caller retains ownership)
      *
      * @throw db_error if DB could not be opened
      * @throw value_error if dsn is invalid
      */
     explicit
-    FileCatalog(const String& dsn,
-                shared_ptr<LocalStorage> storage=shared_ptr<LocalStorage>());
+    FileCatalog(const String& dsn, LocalStorage* storage=0);
 
     /**
      * @brief constructor
-     * @param db database instance
+     * @param db database instance (caller retains ownership)
+     * @param storage local storage (caller retains ownership)
      */
     explicit
-    FileCatalog(shared_ptr<db::Database> db,
-                shared_ptr<LocalStorage> storage=shared_ptr<LocalStorage>());
+    FileCatalog(db::Database* db, LocalStorage* storage=0);
     
     /**
      * @brief destructor
@@ -82,21 +82,22 @@ class FileCatalog {
     /**
      * @brief access bound Database instance
      */
-    shared_ptr<db::Database> database() {
-        return db_;
+    db::Database& database() {
+        return *db_;
     }
     
     /**
      * @brief access bound LocalStorage instance
      */
-    shared_ptr<LocalStorage> storage() { return storage_; }
+    LocalStorage& storage() { return *storage_; }
     
     /**
      * @brief bind a LocalStorage instance
+     * @param storage local storage (caller retains ownership)
      *
      * if @c storage is null, bind NullStorage
      */
-    void storage(shared_ptr<LocalStorage> storage);
+    void storage(LocalStorage* storage);
 
     /**
      * @brief has file been imported to this catalog
