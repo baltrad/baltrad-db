@@ -193,7 +193,17 @@ class Factory {
     /**
      * @brief surround expr with parentheses
      */
-    ParenthesesPtr parentheses(ExpressionPtr xpr) const;
+    ParenthesesPtr parentheses(ExpressionPtr expr) const;
+    
+    /**
+     * @brief MIN function
+     */
+    FunctionPtr min(ExpressionPtr expr) const;
+    
+    /**
+     * @brief MAX function
+     */
+    FunctionPtr max(ExpressionPtr expr) const;
 };
 
 }

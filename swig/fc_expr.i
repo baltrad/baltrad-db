@@ -27,6 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/expr/fwd.hpp>
     #include <brfc/expr/Expression.hpp>
     #include <brfc/expr/Factory.hpp>
+    #include <brfc/expr/Function.hpp>
     #include <brfc/expr/Attribute.hpp>
     #include <brfc/expr/Parentheses.hpp>
     #include <brfc/expr/Label.hpp>
@@ -52,6 +53,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %ignore brfc::expr::Expression::shared_from_this;
 %ignore brfc::expr::Factory::string(const char* value) const;
+%ignore brfc::expr::Function::create;
+%ignore brfc::expr::Function::args;
 %ignore brfc::expr::Literal::create;
 %ignore brfc::expr::Literal::value;
 %ignore brfc::expr::BinaryOperator::create;
@@ -101,6 +104,9 @@ SWIG_SHARED_PTR_DERIVED(BinaryOperator,
 SWIG_SHARED_PTR_DERIVED(BinaryOperator,
                         brfc::expr::Expression,
                         brfc::expr::BinaryOperator);
+SWIG_SHARED_PTR_DERIVED(Function,
+                        brfc::expr::Expression,
+                        brfc::expr::Function);
 SWIG_SHARED_PTR_DERIVED(Literal,
                         brfc::expr::Expression,
                         brfc::expr::Literal);
@@ -158,6 +164,7 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
 %include <brfc/expr/Expression.hpp>
 %include <brfc/expr/Label.hpp>
 %include <brfc/expr/Factory.hpp>
+%include <brfc/expr/Function.hpp>
 %include <brfc/expr/Attribute.hpp>
 %include <brfc/expr/Parentheses.hpp>
 %include <brfc/expr/BinaryOperator.hpp>

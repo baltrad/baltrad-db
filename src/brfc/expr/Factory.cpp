@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/Expression.hpp>
+#include <brfc/expr/Function.hpp>
 #include <brfc/expr/Literal.hpp>
 
 namespace brfc {
@@ -161,8 +162,19 @@ Factory::add(ExpressionPtr lhs, ExpressionPtr rhs) const {
 }
 
 ParenthesesPtr
-Factory::parentheses(ExpressionPtr xpr) const {
-    return xpr->parentheses();
+Factory::parentheses(ExpressionPtr expr) const {
+    return expr->parentheses();
+}
+
+FunctionPtr
+Factory::min(ExpressionPtr expr) const {
+    return Function::min(expr);
+}
+
+
+FunctionPtr
+Factory::max(ExpressionPtr expr) const {
+    return Function::max(expr);
 }
 
 } // namespace expr
