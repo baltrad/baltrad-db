@@ -72,6 +72,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %ignore brfc::Query::Query;
 %ignore brfc::Query::order;
+%ignore brfc::Query::fetch();
 %ignore brfc::ResultSet::ResultSet;
 // deprecated 
 %ignore brfc::ResultSet::integer;
@@ -192,12 +193,14 @@ SWIG_SHARED_PTR(ResultSet, brfc::ResultSet);
     import eu.baltrad.fc.expr.Expression;
     import eu.baltrad.fc.expr.AttributeExpr;
     import eu.baltrad.fc.expr.AttributeExprVector;
+    import eu.baltrad.fc.expr.Function;
     import eu.baltrad.fc.oh5.File;
     import eu.baltrad.fc.oh5.Source;
 %}
 
 %typemap(javaimports) brfc::Query, brfc::Query* %{
     import eu.baltrad.fc.expr.Expression;
+    import eu.baltrad.fc.expr.Function;
     import eu.baltrad.fc.expr.AttributeExpr;
     import eu.baltrad.fc.expr.AttributeExprVector;
 %}
