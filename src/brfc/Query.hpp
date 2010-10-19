@@ -39,7 +39,7 @@ class Query {
         DESCENDING = 2
     };
 
-    typedef std::vector<expr::AttributePtr> AttributeVector;
+    typedef std::vector<expr::ExpressionPtr> ExpressionVector;
     typedef std::pair<expr::ExpressionPtr, SortDirection> OrderPair;
     typedef std::vector<OrderPair> OrderVector;
 
@@ -69,15 +69,21 @@ class Query {
     /**
      * @brief mark an attribute for fetching
      * @param attribute Attribute to fetch to ResultSet
-     * @throw duplicate_entry if the attribute is already marked
      * @return this Query (for chaining)
      *
      * attributes are returned in ResultSet in the same order as they
      * are marked.
      */
     Query& fetch(expr::AttributePtr attribute);
+    
+    /**
+     * @brief mark a result for a function for fetching
+     * @param function Function whose result to fetch to ResultSet
+     * @return this Query (for chaining)
+     */
+    Query& fetch(expr::FunctionPtr function);
 
-    const AttributeVector& fetch() const {
+    const ExpressionVector& fetch() const {
         return fetch_;
     }
 
@@ -120,7 +126,7 @@ class Query {
   private:
     Database* db_;
     bool distinct_;
-    AttributeVector fetch_;
+    ExpressionVector fetch_;
     expr::ExpressionPtr filter_;
     OrderVector order_;
     int limit_;

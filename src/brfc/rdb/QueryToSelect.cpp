@@ -77,7 +77,7 @@ QueryToSelect::transform(const Query& query,
     select->limit(query.limit());
 
     // replace attributes with columns
-    BOOST_FOREACH(expr::AttributePtr expr, query.fetch()) {
+    BOOST_FOREACH(expr::ExpressionPtr expr, query.fetch()) {
         visit(*expr, rpl);
         select->what(rpl.pop());
     }

@@ -30,6 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Expression.hpp>
+#include <brfc/expr/Function.hpp>
 
 namespace brfc {
 
@@ -64,11 +65,16 @@ Query::distinct(bool distinct) {
 
 Query&
 Query::fetch(expr::AttributePtr attribute) {
-    BOOST_FOREACH(expr::AttributePtr attr, fetch_) {
-        if (attr->name() == attribute->name())
-            throw duplicate_entry(attribute->name().to_std_string());
-    }
     fetch_.push_back(attribute);
+    // XXX: there used to be duplicate check here, removed due to
+    //      adding fetch(Function). This should be brought back
+    //      and fetch(...) made to accept labeled expressions only.
+    return *this;
+}
+
+Query&
+Query::fetch(expr::FunctionPtr function) {
+    fetch_.push_back(function);
     return *this;
 }
 
