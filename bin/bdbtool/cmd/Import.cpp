@@ -38,7 +38,7 @@ Import::do_execute(FileCatalog& fc,
     BOOST_FOREACH(const std::string& path, args) {
         std::cout << "importing " << path << std::endl;;
         std::cout.flush();
-        fc.catalog(path);
+        fc.store(path);
     }
     return 0;
 }

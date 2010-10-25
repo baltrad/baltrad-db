@@ -112,7 +112,7 @@ main(int argc, char** argv) {
         return 1;
     } else {
         try {
-            fc.reset(new brfc::FileCatalog(dsn, "/tmp"));
+            fc.reset(new brfc::FileCatalog(dsn));
         } catch (const brfc::brfc_error& e) {
             std::cerr << e.what() << std::endl;
             return 1;

@@ -30,10 +30,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileCatalog.hpp>
 #include <brfc/StringList.hpp>
 #include <brfc/TimeDelta.hpp>
-#include <brfc/oh5/File.hpp>
+
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/RootGroup.hpp>
-#include <brfc/test/TempH5File.hpp>
+#include <brfc/oh5/hl/HlFile.hpp>
 
 namespace po = boost::program_options;
 
@@ -74,24 +74,24 @@ Benchmark::do_execute(FileCatalog& fc,
     }
     
     // read the "template" file
-    shared_ptr<oh5::File> f = oh5::File::from_filesystem(vm["input-file"].as<std::string>());
+    oh5::hl::HlFile f(vm["input-file"].as<std::string>());
 
     DateTime dt(Date(3000, 1, 1));
     TimeDelta delta;
     delta.add_days(1);
-    StringList stored_paths;
+    std::vector<shared_ptr<const db::FileEntry> > stored_files;
     boost::timer timer;
     double elapsed = 0;
     boost::progress_display progress(iterations_);
 
     for (int i=0; i < iterations_; ++i) {
-        test::TempH5File tmp;
-        f->root()->attribute("what/date")->value(Variant(dt.date()));
-        f->root()->attribute("what/time")->value(Variant(dt.time()));
-        tmp.write(*f);
+        f.root().attribute("what/date")->value(oh5::Scalar(dt.date()));
+        f.root().attribute("what/time")->value(oh5::Scalar(dt.time()));
+
         timer.restart();
-        stored_paths.append(fc.catalog(tmp.path())->path());
+        stored_files.push_back(fc.store(f));
         elapsed += timer.elapsed();
+
         dt += delta;
         ++progress;
     }
@@ -103,8 +103,8 @@ Benchmark::do_execute(FileCatalog& fc,
 
     if (vm.count("keep") == 0) {
         std::cout << "cleaning up" << std::endl;
-        BOOST_FOREACH(const String& path, stored_paths) {
-            fc.remove(path);
+        BOOST_FOREACH(shared_ptr<const db::FileEntry> entry, stored_files) {
+            fc.remove(*entry);
         }
     }
 
