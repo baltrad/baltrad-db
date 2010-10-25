@@ -17,28 +17,45 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_DB_MOCK_DATABASE_HPP
-#define BRFC_DB_MOCK_DATABASE_HPP
+#ifndef BRFC_DB_RDB_ATTRIBUTE_RESULT_HPP
+#define BRFC_DB_RDB_ATTRIBUTE_RESULT_HPP
 
-#include <gmock/gmock.h>
-
-#include <brfc/db/AttributeQuery.hpp>
-#include <brfc/db/Database.hpp>
-#include <brfc/db/FileQuery.hpp>
+#include <brfc/smart_ptr.hpp>
+#include <brfc/db/AttributeResult.hpp>
 
 namespace brfc {
-namespace db {
 
-class MockDatabase : public Database {
+namespace sql {
+    class Result;
+}
+
+namespace db {
+namespace rdb {
+
+/**
+ * @brief mediate rdb::Result to ResultSet
+ */
+class RdbAttributeResult : public AttributeResult {
   public:
-    MOCK_METHOD1(do_is_stored, bool(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_remove, bool(const FileEntry&));
-    MOCK_METHOD1(do_store, shared_ptr<FileEntry>(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_query, shared_ptr<FileResult>(const FileQuery&));
-    MOCK_METHOD1(do_query, shared_ptr<AttributeResult>(const AttributeQuery&));
+    explicit RdbAttributeResult(shared_ptr<sql::Result> result)
+            : result_(result) {
+    }
+  
+  protected:
+    virtual bool do_next();
+
+    virtual bool do_seek(int idx);
+
+    virtual int do_size();
+
+    virtual Variant do_value_at(unsigned int pos) const;
+
+  private:
+    shared_ptr<sql::Result> result_;
 };
 
+} // namespace rdb
 } // namespace db
 } // namespace brfc
 
-#endif // BRFC_DB_MOCK_DATABASE_HPP
+#endif // BRFC_DB_RDB_ATTRIBUTE_RESULT_HPP

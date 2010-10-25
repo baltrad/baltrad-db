@@ -17,19 +17,22 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/db/rdb/FileQueryToSelect.hpp>
+#include <brfc/db/rdb/QueryToSelect.hpp>
 
 #include <boost/foreach.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/StringList.hpp>
 
+#include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/FileQuery.hpp>
+
 #include <brfc/db/rdb/AttributeMapper.hpp>
 #include <brfc/db/rdb/Model.hpp>
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/Function.hpp>
 #include <brfc/expr/Label.hpp>
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
@@ -38,6 +41,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Expression.hpp>
+#include <brfc/sql/Function.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Label.hpp>
 #include <brfc/sql/Literal.hpp>
@@ -49,7 +53,7 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
-FileQueryToSelect::FileQueryToSelect(const AttributeMapper* mapper)
+QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
         , model_(&Model::instance())
@@ -67,9 +71,9 @@ FileQueryToSelect::FileQueryToSelect(const AttributeMapper* mapper)
 }
 
 sql::SelectPtr
-FileQueryToSelect::transform(const FileQuery& query,
+QueryToSelect::transform(const FileQuery& query,
                          const AttributeMapper& mapper) {
-    FileQueryToSelect rpl(&mapper);
+    QueryToSelect rpl(&mapper);
 
     sql::SelectPtr select = sql::Select::create();
     select->distinct(true);
@@ -88,9 +92,41 @@ FileQueryToSelect::transform(const FileQuery& query,
     return select;
 }
 
+sql::SelectPtr
+QueryToSelect::transform(const AttributeQuery& query,
+                         const AttributeMapper& mapper) {
+    QueryToSelect rpl(&mapper);
+
+    sql::SelectPtr select = sql::Select::create();
+    select->distinct(query.distinct());
+    select->limit(query.limit());
+
+    // replace attributes with columns
+    BOOST_FOREACH(expr::ExpressionPtr expr, query.fetch()) {
+        visit(*expr, rpl);
+        select->what(rpl.pop());
+    }
+
+    // replace attributes in where clause with columns
+    if (query.filter()) {
+        visit(*query.filter(), rpl);
+        select->where(rpl.pop());
+    } 
+
+    // replace attributes in order by
+    BOOST_FOREACH(AttributeQuery::OrderPair op, query.order()) {
+        visit(*op.first, rpl);
+        select->append_order_by(rpl.pop(), sql::Select::SortDirection(op.second));
+    }
+    
+    // add the built join as from clause
+    select->from(rpl.from_);
+
+    return select;
+}
 
 sql::ColumnPtr
-FileQueryToSelect::source_attr_column(expr::Attribute& attr) {
+QueryToSelect::source_attr_column(expr::Attribute& attr) {
     String key = attr.name().split(":").at(1);
     if (key == "name" or key == "node") {
         // sources is joined by default
@@ -120,14 +156,14 @@ FileQueryToSelect::source_attr_column(expr::Attribute& attr) {
 }
 
 sql::ColumnPtr
-FileQueryToSelect::specialized_attr_column(expr::Attribute& attr) {
+QueryToSelect::specialized_attr_column(expr::Attribute& attr) {
     Mapping mapping = mapper_->mapping(attr.name());
     // specializations are only in bdb_files, already in from clause
     return mapping.column;
 }
 
 sql::ColumnPtr
-FileQueryToSelect::plain_attr_column(expr::Attribute& attr) {
+QueryToSelect::plain_attr_column(expr::Attribute& attr) {
     String name = attr.name();
     Mapping mapping = mapper_->mapping(name);
     
@@ -157,7 +193,7 @@ FileQueryToSelect::plain_attr_column(expr::Attribute& attr) {
 }
 
 void
-FileQueryToSelect::operator()(expr::Attribute& attr) {
+QueryToSelect::operator()(expr::Attribute& attr) {
     String name = attr.name();
     
     sql::ColumnPtr column;
@@ -174,7 +210,7 @@ FileQueryToSelect::operator()(expr::Attribute& attr) {
 }
 
 void
-FileQueryToSelect::join_attrs() {
+QueryToSelect::join_attrs() {
     // join attrs if not already joined
     if (not from_->contains(attrs_)) {
         from_ = from_->join(attrs_,
@@ -204,7 +240,7 @@ replace_pattern(sql::ExpressionPtr expr) {
 } // namespace anonymous
 
 void
-FileQueryToSelect::operator()(expr::BinaryOperator& op) {
+QueryToSelect::operator()(expr::BinaryOperator& op) {
     visit(*op.lhs(), *this);
     visit(*op.rhs(), *this);
     sql::ExpressionPtr rhs = pop();
@@ -215,32 +251,37 @@ FileQueryToSelect::operator()(expr::BinaryOperator& op) {
     push(sql::BinaryOperator::create(op.op(), lhs, rhs));
 }
 
-/*
 void
-FileQueryToSelect::operator()(Column& col) {
-    push(col.shared_from_this());
+QueryToSelect::operator()(expr::Function& func) {
+    sql::FunctionPtr f = sql::Function::create(func.name());
+
+    BOOST_FOREACH(expr::ExpressionPtr arg, func.args()) {
+        visit(*arg, *this);
+        f->add_arg(pop());
+    }
+
+    push(f);
 }
-*/
 
 void
-FileQueryToSelect::operator()(expr::Label& label) {
+QueryToSelect::operator()(expr::Label& label) {
     visit(*label.expression(), *this);
     push(sql::Label::create(pop(), label.name()));
 }
 
 void
-FileQueryToSelect::operator()(expr::Literal& literal) {
+QueryToSelect::operator()(expr::Literal& literal) {
     push(sql::Literal::create(literal.value()));
 }
 
 void
-FileQueryToSelect::operator()(expr::Parentheses& parentheses) {
+QueryToSelect::operator()(expr::Parentheses& parentheses) {
     visit(*parentheses.expression(), *this);
     push(sql::Parentheses::create(pop()));
 }
 
 sql::ExpressionPtr
-FileQueryToSelect::pop() {
+QueryToSelect::pop() {
     BRFC_ASSERT(!stack_.empty());
     sql::ExpressionPtr p = stack_.back();
     stack_.pop_back();
@@ -249,7 +290,7 @@ FileQueryToSelect::pop() {
 }
 
 void
-FileQueryToSelect::push(sql::ExpressionPtr p) {
+QueryToSelect::push(sql::ExpressionPtr p) {
     BRFC_ASSERT(p);
     stack_.push_back(p);
 }

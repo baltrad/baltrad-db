@@ -33,6 +33,7 @@ namespace brfc {
 
 namespace db {
 
+class AttributeQuery;
 class FileQuery;
 
 namespace rdb {
@@ -43,10 +44,11 @@ class Model;
 /**
  * @brief transform a FileQuery to Select statement
  */
-class FileQueryToSelect {
+class QueryToSelect {
   public:
     typedef mpl::vector<expr::Attribute,
                         expr::BinaryOperator,
+                        expr::Function,
                         expr::Label,
                         expr::Literal,
                         expr::Parentheses> accepted_types;
@@ -61,6 +63,8 @@ class FileQueryToSelect {
     static sql::SelectPtr transform(const FileQuery& query,
                                     const AttributeMapper& mapper);
     
+    static sql::SelectPtr transform(const AttributeQuery& query,
+                                    const AttributeMapper& mapper);
     /**
      * @brief replace expr::Attribute with the mapped Column
      * 
@@ -76,7 +80,7 @@ class FileQueryToSelect {
     
     void operator()(expr::BinaryOperator& op);
 
-//    void operator()(Column& op);
+    void operator()(expr::Function& func);
 
     void operator()(expr::Label& label);
 
@@ -91,7 +95,7 @@ class FileQueryToSelect {
      *
      * Default from clause is a join from files to sources
      */
-    FileQueryToSelect(const AttributeMapper* mapper);
+    QueryToSelect(const AttributeMapper* mapper);
 
     sql::ExpressionPtr pop();
 

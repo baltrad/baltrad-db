@@ -30,6 +30,14 @@ namespace sql {
  */
 class Select : public Selectable {
   public:
+    enum SortDirection {
+        ASC = 1,
+        DESC = 2
+    };
+
+    typedef std::pair<ExpressionPtr, SortDirection> OrderPair;
+    typedef std::vector<OrderPair> OrderVector;
+
     /**
      * @brief construct as shared_ptr
      * @sa Select()
@@ -90,6 +98,14 @@ class Select : public Selectable {
         return from_;
     }
 
+    void append_order_by(ExpressionPtr expr, SortDirection dir);
+
+    OrderVector order() const { return order_; }
+    
+    void limit(int limit) { limit_ = limit; }
+
+    int limit() const { return limit_; }
+
   protected:
     /**
      * @brief constructor
@@ -104,6 +120,8 @@ class Select : public Selectable {
     std::vector<ExpressionPtr> what_;
     SelectablePtr from_;
     ExpressionPtr where_;
+    OrderVector order_;
+    int limit_;
     bool distinct_;
 };
 

@@ -103,6 +103,8 @@ class RelationalDatabase : public Database {
     
     virtual shared_ptr<FileResult> do_query(const FileQuery& query);
 
+    virtual shared_ptr<AttributeResult> do_query(const AttributeQuery& query);
+
   private:
     shared_ptr<sql::Connection> conn_;
     shared_ptr<AttributeMapper> mapper_;

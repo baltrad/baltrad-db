@@ -17,28 +17,37 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_DB_MOCK_DATABASE_HPP
-#define BRFC_DB_MOCK_DATABASE_HPP
+#include <brfc/db/rdb/RdbAttributeResult.hpp>
 
-#include <gmock/gmock.h>
+#include <brfc/Variant.hpp>
 
-#include <brfc/db/AttributeQuery.hpp>
-#include <brfc/db/Database.hpp>
-#include <brfc/db/FileQuery.hpp>
+#include <brfc/sql/Result.hpp>
 
 namespace brfc {
 namespace db {
+namespace rdb {
 
-class MockDatabase : public Database {
-  public:
-    MOCK_METHOD1(do_is_stored, bool(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_remove, bool(const FileEntry&));
-    MOCK_METHOD1(do_store, shared_ptr<FileEntry>(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_query, shared_ptr<FileResult>(const FileQuery&));
-    MOCK_METHOD1(do_query, shared_ptr<AttributeResult>(const AttributeQuery&));
-};
+bool
+RdbAttributeResult::do_next() {
+    return result_->next();
+}
 
+bool
+RdbAttributeResult::do_seek(int idx) {
+    return result_->seek(idx);
+}
+
+int
+RdbAttributeResult::do_size() {
+    return result_->size();
+}
+
+Variant
+RdbAttributeResult::do_value_at(unsigned int pos) const {
+    return result_->value_at(pos);
+}
+
+} // namespace rdb
 } // namespace db
 } // namespace brfc
 
-#endif // BRFC_DB_MOCK_DATABASE_HPP

@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/DefaultFileNamer.hpp>
 #include <brfc/NullStorage.hpp>
 
+#include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/Database.hpp>
 #include <brfc/db/FileEntry.hpp>
 #include <brfc/db/FileQuery.hpp>
@@ -102,6 +103,11 @@ FileCatalog::remove(const db::FileEntry& entry) {
 db::FileQuery
 FileCatalog::query_file() const {
     return db::FileQuery(db_.get());
+}
+
+db::AttributeQuery
+FileCatalog::query_attribute() const {
+    return db::AttributeQuery(db_.get());
 }
 
 } // namespace brfc

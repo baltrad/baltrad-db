@@ -176,6 +176,22 @@ DialectCompiler::operator()(const Select& select) {
         from_clause = "\nFROM " + pop();
     }
 
+    StringList order_elm;
+    const Select::OrderVector& order = select.order();
+    BOOST_FOREACH(Select::OrderPair op, order) {
+        visit(*op.first, *this);
+        String dir = (op.second == Select::ASC ? "ASC" : "DESC");
+        order_elm.append(pop() + " " + dir);
+    }
+    String order_clause;
+    if (order.size() > 0)
+        order_clause = "\nORDER BY " + order_elm.join(", ");
+
+    String limit_clause;
+    if (select.limit() > 0) {
+        limit_clause = "\nLIMIT " + String::number(select.limit());
+    }
+
     StringList result_column_elm;
     for (size_t i = 0; i < select.what().size(); ++i) {
         result_column_elm.push_back(pop());
@@ -184,11 +200,13 @@ DialectCompiler::operator()(const Select& select) {
     String result_columns = result_column_elm.join(", ");
 
     String distinct = select.distinct() ? "DISTINCT " : "";
-    // SELECT columns FROM from_obj WHERE where_clause
+    // SELECT columns FROM from_obj WHERE where_clause ORDER BY order_clause
     String clause = "SELECT " + distinct
                               + result_columns
                               + from_clause
-                              + where_clause;
+                              + where_clause
+                              + order_clause
+                              + limit_clause;
     push(clause);
 }
 

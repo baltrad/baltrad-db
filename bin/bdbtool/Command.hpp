@@ -17,28 +17,46 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_DB_MOCK_DATABASE_HPP
-#define BRFC_DB_MOCK_DATABASE_HPP
+#ifndef BRFC_TOOL_COMMAND_HPP
+#define BRFC_TOOL_COMMAND_HPP
 
-#include <gmock/gmock.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
 
-#include <brfc/db/AttributeQuery.hpp>
-#include <brfc/db/Database.hpp>
-#include <brfc/db/FileQuery.hpp>
+#include <brfc/smart_ptr.hpp>
 
 namespace brfc {
-namespace db {
 
-class MockDatabase : public Database {
+class FileCatalog;
+
+namespace tool {
+
+class Command {
   public:
-    MOCK_METHOD1(do_is_stored, bool(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_remove, bool(const FileEntry&));
-    MOCK_METHOD1(do_store, shared_ptr<FileEntry>(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_query, shared_ptr<FileResult>(const FileQuery&));
-    MOCK_METHOD1(do_query, shared_ptr<AttributeResult>(const AttributeQuery&));
+    static shared_ptr<Command> by_name(const std::string& name);
+
+    virtual ~Command() { };
+
+    void help(std::ostream& out) const {
+        return do_help(out);
+    }
+
+    int execute(FileCatalog& fc,
+                const std::vector<std::string>& args) {
+        return do_execute(fc, args);
+    }
+
+  protected:
+    virtual int do_execute(FileCatalog& fc,
+                           const std::vector<std::string>& args) = 0;
+    
+    virtual void do_help(std::ostream& /*out*/) const {
+        // no-op
+    }
 };
 
-} // namespace db
+} // namespace tool
 } // namespace brfc
 
-#endif // BRFC_DB_MOCK_DATABASE_HPP
+#endif // BRFC_TOOL_COMMAND_HPP

@@ -35,7 +35,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/rdb/AttributeMapper.hpp>
 #include <brfc/db/rdb/Model.hpp>
-#include <brfc/db/rdb/FileQueryToSelect.hpp>
+#include <brfc/db/rdb/QueryToSelect.hpp>
+#include <brfc/db/rdb/RdbAttributeResult.hpp>
 #include <brfc/db/rdb/RdbFileEntry.hpp>
 #include <brfc/db/rdb/RdbHelper.hpp>
 #include <brfc/db/rdb/SaveFile.hpp>
@@ -122,7 +123,7 @@ RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
 
 shared_ptr<FileResult>
 RelationalDatabase::do_query(const FileQuery& query) {
-    sql::SelectPtr select = FileQueryToSelect::transform(query, mapper());
+    sql::SelectPtr select = QueryToSelect::transform(query, mapper());
     shared_ptr<sql::Result> res = conn().execute(*select);
     shared_ptr<FileResult> rset(new FileResult());
     while (res->next()) {
@@ -133,6 +134,13 @@ RelationalDatabase::do_query(const FileQuery& query) {
         rset->add(entry);
     }
     return rset;
+}
+
+shared_ptr<AttributeResult>
+RelationalDatabase::do_query(const AttributeQuery& query) {
+    sql::SelectPtr select = QueryToSelect::transform(query, mapper());
+    shared_ptr<sql::Result> res = conn().execute(*select);
+    return shared_ptr<AttributeResult>(new RdbAttributeResult(res));
 }
 
 void

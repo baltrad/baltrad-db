@@ -17,28 +17,32 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_DB_MOCK_DATABASE_HPP
-#define BRFC_DB_MOCK_DATABASE_HPP
+#include <iostream>
 
-#include <gmock/gmock.h>
+#include <boost/foreach.hpp>
+#include <boost/program_options.hpp>
 
-#include <brfc/db/AttributeQuery.hpp>
-#include <brfc/db/Database.hpp>
-#include <brfc/db/FileQuery.hpp>
+#include <brfc/FileCatalog.hpp>
+
+#include <bdbtool/cmd/Import.hpp>
+
+namespace po = boost::program_options;
 
 namespace brfc {
-namespace db {
+namespace tool {
+namespace cmd {
 
-class MockDatabase : public Database {
-  public:
-    MOCK_METHOD1(do_is_stored, bool(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_remove, bool(const FileEntry&));
-    MOCK_METHOD1(do_store, shared_ptr<FileEntry>(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_query, shared_ptr<FileResult>(const FileQuery&));
-    MOCK_METHOD1(do_query, shared_ptr<AttributeResult>(const AttributeQuery&));
-};
+int
+Import::do_execute(FileCatalog& fc,
+                   const std::vector<std::string>& args) {
+    BOOST_FOREACH(const std::string& path, args) {
+        std::cout << "importing " << path << std::endl;;
+        std::cout.flush();
+        fc.catalog(path);
+    }
+    return 0;
+}
 
-} // namespace db
+} // namespace cmd
+} // namespace tool
 } // namespace brfc
-
-#endif // BRFC_DB_MOCK_DATABASE_HPP

@@ -33,6 +33,7 @@ class LocalStorage;
 
 namespace db {
 
+class AttributeQuery;
 class Database;
 class FileEntry;
 class FileQuery;
@@ -178,6 +179,8 @@ class FileCatalog {
      * @brief get a query object bound to owned database
      */
     db::FileQuery query_file() const;
+
+    db::AttributeQuery query_attribute() const;
     
   private:
     shared_ptr<db::Database> db_;
