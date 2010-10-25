@@ -26,8 +26,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %{
     #include <brfc/db/Database.hpp>
     #include <brfc/db/FileEntry.hpp>
-    #include <brfc/db/Query.hpp>
-    #include <brfc/db/ResultSet.hpp>
+    #include <brfc/db/FileQuery.hpp>
+    #include <brfc/db/FileResult.hpp>
 %}
 
 // Enable the JNI class to load the required native library.
@@ -48,18 +48,18 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 SWIG_SHARED_PTR(FileEntry, brfc::db::FileEntry);
 
 /***
- * brfc::db::ResultSet
+ * brfc::db::FileResult
  */
-SWIG_SHARED_PTR(ResultSet, brfc::db::ResultSet);
-%ignore brfc::db::ResultSet::ResultSet;
-%ignore brfc::db::ResultSet::operator=;
+SWIG_SHARED_PTR(FileResult, brfc::db::FileResult);
+%ignore brfc::db::FileResult::FileResult;
+%ignore brfc::db::FileResult::operator=;
 
 /***
- * brfc::db::Query
+ * brfc::db::FileQuery
  */
-%ignore brfc::db::Query::Query;
+%ignore brfc::db::FileQuery::FileQuery;
 
-%typemap(javaimports) brfc::db::Query, brfc::db::Query* %{
+%typemap(javaimports) brfc::db::FileQuery, brfc::db::FileQuery* %{
     import eu.baltrad.fc.expr.Expression;
     import eu.baltrad.fc.expr.AttributeExpr;
     import eu.baltrad.fc.expr.AttributeExprVector;
@@ -91,7 +91,7 @@ SWIG_SHARED_PTR(Database, brfc::db::Database);
   }
 %}
 
-%typemap(javabody) brfc::db::Query %{ 
+%typemap(javabody) brfc::db::FileQuery %{ 
   private long swigCPtr;
   protected boolean swigCMemOwn;
 
@@ -115,10 +115,10 @@ SWIG_SHARED_PTR(Database, brfc::db::Database);
     import eu.baltrad.fc.oh5.Source;
 %}
 
-%include <brfc/db/ResultSet.hpp>
+%include <brfc/db/FileResult.hpp>
 %include <brfc/db/Database.hpp>
 %include <brfc/db/FileEntry.hpp>
-%include <brfc/db/Query.hpp>
+%include <brfc/db/FileQuery.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:
 */

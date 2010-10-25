@@ -30,12 +30,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/SHA1AttributeHasher.hpp>
 #include <brfc/StringList.hpp>
 
-#include <brfc/db/ResultSet.hpp>
-#include <brfc/db/Query.hpp>
+#include <brfc/db/FileQuery.hpp>
+#include <brfc/db/FileResult.hpp>
 
 #include <brfc/db/rdb/AttributeMapper.hpp>
 #include <brfc/db/rdb/Model.hpp>
-#include <brfc/db/rdb/QueryToSelect.hpp>
+#include <brfc/db/rdb/FileQueryToSelect.hpp>
 #include <brfc/db/rdb/RdbFileEntry.hpp>
 #include <brfc/db/rdb/RdbHelper.hpp>
 #include <brfc/db/rdb/SaveFile.hpp>
@@ -120,11 +120,11 @@ RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
     return entry;
 }
 
-shared_ptr<ResultSet>
-RelationalDatabase::do_query(const Query& query) {
-    sql::SelectPtr select = QueryToSelect::transform(query, mapper());
+shared_ptr<FileResult>
+RelationalDatabase::do_query(const FileQuery& query) {
+    sql::SelectPtr select = FileQueryToSelect::transform(query, mapper());
     shared_ptr<sql::Result> res = conn().execute(*select);
-    shared_ptr<ResultSet> rset(new ResultSet());
+    shared_ptr<FileResult> rset(new FileResult());
     while (res->next()) {
         long long id = res->value_at(0).int64_();
         long long lo_id = res->value_at(1).int64_();

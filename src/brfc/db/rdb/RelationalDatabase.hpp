@@ -101,7 +101,7 @@ class RelationalDatabase : public Database {
 
     virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file);
     
-    virtual shared_ptr<ResultSet> do_query(const Query& query);
+    virtual shared_ptr<FileResult> do_query(const FileQuery& query);
 
   private:
     shared_ptr<sql::Connection> conn_;

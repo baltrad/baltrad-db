@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_DB_RDB_QUERY_TO_SELECT_HPP
-#define BRFC_RDD_QUERY_TO_SELECT_HPP
+#ifndef BRFC_DB_RDB_FILE_QUERY_TO_SELECT_HPP
+#define BRFC_DB_RDB_FILE_QUERY_TO_SELECT_HPP
 
 #include <vector>
 
@@ -33,7 +33,7 @@ namespace brfc {
 
 namespace db {
 
-class Query;
+class FileQuery;
 
 namespace rdb {
 
@@ -41,9 +41,9 @@ class AttributeMapper;
 class Model;
 
 /**
- * @brief transform a Query to Select statement
+ * @brief transform a FileQuery to Select statement
  */
-class QueryToSelect {
+class FileQueryToSelect {
   public:
     typedef mpl::vector<expr::Attribute,
                         expr::BinaryOperator,
@@ -52,14 +52,13 @@ class QueryToSelect {
                         expr::Parentheses> accepted_types;
     
     /**
-     * @brief transform a Query to Select statement
+     * @brief transform a FileQuery to Select statement
      *
-     * Attributes in Query.fetch() are visited and the results are stored
-     * in the "what" clause of the select statement. The Query.filter()
-     * expression is also visited and becomes the where clause for the
-     * select statement. From clause is formed during the visitation.
+     * The FileQuery.filter() expression is visited and becomes the where
+     * clause for the select statement. From clause is formed during the
+     * visitation.
      */
-    static sql::SelectPtr transform(const Query& query,
+    static sql::SelectPtr transform(const FileQuery& query,
                                     const AttributeMapper& mapper);
     
     /**
@@ -92,7 +91,7 @@ class QueryToSelect {
      *
      * Default from clause is a join from files to sources
      */
-    QueryToSelect(const AttributeMapper* mapper);
+    FileQueryToSelect(const AttributeMapper* mapper);
 
     sql::ExpressionPtr pop();
 
@@ -121,4 +120,4 @@ class QueryToSelect {
 } // namespace db
 } // namespace brfc
 
-#endif // BRFC_DB_RDB_QUERY_TO_SELECT_HPP
+#endif // BRFC_DB_RDB_FILE_QUERY_TO_SELECT_HPP

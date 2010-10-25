@@ -35,7 +35,7 @@ namespace db {
 
 class Database;
 class FileEntry;
-class Query;
+class FileQuery;
 
 } // namespace db
 
@@ -177,7 +177,7 @@ class FileCatalog {
     /**
      * @brief get a query object bound to owned database
      */
-    db::Query query() const;
+    db::FileQuery query_file() const;
     
   private:
     shared_ptr<db::Database> db_;

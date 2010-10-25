@@ -25,8 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 
-#include <brfc/db/ResultSet.hpp>
-
 #include <brfc/db/rdb/RdbFileEntry.hpp>
 #include <brfc/db/rdb/RdbHelper.hpp>
 

@@ -37,8 +37,8 @@ class PhysicalFile;
 namespace db {
 
 class FileEntry;
-class Query;
-class ResultSet;
+class FileQuery;
+class FileResult;
 
 /**
  * @brief ABC for Database access
@@ -78,7 +78,7 @@ class Database : public boost::noncopyable {
     /**
      * @brief execute a select query
      */
-    shared_ptr<ResultSet> query(const Query& query) {
+    shared_ptr<FileResult> query(const FileQuery& query) {
         return do_query(query);
     }
 
@@ -87,7 +87,7 @@ class Database : public boost::noncopyable {
     virtual bool do_remove(const FileEntry& entry) = 0;
     virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file) = 0;
 
-    virtual shared_ptr<ResultSet> do_query(const Query& query) = 0;
+    virtual shared_ptr<FileResult> do_query(const FileQuery& query) = 0;
 };
 
 } // namespace db

@@ -26,8 +26,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/StringList.hpp>
 
 #include <brfc/db/FileEntry.hpp>
-#include <brfc/db/Query.hpp>
-#include <brfc/db/ResultSet.hpp>
+#include <brfc/db/FileQuery.hpp>
+#include <brfc/db/FileResult.hpp>
 
 #include <brfc/db/rdb/RdbFileEntry.hpp>
 
@@ -66,8 +66,8 @@ namespace rdb {
  *   1 td5  SCAN 2002-02-01 12:00     5     2
  *                                    2     5
  */
-struct db_rdb_Query_test : public testing::TestWithParam<const char*> {
-    db_rdb_Query_test()
+struct db_rdb_FileQuery_test : public testing::TestWithParam<const char*> {
+    db_rdb_FileQuery_test()
             : xpr()
             , src1("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , src2("WMO:02666,RAD:SE51,PLC:Karlskrona")
@@ -135,11 +135,11 @@ struct db_rdb_Query_test : public testing::TestWithParam<const char*> {
     oh5::hl::HlFile td1, td2, td3, td4, td5;
     test::TempH5File tf1, tf2, tf3, tf4, tf5;
     shared_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
-    Query query;
+    FileQuery query;
 };
 
-TEST_P(db_rdb_Query_test, test_queried_entry_has_lob) {
-    shared_ptr<ResultSet> r =
+TEST_P(db_rdb_FileQuery_test, test_queried_entry_has_lob) {
+    shared_ptr<FileResult> r =
             query.filter(xpr.attribute("file:id")->eq(xpr.int64_(fe1->id())))
                  .execute();
     ASSERT_EQ(1, r->size());
@@ -158,16 +158,16 @@ TEST_P(db_rdb_Query_test, test_queried_entry_has_lob) {
     EXPECT_EQ(qre->lo_id(), fre1->lo_id());
 }
 
-TEST_P(db_rdb_Query_test, test_simple) {
-    shared_ptr<ResultSet> r = 
+TEST_P(db_rdb_FileQuery_test, test_simple) {
+    shared_ptr<FileResult> r = 
             query.filter(xpr.attribute("where/xsize")->eq(xpr.int64_(1)))
                  .execute();
     ASSERT_EQ(1, r->size());
     EXPECT_EQ(fe1->id(), r->get(0)->id());
 }
 
-TEST_P(db_rdb_Query_test, test_list_all_files) {
-    shared_ptr<ResultSet> r = query.execute();
+TEST_P(db_rdb_FileQuery_test, test_list_all_files) {
+    shared_ptr<FileResult> r = query.execute();
 
     ASSERT_EQ(5, r->size());
 
@@ -178,8 +178,8 @@ TEST_P(db_rdb_Query_test, test_list_all_files) {
     EXPECT_EQ(fe5->id(), r->get(4)->id());
 }
 
-TEST_P(db_rdb_Query_test, test_filter_by_object) {
-    shared_ptr<ResultSet> r =
+TEST_P(db_rdb_FileQuery_test, test_filter_by_object) {
+    shared_ptr<FileResult> r =
         query.filter(xpr.attribute("what/object")->eq(xpr.string("PVOL")))
              .execute();
 
@@ -190,8 +190,8 @@ TEST_P(db_rdb_Query_test, test_filter_by_object) {
     EXPECT_EQ(fe3->id(), r->get(2)->id());
 }
 
-TEST_P(db_rdb_Query_test, test_filter_by_xsize) {
-    shared_ptr<ResultSet> r =
+TEST_P(db_rdb_FileQuery_test, test_filter_by_xsize) {
+    shared_ptr<FileResult> r =
         query.filter(xpr.attribute("where/xsize")->eq(xpr.int64_(2)))
              .execute();
     ASSERT_EQ(2, r->size());
@@ -200,10 +200,10 @@ TEST_P(db_rdb_Query_test, test_filter_by_xsize) {
     EXPECT_EQ(fe5->id(), r->get(1)->id());
 }
 
-TEST_P(db_rdb_Query_test, test_filter_by_xsize_or_ysize) {
+TEST_P(db_rdb_FileQuery_test, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
-    shared_ptr<ResultSet> r =
+    shared_ptr<FileResult> r =
         query.filter(xsize->eq(xpr.int64_(1))->or_(ysize->eq(xpr.int64_(2))))
              .execute();
 
@@ -214,7 +214,7 @@ TEST_P(db_rdb_Query_test, test_filter_by_xsize_or_ysize) {
     EXPECT_EQ(fe5->id(), r->get(2)->id());
 }
 
-TEST_P(db_rdb_Query_test, test_filter_by_combined_datetime) {
+TEST_P(db_rdb_FileQuery_test, test_filter_by_combined_datetime) {
     DateTime min(2000, 1, 1, 12, 1);
     DateTime max(2001, 1, 1, 12, 0);
     expr::ExpressionPtr what_dt =
@@ -224,7 +224,7 @@ TEST_P(db_rdb_Query_test, test_filter_by_combined_datetime) {
         )->parentheses();
 
     query.filter(what_dt->between(xpr.datetime(min), xpr.datetime(max)));
-    shared_ptr<ResultSet> r = query.execute();
+    shared_ptr<FileResult> r = query.execute();
 
     ASSERT_EQ(3, r->size());
 
@@ -233,9 +233,9 @@ TEST_P(db_rdb_Query_test, test_filter_by_combined_datetime) {
     EXPECT_EQ(fe4->id(), r->get(2)->id());
 }
 
-TEST_P(db_rdb_Query_test, test_filter_by_wmo_code) {
+TEST_P(db_rdb_FileQuery_test, test_filter_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("what/source:WMO");
-    shared_ptr<ResultSet> r =
+    shared_ptr<FileResult> r =
         query.filter(wmo_code->eq(xpr.string("02666")))
              .execute();
 
@@ -245,9 +245,9 @@ TEST_P(db_rdb_Query_test, test_filter_by_wmo_code) {
     EXPECT_EQ(fe4->id(), r->get(1)->id());
 }
 
-TEST_P(db_rdb_Query_test, test_filter_by_node_or_node) {
+TEST_P(db_rdb_FileQuery_test, test_filter_by_node_or_node) {
     expr::AttributePtr node = xpr.attribute("what/source:node");
-    shared_ptr<ResultSet> r =
+    shared_ptr<FileResult> r =
         query.filter(node->eq(xpr.string("seang"))->or_(node->eq(xpr.string("sekkr"))))
              .execute();
     ASSERT_EQ(r->size(), 5);
@@ -259,16 +259,16 @@ TEST_P(db_rdb_Query_test, test_filter_by_node_or_node) {
     EXPECT_EQ(fe5->id(), r->get(4)->id());
 }
 
-TEST_P(db_rdb_Query_test, test_filter_by_node_and_node) {
+TEST_P(db_rdb_FileQuery_test, test_filter_by_node_and_node) {
     expr::AttributePtr node = xpr.attribute("what/source:node");
-    shared_ptr<ResultSet> r =
+    shared_ptr<FileResult> r =
         query.filter(node->eq(xpr.string("seang"))->and_(node->eq(xpr.string("sekkr"))))
              .execute();
     EXPECT_EQ(0, r->size());
 }
 
-TEST_P(db_rdb_Query_test, test_filter_by_place) {
-    shared_ptr<ResultSet> r =
+TEST_P(db_rdb_FileQuery_test, test_filter_by_place) {
+    shared_ptr<FileResult> r =
         query.filter(xpr.attribute("what/source:PLC")->eq(xpr.string("Ängelholm")))
              .execute();
 
@@ -279,13 +279,13 @@ TEST_P(db_rdb_Query_test, test_filter_by_place) {
     EXPECT_EQ(fe5->id(), r->get(2)->id());
 }
 
-TEST_P(db_rdb_Query_test, test_is_stored) {
+TEST_P(db_rdb_FileQuery_test, test_is_stored) {
     bool result = false;
     ASSERT_NO_THROW(result = db->is_stored(td1));
     EXPECT_TRUE(result);
 }
 
-TEST_P(db_rdb_Query_test, test_has_nx_file) {
+TEST_P(db_rdb_FileQuery_test, test_has_nx_file) {
     bool result = false;
     oh5::hl::HlFile td("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
     ASSERT_NO_THROW(result = db->is_stored(td));
@@ -293,8 +293,8 @@ TEST_P(db_rdb_Query_test, test_has_nx_file) {
 }
 
 /*
-TEST_P(db_rdb_Query_test, test_query_file_id) {
-    shared_ptr<ResultSet> r = 
+TEST_P(db_rdb_FileQuery_test, test_query_file_id) {
+    shared_ptr<FileResult> r = 
         query.fetch(xpr.attribute("file:id"))
              .filter(xpr.attribute("file:path")->eq(xpr.string("td1")))
              .execute();
@@ -304,14 +304,14 @@ TEST_P(db_rdb_Query_test, test_query_file_id) {
 */
 
 /*
-TEST_P(db_rdb_Query_test, test_duplicate_fetch_throws) {
+TEST_P(db_rdb_FileQuery_test, test_duplicate_fetch_throws) {
     query.fetch(xpr.attribute("file:path"));
     EXPECT_THROW(query.fetch(xpr.attribute("file:path")), duplicate_entry);
 }
 */
 
-TEST_P(db_rdb_Query_test, test_query_like) {
-    shared_ptr<ResultSet> r =
+TEST_P(db_rdb_FileQuery_test, test_query_like) {
+    shared_ptr<FileResult> r =
         query.filter(xpr.attribute("what/source:node")->like("sea*"))
              .execute();
     ASSERT_EQ(3, r->size());
@@ -322,8 +322,8 @@ TEST_P(db_rdb_Query_test, test_query_like) {
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1
-INSTANTIATE_TEST_CASE_P(db_rdb_Query_test_p,
-                        db_rdb_Query_test,
+INSTANTIATE_TEST_CASE_P(db_rdb_FileQuery_test_p,
+                        db_rdb_FileQuery_test,
                         ::testing::ValuesIn(test_dsns));
 #endif // BRFC_TEST_DSN_COUNT
 

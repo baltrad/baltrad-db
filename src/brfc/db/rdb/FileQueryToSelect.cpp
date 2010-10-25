@@ -17,14 +17,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/db/rdb/QueryToSelect.hpp>
+#include <brfc/db/rdb/FileQueryToSelect.hpp>
 
 #include <boost/foreach.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/StringList.hpp>
 
-#include <brfc/db/Query.hpp>
+#include <brfc/db/FileQuery.hpp>
 #include <brfc/db/rdb/AttributeMapper.hpp>
 #include <brfc/db/rdb/Model.hpp>
 
@@ -49,7 +49,7 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
-QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
+FileQueryToSelect::FileQueryToSelect(const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
         , model_(&Model::instance())
@@ -67,9 +67,9 @@ QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
 }
 
 sql::SelectPtr
-QueryToSelect::transform(const Query& query,
+FileQueryToSelect::transform(const FileQuery& query,
                          const AttributeMapper& mapper) {
-    QueryToSelect rpl(&mapper);
+    FileQueryToSelect rpl(&mapper);
 
     sql::SelectPtr select = sql::Select::create();
     select->distinct(true);
@@ -90,7 +90,7 @@ QueryToSelect::transform(const Query& query,
 
 
 sql::ColumnPtr
-QueryToSelect::source_attr_column(expr::Attribute& attr) {
+FileQueryToSelect::source_attr_column(expr::Attribute& attr) {
     String key = attr.name().split(":").at(1);
     if (key == "name" or key == "node") {
         // sources is joined by default
@@ -120,14 +120,14 @@ QueryToSelect::source_attr_column(expr::Attribute& attr) {
 }
 
 sql::ColumnPtr
-QueryToSelect::specialized_attr_column(expr::Attribute& attr) {
+FileQueryToSelect::specialized_attr_column(expr::Attribute& attr) {
     Mapping mapping = mapper_->mapping(attr.name());
     // specializations are only in bdb_files, already in from clause
     return mapping.column;
 }
 
 sql::ColumnPtr
-QueryToSelect::plain_attr_column(expr::Attribute& attr) {
+FileQueryToSelect::plain_attr_column(expr::Attribute& attr) {
     String name = attr.name();
     Mapping mapping = mapper_->mapping(name);
     
@@ -157,7 +157,7 @@ QueryToSelect::plain_attr_column(expr::Attribute& attr) {
 }
 
 void
-QueryToSelect::operator()(expr::Attribute& attr) {
+FileQueryToSelect::operator()(expr::Attribute& attr) {
     String name = attr.name();
     
     sql::ColumnPtr column;
@@ -174,7 +174,7 @@ QueryToSelect::operator()(expr::Attribute& attr) {
 }
 
 void
-QueryToSelect::join_attrs() {
+FileQueryToSelect::join_attrs() {
     // join attrs if not already joined
     if (not from_->contains(attrs_)) {
         from_ = from_->join(attrs_,
@@ -204,7 +204,7 @@ replace_pattern(sql::ExpressionPtr expr) {
 } // namespace anonymous
 
 void
-QueryToSelect::operator()(expr::BinaryOperator& op) {
+FileQueryToSelect::operator()(expr::BinaryOperator& op) {
     visit(*op.lhs(), *this);
     visit(*op.rhs(), *this);
     sql::ExpressionPtr rhs = pop();
@@ -217,30 +217,30 @@ QueryToSelect::operator()(expr::BinaryOperator& op) {
 
 /*
 void
-QueryToSelect::operator()(Column& col) {
+FileQueryToSelect::operator()(Column& col) {
     push(col.shared_from_this());
 }
 */
 
 void
-QueryToSelect::operator()(expr::Label& label) {
+FileQueryToSelect::operator()(expr::Label& label) {
     visit(*label.expression(), *this);
     push(sql::Label::create(pop(), label.name()));
 }
 
 void
-QueryToSelect::operator()(expr::Literal& literal) {
+FileQueryToSelect::operator()(expr::Literal& literal) {
     push(sql::Literal::create(literal.value()));
 }
 
 void
-QueryToSelect::operator()(expr::Parentheses& parentheses) {
+FileQueryToSelect::operator()(expr::Parentheses& parentheses) {
     visit(*parentheses.expression(), *this);
     push(sql::Parentheses::create(pop()));
 }
 
 sql::ExpressionPtr
-QueryToSelect::pop() {
+FileQueryToSelect::pop() {
     BRFC_ASSERT(!stack_.empty());
     sql::ExpressionPtr p = stack_.back();
     stack_.pop_back();
@@ -249,7 +249,7 @@ QueryToSelect::pop() {
 }
 
 void
-QueryToSelect::push(sql::ExpressionPtr p) {
+FileQueryToSelect::push(sql::ExpressionPtr p) {
     BRFC_ASSERT(p);
     stack_.push_back(p);
 }

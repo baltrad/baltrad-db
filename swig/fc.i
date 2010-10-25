@@ -34,7 +34,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/Time.hpp>
     #include <brfc/TimeDelta.hpp>
     #include <brfc/Variant.hpp>
-    #include <brfc/db/Query.hpp>
+    #include <brfc/db/FileQuery.hpp>
 %}
 
 %typemap("javapackage") brfc::oh5::File,
@@ -170,7 +170,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %typemap(javaimports) brfc::FileCatalog, brfc::FileCatalog* %{
     import eu.baltrad.fc.db.Database;
     import eu.baltrad.fc.db.FileEntry;
-    import eu.baltrad.fc.db.Query;
+    import eu.baltrad.fc.db.FileQuery;
     import eu.baltrad.fc.oh5.PhysicalFile;
 %}
 

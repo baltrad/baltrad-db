@@ -17,54 +17,47 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_DB_RESULT_SET_HPP
-#define BRFC_DB_RESULT_SET_HPP
+#include <brfc/db/FileQuery.hpp>
 
-#include <vector>
+#include <boost/foreach.hpp>
 
-#include <boost/noncopyable.hpp>
+#include <brfc/exceptions.hpp>
 
-#include <brfc/smart_ptr.hpp>
+#include <brfc/db/Database.hpp>
+#include <brfc/db/FileResult.hpp>
+
+#include <brfc/expr/Attribute.hpp>
+#include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace db {
 
-class FileEntry;
+FileQuery::FileQuery(Database* db)
+        : db_(db)
+        , filter_() {
+}
 
-/**
- * @brief ABC for Query results
- */
-class ResultSet : public boost::noncopyable {
-  public:
-    ResultSet()
-        : entries_() {
-    }
+FileQuery::FileQuery(const FileQuery& other)
+        : db_(other.db_)
+        , filter_(other.filter_) {
 
-    /**
-     * @brief destructor
-     */
-    virtual ~ResultSet() { }
+}
 
-    /**
-     * @brief get number of rows in result
-     */
-    int size() {
-        return entries_.size();
-    }
-
-    shared_ptr<FileEntry> get(int i) {
-        return entries_.at(i);
-    }
-
-    void add(shared_ptr<FileEntry> e) {
-        entries_.push_back(e);
-    }
+FileQuery::~FileQuery() {
     
-  private:
-    std::vector<shared_ptr<FileEntry> > entries_;
-};
+}
+
+FileQuery&
+FileQuery::filter(expr::ExpressionPtr expr) {
+    filter_ = filter_ ? filter_->and_(expr) : expr;
+    return *this;
+}
+
+shared_ptr<FileResult>
+FileQuery::execute() {
+    return db_->query(*this);
+}
 
 } // namespace db
 } // namespace brfc
-
-#endif // BRFC_RESULT_SET_HPP
