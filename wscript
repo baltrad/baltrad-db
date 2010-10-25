@@ -95,6 +95,10 @@ def set_options(opt):
                    callback=_store_bool, type="string", nargs=1,
                    default=True, metavar="BOOL",
                    help="build tests [default: %default]")
+    grp.add_option("--build_bdbtool", action="callback",
+                   callback=_store_bool, type="string", nargs=1,
+                   default=False, metavar="BOOL",
+                   help="build bdbtool [default: %default]")
     grp.add_option("--test_db_dsn", action="append",
                    dest="test_db_dsns", metavar="DSN",
                    default=[],
@@ -129,6 +133,7 @@ def configure(conf):
 
     env.build_java = Options.options.build_java
     env.build_tests = Options.options.build_tests
+    env.build_bdbtool = Options.options.build_bdbtool
     
     if env.build_java:
         conf.check_tool("ant", tooldir="misc/waf_tools")
@@ -198,6 +203,16 @@ def configure(conf):
         libpath=env.boost_lib_dir,
         uselib_store="BOOST_FILESYSTEM",
         mandatory=True,
+    )
+
+    conf.check_cxx(
+        header_name="boost/program_options.hpp",
+        lib="boost_program_options",
+        uselib="BOOST_PROGRAM_OPTIONS",
+        includes=env.boost_inc_dir,
+        libpath=env.boost_lib_dir,
+        uselib_store="BOOST_PROGRAM_OPTIONS",
+        mandatory=env.build_bdbtool,
     )
 
     boost_headers = (
@@ -286,6 +301,9 @@ def build(bld):
 
     if env.build_java:
         _build_java_wrapper(bld)
+    
+    if env.build_bdbtool:
+        _build_bdbtool(bld)
 
     if env.build_tests:
         _build_gtest_tests(bld)
@@ -322,6 +340,7 @@ def _build_shared_library(bld):
         source=sources,
         target="brfc",
         includes="src",
+        export_incdirs="src",
         uselib=[
             "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM",
             "HDF5", "HLHDF",
@@ -329,6 +348,22 @@ def _build_shared_library(bld):
             "PQXX",
         ],
         install_path="${install_root}/lib",
+    )
+
+def _build_bdbtool(bld):
+    bld.add_group("build_bdbtool")
+
+    sources = sorted(bld.path.ant_glob("bin/bdbtool/**/*.cpp").split(" "))
+    bld(
+        features="cxx cprogram",
+        source=sources,
+        target="bdbtool",
+        includes="bin",
+        uselib=[
+            "BOOST", "BOOST_PROGRAM_OPTIONS"
+        ],
+        uselib_local=["brfc"],
+        install_path="${install_root}/bin",
     )
 
 def _strlit(var):
