@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %module fc_test
 
 %include "common.i"
-%import "fc_oh5.i"
 
 %{
     #include <brfc/test/TestSwig.hpp>
@@ -28,6 +27,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/test/TempH5File.hpp>
     #include <brfc/test/TempDir.hpp>
 %}
+
+%import "fc_oh5.i"
 
 // Enable the JNI class to load the required native library.
 %pragma(java) jniclasscode=%{

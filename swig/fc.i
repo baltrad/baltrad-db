@@ -20,9 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %module(directors="1") fc
 
 %include "common.i"
-%import "fc_oh5.i"
-%import "fc_db.i"
-%import "fc_expr.i"
 
 %{
     #include <brfc/exceptions.hpp>
@@ -30,12 +27,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/FileNamer.hpp>
     #include <brfc/Date.hpp>
     #include <brfc/DateTime.hpp>
+    #include <brfc/LocalStorage.hpp>
+    #include <brfc/CacheDirStorage.hpp>
     #include <brfc/StringList.hpp>
     #include <brfc/Time.hpp>
     #include <brfc/TimeDelta.hpp>
     #include <brfc/Variant.hpp>
+    #include <brfc/db/AttributeQuery.hpp>
     #include <brfc/db/FileQuery.hpp>
 %}
+
+%import "fc_db.i"
+%import "fc_expr.i"
+%import "fc_oh5.i"
 
 %typemap("javapackage") brfc::oh5::File,
                         brfc::oh5::File*,
@@ -94,6 +98,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::DateTime::operator=;
 %ignore brfc::DateTime::operator+=;
 %ignore brfc::DateTime::operator!=;
+%ignore brfc::DateTime::date() const; // use non-const
+%ignore brfc::DateTime::time() const; // use non-const
 
 %rename(add) brfc::DateTime::operator+;
 
@@ -138,25 +144,25 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::StringList::front(); // nonconst
 %ignore brfc::StringList::back(); // nonconst
 
-/**
+/***
  * brfc::Variant
  */
+%ignore brfc::Variant::Variant(unsigned int);
 %ignore brfc::Variant::Variant(const char* value);
 %ignore brfc::Variant::operator=;
-// deprecated
-%ignore brfc::Variant::is_long;
-%ignore brfc::Variant::longlong;
 
-%typemap(javacode) brfc::Variant %{
-  @Deprecated
-  public boolean is_long() {
-    return fcJNI.Variant_is_int64(swigCPtr, this);
-  }
-    
-  @Deprecated
-  public long longlong() {
-    return fcJNI.Variant_int64_(swigCPtr, this);
-  }
+/***
+ * brfc::LocalStorage
+ **/
+%typemap(javaimports) brfc::LocalStorage, brfc::LocalStorage* %{
+    import eu.baltrad.fc.db.FileEntry;
+%}
+
+/***
+ * brfc::CacheDirStorage
+ **/
+%typemap(javaimports) brfc::CacheDirStorage, brfc::CacheDirStorage* %{
+    import eu.baltrad.fc.db.FileEntry;
 %}
 
 %pragma(java) jniclassimports=%{
@@ -168,6 +174,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 %typemap(javaimports) brfc::FileCatalog, brfc::FileCatalog* %{
+    import eu.baltrad.fc.db.AttributeQuery;
     import eu.baltrad.fc.db.Database;
     import eu.baltrad.fc.db.FileEntry;
     import eu.baltrad.fc.db.FileQuery;
@@ -192,6 +199,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %include <brfc/FileNamer.hpp>
 %include <brfc/FileCatalog.hpp>
+%include <brfc/LocalStorage.hpp>
+%include <brfc/CacheDirStorage.hpp>
 %include <brfc/TimeDelta.hpp>
 %include <brfc/Date.hpp>
 %include <brfc/Time.hpp>

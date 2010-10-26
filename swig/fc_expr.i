@@ -21,8 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %include "common.i"
 
-%import "fc.i"
-
 %{
     #include <brfc/expr/fwd.hpp>
     #include <brfc/expr/Expression.hpp>
@@ -34,6 +32,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/expr/BinaryOperator.hpp>
     #include <brfc/expr/Literal.hpp>
 %}
+
+%import "fc.i"
 
 // Enable the JNI class to load the required native library.
 %pragma(java) jniclasscode=%{
@@ -98,9 +98,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 SWIG_SHARED_PTR(Expression,
                 brfc::expr::Expression)
-SWIG_SHARED_PTR_DERIVED(BinaryOperator,
-                        brfc::expr::Expression,
-                        brfc::expr::BinaryOperator);
 SWIG_SHARED_PTR_DERIVED(BinaryOperator,
                         brfc::expr::Expression,
                         brfc::expr::BinaryOperator);

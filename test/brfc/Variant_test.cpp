@@ -39,7 +39,6 @@ TEST(Variant_test, int64_) {
     EXPECT_FALSE(v.is_null());
     EXPECT_EQ(v.int64_(), 10);
     EXPECT_EQ(v.type(), Variant::INT64);
-    EXPECT_EQ(v.type(), Variant::LONGLONG); // XXX: deprecated
     EXPECT_THROW(v.string(), value_error);
 }
 

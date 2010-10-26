@@ -72,7 +72,7 @@ public class TestFileCatalog extends TestCase {
 
   public void testStoreNXFile() {
     try {
-      FileEntry f = fc.store"/path/to/nxfile");
+      FileEntry f = fc.store("/path/to/nxfile");
       fail("expected FileSystemError");
     } catch (FileSystemError e) {
       // pass

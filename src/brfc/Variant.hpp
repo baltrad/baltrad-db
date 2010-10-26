@@ -37,7 +37,6 @@ class Variant {
         NONE,
         STRING,
         INT64,
-        LONGLONG = INT64, ///< XXX: deprecated
         DOUBLE,
         BOOL,
         DATE,
@@ -176,12 +175,6 @@ class Variant {
 
     /**
      * @brief test for INT64 variant
-     * @deprecated use is_int64()
-     */
-    DEPRECATED(bool is_long() const);
-    
-    /**
-     * @brief test for INT64 variant
      */
     bool is_int64() const;
     
@@ -220,13 +213,6 @@ class Variant {
      */
     const String& string() const;
     
-    /**
-     * @brief access INT64 variant
-     * @throw value_error if type() != INT64
-     * @deprecated use int64_()
-     */
-    DEPRECATED(long long longlong() const);
-
     /**
      * @brief access INT64 variant
      * @throw value_error if type() != INT64

@@ -20,15 +20,21 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %module fc_db
 
 %include "common.i"
-%import "fc_oh5.i"
-%import "fc_expr.i"
 
 %{
+    #include <brfc/oh5/File.hpp>
+    #include <brfc/Variant.hpp>
+    #include <brfc/db/AttributeQuery.hpp>
+    #include <brfc/db/AttributeResult.hpp>
     #include <brfc/db/Database.hpp>
     #include <brfc/db/FileEntry.hpp>
     #include <brfc/db/FileQuery.hpp>
     #include <brfc/db/FileResult.hpp>
 %}
+
+%import "fc.i"
+%import "fc_oh5.i"
+%import "fc_expr.i"
 
 // Enable the JNI class to load the required native library.
 %pragma(java) jniclasscode=%{
@@ -45,14 +51,29 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 /***
  * brfc::db::FileEntry
  */
-SWIG_SHARED_PTR(FileEntry, brfc::db::FileEntry);
+SWIG_SHARED_PTR_DERIVED(FileEntry,
+                        brfc::oh5::File,
+                        brfc::db::FileEntry);
 
-/***
- * brfc::db::FileResult
- */
-SWIG_SHARED_PTR(FileResult, brfc::db::FileResult);
-%ignore brfc::db::FileResult::FileResult;
-%ignore brfc::db::FileResult::operator=;
+%typemap(javaimports) brfc::db::FileEntry, brfc::db::FileEntry* %{
+    import eu.baltrad.fc.oh5.File;
+    import eu.baltrad.fc.oh5.Source;
+%}
+
+%typemap(javabody_derived) brfc::db::FileEntry %{
+  private long swigCPtr;
+  private boolean swigCMemOwnDerived;
+
+  public $javaclassname(long cPtr, boolean cMemoryOwn) {
+    super($imclassname.$javaclassname_SWIGSharedPtrUpcast(cPtr), true);
+    swigCMemOwnDerived = cMemoryOwn;
+    swigCPtr = cPtr;
+  }
+
+  public static long getCPtr($javaclassname obj) {
+    return (obj == null) ? 0 : obj.swigCPtr;
+  }
+%}
 
 /***
  * brfc::db::FileQuery
@@ -66,9 +87,41 @@ SWIG_SHARED_PTR(FileResult, brfc::db::FileResult);
 %}
 
 /***
+ * brfc::db::FileResult
+ */
+SWIG_SHARED_PTR(FileResult, brfc::db::FileResult);
+%ignore brfc::db::FileResult::FileResult;
+%ignore brfc::db::FileResult::operator=;
+
+
+/***
+ * brfc::db::AttributeQuery
+ */
+%ignore brfc::db::AttributeQuery::order() const;
+%ignore brfc::db::AttributeQuery::fetch() const;
+%typemap(javaimports) brfc::db::AttributeQuery, brfc::db::AttributeQuery* %{
+    import eu.baltrad.fc.expr.AttributeExpr;
+    import eu.baltrad.fc.expr.Expression;
+    import eu.baltrad.fc.expr.Function;
+%}
+
+/**
+ * brfc::db::AttributeResult
+ */
+SWIG_SHARED_PTR(AttributeResult, brfc::db::AttributeResult);
+
+%typemap(javaimports) brfc::db::AttributeResult, brfc::db::AttributeResult* %{
+    import eu.baltrad.fc.Date;
+    import eu.baltrad.fc.Time;
+    import eu.baltrad.fc.Variant;
+%}
+
+
+/***
  * brfc::db::Database
  */
 SWIG_SHARED_PTR(Database, brfc::db::Database);
+
 %typemap(javaimports) brfc::db::Database, brfc::db::Database* %{
     import eu.baltrad.fc.oh5.PhysicalFile;
     import eu.baltrad.fc.oh5.Source;
@@ -76,8 +129,7 @@ SWIG_SHARED_PTR(Database, brfc::db::Database);
 
 // make constructors for SWIG_SHARED_PTR public
 %typemap(javabody) brfc::db::Database,
-                   brfc::db::Expression,
-                   brfc::db::FileEntry %{
+                   brfc::db::Expression %{
   private long swigCPtr;
   private boolean swigCMemOwnBase;
 
@@ -91,7 +143,8 @@ SWIG_SHARED_PTR(Database, brfc::db::Database);
   }
 %}
 
-%typemap(javabody) brfc::db::FileQuery %{ 
+%typemap(javabody) brfc::db::AttributeQuery,
+                   brfc::db::FileQuery %{ 
   private long swigCPtr;
   protected boolean swigCMemOwn;
 
@@ -107,14 +160,17 @@ SWIG_SHARED_PTR(Database, brfc::db::Database);
 
 
 %pragma(java) jniclassimports=%{
-    import eu.baltrad.fc.expr.Expression;
     import eu.baltrad.fc.expr.AttributeExpr;
     import eu.baltrad.fc.expr.AttributeExprVector;
+    import eu.baltrad.fc.expr.Expression;
+    import eu.baltrad.fc.expr.Function;
     import eu.baltrad.fc.oh5.File;
     import eu.baltrad.fc.oh5.PhysicalFile;
     import eu.baltrad.fc.oh5.Source;
 %}
 
+%include <brfc/db/AttributeResult.hpp>
+%include <brfc/db/AttributeQuery.hpp>
 %include <brfc/db/FileResult.hpp>
 %include <brfc/db/Database.hpp>
 %include <brfc/db/FileEntry.hpp>

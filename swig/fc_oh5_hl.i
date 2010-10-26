@@ -38,6 +38,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   }
 %}
 
+SWIG_SHARED_PTR_DERIVED(HlFile,
+                        brfc::oh5::PhysicalFile,
+                        brfc::oh5::hl::HlFile);
+
 %typemap(javaimports) brfc::oh5::hl::HlFile %{
     import eu.baltrad.fc.oh5.PhysicalFile;
     import eu.baltrad.fc.Date;

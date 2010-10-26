@@ -27,7 +27,6 @@ namespace brfc {
 
 bool Variant::is_null() const { return type_ == NONE; }
 bool Variant::is_string() const { return type_ == STRING; }
-bool Variant::is_long() const { return is_int64(); }
 bool Variant::is_int64() const { return type_ == INT64; }
 bool Variant::is_double() const { return type_ == DOUBLE; }
 bool Variant::is_bool() const { return type_ == BOOL; }
@@ -38,12 +37,6 @@ bool Variant::is_time() const { return type_ == TIME; }
 const String&
 Variant::string() const {
     return get<const String&>();
-}
-
-long long
-Variant::longlong() const {
-    return int64_();
-    return get<long long>();
 }
 
 long long
