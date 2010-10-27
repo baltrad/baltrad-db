@@ -58,7 +58,7 @@ CacheDirStorage::check_dir() const {
 
 String
 CacheDirStorage::entry_path(const db::FileEntry& entry) const {
-    return dir_ + "/" + String::number(entry.id()) + ".h5";
+    return dir_ + "/" + entry.uuid() + ".h5";
 }
 
 String

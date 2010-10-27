@@ -69,6 +69,7 @@ source_kvs = Table("bdb_source_kvs", meta,
 
 files = Table("bdb_files", meta,
     Column("id", Integer, primary_key=True),
+    Column("uuid", Text, nullable=False, unique=True),
     Column("hash", Text, nullable=False),
     Column("stored_at", DateTime, nullable=False),
     Column("object", Text, nullable=False),
@@ -314,7 +315,8 @@ attribute_entries = [
 ]
 
 virtual_attributes = [
-    ("file:id",          "int",      files.c.id),
+    ("file:uuid",        "string",   files.c.uuid),
+    ("file:stored_at",   "datetime", files.c.stored_at),
     ("what/source:name", "string",   sources.c.name),
     ("what/source:node", "string",   sources.c.name),
 ]

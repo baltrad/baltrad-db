@@ -54,7 +54,7 @@ class CacheDirStorage_test : public ::testing::Test {
     virtual void SetUp() {
         tmpfile.write(file);
         file.path(tmpfile.path());
-        ON_CALL(entry, do_id()).WillByDefault(Return(1));
+        ON_CALL(entry, do_uuid()).WillByDefault(Return("uuid"));
     }
     
     test::TempDir dir;

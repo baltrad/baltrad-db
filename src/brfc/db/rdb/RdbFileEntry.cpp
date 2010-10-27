@@ -41,6 +41,7 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb, long long id)
         , lo_id_(0)
         , source_id_(0)
         , source_()
+        , uuid_()
         , hash_()
         , root_(this) {
     BRFC_ASSERT(rdb_ != 0);
@@ -52,6 +53,13 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb, long long id)
 
 RdbFileEntry::~RdbFileEntry() {
 
+}
+
+String
+RdbFileEntry::do_uuid() const {
+    if (id_ != 0 and uuid_ == "")
+        load();
+    return uuid_;
 }
 
 long long

@@ -10,6 +10,7 @@ CREATE TABLE bdb_sources (
 
 CREATE TABLE bdb_files (
 	id SERIAL NOT NULL, 
+	uuid TEXT NOT NULL, 
 	hash TEXT NOT NULL, 
 	stored_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
 	object TEXT NOT NULL, 
@@ -17,8 +18,9 @@ CREATE TABLE bdb_files (
 	n_time TIME WITHOUT TIME ZONE NOT NULL, 
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id), 
-	 UNIQUE (hash, source_id)
+	 UNIQUE (uuid), 
+	 UNIQUE (hash, source_id), 
+	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
 )
 
 ;
@@ -40,8 +42,8 @@ CREATE TABLE bdb_nodes (
 	type INTEGER, 
 	file_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE, 
-	 FOREIGN KEY(parent_id) REFERENCES bdb_nodes (id)
+	 FOREIGN KEY(parent_id) REFERENCES bdb_nodes (id), 
+	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE
 )
 
 ;
@@ -192,9 +194,10 @@ INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, 
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (108, 'what/undetect', 'real', 'bdb_attribute_values', 'value_real', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (109, 'CLASS', 'string', 'bdb_attribute_values', 'value_str', False);
 INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (110, 'IMAGE_VERSION', 'string', 'bdb_attribute_values', 'value_str', False);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (111, 'file:id', 'int', 'bdb_files', 'id', True);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (112, 'what/source:name', 'string', 'bdb_sources', 'name', True);
-INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (113, 'what/source:node', 'string', 'bdb_sources', 'name', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (111, 'file:uuid', 'string', 'bdb_files', 'uuid', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (112, 'file:stored_at', 'datetime', 'bdb_files', 'stored_at', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (113, 'what/source:name', 'string', 'bdb_sources', 'name', True);
+INSERT INTO bdb_attributes (id, name, converter, storage_table, storage_column, ignore_in_hash) VALUES (114, 'what/source:node', 'string', 'bdb_sources', 'name', True);
 INSERT INTO bdb_sources (id, name) VALUES (1, 'dk');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (1, 'ORG', 94);
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (1, 'CTY', 611);

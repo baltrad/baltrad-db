@@ -31,7 +31,7 @@ namespace db {
 
 class MockFileEntry : public FileEntry {
   public:
-    MOCK_CONST_METHOD0(do_id, long long());
+    MOCK_CONST_METHOD0(do_uuid, String());
     MOCK_CONST_METHOD1(do_write_to_file, void(const String&));
     MOCK_CONST_METHOD0(do_source, const oh5::Source&());
     MOCK_CONST_METHOD0(do_hash, String());

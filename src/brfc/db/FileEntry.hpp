@@ -36,11 +36,9 @@ class FileEntry : public oh5::File {
     virtual ~FileEntry() { }
 
     /**
-     * @brief file id
+     * @brief universally unique identifier
      */
-    long long id() const {
-        return do_id();
-    }
+    String uuid() const { return do_uuid(); }
     
     void write_to_file(const String& path) const {
         do_write_to_file(path);
@@ -53,7 +51,7 @@ class FileEntry : public oh5::File {
     DateTime stored_at() const { return do_stored_at(); }
 
   protected:
-    virtual long long do_id() const = 0;
+    virtual String do_uuid() const = 0;
 
     virtual void do_write_to_file(const String& path) const = 0;
 

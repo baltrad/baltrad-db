@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/RdbHelper.hpp>
 
 #include <boost/foreach.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/FileHasher.hpp>
@@ -219,9 +221,17 @@ RdbHelper::insert_file(RdbFileEntry& entry,
 
     long long source_id = select_source_id(file.source());
 
+    boost::uuids::basic_random_generator<boost::mt19937> gen;
+    boost::uuids::uuid u = gen();
+
+    std::stringstream ss;
+    ss << u;
+    String uuid(ss.str());
+
     DateTime stored_at = DateTime::utc_now();
     stored_at.time().msec(0);
- 
+    
+    qry->value("uuid", sql_.string(uuid));
     qry->value("hash", sql_.string(hash)); 
     qry->value("source_id", sql_.int64_(source_id));
     qry->value("stored_at", sql_.datetime(stored_at));
@@ -235,6 +245,7 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     shared_ptr<sql::Result> result = conn().execute(*qry);
 
     long long file_id = last_id(*result);
+    entry.uuid(uuid);
     entry.id(file_id);
     entry.source_id(source_id);
     entry.hash(hash);
@@ -259,6 +270,7 @@ void
 RdbHelper::load_file(RdbFileEntry& entry) {
     sql::SelectPtr qry = sql::Select::create();
     qry->from(m_.files->join(m_.file_content));
+    qry->what(m_.files->column("uuid"));
     qry->what(m_.files->column("source_id"));
     qry->what(m_.files->column("hash"));
     qry->what(m_.files->column("stored_at"));
@@ -270,7 +282,7 @@ RdbHelper::load_file(RdbFileEntry& entry) {
     if (not result->next())
         throw brfc::lookup_error("no RdbFileEntry by id: "
                                  + String::number(entry.id()).to_std_string());
-
+    entry.uuid(result->value_at("uuid").string());
     entry.source_id(result->value_at("source_id").int64_());
     entry.hash(result->value_at("hash").string());
     entry.lo_id(result->value_at("lo_id").int64_());

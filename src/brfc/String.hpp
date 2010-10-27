@@ -266,6 +266,11 @@ class String {
 String operator+(const char* s1, const String& s2);
 bool operator==(const char* s1, const String& s2);
 
+inline
+bool operator!=(const char* s1, const String& s2) {
+    return not (s1 == s2);
+}
+
 } // namespace brfc
 
 std::ostream&

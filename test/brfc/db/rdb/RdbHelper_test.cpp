@@ -87,6 +87,7 @@ TEST_P(db_rdb_RdbHelper_test, test_insert_file) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
 
     EXPECT_GT(entry.id(), 0);
+    EXPECT_TRUE("" != entry.uuid());
     EXPECT_GT(entry.source_id(), 0);
     EXPECT_EQ("hash", entry.hash());
     EXPECT_NE(DateTime(), entry.stored_at());
@@ -141,6 +142,7 @@ TEST_P(db_rdb_RdbHelper_test, test_load_file) {
     EXPECT_GT(e2.source_id(), 0);
     EXPECT_EQ(entry.source_id(), e2.source_id());
     EXPECT_EQ("hash", e2.hash());
+    EXPECT_EQ(entry.uuid(), e2.uuid());
     EXPECT_NE(DateTime(), e2.stored_at());
     EXPECT_EQ(entry.stored_at(), e2.stored_at());
     EXPECT_GT(e2.lo_id(), 0);

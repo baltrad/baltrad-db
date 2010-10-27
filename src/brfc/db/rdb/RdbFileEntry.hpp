@@ -54,12 +54,19 @@ class RdbFileEntry : public FileEntry {
      */
     virtual ~RdbFileEntry();
 
-    using FileEntry::id;
-    
+    using FileEntry::uuid;
+
+    String uuid(const String& uuid) { return uuid_ = uuid; }
+
     /**
      * @brief set database id
      */
     void id(long long id) { id_ = id; }
+    
+    /**
+     * @brief get database id
+     */
+    long long id() const { return id_; }
     
     /**
      * @brief set bound large object id (file content)
@@ -96,7 +103,7 @@ class RdbFileEntry : public FileEntry {
     void stored_at(const DateTime& dt) { stored_at_ = dt; }
 
   protected:
-    virtual long long do_id() const { return id_; }
+    virtual String do_uuid() const;
 
     virtual void do_write_to_file(const String& path) const;
 
@@ -123,6 +130,7 @@ class RdbFileEntry : public FileEntry {
     long long lo_id_;
     long long source_id_;
     oh5::Source source_;
+    String uuid_;
     String hash_;
     DateTime stored_at_;
     oh5::RootGroup root_;

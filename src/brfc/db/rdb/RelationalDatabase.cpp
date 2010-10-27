@@ -173,9 +173,9 @@ RelationalDatabase::populate_hasher() {
 
 bool
 RelationalDatabase::do_remove(const FileEntry& entry) {
-    String qry("DELETE FROM bdb_files WHERE id = :id");
+    String qry("DELETE FROM bdb_files WHERE uuid = :uuid");
     sql::BindMap binds;
-    binds.add(":id", Variant(entry.id()));
+    binds.add(":uuid", Variant(entry.uuid()));
     shared_ptr<sql::Result> r = conn().execute(qry, binds);
     return r->affected_rows();
 }
