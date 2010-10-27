@@ -56,6 +56,7 @@ SWIG_SHARED_PTR_DERIVED(FileEntry,
                         brfc::db::FileEntry);
 
 %typemap(javaimports) brfc::db::FileEntry, brfc::db::FileEntry* %{
+    import eu.baltrad.fc.DateTime;
     import eu.baltrad.fc.oh5.File;
     import eu.baltrad.fc.oh5.Source;
 %}
