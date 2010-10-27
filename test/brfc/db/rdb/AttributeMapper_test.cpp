@@ -46,10 +46,10 @@ class db_rdb_AttributeMapper_test : public testing::Test {
         t1->add_column("c2");
         t2->add_column("c1");
         t3->add_column("value");
-        mapper.add(Mapping(0, "attr1", "string", t1->column("c1")));
-        mapper.add(Mapping(1, "attr2", "string", t1->column("c2")));
-        mapper.add(Mapping(2, "attr3", "string", t2->column("c1")));
-        mapper.add(Mapping(3, "attr4", "string", t3->column("value")));
+        mapper.add(Mapping("attr1", t1->column("c1")));
+        mapper.add(Mapping("attr2", t1->column("c2")));
+        mapper.add(Mapping("attr3", t2->column("c1")));
+        mapper.add(Mapping("attr4", t3->column("value")));
     }
 
     sql::TablePtr t1, t2, t3;
@@ -61,24 +61,6 @@ TEST_F(db_rdb_AttributeMapper_test, specializations_on) {
     ASSERT_EQ(v.size(), (size_t)2);
     EXPECT_EQ(v.at(0).attribute, "attr1");
     EXPECT_EQ(v.at(1).attribute, "attr2");
-}
-
-TEST_F(db_rdb_AttributeMapper_test, is_specialized) {
-    EXPECT_TRUE(mapper.is_specialized("attr1"));
-    EXPECT_FALSE(mapper.is_specialized("attr4"));
-}
-
-TEST_F(db_rdb_AttributeMapper_test, ignored_in_hash) {
-    StringList l = mapper.ignored_in_hash();
-    EXPECT_EQ(0, l.size());
-    
-    mapper.add(Mapping(4, "attr5", "string", t1->column("c1"), true));
-    mapper.add(Mapping(5, "attr6", "string", t1->column("c1"), true));
-
-    l = mapper.ignored_in_hash();
-    EXPECT_EQ(2, l.size());
-    EXPECT_TRUE(l.contains("attr5"));
-    EXPECT_TRUE(l.contains("attr6"));
 }
 
 } // namespace rdb

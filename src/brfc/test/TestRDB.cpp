@@ -49,7 +49,6 @@ TestRDB::~TestRDB() {
 void
 TestRDB::create() {
     exec_queries_from(String("create.sql"));
-    populate_mapper();
 }
 
 void

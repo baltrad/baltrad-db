@@ -157,8 +157,9 @@ QueryToSelect::source_attr_column(expr::Attribute& attr) {
 
 sql::ColumnPtr
 QueryToSelect::specialized_attr_column(expr::Attribute& attr) {
+    // currently, specialized attributes are only in bdb_files and
+    // bdb_sources. These are already contained in the from clause.
     Mapping mapping = mapper_->mapping(attr.name());
-    // specializations are only in bdb_files, already in from clause
     return mapping.column;
 }
 
@@ -212,7 +213,7 @@ QueryToSelect::operator()(expr::Attribute& attr) {
     sql::ColumnPtr column;
     if (name.starts_with("what/source:")) {
         column = source_attr_column(attr);
-    } else if (mapper_->is_specialized(name)) {
+    } else if (mapper_->has(name)) {
         column = specialized_attr_column(attr);
     } else {
         column = plain_attr_column(attr);

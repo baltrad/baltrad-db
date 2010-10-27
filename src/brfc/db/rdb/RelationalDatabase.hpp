@@ -80,10 +80,6 @@ class RelationalDatabase : public Database {
     
     const AttributeMapper& mapper() const;
 
-    void populate_mapper();
-
-    void populate_hasher();
-
     sql::Connection& conn() const {
         return *conn_;
     }
@@ -106,6 +102,9 @@ class RelationalDatabase : public Database {
     virtual shared_ptr<AttributeResult> do_query(const AttributeQuery& query);
 
   private:
+    void populate_mapper();
+    void populate_hasher();
+
     shared_ptr<sql::Connection> conn_;
     shared_ptr<AttributeMapper> mapper_;
     shared_ptr<FileHasher> file_hasher_;

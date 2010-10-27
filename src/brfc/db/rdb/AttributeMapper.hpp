@@ -37,23 +37,13 @@ namespace rdb {
  * @brief Attribute mapping to database table/column
  */
 struct Mapping {
-    Mapping(int id_,
-            const String& attribute_,
-            const String& type_,
-            sql::ColumnPtr column_,
-            bool ignore_in_hash_=false)
-            : id(id_)
-            , attribute(attribute_)
-            , type(type_)
-            , column(column_)
-            , ignore_in_hash(ignore_in_hash_) {
+    Mapping(const String& attribute_, sql::ColumnPtr column_)
+            : attribute(attribute_)
+            , column(column_) {
     }
     
-    int id; ///< unique id
     String attribute; ///< Attribute name
-    String type; ///< type name of the attribute
     sql::ColumnPtr column; ///< column in the table where value is stored
-    bool ignore_in_hash; ///< ignore this attribute when hashing metadata
 };
 
 /**
@@ -95,16 +85,6 @@ class AttributeMapper {
     void add(const Mapping& mapping);
     
     /**
-     * @brief is Attribute specialized
-     * @param attribute Attribute name
-     * @return true if attribute is found and is specialized
-     * @throw lookup_error if not found
-     *
-     * attribute is specialized if it is stored outside the default table
-     */
-    bool is_specialized(const String& attribute) const;
-    
-    /**
      * @brief get specializations on table
      * @param table table name
      * @return MappingVector for Attributes that have their values stored
@@ -130,8 +110,6 @@ class AttributeMapper {
 
     void clear() { mappings_.clear(); }
 
-    StringList ignored_in_hash() const;
-    
   private:
     typedef std::map<String, Mapping> MappingMap;
 

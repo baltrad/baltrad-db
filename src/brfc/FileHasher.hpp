@@ -65,6 +65,10 @@ class FileHasher {
         ignored_ = ignored;
     }
 
+    void ignore(const String& attribute) {
+        ignored_.push_back(attribute);
+    }
+
     const StringList& ignored() const {
         return ignored_;
     }

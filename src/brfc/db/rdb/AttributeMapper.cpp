@@ -64,12 +64,6 @@ AttributeMapper::has(const String& attribute) const {
     return mappings_.find(attribute) != mappings_.end();
 }
 
-bool
-AttributeMapper::is_specialized(const String& attribute) const {
-    String s = String::from_utf8("bdb_attribute_values");
-    return not mapping(attribute).column->selectable()->name().starts_with(s);
-}
-
 MappingVector
 AttributeMapper::specializations_on(sql::TablePtr table) const {
     MappingVector vec;
@@ -90,17 +84,6 @@ AttributeMapper::mapping(const String& attribute) const {
         throw lookup_error(err.to_utf8());
     }
     return i->second;
-}
-
-StringList
-AttributeMapper::ignored_in_hash() const {
-    StringList ignored;
-    BOOST_FOREACH(const MappingMap::value_type& entry, mappings_) {
-        const Mapping& mapping = entry.second;
-        if (mapping.ignore_in_hash)
-            ignored.append(mapping.attribute);
-    }
-    return ignored;
 }
 
 } // namespace rdb

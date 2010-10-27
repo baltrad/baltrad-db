@@ -59,6 +59,8 @@ RelationalDatabase::RelationalDatabase(const String& dsn_)
         , file_hasher_(new SHA1AttributeHasher())
         , helper_(new RdbHelper(conn_.get(), file_hasher_.get())) {
     conn_->open();
+    populate_mapper();
+    populate_hasher();
 }
 
 RelationalDatabase::RelationalDatabase(shared_ptr<sql::Connection> conn,
@@ -68,6 +70,8 @@ RelationalDatabase::RelationalDatabase(shared_ptr<sql::Connection> conn,
         , file_hasher_(new SHA1AttributeHasher())
         , helper_(helper) {
     BRFC_ASSERT(conn);
+    populate_mapper();
+    populate_hasher();
 }
 
 RelationalDatabase::~RelationalDatabase() {
@@ -145,30 +149,22 @@ RelationalDatabase::do_query(const AttributeQuery& query) {
 
 void
 RelationalDatabase::populate_mapper() {
-    mapper_->clear();
-
     const Model& m = Model::instance();
-    sql::SelectPtr qry = sql::Select::create(m.attrs);
-    shared_ptr<sql::Result> r = conn().execute(*qry);
 
-    String table, column;
-    while (r->next()) {
-        table = r->value_at("storage_table").string();
-        column = r->value_at("storage_column").string();
-        Mapping mapping(r->value_at("id").int64_(),
-                        r->value_at("name").string(),
-                        r->value_at("converter").string(),
-                        m.table_by_name(table)->column(column),
-                        r->value_at("ignore_in_hash").bool_());
-        mapper_->add(mapping);
-    }
-    populate_hasher();
+    mapper_->clear();
+    mapper_->add(Mapping("file:uuid", m.files->column("uuid")));
+    mapper_->add(Mapping("file:hash", m.files->column("hash")));
+    mapper_->add(Mapping("file:stored_at", m.files->column("stored_at")));
+    mapper_->add(Mapping("source:name", m.sources->column("name")));
+    mapper_->add(Mapping("what/object", m.files->column("object")));
+    mapper_->add(Mapping("what/date", m.files->column("n_date")));
+    mapper_->add(Mapping("what/time", m.files->column("n_time")));
 }
 
 void
 RelationalDatabase::populate_hasher() {
     file_hasher_->clear_ignored();
-    file_hasher_->ignore(mapper_->ignored_in_hash());
+    file_hasher_->ignore("what/source");
 }
 
 bool

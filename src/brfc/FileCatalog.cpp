@@ -40,7 +40,6 @@ FileCatalog::FileCatalog(const String& dsn, LocalStorage* storage)
         : db_(new db::rdb::RelationalDatabase(dsn)) 
         , storage_() {
     this->storage(storage);
-    static_pointer_cast<db::rdb::RelationalDatabase>(db_)->populate_mapper();
 }
 
 FileCatalog::FileCatalog(db::Database* db, LocalStorage* storage)
