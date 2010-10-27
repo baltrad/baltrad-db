@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SHA1_ATTRIBUTE_HASHER_HPP
 #define BRFC_SHA1_ATTRIBUTE_HASHER_HPP
 
+#include <string>
+
 #include <brfc/smart_ptr.hpp>
 #include <brfc/FileHasher.hpp>
 
@@ -41,6 +43,8 @@ class SHA1AttributeHasher : public FileHasher {
     virtual ~SHA1AttributeHasher();
 
     static String attribute_string(const oh5::Attribute& attr);
+
+    static std::string sha1hash(const std::string& str);
   
   protected:
     /**

@@ -17,11 +17,15 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <brfc/SHA1AttributeHasher.hpp>
+
+#include <iomanip>
+#include <sstream>
+
 #include <boost/foreach.hpp>
+#include <boost/uuid/sha1.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/util/SHA1.hpp>
-#include <brfc/SHA1AttributeHasher.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/File.hpp>
@@ -43,6 +47,23 @@ SHA1AttributeHasher::attribute_string(const oh5::Attribute& attr) {
     return attr.path() + "=" + attr.value().to_string();
 }
 
+std::string
+SHA1AttributeHasher::sha1hash(const std::string& str) {
+    boost::uuids::detail::sha1 sha;
+    sha.reset();
+    sha.process_bytes(str.c_str(), str.size());
+
+    unsigned int digest[5];
+    sha.get_digest(digest);
+
+    std::stringstream ss;
+    for (int i = 0; i < 5; ++i) {
+        ss << std::hex << std::setfill('0') << std::setw(8) << std::right << digest[i];
+    }
+    
+    return ss.str();
+}
+
 String
 SHA1AttributeHasher::do_hash(const oh5::File& file) const {
     StringList strs;
@@ -57,14 +78,8 @@ SHA1AttributeHasher::do_hash(const oh5::File& file) const {
 
     strs.sort(); // ensure same order
     
-    CSHA1 sha1;
-
     std::string utf8 = strs.join("").to_utf8();
-    std::string hash;
-
-    sha1.Update((unsigned char*)utf8.c_str(), utf8.length());
-    sha1.Final();
-    sha1.ReportHashStl(hash, CSHA1::REPORT_HEX_SHORT);
+    std::string hash = sha1hash(utf8);
 
     return String(hash).to_lower();
 }

@@ -60,6 +60,31 @@ class SHA1AttributeHasher_test : public ::testing::Test {
     SHA1AttributeHasher hasher;
 };
 
+// test messages from FIPS PUB 180-1
+TEST_F(SHA1AttributeHasher_test, test_fips180_1_sample_1) {
+    std::string str("abc");
+    std::string hash = SHA1AttributeHasher::sha1hash(str);
+    EXPECT_EQ("a9993e364706816aba3e25717850c26c9cd0d89d", hash);
+}
+
+TEST_F(SHA1AttributeHasher_test, test_fips180_1_sample_2) {
+    std::string str("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
+    std::string hash = SHA1AttributeHasher::sha1hash(str);
+    EXPECT_EQ("84983e441c3bd26ebaae4aa1f95129e5e54670f1", hash);
+}
+
+TEST_F(SHA1AttributeHasher_test, test_fips180_1_sample3) {
+    std::string str;
+    std::string a50 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    str.reserve(1000000);
+    for (int i = 0; i < 20000; ++i) {
+        str += a50;
+    }
+
+    std::string hash = SHA1AttributeHasher::sha1hash(str);
+    EXPECT_EQ("34aa973cd4c4daa4f61eeb2bdbad27316534016f", hash);
+}
+
 TEST_F(SHA1AttributeHasher_test, attribute_string) {
     oh5::Attribute& a1 = f1.root().create_attribute("a1", oh5::Scalar(1));
     EXPECT_EQ("/a1=1", SHA1AttributeHasher::attribute_string(a1));
