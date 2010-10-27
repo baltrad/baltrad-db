@@ -41,7 +41,7 @@ DateTime::now() {
     if ((tm = std::localtime(&tv.tv_sec)) == 0)
         throw std::runtime_error("std::localtime failed");
     Time t(tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec / 1000);
-    Date d(tm->tm_year, tm->tm_mon, tm->tm_mday);
+    Date d(1900 + tm->tm_year, tm->tm_mon, tm->tm_mday);
     return DateTime(d, t);
 }
 
@@ -54,7 +54,7 @@ DateTime::utc_now() {
     if ((tm = std::gmtime(&tv.tv_sec)) == 0)
         throw std::runtime_error("std::gmtime failed");
     Time t(tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec / 1000);
-    Date d(tm->tm_year, tm->tm_mon, tm->tm_mday);
+    Date d(1900 + tm->tm_year, tm->tm_mon, tm->tm_mday);
     return DateTime(d, t);
 }
 

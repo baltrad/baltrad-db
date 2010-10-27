@@ -17,6 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <ctime>
+
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
@@ -44,6 +46,34 @@ TEST(Datetime_test, test_add) {
     dt1 += TimeDelta().add_days(2).add_hours(13);
     
     EXPECT_EQ(DateTime(2000, 2, 4, 1), dt1);
+}
+
+TEST(DateTime_test, test_to_string) {
+    DateTime dt1(2010, 10, 27, 12, 13, 14, 567);
+    EXPECT_EQ("2010-10-27 12:13:14.567", dt1.to_string("yyyy-MM-dd hh:mm:ss.zzz"));
+}
+
+TEST(DateTime_test, test_now) {
+    // not a foolproof way to test, expect some failures now and then
+    std::tm t;
+    time_t time = std::time(0);
+    localtime_r(&time, &t);
+    DateTime dt = DateTime::now();
+    EXPECT_EQ(1900 + t.tm_year, dt.date().year());
+    EXPECT_EQ(t.tm_mon, dt.date().month());
+    EXPECT_EQ(t.tm_mday, dt.date().day());
+    EXPECT_EQ(t.tm_hour, dt.time().hour());
+}
+
+TEST(DateTime_test, test_utc_now) {
+    std::tm t;
+    time_t time = std::time(0);
+    gmtime_r(&time, &t);
+    DateTime dt = DateTime::utc_now();
+    EXPECT_EQ(1900 + t.tm_year, dt.date().year());
+    EXPECT_EQ(t.tm_mon, dt.date().month());
+    EXPECT_EQ(t.tm_mday, dt.date().day());
+    EXPECT_EQ(t.tm_hour, dt.time().hour());
 }
 
 } // namespace brfc
