@@ -1,17 +1,4 @@
 
-CREATE TABLE bdb_attributes (
-	id SERIAL NOT NULL, 
-	name TEXT NOT NULL, 
-	converter TEXT NOT NULL, 
-	storage_table TEXT NOT NULL, 
-	storage_column TEXT NOT NULL, 
-	ignore_in_hash BOOLEAN NOT NULL, 
-	PRIMARY KEY (id), 
-	 UNIQUE (name)
-)
-
-;
-
 CREATE TABLE bdb_sources (
 	id SERIAL NOT NULL, 
 	name TEXT NOT NULL, 
@@ -24,6 +11,7 @@ CREATE TABLE bdb_sources (
 CREATE TABLE bdb_files (
 	id SERIAL NOT NULL, 
 	hash TEXT NOT NULL, 
+	stored_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
 	object TEXT NOT NULL, 
 	n_date DATE NOT NULL, 
 	n_time TIME WITHOUT TIME ZONE NOT NULL, 
@@ -52,8 +40,8 @@ CREATE TABLE bdb_nodes (
 	type INTEGER, 
 	file_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 FOREIGN KEY(parent_id) REFERENCES bdb_nodes (id), 
-	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE
+	 FOREIGN KEY(file_id) REFERENCES bdb_files (id) ON DELETE CASCADE, 
+	 FOREIGN KEY(parent_id) REFERENCES bdb_nodes (id)
 )
 
 ;
@@ -78,6 +66,19 @@ CREATE TABLE bdb_source_kvs (
 	value VARCHAR NOT NULL, 
 	PRIMARY KEY (source_id, key), 
 	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
+)
+
+;
+
+CREATE TABLE bdb_attributes (
+	id SERIAL NOT NULL, 
+	name TEXT NOT NULL, 
+	converter TEXT NOT NULL, 
+	storage_table TEXT NOT NULL, 
+	storage_column TEXT NOT NULL, 
+	ignore_in_hash BOOLEAN NOT NULL, 
+	PRIMARY KEY (id), 
+	 UNIQUE (name)
 )
 
 ;

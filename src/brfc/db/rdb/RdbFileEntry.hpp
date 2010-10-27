@@ -91,6 +91,10 @@ class RdbFileEntry : public FileEntry {
 
     void hash(const String& hash) { hash_ = hash; }
 
+    using FileEntry::stored_at;
+
+    void stored_at(const DateTime& dt) { stored_at_ = dt; }
+
   protected:
     virtual long long do_id() const { return id_; }
 
@@ -104,6 +108,8 @@ class RdbFileEntry : public FileEntry {
     const oh5::Source& do_source() const;
 
     String do_hash() const;
+
+    DateTime do_stored_at() const;
     
     /**
      * @brief load database entry
@@ -118,6 +124,7 @@ class RdbFileEntry : public FileEntry {
     long long source_id_;
     oh5::Source source_;
     String hash_;
+    DateTime stored_at_;
     oh5::RootGroup root_;
 };
 

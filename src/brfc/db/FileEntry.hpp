@@ -21,9 +21,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/smart_ptr.hpp>
 
+#include <brfc/DateTime.hpp>
 #include <brfc/oh5/File.hpp>
 
 namespace brfc {
+
 namespace db {
 
 /**
@@ -48,6 +50,8 @@ class FileEntry : public oh5::File {
 
     String hash() const { return do_hash(); }
 
+    DateTime stored_at() const { return do_stored_at(); }
+
   protected:
     virtual long long do_id() const = 0;
 
@@ -56,6 +60,8 @@ class FileEntry : public oh5::File {
     virtual const oh5::Source& do_source() const = 0;
 
     virtual String do_hash() const = 0;
+
+    virtual DateTime do_stored_at() const = 0;
 };
 
 } // namespace db

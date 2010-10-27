@@ -218,9 +218,13 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     const String& hash = hasher_->hash(file);
 
     long long source_id = select_source_id(file.source());
+
+    DateTime stored_at = DateTime::utc_now();
+    stored_at.time().msec(0);
  
     qry->value("hash", sql_.string(hash)); 
     qry->value("source_id", sql_.int64_(source_id));
+    qry->value("stored_at", sql_.datetime(stored_at));
     qry->value("object", sql_.string(file.what_object()));
     qry->value("n_date", sql_.date(file.what_date()));
     qry->value("n_time", sql_.time(file.what_time()));
@@ -234,6 +238,7 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     entry.id(file_id);
     entry.source_id(source_id);
     entry.hash(hash);
+    entry.stored_at(stored_at);
 }
 
 void
@@ -256,6 +261,7 @@ RdbHelper::load_file(RdbFileEntry& entry) {
     qry->from(m_.files->join(m_.file_content));
     qry->what(m_.files->column("source_id"));
     qry->what(m_.files->column("hash"));
+    qry->what(m_.files->column("stored_at"));
     qry->what(m_.file_content->column("lo_id"));
     qry->where(m_.files->column("id")->eq(sql_.int64_(entry.id())));
     
@@ -268,6 +274,7 @@ RdbHelper::load_file(RdbFileEntry& entry) {
     entry.source_id(result->value_at("source_id").int64_());
     entry.hash(result->value_at("hash").string());
     entry.lo_id(result->value_at("lo_id").int64_());
+    entry.stored_at(result->value_at("stored_at").to_datetime());
 }
 
 long long

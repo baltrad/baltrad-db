@@ -35,6 +35,7 @@ class MockFileEntry : public FileEntry {
     MOCK_CONST_METHOD1(do_write_to_file, void(const String&));
     MOCK_CONST_METHOD0(do_source, const oh5::Source&());
     MOCK_CONST_METHOD0(do_hash, String());
+    MOCK_CONST_METHOD0(do_stored_at, DateTime());
     MOCK_CONST_METHOD0(do_root, const oh5::Group&());
 };
 

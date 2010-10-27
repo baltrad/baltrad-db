@@ -91,6 +91,14 @@ RdbFileEntry::do_hash() const {
     return hash_;
 }
 
+DateTime
+RdbFileEntry::do_stored_at() const {
+    if (id_ != 0 and stored_at_ == DateTime()) {
+        load();
+    }
+    return stored_at_;
+}
+
 void
 RdbFileEntry::do_write_to_file(const String& path) const {
     sql::Connection& conn = rdb().conn();

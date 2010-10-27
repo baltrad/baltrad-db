@@ -28,7 +28,7 @@ from sqlalchemy import (MetaData, Table, Column, ForeignKey,
                         ForeignKeyConstraint, PrimaryKeyConstraint,
                         UniqueConstraint, create_engine, DDL)
 
-from sqlalchemy.types import (Text, Integer, Float, Date, Time,
+from sqlalchemy.types import (Text, Integer, Float, Date, Time, DateTime,
                               Boolean, String, TypeEngine, TypeDecorator)
 
 from sqlalchemy.databases.postgres import PGBigInteger, PGDoublePrecision
@@ -70,6 +70,7 @@ source_kvs = Table("bdb_source_kvs", meta,
 files = Table("bdb_files", meta,
     Column("id", Integer, primary_key=True),
     Column("hash", Text, nullable=False),
+    Column("stored_at", DateTime, nullable=False),
     Column("object", Text, nullable=False),
     Column("n_date", Date, nullable=False),
     Column("n_time", Time, nullable=False),
