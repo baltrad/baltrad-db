@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/String.hpp>
 
-#include <brfc/deprecate.hpp>
 #include <brfc/expr/fwd.hpp>
 
 namespace brfc {
@@ -54,23 +53,10 @@ class Factory {
      * @}
      */
 
-
-    /**
-     * @brief construct expr::Literal containing a 64-bit integer
-     * @deprecated use int64_()
-     */
-    DEPRECATED(LiteralPtr integer(long long value) const);
-
     /**
      * @brief construct expr::Literal containing a 64-bit integer
      */
     LiteralPtr int64_(long long value) const;
-
-    /**
-     * @brief construct expr::Literal containing a double precision float
-     * @deprecated use double_()
-     */
-    DEPRECATED(LiteralPtr real(double value) const);
 
     /**
      * @brief construct expr::Literal containing a double precision float
@@ -112,12 +98,6 @@ class Factory {
      * @brief construct expr::Literal containing a datetime
      */
     LiteralPtr datetime(const DateTime& datetime) const;
-
-    /**
-     * @brief construct expr::Literal containing a bool
-     * @deprecated use bool_()
-     */
-    DEPRECATED(LiteralPtr boolean(bool value) const);
 
     /**
      * @brief construct expr::Literal containing a bool

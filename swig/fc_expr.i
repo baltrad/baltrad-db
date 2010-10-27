@@ -65,31 +65,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %rename(ExpressionFactory) brfc::expr::Factory;
 %rename(AttributeExpr) brfc::expr::Attribute;
 
-// deprecated
-%ignore brfc::expr::Factory::integer;
-%ignore brfc::expr::Factory::real;
-%ignore brfc::expr::Factory::boolean;
-
-%typemap(javacode) brfc::expr::Factory %{
-  @Deprecated
-  public Literal integer(long value) {
-    long cPtr = fc_exprJNI.ExpressionFactory_int64_(swigCPtr, this, value);
-    return (cPtr == 0) ? null : new Literal(cPtr, true);
-  }
-
-  @Deprecated
-  public Literal real(double value) {
-    long cPtr = fc_exprJNI.ExpressionFactory_double_(swigCPtr, this, value);
-    return (cPtr == 0) ? null : new Literal(cPtr, true);
-  }
-
-  @Deprecated
-  public Literal boolean_(boolean value) {
-    long cPtr = fc_exprJNI.ExpressionFactory_bool_(swigCPtr, this, value);
-    return (cPtr == 0) ? null : new Literal(cPtr, true);
-  }
-%}
-
 %typemap(javaimports) brfc::expr::Factory %{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.DateTime;
