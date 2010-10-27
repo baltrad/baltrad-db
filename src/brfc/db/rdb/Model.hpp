@@ -38,7 +38,6 @@ class Model {
     sql::TablePtr files;
     sql::TablePtr file_content;
     sql::TablePtr nodes;
-    sql::TablePtr attrs;
     sql::TablePtr attrvals;
 
     sql::TablePtr table_by_name(const String& name) const;

@@ -34,7 +34,6 @@ Model::Model()
         , files(sql::Table::create("bdb_files"))
         , file_content(sql::Table::create("bdb_file_content"))
         , nodes(sql::Table::create("bdb_nodes"))
-        , attrs(sql::Table::create("bdb_attributes"))
         , attrvals(sql::Table::create("bdb_attribute_values")) {
     sources->add_column("id");
     sources->add_column("name");
@@ -64,13 +63,6 @@ Model::Model()
     nodes->add_column("type");
     nodes->add_column("file_id");
     nodes->column("file_id")->references(files->column("id"));
-
-    attrs->add_column("id");
-    attrs->add_column("name");
-    attrs->add_column("converter");
-    attrs->add_column("storage_table");
-    attrs->add_column("storage_column");
-    attrs->add_column("ignore_in_hash");
 
     attrvals->add_column("node_id");
     attrvals->add_column("value_int");
