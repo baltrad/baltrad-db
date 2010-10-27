@@ -23,15 +23,14 @@ CREATE TABLE bdb_sources (
 
 CREATE TABLE bdb_files (
 	id SERIAL NOT NULL, 
-	hash_type TEXT NOT NULL, 
-	unique_id TEXT NOT NULL, 
+	hash TEXT NOT NULL, 
 	object TEXT NOT NULL, 
 	n_date DATE NOT NULL, 
 	n_time TIME WITHOUT TIME ZONE NOT NULL, 
 	source_id INTEGER NOT NULL, 
 	PRIMARY KEY (id), 
-	 UNIQUE (unique_id, source_id), 
-	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id)
+	 FOREIGN KEY(source_id) REFERENCES bdb_sources (id), 
+	 UNIQUE (hash, source_id)
 )
 
 ;

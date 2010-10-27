@@ -87,6 +87,10 @@ class RdbFileEntry : public FileEntry {
     
     RelationalDatabase& rdb() const { return *rdb_; }
 
+    using FileEntry::hash;
+
+    void hash(const String& hash) { hash_ = hash; }
+
   protected:
     virtual long long do_id() const { return id_; }
 
@@ -98,6 +102,8 @@ class RdbFileEntry : public FileEntry {
      * @brief source as stored in the database
      */
     const oh5::Source& do_source() const;
+
+    String do_hash() const;
     
     /**
      * @brief load database entry
@@ -111,6 +117,7 @@ class RdbFileEntry : public FileEntry {
     long long lo_id_;
     long long source_id_;
     oh5::Source source_;
+    String hash_;
     oh5::RootGroup root_;
 };
 

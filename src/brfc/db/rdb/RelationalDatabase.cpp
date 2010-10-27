@@ -97,7 +97,7 @@ RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
     qry->from(m.files);
     qry->where(
         xpr.and_(
-            m.files->column("unique_id")->eq(xpr.string(hash)),
+            m.files->column("hash")->eq(xpr.string(hash)),
             m.files->column("source_id")->eq(xpr.int64_(src_id))
         )
     );

@@ -88,6 +88,7 @@ TEST_P(db_rdb_RdbHelper_test, test_insert_file) {
 
     EXPECT_GT(entry.id(), 0);
     EXPECT_GT(entry.source_id(), 0);
+    EXPECT_EQ("hash", entry.hash());
     EXPECT_GT(static_cast<RdbFileEntry*>(entry.root().file())->id(), 0);
 }
 
@@ -137,9 +138,10 @@ TEST_P(db_rdb_RdbHelper_test, test_load_file) {
     EXPECT_NO_THROW(helper.load_file(e2));
 
     EXPECT_GT(e2.source_id(), 0);
-    EXPECT_EQ(e2.source_id(), entry.source_id());
+    EXPECT_EQ(entry.source_id(), e2.source_id());
+    EXPECT_EQ("hash", e2.hash());
     EXPECT_GT(e2.lo_id(), 0);
-    EXPECT_EQ(e2.lo_id(), entry.lo_id());
+    EXPECT_EQ( entry.lo_id(), e2.lo_id());
 }
 
 TEST_P(db_rdb_RdbHelper_test, test_select_root_id) {

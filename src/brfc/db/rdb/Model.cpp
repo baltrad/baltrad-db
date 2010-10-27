@@ -45,8 +45,7 @@ Model::Model()
     source_kvs->column("source_id")->references(sources->column("id"));
 
     files->add_column("id");
-    files->add_column("hash_type");
-    files->add_column("unique_id");
+    files->add_column("hash");
     files->add_column("object");
     files->add_column("n_date");
     files->add_column("n_time");

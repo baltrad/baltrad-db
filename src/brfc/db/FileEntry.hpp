@@ -24,15 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/File.hpp>
 
 namespace brfc {
-
-class String;
-
-namespace oh5 {
-
-class PhysicalFile;
-
-} // namespace oh5
-
 namespace db {
 
 /**
@@ -55,12 +46,16 @@ class FileEntry : public oh5::File {
 
     const oh5::Source& source() const { return do_source(); }
 
+    String hash() const { return do_hash(); }
+
   protected:
     virtual long long do_id() const = 0;
 
     virtual void do_write_to_file(const String& path) const = 0;
 
     virtual const oh5::Source& do_source() const = 0;
+
+    virtual String do_hash() const = 0;
 };
 
 } // namespace db

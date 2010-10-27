@@ -41,6 +41,7 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb, long long id)
         , lo_id_(0)
         , source_id_(0)
         , source_()
+        , hash_()
         , root_(this) {
     BRFC_ASSERT(rdb_ != 0);
     auto_ptr<RdbNodeBackend> root_backend(new RdbNodeBackend());
@@ -80,6 +81,14 @@ RdbFileEntry::do_source() const {
         self->source_ = rdb().helper().select_source(source_id());
     }
     return source_;
+}
+
+String
+RdbFileEntry::do_hash() const {
+    if (id_ != 0 and hash_ == "") {
+        load();
+    }
+    return hash_;
 }
 
 void

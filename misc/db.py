@@ -69,14 +69,13 @@ source_kvs = Table("bdb_source_kvs", meta,
 
 files = Table("bdb_files", meta,
     Column("id", Integer, primary_key=True),
-    Column("hash_type", Text, nullable=False),
-    Column("unique_id", Text, nullable=False),
+    Column("hash", Text, nullable=False),
     Column("object", Text, nullable=False),
     Column("n_date", Date, nullable=False),
     Column("n_time", Time, nullable=False),
     Column("source_id", Integer, ForeignKey(sources.c.id),
            nullable=False),
-    UniqueConstraint("unique_id", "source_id"),
+    UniqueConstraint("hash", "source_id"),
 )
 
 file_content = Table("bdb_file_content", meta,
