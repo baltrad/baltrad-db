@@ -165,7 +165,6 @@ QueryToSelect::specialized_attr_column(expr::Attribute& attr) {
 sql::ColumnPtr
 QueryToSelect::plain_attr_column(expr::Attribute& attr) {
     String name = attr.name();
-    Mapping mapping = mapper_->mapping(name);
     
     StringList path = name.split("/");
     String attrname = path.take_last();
@@ -188,8 +187,22 @@ QueryToSelect::plain_attr_column(expr::Attribute& attr) {
         );
     }
 
-    // replace the attribute with value column
-    return value_t->column(mapping.column->name());
+    switch (attr.type()) {
+        case expr::Attribute::STRING:
+            return value_t->column("value_str");
+        case expr::Attribute::INT64:
+            return value_t->column("value_int");
+        case expr::Attribute::DOUBLE:
+            return value_t->column("value_real");
+        case expr::Attribute::BOOL:
+            return value_t->column("value_bool");
+        case expr::Attribute::DATE:
+            return value_t->column("value_date");
+        case expr::Attribute::TIME:
+            return value_t->column("value_time");
+        default:
+            throw std::runtime_error("unhandled attribute type");
+    }
 }
 
 void
