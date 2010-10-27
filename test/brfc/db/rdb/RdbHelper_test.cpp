@@ -168,11 +168,11 @@ TEST_P(db_rdb_RdbHelper_test, test_load_source) {
     EXPECT_NO_THROW(src = helper.select_source(src_id));
 
     ASSERT_TRUE(src.has("PLC"));
-    EXPECT_EQ("Legionowo", src.at("PLC"));
+    EXPECT_EQ("Legionowo", src.get("PLC"));
     ASSERT_TRUE(src.has("RAD"));
-    EXPECT_EQ("PL41", src.at("RAD"));
+    EXPECT_EQ("PL41", src.get("RAD"));
     ASSERT_TRUE(src.has("name"));
-    EXPECT_EQ("plleg", src.at("name"));
+    EXPECT_EQ("plleg", src.get("name"));
 }
 
 TEST_P(db_rdb_RdbHelper_test, test_select_source_nx) {
@@ -191,11 +191,11 @@ TEST_P(db_rdb_RdbHelper_test, test_load_source_unicode) {
     EXPECT_NO_THROW(src = helper.select_source(src_id));
 
     ASSERT_TRUE(src.has("PLC"));
-    EXPECT_EQ("Legionowo", src.at("PLC"));
+    EXPECT_EQ("Legionowo", src.get("PLC"));
     ASSERT_TRUE(src.has("RAD"));
-    EXPECT_EQ("PL41", src.at("RAD"));
+    EXPECT_EQ("PL41", src.get("RAD"));
     ASSERT_TRUE(src.has("name"));
-    EXPECT_EQ("plleg", src.at("name"));
+    EXPECT_EQ("plleg", src.get("name"));
 }
 
 TEST_P(db_rdb_RdbHelper_test, test_load_source_by_plc_unicode) {
@@ -208,11 +208,11 @@ TEST_P(db_rdb_RdbHelper_test, test_load_source_by_plc_unicode) {
     EXPECT_NO_THROW(src = helper.select_source(src_id));
 
     ASSERT_TRUE(src.has("PLC"));
-    EXPECT_EQ(String::from_utf8("Świdwin"), src.at("PLC"));
+    EXPECT_EQ(String::from_utf8("Świdwin"), src.get("PLC"));
     ASSERT_TRUE(src.has("RAD"));
-    EXPECT_EQ("PL46", src.at("RAD"));
+    EXPECT_EQ("PL46", src.get("RAD"));
     ASSERT_TRUE(src.has("name"));
-    EXPECT_EQ("plswi", src.at("name"));
+    EXPECT_EQ("plswi", src.get("name"));
 }
 
 TEST_P(db_rdb_RdbHelper_test, test_load_children) {

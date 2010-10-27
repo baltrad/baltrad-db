@@ -318,7 +318,7 @@ RdbHelper::select_source_id(const oh5::Source& src) {
     sql::ExpressionPtr x;
     BOOST_FOREACH(const String& key, src.keys()) {
         x = m_.source_kvs->column("key")->eq(sql_.string(key));
-        x = x->and_(m_.source_kvs->column("value")->eq(sql_.string(src.at(key))));
+        x = x->and_(m_.source_kvs->column("value")->eq(sql_.string(src.get(key))));
         qry->where(qry->where()->or_(x->parentheses()));
     }
 

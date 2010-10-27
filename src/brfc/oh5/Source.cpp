@@ -60,7 +60,7 @@ Source::has(const String& key) const {
 }
 
 const String&
-Source::at(const String& key) const {
+Source::get(const String& key) const {
     Map::const_iterator i = map_.find(key);
     if (i == map_.end())
         throw lookup_error(key.to_std_string());

@@ -82,7 +82,7 @@ class Source {
      * @brief key value
      * @throw lookup_error when key does not exist
      */
-    const String& at(const String& key) const;
+    const String& get(const String& key) const;
     
     /**
      * @brief list of set keys

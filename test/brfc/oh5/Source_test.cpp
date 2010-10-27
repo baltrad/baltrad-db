@@ -35,8 +35,8 @@ TEST(oh5_Source_test, test_from_string_valid) {
     EXPECT_TRUE(s.has("WMO"));
     EXPECT_TRUE(s.has("RAD"));
 
-    EXPECT_EQ("02606", s.at("WMO"));
-    EXPECT_EQ("SE50", s.at("RAD"));
+    EXPECT_EQ("02606", s.get("WMO"));
+    EXPECT_EQ("SE50", s.get("RAD"));
 }
 
 TEST(oh5_Source_test, test_from_string_empty) {
@@ -67,10 +67,10 @@ TEST(oh5_Source_test, test_add) {
 
 TEST(oh5_Source_test, test_at) {
     Source s;
-    EXPECT_THROW(s.at("qwe"), lookup_error);
+    EXPECT_THROW(s.get("qwe"), lookup_error);
 
     s.add("qwe", "asd");
-    EXPECT_EQ("asd", s.at("qwe"));
+    EXPECT_EQ("asd", s.get("qwe"));
 }
 
 TEST(oh5_Source_test, test_keys) {
