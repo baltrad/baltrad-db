@@ -29,9 +29,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace expr {
 
+Factory::Factory()
+        : prototypes_(AttributePrototypes::default_odim_h5()) {
+
+}
+
+Factory::Factory(const AttributePrototypes& prototypes)
+        : prototypes_(prototypes) {
+
+}
+
 AttributePtr
 Factory::attribute(const String& name) const {
-    return Attribute::create(name);
+    return prototypes_.get(name);
 }
 
 LiteralPtr

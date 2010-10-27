@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %{
     #include <brfc/expr/fwd.hpp>
+    #include <brfc/expr/AttributePrototypes.hpp>
     #include <brfc/expr/Expression.hpp>
     #include <brfc/expr/Factory.hpp>
     #include <brfc/expr/Function.hpp>
@@ -133,6 +134,7 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
 %}
 
 %include <brfc/expr/fwd.hpp>
+%include <brfc/expr/AttributePrototypes.hpp>
 %include <brfc/expr/Expression.hpp>
 %include <brfc/expr/Label.hpp>
 %include <brfc/expr/Factory.hpp>

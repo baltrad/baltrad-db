@@ -32,21 +32,39 @@ namespace expr {
  */
 class Attribute : public Expression {
   public:
-    static AttributePtr create(const String& name) {
-        return AttributePtr(new Attribute(name));
+    enum Type {
+        UNKNOWN,
+        STRING,
+        INT64,
+        DOUBLE,
+        BOOL,
+        DATE,
+        TIME,
+        DATETIME,
+        SEQUENCE = STRING
+    };
+
+    static AttributePtr create(const String& name, Type type) {
+        return AttributePtr(new Attribute(name, type));
     }
 
     const String& name() const {
         return name_;
     }
 
+    Type type() const {
+        return type_;
+    }
+
   protected:
-    Attribute(const String& name)
-            : name_(name) {
+    Attribute(const String& name, Type type)
+            : name_(name)
+            , type_(type) {
     }
 
   private:
     String name_;
+    Type type_;
 };
 
 }

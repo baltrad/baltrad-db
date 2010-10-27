@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 
 #include <brfc/expr/fwd.hpp>
+#include <brfc/expr/AttributePrototypes.hpp>
 
 namespace brfc {
 
@@ -37,6 +38,18 @@ namespace expr {
  */
 class Factory {
   public:
+    /**
+     * @brief default constructor
+     *
+     * use AttributePrototypes::default_odim_h5() for prototypes
+     */
+    Factory();
+    
+    /**
+     * @brief constructor
+     */
+    explicit Factory(const AttributePrototypes& prototypes);
+
     /**
      * @brief construct expr::Attribute
      */
@@ -184,6 +197,9 @@ class Factory {
      * @brief MAX function
      */
     FunctionPtr max(ExpressionPtr expr) const;
+  
+  private:
+    AttributePrototypes prototypes_;
 };
 
 }
