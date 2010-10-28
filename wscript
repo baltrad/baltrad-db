@@ -80,10 +80,6 @@ def set_options(opt):
     grp.remove_option("--srcdir")
     grp.remove_option("--download")
 
-    #XXX: this should probably be eliminated and just use PREFIX
-    grp.add_option("--install_root", action="store",
-                   default="${PREFIX}/baltrad/db-${VERSION}",
-                   help="installation root [default: '%default']")
     grp.add_option("--debug", action="store_true",
                    default=False,
                    help="compile with debugging information")
@@ -282,7 +278,6 @@ def configure(conf):
         env.append_unique("CXXFLAGS", ["-O2", "-fno-strict-aliasing"])
 
     env.VERSION = VERSION
-    env.install_root = Utils.subst_vars(Options.options.install_root, env)
     env.test_db_dsns = _validate_test_db_dsns(Options.options.test_db_dsns, env)
     
     # set up environment for building tests
@@ -310,7 +305,7 @@ def build(bld):
         if env.build_java:
             _build_java_tests(bld)
 
-    bld.install_files("${install_root}/sql/postgresql",
+    bld.install_files("${PREFIX}/sql/postgresql",
                       bld.path.ant_glob("schema/postgresql/*.sql"))
 
 def test(ctx):
@@ -347,7 +342,7 @@ def _build_shared_library(bld):
             "ICU",
             "PQXX",
         ],
-        install_path="${install_root}/lib",
+        install_path="${PREFIX}/lib",
     )
 
 def _build_bdbtool(bld):
@@ -363,7 +358,7 @@ def _build_bdbtool(bld):
             "BOOST", "BOOST_PROGRAM_OPTIONS"
         ],
         uselib_local=["brfc"],
-        install_path="${install_root}/bin",
+        install_path="${PREFIX}/bin",
     )
 
 def _strlit(var):
@@ -460,7 +455,7 @@ def _build_java_wrapper(bld):
         includes="src",
         uselib="ICU BOOST JNI.H",
         uselib_local="brfc",
-        install_path="${install_root}/lib",
+        install_path="${PREFIX}/lib",
     )
 
     bld.add_group("compile_java_wrapper")
@@ -475,7 +470,7 @@ def _build_java_wrapper(bld):
         target="jbrfc.jar",
     )
 
-    bld.install_files("${install_root}/java", ["jbrfc.jar"])
+    bld.install_files("${PREFIX}/java", ["jbrfc.jar"])
 
     jbrfc = bld.path.find_or_declare("jbrfc.jar")
     
