@@ -44,8 +44,6 @@ class FileEntry : public oh5::File {
         do_write_to_file(path);
     }
 
-    const oh5::Source& source() const { return do_source(); }
-
     String hash() const { return do_hash(); }
 
     DateTime stored_at() const { return do_stored_at(); }
@@ -54,8 +52,6 @@ class FileEntry : public oh5::File {
     virtual String do_uuid() const = 0;
 
     virtual void do_write_to_file(const String& path) const = 0;
-
-    virtual const oh5::Source& do_source() const = 0;
 
     virtual String do_hash() const = 0;
 

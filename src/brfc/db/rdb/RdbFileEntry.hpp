@@ -112,7 +112,7 @@ class RdbFileEntry : public FileEntry {
     /**
      * @brief source as stored in the database
      */
-    const oh5::Source& do_source() const;
+    oh5::Source do_source() const;
 
     String do_hash() const;
 

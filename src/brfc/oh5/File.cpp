@@ -34,12 +34,18 @@ namespace oh5 {
 
 Source
 File::source() const {
+    return do_source();
+}
+
+Source
+File::do_source() const {
     const Attribute* attr = root().attribute("what/source");
     if (attr)
         return Source::from_string(attr->value().to_string());
     return Source();
 }
 
+/*
 void
 File::source(const Source& source) {
     Group& grp = root().get_or_create_group("what");
@@ -50,6 +56,7 @@ File::source(const Source& source) {
     else
         grp.create_attribute("source", srcval);
 }
+*/
 
 namespace {
 

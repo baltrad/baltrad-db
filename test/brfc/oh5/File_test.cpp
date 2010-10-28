@@ -113,19 +113,5 @@ TEST_F(oh5_File_test, test_source_get) {
     EXPECT_EQ("", file.source().to_string());
 }
 
-TEST_F(oh5_File_test, test_source_set) {
-    Source s;
-    s.add("WMO", "02606");
-    s.add("RAD", "SE50");
-    const String& expected = s.to_string();
-
-    file.source(s);
-    EXPECT_EQ(expected, file.what_source());
-
-    file.source(s);
-    ASSERT_NO_THROW(file.what_source());
-    EXPECT_EQ(expected, file.what_source());
-}
-
 } // namespace oh5
 } // namespace brfc

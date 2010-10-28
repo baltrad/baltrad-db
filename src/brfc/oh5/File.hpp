@@ -70,21 +70,14 @@ class File : public boost::noncopyable {
     ///@}
     
     /**
-     * @brief get the Source instance from /what/source
-     * @throw value_error if /what/source is not correctly formed
+     * @brief get Source associated with file
      */
     Source source() const;
     
     /**
-     * @brief set /what/source from a Source instance
-     */
-    void source(const Source& src);
-     
-    /**
      * @name mandatory attribute access shorthands
      * @{
      */
-
     /**
      * @brief access /what/object
      * @throw lookup_error if attribute is missing
@@ -118,7 +111,18 @@ class File : public boost::noncopyable {
     ///@}
   
   protected:
+    /**
+     * @brief root() implementation
+     */
     virtual const Group& do_root() const = 0;
+
+    /**
+     * @brief source() default implementation
+     * @throw value_error if /what/source is not correctly formed
+     * @return Source parsed from /what/source or empty Source if
+     *         /what/source is missing
+     */
+    virtual Source do_source() const;
 };
 
 } // namespace oh5
