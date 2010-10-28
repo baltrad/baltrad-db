@@ -38,7 +38,7 @@ RdbAttributeResult::do_seek(int idx) {
 }
 
 int
-RdbAttributeResult::do_size() {
+RdbAttributeResult::do_size() const {
     return result_->size();
 }
 

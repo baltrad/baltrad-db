@@ -46,7 +46,7 @@ class RdbAttributeResult : public AttributeResult {
 
     virtual bool do_seek(int idx);
 
-    virtual int do_size();
+    virtual int do_size() const;
 
     virtual Variant do_value_at(unsigned int pos) const;
 
