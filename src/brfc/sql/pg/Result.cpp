@@ -49,7 +49,7 @@ Result::do_seek(int idx) {
 }
 
 int
-Result::do_size() {
+Result::do_size() const {
     return result_.size();
 }
 

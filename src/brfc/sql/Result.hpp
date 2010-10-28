@@ -61,7 +61,7 @@ class Result : public boost::noncopyable {
     /**
      * @brief get number of rows in result
      */
-    int size() {
+    int size() const {
         return do_size();
     }
     //@}
@@ -104,7 +104,7 @@ class Result : public boost::noncopyable {
     /**
      * @brief size() implementation
      */
-    virtual int do_size() = 0;
+    virtual int do_size() const = 0;
 
     /**
      * @brief value_at(unsigned int) implementation

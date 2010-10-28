@@ -32,7 +32,7 @@ class MockResult : public Result {
   public:
     MOCK_METHOD0(do_next, bool());
     MOCK_METHOD1(do_seek, bool(int));
-    MOCK_METHOD0(do_size, int());
+    MOCK_CONST_METHOD0(do_size, int());
 
     MOCK_CONST_METHOD1(do_value_at, Variant(unsigned int));
     MOCK_CONST_METHOD1(do_value_at, Variant(const String&));

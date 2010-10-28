@@ -37,7 +37,7 @@ class Result : public sql::Result {
   protected:
     virtual bool do_next();
     virtual bool do_seek(int idx);
-    virtual int do_size();
+    virtual int do_size() const;
     
     /**
      * @brief get value at @c pos
