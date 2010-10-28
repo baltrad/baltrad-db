@@ -38,6 +38,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/QueryToSelect.hpp>
 #include <brfc/db/rdb/RdbAttributeResult.hpp>
 #include <brfc/db/rdb/RdbFileEntry.hpp>
+#include <brfc/db/rdb/RdbFileResult.hpp>
 #include <brfc/db/rdb/RdbHelper.hpp>
 #include <brfc/db/rdb/SaveFile.hpp>
 
@@ -129,15 +130,7 @@ shared_ptr<FileResult>
 RelationalDatabase::do_query(const FileQuery& query) {
     sql::SelectPtr select = QueryToSelect::transform(query, mapper());
     shared_ptr<sql::Result> res = conn().execute(*select);
-    shared_ptr<FileResult> rset(new FileResult());
-    while (res->next()) {
-        long long id = res->value_at(0).int64_();
-        long long lo_id = res->value_at(1).int64_();
-        shared_ptr<RdbFileEntry> entry(new RdbFileEntry(this, id));
-        entry->lo_id(lo_id);
-        rset->add(entry);
-    }
-    return rset;
+    return shared_ptr<FileResult>(new RdbFileResult(this, res));
 }
 
 shared_ptr<AttributeResult>

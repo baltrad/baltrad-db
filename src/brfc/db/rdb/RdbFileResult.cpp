@@ -17,34 +17,39 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/db/rdb/RdbAttributeResult.hpp>
-
-#include <brfc/Variant.hpp>
+#include <brfc/db/rdb/RdbFileResult.hpp>
 
 #include <brfc/sql/Result.hpp>
+
+#include <brfc/db/rdb/RdbFileEntry.hpp>
 
 namespace brfc {
 namespace db {
 namespace rdb {
 
 bool
-RdbAttributeResult::do_next() {
+RdbFileResult::do_next() {
     return result_->next();
 }
 
 bool
-RdbAttributeResult::do_seek(int idx) {
+RdbFileResult::do_seek(int idx) {
     return result_->seek(idx);
 }
 
 int
-RdbAttributeResult::do_size() const {
+RdbFileResult::do_size() const {
     return result_->size();
 }
 
-Variant
-RdbAttributeResult::do_value_at(unsigned int pos) const {
-    return result_->value_at(pos);
+shared_ptr<FileEntry>
+RdbFileResult::do_entry() {
+    long long id = result_->value_at(0).int64_();
+    long long lo_id = result_->value_at(1).int64_();
+
+    shared_ptr<RdbFileEntry> entry(new RdbFileEntry(rdb_, id));
+    entry->lo_id(lo_id);
+    return entry;
 }
 
 } // namespace rdb

@@ -20,8 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_FILE_RESULT_HPP
 #define BRFC_DB_FILE_RESULT_HPP
 
-#include <vector>
-
 #include <boost/noncopyable.hpp>
 
 #include <brfc/smart_ptr.hpp>
@@ -32,36 +30,62 @@ namespace db {
 class FileEntry;
 
 /**
- * @brief FileQuery results
+ * @brief ABC for FileQuery results
  */
 class FileResult : public boost::noncopyable {
   public:
-    FileResult()
-        : entries_() {
-    }
-
     /**
      * @brief destructor
      */
     virtual ~FileResult() { }
 
     /**
-     * @brief get number of rows in result
+     * @brief get number of entries in result
      */
-    int size() {
-        return entries_.size();
-    }
+    int size() const { return do_size(); }
+    
+    /**
+     * @brief move to next entry
+     * @return true if there is a valid entry
+     */
+    bool next() { return do_next(); }
 
-    shared_ptr<FileEntry> get(int i) {
-        return entries_.at(i);
-    }
-
-    void add(shared_ptr<FileEntry> e) {
-        entries_.push_back(e);
+    /**
+     * @brief seek to entry
+     * @param idx entry number, starting from 0. if negative, seek backwards
+     * @return true if new row is valid
+     */
+    bool seek(int idx) {
+        return do_seek(idx);
     }
     
-  private:
-    std::vector<shared_ptr<FileEntry> > entries_;
+    /**
+     * @brief get the entry
+     */
+    shared_ptr<FileEntry> entry() { return do_entry(); }
+
+  protected:
+    /**
+     * @brief size() implementation
+     */
+    virtual int do_size() const = 0;
+
+    /**
+     * @brief next() implementation
+     */
+    virtual bool do_next() = 0;
+    
+    /**
+     * @brief seek() implementation
+     */
+    virtual bool do_seek(int idx) {
+        return do_seek(idx);
+    }
+
+    /**
+     * @brief entry() implementation
+     */
+    virtual shared_ptr<FileEntry> do_entry() = 0;
 };
 
 } // namespace db

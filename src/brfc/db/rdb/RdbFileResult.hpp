@@ -17,36 +17,43 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/db/rdb/RdbAttributeResult.hpp>
+#ifndef BRFC_DB_RDB_RDB_FILE_RESULT_HPP
+#define BRFC_DB_RDB_RDB_FILE_RESULT_HPP
 
-#include <brfc/Variant.hpp>
-
-#include <brfc/sql/Result.hpp>
+#include <brfc/smart_ptr.hpp>
+#include <brfc/db/FileResult.hpp>
 
 namespace brfc {
+
+namespace sql {
+    class Result;
+} // namespace sql
+
 namespace db {
 namespace rdb {
 
-bool
-RdbAttributeResult::do_next() {
-    return result_->next();
-}
+class RelationalDatabase;
 
-bool
-RdbAttributeResult::do_seek(int idx) {
-    return result_->seek(idx);
-}
+class RdbFileResult : public FileResult {
+  public:
+    RdbFileResult(RelationalDatabase* rdb, shared_ptr<sql::Result> result)
+            : rdb_(rdb)
+            , result_(result) {
+    }
 
-int
-RdbAttributeResult::do_size() const {
-    return result_->size();
-}
-
-Variant
-RdbAttributeResult::do_value_at(unsigned int pos) const {
-    return result_->value_at(pos);
-}
+  protected:
+    virtual bool do_seek(int pos);
+    virtual bool do_next();
+    virtual int do_size() const;
+    virtual shared_ptr<FileEntry> do_entry();
+  
+  private:
+    RelationalDatabase* rdb_;
+    shared_ptr<sql::Result> result_;
+};
 
 } // namespace rdb
 } // namespace db
 } // namespace brfc
+
+#endif // BRFC_DB_RDB_RDB_FILE_RESULT_HPP
