@@ -62,8 +62,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::expr::Parentheses::create;
 %ignore brfc::expr::Label::create;
 
-%rename(AttributeExpr) brfc::expr::Attribute;
-
 /***
  * brfc::expr::EXpressionFactory
  */
@@ -91,7 +89,7 @@ SWIG_SHARED_PTR_DERIVED(Label,
 SWIG_SHARED_PTR_DERIVED(Parentheses,
                         brfc::expr::Expression,
                         brfc::expr::Parentheses);
-SWIG_SHARED_PTR_DERIVED(AttributeExpr,
+SWIG_SHARED_PTR_DERIVED(Attribute,
                         brfc::expr::Expression,
                         brfc::expr::Attribute);
 
@@ -109,9 +107,6 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 %}
-
-%template(AttributeExprVector) std::vector<brfc::shared_ptr<brfc::expr::Attribute> >;
-
 
 // make constructors for SWIG_SHARED_PTR public
 %typemap(javabody) brfc::expr::Expression %{

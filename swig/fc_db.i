@@ -83,8 +83,7 @@ SWIG_SHARED_PTR_DERIVED(FileEntry,
 
 %typemap(javaimports) brfc::db::FileQuery, brfc::db::FileQuery* %{
     import eu.baltrad.fc.expr.Expression;
-    import eu.baltrad.fc.expr.AttributeExpr;
-    import eu.baltrad.fc.expr.AttributeExprVector;
+    import eu.baltrad.fc.expr.Attribute;
 %}
 
 /***
@@ -101,7 +100,7 @@ SWIG_SHARED_PTR(FileResult, brfc::db::FileResult);
 %ignore brfc::db::AttributeQuery::order() const;
 %ignore brfc::db::AttributeQuery::fetch() const;
 %typemap(javaimports) brfc::db::AttributeQuery, brfc::db::AttributeQuery* %{
-    import eu.baltrad.fc.expr.AttributeExpr;
+    import eu.baltrad.fc.expr.Attribute;
     import eu.baltrad.fc.expr.Expression;
     import eu.baltrad.fc.expr.Function;
 %}
@@ -161,8 +160,7 @@ SWIG_SHARED_PTR(Database, brfc::db::Database);
 
 
 %pragma(java) jniclassimports=%{
-    import eu.baltrad.fc.expr.AttributeExpr;
-    import eu.baltrad.fc.expr.AttributeExprVector;
+    import eu.baltrad.fc.expr.Attribute;
     import eu.baltrad.fc.expr.Expression;
     import eu.baltrad.fc.expr.Function;
     import eu.baltrad.fc.oh5.File;
