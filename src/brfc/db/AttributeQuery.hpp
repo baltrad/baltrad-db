@@ -35,13 +35,13 @@ class AttributeResult;
  */
 class AttributeQuery {
   public:
-    enum SortDirection {
-        ASCENDING = 1,
-        DESCENDING = 2
+    enum SortDir {
+        ASC = 1,
+        DESC = 2
     };
 
     typedef std::vector<expr::ExpressionPtr> ExpressionVector;
-    typedef std::pair<expr::ExpressionPtr, SortDirection> OrderPair;
+    typedef std::pair<expr::ExpressionPtr, SortDir> OrderPair;
     typedef std::vector<OrderPair> OrderVector;
 
     /**
@@ -104,7 +104,7 @@ class AttributeQuery {
     /**
      * @brief append sort order
      */
-    AttributeQuery& order_by(expr::ExpressionPtr expr, SortDirection dir);
+    AttributeQuery& order_by(expr::ExpressionPtr expr, SortDir dir);
 
     OrderVector order() const { return order_; }
     

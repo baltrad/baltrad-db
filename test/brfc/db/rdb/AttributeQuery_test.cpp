@@ -170,7 +170,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_object) {
     shared_ptr<AttributeResult> r =
         query.fetch(xpr.attribute("file:uuid"))
              .filter(xpr.attribute("what/object")->eq(xpr.string("PVOL")))
-             .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASCENDING)
+             .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC)
              .execute();
 
     EXPECT_EQ(3, r->size());
@@ -201,7 +201,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_xsize_or_ysize) {
     shared_ptr<AttributeResult> r =
         query.fetch(xpr.attribute("file:uuid"))
              .filter(xsize->eq(xpr.int64_(1))->or_(ysize->eq(xpr.int64_(2))))
-             .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASCENDING)
+             .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC)
              .execute();
 
     EXPECT_EQ(4, r->size());
@@ -334,7 +334,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_order_by) {
         xpr.attribute("what/date")->add(xpr.attribute("what/time"));
     shared_ptr<AttributeResult> r =
         query.fetch(xpr.attribute("file:uuid"))
-             .order_by(dt, AttributeQuery::DESCENDING)
+             .order_by(dt, AttributeQuery::DESC)
              .execute();
 
     EXPECT_EQ(5, r->size());

@@ -87,7 +87,7 @@ AttributeQuery::filter(expr::ExpressionPtr expr) {
 }
 
 AttributeQuery&
-AttributeQuery::order_by(expr::ExpressionPtr expr, SortDirection dir) {
+AttributeQuery::order_by(expr::ExpressionPtr expr, SortDir dir) {
     order_.push_back(std::make_pair(expr, dir));
     return *this;
 }
