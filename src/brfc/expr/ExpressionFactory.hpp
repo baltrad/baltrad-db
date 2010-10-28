@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_EXPR_FACTORY_HPP
-#define BRFC_EXPR_FACTORY_HPP
+#ifndef BRFC_EXPR_EXPRESSION_FACTORY_HPP
+#define BRFC_EXPR_EXPRESSION_FACTORY_HPP
 
 #include <brfc/String.hpp>
 
@@ -36,19 +36,19 @@ namespace expr {
 /**
  * @brief factory for constructing expression elements
  */
-class Factory {
+class ExpressionFactory {
   public:
     /**
      * @brief default constructor
      *
      * use AttributePrototypes::default_odim_h5() for prototypes
      */
-    Factory();
+    ExpressionFactory();
     
     /**
      * @brief constructor
      */
-    explicit Factory(const AttributePrototypes& prototypes);
+    explicit ExpressionFactory(const AttributePrototypes& prototypes);
 
     /**
      * @brief construct expr::Attribute
@@ -205,4 +205,4 @@ class Factory {
 }
 }
 
-#endif // BRFC_EXPR_FACTORY_HPP
+#endif // BRFC_EXPR_EXPRESSION_FACTORY_HPP

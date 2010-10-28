@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/expr/fwd.hpp>
     #include <brfc/expr/AttributePrototypes.hpp>
     #include <brfc/expr/Expression.hpp>
-    #include <brfc/expr/Factory.hpp>
+    #include <brfc/expr/ExpressionFactory.hpp>
     #include <brfc/expr/Function.hpp>
     #include <brfc/expr/Attribute.hpp>
     #include <brfc/expr/Parentheses.hpp>
@@ -53,7 +53,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::expr::Select;
 
 %ignore brfc::expr::Expression::shared_from_this;
-%ignore brfc::expr::Factory::string(const char* value) const;
 %ignore brfc::expr::Function::create;
 %ignore brfc::expr::Function::args;
 %ignore brfc::expr::Literal::create;
@@ -63,10 +62,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::expr::Parentheses::create;
 %ignore brfc::expr::Label::create;
 
-%rename(ExpressionFactory) brfc::expr::Factory;
 %rename(AttributeExpr) brfc::expr::Attribute;
 
-%typemap(javaimports) brfc::expr::Factory %{
+/***
+ * brfc::expr::EXpressionFactory
+ */
+%ignore brfc::expr::ExpressionFactory::string(const char* value) const;
+%typemap(javaimports) brfc::expr::ExpressionFactory %{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.DateTime;
     import eu.baltrad.fc.Time;
@@ -137,7 +139,7 @@ SWIG_SHARED_PTR_DERIVED(AttributeExpr,
 %include <brfc/expr/AttributePrototypes.hpp>
 %include <brfc/expr/Expression.hpp>
 %include <brfc/expr/Label.hpp>
-%include <brfc/expr/Factory.hpp>
+%include <brfc/expr/ExpressionFactory.hpp>
 %include <brfc/expr/Function.hpp>
 %include <brfc/expr/Attribute.hpp>
 %include <brfc/expr/Parentheses.hpp>

@@ -30,10 +30,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/AttributeResult.hpp>
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/expr/Factory.hpp>
 #include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/Literal.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/ExpressionFactory.hpp>
+#include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -128,7 +128,7 @@ struct db_rdb_AttributeQuery_test : public testing::TestWithParam<const char*> {
         db->clean();
     }
     
-    expr::Factory xpr;
+    expr::ExpressionFactory xpr;
     String src1, src2;
     test::TestRDB* db;
     oh5::hl::HlFile td1, td2, td3, td4, td5;

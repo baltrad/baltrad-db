@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/expr/Factory.hpp>
+#include <brfc/expr/ExpressionFactory.hpp>
 
 #include <brfc/DateTime.hpp>
 
@@ -29,146 +29,146 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace expr {
 
-Factory::Factory()
+ExpressionFactory::ExpressionFactory()
         : prototypes_(AttributePrototypes::default_odim_h5()) {
 
 }
 
-Factory::Factory(const AttributePrototypes& prototypes)
+ExpressionFactory::ExpressionFactory(const AttributePrototypes& prototypes)
         : prototypes_(prototypes) {
 
 }
 
 AttributePtr
-Factory::attribute(const String& name) const {
+ExpressionFactory::attribute(const String& name) const {
     return prototypes_.get(name);
 }
 
 LiteralPtr
-Factory::string(const String& value) const {
+ExpressionFactory::string(const String& value) const {
     return Literal::create(Variant(value));
 }
 
 LiteralPtr
-Factory::string(const char* value) const {
+ExpressionFactory::string(const char* value) const {
     return Literal::create(Variant(value));
 }
 
 LiteralPtr
-Factory::int64_(long long value) const {
+ExpressionFactory::int64_(long long value) const {
     return Literal::create(Variant(value));
 }
 
 LiteralPtr
-Factory::double_(double value) const {
+ExpressionFactory::double_(double value) const {
     return Literal::create(Variant(value));
 }
 
 LiteralPtr
-Factory::date(int year, int month, int day) const {
+ExpressionFactory::date(int year, int month, int day) const {
     return date(Date(year, month, day));
 }
 
 LiteralPtr
-Factory::date(const Date& date) const {
+ExpressionFactory::date(const Date& date) const {
     return Literal::create(Variant(Date(date)));
 }
 
 LiteralPtr
-Factory::date(const DateTime& datetime) const {
+ExpressionFactory::date(const DateTime& datetime) const {
     return date(datetime.date());
 }
 
 LiteralPtr
-Factory::time(int hour, int minute, int second) const {
+ExpressionFactory::time(int hour, int minute, int second) const {
     return time(Time(hour, minute, second));
 }
 
 LiteralPtr
-Factory::time(const Time& time) const {
+ExpressionFactory::time(const Time& time) const {
     return Literal::create(Variant(time));
 }
 
 LiteralPtr
-Factory::time(const DateTime& datetime) const {
+ExpressionFactory::time(const DateTime& datetime) const {
     return time(datetime.time());
 }
 
 LiteralPtr
-Factory::datetime(const DateTime& datetime) const {
+ExpressionFactory::datetime(const DateTime& datetime) const {
     return Literal::create(Variant(datetime));
 }
 
 LiteralPtr
-Factory::bool_(bool value) const {
+ExpressionFactory::bool_(bool value) const {
     return Literal::create(Variant(value));
 }
 
 BinaryOperatorPtr
-Factory::ne(ExpressionPtr lhs, ExpressionPtr rhs) const {
+ExpressionFactory::ne(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->ne(rhs);
 }
 
 BinaryOperatorPtr
-Factory::eq(ExpressionPtr lhs, ExpressionPtr rhs) const {
+ExpressionFactory::eq(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->eq(rhs);
 }
 
 BinaryOperatorPtr
-Factory::gt(ExpressionPtr lhs, ExpressionPtr rhs) const {
+ExpressionFactory::gt(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->gt(rhs);
 }
 
 BinaryOperatorPtr
-Factory::lt(ExpressionPtr lhs, ExpressionPtr rhs) const {
+ExpressionFactory::lt(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->lt(rhs);
 }
 
 BinaryOperatorPtr
-Factory::le(ExpressionPtr lhs, ExpressionPtr rhs) const {
+ExpressionFactory::le(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->le(rhs);
 }
 
 BinaryOperatorPtr
-Factory::ge(ExpressionPtr lhs, ExpressionPtr rhs) const {
+ExpressionFactory::ge(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->ge(rhs);
 }
 
 BinaryOperatorPtr
-Factory::between(ExpressionPtr expr,
+ExpressionFactory::between(ExpressionPtr expr,
                  ExpressionPtr low,
                  ExpressionPtr high) const {
     return expr->between(low, high);
 }
 
 BinaryOperatorPtr
-Factory::and_(ExpressionPtr lhs, ExpressionPtr rhs) const {
+ExpressionFactory::and_(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->and_(rhs);
 }
 
 BinaryOperatorPtr
-Factory::or_(ExpressionPtr lhs, ExpressionPtr rhs) const {
+ExpressionFactory::or_(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->or_(rhs);
 }
 
 BinaryOperatorPtr
-Factory::add(ExpressionPtr lhs, ExpressionPtr rhs) const {
+ExpressionFactory::add(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->add(rhs);
 }
 
 ParenthesesPtr
-Factory::parentheses(ExpressionPtr expr) const {
+ExpressionFactory::parentheses(ExpressionPtr expr) const {
     return expr->parentheses();
 }
 
 FunctionPtr
-Factory::min(ExpressionPtr expr) const {
+ExpressionFactory::min(ExpressionPtr expr) const {
     return Function::min(expr);
 }
 
 
 FunctionPtr
-Factory::max(ExpressionPtr expr) const {
+ExpressionFactory::max(ExpressionPtr expr) const {
     return Function::max(expr);
 }
 
