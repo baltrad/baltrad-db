@@ -127,14 +127,14 @@ RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
 }
 
 shared_ptr<FileResult>
-RelationalDatabase::do_query(const FileQuery& query) {
+RelationalDatabase::do_execute(const FileQuery& query) {
     sql::SelectPtr select = QueryToSelect::transform(query, mapper());
     shared_ptr<sql::Result> res = conn().execute(*select);
     return shared_ptr<FileResult>(new RdbFileResult(this, res));
 }
 
 shared_ptr<AttributeResult>
-RelationalDatabase::do_query(const AttributeQuery& query) {
+RelationalDatabase::do_execute(const AttributeQuery& query) {
     sql::SelectPtr select = QueryToSelect::transform(query, mapper());
     shared_ptr<sql::Result> res = conn().execute(*select);
     return shared_ptr<AttributeResult>(new RdbAttributeResult(res));

@@ -94,7 +94,7 @@ AttributeQuery::order_by(expr::ExpressionPtr expr, SortDir dir) {
 
 shared_ptr<AttributeResult>
 AttributeQuery::execute() {
-    return db_->query(*this);
+    return db_->execute(*this);
 }
 
 } // namespace db

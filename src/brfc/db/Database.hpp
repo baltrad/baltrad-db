@@ -80,15 +80,15 @@ class Database : public boost::noncopyable {
     /**
      * @brief execute a query
      */
-    shared_ptr<FileResult> query(const FileQuery& query) {
-        return do_query(query);
+    shared_ptr<FileResult> execute(const FileQuery& query) {
+        return do_execute(query);
     }
     
     /**
      * @brief execute a query
      */
-    shared_ptr<AttributeResult> query(const AttributeQuery& query) {
-        return do_query(query);
+    shared_ptr<AttributeResult> execute(const AttributeQuery& query) {
+        return do_execute(query);
     }
 
   protected:
@@ -96,8 +96,8 @@ class Database : public boost::noncopyable {
     virtual bool do_remove(const FileEntry& entry) = 0;
     virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file) = 0;
 
-    virtual shared_ptr<FileResult> do_query(const FileQuery& query) = 0;
-    virtual shared_ptr<AttributeResult> do_query(const AttributeQuery& query) = 0;
+    virtual shared_ptr<FileResult> do_execute(const FileQuery& query) = 0;
+    virtual shared_ptr<AttributeResult> do_execute(const AttributeQuery& query) = 0;
 };
 
 } // namespace db

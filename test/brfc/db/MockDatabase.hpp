@@ -34,8 +34,8 @@ class MockDatabase : public Database {
     MOCK_METHOD1(do_is_stored, bool(const oh5::PhysicalFile&));
     MOCK_METHOD1(do_remove, bool(const FileEntry&));
     MOCK_METHOD1(do_store, shared_ptr<FileEntry>(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_query, shared_ptr<FileResult>(const FileQuery&));
-    MOCK_METHOD1(do_query, shared_ptr<AttributeResult>(const AttributeQuery&));
+    MOCK_METHOD1(do_execute, shared_ptr<FileResult>(const FileQuery&));
+    MOCK_METHOD1(do_execute, shared_ptr<AttributeResult>(const AttributeQuery&));
 };
 
 } // namespace db

@@ -56,7 +56,7 @@ FileQuery::filter(expr::ExpressionPtr expr) {
 
 shared_ptr<FileResult>
 FileQuery::execute() {
-    return db_->query(*this);
+    return db_->execute(*this);
 }
 
 } // namespace db

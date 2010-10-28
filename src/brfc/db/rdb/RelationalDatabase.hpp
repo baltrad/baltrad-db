@@ -97,9 +97,9 @@ class RelationalDatabase : public Database {
 
     virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file);
     
-    virtual shared_ptr<FileResult> do_query(const FileQuery& query);
+    virtual shared_ptr<FileResult> do_execute(const FileQuery& query);
 
-    virtual shared_ptr<AttributeResult> do_query(const AttributeQuery& query);
+    virtual shared_ptr<AttributeResult> do_execute(const AttributeQuery& query);
 
   private:
     void populate_mapper();
