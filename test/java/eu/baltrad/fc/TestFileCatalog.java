@@ -67,7 +67,7 @@ public class TestFileCatalog extends TestCase {
 
   public void testStore() {
     FileEntry f = fc.store(tempfile.path());
-    assertTrue(f.id() > 0);
+    assertTrue(f.uuid() != "");
   }
 
   public void testStoreNXFile() {
