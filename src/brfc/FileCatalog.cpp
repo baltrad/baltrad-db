@@ -69,7 +69,8 @@ FileCatalog::storage(LocalStorage* storage) {
 
 bool
 FileCatalog::is_stored(const String& path) const {
-    return is_stored(oh5::hl::HlFile(path));
+    oh5::hl::HlFile f(path);
+    return is_stored(f);
 }
 
 bool
@@ -79,7 +80,8 @@ FileCatalog::is_stored(const oh5::PhysicalFile& f) const {
 
 shared_ptr<const db::FileEntry>
 FileCatalog::store(const String& path) {
-    return store(oh5::hl::HlFile(path)); 
+    oh5::hl::HlFile f(path);
+    return store(f); 
 }
 
 shared_ptr<const db::FileEntry>
