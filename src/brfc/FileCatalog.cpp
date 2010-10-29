@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/DefaultFileNamer.hpp>
 #include <brfc/NullStorage.hpp>
+#include <brfc/CacheDirStorage.hpp>
 
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/Database.hpp>
@@ -40,6 +41,12 @@ FileCatalog::FileCatalog(const String& dsn, LocalStorage* storage)
         : db_(new db::rdb::RelationalDatabase(dsn)) 
         , storage_() {
     this->storage(storage);
+}
+
+FileCatalog::FileCatalog(const String& dsn, const String& path)
+        : db_(new db::rdb::RelationalDatabase(dsn))
+        , storage_() {
+    this->storage(new CacheDirStorage(path));
 }
 
 FileCatalog::FileCatalog(db::Database* db, LocalStorage* storage)

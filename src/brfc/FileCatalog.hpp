@@ -66,6 +66,17 @@ class FileCatalog {
      */
     explicit
     FileCatalog(const String& dsn, LocalStorage* storage=0);
+    
+    /**
+     * @brief constructor
+     * @param dsn database connection string
+     * @param path path to storage
+     * @note this is provided for backward compatibility and will go away!
+     *
+     * use CacheDirStorage(path) for local storage
+     */
+    explicit
+    FileCatalog(const String& dsn, const String& path);
 
     /**
      * @brief constructor
@@ -74,7 +85,7 @@ class FileCatalog {
      */
     explicit
     FileCatalog(db::Database* db, LocalStorage* storage=0);
-    
+
     /**
      * @brief destructor
      */
