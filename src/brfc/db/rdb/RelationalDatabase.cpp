@@ -126,6 +126,14 @@ RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
     return entry;
 }
 
+shared_ptr<FileEntry>
+RelationalDatabase::do_entry_by_uuid(const String& uuid) {
+    shared_ptr<RdbFileEntry> entry(new RdbFileEntry(this));
+    entry->uuid(uuid);
+    entry->load();
+    return entry;
+}
+
 shared_ptr<FileResult>
 RelationalDatabase::do_execute(const FileQuery& query) {
     sql::SelectPtr select = QueryToSelect::transform(query, mapper());

@@ -103,6 +103,11 @@ class RdbFileEntry : public FileEntry {
 
     void loaded(bool loaded) { loaded_ = loaded; }
 
+    /**
+     * @brief load database entry
+     */
+    void load() const;
+
   protected:
     virtual String do_uuid() const;
 
@@ -119,11 +124,6 @@ class RdbFileEntry : public FileEntry {
 
     DateTime do_stored_at() const;
     
-    /**
-     * @brief load database entry
-     */
-    void load() const;
-
   private:
     RelationalDatabase* rdb_;
     

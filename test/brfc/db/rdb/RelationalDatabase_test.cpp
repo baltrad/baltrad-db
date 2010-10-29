@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/filesystem.hpp>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 
@@ -80,6 +81,22 @@ TEST_P(db_rdb_RelationalDatabase_test, store) {
     ASSERT_TRUE(re);
     EXPECT_TRUE(re->id() > 0);
     EXPECT_TRUE(re->lo_id() > 0);
+}
+
+TEST_P(db_rdb_RelationalDatabase_test, entry_by_uuid) {
+    EXPECT_THROW(db->entry_by_uuid("nxuuid"), lookup_error);
+
+    oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    test::TempH5File tf;
+    tf.write(file);
+    file.path(tf.path());
+    
+    shared_ptr<FileEntry> e1, e2;
+    EXPECT_NO_THROW(e1 = db->store(file));
+     
+    EXPECT_NO_THROW(e2 = db->entry_by_uuid(e1->uuid()));
+    EXPECT_EQ(e1->uuid(), e2->uuid());
+    EXPECT_EQ(e1->hash(), e2->hash());
 }
 
 TEST_P(db_rdb_RelationalDatabase_test, remove) {

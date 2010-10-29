@@ -78,6 +78,13 @@ class Database : public boost::noncopyable {
     shared_ptr<FileEntry> store(const oh5::PhysicalFile& file);
 
     /**
+     * @brief get FileEntry by UUID
+     */
+    shared_ptr<FileEntry> entry_by_uuid(const String& uuid) {
+        return do_entry_by_uuid(uuid);
+    }
+
+    /**
      * @brief execute a query
      */
     shared_ptr<FileResult> execute(const FileQuery& query) {
@@ -95,6 +102,7 @@ class Database : public boost::noncopyable {
     virtual bool do_is_stored(const oh5::PhysicalFile& file) = 0;
     virtual bool do_remove(const FileEntry& entry) = 0;
     virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file) = 0;
+    virtual shared_ptr<FileEntry> do_entry_by_uuid(const String& uuid) = 0;
 
     virtual shared_ptr<FileResult> do_execute(const FileQuery& query) = 0;
     virtual shared_ptr<AttributeResult> do_execute(const AttributeQuery& query) = 0;

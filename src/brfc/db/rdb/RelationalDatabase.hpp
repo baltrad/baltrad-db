@@ -96,6 +96,7 @@ class RelationalDatabase : public Database {
     virtual bool do_remove(const FileEntry& entry);
 
     virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file);
+    virtual shared_ptr<FileEntry> do_entry_by_uuid(const String& uuid);
     
     virtual shared_ptr<FileResult> do_execute(const FileQuery& query);
 
