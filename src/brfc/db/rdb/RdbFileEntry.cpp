@@ -35,9 +35,10 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
-RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb, long long id)
+RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         : rdb_(rdb)
-        , id_(id)
+        , loaded_(false)
+        , id_(0)
         , lo_id_(0)
         , source_id_(0)
         , source_()
@@ -45,10 +46,7 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb, long long id)
         , hash_()
         , root_(this) {
     BRFC_ASSERT(rdb_ != 0);
-    auto_ptr<RdbNodeBackend> root_backend(new RdbNodeBackend());
-    if (id != 0)
-        root_backend->id(rdb->helper().select_root_id(*this));
-    root_.backend(root_backend.release());
+    root_.backend(new RdbNodeBackend());
 }
 
 RdbFileEntry::~RdbFileEntry() {
@@ -57,21 +55,21 @@ RdbFileEntry::~RdbFileEntry() {
 
 String
 RdbFileEntry::do_uuid() const {
-    if (id_ != 0 and uuid_ == "")
+    if (not loaded())
         load();
     return uuid_;
 }
 
 long long
 RdbFileEntry::lo_id() const {
-    if (lo_id_ == 0)
+    if (not loaded())
         load();
     return lo_id_;
 }
 
 long long
 RdbFileEntry::source_id() const {
-    if (source_id_ == 0)
+    if (not loaded())
         load();
     return source_id_;
 }
@@ -79,7 +77,14 @@ RdbFileEntry::source_id() const {
 void
 RdbFileEntry::load() const {
     RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
-    rdb().helper().load_file(*self);
+    self->loaded(true); // to disable recursion
+    try {
+        rdb().helper().load_file(*self);
+    } catch (...) {
+        self->loaded(false);
+        throw;
+    }
+    rdb().helper().backend(self->root()).id(rdb().helper().select_root_id(*this));
 }
 
 oh5::Source
@@ -93,17 +98,15 @@ RdbFileEntry::do_source() const {
 
 String
 RdbFileEntry::do_hash() const {
-    if (id_ != 0 and hash_ == "") {
+    if (not loaded())
         load();
-    }
     return hash_;
 }
 
 DateTime
 RdbFileEntry::do_stored_at() const {
-    if (id_ != 0 and stored_at_ == DateTime()) {
+    if (not loaded())
         load();
-    }
     return stored_at_;
 }
 

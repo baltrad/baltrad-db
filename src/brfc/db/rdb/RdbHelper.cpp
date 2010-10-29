@@ -215,8 +215,6 @@ RdbHelper::insert_attribute(oh5::Attribute& attr) {
 void
 RdbHelper::insert_file(RdbFileEntry& entry,
                        const oh5::PhysicalFile& file) {
-    sql::InsertPtr qry = sql::Insert::create(m_.files);
-
     const String& hash = hasher_->hash(file);
 
     long long source_id = select_source_id(file.source());
@@ -231,6 +229,7 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     DateTime stored_at = DateTime::utc_now();
     stored_at.time().msec(0);
     
+    sql::InsertPtr qry = sql::Insert::create(m_.files);
     qry->value("uuid", sql_.string(uuid));
     qry->value("hash", sql_.string(hash)); 
     qry->value("source_id", sql_.int64_(source_id));
@@ -250,6 +249,7 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     entry.source_id(source_id);
     entry.hash(hash);
     entry.stored_at(stored_at);
+    entry.loaded(true);
 }
 
 void
@@ -269,41 +269,51 @@ RdbHelper::insert_file_content(RdbFileEntry& entry, const String& path) {
 void
 RdbHelper::load_file(RdbFileEntry& entry) {
     sql::SelectPtr qry = sql::Select::create();
-    qry->from(m_.files->join(m_.file_content));
+    qry->from(m_.files->outerjoin(m_.file_content));
     qry->what(m_.files->column("uuid"));
     qry->what(m_.files->column("source_id"));
     qry->what(m_.files->column("hash"));
     qry->what(m_.files->column("stored_at"));
     qry->what(m_.file_content->column("lo_id"));
-    qry->where(m_.files->column("id")->eq(sql_.int64_(entry.id())));
+    if (entry.id() != 0)
+        qry->where(m_.files->column("id")->eq(sql_.int64_(entry.id())));
+    else if (entry.uuid() != "")
+        qry->where(m_.files->column("uuid")->eq(sql_.string(entry.uuid())));
+    else
+        throw std::runtime_error("no uuid or id to load file from db");
     
     shared_ptr<sql::Result> result = conn().execute(*qry);
 
     if (not result->next())
-        throw brfc::lookup_error("no RdbFileEntry by id: "
-                                 + String::number(entry.id()).to_std_string());
+        throw brfc::lookup_error("no RdbFileEntry found by id=" +
+                                 String::number(entry.id()).to_std_string() +
+                                 " uuid=" + entry.uuid().to_std_string());
+
     entry.uuid(result->value_at("uuid").string());
     entry.source_id(result->value_at("source_id").int64_());
     entry.hash(result->value_at("hash").string());
-    entry.lo_id(result->value_at("lo_id").int64_());
+    entry.lo_id(result->value_at("lo_id").to_int64());
     entry.stored_at(result->value_at("stored_at").to_datetime());
 }
 
 long long
 RdbHelper::select_root_id(const RdbFileEntry& entry) {
     sql::SelectPtr qry = sql::Select::create();
-    qry->from(m_.nodes);
+    qry->from(m_.files->join(m_.nodes));
     qry->what(m_.nodes->column("id"));
-    qry->where(
-        sql_.and_(
-            m_.nodes->column("file_id")->eq(sql_.int64_(entry.id())),
-            m_.nodes->column("name")->eq(sql_.string(""))
-        )
-    );
+    qry->where(m_.nodes->column("name")->eq(sql_.string("")));
+    if (entry.id() != 0)
+        qry->append_where(m_.files->column("id")->eq(sql_.int64_(entry.id())));
+    else if (entry.uuid() != "")
+        qry->append_where(m_.files->column("uuid")->eq(sql_.string(entry.uuid())));
+    else
+        throw std::runtime_error("no uuid or id to load file from db");
 
     shared_ptr<sql::Result> r = conn().execute(*qry);
     
-    r->next();
+    if (not r->next())
+        return 0;
+
     return r->value_at(0).int64_();
 }
 

@@ -128,7 +128,7 @@ TEST_P(db_rdb_RdbHelper_test, test_insert_node_attribute) {
     EXPECT_NO_THROW(helper.insert_node(attr));
 }
 
-TEST_P(db_rdb_RdbHelper_test, test_load_file) {
+TEST_P(db_rdb_RdbHelper_test, test_load_file_by_id) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
     test::TempH5File tf;
     tf.write(file);
@@ -149,14 +149,51 @@ TEST_P(db_rdb_RdbHelper_test, test_load_file) {
     EXPECT_EQ(entry.lo_id(), e2.lo_id());
 }
 
-TEST_P(db_rdb_RdbHelper_test, test_select_root_id) {
+TEST_P(db_rdb_RdbHelper_test, test_load_file_by_uuid) {
+    EXPECT_NO_THROW(helper.insert_file(entry, file));
+    test::TempH5File tf;
+    tf.write(file);
+    EXPECT_NO_THROW(helper.insert_file_content(entry, tf.path()));
+
+    RdbFileEntry e2(db);
+    e2.uuid(entry.uuid());
+
+    EXPECT_NO_THROW(helper.load_file(e2));
+
+    EXPECT_GT(e2.source_id(), 0);
+    EXPECT_EQ(entry.source_id(), e2.source_id());
+    EXPECT_EQ("hash", e2.hash());
+    EXPECT_EQ(entry.uuid(), e2.uuid());
+    EXPECT_NE(DateTime(), e2.stored_at());
+    EXPECT_EQ(entry.stored_at(), e2.stored_at());
+    EXPECT_GT(e2.lo_id(), 0);
+    EXPECT_EQ(entry.lo_id(), e2.lo_id());
+}
+
+TEST_P(db_rdb_RdbHelper_test, test_select_root_id_by_id) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
     EXPECT_NO_THROW(helper.insert_node(entry.root()));
+
+    RdbFileEntry e2(db);
+    e2.id(entry.id());
+
+    long long id = 0;
+    EXPECT_NO_THROW(id = helper.select_root_id(e2));
+    EXPECT_EQ(helper.backend(entry.root()).id(), id);
+}
+
+TEST_P(db_rdb_RdbHelper_test, test_select_root_id_by_uuid) {
+    EXPECT_NO_THROW(helper.insert_file(entry, file));
+    EXPECT_NO_THROW(helper.insert_node(entry.root()));
+
+    RdbFileEntry e2(db);
+    e2.uuid(entry.uuid());
     
     long long id = 0;
-    EXPECT_NO_THROW(id = helper.select_root_id(entry));
-    EXPECT_EQ(id, helper.backend(entry.root()).id());
+    EXPECT_NO_THROW(id = helper.select_root_id(e2));
+    EXPECT_EQ(helper.backend(entry.root()).id(), id);
 }
+
 
 TEST_P(db_rdb_RdbHelper_test, test_load_source) {
     long long src_id = 0;

@@ -47,7 +47,8 @@ RdbFileResult::do_entry() {
     long long id = result_->value_at(0).int64_();
     long long lo_id = result_->value_at(1).int64_();
 
-    shared_ptr<RdbFileEntry> entry(new RdbFileEntry(rdb_, id));
+    shared_ptr<RdbFileEntry> entry(new RdbFileEntry(rdb_));
+    entry->id(id);
     entry->lo_id(lo_id);
     return entry;
 }

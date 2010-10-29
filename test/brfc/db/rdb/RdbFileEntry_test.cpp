@@ -63,15 +63,6 @@ TEST_F(db_rdb_RdbFileEntry_test, test_ctor) {
     EXPECT_EQ(0, entry.root().parent());
 }
 
-
-TEST_F(db_rdb_RdbFileEntry_test, test_ctor_existing) {
-    EXPECT_CALL(helper, select_root_id(_))
-            .WillOnce(Return(1234));
-
-    RdbFileEntry existing(&db, 10);
-    EXPECT_EQ(1234, helper.backend(existing.root()).id());
-}
-
 TEST_F(db_rdb_RdbFileEntry_test, test_source_id) {
     EXPECT_CALL(helper, load_file(Ref(entry)));
     entry.source_id();

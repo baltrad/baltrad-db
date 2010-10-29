@@ -43,11 +43,8 @@ class RdbFileEntry : public FileEntry {
     /**
      * @brief constructor
      * @param rdb RelationalDatabase this entry is from
-     * @param id database id of this entry
-     *
-     * if id is not 0, id for root node is loaded from database
      */
-    RdbFileEntry(RelationalDatabase* rdb, long long id=0);
+    explicit RdbFileEntry(RelationalDatabase* rdb);
 
     /**
      * @brief destructor
@@ -102,6 +99,10 @@ class RdbFileEntry : public FileEntry {
 
     void stored_at(const DateTime& dt) { stored_at_ = dt; }
 
+    bool loaded() const { return loaded_; }
+
+    void loaded(bool loaded) { loaded_ = loaded; }
+
   protected:
     virtual String do_uuid() const;
 
@@ -125,7 +126,8 @@ class RdbFileEntry : public FileEntry {
 
   private:
     RelationalDatabase* rdb_;
-
+    
+    bool loaded_;
     long long id_;
     long long lo_id_;
     long long source_id_;
