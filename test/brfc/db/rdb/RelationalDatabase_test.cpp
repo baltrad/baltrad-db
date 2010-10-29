@@ -81,6 +81,8 @@ TEST_P(db_rdb_RelationalDatabase_test, store) {
     ASSERT_TRUE(re);
     EXPECT_TRUE(re->id() > 0);
     EXPECT_TRUE(re->lo_id() > 0);
+    EXPECT_FALSE(e->source().empty());
+    EXPECT_TRUE(e->source().has("name"));
 }
 
 TEST_P(db_rdb_RelationalDatabase_test, entry_by_uuid) {
