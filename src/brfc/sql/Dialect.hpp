@@ -35,7 +35,7 @@ class Dialect {
         LAST_INSERT_ID = 2
     };
 
-    ~Dialect() { }
+    virtual ~Dialect() { }
 
     bool has_feature(Feature feature) const {
         return do_has_feature(feature);
