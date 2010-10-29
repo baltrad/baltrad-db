@@ -74,11 +74,14 @@ sql::SelectPtr
 QueryToSelect::transform(const FileQuery& query,
                          const AttributeMapper& mapper) {
     QueryToSelect rpl(&mapper);
+    const Model& m = Model::instance();
 
     sql::SelectPtr select = sql::Select::create();
     select->distinct(true);
-    select->what(Model::instance().files->column("id"));
-    select->what(Model::instance().file_content->column("lo_id"));
+    select->what(m.files->column("id"));
+    select->what(m.file_content->column("lo_id"));
+    select->what(m.files->column("stored_at"));
+    select->append_order_by(m.files->column("stored_at"), sql::Select::DESC);
 
     // replace attributes in where clause with columns
     if (query.filter()) {
