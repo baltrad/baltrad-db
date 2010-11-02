@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>
+#include <brfc/sql/Bind.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Function.hpp>
@@ -48,6 +49,7 @@ DialectCompiler::do_compile(const Element& expr) {
     stack_.clear();
     binds_.clear();
     visit(expr, *this);
+    BRFC_ASSERT(!stack_.empty());
     return Query(stack_.back(), binds_);
 }
 
@@ -71,6 +73,15 @@ DialectCompiler::operator()(const BinaryOperator& expr) {
     const String& rhs = pop();
     const String& lhs = pop();
     push(lhs + " " + expr.op() + " " + rhs);
+}
+
+void
+DialectCompiler::operator()(const Bind& bind) {
+    String name = bind.name();
+    if (not name.starts_with(":"))
+        name.prepend(":");
+    binds_.add(name, Variant());
+    push(name);
 }
 
 void

@@ -36,12 +36,6 @@ class sql_BindMap_test : public testing::Test {
     BindMap binds;
 };
 
-TEST_F(sql_BindMap_test, test_add_qvariant) {
-    Variant val(1);
-    binds.add(":bind", val);
-    EXPECT_EQ(val, binds.get(":bind"));
-}
-
 TEST_F(sql_BindMap_test, test_add_variant) {
     Variant val(1);
     binds.add(":bind", val);
@@ -73,6 +67,26 @@ TEST_F(sql_BindMap_test, test_get_with_default) {
     EXPECT_NO_THROW(result = binds.get(":bind", default_));
     EXPECT_EQ(default_, result);
 }
+
+
+TEST_F(sql_BindMap_test, test_set) {
+    EXPECT_THROW(binds.set(":bind", Variant()), lookup_error);
+    
+    binds.add(":bind", Variant());
+    EXPECT_NO_THROW(binds.set(":bind", Variant(1)));
+    ASSERT_TRUE(binds.has(":bind"));
+    EXPECT_EQ(Variant(1), binds.get(":bind"));
+}
+
+TEST_F(sql_BindMap_test, test_set_without_colon) {
+    EXPECT_THROW(binds.set("bind", Variant()), lookup_error);
+    
+    binds.add(":bind", Variant());
+    EXPECT_NO_THROW(binds.set("bind", Variant(1)));
+    ASSERT_TRUE(binds.has(":bind"));
+    EXPECT_EQ(Variant(1), binds.get(":bind"));
+}
+
 
 TEST_F(sql_BindMap_test, test_size) {
     EXPECT_EQ((size_t)0, binds.size());

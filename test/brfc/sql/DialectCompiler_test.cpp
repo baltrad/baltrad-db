@@ -22,19 +22,18 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 #include <brfc/Variant.hpp>
 
-#include <brfc/sql/BinaryOperator.hpp>
-#include <brfc/sql/Factory.hpp>
-#include <brfc/sql/Literal.hpp>
-#include <brfc/sql/Parentheses.hpp>
-
 #include <brfc/sql/Alias.hpp>
+#include <brfc/sql/BinaryOperator.hpp>
+#include <brfc/sql/Bind.hpp>
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/DialectCompiler.hpp>
+#include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Function.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Literal.hpp>
+#include <brfc/sql/Parentheses.hpp>
 #include <brfc/sql/Query.hpp>
 #include <brfc/sql/Select.hpp>
 #include <brfc/sql/Table.hpp>
@@ -142,6 +141,22 @@ TEST_F(sql_DialectCompiler_test, test_column) {
     ColumnPtr c = t1->column("c1");
     const Query& q = compiler.compile(*c);
     EXPECT_EQ("t1.c1", q.statement());
+}
+
+TEST_F(sql_DialectCompiler_test, test_bind) {
+    BindPtr b = Bind::create(":bind");
+    const Query& q = compiler.compile(*b);
+    EXPECT_EQ(":bind", q.statement());
+    ASSERT_TRUE(q.binds().has("bind"));
+    EXPECT_EQ(Variant(), q.binds().get("bind"));
+}
+
+TEST_F(sql_DialectCompiler_test, test_bind_without_colon) {
+    BindPtr b = Bind::create("bind");
+    const Query& q = compiler.compile(*b);
+    EXPECT_EQ(":bind", q.statement());
+    ASSERT_TRUE(q.binds().has("bind"));
+    EXPECT_EQ(Variant(), q.binds().get("bind"));
 }
 
 TEST_F(sql_DialectCompiler_test, test_aliased_table_column) {

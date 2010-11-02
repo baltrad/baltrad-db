@@ -31,6 +31,7 @@ namespace sql {
 
 class Alias;
 class Attribute;
+class Bind;
 class BinaryOperator;
 class Column;
 class Element;
@@ -47,6 +48,7 @@ class Table;
 
 typedef shared_ptr<Alias> AliasPtr;
 typedef shared_ptr<Attribute> AttributePtr;
+typedef shared_ptr<Bind> BindPtr;
 typedef shared_ptr<BinaryOperator> BinaryOperatorPtr;
 typedef shared_ptr<Column> ColumnPtr;
 typedef shared_ptr<Element> ElementPtr;

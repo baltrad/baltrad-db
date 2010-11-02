@@ -37,12 +37,29 @@ class Query {
             , binds_(binds) {
     }
 
-    void binds(const BindMap& binds) {
-        binds_ = binds;
+    Query(const Query& other)
+            : statement_(other.statement_)
+            , binds_(other.binds_) {
     }
 
-    BindMap& binds() {
-        return binds_;
+    Query& operator=(const Query& rhs) {
+        if (this != &rhs) {
+            statement_ = rhs.statement_;
+            binds_ = rhs.binds_;
+        }
+        return *this;
+    }
+    
+    /**
+     * @brief bind a value
+     * @throw lookup_error if no such bind is defined
+     */
+    void bind(const String& name, const Variant& value) {
+        binds_.set(name, value);
+    }
+
+    void binds(const BindMap& binds) {
+        binds_ = binds;
     }
 
     const BindMap& binds() const {
@@ -51,10 +68,6 @@ class Query {
 
     void statement(const String& statement) {
         statement_ = statement;
-    }
-
-    String& statement() {
-        return statement_;
     }
 
     const String& statement() const {

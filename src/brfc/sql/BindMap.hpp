@@ -43,6 +43,12 @@ class BindMap {
      * @throw duplicate_entry if bind already exists
      */
     void add(const String& name, const Variant& value);
+
+    /**
+     * @throw lookup_error if bind doesn't exist
+     *
+     */
+    void set(const String& name, const Variant& value);
     
     /**
      * @return true if bind exists

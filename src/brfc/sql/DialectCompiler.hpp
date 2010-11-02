@@ -40,6 +40,7 @@ class DialectCompiler : public Compiler {
   public:
     typedef mpl::vector<const Alias,
                         const BinaryOperator,
+                        const Bind,
                         const Column,
                         const Function,
                         const Insert,
@@ -67,13 +68,21 @@ class DialectCompiler : public Compiler {
      *       a FROM-clause
      */
     void operator()(const Alias& expr);
-
+    
     /**
      * @brief compile binary operator to string form
      *
      * @post stack contains 'lhs op rhs'
      */
     void operator()(const BinaryOperator& expr);
+
+    /**
+     * @brief compile a Bind to string form
+     *
+     * @post top of the stack constains bind name, BindMap has an entry
+     *       with the name and null value
+     */
+    void operator()(const Bind& bind);
 
     /**
      * @brief compile column to string form

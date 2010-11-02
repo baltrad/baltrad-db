@@ -21,6 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/DateTime.hpp>
 
+#include <brfc/sql/Bind.hpp>
 #include <brfc/sql/Expression.hpp>
 #include <brfc/sql/Literal.hpp>
 
@@ -90,6 +91,11 @@ Factory::datetime(const DateTime& datetime) const {
 LiteralPtr
 Factory::bool_(bool value) const {
     return Literal::create(Variant(value));
+}
+
+BindPtr
+Factory::bind(const String& name) const {
+    return Bind::create(name);
 }
 
 BinaryOperatorPtr

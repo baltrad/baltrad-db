@@ -105,6 +105,8 @@ class Factory {
      */
     LiteralPtr bool_(bool value) const;
 
+    BindPtr bind(const String& name) const;
+
     /**
      * @name comparison operators
      * @{

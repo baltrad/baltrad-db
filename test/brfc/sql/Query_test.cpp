@@ -38,28 +38,55 @@ class sql_Query_test : public testing::Test {
     }
 
     Query query;
+    BindMap binds;
     ::testing::NiceMock<MockDialect> dialect;
 };
 
+TEST_F(sql_Query_test, test_bind) {
+    binds.add(":bind", Variant());
+    query.binds(binds);
+
+    EXPECT_NO_THROW(query.bind(":bind", Variant(1)));
+    ASSERT_TRUE(query.binds().has(":bind"));
+    EXPECT_EQ(Variant(1), query.binds().get(":bind"));
+}
+
+TEST_F(sql_Query_test, test_bind_double) {
+    binds.add(":bind", Variant());
+    query.binds(binds);
+
+    EXPECT_NO_THROW(query.bind(":bind", Variant(1.0f)));
+    EXPECT_NO_THROW(query.bind(":bind", Variant(1)));
+    ASSERT_TRUE(query.binds().has(":bind"));
+    EXPECT_EQ(Variant(1), query.binds().get(":bind"));
+}
+
+TEST_F(sql_Query_test, test_bind_missing) {
+    EXPECT_THROW(query.bind(":bind", Variant()), lookup_error);
+}
+
 TEST_F(sql_Query_test, test_replace_binds_missing_binds) {
     query.statement(":bind1 :bind2");
-    query.binds().add(":bind1", Variant());
+    binds.add(":bind1", Variant());
+    query.binds(binds);
 
     EXPECT_THROW(query.replace_binds(dialect), value_error);
 }
 
 TEST_F(sql_Query_test, test_replace_binds_excessive_binds) {
     query.statement(":bind1");
-    query.binds().add(":bind1", Variant());
-    query.binds().add(":bind2", Variant());
+    binds.add(":bind1", Variant());
+    binds.add(":bind2", Variant());
+    query.binds(binds);
 
     EXPECT_THROW(query.replace_binds(dialect), value_error);
 }
 
 TEST_F(sql_Query_test, test_replace_binds_find_simple_placeholders) {
     query.statement(":bind1 asd :bind2 qwe");
-    query.binds().add(":bind1", Variant(1));
-    query.binds().add(":bind2", Variant(2));
+    binds.add(":bind1", Variant(1));
+    binds.add(":bind2", Variant(2));
+    query.binds(binds);
 
     String result;
     EXPECT_NO_THROW(result = query.replace_binds(dialect));
@@ -68,9 +95,10 @@ TEST_F(sql_Query_test, test_replace_binds_find_simple_placeholders) {
 
 TEST_F(sql_Query_test, test_replace_binds_find_complex_placeholders) {
     query.statement("(:bind1), :bind2, :bind_3+");
-    query.binds().add(":bind1", Variant(1));
-    query.binds().add(":bind2", Variant(2));
-    query.binds().add(":bind_3", Variant(3));
+    binds.add(":bind1", Variant(1));
+    binds.add(":bind2", Variant(2));
+    binds.add(":bind_3", Variant(3));
+    query.binds(binds);
     
     String result;
     EXPECT_NO_THROW(result = query.replace_binds(dialect));
@@ -80,7 +108,8 @@ TEST_F(sql_Query_test, test_replace_binds_find_complex_placeholders) {
 TEST_F(sql_Query_test, test_replace_binds_large_replacement) {
     // replacement text is longer than placeholder
     query.statement(":bind1");
-    query.binds().add(":bind1", Variant(1234567));
+    binds.add(":bind1", Variant(1234567));
+    query.binds(binds);
     
     String result;
     EXPECT_NO_THROW(result = query.replace_binds(dialect));
@@ -89,9 +118,10 @@ TEST_F(sql_Query_test, test_replace_binds_large_replacement) {
 
 TEST_F(sql_Query_test, test_replace_binds_replacement_with_colon) {
     query.statement(":bind1 texttext :bind2 texttext :bind3");
-    query.binds().add(":bind1", Variant(":a:b:c:d:e:"));
-    query.binds().add(":bind2", Variant("a:b:c:d:e"));
-    query.binds().add(":bind3", Variant(":a:b:c:d:e:"));
+    binds.add(":bind1", Variant(":a:b:c:d:e:"));
+    binds.add(":bind2", Variant("a:b:c:d:e"));
+    binds.add(":bind3", Variant(":a:b:c:d:e:"));
+    query.binds(binds);
 
     String result;
     EXPECT_NO_THROW(result = query.replace_binds(dialect));

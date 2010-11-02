@@ -52,6 +52,16 @@ BindMap::add(const String& name, const Variant& value) {
         throw duplicate_entry(name.to_std_string());
 }
 
+void
+BindMap::set(const String& name, const Variant& value) {
+    const String& key = name_to_placeholder(name);
+    map::iterator iter = binds_.find(key);
+    if (iter == binds_.end())
+        throw lookup_error(name.to_std_string());
+    binds_.erase(iter);
+    binds_.insert(std::make_pair(key, value));
+}
+
 bool
 BindMap::has(const String& name) const {
     return binds_.find(name_to_placeholder(name)) != binds_.end();
