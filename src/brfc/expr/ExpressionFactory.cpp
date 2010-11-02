@@ -19,9 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/ExpressionFactory.hpp>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/DateTime.hpp>
 
 #include <brfc/expr/Attribute.hpp>
+#include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Expression.hpp>
 #include <brfc/expr/Function.hpp>
 #include <brfc/expr/Literal.hpp>
@@ -170,6 +172,18 @@ ExpressionFactory::min(ExpressionPtr expr) const {
 FunctionPtr
 ExpressionFactory::max(ExpressionPtr expr) const {
     return Function::max(expr);
+}
+
+ExpressionPtr
+ExpressionFactory::combined_datetime(const String& date,
+                                     const String& time) const {
+    AttributePtr date_attr = attribute(date);
+    if (date_attr->type() != Attribute::DATE)
+        throw value_error("invalid attribute for date");
+    AttributePtr time_attr = attribute(time);
+    if (time_attr->type() != Attribute::TIME)
+        throw value_error("invalid attribute for time");
+    return add(date_attr, time_attr);
 }
 
 } // namespace expr

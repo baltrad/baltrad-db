@@ -197,6 +197,15 @@ class ExpressionFactory {
      * @brief MAX function
      */
     FunctionPtr max(ExpressionPtr expr) const;
+
+    /**
+     * @brief combine date and time attribute to datetime
+     * @param date name of the date attribute
+     * @param time name of the time attribute
+     * @throw value_error if attributes are of incorrect type
+     */
+    ExpressionPtr combined_datetime(const String& date,
+                                    const String& time) const;
   
   private:
     AttributePrototypes prototypes_;
