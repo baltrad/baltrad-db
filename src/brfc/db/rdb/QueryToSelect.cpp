@@ -80,8 +80,7 @@ QueryToSelect::transform(const FileQuery& query,
     select->distinct(true);
     select->what(m.files->column("id"));
     select->what(m.file_content->column("lo_id"));
-    select->what(m.files->column("stored_at"));
-    select->append_order_by(m.files->column("stored_at"), sql::Select::DESC);
+    select->append_order_by(m.files->column("id"), sql::Select::ASC);
 
     // replace attributes in where clause with columns
     if (query.filter()) {
