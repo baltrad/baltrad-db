@@ -73,15 +73,18 @@ Benchmark::do_execute(FileCatalog& fc,
         return 1;
     }
     
+
+    boost::timer timer;
+
     // read the "template" file
     oh5::hl::HlFile f(vm["input-file"].as<std::string>());
+    double load_secs = timer.elapsed();
 
     DateTime dt(Date(3000, 1, 1));
     TimeDelta delta;
     delta.add_days(1);
+    double store_secs;
     std::vector<shared_ptr<const db::FileEntry> > stored_files;
-    boost::timer timer;
-    double elapsed = 0;
     boost::progress_display progress(iterations_);
 
     for (int i=0; i < iterations_; ++i) {
@@ -90,16 +93,18 @@ Benchmark::do_execute(FileCatalog& fc,
 
         timer.restart();
         stored_files.push_back(fc.store(f));
-        elapsed += timer.elapsed();
+        store_secs += timer.elapsed();
 
         dt += delta;
         ++progress;
     }
 
     std::cout << "imported " << iterations_
-              << " files in " << elapsed << " secs (avg. "
-              << elapsed / iterations_ << " secs per file) "
-              << std::endl;
+              << " files in " << store_secs << " secs " << std::endl
+              << "average: " << store_secs / iterations_ << " (store) + "
+              << load_secs << " (load) = "
+              << store_secs / iterations_ + load_secs
+              << " (total) secs per file" << std::endl;
 
     if (vm.count("keep") == 0) {
         std::cout << "cleaning up" << std::endl;
