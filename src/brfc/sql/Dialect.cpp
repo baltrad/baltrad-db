@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Dialect.hpp>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/DateTimeParser.hpp>
 #include <brfc/Variant.hpp>
 
 namespace brfc {
@@ -27,6 +28,10 @@ namespace sql {
 
 String
 Dialect::do_variant_to_string(const Variant& value) const {
+    static DateTimeParser date_parser("yyyy-MM-dd");
+    static DateTimeParser time_parser("HH:mm:ss.zzz");
+    static DateTimeParser datetime_parser("yyyy-MM-dd hh:mm:ss.zzz");
+
     switch (value.type()) {
         case Variant::NONE:
             return "NULL";
@@ -39,11 +44,11 @@ Dialect::do_variant_to_string(const Variant& value) const {
         case Variant::BOOL:
             return value.to_string().to_lower();
         case Variant::DATE:
-            return "'" + value.date().to_string("yyyy-MM-dd") + "'";
+            return "'" + date_parser.date_to_string(value.date()) + "'";
         case Variant::TIME:
-            return "'" + value.time().to_string("HH:mm:ss.zzz") + "'";
+            return "'" + time_parser.time_to_string(value.time()) + "'";
         case Variant::DATETIME:
-            return "'" + value.datetime().to_string("yyyy-MM-dd hh:mm:ss.zzz") + "'";
+            return "'" + datetime_parser.to_string(value.datetime()) + "'";
         default:
             throw value_error(value.to_string().to_std_string());
     }
