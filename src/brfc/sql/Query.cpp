@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Query.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/String.hpp>
 #include <brfc/RegExp.hpp>
 
 #include <brfc/sql/Dialect.hpp>
@@ -28,37 +27,73 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
+Query::Query(const String& stmt, const BindMap& binds)
+        : stmt_(split_statement(stmt))
+        , binds_(binds) {
+}
+
+Query::Query(const Query& other)
+        : stmt_(other.stmt_)
+        , binds_(other.binds_) {
+}
+
+Query&
+Query::operator=(const Query& rhs) {
+    if (this != &rhs) {
+        stmt_ = rhs.stmt_;
+        binds_ = rhs.binds_;
+    }
+    return *this;
+}
+
+void
+Query::statement(const String& stmt) {
+    stmt_ = split_statement(stmt);
+}
+
+String
+Query::statement() const {
+    return stmt_.join("");
+}
+
 String
 Query::replace_binds(const Dialect& dialect) const {
-    if (binds_.size() == 0)
-        return statement_;
-    RegExp bind_re(":[a-zA-Z0-9_]+");
-    String statement(statement_), bind_str;
-    int pos = 0, ppos = 0;
-    size_t replace_count = 0;
-    while (bind_re.index_in(statement, pos) != -1) {
-        ppos = bind_re.pos() ? bind_re.pos() - 1 : 0;
-        if (statement.char_at(ppos) == '\\') {
+    // this relies on the fact that stmt_ always starts with a "plain" string
+    // and then alternates between a bind key and a "plain" string
+    String replaced;
+    for (size_t i=0; i < stmt_.size(); ++i) {
+        const String& stmt_bit = stmt_.at(i);
+        if (i % 2) { // bind key
+            replaced += dialect.variant_to_string(binds_.get(stmt_bit));
+        } else { // "plain" string
+            replaced += stmt_bit;
+        }
+    }
+    return replaced;
+}
+
+StringList
+Query::split_statement(const String& stmt) {
+    StringList stmt_bits;
+    RegExp bind_re(":[a-zA-Z]+[a-zA-Z0-9_]*");
+    int pos = 0, ppos = 0, lpos = 0;
+    while (bind_re.index_in(stmt, pos) != -1) {
+        ppos = bind_re.pos() - 1;
+        /* ':' is precededed by '\' or ':'*/
+        if (ppos > -1 and (stmt.char_at(ppos) == '\\' or
+                           stmt.char_at(ppos) == ':')) {
             pos = bind_re.pos() + bind_re.matched_length();
             continue;
         }
-        try {
-            bind_str = dialect.variant_to_string(binds_.get(bind_re.cap()));
-        } catch (const lookup_error&) {
-            throw value_error("missing value for bind placeholder " +
-                              bind_re.cap().to_std_string());
-        }
-        statement.replace(bind_re.pos(), bind_re.matched_length(), bind_str);
-        pos = bind_re.pos() + bind_str.length();
-        ++replace_count;
+        stmt_bits.push_back(stmt.substr(lpos, bind_re.pos() - lpos));
+        stmt_bits.push_back(bind_re.cap());
+        lpos = bind_re.pos() + bind_re.matched_length();
+        pos = lpos;
     }
-
-    // XXX: should there be a flag to omit this test?
-    if (replace_count != binds_.size())
-        throw value_error("not all binds consumed");
-    return statement;
+    if (lpos != stmt.length())
+        stmt_bits.push_back(stmt.substr(lpos));
+    return stmt_bits;
 }
-
 
 } // namespace sql
 } // namespace brfc

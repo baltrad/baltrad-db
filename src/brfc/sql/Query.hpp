@@ -21,6 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_QUERY_HPP
 
 #include <brfc/String.hpp>
+#include <brfc/StringList.hpp>
+
 
 #include <brfc/sql/BindMap.hpp>
 
@@ -31,28 +33,26 @@ class Dialect;
 
 class Query {
   public:
-    explicit Query(const String& statement="",
-                   const BindMap& binds=BindMap())
-            : statement_(statement)
-            , binds_(binds) {
-    }
-
-    Query(const Query& other)
-            : statement_(other.statement_)
-            , binds_(other.binds_) {
-    }
-
-    Query& operator=(const Query& rhs) {
-        if (this != &rhs) {
-            statement_ = rhs.statement_;
-            binds_ = rhs.binds_;
-        }
-        return *this;
-    }
+    /**
+     * @brief constructor
+     * @param stmt the sql statement string
+     * @param binds bind placeholder values
+     */
+    explicit Query(const String& stmt="", const BindMap& binds=BindMap());
+    
+    /**
+     * @brief copy constructor
+     */
+    Query(const Query& other);
+    
+    /**
+     * @brief copy assignment
+     */
+    Query& operator=(const Query& rhs);
     
     /**
      * @brief bind a value
-     * @throw lookup_error if no such bind is defined
+     * @throw lookup_error if no such bind is defined in binds
      */
     void bind(const String& name, const Variant& value) {
         binds_.set(name, value);
@@ -66,23 +66,21 @@ class Query {
         return binds_;
     }
 
-    void statement(const String& statement) {
-        statement_ = statement;
-    }
+    void statement(const String& statement);
 
-    const String& statement() const {
-        return statement_;
-    }
+    String statement() const;
 
     /**
      * @brief replace bind placeholders in the SQL statement
      * @param dialect database dialect the replacement is done for
-     * @throw value_error if not all binds consumed or available
+     * @throw lookup_error if not all binds consumed
      */
     String replace_binds(const Dialect& dialect) const;
     
   private:
-    String statement_;
+    static StringList split_statement(const String& stmt);
+
+    StringList stmt_;
     BindMap binds_;
 };
 
