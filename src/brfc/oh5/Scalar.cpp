@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
+#include <brfc/DateTimeParser.hpp>
 #include <brfc/Time.hpp>
 
 namespace brfc {
@@ -144,7 +145,10 @@ class scalar_to_bool : public boost::static_visitor<bool> {
 class scalar_to_date : public boost::static_visitor<Date> {
   public:
     Date operator()(const String& value) const {
-        return Date::from_string(value, "yyyyMMdd");
+        static DateTimeParser parser("yyyyMMdd");
+        if (value.length() != 8)
+            throw value_error("oh5::Scalar not convertible to Date");
+        return parser.date_from_string(value);
     }
 
     template<typename T>
@@ -158,7 +162,10 @@ class scalar_to_date : public boost::static_visitor<Date> {
 class scalar_to_time : public boost::static_visitor<Time> {
   public:
     Time operator()(const String& value) const {
-        return Time::from_string(value, "hhmmss");
+        static DateTimeParser parser("hhmmss");
+        if (value.length() != 6)
+            throw value_error("oh5::Scalar not convertible to Time");
+        return parser.time_from_string(value);
     }
 
     template<typename T>
