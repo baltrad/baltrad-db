@@ -37,9 +37,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/PhysicalFile.hpp>
 
 #include <brfc/sql/expr.hpp>
+#include <brfc/sql/Bind.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/LargeObject.hpp>
+#include <brfc/sql/Query.hpp>
 #include <brfc/sql/Result.hpp>
 
 namespace brfc {
@@ -64,22 +66,24 @@ variant_to_oh5_scalar(const Variant& value) {
         case Variant::TIME:
             return oh5::Scalar(value.time());
         default:
-            throw std::runtime_error("invalid Variant to oh5::Scalar");
+            break;
     }
+    throw std::runtime_error("invalid Variant to oh5::Scalar");
 }
 
-sql::LiteralPtr
+Variant
 attr_sql_value(const oh5::Attribute& attr) {
     switch (attr.value().type()) {
         case oh5::Scalar::STRING:
-            return sql::Literal::create(Variant(attr.value().string()));
+            return Variant(attr.value().string());
         case oh5::Scalar::INT64:
-            return sql::Literal::create(Variant(attr.value().int64_()));
+            return Variant(attr.value().int64_());
         case oh5::Scalar::DOUBLE:
-            return sql::Literal::create(Variant(attr.value().double_()));
+            return Variant(attr.value().double_());
         default:
-            BRFC_ASSERT(false);
+            break;
     }
+    BRFC_ASSERT(false);
 }
 
 long long
@@ -103,8 +107,9 @@ attr_sql_column(const oh5::Attribute& attr) {
         case oh5::Scalar::DOUBLE:
             return m.attrvals->column("value_real");
         default:
-            BRFC_ASSERT(false);
+            break;
     }
+    BRFC_ASSERT(false);
 }
 
 } // namespace anonymous
@@ -115,8 +120,9 @@ RdbHelper::RdbHelper(sql::Connection* conn, const FileHasher* hasher)
         : conn_(conn)
         , hasher_(hasher)
         , m_(Model::instance())
-        , sql_() {
-
+        , sql_()
+        , insert_node_qry_()
+        , insert_attr_qry_() {
 }
 
 RdbHelper::~RdbHelper() {
@@ -155,25 +161,40 @@ RdbHelper::last_id(sql::Result& result) {
 }
 
 void
-RdbHelper::insert_node(oh5::Node& node) {
-    RdbFileEntry* file = dynamic_cast<RdbFileEntry*>(node.file());
-    BRFC_ASSERT(file != 0);
-
+RdbHelper::compile_insert_node_query() {
     sql::InsertPtr qry = sql::Insert::create(m_.nodes);
     if (dialect().has_feature(sql::Dialect::RETURNING))
         qry->add_return(m_.nodes->column("id"));
 
+    qry->value("parent_id", sql_.bind(":parent_id"));
+    qry->value("type", sql_.bind(":type"));
+    qry->value("file_id", sql_.bind(":file_id"));
+    qry->value("name", sql_.bind(":name"));
+
+    const sql::Query& q = conn().compiler().compile(*qry);
+    insert_node_qry_.reset(new sql::Query(q));
+}
+
+void
+RdbHelper::insert_node(oh5::Node& node) {
+    RdbFileEntry* file = dynamic_cast<RdbFileEntry*>(node.file());
+    BRFC_ASSERT(file != 0);
+
+    if (insert_node_qry_.get() == 0)
+        compile_insert_node_query();
+    sql::Query qry(*insert_node_qry_); // make a copy not to mess up defaults
+
+    Variant parent_id;
     const oh5::Node* parent = node.parent();
     if (parent) {
-        long long parent_id = backend(*parent).id();
-        qry->value("parent_id", sql_.int64_(parent_id));
+        parent_id = Variant(backend(*parent).id());
     }
+    qry.bind(":parent_id", parent_id);
+    qry.bind(":type", Variant(node_sql_type(node)));
+    qry.bind(":file_id", Variant(file->id()));
+    qry.bind(":name", Variant(node.name()));
 
-    qry->value("type", sql_.int64_(node_sql_type(node)));
-    qry->value("file_id", sql_.int64_(file->id()));
-    qry->value("name", sql_.string(node.name()));
-
-    shared_ptr<sql::Result> result = conn().execute(*qry);
+    shared_ptr<sql::Result> result = conn().execute(qry);
 
     long long db_id = last_id(*result);
     backend(node).id(db_id);
@@ -186,30 +207,49 @@ RdbHelper::insert_node(oh5::Node& node) {
 }
 
 void
-RdbHelper::insert_attribute(oh5::Attribute& attr) {
+RdbHelper::compile_insert_attr_query() {
     sql::InsertPtr qry = sql::Insert::create(m_.attrvals);
 
-    qry->value("node_id", sql_.int64_(backend(attr).id()));
-    qry->value(attr_sql_column(attr)->name(), attr_sql_value(attr));
+    qry->value("node_id", sql_.bind(":node_id"));
+    qry->value("value_str", sql_.bind(":value_str"));
+    qry->value("value_int", sql_.bind(":value_int"));
+    qry->value("value_real", sql_.bind(":value_real"));
+    qry->value("value_bool", sql_.bind(":value_bool"));
+    qry->value("value_date", sql_.bind(":value_date"));
+    qry->value("value_time", sql_.bind(":value_time"));
+
+    const sql::Query& q = conn().compiler().compile(*qry);
+    insert_attr_qry_.reset(new sql::Query(q));
+}
+
+void
+RdbHelper::insert_attribute(oh5::Attribute& attr) {
+    if (insert_attr_qry_.get() == 0)
+        compile_insert_attr_query();
+    sql::Query qry(*insert_attr_qry_); // make a copy not to mess up defaults
+    
+    qry.bind(":node_id", Variant(backend(attr).id()));
+
+    qry.bind(attr_sql_column(attr)->name(), attr_sql_value(attr));
 
     if (attr.value().type() == oh5::Scalar::STRING) {
         try {
             bool val = attr.value().to_bool();
-            qry->value("value_bool", sql_.bool_(val));
+            qry.bind(":value_bool", Variant(val));
         } catch (const value_error&) { /* pass */ }
 
         try {
             Date date = attr.value().to_date();
-            qry->value("value_date", sql_.date(date));
+            qry.bind(":value_date", Variant(date));
         } catch (const value_error&) { /* pass */ }
 
         try {
             Time time = attr.value().to_time();
-            qry->value("value_time", sql_.time(time));
+            qry.bind(":value_time", Variant(time));
         } catch (const value_error&) { /* pass */ }
     }
 
-    conn().execute(*qry);
+    conn().execute(qry);
 }
 
 void

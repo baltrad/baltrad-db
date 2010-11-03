@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_RDB_RDB_HELPER_HPP
 #define BRFC_DB_RDB_RDB_HELPER_HPP
 
+#include <boost/noncopyable.hpp>
+
 #include <brfc/sql/Factory.hpp>
 
 namespace brfc {
@@ -37,6 +39,7 @@ namespace oh5 {
 namespace sql {
     class Connection;
     class Dialect;
+    class Query;
     class Result;
 }
 
@@ -50,7 +53,7 @@ class RdbNodeBackend;
 /**
  * @brief gather & simplify database queries
  */
-class RdbHelper {
+class RdbHelper : boost::noncopyable {
   public:
     RdbHelper(sql::Connection* conn, const FileHasher* hasher);
 
@@ -152,10 +155,15 @@ class RdbHelper {
   private:
     long long last_id(sql::Result& result);
 
+    void compile_insert_node_query();
+    void compile_insert_attr_query();
+
     sql::Connection* conn_;
     const FileHasher* hasher_;
     const Model& m_;
     sql::Factory sql_;
+    scoped_ptr<sql::Query> insert_node_qry_;
+    scoped_ptr<sql::Query> insert_attr_qry_;
 };
 
 } // namespace rdb
