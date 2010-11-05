@@ -136,14 +136,14 @@ RelationalDatabase::do_entry_by_uuid(const String& uuid) {
 
 shared_ptr<FileResult>
 RelationalDatabase::do_execute(const FileQuery& query) {
-    sql::SelectPtr select = QueryToSelect::transform(query, mapper());
+    sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
     shared_ptr<sql::Result> res = conn().execute(*select);
     return shared_ptr<FileResult>(new RdbFileResult(this, res));
 }
 
 shared_ptr<AttributeResult>
 RelationalDatabase::do_execute(const AttributeQuery& query) {
-    sql::SelectPtr select = QueryToSelect::transform(query, mapper());
+    sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
     shared_ptr<sql::Result> res = conn().execute(*select);
     return shared_ptr<AttributeResult>(new RdbAttributeResult(res));
 }

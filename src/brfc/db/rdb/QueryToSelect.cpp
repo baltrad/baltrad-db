@@ -56,75 +56,76 @@ namespace rdb {
 QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
-        , model_(&Model::instance())
-        , attrs_(model_->nodes->alias("attrs"))
-        , pnode1_(model_->nodes->alias("pnode1"))
+        , m_(Model::instance())
+        , attrs_(m_.nodes->alias("attrs"))
+        , pnode1_(m_.nodes->alias("pnode1"))
+        , select_()
         , from_() {
+}
+
+void
+QueryToSelect::reset() {
+    select_ = sql::Select::create();
     // always select from files and join sources
-    Model* m = model_;
-    from_ = m->files->join(m->sources,
-                           xpr_.eq(m->files->column("source_id"),
-                                   m->sources->column("id")));
-    from_ = from_->join(m->file_content,
-                        xpr_.eq(m->file_content->column("file_id"),
-                                m->files->column("id")));
+    from_ = m_.files->join(m_.sources,
+                           xpr_.eq(m_.files->column("source_id"),
+                                   m_.sources->column("id")));
+    from_ = from_->join(m_.file_content,
+                        xpr_.eq(m_.file_content->column("file_id"),
+                                m_.files->column("id")));
+    stack_.clear();
 }
 
 sql::SelectPtr
-QueryToSelect::transform(const FileQuery& query,
-                         const AttributeMapper& mapper) {
-    QueryToSelect rpl(&mapper);
-    const Model& m = Model::instance();
+QueryToSelect::transform(const FileQuery& query) {
+    reset();
 
-    sql::SelectPtr select = sql::Select::create();
-    select->distinct(true);
-    select->what(m.files->column("id"));
-    select->what(m.file_content->column("lo_id"));
-    select->append_order_by(m.files->column("id"), sql::Select::ASC);
+    select_->distinct(true);
+    select_->what(m_.files->column("id"));
+    select_->what(m_.file_content->column("lo_id"));
+    select_->append_order_by(m_.files->column("id"), sql::Select::ASC);
 
     // replace attributes in where clause with columns
     if (query.filter()) {
-        visit(*query.filter(), rpl);
-        select->where(rpl.pop());
+        visit(*query.filter(), *this);
+        select_->where(pop());
     } 
     
     // add the built join as from clause
-    select->from(rpl.from_);
+    select_->from(from_);
 
-    return select;
+    return select_;
 }
 
 sql::SelectPtr
-QueryToSelect::transform(const AttributeQuery& query,
-                         const AttributeMapper& mapper) {
-    QueryToSelect rpl(&mapper);
-
-    sql::SelectPtr select = sql::Select::create();
-    select->distinct(query.distinct());
-    select->limit(query.limit());
+QueryToSelect::transform(const AttributeQuery& query) {
+    reset();
+    
+    select_->distinct(query.distinct());
+    select_->limit(query.limit());
 
     // replace attributes with columns
     BOOST_FOREACH(expr::ExpressionPtr expr, query.fetch()) {
-        visit(*expr, rpl);
-        select->what(rpl.pop());
+        visit(*expr, *this);
+        select_->what(pop());
     }
 
     // replace attributes in where clause with columns
     if (query.filter()) {
-        visit(*query.filter(), rpl);
-        select->where(rpl.pop());
+        visit(*query.filter(), *this);
+        select_->where(pop());
     } 
 
     // replace attributes in order by
     BOOST_FOREACH(AttributeQuery::OrderPair op, query.order()) {
-        visit(*op.first, rpl);
-        select->append_order_by(rpl.pop(), sql::Select::SortDirection(op.second));
+        visit(*op.first, *this);
+        select_->append_order_by(pop(), sql::Select::SortDirection(op.second));
     }
     
     // add the built join as from clause
-    select->from(rpl.from_);
+    select_->from(from_);
 
-    return select;
+    return select_;
 }
 
 sql::ColumnPtr
@@ -133,10 +134,10 @@ QueryToSelect::source_attr_column(expr::Attribute& attr) {
     if (key == "name" or key == "node") {
         // sources is joined by default
         // this attribute can be accessed at sources.name
-        return model_->sources->column("name");
+        return m_.sources->column("name");
     } else {
         String alias = "src_" + key;
-        sql::AliasPtr value_t = model_->source_kvs->alias(alias);
+        sql::AliasPtr value_t = m_.source_kvs->alias(alias);
 
         // join if missing
         if (not from_->contains(value_t)) {
@@ -144,7 +145,7 @@ QueryToSelect::source_attr_column(expr::Attribute& attr) {
                         xpr_.and_(
                             xpr_.eq(
                                 value_t->column("source_id"),
-                                model_->sources->column("id")),
+                                m_.sources->column("id")),
                             xpr_.eq(
                                 value_t->column("key"),
                                 xpr_.string(key))
@@ -179,7 +180,7 @@ QueryToSelect::plain_attr_column(expr::Attribute& attr) {
 
     // alias the table (this attribute is always searched on this alias)
     String alias = name.remove("/") + "_values";
-    sql::AliasPtr value_t = model_->attrvals->alias(alias);
+    sql::AliasPtr value_t = m_.attrvals->alias(alias);
     
     // join this table-alias if not already joined
     if (not from_->contains(value_t)) {
@@ -231,7 +232,7 @@ QueryToSelect::join_attrs() {
     if (not from_->contains(attrs_)) {
         from_ = from_->join(attrs_,
                             xpr_.eq(attrs_->column("file_id"),
-                                    model_->files->column("id")));
+                                    m_.files->column("id")));
         from_ = from_->join(pnode1_,
                             xpr_.eq(pnode1_->column("id"),
                                     attrs_->column("parent_id")));
