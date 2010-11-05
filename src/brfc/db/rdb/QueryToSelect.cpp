@@ -196,7 +196,7 @@ QueryToSelect::plain_attr_column(expr::Attribute& attr) {
         case expr::Attribute::INT64:
             return value_t->column("value_int");
         case expr::Attribute::DOUBLE:
-            return value_t->column("value_real");
+            return value_t->column("value_double");
         case expr::Attribute::BOOL:
             return value_t->column("value_bool");
         case expr::Attribute::DATE:

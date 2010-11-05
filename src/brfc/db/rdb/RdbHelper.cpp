@@ -105,7 +105,7 @@ attr_sql_column(const oh5::Attribute& attr) {
         case oh5::Scalar::INT64:
             return m.attrvals->column("value_int");
         case oh5::Scalar::DOUBLE:
-            return m.attrvals->column("value_real");
+            return m.attrvals->column("value_double");
         default:
             break;
     }
@@ -213,7 +213,7 @@ RdbHelper::compile_insert_attr_query() {
     qry->value("node_id", sql_.bind(":node_id"));
     qry->value("value_str", sql_.bind(":value_str"));
     qry->value("value_int", sql_.bind(":value_int"));
-    qry->value("value_real", sql_.bind(":value_real"));
+    qry->value("value_double", sql_.bind(":value_double"));
     qry->value("value_bool", sql_.bind(":value_bool"));
     qry->value("value_date", sql_.bind(":value_date"));
     qry->value("value_time", sql_.bind(":value_time"));
@@ -274,9 +274,9 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     qry->value("hash", sql_.string(hash)); 
     qry->value("source_id", sql_.int64_(source_id));
     qry->value("stored_at", sql_.datetime(stored_at));
-    qry->value("object", sql_.string(file.what_object()));
-    qry->value("n_date", sql_.date(file.what_date()));
-    qry->value("n_time", sql_.time(file.what_time()));
+    qry->value("what_object", sql_.string(file.what_object()));
+    qry->value("what_date", sql_.date(file.what_date()));
+    qry->value("what_time", sql_.time(file.what_time()));
 
     if (dialect().has_feature(sql::Dialect::RETURNING))
         qry->add_return(m_.files->column("id"));
@@ -413,7 +413,7 @@ RdbHelper::load_children(oh5::Node& node) {
     qry->what(m_.nodes->column("type"));
     qry->what(m_.attrvals->column("value_int"));
     qry->what(m_.attrvals->column("value_str"));
-    qry->what(m_.attrvals->column("value_real"));
+    qry->what(m_.attrvals->column("value_double"));
     qry->what(m_.attrvals->column("value_bool"));
     qry->what(m_.attrvals->column("value_date"));
     qry->what(m_.attrvals->column("value_time"));
@@ -438,8 +438,8 @@ RdbHelper::load_children(oh5::Node& node) {
                 value = oh5::Scalar(r->value_at("value_str").string());
             } else if (not r->value_at("value_int").is_null()) {
                 value = oh5::Scalar(r->value_at("value_int").int64_());
-            } else if (not r->value_at("value_real").is_null()) {
-                value = oh5::Scalar(r->value_at("value_real").double_());
+            } else if (not r->value_at("value_double").is_null()) {
+                value = oh5::Scalar(r->value_at("value_double").double_());
             } else {
                 BRFC_ASSERT(false);
             }

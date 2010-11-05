@@ -47,9 +47,9 @@ Model::Model()
     files->add_column("uuid");
     files->add_column("hash");
     files->add_column("stored_at");
-    files->add_column("object");
-    files->add_column("n_date");
-    files->add_column("n_time");
+    files->add_column("what_object");
+    files->add_column("what_date");
+    files->add_column("what_time");
     files->add_column("source_id");
     files->column("source_id")->references(sources->column("id"));
 
@@ -67,7 +67,7 @@ Model::Model()
     attrvals->add_column("node_id");
     attrvals->add_column("value_int");
     attrvals->add_column("value_str");
-    attrvals->add_column("value_real");
+    attrvals->add_column("value_double");
     attrvals->add_column("value_bool");
     attrvals->add_column("value_date");
     attrvals->add_column("value_time");

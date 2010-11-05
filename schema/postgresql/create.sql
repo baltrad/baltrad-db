@@ -8,9 +8,9 @@ CREATE TABLE bdb_files (
     uuid TEXT NOT NULL UNIQUE,
     hash TEXT NOT NULL,
     stored_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    object TEXT NOT NULL,
-    n_date DATE NOT NULL,
-    n_time TIME WITHOUT TIME ZONE NOT NULL, 
+    what_object TEXT NOT NULL,
+    what_date DATE NOT NULL,
+    what_time TIME WITHOUT TIME ZONE NOT NULL, 
     source_id INTEGER NOT NULL REFERENCES bdb_sources(id),
     UNIQUE (hash, source_id)
 );
@@ -37,7 +37,7 @@ CREATE TABLE bdb_attribute_values (
         REFERENCES bdb_nodes(id) ON DELETE CASCADE,
     value_int BIGINT,
     value_str TEXT,
-    value_real DOUBLE PRECISION,
+    value_double DOUBLE PRECISION,
     value_bool BOOLEAN,
     value_date DATE,
     value_time TIME WITHOUT TIME ZONE

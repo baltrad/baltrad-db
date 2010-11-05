@@ -319,24 +319,6 @@ TEST_P(db_rdb_FileQuery_test, test_has_nx_file) {
     EXPECT_FALSE(result);
 }
 
-/*
-TEST_P(db_rdb_FileQuery_test, test_query_file_id) {
-    shared_ptr<FileResult> r = 
-        query.fetch(xpr.attribute("file:uuid"))
-             .filter(xpr.attribute("file:path")->eq(xpr.string("td1")))
-             .execute();
-    EXPECT_EQ(1, r->size());
-    EXPECT_EQ(fe1->uuid(), r->get(1)->int64_(0), 0);
-}
-*/
-
-/*
-TEST_P(db_rdb_FileQuery_test, test_duplicate_fetch_throws) {
-    query.fetch(xpr.attribute("file:path"));
-    EXPECT_THROW(query.fetch(xpr.attribute("file:path")), duplicate_entry);
-}
-*/
-
 TEST_P(db_rdb_FileQuery_test, test_query_like) {
     shared_ptr<FileResult> r =
         query.filter(xpr.attribute("what/source:node")->like("sea*"))
@@ -349,6 +331,10 @@ TEST_P(db_rdb_FileQuery_test, test_query_like) {
     EXPECT_EQ(fe3->uuid(), r->entry()->uuid());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(fe5->uuid(), r->entry()->uuid());
+}
+
+TEST_P(db_rdb_FileQuery_test, test_query_missing) {
+
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1
