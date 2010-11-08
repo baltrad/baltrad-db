@@ -85,7 +85,9 @@ Expression::between(const Expression& low, const Expression& high) const {
 
 BinaryOperatorPtr
 Expression::like(const String& pattern) const {
-    return like(Literal(Variant(pattern)));
+    Variant v(pattern);
+    Literal l(v);
+    return like(l);
 }
 
 BinaryOperatorPtr

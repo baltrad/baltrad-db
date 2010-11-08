@@ -220,7 +220,8 @@ AttributePrototypes::default_odim_h5() {
     AttributePrototypes prototypes;
     
     BOOST_FOREACH(const NameTypeMap::value_type& defn, defns) {
-        prototypes.add(Attribute(defn.first, defn.second));
+	Attribute attr(defn.first, defn.second);
+        prototypes.add(attr);
     }
 
     return prototypes;
