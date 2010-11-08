@@ -31,76 +31,76 @@ namespace brfc {
 namespace expr {
 
 BinaryOperatorPtr
-Expression::ne(ExpressionPtr rhs) const {
-    return BinaryOperator::create("!=", this->shared_from_this(), rhs);
+Expression::ne(const Expression& rhs) const {
+    return make_shared<BinaryOperator>("!=", *this, rhs);
 }
 
 BinaryOperatorPtr
-Expression::eq(ExpressionPtr rhs) const {
-    return BinaryOperator::create("=", this->shared_from_this(), rhs);
+Expression::eq(const Expression& rhs) const {
+    return make_shared<BinaryOperator>("=", *this, rhs);
 }
 
 BinaryOperatorPtr
-Expression::gt(ExpressionPtr rhs) const {
-    return BinaryOperator::create(">", this->shared_from_this(), rhs);
+Expression::gt(const Expression& rhs) const {
+    return make_shared<BinaryOperator>(">", *this, rhs);
 }
 
 BinaryOperatorPtr
-Expression::lt(ExpressionPtr rhs) const {
-    return BinaryOperator::create("<", this->shared_from_this(), rhs);
+Expression::lt(const Expression& rhs) const {
+    return make_shared<BinaryOperator>("<", *this, rhs);
 }
 
 BinaryOperatorPtr
-Expression::le(ExpressionPtr rhs) const {
-    return BinaryOperator::create("<=", this->shared_from_this(), rhs);
+Expression::le(const Expression& rhs) const {
+    return make_shared<BinaryOperator>("<=", *this, rhs);
 }
 
 BinaryOperatorPtr
-Expression::ge(ExpressionPtr rhs) const {
-    return BinaryOperator::create(">=", this->shared_from_this(), rhs);
+Expression::ge(const Expression& rhs) const {
+    return make_shared<BinaryOperator>(">=", *this, rhs);
 }
 
 BinaryOperatorPtr
-Expression::and_(ExpressionPtr rhs) const {
-    return BinaryOperator::create("AND", this->shared_from_this(), rhs);
+Expression::and_(const Expression& rhs) const {
+    return make_shared<BinaryOperator>("AND", *this, rhs);
 }
 
 BinaryOperatorPtr
-Expression::or_(ExpressionPtr rhs) const {
-    return BinaryOperator::create("OR", this->shared_from_this(), rhs);
+Expression::or_(const Expression& rhs) const {
+    return make_shared<BinaryOperator>("OR", *this, rhs);
 }
 
 BinaryOperatorPtr
-Expression::add(ExpressionPtr rhs) const {
-    return BinaryOperator::create("+", this->shared_from_this(), rhs);
+Expression::add(const Expression& rhs) const {
+    return make_shared<BinaryOperator>("+", *this, rhs);
 }
 
 BinaryOperatorPtr
-Expression::between(ExpressionPtr low, ExpressionPtr high) const {
+Expression::between(const Expression& low, const Expression& high) const {
     // this >= low and this <= high
     ExpressionPtr rhs = le(high);
     ExpressionPtr lhs = ge(low);
-    return lhs->and_(rhs);
+    return lhs->and_(*rhs);
 }
 
 BinaryOperatorPtr
 Expression::like(const String& pattern) const {
-    return like(Literal::create(Variant(pattern)));
+    return like(Literal(Variant(pattern)));
 }
 
 BinaryOperatorPtr
-Expression::like(ExpressionPtr pattern) const {
-    return BinaryOperator::create("LIKE", this->shared_from_this(), pattern);
+Expression::like(const Expression& pattern) const {
+    return make_shared<BinaryOperator>("LIKE", *this, pattern);
 }
 
 ParenthesesPtr
 Expression::parentheses() const {
-    return Parentheses::create(this->shared_from_this());
+    return make_shared<Parentheses>(*this);
 }
 
 LabelPtr
 Expression::label(const String& label) const {
-    return Label::create(this->shared_from_this(), label);
+    return make_shared<Label>(*this, label);
 }
 
 } // namespace expr

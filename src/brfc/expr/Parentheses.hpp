@@ -30,26 +30,30 @@ namespace expr {
  */
 class Parentheses : public Expression {
   public:
-    static ParenthesesPtr create(ExpressionPtr expression) {
-        return ParenthesesPtr(new Parentheses(expression));
+    explicit Parentheses(const Expression& expr)
+            : Expression()
+            , expr_(expr.clone()) {
+    }
+   
+    virtual ExpressionPtr clone() const {
+        return ExpressionPtr(new Parentheses(*this));
     }
 
-    void expression(ExpressionPtr expression) {
-        expression_ = expression;
+    void expression(const Expression& expr) {
+        expr_ = expr.clone();
     }
     
-    ExpressionPtr expression() const {
-        return expression_;
+    const Expression& expression() const {
+        return *expr_;
     }
 
   protected:
-    Parentheses(ExpressionPtr expression)
-            : Expression()
-            , expression_(expression) {
+    Parentheses(const Parentheses& other)
+            : expr_(other.expr_->clone()) {
     }
 
   private:
-    ExpressionPtr expression_;
+    ExpressionPtr expr_;
 };
 
 }

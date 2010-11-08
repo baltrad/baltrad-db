@@ -66,8 +66,8 @@ AttributeQuery::distinct(bool distinct) {
 }
 
 AttributeQuery&
-AttributeQuery::fetch(expr::AttributePtr attribute) {
-    fetch_.push_back(attribute);
+AttributeQuery::fetch(const expr::Attribute& attribute) {
+    fetch_.push_back(attribute.clone());
     // XXX: there used to be duplicate check here, removed due to
     //      adding fetch(Function). This should be brought back
     //      and fetch(...) made to accept labeled expressions only.
@@ -75,20 +75,20 @@ AttributeQuery::fetch(expr::AttributePtr attribute) {
 }
 
 AttributeQuery&
-AttributeQuery::fetch(expr::FunctionPtr function) {
-    fetch_.push_back(function);
+AttributeQuery::fetch(const expr::Function& function) {
+    fetch_.push_back(function.clone());
     return *this;
 }
 
 AttributeQuery&
-AttributeQuery::filter(expr::ExpressionPtr expr) {
-    filter_ = filter_ ? filter_->and_(expr) : expr;
+AttributeQuery::filter(const expr::Expression& expr) {
+    filter_ = filter_ ? filter_->and_(expr) : expr.clone();
     return *this;
 }
 
 AttributeQuery&
-AttributeQuery::order_by(expr::ExpressionPtr expr, SortDir dir) {
-    order_.push_back(std::make_pair(expr, dir));
+AttributeQuery::order_by(const expr::Expression& expr, SortDir dir) {
+    order_.push_back(std::make_pair(expr.clone(), dir));
     return *this;
 }
 

@@ -46,12 +46,12 @@ class Model;
  */
 class QueryToSelect {
   public:
-    typedef mpl::vector<expr::Attribute,
-                        expr::BinaryOperator,
-                        expr::Function,
-                        expr::Label,
-                        expr::Literal,
-                        expr::Parentheses> accepted_types;
+    typedef mpl::vector<const expr::Attribute,
+                        const expr::BinaryOperator,
+                        const expr::Function,
+                        const expr::Label,
+                        const expr::Literal,
+                        const expr::Parentheses> accepted_types;
     
     /**
      * @brief constructor
@@ -93,37 +93,37 @@ class QueryToSelect {
      *   mapper
      * - plain_attr_column() for every other attribute
      */
-    void operator()(expr::Attribute& attr);
+    void operator()(const expr::Attribute& attr);
     
     /**
      * @brief turn expr::BinaryOperator into sql::BinaryOperator
      * @post the expression stack contains equivalent sql::BinaryOperator
      */
-    void operator()(expr::BinaryOperator& op);
+    void operator()(const expr::BinaryOperator& op);
     
     /**
      * @brief turn expr::Function into sql::Function
      * @post the expression stack contains equivalent sql::Function
      */
-    void operator()(expr::Function& func);
+    void operator()(const expr::Function& func);
     
     /**
      * @brief turn expr::Label into sql::Label
      * @post the expression stack contains equivalent sql::Label
      */
-    void operator()(expr::Label& label);
+    void operator()(const expr::Label& label);
     
     /**
      * @brief turn expr::Literal into sql::Literal
      * @post the expression stack contains equivalent sql::Literal
      */
-    void operator()(expr::Literal& literal);
+    void operator()(const expr::Literal& literal);
     
     /**
      * @brief turn expr::Parentheses into sql::Parentheses
      * @post the expression stack contains equivalent sql::Parentheses
      */
-    void operator()(expr::Parentheses& parentheses);
+    void operator()(const expr::Parentheses& parentheses);
 
  protected: 
     /**
@@ -163,7 +163,7 @@ class QueryToSelect {
      *   join-condition 'bdb_source_kvs.key=$KEY'. The column for the
      *   attribute is 'src_$KEY.value'.
      */
-    sql::ColumnPtr source_attr_column(expr::Attribute& attr);
+    sql::ColumnPtr source_attr_column(const expr::Attribute& attr);
 
     /**
      * @brief look up sql::Column for a specialized attribute
@@ -172,7 +172,7 @@ class QueryToSelect {
      * look up mapping from the mapper and use Mapping::column as the column
      * for the attribute.
      */
-    sql::ColumnPtr specialized_attr_column(expr::Attribute& attr);
+    sql::ColumnPtr specialized_attr_column(const expr::Attribute& attr);
 
     /**
      * @brief look up sql::Column for a plain attribute
@@ -184,7 +184,7 @@ class QueryToSelect {
      *
      * The column for the attribute is '$NAME_values.value_$TYPE'.
      */
-    sql::ColumnPtr plain_attr_column(expr::Attribute& attr);
+    sql::ColumnPtr plain_attr_column(const expr::Attribute& attr);
 
   private:
     const AttributeMapper* mapper_;

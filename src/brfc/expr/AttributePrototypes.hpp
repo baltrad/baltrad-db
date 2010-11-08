@@ -43,9 +43,9 @@ class AttributePrototypes {
 
     bool has(const String& name) const;
 
-    void add(AttributePtr prototype);
+    void add(const Attribute& prototype);
 
-    AttributePtr get(const String& name) const;
+    const Attribute& get(const String& name) const;
 
     void clear();
 

@@ -49,8 +49,8 @@ FileQuery::~FileQuery() {
 }
 
 FileQuery&
-FileQuery::filter(expr::ExpressionPtr expr) {
-    filter_ = filter_ ? filter_->and_(expr) : expr;
+FileQuery::filter(const expr::Expression& expr) {
+    filter_ = filter_ ? filter_->and_(expr) : expr.clone();
     return *this;
 }
 

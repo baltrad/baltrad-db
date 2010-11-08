@@ -43,27 +43,27 @@ ExpressionFactory::ExpressionFactory(const AttributePrototypes& prototypes)
 
 AttributePtr
 ExpressionFactory::attribute(const String& name) const {
-    return prototypes_.get(name);
+    return static_pointer_cast<Attribute>(prototypes_.get(name).clone());
 }
 
 LiteralPtr
 ExpressionFactory::string(const String& value) const {
-    return Literal::create(Variant(value));
+    return make_shared<Literal>(Variant(value));
 }
 
 LiteralPtr
 ExpressionFactory::string(const char* value) const {
-    return Literal::create(Variant(value));
+    return make_shared<Literal>(Variant(value));
 }
 
 LiteralPtr
 ExpressionFactory::int64_(long long value) const {
-    return Literal::create(Variant(value));
+    return make_shared<Literal>(Variant(value));
 }
 
 LiteralPtr
 ExpressionFactory::double_(double value) const {
-    return Literal::create(Variant(value));
+    return make_shared<Literal>(Variant(value));
 }
 
 LiteralPtr
@@ -73,7 +73,7 @@ ExpressionFactory::date(int year, int month, int day) const {
 
 LiteralPtr
 ExpressionFactory::date(const Date& date) const {
-    return Literal::create(Variant(Date(date)));
+    return make_shared<Literal>(Variant(date));
 }
 
 LiteralPtr
@@ -88,7 +88,7 @@ ExpressionFactory::time(int hour, int minute, int second) const {
 
 LiteralPtr
 ExpressionFactory::time(const Time& time) const {
-    return Literal::create(Variant(time));
+    return make_shared<Literal>(Variant(time));
 }
 
 LiteralPtr
@@ -98,79 +98,79 @@ ExpressionFactory::time(const DateTime& datetime) const {
 
 LiteralPtr
 ExpressionFactory::datetime(const DateTime& datetime) const {
-    return Literal::create(Variant(datetime));
+    return make_shared<Literal>(Variant(datetime));
 }
 
 LiteralPtr
 ExpressionFactory::bool_(bool value) const {
-    return Literal::create(Variant(value));
+    return make_shared<Literal>(Variant(value));
 }
 
 BinaryOperatorPtr
-ExpressionFactory::ne(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->ne(rhs);
+ExpressionFactory::ne(const Expression& lhs, const Expression& rhs) const {
+    return lhs.ne(rhs);
 }
 
 BinaryOperatorPtr
-ExpressionFactory::eq(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->eq(rhs);
+ExpressionFactory::eq(const Expression& lhs, const Expression& rhs) const {
+    return lhs.eq(rhs);
 }
 
 BinaryOperatorPtr
-ExpressionFactory::gt(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->gt(rhs);
+ExpressionFactory::gt(const Expression& lhs, const Expression& rhs) const {
+    return lhs.gt(rhs);
 }
 
 BinaryOperatorPtr
-ExpressionFactory::lt(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->lt(rhs);
+ExpressionFactory::lt(const Expression& lhs, const Expression& rhs) const {
+    return lhs.lt(rhs);
 }
 
 BinaryOperatorPtr
-ExpressionFactory::le(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->le(rhs);
+ExpressionFactory::le(const Expression& lhs, const Expression& rhs) const {
+    return lhs.le(rhs);
 }
 
 BinaryOperatorPtr
-ExpressionFactory::ge(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->ge(rhs);
+ExpressionFactory::ge(const Expression& lhs, const Expression& rhs) const {
+    return lhs.ge(rhs);
 }
 
 BinaryOperatorPtr
-ExpressionFactory::between(ExpressionPtr expr,
-                 ExpressionPtr low,
-                 ExpressionPtr high) const {
-    return expr->between(low, high);
+ExpressionFactory::between(const Expression& expr,
+                           const Expression& low,
+                           const Expression& high) const {
+    return expr.between(low, high);
 }
 
 BinaryOperatorPtr
-ExpressionFactory::and_(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->and_(rhs);
+ExpressionFactory::and_(const Expression& lhs, const Expression& rhs) const {
+    return lhs.and_(rhs);
 }
 
 BinaryOperatorPtr
-ExpressionFactory::or_(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->or_(rhs);
+ExpressionFactory::or_(const Expression& lhs, const Expression& rhs) const {
+    return lhs.or_(rhs);
 }
 
 BinaryOperatorPtr
-ExpressionFactory::add(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->add(rhs);
+ExpressionFactory::add(const Expression& lhs, const Expression& rhs) const {
+    return lhs.add(rhs);
 }
 
 ParenthesesPtr
-ExpressionFactory::parentheses(ExpressionPtr expr) const {
-    return expr->parentheses();
+ExpressionFactory::parentheses(const Expression& expr) const {
+    return expr.parentheses();
 }
 
 FunctionPtr
-ExpressionFactory::min(ExpressionPtr expr) const {
+ExpressionFactory::min(const Expression& expr) const {
     return Function::min(expr);
 }
 
 
 FunctionPtr
-ExpressionFactory::max(ExpressionPtr expr) const {
+ExpressionFactory::max(const Expression& expr) const {
     return Function::max(expr);
 }
 
@@ -183,7 +183,7 @@ ExpressionFactory::combined_datetime(const String& date,
     AttributePtr time_attr = attribute(time);
     if (time_attr->type() != Attribute::TIME)
         throw value_error("invalid attribute for time");
-    return add(date_attr, time_attr);
+    return add(*date_attr, *time_attr);
 }
 
 } // namespace expr

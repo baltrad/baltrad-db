@@ -44,8 +44,13 @@ class Attribute : public Expression {
         SEQUENCE = STRING
     };
 
-    static AttributePtr create(const String& name, Type type) {
-        return AttributePtr(new Attribute(name, type));
+    Attribute(const String& name, Type type)
+            : name_(name)
+            , type_(type) {
+    }
+
+    virtual ExpressionPtr clone() const {
+        return ExpressionPtr(new Attribute(*this));
     }
 
     const String& name() const {
@@ -57,9 +62,9 @@ class Attribute : public Expression {
     }
 
   protected:
-    Attribute(const String& name, Type type)
-            : name_(name)
-            , type_(type) {
+    Attribute(const Attribute& other)
+            : name_(other.name_)
+            , type_(other.type_) {
     }
 
   private:

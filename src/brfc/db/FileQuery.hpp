@@ -58,7 +58,7 @@ class FileQuery {
      *
      * successive filtering expressions are added together using AND
      */
-    FileQuery& filter(expr::ExpressionPtr expr);
+    FileQuery& filter(const expr::Expression& expr);
     
     expr::ExpressionPtr filter() const {
         return filter_;

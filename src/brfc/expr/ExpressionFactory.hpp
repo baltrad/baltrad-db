@@ -124,39 +124,39 @@ class ExpressionFactory {
     /**
      * @brief lhs != rhs
      */
-    BinaryOperatorPtr ne(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    BinaryOperatorPtr ne(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs == rhs
      */
-    BinaryOperatorPtr eq(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    BinaryOperatorPtr eq(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs > rhs
      */
-    BinaryOperatorPtr gt(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    BinaryOperatorPtr gt(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs < rhs
      */
-    BinaryOperatorPtr lt(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    BinaryOperatorPtr lt(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs <= rhs
      */
-    BinaryOperatorPtr le(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    BinaryOperatorPtr le(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs >= rhs
      */
-    BinaryOperatorPtr ge(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    BinaryOperatorPtr ge(const Expression& lhs, const Expression& rhs) const;
     
     /**
      * @brief low <= expr => high
      */
-    BinaryOperatorPtr between(ExpressionPtr expr,
-                              ExpressionPtr low,
-                              ExpressionPtr high) const;
+    BinaryOperatorPtr between(const Expression& expr,
+                              const Expression& low,
+                              const Expression& high) const;
     //@}
 
     /**
@@ -166,37 +166,33 @@ class ExpressionFactory {
     /**
      * @brief lhs AND rhs
      */
-    BinaryOperatorPtr and_(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    BinaryOperatorPtr and_(const Expression& lhs, const Expression& rhs) const;
     
     /**
      * @brief lhs OR rhs
      */
-    BinaryOperatorPtr or_(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    BinaryOperatorPtr or_(const Expression& lhs, const Expression& rhs) const;
     //@}
     
     /**
-     * @name arithmetic operators
-     * @{
-     */
-    /**
      * @brief lhs + rhs
      */
-    BinaryOperatorPtr add(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    BinaryOperatorPtr add(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief surround expr with parentheses
      */
-    ParenthesesPtr parentheses(ExpressionPtr expr) const;
+    ParenthesesPtr parentheses(const Expression& expr) const;
     
     /**
      * @brief MIN function
      */
-    FunctionPtr min(ExpressionPtr expr) const;
+    FunctionPtr min(const Expression& expr) const;
     
     /**
      * @brief MAX function
      */
-    FunctionPtr max(ExpressionPtr expr) const;
+    FunctionPtr max(const Expression& expr) const;
 
     /**
      * @brief combine date and time attribute to datetime

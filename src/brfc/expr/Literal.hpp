@@ -31,8 +31,12 @@ namespace expr {
  */
 class Literal : public Expression {
   public:
-    static LiteralPtr create(const Variant& value) {
-        return LiteralPtr(new Literal(value));
+    explicit Literal(const Variant& value)
+            : value_(value) {
+    }
+
+    virtual ExpressionPtr clone() const {
+        return ExpressionPtr(new Literal(*this));
     }
 
     const Variant& value() const {
@@ -40,8 +44,8 @@ class Literal : public Expression {
     }
 
   protected:
-    explicit Literal(const Variant& value)
-            : value_(value) {
+    Literal(const Literal& other)
+            : value_(other.value_) {
     }
 
   private:

@@ -33,15 +33,25 @@ namespace expr {
 /**
  * @brief ABC for query expressions
  */
-class Expression : public boost::noncopyable
-                 , public enable_shared_from_this<Expression> {
+class Expression : public boost::noncopyable {
   public:
+    /**
+     * @brief constructor
+     */
+    Expression()
+            : boost::noncopyable() {
+    }
+    
+    /**
+     * @brief create a copy of this expression
+     */
+    virtual ExpressionPtr clone() const = 0;
+    
+    /**
+     * @brief destructor
+     */
     virtual ~Expression() { }
 
-    ExpressionPtr shared_from_this() const {
-        return const_pointer_cast<Expression>(
-                enable_shared_from_this<Expression>::shared_from_this());
-    }
     /**
      * @name comparison operators
      * @{
@@ -49,38 +59,38 @@ class Expression : public boost::noncopyable
     /**
      * @brief this != rhs
      */
-    BinaryOperatorPtr ne(ExpressionPtr rhs) const;
+    BinaryOperatorPtr ne(const Expression& rhs) const;
 
     /**
      * @brief this == rhs
      */
-    BinaryOperatorPtr eq(ExpressionPtr rhs) const;
+    BinaryOperatorPtr eq(const Expression& rhs) const;
 
     /**
      * @brief this > rhs
      */
-    BinaryOperatorPtr gt(ExpressionPtr rhs) const;
+    BinaryOperatorPtr gt(const Expression& rhs) const;
 
     /**
      * @brief this < rhs
      */
-    BinaryOperatorPtr lt(ExpressionPtr rhs) const;
+    BinaryOperatorPtr lt(const Expression& rhs) const;
 
     /**
      * @brief this <= rhs
      */
-    BinaryOperatorPtr le(ExpressionPtr rhs) const;
+    BinaryOperatorPtr le(const Expression& rhs) const;
 
     /**
      * @brief this >= rhs
      */
-    BinaryOperatorPtr ge(ExpressionPtr rhs) const;
+    BinaryOperatorPtr ge(const Expression& rhs) const;
     
     /**
      * @brief low <= this => high
      */
-    BinaryOperatorPtr between(ExpressionPtr low,
-                              ExpressionPtr high) const;
+    BinaryOperatorPtr between(const Expression& low,
+                              const Expression& high) const;
     
     /**
      * @brief this LIKE pattern
@@ -97,7 +107,7 @@ class Expression : public boost::noncopyable
      *  @param pattern pattern to match against
      *  @sa like(const String&) const
      **/
-    BinaryOperatorPtr like(ExpressionPtr pattern) const;
+    BinaryOperatorPtr like(const Expression& pattern) const;
     //@}
 
     /**
@@ -107,12 +117,12 @@ class Expression : public boost::noncopyable
     /**
      * @brief this AND rhs
      */
-    BinaryOperatorPtr and_(ExpressionPtr rhs) const;
+    BinaryOperatorPtr and_(const Expression& rhs) const;
     
     /**
      * @brief this OR rhs
      */
-    BinaryOperatorPtr or_(ExpressionPtr rhs) const;
+    BinaryOperatorPtr or_(const Expression& rhs) const;
     //@}
     
     /**
@@ -122,7 +132,7 @@ class Expression : public boost::noncopyable
     /**
      * @brief this + rhs
      */
-    BinaryOperatorPtr add(ExpressionPtr rhs) const;
+    BinaryOperatorPtr add(const Expression& rhs) const;
     //@}
 
     /**
@@ -136,10 +146,10 @@ class Expression : public boost::noncopyable
     LabelPtr label(const String& label) const;
 
   protected:
-    Expression()
-            : boost::noncopyable()
-            , enable_shared_from_this<Expression>() {
-    }
+    /**
+     * @brief copy-constructor
+     */
+    Expression(const Expression& other);
 };
 
 }

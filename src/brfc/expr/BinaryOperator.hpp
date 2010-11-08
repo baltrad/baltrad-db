@@ -32,10 +32,17 @@ namespace expr {
  */
 class BinaryOperator : public Expression {
   public:
-    static BinaryOperatorPtr create(const String& op,
-                                    ExpressionPtr lhs,
-                                    ExpressionPtr rhs) {
-        return BinaryOperatorPtr(new BinaryOperator(op, lhs, rhs));
+    BinaryOperator(const String& op,
+                   const Expression& lhs,
+                   const Expression& rhs)
+            : Expression()
+            , op_(op)
+            , lhs_(lhs.clone())
+            , rhs_(rhs.clone()) {
+    }
+
+    virtual ExpressionPtr clone() const {
+        return ExpressionPtr(new BinaryOperator(*this));
     }
 
     void lhs(ExpressionPtr lhs) { lhs_ = lhs; }
@@ -46,13 +53,10 @@ class BinaryOperator : public Expression {
     const String& op() const { return op_; }
 
   protected:
-    BinaryOperator(const String& op,
-                   ExpressionPtr lhs,
-                   ExpressionPtr rhs)
-            : Expression()
-            , op_(op)
-            , lhs_(lhs)
-            , rhs_(rhs) {
+    BinaryOperator(const BinaryOperator& other)
+            : op_(other.op_)
+            , lhs_(other.lhs_->clone())
+            , rhs_(other.rhs_->clone()) {
     }
 
   private:

@@ -220,7 +220,7 @@ AttributePrototypes::default_odim_h5() {
     AttributePrototypes prototypes;
     
     BOOST_FOREACH(const NameTypeMap::value_type& defn, defns) {
-        prototypes.add(Attribute::create(defn.first, defn.second));
+        prototypes.add(Attribute(defn.first, defn.second));
     }
 
     return prototypes;
@@ -232,20 +232,21 @@ AttributePrototypes::has(const String& name) const {
 }
 
 void
-AttributePrototypes::add(AttributePtr prototype) {
-    if (has(prototype->name()))
-        throw duplicate_entry(prototype->name().to_utf8());
-    prototypes_.insert(std::make_pair(prototype->name(), prototype));
+AttributePrototypes::add(const Attribute& prototype) {
+    if (has(prototype.name()))
+        throw duplicate_entry(prototype.name().to_utf8());
+    AttributePtr ptr = static_pointer_cast<Attribute>(prototype.clone());
+    prototypes_.insert(std::make_pair(prototype.name(), ptr));
 
 }
 
-AttributePtr
+const Attribute&
 AttributePrototypes::get(const String& name) const {
     PrototypeMap::const_iterator i = prototypes_.find(name);
     if (i == prototypes_.end())
         throw lookup_error("no prototype for attribute: "
                            + name.to_std_string());
-    return Attribute::create(i->first, i->second->type());
+    return *i->second;
 }
 
 void

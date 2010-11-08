@@ -75,14 +75,14 @@ class AttributeQuery {
      * attributes are returned in ResultSet in the same order as they
      * are marked.
      */
-    AttributeQuery& fetch(expr::AttributePtr attribute);
+    AttributeQuery& fetch(const expr::Attribute& attribute);
     
     /**
      * @brief mark a result for a function for fetching
      * @param function Function whose result to fetch to ResultSet
      * @return this AttributeQuery (for chaining)
      */
-    AttributeQuery& fetch(expr::FunctionPtr function);
+    AttributeQuery& fetch(const expr::Function& function);
 
     const ExpressionVector& fetch() const {
         return fetch_;
@@ -95,16 +95,16 @@ class AttributeQuery {
      *
      * successive filtering expressions are added together using AND
      */
-    AttributeQuery& filter(expr::ExpressionPtr expr);
+    AttributeQuery& filter(const expr::Expression& expr);
     
-    expr::ExpressionPtr filter() const {
+    const expr::ExpressionPtr filter() const {
         return filter_;
     }
 
     /**
      * @brief append sort order
      */
-    AttributeQuery& order_by(expr::ExpressionPtr expr, SortDir dir);
+    AttributeQuery& order_by(const expr::Expression& expr, SortDir dir);
 
     OrderVector order() const { return order_; }
     

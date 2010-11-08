@@ -129,7 +129,7 @@ QueryToSelect::transform(const AttributeQuery& query) {
 }
 
 sql::ColumnPtr
-QueryToSelect::source_attr_column(expr::Attribute& attr) {
+QueryToSelect::source_attr_column(const expr::Attribute& attr) {
     String key = attr.name().split(":").at(1);
     if (key == "name" or key == "node") {
         // sources is joined by default
@@ -159,7 +159,7 @@ QueryToSelect::source_attr_column(expr::Attribute& attr) {
 }
 
 sql::ColumnPtr
-QueryToSelect::specialized_attr_column(expr::Attribute& attr) {
+QueryToSelect::specialized_attr_column(const expr::Attribute& attr) {
     // currently, specialized attributes are only in bdb_files and
     // bdb_sources. These are already contained in the from clause.
     Mapping mapping = mapper_->mapping(attr.name());
@@ -167,7 +167,7 @@ QueryToSelect::specialized_attr_column(expr::Attribute& attr) {
 }
 
 sql::ColumnPtr
-QueryToSelect::plain_attr_column(expr::Attribute& attr) {
+QueryToSelect::plain_attr_column(const expr::Attribute& attr) {
     String name = attr.name();
     
     StringList path = name.split("/");
@@ -210,7 +210,7 @@ QueryToSelect::plain_attr_column(expr::Attribute& attr) {
 }
 
 void
-QueryToSelect::operator()(expr::Attribute& attr) {
+QueryToSelect::operator()(const expr::Attribute& attr) {
     String name = attr.name();
     
     sql::ColumnPtr column;
@@ -257,7 +257,7 @@ replace_pattern(sql::ExpressionPtr expr) {
 } // namespace anonymous
 
 void
-QueryToSelect::operator()(expr::BinaryOperator& op) {
+QueryToSelect::operator()(const expr::BinaryOperator& op) {
     visit(*op.lhs(), *this);
     visit(*op.rhs(), *this);
     sql::ExpressionPtr rhs = pop();
@@ -269,7 +269,7 @@ QueryToSelect::operator()(expr::BinaryOperator& op) {
 }
 
 void
-QueryToSelect::operator()(expr::Function& func) {
+QueryToSelect::operator()(const expr::Function& func) {
     sql::FunctionPtr f = sql::Function::create(func.name());
 
     BOOST_FOREACH(expr::ExpressionPtr arg, func.args()) {
@@ -281,19 +281,19 @@ QueryToSelect::operator()(expr::Function& func) {
 }
 
 void
-QueryToSelect::operator()(expr::Label& label) {
-    visit(*label.expression(), *this);
+QueryToSelect::operator()(const expr::Label& label) {
+    visit(label.expression(), *this);
     push(sql::Label::create(pop(), label.name()));
 }
 
 void
-QueryToSelect::operator()(expr::Literal& literal) {
+QueryToSelect::operator()(const expr::Literal& literal) {
     push(sql::Literal::create(literal.value()));
 }
 
 void
-QueryToSelect::operator()(expr::Parentheses& parentheses) {
-    visit(*parentheses.expression(), *this);
+QueryToSelect::operator()(const expr::Parentheses& parentheses) {
+    visit(parentheses.expression(), *this);
     push(sql::Parentheses::create(pop()));
 }
 

@@ -31,18 +31,23 @@ namespace expr {
 
 class Function : public Expression {
   public:
-    static FunctionPtr create(const String& name) {
-        return FunctionPtr(new Function(name));
+    explicit Function(const String& name)
+            : name_(name)
+            , args_() {
     }
 
-    static FunctionPtr max(const ExpressionPtr& arg) {
-        FunctionPtr f = Function::create("MAX");
+    virtual ExpressionPtr clone() const {
+        return ExpressionPtr(new Function(*this));
+    }
+
+    static FunctionPtr max(const Expression& arg) {
+        FunctionPtr f = make_shared<Function>("MAX");
         f->add_arg(arg);
         return f;
     }
 
-    static FunctionPtr min(const ExpressionPtr& arg) {
-        FunctionPtr f = Function::create("MIN");
+    static FunctionPtr min(const Expression& arg) {
+        FunctionPtr f = make_shared<Function>("MIN");
         f->add_arg(arg);
         return f;
     }
@@ -51,16 +56,19 @@ class Function : public Expression {
     
     std::vector<ExpressionPtr> args() const { return args_; }
 
-    void add_arg(ExpressionPtr arg) {
-        args_.push_back(arg);
+    void add_arg(const Expression& arg) {
+        args_.push_back(arg.clone());
+    }
+  
+  protected:
+    Function(const Function& other)
+            : name_(other.name_)
+            , args_() {
+        for (size_t i=0; i < other.args_.size(); ++i) {
+            args_.push_back(other.args_.at(i)->clone());
+        }
     }
    
-  protected:
-    explicit Function(const String& name)
-            : name_(name)
-            , args_() {
-    }
-
   private:
     String name_;
     std::vector<ExpressionPtr> args_;

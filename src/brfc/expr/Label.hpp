@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Expression.hpp>
 
+
 namespace brfc {
 namespace expr {
 
@@ -34,8 +35,13 @@ namespace expr {
  */
 class Label : public Expression {
   public:
-    static LabelPtr create(ExpressionPtr expression, const String& name) {
-        return LabelPtr(new Label(expression, name));
+    Label(const Expression& expr, const String& name)
+            : expr_(expr.clone())
+            , name_(name) {
+    }
+
+    virtual ExpressionPtr clone() const {
+        return ExpressionPtr(new Label(*this));
     }
 
     void name(const String& name) {
@@ -46,25 +52,25 @@ class Label : public Expression {
         return name_;
     }
 
-    void expression(ExpressionPtr expression) {
-        expression_ = expression;
+    void expression(const Expression& expr) {
+        expr_ = expr.clone();
     }
 
     /**
      * @brief get expression this label is for
      */
-    ExpressionPtr expression() const {
-        return expression_;
+    const Expression& expression() const {
+        return *expr_;
     }
 
   protected:
-    explicit Label(ExpressionPtr expression, const String& name)
-            : expression_(expression)
-            , name_(name) {
+    Label(const Label& other)
+            : expr_(other.expr_->clone())
+            , name_(other.name_) {
     }
 
   private:
-    ExpressionPtr expression_;
+    ExpressionPtr expr_;
     String name_;
 };
 
