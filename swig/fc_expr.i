@@ -53,14 +53,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::expr::Select;
 
 %ignore brfc::expr::Expression::shared_from_this;
-%ignore brfc::expr::Function::create;
 %ignore brfc::expr::Function::args;
-%ignore brfc::expr::Literal::create;
 %ignore brfc::expr::Literal::value;
-%ignore brfc::expr::BinaryOperator::create;
-%ignore brfc::expr::Attribute::create;
-%ignore brfc::expr::Parentheses::create;
-%ignore brfc::expr::Label::create;
+
+%typemap(javaimports) brfc::expr::Literal %{
+    import eu.baltrad.fc.Variant;
+%}
 
 /***
  * brfc::expr::EXpressionFactory
@@ -128,6 +126,7 @@ SWIG_SHARED_PTR_DERIVED(Attribute,
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.DateTime;
     import eu.baltrad.fc.Time;
+    import eu.baltrad.fc.Variant;
 %}
 
 %include <brfc/expr/fwd.hpp>
