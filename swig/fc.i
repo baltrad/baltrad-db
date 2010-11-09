@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/exceptions.hpp>
     #include <brfc/FileCatalog.hpp>
     #include <brfc/FileNamer.hpp>
+    #include <brfc/DefaultFileNamer.hpp>
     #include <brfc/Date.hpp>
     #include <brfc/DateTime.hpp>
     #include <brfc/LocalStorage.hpp>
@@ -65,11 +66,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 %}
-
-%ignore brfc::FileCatalog::FileCatalog(shared_ptr<Database>,
-                                       shared_ptr<FileNamer>,
-                                       const String&);
-%ignore brfc::FileCatalog::file_namer(shared_ptr<FileNamer>);
 
 /***
  * brfc::Date
@@ -183,6 +179,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %typemap(javaimports) brfc::FileNamer, brfc::FileNamer* %{
     import eu.baltrad.fc.oh5.File;
+    import eu.baltrad.fc.db.FileEntry;
 %}
 
 // Enable the JNI class to load the required native library.
@@ -198,6 +195,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 %include <brfc/FileNamer.hpp>
+%include <brfc/DefaultFileNamer.hpp>
 %include <brfc/FileCatalog.hpp>
 %include <brfc/LocalStorage.hpp>
 %include <brfc/CacheDirStorage.hpp>

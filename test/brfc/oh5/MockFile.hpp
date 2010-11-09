@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gmock/gmock.h>
 
 #include <brfc/oh5/File.hpp>
+#include <brfc/oh5/Group.hpp>
 
 namespace brfc {
 namespace oh5 {

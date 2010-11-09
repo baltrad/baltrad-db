@@ -27,21 +27,30 @@ namespace brfc {
 /**
  * @brief default FileNamer implementation
  *
- * name files as Z_\$(type)_C_\$(CCCC)_ \$(timestamp)_\$(freeformat).h5
- *
- * where:
- *   - @c type is the value of "/what/object"
- *   - @c CCCC is the WMO CCCC associated with the Source
- *   - @c timestamp is the value of "/what/date" and "/what/time" formatted
- *     as @c yyyyMMddhhmmss
- *   - @c freeformat contains the node_id associated with the Source
  */
 class DefaultFileNamer : public FileNamer {
   public:
     DefaultFileNamer();
 
   protected:
-    virtual String do_name(const oh5::File& f) const;
+    /**
+     * name files as \$(type)_\$(source)_\$(timestamp).h5
+     *
+     * where:
+     *   - @c type is the value of "/what/object"
+     *   - @c source is the value of 'name' key in Source or 'unknown'
+     *   - @c timestamp is the value of "/what/date" and "/what/time" formatted
+     *     as @c yyyyMMddThhmmssZ
+     */
+    virtual String do_name(const oh5::File& file) const;
+
+    /**
+     * @brief name a FileEntry
+     *
+     * use the name given by name(const oh5::File&), but inject the first group
+     * of the uuid before the file extension.
+     */
+    virtual String do_name(const db::FileEntry& entry) const;
 };
 
 } // namespace brfc
