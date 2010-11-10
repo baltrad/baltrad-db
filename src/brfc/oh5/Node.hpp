@@ -33,9 +33,10 @@ namespace brfc {
 namespace oh5 {
 
 class Attribute;
-class NodeBackend;
+class DataSet;
 class File;
 class Group;
+class NodeBackend;
 class Scalar;
 
 template<typename T>
@@ -150,6 +151,13 @@ class Node : public boost::noncopyable {
      * @return reference to the created attribute
      */
     Attribute& create_attribute(const String& name, const Scalar& value);
+    
+    /**
+     * @brief create a child dataset
+     * @param name dataset name
+     * @return reference to the created dataset
+     */
+    DataSet& create_dataset(const String& name);
     
     /**
      * @brief create a child group

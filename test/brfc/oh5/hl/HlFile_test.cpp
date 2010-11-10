@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
@@ -57,6 +58,8 @@ TEST_F(oh5_hl_HlFile_test, test_load_from_filesystem) {
     file.root().create_attribute("time", t_12_05_01);
     Group& what = file.root().create_group("what");
     what.create_attribute("date", d_2000_01_02);
+    Group& data1 = file.root().create_group("data1");
+    data1.create_dataset("data");
 
     test::TempH5File tempfile;
     tempfile.write(file);
@@ -64,7 +67,7 @@ TEST_F(oh5_hl_HlFile_test, test_load_from_filesystem) {
     HlFile g(tempfile.path());
     EXPECT_EQ(g.path(), tempfile.path());
     Group& root = g.root();
-    EXPECT_EQ((size_t)3, root.children().size());
+    EXPECT_EQ((size_t)4, root.children().size());
     EXPECT_TRUE(root.has_child("date"));
     EXPECT_TRUE(root.has_child("time"));
     EXPECT_TRUE(root.has_child("what"));
@@ -75,6 +78,8 @@ TEST_F(oh5_hl_HlFile_test, test_load_from_filesystem) {
     EXPECT_EQ("20000102", root.attribute("date")->value().string());
     EXPECT_EQ("120501", root.attribute("time")->value().string());
     EXPECT_EQ("20000102", root.attribute("what/date")->value().string());
+    EXPECT_TRUE(root.has_child("data1/data"));
+    EXPECT_TRUE(dynamic_cast<DataSet*>(root.child("data1/data")) != 0);
 }
 
 } // namespace hl

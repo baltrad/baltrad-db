@@ -27,6 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/RdbNodeBackend.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/Scalar.hpp>
 #include <brfc/oh5/Source.hpp>
 #include <brfc/oh5/hl/HlFile.hpp>
@@ -126,6 +127,20 @@ TEST_P(db_rdb_RdbHelper_test, test_insert_node_attribute) {
     attr.parent(&entry.root());
 
     EXPECT_NO_THROW(helper.insert_node(attr));
+}
+
+TEST_P(db_rdb_RdbHelper_test, test_insert_node_dataset) {
+    EXPECT_NO_THROW(helper.insert_file(entry, file));
+    EXPECT_NO_THROW(helper.insert_node(entry.root()));
+    oh5::Node* parent = 0;
+    EXPECT_NO_THROW(parent = &entry.root().create_group("data1"));
+    
+    oh5::DataSet ds("data");
+    ds.backend(new RdbNodeBackend());
+    ds.parent(parent);
+
+    EXPECT_NO_THROW(helper.insert_node(ds));
+    EXPECT_GT(helper.backend(ds).id(), 0);
 }
 
 TEST_P(db_rdb_RdbHelper_test, test_load_file_by_id) {
@@ -257,12 +272,15 @@ TEST_P(db_rdb_RdbHelper_test, test_load_children) {
     EXPECT_NO_THROW(helper.insert_node(entry.root()));
 
     oh5::Group *g1, *g2;
-    oh5::Attribute *a1, *a2; 
+    oh5::Attribute *a1, *a2, *a3; 
+    oh5::DataSet* ds1;
 
     EXPECT_NO_THROW(g1 = &entry.root().create_group("g1"));
     EXPECT_NO_THROW(g2 = &entry.root().create_group("g2"));
     EXPECT_NO_THROW(a1 = &entry.root().create_attribute("a1", oh5::Scalar(1)));
     EXPECT_NO_THROW(a2 = &g2->create_attribute("a2", oh5::Scalar(2)));
+    EXPECT_NO_THROW(ds1 = &g2->create_dataset("ds1"));
+    EXPECT_NO_THROW(a3 = &ds1->create_attribute("a3", oh5::Scalar(3)));
     
     oh5::RootGroup r(&entry);
     r.backend(new RdbNodeBackend());
@@ -283,12 +301,17 @@ TEST_P(db_rdb_RdbHelper_test, test_load_children) {
     ASSERT_TRUE(g);
     EXPECT_EQ(helper.backend(*g2).id(), helper.backend(*g).id());
     EXPECT_FALSE(helper.backend(*g).loaded());
-    
+
     oh5::Attribute* a = r.attribute("a1");
     ASSERT_TRUE(a);
     EXPECT_EQ(helper.backend(*a1).id(), helper.backend(*a).id());
     EXPECT_FALSE(helper.backend(*a).loaded());
     EXPECT_EQ(a1->value(), a->value());
+
+    oh5::DataSet* d = dynamic_cast<oh5::DataSet*>(r.child("g2/ds1"));
+    ASSERT_TRUE(d);
+    EXPECT_EQ(helper.backend(*ds1).id(), helper.backend(*d).id());
+    EXPECT_FALSE(helper.backend(*d).loaded());
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1

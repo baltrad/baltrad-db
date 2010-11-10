@@ -32,6 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/RdbNodeBackend.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/Scalar.hpp>
 #include <brfc/oh5/PhysicalFile.hpp>
@@ -92,6 +93,8 @@ node_sql_type(const oh5::Node& node) {
         return 1;
     else if (dynamic_cast<const oh5::Attribute*>(&node) != 0)
         return 2;
+    else if (dynamic_cast<const oh5::DataSet*>(&node) != 0)
+        return 3;
     else
         BRFC_ASSERT(false);
 }
@@ -444,6 +447,8 @@ RdbHelper::load_children(oh5::Node& node) {
                 BRFC_ASSERT(false);
             }
             child.reset(new oh5::Attribute(name, value));
+        } else if (type == 3) { // DATASET
+            child.reset(new oh5::DataSet(name));
         } else {
             BRFC_ASSERT(false);
         }

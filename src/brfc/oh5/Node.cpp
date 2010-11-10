@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/NodeBackend.hpp>
 
@@ -83,6 +84,12 @@ Attribute&
 Node::create_attribute(const String& name, const Scalar& value) {
     auto_ptr<Attribute> node(new Attribute(name, value));
     return static_cast<Attribute&>(create_child(node.release()));
+}
+
+DataSet&
+Node::create_dataset(const String& name) {
+    auto_ptr<DataSet> node(new DataSet(name));
+    return static_cast<DataSet&>(create_child(node.release()));
 }
 
 Group&

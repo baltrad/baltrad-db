@@ -21,10 +21,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
+#include <brfc/assert.hpp>
 #include <brfc/FileHasher.hpp>
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/PhysicalFile.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
@@ -49,14 +51,29 @@ SaveFile::operator()(const oh5::RootGroup& root) {
 
 void
 SaveFile::operator()(const oh5::Group& group) {
-    const oh5::Group* parent = group.parent<oh5::Group>();
-    entry_.group(parent->path())->create_group(group.name());
+    const String& path = group.parent()->path();
+    oh5::Node* parent = entry_.node(path);
+    BRFC_ASSERT(parent);
+
+    parent->create_group(group.name());
+}
+
+void
+SaveFile::operator()(const oh5::DataSet& dataset) {
+    const String& path = dataset.parent()->path();
+    oh5::Node* parent = entry_.node(path);
+    BRFC_ASSERT(parent);
+
+    parent->create_dataset(dataset.name());
 }
 
 void
 SaveFile::operator()(const oh5::Attribute& attr) {
-    const oh5::Group* parent = attr.parent<oh5::Group>();
-    entry_.group(parent->path())->create_attribute(attr.name(), attr.value());
+    const String& path = attr.parent()->path();
+    oh5::Node* parent = entry_.node(path);
+    BRFC_ASSERT(parent);
+
+    parent->create_attribute(attr.name(), attr.value());
 }
 
 void

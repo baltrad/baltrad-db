@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
+#include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/StringList.hpp>
@@ -71,27 +72,43 @@ HlFile::~HlFile() {
 
 namespace {
 
-void add_attribute_from_node(Group& root, HL_Node* node) {
-    String nodename = String::from_utf8(HLNode_getName(node));
-    StringList path = nodename.split("/");
-
-    String attr_name = path.take_last(); // last element is always attribute
-
-    // XXX: don't load if attribute is attached to DataSet
-    if (path.back() == "data")
-        return;
-
+void add_attribute(Node& parent, const String& name, HL_Node* node) {
     shared_ptr<const Converter> converter =
         Converter::create_from_hlhdf_node(*node);
     if (not converter)
-        throw std::runtime_error("could not convert " +
-                                 nodename.to_utf8() +
+        throw std::runtime_error(std::string("could not convert ") +
+                                 HLNode_getName(node) + 
                                  " value");
     Scalar value = converter->convert(*node);
+    parent.create_attribute(name, value);
+}
 
-    path.take_first(); // discard the root element
-    Group& grp = root.get_or_create_group(path.join("/"));
-    grp.create_attribute(attr_name, value);
+void add_node(Group& root, HL_Node* node) {
+    String pathname = String::from_utf8(HLNode_getName(node));
+    StringList path = pathname.split("/", String::SKIP_EMPTY_PARTS);
+
+    String nodename = path.take_last();
+    
+    Node* parent = 0;
+    if (path.empty())
+        parent = &root;
+    else
+        parent = root.child(path.join("/"));
+    BRFC_ASSERT(parent);
+
+    switch (HLNode_getType(node)) {
+        case ATTRIBUTE_ID:
+            add_attribute(*parent, nodename, node);
+            break;
+        case GROUP_ID:
+            parent->create_group(nodename);
+            break;
+        case DATASET_ID:
+            parent->create_dataset(nodename);
+            break;
+        default:
+            break;
+    }
 }
 
 } // namespace anonymous
@@ -106,14 +123,12 @@ HlFile::load() {
     if (not nodes)
         throw fs_error("could not open file: " + path_utf8);
 
-    HLNodeList_selectMetadataNodes(nodes.get());
+    HLNodeList_selectAllNodes(nodes.get());
     HLNodeList_fetchMarkedNodes(nodes.get());
 
     for (int i=0; i < HLNodeList_getNumberOfNodes(nodes.get()); ++i) {
         HL_Node* node = HLNodeList_getNodeByIndex(nodes.get(), i);
-        if (HLNode_getType(node) == ATTRIBUTE_ID) {
-            add_attribute_from_node(root_, node);
-        }
+        add_node(root_, node);
     }
 }
 

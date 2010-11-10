@@ -29,7 +29,7 @@ CREATE TABLE bdb_nodes (
     file_id INTEGER NOT NULL REFERENCES bdb_files(id) ON DELETE CASCADE,
     parent_id INTEGER REFERENCES bdb_nodes(id), 
     name TEXT NOT NULL,
-    type INTEGER
+    type INTEGER /* 1: group, 2: attribute, 3: dataset */
 );
 
 CREATE TABLE bdb_attribute_values (

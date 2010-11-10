@@ -94,9 +94,10 @@ TEST_P(db_rdb_RelationalDatabase_test, entry_by_uuid) {
     file.path(tf.path());
     
     shared_ptr<FileEntry> e1, e2;
-    EXPECT_NO_THROW(e1 = db->store(file));
+    ASSERT_NO_THROW(e1 = db->store(file));
      
-    EXPECT_NO_THROW(e2 = db->entry_by_uuid(e1->uuid()));
+    ASSERT_NO_THROW(e2 = db->entry_by_uuid(e1->uuid()));
+
     EXPECT_EQ(e1->uuid(), e2->uuid());
     EXPECT_EQ(e1->hash(), e2->hash());
 }

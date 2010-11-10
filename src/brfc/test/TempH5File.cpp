@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/visit.hpp>
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/File.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Scalar.hpp>
@@ -63,6 +64,7 @@ namespace {
 class GatherHLNodes {
   public:
     typedef mpl::vector<const oh5::RootGroup,
+                        const oh5::DataSet,
                         const oh5::Group,
                         const oh5::Attribute> accepted_types;
     
@@ -73,6 +75,23 @@ class GatherHLNodes {
 
     void operator()(const oh5::RootGroup& root) {
         // pass, the file already has a root group by default
+    }
+
+    void operator()(const oh5::DataSet& dataset) {
+        const String& path = dataset.path();
+
+        // create node
+        HL_Node* node = HLNode_newDataset(path.to_utf8().c_str());
+        if (node == 0)
+            throw std::runtime_error("could not create dataset node");
+        
+        // add node to nodelist
+        if (HLNodeList_addNode(nodes_.get(), node) == 0)
+            throw std::runtime_error("could not add dataset node");
+
+        hsize_t dims[]={1};
+        int array[] = {0};
+        HLNode_setArrayValue(node, sizeof(int), 1, dims, (unsigned char*)array, "int", -1);
     }
 
     void operator()(const oh5::Group& group) {
@@ -87,6 +106,7 @@ class GatherHLNodes {
         if (HLNodeList_addNode(nodes_.get(), node) == 0)
             throw std::runtime_error("could not add group node");
     }
+
 
     void operator()(const oh5::Attribute& attr) {
         const String& path = attr.path();

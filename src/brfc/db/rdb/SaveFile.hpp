@@ -29,6 +29,7 @@ class FileHasher;
 namespace oh5 {
 
 class Attribute;
+class DataSet;
 class Group;
 class PhysicalFile;
 class RootGroup;
@@ -51,6 +52,7 @@ class SaveFile {
      */
     typedef mpl::vector<const oh5::RootGroup,
                         const oh5::Group,
+                        const oh5::DataSet,
                         const oh5::Attribute> accepted_types;
     
     /**
@@ -63,15 +65,16 @@ class SaveFile {
     
     /**
      * @brief save a oh5::Group instance to database
-     *
-     * save a group using a SaveGroup functor.
      */
     void operator()(const oh5::Group& group);    
+
+    /**
+     * @brief save a oh5::DataSet instance to database
+     */
+    void operator()(const oh5::DataSet& dataset);
     
     /**
      * @brief save a oh5::Attribute instance to database
-     *
-     * instance is saved using a SaveAttribute functor.
      */
     void operator()(const oh5::Attribute& attribute);
     

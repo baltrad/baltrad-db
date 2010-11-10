@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/MemoryNodeBackend.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
@@ -53,6 +54,11 @@ TEST_F(oh5_Group_test, test_accepts_child_Group) {
 TEST_F(oh5_Group_test, test_accepts_child_RootGroup) {
     RootGroup node;
     EXPECT_FALSE(g.accepts_child(node));
+}
+
+TEST_F(oh5_Group_test, test_accepts_child_DataSet) {
+    DataSet node("data");
+    EXPECT_TRUE(g.accepts_child(node));
 }
 
 TEST_F(oh5_Group_test, test_attribute_access) {
