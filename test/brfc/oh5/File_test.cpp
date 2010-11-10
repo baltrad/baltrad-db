@@ -70,6 +70,13 @@ TEST_F(oh5_File_test, test_group) {
     EXPECT_FALSE(file.group("/nx"));
 }
 
+TEST_F(oh5_File_test, test_node) {
+    EXPECT_EQ(&root, file.node("/"));
+    EXPECT_EQ(what, file.node("/what"));
+    EXPECT_TRUE(file.node("/what/source"));
+    EXPECT_FALSE(file.node("/nx"));
+}
+
 TEST_F(oh5_File_test, required_attribute_shortcuts) {
     EXPECT_EQ(file.what_object(), "pvol");
     EXPECT_EQ(file.what_date(), Date(2000, 1, 2));

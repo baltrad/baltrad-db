@@ -35,6 +35,7 @@ namespace oh5 {
 
 class Attribute;
 class Group;
+class Node;
 class Source;
 
 /**
@@ -46,6 +47,20 @@ class File : public boost::noncopyable {
      * @brief destructor
      */
     virtual ~File() { }
+    
+    /**
+     * @brief get hold of Node at path
+     * @param path path to Node, where elements are separated by '/'
+     * @return pointer to requested Node if found
+     *
+     * group("path/to/node")
+     */
+    const Node* node(const String& path) const;
+    
+    /**
+     * @copydoc node(const String&) const
+     */
+    Node* node(const String& path);
 
     /**
      * @brief get hold of Group at path
@@ -53,21 +68,23 @@ class File : public boost::noncopyable {
      * @return pointer to requested Group if found
      *
      * group("path/to/group")
-     * @{
      */
     const Group* group(const String& path) const;
-
+    
+    /**
+     * @copydoc group(const String&) const
+     */
     Group* group(const String& path);
-    ///@}
     
     /**
      * @brief get the root group
-     * @{
      */
     const Group& root() const { return do_root(); }
-
+    
+    /**
+     * @copydoc root() const
+     */
     Group& root() { return const_cast<Group&>(do_root()); }
-    ///@}
     
     /**
      * @brief get Source associated with file

@@ -45,19 +45,6 @@ File::do_source() const {
     return Source();
 }
 
-/*
-void
-File::source(const Source& source) {
-    Group& grp = root().get_or_create_group("what");
-    Scalar srcval = Scalar(source.to_string());
-    Attribute* attr = grp.attribute("source");
-    if (attr)
-        attr->value(srcval);
-    else
-        grp.create_attribute("source", srcval);
-}
-*/
-
 namespace {
 
 const Attribute&
@@ -90,6 +77,19 @@ File::what_source() const {
     return get_attribute(root(), "what/source").value().string();
 }
 
+Node*
+File::node(const String& path) {
+    const File* self = const_cast<const File*>(this);
+    return const_cast<Node*>(self->node(path));
+}
+
+const Node*
+File::node(const String& path) const {
+    if (path == "/")
+        return &root();
+    return root().child(path);
+}
+
 Group*
 File::group(const String& path) {
     const File* self = const_cast<const File*>(this);
@@ -98,10 +98,7 @@ File::group(const String& path) {
 
 const Group*
 File::group(const String& path) const {
-    if (path == "/")
-        return &root();
-    const Node* node = root().child(path);
-    return dynamic_cast<const Group*>(node);
+    return dynamic_cast<const Group*>(node(path));
 }
 
 } // namespace oh5
