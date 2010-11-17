@@ -119,9 +119,8 @@ attr_sql_column(const oh5::Attribute& attr) {
 
 
 
-RdbHelper::RdbHelper(sql::Connection* conn, const FileHasher* hasher)
+RdbHelper::RdbHelper(shared_ptr<sql::Connection> conn)
         : conn_(conn)
-        , hasher_(hasher)
         , m_(Model::instance())
         , sql_()
         , insert_node_qry_()
@@ -258,8 +257,6 @@ RdbHelper::insert_attribute(oh5::Attribute& attr) {
 void
 RdbHelper::insert_file(RdbFileEntry& entry,
                        const oh5::PhysicalFile& file) {
-    const String& hash = hasher_->hash(file);
-
     long long source_id = select_source_id(file.source());
 
     boost::uuids::basic_random_generator<boost::mt19937> gen;
@@ -274,7 +271,7 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     
     sql::InsertPtr qry = sql::Insert::create(m_.files);
     qry->value("uuid", sql_.string(uuid));
-    qry->value("hash", sql_.string(hash)); 
+    qry->value("hash", sql_.string(entry.hash())); 
     qry->value("source_id", sql_.int64_(source_id));
     qry->value("stored_at", sql_.datetime(stored_at));
     qry->value("what_object", sql_.string(file.what_object()));
@@ -290,7 +287,6 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     entry.uuid(uuid);
     entry.id(file_id);
     entry.source_id(source_id);
-    entry.hash(hash);
     entry.stored_at(stored_at);
     entry.loaded(true);
 }
@@ -453,8 +449,9 @@ RdbHelper::load_children(oh5::Node& node) {
             BRFC_ASSERT(false);
         }
         
-        oh5::Node& c = backend(node).add_child(child.release());
+        oh5::Node& c = backend(node).create_child(child.release());
         backend(c).id(id);
+        backend(c).loaded(false);
     }
 
     backend(node).loaded(true);

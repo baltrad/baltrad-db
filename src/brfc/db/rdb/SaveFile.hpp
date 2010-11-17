@@ -20,17 +20,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_RDB_SAVE_FILE_HPP
 #define BRFC_DB_RDB_SAVE_FILE_HPP
 
+#include <brfc/smart_ptr.hpp>
 #include <brfc/visit.hpp>
 
 namespace brfc {
-
-class FileHasher;
-
 namespace oh5 {
 
 class Attribute;
 class DataSet;
 class Group;
+class Node;
 class PhysicalFile;
 class RootGroup;
 
@@ -39,8 +38,8 @@ class RootGroup;
 namespace db {
 namespace rdb {
 
-class RdbHelper;
 class RdbFileEntry;
+class RelationalDatabase;
 
 /**
  * @brief save oh5::PhysicalFile instances to database
@@ -57,9 +56,9 @@ class SaveFile {
     
     /**
      * @brief constructor
-     * @param entry
+     * @param rdb the database
      */
-    explicit SaveFile(RdbFileEntry& entry);
+    explicit SaveFile(RelationalDatabase* rdb);
 
     void operator()(const oh5::RootGroup& root);
     
@@ -81,13 +80,15 @@ class SaveFile {
     /**
      * @brief save a oh5::PhysicalFile instance to database
      * @param file the file to be saved
-     * @return database id of the saved file
+     * @return file entry in the database
      */
-    void operator()(const oh5::PhysicalFile& file);
+    shared_ptr<RdbFileEntry> operator()(const oh5::PhysicalFile& file);
 
   private:
-    RdbFileEntry& entry_;
-    RdbHelper& helper_;
+    oh5::Node& parent_on_entry(const oh5::Node& node);
+
+    RelationalDatabase* rdb_;
+    shared_ptr<RdbFileEntry> entry_;
 };
 
 } // namespace rdb

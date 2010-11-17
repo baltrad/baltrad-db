@@ -57,19 +57,16 @@ namespace rdb {
 RelationalDatabase::RelationalDatabase(const String& dsn_)
         : conn_(sql::Connection::create(dsn_))
         , mapper_(new AttributeMapper())
-        , file_hasher_(new SHA1AttributeHasher())
-        , helper_(new RdbHelper(conn_.get(), file_hasher_.get())) {
+        , file_hasher_(new SHA1AttributeHasher()) {
     conn_->open();
     populate_mapper();
     populate_hasher();
 }
 
-RelationalDatabase::RelationalDatabase(shared_ptr<sql::Connection> conn,
-                                       shared_ptr<RdbHelper> helper)
+RelationalDatabase::RelationalDatabase(shared_ptr<sql::Connection> conn)
         : conn_(conn)
         , mapper_(new AttributeMapper())
-        , file_hasher_(new SHA1AttributeHasher())
-        , helper_(helper) {
+        , file_hasher_(new SHA1AttributeHasher()) {
     BRFC_ASSERT(conn);
     populate_mapper();
     populate_hasher();
@@ -77,6 +74,11 @@ RelationalDatabase::RelationalDatabase(shared_ptr<sql::Connection> conn,
 
 RelationalDatabase::~RelationalDatabase() {
 
+}
+
+shared_ptr<sql::Connection>
+RelationalDatabase::conn() const {
+    return conn_;
 }
 
 AttributeMapper&
@@ -94,7 +96,8 @@ RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
     const Model& m = Model::instance();
 
     const String& hash = file_hasher().hash(file);
-    long long src_id = helper().select_source_id(file.source());
+    shared_ptr<sql::Connection> c = conn();
+    long long src_id = RdbHelper(c).select_source_id(file.source());
 
     sql::Factory xpr;
     sql::SelectPtr qry = sql::Select::create();
@@ -107,23 +110,13 @@ RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
         )
     );
 
-    shared_ptr<sql::Result> result = conn().execute(*qry);
+    shared_ptr<sql::Result> result = c->execute(*qry);
     return result->size() > 0;
 }
 
 shared_ptr<FileEntry>
 RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
-    shared_ptr<RdbFileEntry> entry(new RdbFileEntry(this));
-    conn().begin();
-    try {
-        SaveFile save(*entry);
-        save(file);
-        conn().commit();
-    } catch (const std::runtime_error&) {
-        conn().rollback();
-        throw;
-    }
-    return entry;
+    return SaveFile(this)(file);
 }
 
 shared_ptr<FileEntry>
@@ -137,14 +130,14 @@ RelationalDatabase::do_entry_by_uuid(const String& uuid) {
 shared_ptr<FileResult>
 RelationalDatabase::do_execute(const FileQuery& query) {
     sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
-    shared_ptr<sql::Result> res = conn().execute(*select);
+    shared_ptr<sql::Result> res = conn()->execute(*select);
     return shared_ptr<FileResult>(new RdbFileResult(this, res));
 }
 
 shared_ptr<AttributeResult>
 RelationalDatabase::do_execute(const AttributeQuery& query) {
     sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
-    shared_ptr<sql::Result> res = conn().execute(*select);
+    shared_ptr<sql::Result> res = conn()->execute(*select);
     return shared_ptr<AttributeResult>(new RdbAttributeResult(res));
 }
 
@@ -173,7 +166,7 @@ RelationalDatabase::do_remove(const FileEntry& entry) {
     String qry("DELETE FROM bdb_files WHERE uuid = :uuid");
     sql::BindMap binds;
     binds.add(":uuid", Variant(entry.uuid()));
-    shared_ptr<sql::Result> r = conn().execute(qry, binds);
+    shared_ptr<sql::Result> r = conn()->execute(qry, binds);
     return r->affected_rows();
 }
 

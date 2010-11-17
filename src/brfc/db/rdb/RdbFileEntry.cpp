@@ -78,27 +78,29 @@ void
 RdbFileEntry::load() const {
     RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
     self->loaded(true); // to disable recursion
+    RdbHelper helper(rdb().conn());
     try {
-        rdb().helper().load_file(*self);
+        helper.load_file(*self);
     } catch (...) {
         self->loaded(false);
         throw;
     }
-    rdb().helper().backend(self->root()).id(rdb().helper().select_root_id(*this));
+    helper.backend(self->root()).id(helper.select_root_id(*this));
 }
 
 oh5::Source
 RdbFileEntry::do_source() const {
+    RdbHelper helper(rdb().conn());
     if (source_.empty()) {
         RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
-        self->source_ = rdb().helper().select_source(source_id());
+        self->source_ = helper.select_source(source_id());
     }
     return source_;
 }
 
 String
 RdbFileEntry::do_hash() const {
-    if (not loaded())
+    if (hash_ == "" and not loaded())
         load();
     return hash_;
 }
@@ -112,13 +114,13 @@ RdbFileEntry::do_stored_at() const {
 
 void
 RdbFileEntry::do_write_to_file(const String& path) const {
-    sql::Connection& conn = rdb().conn();
-    conn.begin();
+    shared_ptr<sql::Connection> conn = rdb().conn();
+    conn->begin();
     try {
-        conn.large_object(lo_id_)->write_to_file(path);
-        conn.commit();
+        conn->large_object(lo_id_)->write_to_file(path);
+        conn->commit();
     } catch (...) {
-        conn.rollback();
+        conn->rollback();
         throw;
     }
 }

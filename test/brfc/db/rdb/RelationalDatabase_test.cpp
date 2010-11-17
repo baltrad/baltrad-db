@@ -166,7 +166,7 @@ TEST_P(db_rdb_RelationalDatabase_test, resultset_keeps_qsqldatabase_alive) {
     shared_ptr<sql::Result> r;
     {
         RelationalDatabase db(GetParam());
-        r = db.conn().execute("SELECT 1", sql::BindMap());
+        r = db.conn()->execute("SELECT 1", sql::BindMap());
     };
     r->size();
 }

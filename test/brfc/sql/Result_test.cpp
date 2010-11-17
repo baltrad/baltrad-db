@@ -43,7 +43,7 @@ struct rdb_Result_test : public testing::TestWithParam<const char*> {
     }
 
     shared_ptr<Result> query(const String& stmt, const BindMap& binds) {
-        return db->conn().execute(stmt, binds);
+        return db->conn()->execute(stmt, binds);
     }
     
     test::TestRDB* db;

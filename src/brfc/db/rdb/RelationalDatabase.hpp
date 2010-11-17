@@ -68,8 +68,7 @@ class RelationalDatabase : public Database {
      */
     explicit RelationalDatabase(const String& dsn);
 
-    RelationalDatabase(shared_ptr<sql::Connection> conn,
-                       shared_ptr<RdbHelper> helper);
+    explicit RelationalDatabase(shared_ptr<sql::Connection> conn);
 
     /**
      * @brief destructor
@@ -80,13 +79,9 @@ class RelationalDatabase : public Database {
     
     const AttributeMapper& mapper() const;
 
-    sql::Connection& conn() const {
-        return *conn_;
-    }
-    
-    FileHasher& file_hasher() { return *file_hasher_; }
+    shared_ptr<sql::Connection> conn() const;    
 
-    RdbHelper& helper() { return *helper_; }
+    FileHasher& file_hasher() { return *file_hasher_; }
 
   protected:
     /**

@@ -25,65 +25,87 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileHasher.hpp>
 #include <brfc/StringList.hpp>
 
+#include <brfc/db/rdb/RdbHelper.hpp>
+#include <brfc/db/rdb/RdbFileEntry.hpp>
+#include <brfc/db/rdb/RelationalDatabase.hpp>
+
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/PhysicalFile.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
 
-#include <brfc/db/rdb/RdbHelper.hpp>
-#include <brfc/db/rdb/RdbFileEntry.hpp>
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/sql/Connection.hpp>
 
 namespace brfc {
 namespace db {
 namespace rdb {
 
-SaveFile::SaveFile(RdbFileEntry& entry)
-        : entry_(entry)
-        , helper_(entry.rdb().helper()) {
+SaveFile::SaveFile(RelationalDatabase* rdb)
+        : rdb_(rdb)
+        , entry_() {
+}
+
+oh5::Node&
+SaveFile::parent_on_entry(const oh5::Node& node) {
+    const String& path = node.parent()->path();
+    oh5::Node* parent = entry_->node(path);
+    BRFC_ASSERT(parent);
+    return *parent;
 }
 
 void
 SaveFile::operator()(const oh5::RootGroup& root) {
-    helper_.insert_node(entry_.root());
+    // no-op
 }
 
 void
 SaveFile::operator()(const oh5::Group& group) {
-    const String& path = group.parent()->path();
-    oh5::Node* parent = entry_.node(path);
-    BRFC_ASSERT(parent);
-
-    parent->create_group(group.name());
+    // XXX: set loaded to prevent (failing) child lookup?
+    parent_on_entry(group).create_group(group.name());
 }
 
 void
 SaveFile::operator()(const oh5::DataSet& dataset) {
-    const String& path = dataset.parent()->path();
-    oh5::Node* parent = entry_.node(path);
-    BRFC_ASSERT(parent);
-
-    parent->create_dataset(dataset.name());
+    parent_on_entry(dataset).create_dataset(dataset.name()); 
 }
 
 void
 SaveFile::operator()(const oh5::Attribute& attr) {
-    const String& path = attr.parent()->path();
-    oh5::Node* parent = entry_.node(path);
-    BRFC_ASSERT(parent);
-
-    parent->create_attribute(attr.name(), attr.value());
+    parent_on_entry(attr).create_attribute(attr.name(), attr.value());
 }
 
-void
+shared_ptr<RdbFileEntry>
 SaveFile::operator()(const oh5::PhysicalFile& file) {
-    helper_.insert_file(entry_, file);
-    helper_.insert_file_content(entry_, file.path());
+    entry_.reset(new RdbFileEntry(rdb_));
+    entry_->hash(rdb_->file_hasher().hash(file));
+    entry_->loaded(true);
 
+    // copy nodes from file to entry
     BOOST_FOREACH(const oh5::Node& node, file.root()) {
         visit(node, *this);
     }
+
+    shared_ptr<sql::Connection> conn = rdb_->conn();
+
+    conn->begin();
+    try { 
+        RdbHelper helper(conn);
+
+        helper.insert_file(*entry_, file);
+        helper.insert_file_content(*entry_, file.path());
+
+        BOOST_FOREACH(oh5::Node& node, entry_->root()) {
+            helper.insert_node(node);
+        }
+
+        conn->commit();
+    } catch (...) {
+        conn->rollback();
+        throw;
+    }
+
+    return entry_;
 }
 
 } // namespace rdb

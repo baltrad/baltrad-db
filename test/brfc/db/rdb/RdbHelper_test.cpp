@@ -17,9 +17,12 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <boost/foreach.hpp>
+
 #include <gtest/gtest.h>
 
 #include <brfc/Date.hpp>
+#include <brfc/FileHasher.hpp>
 #include <brfc/Time.hpp>
 
 #include <brfc/db/rdb/RdbHelper.hpp>
@@ -39,10 +42,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include "config.hpp"
 #include "../../common.hpp"
-#include "../../MockHasher.hpp"
-
-using ::testing::_;
-using ::testing::Return;
 
 namespace brfc {
 namespace db {
@@ -52,25 +51,25 @@ class db_rdb_RdbHelper_test : public ::testing::TestWithParam<const char*> {
   public:
     db_rdb_RdbHelper_test()
             : db(TestRDBEnv::get_database(GetParam()))
-            , hasher()
-            , helper(&db->conn(), &hasher)
+            , conn(db->conn())
+            , helper(conn)
             , entry(db)
             , file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Karlskrona") {
     }
 
     virtual void SetUp() {
-        ON_CALL(hasher, do_hash(_)).WillByDefault(Return("hash"));
-        db->conn().begin();
+        conn->begin();
+        entry.hash("hash");
     }
 
     virtual void TearDown() {
-        if (db->conn().in_transaction())
-            db->conn().rollback();
+        if (conn->in_transaction())
+            conn->rollback();
         db->clean();
     }
 
     test::TestRDB* db;
-    ::testing::NiceMock<MockHasher> hasher;
+    shared_ptr<sql::Connection> conn;
     RdbHelper helper;
     RdbFileEntry entry;
     oh5::hl::HlFile file;
@@ -104,7 +103,7 @@ TEST_P(db_rdb_RdbHelper_test, test_insert_file_content) {
     EXPECT_NO_THROW(helper.insert_file_content(entry, tf.path()));
     EXPECT_GT(entry.lo_id(), 0);
 
-    EXPECT_NO_THROW(db->conn().commit());
+    EXPECT_NO_THROW(conn->commit());
 }
 
 TEST_P(db_rdb_RdbHelper_test, test_insert_node_group) {
@@ -134,11 +133,13 @@ TEST_P(db_rdb_RdbHelper_test, test_insert_node_dataset) {
     EXPECT_NO_THROW(helper.insert_node(entry.root()));
     oh5::Node* parent = 0;
     EXPECT_NO_THROW(parent = &entry.root().create_group("data1"));
+    EXPECT_NO_THROW(helper.insert_node(*parent));
     
     oh5::DataSet ds("data");
     ds.backend(new RdbNodeBackend());
     ds.parent(parent);
 
+    helper.insert_node(ds);
     EXPECT_NO_THROW(helper.insert_node(ds));
     EXPECT_GT(helper.backend(ds).id(), 0);
 }
@@ -268,24 +269,27 @@ TEST_P(db_rdb_RdbHelper_test, test_load_source_by_plc_unicode) {
 }
 
 TEST_P(db_rdb_RdbHelper_test, test_load_children) {
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
-    EXPECT_NO_THROW(helper.insert_node(entry.root()));
 
     oh5::Group *g1, *g2;
     oh5::Attribute *a1, *a2, *a3; 
     oh5::DataSet* ds1;
 
-    EXPECT_NO_THROW(g1 = &entry.root().create_group("g1"));
-    EXPECT_NO_THROW(g2 = &entry.root().create_group("g2"));
-    EXPECT_NO_THROW(a1 = &entry.root().create_attribute("a1", oh5::Scalar(1)));
-    EXPECT_NO_THROW(a2 = &g2->create_attribute("a2", oh5::Scalar(2)));
-    EXPECT_NO_THROW(ds1 = &g2->create_dataset("ds1"));
-    EXPECT_NO_THROW(a3 = &ds1->create_attribute("a3", oh5::Scalar(3)));
+    g1 = &entry.root().create_group("g1");
+    g2 = &entry.root().create_group("g2");
+    a1 = &entry.root().create_attribute("a1", oh5::Scalar(1));
+    a2 = &g2->create_attribute("a2", oh5::Scalar(2));
+    ds1 = &g2->create_dataset("ds1");
+    a3 = &ds1->create_attribute("a3", oh5::Scalar(3));
+
+    EXPECT_NO_THROW(helper.insert_file(entry, file));
+    BOOST_FOREACH(oh5::Node& node, entry.root()) {
+        EXPECT_NO_THROW(helper.insert_node(node));
+    }
     
     oh5::RootGroup r(&entry);
     r.backend(new RdbNodeBackend());
     helper.backend(r).id(helper.backend(entry.root()).id());
-    EXPECT_FALSE(helper.backend(r).loaded());
+    helper.backend(r).loaded(false);
 
     EXPECT_NO_THROW(helper.load_children(r));
     EXPECT_TRUE(helper.backend(r).loaded());

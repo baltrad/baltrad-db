@@ -34,7 +34,7 @@ namespace rdb {
 RdbNodeBackend::RdbNodeBackend(long long id)
         : children_()
         , id_(id)
-        , loaded_(false) {
+        , loaded_(true) {
 
 }
 
@@ -46,19 +46,8 @@ oh5::Node&
 RdbNodeBackend::do_create_child(oh5::Node* _node) {
     auto_ptr<oh5::Node> node(_node);
 
-    node->backend(new RdbNodeBackend());
-    rdb().helper().insert_node(*node);
-
-    children_.push_back(node);
-    return children_.back();
-}
-
-oh5::Node&
-RdbNodeBackend::add_child(oh5::Node* _node) {
-    auto_ptr<oh5::Node> node(_node);
-
-    node->backend(new RdbNodeBackend());
     node->parent(this->front());
+    node->backend(new RdbNodeBackend());
 
     children_.push_back(node);
     return children_.back();
@@ -74,7 +63,8 @@ RdbNodeBackend::rdb() const {
 void
 RdbNodeBackend::load() const {
     RdbNodeBackend* self = const_cast<RdbNodeBackend*>(this);
-    rdb().helper().load_children(*self->front());
+    RdbHelper helper(rdb().conn());
+    helper.load_children(*self->front());
     loaded_ = true;
 }
 
