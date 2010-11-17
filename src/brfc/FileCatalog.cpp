@@ -118,4 +118,9 @@ FileCatalog::query_attribute() const {
     return db::AttributeQuery(db_.get());
 }
 
+String
+FileCatalog::local_path_for_uuid(const String& uuid) {
+    return storage().store(*database().entry_by_uuid(uuid));
+}
+
 } // namespace brfc

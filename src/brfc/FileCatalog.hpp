@@ -192,6 +192,16 @@ class FileCatalog {
     db::FileQuery query_file() const;
 
     db::AttributeQuery query_attribute() const;
+
+    /**
+     * @brief absolute local path for database entry idenified by @c uuid
+     *
+     * equivalent to:
+     * @code
+     * storage().store(*database().entry_by_uuid(uuid));
+     * @endcode
+     */
+    String local_path_for_uuid(const String& uuid);
     
   private:
     shared_ptr<db::Database> db_;

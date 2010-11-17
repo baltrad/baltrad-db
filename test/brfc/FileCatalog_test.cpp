@@ -149,4 +149,14 @@ TEST_F(FileCatalog_test, test_remove_nx_file) {
     EXPECT_TRUE(fc.remove(*entry));
 }
 
+TEST_F(FileCatalog_test, test_local_path_for_uuid) {
+    String uuid = "uuid";
+    EXPECT_CALL(db, do_entry_by_uuid(Ref(uuid)))
+        .WillOnce(Return(entry));
+    EXPECT_CALL(storage, do_store(Ref(*entry)))
+        .WillOnce(Return("/path/to/file"));
+    
+    EXPECT_EQ("/path/to/file", fc.local_path_for_uuid(uuid));
+}
+
 } // namespace brfc
