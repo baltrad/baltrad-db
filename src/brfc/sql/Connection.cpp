@@ -21,28 +21,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/String.hpp>
-#include <brfc/Url.hpp>
 
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Query.hpp>
 #include <brfc/sql/Select.hpp>
-#include <brfc/sql/pg/Connection.hpp>
 
 namespace brfc {
 namespace sql {
 
 Connection::~Connection() {
 
-}
-
-shared_ptr<Connection>
-Connection::create(const String& dsn) {
-    Url url(dsn);
-    if (url.scheme() == "postgresql")
-        return make_shared<pg::Connection>(url);
-    else
-        throw value_error("no mapping found for dsn scheme: "
-                          + url.scheme().to_utf8());
 }
 
 void
@@ -74,6 +62,7 @@ Connection::rollback() {
         throw db_error("no open connection");
     if (not in_transaction())
         throw db_error("no active transaction");
+
     do_rollback();
 }
 
@@ -84,11 +73,6 @@ Connection::commit() {
     if (not in_transaction())
         throw db_error("no active transaction");
     do_commit();
-}
-
-shared_ptr<Result>
-Connection::execute(const String& statement, const BindMap& binds) {
-    return execute(Query(statement, binds));    
 }
 
 shared_ptr<Result>
@@ -103,12 +87,16 @@ Connection::execute(const Select& stmt) {
 
 shared_ptr<Result>
 Connection::execute(const Query& query) {
-    String statement = query.replace_binds(dialect());
+    return execute(query.replace_binds(dialect()));
+}
+
+shared_ptr<Result>
+Connection::execute(const String& stmt) {
     shared_ptr<Result> result;
     if (not in_transaction()) {
         try {
             begin();
-            result = do_execute(statement);
+            result = do_execute(stmt);
             commit();
         } catch (const std::runtime_error& e) {
             rollback();
@@ -116,7 +104,7 @@ Connection::execute(const Query& query) {
         }
     } else {
         try {
-            result = do_execute(statement);
+            result = do_execute(stmt);
         } catch (const std::runtime_error& e) {
             throw db_error(e.what());
         }

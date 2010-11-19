@@ -94,6 +94,8 @@ AttributeQuery::order_by(const expr::Expression& expr, SortDir dir) {
 
 shared_ptr<AttributeResult>
 AttributeQuery::execute() {
+    if (not db_)
+        throw std::runtime_error("AttributeQuery not associated with Database");
     return db_->execute(*this);
 }
 

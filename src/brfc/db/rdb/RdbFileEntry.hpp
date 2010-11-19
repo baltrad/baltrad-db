@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_DB_RDB_RELATIONAL_FILE_ENTRY_HPP
-#define BRFC_DB_RDB_RELATIONAL_FILE_ENTRY_HPP
+#ifndef BRFC_DB_RDB_RDB_FILE_ENTRY_HPP
+#define BRFC_DB_RDB_RDB_FILE_ENTRY_HPP
 
 #include <brfc/db/FileEntry.hpp>
 
@@ -26,13 +26,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Source.hpp>
 
 namespace brfc {
-
-class FileHasher;
-
 namespace db {
 namespace rdb {
 
-class AttributeMapper;
 class RelationalDatabase;
 
 /**
@@ -142,4 +138,4 @@ class RdbFileEntry : public FileEntry {
 } // namespace db
 } // namespace brfc
 
-#endif // BRFC_DB_RDB_RELATIONAL_FILE_ENTRY_HPP
+#endif // BRFC_DB_RDB_RDB_FILE_ENTRY_HPP

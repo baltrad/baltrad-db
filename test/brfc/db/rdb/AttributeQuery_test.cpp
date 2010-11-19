@@ -239,6 +239,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_combined_datetime) {
 
     query.fetch(*xpr.attribute("file:uuid"));
     query.filter(*what_dt->between(*xpr.datetime(min), *xpr.datetime(max)));
+    query.order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     shared_ptr<AttributeResult> r = query.execute();
 
     EXPECT_EQ(r->size(), 3);
@@ -269,6 +270,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_select_by_or_node) {
     shared_ptr<AttributeResult> r =
         query.fetch(*xpr.attribute("file:uuid"))
              .filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))))
+             .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC)
              .execute();
     EXPECT_EQ(r->size(), 5);
     ASSERT_TRUE(r->next());

@@ -67,14 +67,6 @@ class sql_Connection_test : public testing::Test {
     ::testing::NiceMock<MockConnection> conn;
 };
 
-TEST_F(sql_Connection_test, test_create_valid_url) {
-    EXPECT_TRUE(Connection::create("postgresql://user:password@localhost/dbname"));
-}
-
-TEST_F(sql_Connection_test, test_create_invalid_url) {
-    EXPECT_THROW(Connection::create("bla://user:password@localhost/dbname"), value_error);
-}
-
 TEST_F(sql_Connection_test, test_no_transaction_execute) {
     String stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
@@ -247,7 +239,7 @@ TEST_F(sql_Connection_test, test_execute_replaces_binds) {
     EXPECT_CALL(conn, do_execute(String("1")))
         .WillOnce(Return(shared_ptr<Result>()));
     
-    conn.execute(stmt, binds);
+    conn.execute(Query(stmt, binds));
 }
 
 } // namespace sql

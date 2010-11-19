@@ -56,6 +56,8 @@ FileQuery::filter(const expr::Expression& expr) {
 
 shared_ptr<FileResult>
 FileQuery::execute() {
+    if (not db_)
+        throw std::runtime_error("FileQuery not associated with Database");
     return db_->execute(*this);
 }
 

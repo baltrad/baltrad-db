@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/PhysicalFile.hpp>
 
 #include "../../sql/MockConnection.hpp"
+#include "../../sql/MockConnectionPool.hpp"
 #include "../../oh5/MockNode.hpp"
 
 using ::testing::_;
@@ -43,7 +44,9 @@ class db_rdb_RdbNodeBackend_test : public ::testing::Test {
     db_rdb_RdbNodeBackend_test()
             : conn()
             , conn_ptr(&conn, no_delete)
-            , db(conn_ptr)
+            , pool()
+            , pool_ptr(&pool, no_delete)
+            , db(pool_ptr)
             , entry(&db)
             , node("mocknode")
             , backend() {
@@ -51,6 +54,8 @@ class db_rdb_RdbNodeBackend_test : public ::testing::Test {
     }
 
     virtual void SetUp() {
+        ON_CALL(pool, do_get())
+            .WillByDefault(Return(conn_ptr));
         ON_CALL(node, do_file())
             .WillByDefault(Return(&entry));
         backend.front(&node);
@@ -58,6 +63,8 @@ class db_rdb_RdbNodeBackend_test : public ::testing::Test {
 
     sql::MockConnection conn;
     shared_ptr<sql::Connection> conn_ptr;
+    sql::MockConnectionPool pool;
+    shared_ptr<sql::ConnectionPool> pool_ptr;
     RelationalDatabase db;
     RdbFileEntry entry;
     ::testing::NiceMock<oh5::MockNode> node;

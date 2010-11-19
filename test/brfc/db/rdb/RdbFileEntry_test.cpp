@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/PhysicalFile.hpp>
 
 #include "../../sql/MockConnection.hpp"
+#include "../../sql/MockConnectionPool.hpp"
 
 using ::testing::_;
 using ::testing::Ref;
@@ -41,12 +42,23 @@ class db_rdb_RdbFileEntry_test : public ::testing::Test {
   public:
     db_rdb_RdbFileEntry_test()
             : conn()
-            , db(shared_ptr<sql::Connection>(&conn, no_delete))
+            , conn_ptr(&conn, no_delete)
+            , pool()
+            , pool_ptr(&pool, no_delete)
+            , db(pool_ptr)
             , entry(&db) {
     
     }
 
+    virtual void SetUp() {
+        ON_CALL(pool, do_get())
+            .WillByDefault(Return(conn_ptr));
+    }
+    
     sql::MockConnection conn;
+    shared_ptr<sql::Connection> conn_ptr;
+    sql::MockConnectionPool pool;
+    shared_ptr<sql::ConnectionPool> pool_ptr;
     RelationalDatabase db;
     RdbFileEntry entry;
 };

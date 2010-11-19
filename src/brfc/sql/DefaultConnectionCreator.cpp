@@ -17,23 +17,39 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_SQL_MOCK_COMPILER_HPP
-#define BRFC_SQL_MOCK_COMPILER_HPP
+#include <brfc/sql/DefaultConnectionCreator.hpp>
 
-#include <gmock/gmock.h>
+#include <brfc/Url.hpp>
 
-#include <brfc/sql/Compiler.hpp>
-#include <brfc/sql/Element.hpp>
+#include <brfc/sql/pg/Connection.hpp>
 
 namespace brfc {
-namespace sql  {
+namespace sql {
 
-class MockCompiler : public Compiler {
-  public:
-    MOCK_METHOD1(do_compile, Query(const Element&));
-};
+DefaultConnectionCreator::DefaultConnectionCreator(const String& dsn)
+        : dsn_(dsn) {
+}
+
+DefaultConnectionCreator::~DefaultConnectionCreator() {
+
+}
+
+Connection*
+DefaultConnectionCreator::do_create() const {
+    // rdb is our only implementation
+    Url url(dsn_);
+    if (url.scheme() == "postgresql")
+        return new pg::Connection(url);
+    else
+        throw value_error("no mapping found for dsn scheme: "
+                          + url.scheme().to_utf8());
+
+}
+
+DefaultConnectionCreator*
+DefaultConnectionCreator::do_clone() const {
+    return new DefaultConnectionCreator(dsn_);
+}
 
 } // namespace sql
 } // namespace brfc
-
-#endif // BRFC_SQL_MOCK_COMPILER_HPP

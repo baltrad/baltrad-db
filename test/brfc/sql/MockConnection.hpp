@@ -28,8 +28,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
 
+#include "FakeConnection.hpp"
+
 namespace brfc {
 namespace sql {
+
 
 class MockConnection : public Connection {
   public:
@@ -49,6 +52,27 @@ class MockConnection : public Connection {
     MOCK_METHOD1(do_large_object, shared_ptr<LargeObject>(const String&));
 
     MOCK_CONST_METHOD0(do_last_insert_id, long long());
+
+    void delegate_to_fake() {
+        using ::testing::Invoke;
+        ON_CALL(*this, do_open())
+            .WillByDefault(Invoke(&fake_, &FakeConnection::do_open));
+        ON_CALL(*this, do_close())
+            .WillByDefault(Invoke(&fake_, &FakeConnection::do_close));
+        ON_CALL(*this, do_is_open())
+            .WillByDefault(Invoke(&fake_, &FakeConnection::do_is_open));
+        ON_CALL(*this, do_begin())
+            .WillByDefault(Invoke(&fake_, &FakeConnection::do_begin));
+        ON_CALL(*this, do_commit())
+            .WillByDefault(Invoke(&fake_, &FakeConnection::do_commit));
+        ON_CALL(*this, do_rollback())
+            .WillByDefault(Invoke(&fake_, &FakeConnection::do_rollback));
+        ON_CALL(*this, do_in_transaction())
+            .WillByDefault(Invoke(&fake_, &FakeConnection::do_in_transaction));
+    }
+
+  private:
+    FakeConnection fake_;
 };
 
 } // namespace sql

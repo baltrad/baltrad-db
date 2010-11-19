@@ -16,24 +16,32 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef BRFC_OH5_MOCK_PHYSICAL_FILE_HPP
-#define BRFC_OH5_MOCK_PHYSICAL_FILE_HPP
 
-#include <gmock/gmock.h>
-
-#include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/PhysicalFile.hpp>
+#include <brfc/sql/LargeObjectProxy.hpp>
 
 namespace brfc {
-namespace oh5 {
+namespace sql {
 
-class MockPhysicalFile : public PhysicalFile {
-  public:
-    MOCK_CONST_METHOD0(do_root, const Group&());
-    MOCK_CONST_METHOD0(do_path, const String&());
-};
+LargeObjectProxy::LargeObjectProxy(shared_ptr<Connection> conn,
+                                   shared_ptr<LargeObject> lobj)
+        : conn_(conn)
+        , lobj_(lobj) {
 
-} // namespace oh5
+}
+
+LargeObjectProxy::~LargeObjectProxy() {
+
+}
+
+long long
+LargeObjectProxy::do_id() const {
+    return lobj_->id();
+}
+
+void
+LargeObjectProxy::do_write_to_file(const String& path) const {
+    lobj_->write_to_file(path);
+}
+
+} // namespace sql
 } // namespace brfc
-
-#endif // BRFC_OH5_MOCK_PHYSICAL_FILE_HPP

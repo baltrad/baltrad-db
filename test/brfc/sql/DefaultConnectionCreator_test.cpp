@@ -16,24 +16,28 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef BRFC_OH5_MOCK_PHYSICAL_FILE_HPP
-#define BRFC_OH5_MOCK_PHYSICAL_FILE_HPP
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/PhysicalFile.hpp>
+#include <brfc/exceptions.hpp>
+
+#include <brfc/sql/Connection.hpp>
+#include <brfc/sql/DefaultConnectionCreator.hpp>
 
 namespace brfc {
-namespace oh5 {
+namespace sql {
 
-class MockPhysicalFile : public PhysicalFile {
-  public:
-    MOCK_CONST_METHOD0(do_root, const Group&());
-    MOCK_CONST_METHOD0(do_path, const String&());
-};
+TEST(sql_DefaultConnectionCreator_test, test_create_valid_url) {
+    DefaultConnectionCreator c("postgresql://user:password@localhost/dbname");
+    auto_ptr<Connection> p;    
+    EXPECT_NO_THROW(p.reset(c.create()));
+}
 
-} // namespace oh5
+TEST(sql_DefaultConnectionCreator_test, test_create_invalid_url) {
+    DefaultConnectionCreator c("bla://user:password@localhost/dbname");
+    auto_ptr<Connection> p;
+    EXPECT_THROW(p.reset(c.create()), value_error);
+}
+
+} // namespace sql
 } // namespace brfc
-
-#endif // BRFC_OH5_MOCK_PHYSICAL_FILE_HPP

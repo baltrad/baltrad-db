@@ -17,23 +17,43 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_SQL_MOCK_COMPILER_HPP
-#define BRFC_SQL_MOCK_COMPILER_HPP
+#ifndef BRFC_SQL_LARGE_OBJECT_PROXY_HPP
+#define BRFC_SQL_LARGE_OBJECT_PROXY_HPP
 
-#include <gmock/gmock.h>
+#include <brfc/smart_ptr.hpp>
 
-#include <brfc/sql/Compiler.hpp>
-#include <brfc/sql/Element.hpp>
+#include <brfc/sql/LargeObject.hpp>
 
 namespace brfc {
-namespace sql  {
+namespace sql {
 
-class MockCompiler : public Compiler {
+class Connection;
+
+/**
+ * @brief proxy for LargeObject
+ */
+class LargeObjectProxy : public LargeObject {
   public:
-    MOCK_METHOD1(do_compile, Query(const Element&));
+    /**
+     * @brief constructor
+     * @param conn the database connection
+     * @param lobj the proxied large object
+     */
+    LargeObjectProxy(shared_ptr<Connection> conn,
+                     shared_ptr<LargeObject> lobj);
+    
+    virtual ~LargeObjectProxy();
+
+  protected:
+    virtual long long do_id() const;
+    virtual void do_write_to_file(const String& path) const;
+  
+  private:
+    shared_ptr<Connection> conn_;
+    shared_ptr<LargeObject> lobj_;
 };
 
 } // namespace sql
 } // namespace brfc
 
-#endif // BRFC_SQL_MOCK_COMPILER_HPP
+#endif // BRFC_SQL_LARGE_OBJECT_PROXY_HPP

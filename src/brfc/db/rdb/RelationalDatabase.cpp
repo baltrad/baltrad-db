@@ -46,28 +46,32 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Source.hpp>
 
 #include <brfc/sql/expr.hpp>
+#include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Connection.hpp>
+#include <brfc/sql/DefaultConnectionCreator.hpp>
 #include <brfc/sql/Result.hpp>
 
 namespace brfc {
 namespace db {
 namespace rdb {
 
-RelationalDatabase::RelationalDatabase(const String& dsn_)
-        : conn_(sql::Connection::create(dsn_))
+RelationalDatabase::RelationalDatabase(const String& dsn)
+        : creator_(new sql::DefaultConnectionCreator(dsn))
+        , pool_(new sql::BasicConnectionPool(creator_))
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher()) {
-    conn_->open();
+    conn(); // check if connection is valid
     populate_mapper();
     populate_hasher();
 }
 
-RelationalDatabase::RelationalDatabase(shared_ptr<sql::Connection> conn)
-        : conn_(conn)
+RelationalDatabase::RelationalDatabase(shared_ptr<sql::ConnectionPool> pool)
+        : creator_()
+        , pool_(pool)
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher()) {
-    BRFC_ASSERT(conn);
+    BRFC_ASSERT(pool);
     populate_mapper();
     populate_hasher();
 }
@@ -78,7 +82,7 @@ RelationalDatabase::~RelationalDatabase() {
 
 shared_ptr<sql::Connection>
 RelationalDatabase::conn() const {
-    return conn_;
+    return pool_->get();
 }
 
 AttributeMapper&
@@ -166,7 +170,7 @@ RelationalDatabase::do_remove(const FileEntry& entry) {
     String qry("DELETE FROM bdb_files WHERE uuid = :uuid");
     sql::BindMap binds;
     binds.add(":uuid", Variant(entry.uuid()));
-    shared_ptr<sql::Result> r = conn()->execute(qry, binds);
+    shared_ptr<sql::Result> r = conn()->execute(sql::Query(qry, binds));
     return r->affected_rows();
 }
 

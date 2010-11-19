@@ -48,7 +48,7 @@ class AttributeQuery {
      * @brief constructor
      * @param db Database instance this AttributeQuery executes on
      */
-    AttributeQuery(Database* db);
+    AttributeQuery(Database* db=0);
 
     /**
      * @brief copy constructor

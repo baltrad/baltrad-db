@@ -39,7 +39,7 @@ class FileQuery {
      * @brief constructor
      * @param db Database instance this FileQuery executes on
      */
-    FileQuery(Database* db);
+    FileQuery(Database* db=0);
 
     /**
      * @brief copy constructor

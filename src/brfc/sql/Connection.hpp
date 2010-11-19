@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_CONNECTION_HPP
 #define BRFC_SQL_CONNECTION_HPP
 
+#include <boost/noncopyable.hpp>
+
 #include <brfc/smart_ptr.hpp>
 
 #include <brfc/sql/BindMap.hpp>
@@ -42,20 +44,8 @@ class Select;
 /**
  * @brief ABC for database connections
  */
-class Connection {
+class Connection : boost::noncopyable {
   public:
-    /**
-     * @brief create a Connection instance from dsn
-     * @param dsn dsn (transformed to Url)
-     * @throw value_error if url with invalid scheme is supplied
-     *
-     * construct a connection according to Url::scheme.
-     *
-     * schemes map as:
-     *  - postgresql -> PostgresConnection
-     */
-    static shared_ptr<Connection> create(const String& dsn);
-
     virtual ~Connection();    
 
     /**
@@ -121,18 +111,6 @@ class Connection {
     }
 
     /**
-     * @brief execute a statement
-     *
-     * @param statement statment to execute
-     * @param binds binds to replace into the statement
-     * 
-     * equivalent to:
-     * @code execute(Query(statement, binds)); @endcode
-     */
-    shared_ptr<Result> execute(const String& statement,
-                               const BindMap& binds=BindMap());
-    
-    /**
      * @brief execute an Insert statement
      */
     shared_ptr<Result> execute(const Insert& stmt);
@@ -155,6 +133,8 @@ class Connection {
      * @sa do_execute
      */
     shared_ptr<Result> execute(const Query& query);
+
+    shared_ptr<Result> execute(const String& query);
 
     const Dialect& dialect() const {
         return do_dialect();
@@ -179,28 +159,72 @@ class Connection {
     }
 
   protected:
-    virtual void do_open() = 0;
-    virtual void do_close() = 0;
-    virtual bool do_is_open() const = 0;
-
-    virtual void do_begin() = 0;
-    virtual void do_commit() = 0;
-    virtual void do_rollback() = 0;
-
-    virtual shared_ptr<Result> do_execute(const String& statement) = 0;
+    // allow access to protected virtuals
+    friend class ConnectionProxy;
     
     /**
-     * @return true if there is an ongoing transaction
+     * @brief open() implementation
+     */
+    virtual void do_open() = 0;
+
+    /**
+     * @brief close() implementation
+     */
+    virtual void do_close() = 0;
+
+    /**
+     * @brief is_open() implementation
+     */
+    virtual bool do_is_open() const = 0;
+    
+    /**
+     * @brief begin() implementation
+     */
+    virtual void do_begin() = 0;
+
+    /**
+     * @brief commit() implementation
+     */
+    virtual void do_commit() = 0;
+
+    /**
+     * @brief rollback() implementation
+     */
+    virtual void do_rollback() = 0;
+
+    /**
+     * @brief in_transaction() implementation
      */
     virtual bool do_in_transaction() const = 0;
     
+    /**
+     * @brief execute(const Sting& implementation)
+     */
+    virtual shared_ptr<Result> do_execute(const String& query) = 0;
+    
+    /**
+     * @brief dialect() implementation
+     */
     virtual const Dialect& do_dialect() const = 0;
-
+    
+    /**
+     * @brief compiler() implementation
+     */
     virtual Compiler& do_compiler() = 0;
     
+    /**
+     * @brief large_object(long long) implementation
+     */
     virtual shared_ptr<LargeObject> do_large_object(long long id) = 0;
-    virtual shared_ptr<LargeObject> do_large_object(const String& path) = 0;
 
+    /**
+     * @brief large_object(const String&) implementation
+     */
+    virtual shared_ptr<LargeObject> do_large_object(const String& path) = 0;
+    
+    /**
+     * @brief last_insert_id() implementation
+     */
     virtual long long do_last_insert_id() const = 0;
   
 };

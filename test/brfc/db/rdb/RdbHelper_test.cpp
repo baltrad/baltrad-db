@@ -149,6 +149,7 @@ TEST_P(db_rdb_RdbHelper_test, test_load_file_by_id) {
     test::TempH5File tf;
     tf.write(file);
     EXPECT_NO_THROW(helper.insert_file_content(entry, tf.path()));
+    conn->commit();
 
     RdbFileEntry e2(db);
     e2.id(entry.id());
@@ -170,6 +171,7 @@ TEST_P(db_rdb_RdbHelper_test, test_load_file_by_uuid) {
     test::TempH5File tf;
     tf.write(file);
     EXPECT_NO_THROW(helper.insert_file_content(entry, tf.path()));
+    conn->commit();
 
     RdbFileEntry e2(db);
     e2.uuid(entry.uuid());
@@ -201,11 +203,13 @@ TEST_P(db_rdb_RdbHelper_test, test_select_root_id_by_id) {
 TEST_P(db_rdb_RdbHelper_test, test_select_root_id_by_uuid) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
     EXPECT_NO_THROW(helper.insert_node(entry.root()));
+    conn->commit();
 
     RdbFileEntry e2(db);
     e2.uuid(entry.uuid());
     
     long long id = 0;
+    id = helper.select_root_id(e2);
     EXPECT_NO_THROW(id = helper.select_root_id(e2));
     EXPECT_EQ(helper.backend(entry.root()).id(), id);
 }
@@ -285,6 +289,7 @@ TEST_P(db_rdb_RdbHelper_test, test_load_children) {
     BOOST_FOREACH(oh5::Node& node, entry.root()) {
         EXPECT_NO_THROW(helper.insert_node(node));
     }
+    conn->commit();
     
     oh5::RootGroup r(&entry);
     r.backend(new RdbNodeBackend());

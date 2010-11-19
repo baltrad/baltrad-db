@@ -16,24 +16,39 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef BRFC_OH5_MOCK_PHYSICAL_FILE_HPP
-#define BRFC_OH5_MOCK_PHYSICAL_FILE_HPP
 
-#include <gmock/gmock.h>
+#ifndef BRFC_SQL_CONNETION_CREATOR_HPP
+#define BRFC_SQL_CONNETION_CREATOR_HPP
 
-#include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/PhysicalFile.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace brfc {
-namespace oh5 {
+namespace sql {
 
-class MockPhysicalFile : public PhysicalFile {
+class Connection;
+
+/**
+ * @brief ABC for creating Connection instances
+ */
+class ConnectionCreator : boost::noncopyable {
   public:
-    MOCK_CONST_METHOD0(do_root, const Group&());
-    MOCK_CONST_METHOD0(do_path, const String&());
+    virtual ~ConnectionCreator() { }
+    
+    /**
+     * @brief create a Connection instance
+     */
+    Connection* create() const {
+        return do_create();
+    }
+ 
+  protected:
+    /**
+     * @brief create() implementation
+     */
+    virtual Connection* do_create() const = 0;
 };
 
-} // namespace oh5
+} // namespace sql
 } // namespace brfc
 
-#endif // BRFC_OH5_MOCK_PHYSICAL_FILE_HPP
+#endif // BRFC_SQL_CONNETION_CREATOR_HPP

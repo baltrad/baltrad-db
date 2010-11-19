@@ -211,6 +211,16 @@ def configure(conf):
         mandatory=env.build_bdbtool,
     )
 
+    conf.check_cxx(
+        header_name="boost/thread.hpp",
+        lib="boost_thread",
+        uselib="BOOST_THREAD",
+        includes=env.boost_inc_dir,
+        libpath=env.boost_lib_dir,
+        uselib_store="BOOST_THREAD",
+        mandatory=True,
+    )
+
     boost_headers = (
         "bimap.hpp",
         "enable_shared_from_this.hpp",
@@ -337,7 +347,7 @@ def _build_shared_library(bld):
         includes="src",
         export_incdirs="src",
         uselib=[
-            "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM",
+            "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM", "BOOST_THREAD",
             "HDF5", "HLHDF",
             "ICU",
             "PQXX",

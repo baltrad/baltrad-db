@@ -42,6 +42,8 @@ class Source;
 namespace sql {
 
 class Connection;
+class ConnectionCreator;
+class ConnectionPool;
 
 } // namespace sql
 
@@ -67,8 +69,8 @@ class RelationalDatabase : public Database {
      * the only engine currently supported is 'postgresql'
      */
     explicit RelationalDatabase(const String& dsn);
-
-    explicit RelationalDatabase(shared_ptr<sql::Connection> conn);
+    
+    explicit RelationalDatabase(shared_ptr<sql::ConnectionPool> pool);
 
     /**
      * @brief destructor
@@ -78,7 +80,10 @@ class RelationalDatabase : public Database {
     AttributeMapper& mapper();
     
     const AttributeMapper& mapper() const;
-
+    
+    /**
+     * @brief acquire a connection from the associated pool
+     */
     shared_ptr<sql::Connection> conn() const;    
 
     FileHasher& file_hasher() { return *file_hasher_; }
@@ -101,7 +106,8 @@ class RelationalDatabase : public Database {
     void populate_mapper();
     void populate_hasher();
 
-    shared_ptr<sql::Connection> conn_;
+    shared_ptr<sql::ConnectionCreator> creator_;
+    shared_ptr<sql::ConnectionPool> pool_;
     shared_ptr<AttributeMapper> mapper_;
     shared_ptr<FileHasher> file_hasher_;
     shared_ptr<RdbHelper> helper_;
