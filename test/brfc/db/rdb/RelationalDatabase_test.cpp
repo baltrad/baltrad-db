@@ -103,6 +103,23 @@ TEST_P(db_rdb_RelationalDatabase_test, entry_by_uuid) {
     EXPECT_EQ(e1->hash(), e2->hash());
 }
 
+TEST_P(db_rdb_RelationalDatabase_test, entry_by_file) {
+    oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    test::TempH5File tf;
+    tf.write(file);
+    file.path(tf.path());
+
+    EXPECT_THROW(db->entry_by_file(file), lookup_error);
+    
+    shared_ptr<FileEntry> e1, e2;
+    ASSERT_NO_THROW(e1 = db->store(file));
+    
+    ASSERT_NO_THROW(e2 = db->entry_by_file(file));
+
+    EXPECT_EQ(e1->uuid(), e2->uuid());
+    EXPECT_EQ(e1->hash(), e2->hash());
+}
+
 TEST_P(db_rdb_RelationalDatabase_test, remove) {
     oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     test::TempH5File tf;

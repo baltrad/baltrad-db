@@ -96,6 +96,24 @@ FileCatalog::store(const oh5::PhysicalFile& file) {
     return e;
 }
 
+shared_ptr<const db::FileEntry>
+FileCatalog::get_or_store(const String& path) {
+    oh5::hl::HlFile f(path);
+    return get_or_store(f);
+}
+
+shared_ptr<const db::FileEntry>
+FileCatalog::get_or_store(const oh5::PhysicalFile& file) {
+    shared_ptr<db::FileEntry> e = db_->get_or_store(file);
+    try {
+        storage_->prestore(*e, file.path());
+    } catch (const std::runtime_error& e) {
+        std::cerr << "IGNORED EXCEPTION: LocalStorage::prestore: "
+                  << e.what() << std::endl << std::flush;
+    }
+    return e;
+}
+
 bool
 FileCatalog::remove(const db::FileEntry& entry) {
     bool removed = db_->remove(entry);

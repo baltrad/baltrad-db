@@ -75,10 +75,36 @@ class Database : public boost::noncopyable {
      * @throw db_error if a database error occurs
      * @throw duplicate_entry if file is already stored to database
      */
-    shared_ptr<FileEntry> store(const oh5::PhysicalFile& file);
+    shared_ptr<FileEntry> store(const oh5::PhysicalFile& file) {
+        return do_store(file);
+    }
+    
+    /**
+     * @brief get a FileEntry for @c file, storing it if not already stored
+     * @throw db_error if a database error occurs
+     *
+     * this is equivalent to:
+     * @code
+     * if (is_stored(file)) {
+     *    return entry_by_file(file);
+     * } else {
+     *    return store(file);
+     * }
+     * @endcode
+     */
+    shared_ptr<FileEntry> get_or_store(const oh5::PhysicalFile& file);
+    
+    /**
+     * @brief get FileEntry by physical file
+     * @param file the physical file to look up
+     */
+    shared_ptr<FileEntry> entry_by_file(const oh5::PhysicalFile& file) {
+        return do_entry_by_file(file);
+    }
 
     /**
      * @brief get FileEntry by UUID
+     * @param uuid the UUID of requested entry
      */
     shared_ptr<FileEntry> entry_by_uuid(const String& uuid) {
         return do_entry_by_uuid(uuid);
@@ -102,6 +128,7 @@ class Database : public boost::noncopyable {
     virtual bool do_is_stored(const oh5::PhysicalFile& file) = 0;
     virtual bool do_remove(const FileEntry& entry) = 0;
     virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file) = 0;
+    virtual shared_ptr<FileEntry> do_entry_by_file(const oh5::PhysicalFile& file) = 0;
     virtual shared_ptr<FileEntry> do_entry_by_uuid(const String& uuid) = 0;
 
     virtual shared_ptr<FileResult> do_execute(const FileQuery& query) = 0;

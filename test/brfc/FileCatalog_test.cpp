@@ -115,6 +115,41 @@ TEST_F(FileCatalog_test, test_store_on_prestore_failure) {
     EXPECT_TRUE(e);
 }
 
+TEST_F(FileCatalog_test, test_get_or_store) {
+    EXPECT_CALL(db, do_is_stored(Ref(minfile)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(db, do_entry_by_file(Ref(minfile)))
+        .WillOnce(Return(entry));
+    EXPECT_CALL(storage, do_prestore(Ref(*entry), minfile.path()))
+        .WillOnce(Return("/path/to/file"));
+    
+    shared_ptr<const db::FileEntry> e;
+    EXPECT_NO_THROW(e = fc.get_or_store(minfile));
+    EXPECT_TRUE(e);
+}
+
+TEST_F(FileCatalog_test, test_get_or_store_on_db_failure) {
+    EXPECT_CALL(db, do_is_stored(Ref(minfile)))
+        .WillOnce(Throw(db_error("error")));
+
+    EXPECT_THROW(fc.get_or_store(minfile), db_error);
+}
+
+TEST_F(FileCatalog_test, test_get_or_store_on_prestore_failure) {
+    EXPECT_CALL(db, do_is_stored(Ref(minfile)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(db, do_entry_by_file(Ref(minfile)))
+        .WillOnce(Return(entry));
+    EXPECT_CALL(storage, do_prestore(Ref(*entry), minfile.path()))
+        .WillOnce(Throw(std::runtime_error("error")));
+    
+    shared_ptr<const db::FileEntry> e;
+    EXPECT_NO_THROW(e = fc.get_or_store(minfile));
+    EXPECT_TRUE(e);
+}
+
+
+
 /*
 TEST_F(FileCatalog_test, test_double_import_throws) {
     EXPECT_THROW(fc.store(minfile), duplicate_entry);

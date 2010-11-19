@@ -19,10 +19,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/oh5/PhysicalFile.hpp>
-
 #include <brfc/db/MockDatabase.hpp>
 #include <brfc/db/MockFileEntry.hpp>
+
+#include <brfc/oh5/MockPhysicalFile.hpp>
 
 using ::testing::Ref;
 using ::testing::Return;
@@ -38,6 +38,31 @@ class db_Database_test : public ::testing::Test {
 
     MockDatabase db;
 };
+
+TEST_F(db_Database_test, test_get_or_store_stored) {
+    oh5::MockPhysicalFile f; 
+    MockFileEntry fe;
+    shared_ptr<MockFileEntry> fe_ptr(&fe, no_delete);
+    EXPECT_CALL(db, do_is_stored(Ref(f)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(db, do_entry_by_file(Ref(f)))
+        .WillOnce(Return(fe_ptr));
+    
+    EXPECT_EQ(fe_ptr, db.get_or_store(f));
+}
+
+TEST_F(db_Database_test, test_get_or_store_not_stored) {
+    oh5::MockPhysicalFile f; 
+    MockFileEntry fe;
+    shared_ptr<MockFileEntry> fe_ptr(&fe, no_delete);
+    EXPECT_CALL(db, do_is_stored(Ref(f)))
+        .WillOnce(Return(false));
+    EXPECT_CALL(db, do_store(Ref(f)))
+        .WillOnce(Return(fe_ptr));
+    
+    EXPECT_EQ(fe_ptr, db.get_or_store(f));
+}
+
 
 } // namepsace db
 } // namespace brfc

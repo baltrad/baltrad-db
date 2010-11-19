@@ -97,6 +97,21 @@ RelationalDatabase::mapper() const {
 
 bool
 RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
+    try {
+        entry_by_file(file);
+    } catch (lookup_error) {
+        return false;
+    }
+    return true;
+}
+
+shared_ptr<FileEntry>
+RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
+    return SaveFile(this)(file);
+}
+
+shared_ptr<FileEntry>
+RelationalDatabase::do_entry_by_file(const oh5::PhysicalFile& file) {
     const Model& m = Model::instance();
 
     const String& hash = file_hasher().hash(file);
@@ -105,7 +120,7 @@ RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
 
     sql::Factory xpr;
     sql::SelectPtr qry = sql::Select::create();
-    qry->what(xpr.bool_(true));
+    qry->what(m.files->column("uuid"));
     qry->from(m.files);
     qry->where(
         xpr.and_(
@@ -115,12 +130,10 @@ RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
     );
 
     shared_ptr<sql::Result> result = c->execute(*qry);
-    return result->size() > 0;
-}
-
-shared_ptr<FileEntry>
-RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
-    return SaveFile(this)(file);
+    if (result->size() > 1 or not result->next())
+        throw lookup_error(file.path().to_std_string() + " is not stored");
+    
+    return entry_by_uuid(result->value_at("uuid").string());
 }
 
 shared_ptr<FileEntry>

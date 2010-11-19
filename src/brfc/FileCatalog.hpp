@@ -164,13 +164,40 @@ class FileCatalog {
      * @throw db_error if storing file to database fails
      * @throw duplicate_entry if file has already been stored
      * 
-     * the FileEntry is passed to LocalStorage::prestore and if successful,
-     * the resulting oh5::PhysialFile will replace FileEntry::file.
+     * the FileEntry is passed to LocalStorage::prestore.
      *
      * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
      * is considered failed.
      */
     shared_ptr<const db::FileEntry> store(const oh5::PhysicalFile& file);
+    
+    /**
+     * @brief get db::FileEntry for a file, storing it if necessary
+     * @param path absolute path to file
+     * @return FileEntry instance of the stored file
+     * @throw db_error if storing file to database fails
+     * @throw fs_error if file can not be opened
+     *
+     * this is a short-hand for:
+     * @code
+     * store(oh5::hl::HlFile(path))
+     * @endcode
+     */
+    shared_ptr<const db::FileEntry> get_or_store(const String& path);
+
+    /**
+     * @brief get db::FileEntry for a file, storing it if necessary
+     * @param file oh5::PhysicalFile instance to get the entry for
+     * @return FileEntry instance for the file
+     * @throw db_error if storing file to database fails
+     *
+     * the FileEntry is passed to LocalStorage::prestore.
+     *
+     *
+     * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
+     * is considered failed.
+     */
+    shared_ptr<const db::FileEntry> get_or_store(const oh5::PhysicalFile& file);
     
     /**
      * @brief remove file from catalog

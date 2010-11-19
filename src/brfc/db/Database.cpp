@@ -18,14 +18,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <brfc/db/Database.hpp>
-#include <brfc/db/FileEntry.hpp>
 
 namespace brfc {
 namespace db {
 
 shared_ptr<FileEntry>
-Database::store(const oh5::PhysicalFile& file) {
-    return do_store(file);
+Database::get_or_store(const oh5::PhysicalFile& file) {
+    if (is_stored(file))
+        return entry_by_file(file);
+    else
+        return store(file);
 }
 
 } // namespace db
