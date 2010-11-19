@@ -22,9 +22,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Variant.hpp>
 #include <brfc/exceptions.hpp>
 
-#include "common.hpp"
+#include <brfc/test_common.hpp>
 
-using namespace brfc;
+namespace brfc {
 
 TEST(Variant_test, null) {
     Variant v;
@@ -182,3 +182,5 @@ TEST(Variant_test, to_datetime) {
     EXPECT_THROW(Variant(Time(12, 34, 56)).to_datetime(), value_error);
     EXPECT_EQ(DateTime(2000, 11, 12, 23, 45, 56), Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_datetime());
 }
+
+} // namespace brfc

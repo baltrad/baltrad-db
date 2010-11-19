@@ -31,8 +31,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test/TestRDB.hpp>
 
-#include "config.hpp"
-#include "../common.hpp"
+#include <brfc/test_config.hpp>
+#include <brfc/test_common.hpp>
 
 namespace brfc {
 namespace sql {

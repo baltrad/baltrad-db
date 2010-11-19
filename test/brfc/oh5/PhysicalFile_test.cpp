@@ -21,8 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Group.hpp>
 
-#include "../common.hpp"
-#include "MockPhysicalFile.hpp"
+#include <brfc/test_common.hpp>
+#include <brfc/oh5/MockPhysicalFile.hpp>
 
 using ::testing::ReturnRef;
 

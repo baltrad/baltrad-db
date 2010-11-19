@@ -27,8 +27,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/PhysicalFile.hpp>
 
-#include "../../sql/MockConnection.hpp"
-#include "../../sql/MockConnectionPool.hpp"
+#include <brfc/sql/MockConnection.hpp>
+#include <brfc/sql/MockConnectionPool.hpp>
 
 using ::testing::_;
 using ::testing::Ref;

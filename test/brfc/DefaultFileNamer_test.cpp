@@ -28,9 +28,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
-#include "common.hpp"
-#include "db/MockFileEntry.hpp"
-#include "oh5/MockFile.hpp"
+#include <brfc/test_common.hpp>
+#include <brfc/db/MockFileEntry.hpp>
+#include <brfc/oh5/MockFile.hpp>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -42,9 +42,9 @@ class DefaultFileNamer_test : public ::testing::Test {
     DefaultFileNamer_test()
             : namer()
             , root()
+            , what()
             , file()
-            , entry()
-            , what() {
+            , entry() {
     }
     
     virtual void SetUp() {

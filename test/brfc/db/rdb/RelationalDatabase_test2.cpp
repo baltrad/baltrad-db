@@ -25,12 +25,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/DialectCompiler.hpp>
 
-#include "../../sql/MockDialect.hpp"
-#include "../../sql/MockConnection.hpp"
-#include "../../sql/MockConnectionPool.hpp"
-#include "../../oh5/MockPhysicalFile.hpp"
-#include "../../sql/MockResult.hpp"
-#include "../MockFileEntry.hpp"
+#include <brfc/db/MockFileEntry.hpp>
+#include <brfc/oh5/MockPhysicalFile.hpp>
+#include <brfc/sql/MockDialect.hpp>
+#include <brfc/sql/MockConnection.hpp>
+#include <brfc/sql/MockConnectionPool.hpp>
+#include <brfc/sql/MockResult.hpp>
 
 using ::testing::_;
 using ::testing::Return;

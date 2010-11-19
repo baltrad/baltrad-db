@@ -21,9 +21,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/LargeObjectProxy.hpp>
 
-#include "../common.hpp"
-#include "MockLargeObject.hpp"
-#include "MockConnection.hpp"
+#include <brfc/test_common.hpp>
+#include <brfc/sql/MockLargeObject.hpp>
+#include <brfc/sql/MockConnection.hpp>
 
 using ::testing::Return;
 

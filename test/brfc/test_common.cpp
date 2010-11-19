@@ -17,7 +17,9 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "common.hpp"
+#include <iostream>
+
+#include <boost/foreach.hpp>
 
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
@@ -25,11 +27,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Scalar.hpp>
 #include <brfc/test/TestRDB.hpp>
 
-#include <boost/foreach.hpp>
-
-#include <iostream>
-
-#include "config.hpp"
+#include <brfc/test_config.hpp>
+#include <brfc/test_common.hpp>
 
 namespace brfc {
 

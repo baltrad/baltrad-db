@@ -31,10 +31,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test/TempH5File.hpp>
 #include <brfc/test/TempDir.hpp>
 
-#include "common.hpp"
-#include "MockLocalStorage.hpp"
-#include "db/MockDatabase.hpp"
-#include "db/MockFileEntry.hpp"
+#include <brfc/test_common.hpp>
+#include <brfc/MockLocalStorage.hpp>
+#include <brfc/db/MockDatabase.hpp>
+#include <brfc/db/MockFileEntry.hpp>
 
 using testing::_;
 using testing::Eq;

@@ -28,8 +28,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Source.hpp>
 #include <brfc/oh5/MemoryNodeBackend.hpp>
 
-#include "../common.hpp"
-#include "MockFile.hpp"
+#include <brfc/test_common.hpp>
+#include <brfc/oh5/MockFile.hpp>
 
 using ::testing::ReturnRef;
 

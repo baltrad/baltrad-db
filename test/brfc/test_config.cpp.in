@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "config.hpp"
+#include <brfc/test_config.hpp>
 
 namespace brfc {
 

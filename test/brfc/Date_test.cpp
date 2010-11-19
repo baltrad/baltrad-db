@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 #include <brfc/TimeDelta.hpp>
 
-#include "common.hpp"
+#include <brfc/test_common.hpp>
 
 namespace brfc {
 

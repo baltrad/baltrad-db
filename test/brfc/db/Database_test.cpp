@@ -21,8 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/PhysicalFile.hpp>
 
-#include "MockDatabase.hpp"
-#include "MockFileEntry.hpp"
+#include <brfc/db/MockDatabase.hpp>
+#include <brfc/db/MockFileEntry.hpp>
 
 using ::testing::Ref;
 using ::testing::Return;

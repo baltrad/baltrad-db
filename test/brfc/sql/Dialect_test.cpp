@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/Variant.hpp>
 
-#include "MockDialect.hpp"
+#include <brfc/sql/MockDialect.hpp>
 
 namespace brfc {
 namespace sql {

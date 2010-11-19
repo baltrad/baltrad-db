@@ -30,11 +30,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Select.hpp>
 #include <brfc/sql/Table.hpp>
 
-#include "../common.hpp"
-#include "MockCompiler.hpp"
-#include "MockConnection.hpp"
-#include "MockDialect.hpp"
-#include "MockResult.hpp"
+#include <brfc/test_common.hpp>
+#include <brfc/sql/MockCompiler.hpp>
+#include <brfc/sql/MockConnection.hpp>
+#include <brfc/sql/MockDialect.hpp>
+#include <brfc/sql/MockResult.hpp>
 
 using testing::Ref;
 using testing::Return;

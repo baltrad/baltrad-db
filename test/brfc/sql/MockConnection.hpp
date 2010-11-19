@@ -28,7 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
 
-#include "FakeConnection.hpp"
+#include <brfc/sql/FakeConnection.hpp>
 
 namespace brfc {
 namespace sql {

@@ -38,8 +38,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Select.hpp>
 #include <brfc/sql/Table.hpp>
 
-#include "../common.hpp"
-#include "MockDialect.hpp"
+#include <brfc/test_common.hpp>
+#include <brfc/sql/MockDialect.hpp>
 
 using ::testing::_;
 using ::testing::Invoke;

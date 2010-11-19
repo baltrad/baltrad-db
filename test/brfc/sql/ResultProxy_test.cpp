@@ -21,9 +21,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/ResultProxy.hpp>
 
-#include "../common.hpp"
-#include "MockResult.hpp"
-#include "MockConnection.hpp"
+#include <brfc/test_common.hpp>
+#include <brfc/sql/MockResult.hpp>
+#include <brfc/sql/MockConnection.hpp>
 
 using ::testing::Return;
 

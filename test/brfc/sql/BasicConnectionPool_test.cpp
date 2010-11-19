@@ -22,8 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/ConnectionProxy.hpp>
 
-#include "MockConnection.hpp"
-#include "MockConnectionCreator.hpp"
+#include <brfc/sql/MockConnection.hpp>
+#include <brfc/sql/MockConnectionCreator.hpp>
 
 using ::testing::Return;
 

@@ -29,8 +29,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Node.hpp>
 #include <brfc/oh5/NodeBackend.hpp>
 
-#include "../common.hpp"
-#include "MockNode.hpp"
+#include <brfc/test_common.hpp>
+#include <brfc/oh5/MockNode.hpp>
 
 using ::testing::_;
 using ::testing::Return;

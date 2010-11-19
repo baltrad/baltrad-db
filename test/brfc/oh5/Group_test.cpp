@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/MemoryNodeBackend.hpp>
 #include <brfc/oh5/RootGroup.hpp>
 
-#include "../common.hpp"
+#include <brfc/test_common.hpp>
 
 namespace brfc {
 namespace oh5 {

@@ -386,8 +386,8 @@ def _build_gtest_tests(bld):
 
     cfg_cpp = bld(
         features="subst",
-        source = "test/brfc/config.cpp.in",
-        target = "test/brfc/config.cpp",
+        source = "test/brfc/test_config.cpp.in",
+        target = "test/brfc/test_config.cpp",
         on_results=True,
     )
 
@@ -395,20 +395,20 @@ def _build_gtest_tests(bld):
 
     cfg_hpp = bld(
         features="subst",
-        source = "test/brfc/config.hpp.in",
-        target = "test/brfc/config.hpp",
+        source = "test/brfc/test_config.hpp.in",
+        target = "test/brfc/test_config.hpp",
         on_results=True,
     )
     cfg_hpp.dict = cfg_values
 
     sources = sorted(bld.path.ant_glob("test/brfc/**/*.cpp").split(" "))
-    sources.insert(0, "test/brfc/config.cpp")
+    sources.insert(0, "test/brfc/test_config.cpp")
     lib = bld(
         features="cxx cprogram",
         source=sources,
         target="test_runner",
         env=bld.env_of_name("testenv").copy(),
-        includes="src test/brfc",
+        includes="src test",
         uselib=[
             "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM",
             "GMOCK", "GTEST",

@@ -19,7 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include "common.hpp"
+#include <brfc/test_common.hpp>
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);

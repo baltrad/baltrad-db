@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Table.hpp>
 #include <brfc/sql/Column.hpp>
 
-#include "../../common.hpp"
+#include <brfc/test_common.hpp>
 
 namespace brfc {
 namespace db {

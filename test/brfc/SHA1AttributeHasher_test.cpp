@@ -30,9 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
-#include <brfc/sql/fwd.hpp>
-
-#include "common.hpp"
+#include <brfc/test_common.hpp>
 
 namespace brfc {
 

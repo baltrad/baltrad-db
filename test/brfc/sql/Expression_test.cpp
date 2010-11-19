@@ -32,7 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Select.hpp>
 #include <brfc/sql/Table.hpp>
 
-#include "common.hpp"
+#include <brfc/test_common.hpp>
 
 namespace brfc {
 namespace sql {
