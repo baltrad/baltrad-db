@@ -31,13 +31,28 @@ namespace db {
 
 class MockDatabase : public Database {
   public:
-    MOCK_METHOD1(do_is_stored, bool(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_remove, bool(const FileEntry&));
-    MOCK_METHOD1(do_store, shared_ptr<FileEntry>(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_entry_by_file, shared_ptr<FileEntry>(const oh5::PhysicalFile&));
-    MOCK_METHOD1(do_entry_by_uuid, shared_ptr<FileEntry>(const String&));
-    MOCK_METHOD1(do_execute, shared_ptr<FileResult>(const FileQuery&));
-    MOCK_METHOD1(do_execute, shared_ptr<AttributeResult>(const AttributeQuery&));
+    MOCK_METHOD1(do_is_stored,
+        bool(const oh5::PhysicalFile&));
+    MOCK_METHOD1(do_remove,
+        bool(const FileEntry&));
+    MOCK_METHOD1(do_store,
+        shared_ptr<FileEntry>(const oh5::PhysicalFile&));
+    MOCK_METHOD1(do_entry_by_file,
+        shared_ptr<FileEntry>(const oh5::PhysicalFile&));
+    MOCK_METHOD1(do_entry_by_uuid,
+        shared_ptr<FileEntry>(const String&));
+    MOCK_METHOD1(do_execute,
+        shared_ptr<FileResult>(const FileQuery&));
+    MOCK_METHOD1(do_execute,
+        shared_ptr<AttributeResult>(const AttributeQuery&));
+    MOCK_CONST_METHOD0(do_sources,
+        std::vector<oh5::Source>());
+    MOCK_METHOD1(do_add_source,
+        void(const oh5::Source&));
+    MOCK_METHOD1(do_update_source,
+        void(const oh5::Source&));
+    MOCK_METHOD1(do_remove_source,
+        void(const oh5::Source&));
 };
 
 } // namespace db

@@ -20,9 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_DATABASE_H
 #define BRFC_DB_DATABASE_H
 
+#include <vector>
+
 #include <boost/noncopyable.hpp>
 
 #include <brfc/smart_ptr.hpp>
+
+#include <brfc/oh5/Source.hpp>
 
 namespace brfc {
 
@@ -123,7 +127,39 @@ class Database : public boost::noncopyable {
     shared_ptr<AttributeResult> execute(const AttributeQuery& query) {
         return do_execute(query);
     }
+    
+    /**
+     * @brief list sources defined in the database
+     *
+     * @note in Java, this method is renamed to _sources(), returning a
+     *       eu.baltrad.fc.oh5.SourceVector. There is a wrapper method
+     *       sources() returning a List<eu.baltrad.fc.oh5.Source>.
+     */
+    std::vector<oh5::Source> sources() const {
+        return do_sources();
+    }
+    
+    /**
+     * @brief add a source definition to this database
+     */
+    void add_source(const oh5::Source& source) {
+        do_add_source(source);
+    }
 
+    /**
+     * @brief update a source definition in this database
+     */
+    void update_source(const oh5::Source& source) {
+        do_update_source(source);
+    }
+    
+    /**
+     * @brief remove a source definition from this database
+     */
+    void remove_source(const oh5::Source& source) {
+        do_remove_source(source);
+    }
+   
   protected:
     virtual bool do_is_stored(const oh5::PhysicalFile& file) = 0;
     virtual bool do_remove(const FileEntry& entry) = 0;
@@ -133,6 +169,11 @@ class Database : public boost::noncopyable {
 
     virtual shared_ptr<FileResult> do_execute(const FileQuery& query) = 0;
     virtual shared_ptr<AttributeResult> do_execute(const AttributeQuery& query) = 0;
+
+    virtual std::vector<oh5::Source> do_sources() const = 0;
+    virtual void do_add_source(const oh5::Source& source) = 0;
+    virtual void do_update_source(const oh5::Source& source) = 0;
+    virtual void do_remove_source(const oh5::Source& source) = 0;
 };
 
 } // namespace db

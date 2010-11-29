@@ -250,3 +250,4 @@ INSERT INTO bdb_sources (id, name) VALUES (52, 'sekkr');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (52, 'PLC', 'Karlskrona');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (52, 'RAD', 'SE51');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (52, 'WMO', '02666');
+ALTER SEQUENCE bdb_sources_id_seq RESTART WITH 53;

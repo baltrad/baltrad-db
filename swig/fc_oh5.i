@@ -92,7 +92,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     import eu.baltrad.fc.StringList;
 %}
 
-%typemap(javabody) brfc::oh5::Source %{
+%typemap(javabody) brfc::oh5::Source, std::vector<brfc::oh5::Source> %{
   private long swigCPtr;
   protected boolean swigCMemOwn;
 
@@ -105,6 +105,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 %}
+
+%template(SourceVector) std::vector<brfc::oh5::Source>;
+
 
 /***
  * brfc::oh5::Scalar

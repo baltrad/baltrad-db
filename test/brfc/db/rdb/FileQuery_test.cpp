@@ -265,7 +265,7 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_wmo_code) {
 }
 
 TEST_P(db_rdb_FileQuery_test, test_filter_by_node_or_node) {
-    expr::AttributePtr node = xpr.attribute("what/source:node");
+    expr::AttributePtr node = xpr.attribute("what/source:_name");
     shared_ptr<FileResult> r =
         query.filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))))
              .execute();
@@ -284,7 +284,7 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_node_or_node) {
 }
 
 TEST_P(db_rdb_FileQuery_test, test_filter_by_node_and_node) {
-    expr::AttributePtr node = xpr.attribute("what/source:node");
+    expr::AttributePtr node = xpr.attribute("what/source:_name");
     shared_ptr<FileResult> r =
         query.filter(*node->eq(*xpr.string("seang"))->and_(*node->eq(*xpr.string("sekkr"))))
              .execute();
@@ -321,7 +321,7 @@ TEST_P(db_rdb_FileQuery_test, test_has_nx_file) {
 
 TEST_P(db_rdb_FileQuery_test, test_query_like) {
     shared_ptr<FileResult> r =
-        query.filter(*xpr.attribute("what/source:node")->like("sea*"))
+        query.filter(*xpr.attribute("what/source:_name")->like("sea*"))
              .execute();
     EXPECT_EQ(3, r->size());
 

@@ -131,7 +131,7 @@ QueryToSelect::transform(const AttributeQuery& query) {
 sql::ColumnPtr
 QueryToSelect::source_attr_column(const expr::Attribute& attr) {
     String key = attr.name().split(":").at(1);
-    if (key == "name" or key == "node") {
+    if (key == "_name") {
         // sources is joined by default
         // this attribute can be accessed at sources.name
         return m_.sources->column("name");

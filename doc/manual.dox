@@ -157,7 +157,7 @@ Here's a list of them:
 
   - file\:uuid - universally unique id of the file in database
   - file\:stored_at - when was the file imported to the database
-  - src:name - the name of the source in database
+  - src:_name - the name of the source in database
   - src:X - source key in database, where X is the source key (PLC, CTY, ...)
 
 @section querying_attributes Querying attributes
@@ -279,7 +279,7 @@ try {
 ExpressionFactory xpr;
 
 FileQuery q = fc.query_file();
-q.filter(xpr.attribute("what/source:node").eq(xpr.string("seang"));
+q.filter(xpr.attribute("what/source:_name").eq(xpr.string("seang"));
 
 // execute
 FileResult r = q.execute();

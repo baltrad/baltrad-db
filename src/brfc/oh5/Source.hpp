@@ -86,8 +86,15 @@ class Source {
     
     /**
      * @brief list of set keys
+     *
+     * @note keys prefixed with "_" are not included
      */
     StringList keys() const;
+
+    /**
+     * @brief list of all keys (including those prefixed with "_")
+     */
+    StringList all_keys() const;
     
     /**
      * @throw lookup_error when key does not exist
@@ -106,6 +113,11 @@ class Source {
     
     /**
      * @brief join to key:value pairs separated by comma
+     *
+     * for example, if this source held {"key1": "value1", "key2": "value2"},
+     * the returned string would be "key1:value1,key2:value2".
+     *
+     * @note keys prefixed with "_" are not included in the string
      */
     String to_string() const;
 

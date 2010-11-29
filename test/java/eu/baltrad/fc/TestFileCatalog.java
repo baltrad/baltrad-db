@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.fc;
 
+import java.util.List;
+
 import eu.baltrad.fc.FileCatalog;
 import eu.baltrad.fc.Date;
 import eu.baltrad.fc.Time;
@@ -27,6 +29,7 @@ import eu.baltrad.fc.FileSystemError;
 
 import eu.baltrad.fc.db.FileEntry;
 
+import eu.baltrad.fc.oh5.Source;
 import eu.baltrad.fc.oh5.hl.HlFile;
 
 import eu.baltrad.fc.test.TestRDB;
@@ -85,4 +88,8 @@ public class TestFileCatalog extends TestCase {
     assertEquals("2", namer.name(file));
   }
 
+  public void testSourceList() {
+    List<Source> sources = fc.database().sources();
+    assertTrue(sources.size() > 0);
+  }
 }

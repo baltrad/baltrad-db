@@ -396,10 +396,118 @@ RdbHelper::select_source(long long id) {
 
     r = conn().execute(*qry);
 
-    if (r->next())
-        src.add("name", r->value_at("name").string());
+    if (r->next()) {
+        src.add("_name", r->value_at("name").string());
+        src.add("_id", r->value_at("id").to_string());
+    }
 
     return src;
+}
+
+std::vector<oh5::Source>
+RdbHelper::select_all_sources() {
+    sql::SelectPtr qry = sql::Select::create();
+    qry->from(m_.sources->outerjoin(m_.source_kvs));
+    qry->what(m_.sources->column("id"));
+    qry->what(m_.sources->column("name"));
+    qry->what(m_.source_kvs->column("key"));
+    qry->what(m_.source_kvs->column("value"));
+
+    shared_ptr<sql::Result> r = conn().execute(*qry);
+
+    oh5::Source src;
+    long long prev_id = 0, id = 0;
+    std::vector<oh5::Source> sources;
+    while (r->next()) {
+        id = r->value_at("id").int64_();
+        if (id != prev_id) {
+            if (prev_id != 0) {
+                sources.push_back(src);
+                src.clear();
+            }
+            prev_id = id;
+            src.add("_name", r->value_at("name").string());
+            src.add("_id", String::number(id));
+        }
+        src.add(r->value_at("key").string(), r->value_at("value").string());
+    }
+    sources.push_back(src);
+    return sources;
+}
+
+void
+RdbHelper::add_source(const oh5::Source& source) {
+    try {
+        conn().begin();
+        sql::InsertPtr qry = sql::Insert::create(m_.sources);
+        qry->value(m_.sources->column("name"),
+                   sql_.string(source.get("_name")));
+        if (dialect().has_feature(sql::Dialect::RETURNING))
+            qry->add_return(m_.sources->column("id"));
+        shared_ptr<sql::Result> r = conn().execute(*qry);
+        long long id = last_id(*r);
+
+        BOOST_FOREACH(const String& key, source.keys()) {
+            qry = sql::Insert::create(m_.source_kvs);
+            qry->value(m_.source_kvs->column("source_id"),
+                       sql_.int64_(id));
+            qry->value(m_.source_kvs->column("key"),
+                       sql_.string(key));
+            qry->value(m_.source_kvs->column("value"),
+                       sql_.string(source.get(key)));
+            conn().execute(*qry);
+        }
+
+        conn().commit();
+    } catch (...) {
+        conn().rollback();
+        throw;
+    }
+}
+
+void
+RdbHelper::update_source(const oh5::Source& source) {
+    long long id = source.get("_id").to_int();
+    try {
+        conn().begin();
+
+        String stmt("UPDATE bdb_sources SET name = :name WHERE id = :id");
+        sql::BindMap binds;
+        binds.add(":name", Variant(source.get("_name")));
+        binds.add(":id", Variant(id));
+        conn().execute(sql::Query(stmt, binds));
+
+        stmt = "DELETE FROM bdb_source_kvs WHERE source_id = :id";
+        binds.clear();
+        binds.add(":id", Variant(id));
+        conn().execute(sql::Query(stmt, binds));
+    
+        BOOST_FOREACH(const String& key, source.keys()) {
+            sql::InsertPtr qry = sql::Insert::create(m_.source_kvs);
+            qry->value(m_.source_kvs->column("source_id"),
+                       sql_.int64_(id));
+            qry->value(m_.source_kvs->column("key"),
+                       sql_.string(key));
+            qry->value(m_.source_kvs->column("value"),
+                       sql_.string(source.get(key)));
+            conn().execute(*qry);
+        }
+
+        conn().commit();
+    } catch (...) {
+        conn().rollback();
+        throw;
+    }
+}
+
+void
+RdbHelper::remove_source(const oh5::Source& source) {
+    String stmt("DELETE FROM bdb_sources WHERE id = :id");
+    sql::BindMap binds;
+    binds.add(":id", Variant(source.get("_id").to_int()));
+    shared_ptr<sql::Result> r = conn().execute(sql::Query(stmt, binds));
+    if (not r->affected_rows())
+        throw lookup_error("source not stored in database");
 }
 
 void

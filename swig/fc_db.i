@@ -123,9 +123,27 @@ SWIG_SHARED_PTR(AttributeResult, brfc::db::AttributeResult);
 SWIG_SHARED_PTR(Database, brfc::db::Database);
 
 %typemap(javaimports) brfc::db::Database, brfc::db::Database* %{
+    import java.util.List;
+    import java.util.Vector;
+
     import eu.baltrad.fc.oh5.PhysicalFile;
     import eu.baltrad.fc.oh5.Source;
+    import eu.baltrad.fc.oh5.SourceVector;
 %}
+
+// brfc::db::Database::sources -> eu.baltrad.fc.db.Database._sources
+%rename(_sources) brfc::db::Database::sources;
+%typemap(javacode) brfc::db::Database %{
+  public List<Source> sources() {
+    SourceVector srcvec = _sources();
+    List<Source> srclist = new Vector<Source>((int)srcvec.size());
+    for (int i=0; i < srcvec.size(); i++) {
+        srclist.add(srcvec.get(i));
+    }
+    return srclist;
+  }
+%}
+
 
 // make constructors for SWIG_SHARED_PTR public
 %typemap(javabody) brfc::db::Database,

@@ -64,6 +64,17 @@ class db_rdb_RelationalDatabase_test : public testing::TestWithParam<const char*
     virtual void TearDown() {
         db->clean();
     }
+    
+    template<typename T>
+    typename T::const_iterator
+    source_by_name(const T& sources, const String& name) {
+        typename T::const_iterator i = sources.begin();
+        for ( ; i != sources.end(); ++i) {
+            if (i->get("_name") == name)
+                break;
+        }
+        return i;
+    }
 
     test::TestRDB* db;
 };
@@ -83,7 +94,7 @@ TEST_P(db_rdb_RelationalDatabase_test, store) {
     EXPECT_TRUE(re->id() > 0);
     EXPECT_TRUE(re->lo_id() > 0);
     EXPECT_FALSE(e->source().empty());
-    EXPECT_TRUE(e->source().has("name"));
+    EXPECT_TRUE(e->source().has("_name"));
 }
 
 TEST_P(db_rdb_RelationalDatabase_test, entry_by_uuid) {
@@ -166,20 +177,6 @@ TEST_P(db_rdb_RelationalDatabase_test, store_with_invalid_attributes) {
     EXPECT_NO_THROW(db->store(file));
 }
 
-TEST_P(db_rdb_RelationalDatabase_test, attribute_groups_not_saved) {
-    oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
-    
-    ASSERT_NO_THROW(db->store(file));
-    
-    /* XXX: figure out how to test this
-    EXPECT_EQ(0, file->root()->child_group_by_name("what")->db_id());
-    EXPECT_NE(0, file->root()->db_id());
-    */
-}
-
 TEST_P(db_rdb_RelationalDatabase_test, DISABLED_resultset_keeps_qsqldatabase_alive) {
     shared_ptr<sql::Result> r;
     {
@@ -189,6 +186,72 @@ TEST_P(db_rdb_RelationalDatabase_test, DISABLED_resultset_keeps_qsqldatabase_ali
     r->size();
 }
 
+TEST_P(db_rdb_RelationalDatabase_test, test_sources) {
+    std::vector<oh5::Source> sources;
+    EXPECT_NO_THROW(sources = db->sources());
+
+    EXPECT_TRUE(sources.size() > 0);
+}
+
+TEST_P(db_rdb_RelationalDatabase_test, test_add_source) {
+    oh5::Source src;
+    EXPECT_THROW(db->add_source(src), lookup_error);
+
+    src.add("_name", "srcname1");
+
+    EXPECT_NO_THROW(db->add_source(src));
+
+    std::vector<oh5::Source> sources = db->sources();
+
+    EXPECT_TRUE(source_by_name(sources, "srcname1") != sources.end());
+
+    EXPECT_THROW(db->add_source(src), db_error);
+}
+
+TEST_P(db_rdb_RelationalDatabase_test, test_update_source) {
+    oh5::Source src;
+    src.add("_name", "srcname2");
+    src.add("key1", "value1");
+    src.add("key2", "value2");
+    
+    EXPECT_NO_THROW(db->add_source(src));
+
+    std::vector<oh5::Source> sources = db->sources();
+    ASSERT_TRUE(source_by_name(sources, "srcname2") != sources.end());
+    src = *source_by_name(sources, "srcname2");
+    src.remove("_name");
+    src.remove("key2");
+    src.add("_name", "srcname3");
+    src.add("key3", "value3");
+    EXPECT_NO_THROW(db->update_source(src));
+
+    sources = db->sources();
+
+    ASSERT_TRUE(source_by_name(sources, "srcname2") == sources.end());
+    ASSERT_TRUE(source_by_name(sources, "srcname3") != sources.end());
+    src = *source_by_name(sources, "srcname3");
+    ASSERT_TRUE(src.has("key1"));
+    EXPECT_EQ("value1", src.get("key1"));
+    ASSERT_TRUE(src.has("key3"));
+    EXPECT_EQ("value3", src.get("key3"));
+}
+
+TEST_P(db_rdb_RelationalDatabase_test, test_remove_source) {
+    oh5::Source src;
+    src.add("_name", "srcname4");
+
+    EXPECT_THROW(db->remove_source(src), lookup_error);
+
+    db->add_source(src);
+    std::vector<oh5::Source> sources = db->sources(); 
+    ASSERT_TRUE(source_by_name(sources, "srcname4") != sources.end());
+    src = *source_by_name(sources, "srcname4");
+
+    EXPECT_NO_THROW(db->remove_source(src));
+
+    sources = db->sources();
+    EXPECT_TRUE(source_by_name(sources, "srcname4") == sources.end());
+}
 
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(db_rdb_RelationalDatabase_test_p,

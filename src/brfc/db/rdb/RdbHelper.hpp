@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_RDB_RDB_HELPER_HPP
 #define BRFC_DB_RDB_RDB_HELPER_HPP
 
+#include <vector>
+
 #include <boost/noncopyable.hpp>
 
 #include <brfc/sql/Factory.hpp>
@@ -151,6 +153,14 @@ class RdbHelper : boost::noncopyable {
      * @pre node has database id
      */
     void load_children(oh5::Node& node);
+
+    std::vector<oh5::Source> select_all_sources();
+
+    void add_source(const oh5::Source& source);
+
+    void update_source(const oh5::Source& source);
+
+    void remove_source(const oh5::Source& source);
 
   private:
     long long last_id(sql::Result& result);

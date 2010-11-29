@@ -71,6 +71,16 @@ StringList
 Source::keys() const {
     StringList keys;
     BOOST_FOREACH(const Map::value_type& kv, map_) {
+        if (not kv.first.starts_with("_"))
+           keys.push_back(kv.first);
+    }
+    return keys;
+}
+
+StringList
+Source::all_keys() const {
+    StringList keys;
+    BOOST_FOREACH(const Map::value_type& kv, map_) {
         keys.push_back(kv.first);
     }
     return keys;
@@ -96,7 +106,8 @@ String
 Source::to_string() const {
     StringList elms;
     BOOST_FOREACH(const Map::value_type& kv, map_) {
-        elms.push_back(kv.first + ":" + kv.second);
+        if (not kv.first.starts_with("_"))
+            elms.push_back(kv.first + ":" + kv.second);
     }
     return elms.join(",");
 }

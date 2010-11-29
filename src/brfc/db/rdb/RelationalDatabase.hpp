@@ -103,6 +103,11 @@ class RelationalDatabase : public Database {
 
     virtual shared_ptr<AttributeResult> do_execute(const AttributeQuery& query);
 
+    virtual std::vector<oh5::Source> do_sources() const;
+    virtual void do_add_source(const oh5::Source& source);
+    virtual void do_update_source(const oh5::Source& source);
+    virtual void do_remove_source(const oh5::Source& source);
+
   private:
     void populate_mapper();
     void populate_hasher();

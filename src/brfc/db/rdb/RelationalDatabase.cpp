@@ -166,7 +166,7 @@ RelationalDatabase::populate_mapper() {
     mapper_->add(Mapping("file:uuid", m.files->column("uuid")));
     mapper_->add(Mapping("file:hash", m.files->column("hash")));
     mapper_->add(Mapping("file:stored_at", m.files->column("stored_at")));
-    mapper_->add(Mapping("source:name", m.sources->column("name")));
+    mapper_->add(Mapping("source:_name", m.sources->column("name")));
     mapper_->add(Mapping("what/object", m.files->column("what_object")));
     mapper_->add(Mapping("what/date", m.files->column("what_date")));
     mapper_->add(Mapping("what/time", m.files->column("what_time")));
@@ -185,6 +185,26 @@ RelationalDatabase::do_remove(const FileEntry& entry) {
     binds.add(":uuid", Variant(entry.uuid()));
     shared_ptr<sql::Result> r = conn()->execute(sql::Query(qry, binds));
     return r->affected_rows();
+}
+
+std::vector<oh5::Source>
+RelationalDatabase::do_sources() const {
+    return RdbHelper(conn()).select_all_sources();
+}
+
+void
+RelationalDatabase::do_add_source(const oh5::Source& source) {
+    RdbHelper(conn()).add_source(source);
+}
+
+void
+RelationalDatabase::do_update_source(const oh5::Source& source) {
+    RdbHelper(conn()).update_source(source);
+}
+
+void
+RelationalDatabase::do_remove_source(const oh5::Source& source) {
+    RdbHelper(conn()).remove_source(source);
 }
 
 } // namespace rdb

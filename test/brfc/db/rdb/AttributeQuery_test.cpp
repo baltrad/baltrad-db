@@ -266,7 +266,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_select_by_wmo_code) {
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_select_by_or_node) {
-    expr::AttributePtr node = xpr.attribute("what/source:node");
+    expr::AttributePtr node = xpr.attribute("what/source:_name");
     shared_ptr<AttributeResult> r =
         query.fetch(*xpr.attribute("file:uuid"))
              .filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))))
@@ -286,7 +286,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_select_by_or_node) {
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_select_by_node_and_node) {
-    expr::AttributePtr node = xpr.attribute("what/source:node");
+    expr::AttributePtr node = xpr.attribute("what/source:_name");
     shared_ptr<AttributeResult> r =
         query.fetch(*xpr.attribute("file:uuid"))
              .filter(*node->eq(*xpr.string("seang"))->and_(*node->eq(*xpr.string("sekkr"))))
@@ -316,7 +316,7 @@ TEST_P(db_rdb_AttributeQuery_test, DISABLED_test_duplicate_fetch_throws) {
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_query_like) {
-    expr::AttributePtr node = xpr.attribute("what/source:node");
+    expr::AttributePtr node = xpr.attribute("what/source:_name");
     shared_ptr<AttributeResult> r =
         query.fetch(*xpr.attribute("file:uuid"))
              .filter(*node->like("sea*"))

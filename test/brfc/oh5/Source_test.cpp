@@ -76,9 +76,22 @@ TEST(oh5_Source_test, test_at) {
 TEST(oh5_Source_test, test_keys) {
     Source s;
     EXPECT_EQ((size_t)0, s.keys().size());
+    s.add("_hidden", "value");
+    EXPECT_EQ((size_t)0, s.keys().size());
     s.add("qwe", "asd");
     EXPECT_EQ((size_t)1, s.keys().size());
     EXPECT_TRUE(s.keys().contains("qwe"));
+}
+
+TEST(oh5_Source_test, test_all_keys) {
+    Source s;
+    EXPECT_EQ((size_t)0, s.all_keys().size());
+    s.add("_hidden", "value");
+    EXPECT_EQ((size_t)1, s.all_keys().size());
+    EXPECT_TRUE(s.all_keys().contains("_hidden"));
+    s.add("qwe", "asd");
+    EXPECT_EQ((size_t)2, s.all_keys().size());
+    EXPECT_TRUE(s.all_keys().contains("qwe"));
 }
 
 TEST(oh5_Source_test, test_remove) {
@@ -92,6 +105,8 @@ TEST(oh5_Source_test, test_remove) {
 
 TEST(oh5_Source_test, test_to_string) {
     Source s;
+    EXPECT_EQ("", s.to_string());
+    s.add("_hidden", "value");
     EXPECT_EQ("", s.to_string());
     s.add("WMO", "02606");
     EXPECT_EQ("WMO:02606", s.to_string());
