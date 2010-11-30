@@ -23,6 +23,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 
+struct tm;
+
 namespace brfc {
 
 /**
@@ -95,6 +97,12 @@ class DateTime {
     String to_string(const String& format) const;
 
     static DateTime from_string(const String& str, const String& format);
+    
+    /**
+     * @brief convert to tm
+     * @throw value_error if not convertible
+     */
+    struct tm to_tm() const;
 
     bool operator==(const DateTime& rhs) const;
 

@@ -76,4 +76,18 @@ TEST(DateTime_test, test_utc_now) {
     EXPECT_EQ(t.tm_hour, dt.time().hour());
 }
 
+TEST(DateTime_test, test_to_tm) {
+    DateTime dt1(1899, 10, 27, 12, 13, 14, 567);
+    EXPECT_THROW(dt1.to_tm(), value_error);
+
+    DateTime dt2(2010, 10, 27, 12, 13, 14, 567);
+    struct tm t = dt2.to_tm();
+    EXPECT_EQ(t.tm_year, 110);
+    EXPECT_EQ(t.tm_mon, 10);
+    EXPECT_EQ(t.tm_mday, 27);
+    EXPECT_EQ(t.tm_hour, 12);
+    EXPECT_EQ(t.tm_min, 13);
+    EXPECT_EQ(t.tm_sec, 14);
+}
+
 } // namespace brfc

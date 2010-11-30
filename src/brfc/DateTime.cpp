@@ -68,6 +68,20 @@ DateTime::from_string(const String& str, const String& format) {
     return DateTimeParser(format).from_string(str);
 }
 
+struct tm
+DateTime::to_tm() const {
+    if (date().year() < 1900)
+        throw value_error("can't convert DateTime to tm: year < 1900");
+    struct tm t;
+    t.tm_year = date().year() - 1900;
+    t.tm_mon = date().month();
+    t.tm_mday = date().day();
+    t.tm_hour = time().hour();
+    t.tm_min = time().minute();
+    t.tm_sec = time().second();
+    return t;
+}
+
 bool
 DateTime::operator==(const DateTime& rhs) const {
     return date_ == rhs.date_ and time_ == rhs.time_;
