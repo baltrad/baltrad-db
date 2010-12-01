@@ -27,7 +27,7 @@ RegExp::RegExp(const String& pattern)
         : uerr_(U_ZERO_ERROR)
         , matches_(false)
         , input_()
-        , re_(pattern.utf16(), 0, uerr_) {
+        , re_(UnicodeString(pattern.utf16(), pattern.length()), 0, uerr_) {
     if (U_FAILURE(uerr_))
         throw value_error(u_errorName(uerr_));
 }

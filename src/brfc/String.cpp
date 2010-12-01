@@ -111,8 +111,7 @@ String::to_utf8() const {
 
 const String::uchar*
 String::utf16() const {
-    String* that = const_cast<String*>(this);
-    return that->value_.getTerminatedBuffer();
+    return value_.getBuffer();
 }
 
 String

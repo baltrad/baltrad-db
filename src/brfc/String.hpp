@@ -78,15 +78,6 @@ class String {
     }
 
     /**
-     * @brief UTF-16 array
-     * @return '\0'-terminated array of unsigned shorts
-     * @sa utf16()
-     */
-    const uchar* unicode() const {
-        return utf16();
-    }
-    
-    /**
      * @brief set from UTF-16 array
      */
     String& set_utf16(const uchar* unicode, int length);
@@ -95,13 +86,14 @@ class String {
      * @brief construct from UTF-16 array
      * @param unicode array of UTF-16 code units
      * @param length number of unicode characters to copy.
-     *        If -1 (the default), @a unicode must be NULL-terminated
      */
-    static String from_utf16(const uchar* unicode, int length=-1);
+    static String from_utf16(const uchar* unicode, int length);
 
     /**
      * @brief access UTF-16 code units
-     * @return NULL-terminated array of UTF-16 code units
+     * @return array of UTF-16 code units
+     *
+     * the returned array is possibly not null-terminated
      *
      * @note the result remains valid until the string is modified.
      */

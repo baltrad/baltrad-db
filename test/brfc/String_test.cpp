@@ -85,10 +85,6 @@ TEST_F(String_test, test_from_to_utf8) {
 }
 
 TEST_F(String_test, test_from_to_utf16) {
-    EXPECT_EQ(empty, String::from_utf16(empty.utf16()));
-    EXPECT_EQ(ascii, String::from_utf16(ascii.utf16()));
-    EXPECT_EQ(unicode, String::from_utf16(unicode.utf16()));
-
     EXPECT_EQ(empty, String::from_utf16(empty.utf16(), empty.length()));
     EXPECT_EQ(ascii, String::from_utf16(ascii.utf16(), ascii.length()));
     EXPECT_EQ(unicode, String::from_utf16(unicode.utf16(), unicode.length()));
