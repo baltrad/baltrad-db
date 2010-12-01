@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/String.hpp>
 
 #include <iostream>
+#include <vector>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
@@ -84,12 +85,12 @@ class UConv {
 
     std::string from_utf16(const String& str) {
         int max_bytes = max_bytes_for_string(str);
-        auto_ptr<char> buf(new char[max_bytes]);
+        std::vector<char> buf(max_bytes);
         ucnv_fromUChars(conv_,
-                        buf.get(), max_bytes,
+                        &buf[0], max_bytes,
                         str.utf16(), str.length(),
                         &err_); 
-        return std::string(buf.get());
+        return std::string(&buf[0]);
     }
 
     ~UConv() {
