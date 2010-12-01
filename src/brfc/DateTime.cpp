@@ -79,6 +79,9 @@ DateTime::to_tm() const {
     t.tm_hour = time().hour();
     t.tm_min = time().minute();
     t.tm_sec = time().second();
+    t.tm_wday = 0;
+    t.tm_yday = 0;
+    t.tm_isdst = 0;
     return t;
 }
 
