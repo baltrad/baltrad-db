@@ -63,12 +63,15 @@ class db_rdb_RdbFileEntry_test : public ::testing::Test {
     RdbFileEntry entry;
 };
 
-/*
 TEST_F(db_rdb_RdbFileEntry_test, test_ctor) {
     EXPECT_EQ(&entry, entry.root().file());
     EXPECT_EQ(0, entry.root().parent());
+    RdbNodeBackend* be = dynamic_cast<RdbNodeBackend*>(&entry.root().backend());
+    ASSERT_TRUE(be);
+    EXPECT_FALSE(be->loaded());
 }
 
+/*
 TEST_F(db_rdb_RdbFileEntry_test, test_source_id) {
     EXPECT_CALL(helper, load_file(Ref(entry)));
     entry.source_id();

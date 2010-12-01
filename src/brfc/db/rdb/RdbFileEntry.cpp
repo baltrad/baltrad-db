@@ -46,7 +46,9 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         , hash_()
         , root_(this) {
     BRFC_ASSERT(rdb_ != 0);
-    root_.backend(new RdbNodeBackend());
+    auto_ptr<RdbNodeBackend> be(new RdbNodeBackend());
+    be->loaded(false);
+    root_.backend(be.release());
 }
 
 RdbFileEntry::~RdbFileEntry() {
