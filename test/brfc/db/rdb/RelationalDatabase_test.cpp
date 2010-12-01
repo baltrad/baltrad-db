@@ -35,7 +35,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
-
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Result.hpp>
@@ -204,6 +203,9 @@ TEST_P(db_rdb_RelationalDatabase_test, test_add_source) {
     std::vector<oh5::Source> sources = db->sources();
 
     EXPECT_TRUE(source_by_name(sources, "srcname1") != sources.end());
+
+    src = *source_by_name(sources, "srcname1");
+    EXPECT_EQ(0, src.keys().size());
 
     EXPECT_THROW(db->add_source(src), db_error);
 }

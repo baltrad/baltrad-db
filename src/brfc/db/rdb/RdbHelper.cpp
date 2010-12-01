@@ -429,6 +429,8 @@ RdbHelper::select_all_sources() {
             src.add("_name", r->value_at("name").string());
             src.add("_id", String::number(id));
         }
+        if (r->value_at("key").is_null())
+            continue; // no key:value pairs associated
         src.add(r->value_at("key").string(), r->value_at("value").string());
     }
     sources.push_back(src);
