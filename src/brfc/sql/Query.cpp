@@ -19,8 +19,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Query.hpp>
 
+#include <string>
+
+#include <boost/foreach.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
+
 #include <brfc/exceptions.hpp>
-#include <brfc/RegExp.hpp>
 
 #include <brfc/sql/Dialect.hpp>
 
@@ -28,7 +32,7 @@ namespace brfc {
 namespace sql {
 
 Query::Query(const String& stmt, const BindMap& binds)
-        : stmt_(split_statement(stmt))
+        : stmt_(stmt)
         , binds_(binds) {
 }
 
@@ -46,53 +50,42 @@ Query::operator=(const Query& rhs) {
     return *this;
 }
 
-void
-Query::statement(const String& stmt) {
-    stmt_ = split_statement(stmt);
-}
+namespace {
 
-String
-Query::statement() const {
-    return stmt_.join("");
-}
+struct formatter {
+    typedef std::map<std::string, std::string> rpl_map;
+
+    rpl_map map;
+
+    formatter(const BindMap& binds, const Dialect& dialect)
+            : map() {
+        BOOST_FOREACH(const BindMap::value_type& kv, binds) {
+            map[kv.first.to_std_string()] = dialect.variant_to_string(kv.second).to_std_string();
+        }
+    }
+    
+    const std::string& operator()(const boost::xpressive::smatch& match) const {
+        rpl_map::const_iterator iter = map.find(match[0]);
+        if (iter == map.end())
+            throw lookup_error(match[0]);
+        return iter->second;
+    }
+
+};
+
+} // namespace anonymous
 
 String
 Query::replace_binds(const Dialect& dialect) const {
-    // this relies on the fact that stmt_ always starts with a "plain" string
-    // and then alternates between a bind key and a "plain" string
-    String replaced;
-    for (size_t i=0; i < stmt_.size(); ++i) {
-        const String& stmt_bit = stmt_.at(i);
-        if (i % 2) { // bind key
-            replaced += dialect.variant_to_string(binds_.get(stmt_bit));
-        } else { // "plain" string
-            replaced += stmt_bit;
-        }
-    }
-    return replaced;
-}
+    std::string std_stmt = statement().to_std_string();
 
-StringList
-Query::split_statement(const String& stmt) {
-    StringList stmt_bits;
-    RegExp bind_re(":[a-zA-Z]+[a-zA-Z0-9_]*");
-    int pos = 0, ppos = 0, lpos = 0;
-    while (bind_re.index_in(stmt, pos) != -1) {
-        ppos = bind_re.pos() - 1;
-        /* ':' is precededed by '\' or ':'*/
-        if (ppos > -1 and (stmt.char_at(ppos) == '\\' or
-                           stmt.char_at(ppos) == ':')) {
-            pos = bind_re.pos() + bind_re.matched_length();
-            continue;
-        }
-        stmt_bits.push_back(stmt.substr(lpos, bind_re.pos() - lpos));
-        stmt_bits.push_back(bind_re.cap());
-        lpos = bind_re.pos() + bind_re.matched_length();
-        pos = lpos;
-    }
-    if (lpos != stmt.length())
-        stmt_bits.push_back(stmt.substr(lpos));
-    return stmt_bits;
+    formatter fmt(binds_, dialect);
+
+    using namespace boost::xpressive;
+    static const sregex re = ~after(as_xpr(':') | '\\') >> ":" >> +(alpha | '_') >> *(alnum | '_');
+
+    std::string replaced = regex_replace(std_stmt, re, fmt); 
+    return String(replaced);
 }
 
 } // namespace sql

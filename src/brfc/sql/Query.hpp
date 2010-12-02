@@ -66,9 +66,9 @@ class Query {
         return binds_;
     }
 
-    void statement(const String& statement);
+    void statement(const String& statement) { stmt_ = statement; }
 
-    String statement() const;
+    const String& statement() const { return stmt_; }
 
     /**
      * @brief replace bind placeholders in the SQL statement
@@ -78,9 +78,7 @@ class Query {
     String replace_binds(const Dialect& dialect) const;
     
   private:
-    static StringList split_statement(const String& stmt);
-
-    StringList stmt_;
+    String stmt_;
     BindMap binds_;
 };
 
