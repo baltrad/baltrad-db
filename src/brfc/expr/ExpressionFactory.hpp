@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_EXPRESSION_FACTORY_HPP
 #define BRFC_EXPR_EXPRESSION_FACTORY_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/expr/fwd.hpp>
 #include <brfc/expr/AttributePrototypes.hpp>
@@ -53,13 +53,13 @@ class ExpressionFactory {
     /**
      * @brief construct expr::Attribute
      */
-    AttributePtr attribute(const String& name) const;
+    AttributePtr attribute(const std::string& name) const;
 
     /**
      * @brief construct expr::Literal containing a string
      * @{
      */
-    LiteralPtr string(const String& value) const;
+    LiteralPtr string(const std::string& value) const;
     LiteralPtr string(const char* value) const;
 
     /**
@@ -200,8 +200,8 @@ class ExpressionFactory {
      * @param time name of the time attribute
      * @throw value_error if attributes are of incorrect type
      */
-    ExpressionPtr combined_datetime(const String& date,
-                                    const String& time) const;
+    ExpressionPtr combined_datetime(const std::string& date,
+                                    const std::string& time) const;
   
   private:
     AttributePrototypes prototypes_;

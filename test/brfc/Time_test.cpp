@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/String.hpp>
+#include <string>
 #include <brfc/Time.hpp>
 #include <brfc/TimeDelta.hpp>
 

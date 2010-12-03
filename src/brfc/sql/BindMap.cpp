@@ -21,6 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <utility>
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <brfc/exceptions.hpp>
 
 namespace brfc {
@@ -45,38 +47,38 @@ BindMap::operator=(const BindMap& rhs) {
 }
 
 void
-BindMap::add(const String& name, const Variant& value) {
+BindMap::add(const std::string& name, const Variant& value) {
     const map::value_type& pair = std::make_pair(name_to_placeholder(name),
                                                  value);
     if (not binds_.insert(pair).second)
-        throw duplicate_entry(name.to_std_string());
+        throw duplicate_entry("duplicate BindMap key: " + name);
 }
 
 void
-BindMap::set(const String& name, const Variant& value) {
-    const String& key = name_to_placeholder(name);
+BindMap::set(const std::string& name, const Variant& value) {
+    const std::string& key = name_to_placeholder(name);
     map::iterator iter = binds_.find(key);
     if (iter == binds_.end())
-        throw lookup_error(name.to_std_string());
+        throw lookup_error("no BindMap key: " + name);
     binds_.erase(iter);
     binds_.insert(std::make_pair(key, value));
 }
 
 bool
-BindMap::has(const String& name) const {
+BindMap::has(const std::string& name) const {
     return binds_.find(name_to_placeholder(name)) != binds_.end();
 }
 
 const Variant&
-BindMap::get(const String& name) const {
+BindMap::get(const std::string& name) const {
     map::const_iterator iter = binds_.find(name_to_placeholder(name));
     if (iter == binds_.end())
-        throw lookup_error(name.to_std_string());
+        throw lookup_error("no BindMap key: " + name);
     return iter->second;
 }
 
 const Variant&
-BindMap::get(const String& name, const Variant& default_) const {
+BindMap::get(const std::string& name, const Variant& default_) const {
     try {
         return get(name);
     } catch (const lookup_error&) {
@@ -84,16 +86,16 @@ BindMap::get(const String& name, const Variant& default_) const {
     }
 }
 
-String
-BindMap::name_to_placeholder(const String& name) const {
-    String placeholder(name);
-    if (not placeholder.starts_with(":"))
-        placeholder.prepend(":");
+std::string
+BindMap::name_to_placeholder(const std::string& name) const {
+    std::string placeholder(name);
+    if (not boost::starts_with(placeholder, ":"))
+        placeholder = ":" + placeholder;
     return placeholder;
 }
 
 bool
-BindMap::remove(const String& name) {
+BindMap::remove(const std::string& name) {
     return binds_.erase(name_to_placeholder(name));
 }
 

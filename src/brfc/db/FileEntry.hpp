@@ -38,22 +38,22 @@ class FileEntry : public oh5::File {
     /**
      * @brief universally unique identifier
      */
-    String uuid() const { return do_uuid(); }
+    std::string uuid() const { return do_uuid(); }
     
-    void write_to_file(const String& path) const {
+    void write_to_file(const std::string& path) const {
         do_write_to_file(path);
     }
 
-    String hash() const { return do_hash(); }
+    std::string hash() const { return do_hash(); }
 
     DateTime stored_at() const { return do_stored_at(); }
 
   protected:
-    virtual String do_uuid() const = 0;
+    virtual std::string do_uuid() const = 0;
 
-    virtual void do_write_to_file(const String& path) const = 0;
+    virtual void do_write_to_file(const std::string& path) const = 0;
 
-    virtual String do_hash() const = 0;
+    virtual std::string do_hash() const = 0;
 
     virtual DateTime do_stored_at() const = 0;
 };

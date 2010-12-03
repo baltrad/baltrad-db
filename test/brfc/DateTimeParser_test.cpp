@@ -267,7 +267,7 @@ TEST(DateTimeParser_test, test_from_string_invalid_literal) {
 TEST(DateTimeParser_test, test_to_string) {
     DateTimeParser parser("yyyy/MM/dd hh:mm:ss.zzz");
     DateTime dt(2005, 12, 13, 12, 34, 56, 789);
-    String str;
+    std::string str;
     EXPECT_NO_THROW(str = parser.to_string(dt));
     EXPECT_EQ("2005/12/13 12:34:56.789", str);
 }

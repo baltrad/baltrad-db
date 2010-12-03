@@ -28,7 +28,7 @@ namespace sql {
 
 class BindMap {
   public:
-    typedef std::map<String, Variant> map;
+    typedef std::map<std::string, Variant> map;
     typedef map::iterator iterator;
     typedef map::const_iterator const_iterator;
     typedef map::value_type value_type;
@@ -42,29 +42,29 @@ class BindMap {
     /**
      * @throw duplicate_entry if bind already exists
      */
-    void add(const String& name, const Variant& value);
+    void add(const std::string& name, const Variant& value);
 
     /**
      * @throw lookup_error if bind doesn't exist
      *
      */
-    void set(const String& name, const Variant& value);
+    void set(const std::string& name, const Variant& value);
     
     /**
      * @return true if bind exists
      */
-    bool has(const String& name) const;
+    bool has(const std::string& name) const;
     
     /**
      * @throw lookup_error if bind not found
      */
-    const Variant& get(const String& name) const;
+    const Variant& get(const std::string& name) const;
     
     /**
      * @brief get bind value
      * @return the value or default_ if bind not found
      */
-    const Variant& get(const String& name, const Variant& default_) const;
+    const Variant& get(const std::string& name, const Variant& default_) const;
 
     size_t size() const {
         return binds_.size();
@@ -89,14 +89,14 @@ class BindMap {
     /**
      * @brief remove a bind
      */
-    bool remove(const String& name);
+    bool remove(const std::string& name);
     
     void clear() {
         binds_.clear();
     }
 
   private:
-    String name_to_placeholder(const String& name) const;
+    std::string name_to_placeholder(const std::string& name) const;
 
     map binds_;
 };

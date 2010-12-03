@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %include "common.i"
 
 %{
-    #include <brfc/test/TestSwig.hpp>
     #include <brfc/test/TestRDB.hpp>
     #include <brfc/test/TempH5File.hpp>
     #include <brfc/test/TempDir.hpp>
@@ -50,7 +49,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     import eu.baltrad.fc.oh5.File;
 %}
 
-%include <brfc/test/TestSwig.hpp>
 %include <brfc/test/TestRDB.hpp>
 %include <brfc/test/TempH5File.hpp>
 %include <brfc/test/TempDir.hpp>

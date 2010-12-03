@@ -60,7 +60,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::oh5::Node::children() const;
 %ignore brfc::oh5::Node::parent() const;
 %ignore brfc::oh5::Node::root() const;
-%ignore brfc::oh5::Node::child(const brfc::String&) const;
+%ignore brfc::oh5::Node::child(const std::string&) const;
 %ignore brfc::oh5::Node::file() const;
 
 // ignore Node constructors (std::auto_ptr)
@@ -75,9 +75,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 /***
  * brfc::oh5::Group
  */
-%ignore brfc::oh5::Group::attribute(const brfc::String&) const;
-%ignore brfc::oh5::Group::effective_attribute(const brfc::String&) const;
-%ignore brfc::oh5::Group::group(const brfc::String&) const;
+%ignore brfc::oh5::Group::attribute(const std::string&) const;
+%ignore brfc::oh5::Group::effective_attribute(const std::string&) const;
+%ignore brfc::oh5::Group::group(const std::string&) const;
 
 %typemap(javaimports) brfc::oh5::Group,
                       brfc::oh5::Group* %{
@@ -130,7 +130,7 @@ SWIG_SHARED_PTR_DERIVED(PhysicalFile,
                         brfc::oh5::File,
                         brfc::oh5::PhysicalFile);
 
-%ignore brfc::oh5::File::group(const brfc::String&) const;
+%ignore brfc::oh5::File::group(const brfc::string&) const;
 %ignore brfc::oh5::File::root() const;
 
 %typemap(javaimports) brfc::oh5::File,

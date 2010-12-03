@@ -101,7 +101,7 @@ def set_options(opt):
                    help="database to test against (specify multiple times "
                         "for different databases)")
 
-    libnames = ("boost", "hdf5", "hlhdf", "gmock", "gtest", "icu", "jdk", "pqxx")
+    libnames = ("boost", "hdf5", "hlhdf", "gmock", "gtest", "jdk", "pqxx")
     for libname in libnames:
         _add_lib_path_options(grp, libname)
     
@@ -166,17 +166,6 @@ def configure(conf):
         libpath=env.hlhdf_lib_dir,
         uselib_store="HLHDF",
         uselib="HDF5",
-        mandatory=True,
-    )
-    
-    # check for libicu
-    _lib_path_opts_to_env(env, "icu")
-    conf.check_cxx(
-        header_name=["unicode/unistr.h", "unicode/regex.h"],
-        lib=["icui18n", "icuuc", "icutu"],
-        includes=env.icu_inc_dir,
-        libpath=env.icu_lib_dir,
-        uselib_store="ICU",
         mandatory=True,
     )
     
@@ -349,7 +338,6 @@ def _build_shared_library(bld):
         uselib=[
             "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM", "BOOST_THREAD",
             "HDF5", "HLHDF",
-            "ICU",
             "PQXX",
         ],
         install_path="${PREFIX}/lib",
@@ -413,7 +401,6 @@ def _build_gtest_tests(bld):
             "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM",
             "GMOCK", "GTEST",
             "HDF5", "HLHDF",
-            "ICU",
             "PQXX",
         ],
         uselib_local="brfc",
@@ -448,7 +435,7 @@ def _build_java_wrapper(bld):
             source="swig/" + filename,
             swig_flags="-c++ -java -outdir %s -package %s" % (outdir, package),
             includes="src",
-            uselib="ICU HLHDF BOOST JNI.H",
+            uselib="HLHDF BOOST JNI.H",
             target=target,
             # build shared objects (these flags are platform/compiler specific)
             # -fPIC -DPIC is for gcc on Linux
@@ -463,7 +450,7 @@ def _build_java_wrapper(bld):
         target="brfc_java",
         add_objects=swig_targets,
         includes="src",
-        uselib="ICU BOOST JNI.H",
+        uselib="BOOST JNI.H",
         uselib_local="brfc",
         install_path="${PREFIX}/lib",
     )
@@ -547,7 +534,6 @@ def _run_tests(bld):
        "BOOST_SYSTEM", "BOOST_FILESYSTEM",
        "GMOCK", "GTEST",
        "HDF5", "HLHDF",
-       "ICU",
        "PQXX",
     ]
 

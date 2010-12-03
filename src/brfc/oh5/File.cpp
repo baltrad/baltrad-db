@@ -48,16 +48,16 @@ File::do_source() const {
 namespace {
 
 const Attribute&
-get_attribute(const Group& grp, const String& name) {
+get_attribute(const Group& grp, const std::string& name) {
     const Attribute* attr = grp.attribute(name);
     if (not attr)
-        throw lookup_error("missing attribute: " + name.to_utf8());
+        throw lookup_error("missing attribute: " + name);
     return *attr;
 }
 
 } // namespace anonymous
 
-String
+std::string
 File::what_object() const {
     return get_attribute(root(), "what/object").value().string();
 }
@@ -72,32 +72,32 @@ File::what_time() const {
     return get_attribute(root(), "what/time").value().to_time();
 }
 
-String
+std::string
 File::what_source() const {
     return get_attribute(root(), "what/source").value().string();
 }
 
 Node*
-File::node(const String& path) {
+File::node(const std::string& path) {
     const File* self = const_cast<const File*>(this);
     return const_cast<Node*>(self->node(path));
 }
 
 const Node*
-File::node(const String& path) const {
+File::node(const std::string& path) const {
     if (path == "/")
         return &root();
     return root().child(path);
 }
 
 Group*
-File::group(const String& path) {
+File::group(const std::string& path) {
     const File* self = const_cast<const File*>(this);
     return const_cast<Group*>(self->group(path));
 }
 
 const Group*
-File::group(const String& path) const {
+File::group(const std::string& path) const {
     return dynamic_cast<const Group*>(node(path));
 }
 

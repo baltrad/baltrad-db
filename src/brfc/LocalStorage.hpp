@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_LOCAL_STORAGE_HPP
 #define BRFC_LOCAL_STORAGE_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 
@@ -43,7 +43,7 @@ class LocalStorage {
      * @param path absolute path to the file in filesystem
      * @return absolute path to the stored file
      */
-    String prestore(const db::FileEntry& entry, const String& path) {
+    std::string prestore(const db::FileEntry& entry, const std::string& path) {
         return do_prestore(entry, path);
     }
 
@@ -52,7 +52,7 @@ class LocalStorage {
      * @return absolute path to the stored file
      */
 
-    String store(const db::FileEntry& entry) {
+    std::string store(const db::FileEntry& entry) {
         return do_store(entry);
     }
     
@@ -75,12 +75,12 @@ class LocalStorage {
     /**
      * @return absolute path to the stored file
      */
-    virtual String do_prestore(const db::FileEntry& entry, const String& path) = 0;
+    virtual std::string do_prestore(const db::FileEntry& entry, const std::string& path) = 0;
 
     /**
      * @return absolute path to the stored file
      */
-    virtual String do_store(const db::FileEntry& entry) = 0;
+    virtual std::string do_store(const db::FileEntry& entry) = 0;
  
     /**
      * @return true if the file no longer exists

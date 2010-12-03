@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_LABEL_HPP
 #define BRFC_EXPR_LABEL_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/expr/Expression.hpp>
 
@@ -35,7 +35,7 @@ namespace expr {
  */
 class Label : public Expression {
   public:
-    Label(const Expression& expr, const String& name)
+    Label(const Expression& expr, const std::string& name)
             : expr_(expr.clone())
             , name_(name) {
     }
@@ -44,11 +44,11 @@ class Label : public Expression {
         return ExpressionPtr(new Label(*this));
     }
 
-    void name(const String& name) {
+    void name(const std::string& name) {
         name_ = name;
     }
 
-    const String& name() const {
+    const std::string& name() const {
         return name_;
     }
 
@@ -71,7 +71,7 @@ class Label : public Expression {
 
   private:
     ExpressionPtr expr_;
-    String name_;
+    std::string name_;
 };
 
 }

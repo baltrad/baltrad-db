@@ -20,13 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_DIALECT_COMPILER_HPP
 #define BRFC_SQL_DIALECT_COMPILER_HPP
 
+#include <vector>
+
 #include <brfc/visit.hpp>
 #include <brfc/Variant.hpp>
 
 #include <brfc/sql/fwd.hpp>
 #include <brfc/sql/Compiler.hpp>
-
-#include <vector>
 
 namespace brfc {
 namespace sql {
@@ -149,13 +149,13 @@ class DialectCompiler : public Compiler {
     virtual Query do_compile(const Element& expr);
 
   private:
-    String pop();
-    void push(const String& str);
+    std::string pop();
+    void push(const std::string& str);
     
     const Dialect* dialect_;
     bool in_from_clause_;
     BindMap binds_;
-    std::vector<String> stack_;
+    std::vector<std::string> stack_;
 };
 
 }

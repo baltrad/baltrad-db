@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_PG_DIALECT_HPP
 
 #include <brfc/sql/Dialect.hpp>
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 namespace sql {
@@ -38,10 +38,10 @@ class Dialect : public sql::Dialect {
 
   protected:
     virtual bool do_has_feature(Feature feature) const;
-    virtual const String& do_name() const;
+    virtual const std::string& do_name() const;
   
   private:
-    String name_;
+    std::string name_;
     int version_;
 };
 

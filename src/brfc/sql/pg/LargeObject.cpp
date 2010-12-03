@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/numeric/conversion/cast.hpp>
 
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 namespace sql {
@@ -32,8 +32,8 @@ LargeObject::LargeObject(pqxx::dbtransaction& tx, long long id)
     
 }
 
-LargeObject::LargeObject(pqxx::dbtransaction& tx, const String& path)
-        : lob_(tx, path.to_utf8()) {
+LargeObject::LargeObject(pqxx::dbtransaction& tx, const std::string& path)
+        : lob_(tx, path) {
 
 }
 
@@ -43,8 +43,8 @@ LargeObject::do_id() const {
 }
 
 void
-LargeObject::do_write_to_file(const String& path) const {
-    lob_.to_file(path.to_utf8());
+LargeObject::do_write_to_file(const std::string& path) const {
+    lob_.to_file(path);
 }
 
 } // namespace pg

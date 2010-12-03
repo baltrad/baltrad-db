@@ -31,7 +31,7 @@ namespace fs = boost::filesystem;
 
 namespace brfc {
 
-CacheDirStorage::CacheDirStorage(const String& dir)
+CacheDirStorage::CacheDirStorage(const std::string& dir)
         : dir_(dir) {
     check_dir();
 }
@@ -42,45 +42,44 @@ CacheDirStorage::~CacheDirStorage() {
 
 void
 CacheDirStorage::check_dir() const {
-    std::string dir_utf8 = dir_.to_utf8();
-    fs::path fs_path = fs::path(dir_utf8);
+    fs::path fs_path = fs::path(dir_);
     try {
         if (not fs_path.is_complete())
-            throw fs_error("'" + dir_utf8 + "' is not a complete path");
+            throw fs_error("'" + dir_ + "' is not a complete path");
         if (not fs::exists(fs_path))
-            throw fs_error("'" + dir_utf8 + "' does not exist");
+            throw fs_error("'" + dir_ + "' does not exist");
         if (not fs::is_directory(fs_path))
-            throw fs_error("'" + dir_utf8 + "' is not a directory");
+            throw fs_error("'" + dir_ + "' is not a directory");
     } catch (const fs::filesystem_error& e) {
         throw fs_error(e.what());
     }
 }
 
-String
+std::string
 CacheDirStorage::entry_path(const db::FileEntry& entry) const {
     return dir_ + "/" + entry.uuid() + ".h5";
 }
 
-String
+std::string
 CacheDirStorage::do_store(const db::FileEntry& entry) {
-    const String& path = entry_path(entry);
-    if (not fs::exists(path.to_utf8())) {
+    const std::string& path = entry_path(entry);
+    if (not fs::exists(path)) {
         entry.write_to_file(path);
     }
     return path;
 }
 
-String
-CacheDirStorage::do_prestore(const db::FileEntry& entry, const String& path) {
-    const String& new_path = entry_path(entry);
+std::string
+CacheDirStorage::do_prestore(const db::FileEntry& entry, const std::string& path) {
+    const std::string& new_path = entry_path(entry);
     
-    fs::copy_file(path.to_utf8(), new_path.to_utf8());
+    fs::copy_file(path, new_path);
     return new_path;
 }
 
 bool
 CacheDirStorage::do_remove(const db::FileEntry& entry) {
-    fs::path fs_path(entry_path(entry).to_utf8());
+    fs::path fs_path(entry_path(entry));
 
     if (fs::exists(fs_path)) {
         fs::remove(fs_path);
@@ -91,7 +90,7 @@ CacheDirStorage::do_remove(const db::FileEntry& entry) {
 
 void
 CacheDirStorage::do_clean() {
-    fs::directory_iterator iter(dir_.to_utf8());
+    fs::directory_iterator iter(dir_);
     for ( ; iter != fs::directory_iterator(); ++iter) {
         fs::remove(iter->path());
     }

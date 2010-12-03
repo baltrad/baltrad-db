@@ -16,10 +16,12 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+#include <string>
 
 #include <gtest/gtest.h>
 
-#include <brfc/String.hpp>
+#include <boost/lexical_cast.hpp>
+
 #include <brfc/Variant.hpp>
 
 #include <brfc/sql/Alias.hpp>
@@ -56,13 +58,13 @@ class Replacer {
             , count_(0) {
     }
 
-    String replace(const Variant& value) {
-        String key = String(":lit_") + String::number(count_++);
+    std::string replace(const Variant& value) {
+        std::string key = ":lit_" + boost::lexical_cast<std::string>(count_++);
         binds_.add(key, value);
         return key;
     }
 
-    Variant value(const String& key) const {
+    Variant value(const std::string& key) const {
         return binds_.get(key, Variant());
     }
 
@@ -210,7 +212,7 @@ TEST_F(sql_DialectCompiler_test, test_select) {
     select->what(column2);
     select->what(column3);
     select->where(column->lt(xpr.int64_(1)));
-    String expected("SELECT t1.c1, t1.c2, t2.c3\nFROM t1 CROSS JOIN t2\nWHERE t1.c1 < :lit_0");
+    std::string expected("SELECT t1.c1, t1.c2, t2.c3\nFROM t1 CROSS JOIN t2\nWHERE t1.c1 < :lit_0");
     const Query& q = compiler.compile(*select);
     EXPECT_EQ(expected, q.statement());
     EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
@@ -224,7 +226,7 @@ TEST_F(sql_DialectCompiler_test, test_select_order_by) {
     select->append_order_by(t1->column("c1"), Select::ASC);
     select->append_order_by(t1->column("c3"), Select::DESC);
     const Query& q = compiler.compile(*select);
-    String expected = "SELECT t1.c1, t1.c2\nFROM t1\nORDER BY t1.c1 ASC, t1.c3 DESC";
+    std::string expected = "SELECT t1.c1, t1.c2\nFROM t1\nORDER BY t1.c1 ASC, t1.c3 DESC";
     EXPECT_EQ(expected, q.statement());
 }
 
@@ -234,7 +236,7 @@ TEST_F(sql_DialectCompiler_test, test_select_limit) {
     select->what(t1->column("c1"));
     select->limit(1);
     const Query& q = compiler.compile(*select);
-    String expected("SELECT t1.c1\nFROM t1\nLIMIT 1");
+    std::string expected("SELECT t1.c1\nFROM t1\nLIMIT 1");
     EXPECT_EQ(expected, q.statement());
 }
 
@@ -243,7 +245,7 @@ TEST_F(sql_DialectCompiler_test, test_insert) {
     insert->value("c1", xpr.int64_(1));
     insert->value("c2", xpr.int64_(2));
     insert->add_return(t1->column("c3"));
-    String expected("INSERT INTO t1(c1, c2) VALUES (:lit_0, :lit_1) RETURNING t1.c3");
+    std::string expected("INSERT INTO t1(c1, c2) VALUES (:lit_0, :lit_1) RETURNING t1.c3");
     const Query& q = compiler.compile(*insert);
     EXPECT_EQ(expected, q.statement());
     EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
@@ -254,7 +256,7 @@ TEST_F(sql_DialectCompiler_test, test_factory_or_) {
     ExpressionPtr e1 = t1->column("c1")->eq(xpr.int64_(1));
     ExpressionPtr e2 = t1->column("c1")->eq(xpr.int64_(2));
     ExpressionPtr e3 = xpr.or_(e1, e2);
-    String expected("t1.c1 = :lit_0 OR t1.c1 = :lit_1");
+    std::string expected("t1.c1 = :lit_0 OR t1.c1 = :lit_1");
     const Query& q = compiler.compile(*e3);
     EXPECT_EQ(expected, q.statement());
     EXPECT_EQ(Variant(1), replacer.value(":lit_0"));

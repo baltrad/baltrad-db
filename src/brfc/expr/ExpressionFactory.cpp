@@ -42,12 +42,12 @@ ExpressionFactory::ExpressionFactory(const AttributePrototypes& prototypes)
 }
 
 AttributePtr
-ExpressionFactory::attribute(const String& name) const {
+ExpressionFactory::attribute(const std::string& name) const {
     return static_pointer_cast<Attribute>(prototypes_.get(name).clone());
 }
 
 LiteralPtr
-ExpressionFactory::string(const String& value) const {
+ExpressionFactory::string(const std::string& value) const {
     return make_shared<Literal>(Variant(value));
 }
 
@@ -175,8 +175,8 @@ ExpressionFactory::max(const Expression& expr) const {
 }
 
 ExpressionPtr
-ExpressionFactory::combined_datetime(const String& date,
-                                     const String& time) const {
+ExpressionFactory::combined_datetime(const std::string& date,
+                                     const std::string& time) const {
     AttributePtr date_attr = attribute(date);
     if (date_attr->type() != Attribute::DATE)
         throw value_error("invalid attribute for date");

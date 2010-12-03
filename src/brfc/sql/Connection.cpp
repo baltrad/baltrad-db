@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Connection.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Query.hpp>
@@ -91,7 +91,7 @@ Connection::execute(const Query& query) {
 }
 
 shared_ptr<Result>
-Connection::execute(const String& stmt) {
+Connection::execute(const std::string& stmt) {
     shared_ptr<Result> result;
     if (not in_transaction()) {
         try {
@@ -118,7 +118,7 @@ Connection::large_object(long long id) {
 }
 
 shared_ptr<LargeObject>
-Connection::large_object(const String& path) {
+Connection::large_object(const std::string& path) {
     return do_large_object(path);
 }
 

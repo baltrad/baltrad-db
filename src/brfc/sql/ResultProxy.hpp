@@ -68,7 +68,7 @@ class ResultProxy : public Result {
     /**
      * @brief forward the call to the proxied result
      */
-    virtual Variant do_value_at(const String& pos) const;
+    virtual Variant do_value_at(const std::string& pos) const;
 
     /**
      * @brief forward the call to the proxied result

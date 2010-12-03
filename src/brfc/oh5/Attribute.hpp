@@ -39,7 +39,7 @@ class Attribute : public Node {
      * @param name name of the attribute
      * @param value attribute value
      */
-    Attribute(const String& name, const Scalar& value);
+    Attribute(const std::string& name, const Scalar& value);
 
     /**
      * @brief destructor
@@ -62,7 +62,7 @@ class Attribute : public Node {
      * if the parent group is named "what", "where" or "how", return
      * name prefixed with parent group, otherwise return name
      */
-    String full_name() const;
+    std::string full_name() const;
     
   protected:
     /**

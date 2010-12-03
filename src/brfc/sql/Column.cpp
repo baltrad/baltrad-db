@@ -52,7 +52,7 @@ Column::proxy(SelectablePtr t) const {
 }
 
 ColumnPtr
-Column::proxy(const String& name, SelectablePtr t) const {
+Column::proxy(const std::string& name, SelectablePtr t) const {
     return Column::create(name, t, this->shared_from_this());
 }
 

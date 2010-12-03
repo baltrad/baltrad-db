@@ -66,7 +66,7 @@ class db_rdb_RelationalDatabase_test : public testing::TestWithParam<const char*
     
     template<typename T>
     typename T::const_iterator
-    source_by_name(const T& sources, const String& name) {
+    source_by_name(const T& sources, const std::string& name) {
         typename T::const_iterator i = sources.begin();
         for ( ; i != sources.end(); ++i) {
             if (i->get("_name") == name)
@@ -162,7 +162,7 @@ TEST_P(db_rdb_RelationalDatabase_test, write_entry_to_file) {
     // test writing
     test::TempH5File tef;
     EXPECT_NO_THROW(e->write_to_file(tef.path()));
-    EXPECT_EQ(fs::file_size(tef.path().to_utf8()), fs::file_size(tf.path().to_utf8()));
+    EXPECT_EQ(fs::file_size(tef.path()), fs::file_size(tf.path()));
 }
 
 TEST_P(db_rdb_RelationalDatabase_test, store_with_invalid_attributes) {

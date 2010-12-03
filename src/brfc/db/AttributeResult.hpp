@@ -20,14 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_ATTRIBUTE_RESULT_HPP
 #define BRFC_DB_ATTRIBUTE_RESULT_HPP
 
-#include <boost/noncopyable.hpp>
+#include <string>
 
-#include <brfc/deprecate.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace brfc {
 
 class Date;
-class String;
 class Time;
 class Variant;
 
@@ -93,7 +92,7 @@ class AttributeResult : public boost::noncopyable {
      *
      * equivalent to: @code value_at(pos).to_string(); @endcode
      */
-    String string(unsigned int pos) const;
+    std::string string(unsigned int pos) const;
 
     /**
      * @brief get a 64-bit integer value at \c pos

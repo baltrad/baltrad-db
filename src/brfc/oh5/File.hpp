@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/noncopyable.hpp>
 
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 
@@ -55,12 +55,12 @@ class File : public boost::noncopyable {
      *
      * group("path/to/node")
      */
-    const Node* node(const String& path) const;
+    const Node* node(const std::string& path) const;
     
     /**
      * @copydoc node(const String&) const
      */
-    Node* node(const String& path);
+    Node* node(const std::string& path);
 
     /**
      * @brief get hold of Group at path
@@ -69,12 +69,12 @@ class File : public boost::noncopyable {
      *
      * group("path/to/group")
      */
-    const Group* group(const String& path) const;
+    const Group* group(const std::string& path) const;
     
     /**
      * @copydoc group(const String&) const
      */
-    Group* group(const String& path);
+    Group* group(const std::string& path);
     
     /**
      * @brief get the root group
@@ -98,14 +98,14 @@ class File : public boost::noncopyable {
     /**
      * @brief access /what/object
      * @throw lookup_error if attribute is missing
-     * @throw value_error if attribute value is not a String
+     * @throw value_error if attribute value is not a std::string
      */
-    String what_object() const;
+    std::string what_object() const;
 
     /**
      * @brief access /what/date
      * @throw lookup_error if attribute is missing
-     * @throw value_error if attribute value is not a Date or a String in
+     * @throw value_error if attribute value is not a Date or a std::string in
      *                    'yyyyMMdd' format
      */
     Date what_date() const;
@@ -113,7 +113,7 @@ class File : public boost::noncopyable {
     /**
      * @brief access /what/time
      * @throw lookup_error if attribute is missing
-     * @throw value_error if attribute value is not a Time or a String in
+     * @throw value_error if attribute value is not a Time or a std::string in
      *                    'hhmmss' format
      */
     Time what_time() const;
@@ -122,9 +122,9 @@ class File : public boost::noncopyable {
      * @brief access /what/source
      *
      * @throw lookup_error if attribute is missing
-     * @throw value_error if attribute value is not a String
+     * @throw value_error if attribute value is not a std::string
      */
-    String what_source() const;
+    std::string what_source() const;
     ///@}
   
   protected:

@@ -40,7 +40,7 @@ class FileHasher {
     /**
      * @brief constructor
      */
-    explicit FileHasher(const String& name)
+    explicit FileHasher(const std::string& name)
             : name_(name)
             , ignored_() {
     }
@@ -50,14 +50,14 @@ class FileHasher {
     /**
      * @brief name of this hasher
      */
-    String name() const {
+    std::string name() const {
         return name_;
     }
 
     /**
      * @brief hash a file
      */
-    String hash(const oh5::File& file) const {
+    std::string hash(const oh5::File& file) const {
         return do_hash(file);
     }
 
@@ -65,7 +65,7 @@ class FileHasher {
         ignored_ = ignored;
     }
 
-    void ignore(const String& attribute) {
+    void ignore(const std::string& attribute) {
         ignored_.push_back(attribute);
     }
 
@@ -79,10 +79,10 @@ class FileHasher {
 
 
   protected:
-    virtual String do_hash(const oh5::File& file) const = 0;
+    virtual std::string do_hash(const oh5::File& file) const = 0;
   
   private:
-    String name_;
+    std::string name_;
     StringList ignored_;
 };
 

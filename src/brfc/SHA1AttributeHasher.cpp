@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 #include <boost/uuid/sha1.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 #include <brfc/exceptions.hpp>
 
@@ -42,7 +43,7 @@ SHA1AttributeHasher::~SHA1AttributeHasher() {
 
 }
 
-String
+std::string
 SHA1AttributeHasher::attribute_string(const oh5::Attribute& attr) {
     return attr.path() + "=" + attr.value().to_string();
 }
@@ -64,7 +65,7 @@ SHA1AttributeHasher::sha1hash(const std::string& str) {
     return ss.str();
 }
 
-String
+std::string
 SHA1AttributeHasher::do_hash(const oh5::File& file) const {
     StringList strs;
     const oh5::Attribute* attr = 0;
@@ -78,10 +79,10 @@ SHA1AttributeHasher::do_hash(const oh5::File& file) const {
 
     strs.sort(); // ensure same order
     
-    std::string utf8 = strs.join("").to_utf8();
-    std::string hash = sha1hash(utf8);
+    std::string hash = sha1hash(strs.join(""));
 
-    return String(hash).to_lower();
+    boost::to_lower(hash);
+    return hash;
 }
 
 } // namespace brfc

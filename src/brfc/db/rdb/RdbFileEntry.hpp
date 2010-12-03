@@ -49,7 +49,7 @@ class RdbFileEntry : public FileEntry {
 
     using FileEntry::uuid;
 
-    String uuid(const String& uuid) { return uuid_ = uuid; }
+    std::string uuid(const std::string& uuid) { return uuid_ = uuid; }
 
     /**
      * @brief set database id
@@ -89,7 +89,7 @@ class RdbFileEntry : public FileEntry {
 
     using FileEntry::hash;
 
-    void hash(const String& hash) { hash_ = hash; }
+    void hash(const std::string& hash) { hash_ = hash; }
 
     using FileEntry::stored_at;
 
@@ -105,9 +105,9 @@ class RdbFileEntry : public FileEntry {
     void load() const;
 
   protected:
-    virtual String do_uuid() const;
+    virtual std::string do_uuid() const;
 
-    virtual void do_write_to_file(const String& path) const;
+    virtual void do_write_to_file(const std::string& path) const;
 
     virtual const oh5::Group& do_root() const { return root_; }
     
@@ -116,7 +116,7 @@ class RdbFileEntry : public FileEntry {
      */
     oh5::Source do_source() const;
 
-    String do_hash() const;
+    std::string do_hash() const;
 
     DateTime do_stored_at() const;
     
@@ -128,8 +128,8 @@ class RdbFileEntry : public FileEntry {
     long long lo_id_;
     long long source_id_;
     oh5::Source source_;
-    String uuid_;
-    String hash_;
+    std::string uuid_;
+    std::string hash_;
     DateTime stored_at_;
     oh5::RootGroup root_;
 };

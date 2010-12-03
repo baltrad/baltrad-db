@@ -30,7 +30,7 @@ namespace sql {
 class MockLargeObject : public LargeObject {
   public:
     MOCK_CONST_METHOD0(do_id, long long());
-    MOCK_CONST_METHOD1(do_write_to_file, void(const String&));
+    MOCK_CONST_METHOD1(do_write_to_file, void(const std::string&));
 };
 
 } // namespace sql

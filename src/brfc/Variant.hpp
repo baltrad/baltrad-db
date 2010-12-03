@@ -20,10 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_VARIANT_HPP
 #define BRFC_VARIANT_HPP
 
+#include <string>
+
 #include <boost/variant.hpp>
 
-#include <brfc/deprecate.hpp>
-#include <brfc/String.hpp>
 #include <brfc/DateTime.hpp>
 
 namespace brfc {
@@ -65,13 +65,13 @@ class Variant {
      */
     explicit Variant(const char* value)
             : type_(STRING)
-            , value_(String::from_utf8(value)) {
+            , value_(std::string(value)) {
     }
 
     /**
-     * @brief construct string variant from String
+     * @brief construct string variant from std::string
      */
-    explicit Variant(const String& value)
+    explicit Variant(const std::string& value)
             : type_(STRING)
             , value_(value) {
     }
@@ -211,7 +211,7 @@ class Variant {
      * @brief access STRING variant
      * @throw value_error if type() != STRING
      */
-    const String& string() const;
+    const std::string& string() const;
     
     /**
      * @brief access INT64 variant
@@ -255,19 +255,19 @@ class Variant {
      * @{
      */
     /**
-     * @brief convert to String
+     * @brief convert to std::string
      *
      * all variants are convertible to string.
      *
      * conversions:
-     *  - NULL variant is converted to empty String
-     *  - double and int64 variants are converted using String::number
+     *  - NULL variant is converted to empty std::string
+     *  - double and int64 variants are converted using boost::lexical_cast
      *  - bool variant maps is converted to "True" or "False"
      *  - Date variant is converted to ISO 8601 format yyyy-MM-dd
      *  - Time variant is converted to ISO 8601 format hh:mm:ss
      *  - DateTime variant is converted to ISO 8601 format yyyy-MM-dd hh:mm:ss
      */
-    String to_string() const;
+    std::string to_string() const;
     
     /**
      * @brief convert to 64-bit integer
@@ -275,7 +275,7 @@ class Variant {
      * 
      * conversions:
      *  - NULL variant is converted to 0
-     *  - String values are converted with boost::lexical_cast
+     *  - std::string values are converted with boost::lexical_cast
      *  - double and bool variants are converted with implicit C++ conversion
      *  - all other variants are not convertible
      */
@@ -286,7 +286,7 @@ class Variant {
      *
      * conversions:
      *  - NULL variant is converted to 0.0
-     *  - String values are converted with boost::lexical_cast
+     *  - std::string values are converted with boost::lexical_cast
      *  - int64 and bool variants are converted with implicit C++ conversion
      *  - all other variants are not convertible
      */
@@ -299,7 +299,7 @@ class Variant {
      *
      * conversions:
      *  - NULL variant is converted to false
-     *  - empty String and String containing "0" or "false" is converted to
+     *  - empty std::string and std::string containing "0" or "false" is converted to
      *    false, all other strings to true
      *  - Date and Time variants are converted to true
      *  - all other variants are converted using implicit C++ conversion
@@ -310,7 +310,7 @@ class Variant {
      * @brief convert to Time value
      *
      * conversions:
-     *  - String variant containing ISO 8601 format 'yyyy-MM-dd'
+     *  - std::string variant containing ISO 8601 format 'yyyy-MM-dd'
      *  - DateTime values convert to contained Time value
      *  - all other variants are not convertible
      */
@@ -320,7 +320,7 @@ class Variant {
      * @brief convert to Date value
      *
      * conversions:
-     *  - String variant containing ISO 8601 format 'hh:mm:ss'
+     *  - std::string variant containing ISO 8601 format 'hh:mm:ss'
      *  - DateTime values convert to contained Date value
      *  - all other variants are not convertible
      */
@@ -331,7 +331,7 @@ class Variant {
      * @brief convert to DateTime value
      *
      * conversions:
-     *  - String variant containing ISO 8601 format 'yyyy-MM-dd hh:mm:ss'
+     *  - std::string variant containing ISO 8601 format 'yyyy-MM-dd hh:mm:ss'
      *  - all other variants are not convertible
      */
     DateTime to_datetime() const;
@@ -343,7 +343,7 @@ class Variant {
     T get() const;
 
     Type type_;
-    typedef boost::variant<String,
+    typedef boost::variant<std::string,
                            long long,
                            double,
                            bool,

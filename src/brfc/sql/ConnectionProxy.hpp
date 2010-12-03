@@ -94,7 +94,7 @@ class ConnectionProxy : public Connection,
      *
      * proxy the result of the call with ResultProxy
      */
-    virtual shared_ptr<Result> do_execute(const String& stmt);
+    virtual shared_ptr<Result> do_execute(const std::string& stmt);
 
     /**
      * @brief forward the call to the proxied database connection
@@ -114,7 +114,7 @@ class ConnectionProxy : public Connection,
     /**
      * @brief forward the call to the proxied database connection
      */
-    virtual shared_ptr<LargeObject> do_large_object(const String& path);
+    virtual shared_ptr<LargeObject> do_large_object(const std::string& path);
     
     /**
      * @brief forward the call to the proxied database connection

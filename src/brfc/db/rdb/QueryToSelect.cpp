@@ -20,6 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/QueryToSelect.hpp>
 
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/StringList.hpp>
@@ -130,13 +133,13 @@ QueryToSelect::transform(const AttributeQuery& query) {
 
 sql::ColumnPtr
 QueryToSelect::source_attr_column(const expr::Attribute& attr) {
-    String key = attr.name().split(":").at(1);
+    std::string key = StringList::split(attr.name(), ":").at(1);
     if (key == "_name") {
         // sources is joined by default
         // this attribute can be accessed at sources.name
         return m_.sources->column("name");
     } else {
-        String alias = "src_" + key;
+        std::string alias = "src_" + key;
         sql::AliasPtr value_t = m_.source_kvs->alias(alias);
 
         // join if missing
@@ -168,18 +171,19 @@ QueryToSelect::specialized_attr_column(const expr::Attribute& attr) {
 
 sql::ColumnPtr
 QueryToSelect::plain_attr_column(const expr::Attribute& attr) {
-    String name = attr.name();
+    std::string name = attr.name();
     
-    StringList path = name.split("/");
-    String attrname = path.take_last();
-    String groupname;
+    StringList path = StringList::split(name, "/");
+    std::string attrname = path.take_last();
+    std::string groupname;
     if (not path.empty())
         groupname = path.take_last();
 
     join_attrs(); 
 
     // alias the table (this attribute is always searched on this alias)
-    String alias = name.remove("/") + "_values";
+    boost::erase_all(name, "/");
+    std::string alias = name + "_values";
     sql::AliasPtr value_t = m_.attrvals->alias(alias);
     
     // join this table-alias if not already joined
@@ -211,10 +215,10 @@ QueryToSelect::plain_attr_column(const expr::Attribute& attr) {
 
 void
 QueryToSelect::operator()(const expr::Attribute& attr) {
-    String name = attr.name();
+    const std::string& name = attr.name();
     
     sql::ColumnPtr column;
-    if (name.starts_with("what/source:")) {
+    if (boost::starts_with(name, "what/source:")) {
         column = source_attr_column(attr);
     } else if (mapper_->has(name)) {
         column = specialized_attr_column(attr);
@@ -245,9 +249,9 @@ sql::ExpressionPtr
 replace_pattern(sql::ExpressionPtr expr) {
     sql::LiteralPtr l = dynamic_pointer_cast<sql::Literal>(expr);
     if (l and l->value().is_string()) {
-        String value(l->value().string());
-        value.replace("*", "%");
-        value.replace("?", "_");
+        std::string value(l->value().string());
+        boost::replace_all(value, "*", "%");
+        boost::replace_all(value, "?", "_");
         l = sql::Literal::create(Variant(value));
         return l;
     }

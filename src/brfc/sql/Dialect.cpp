@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Dialect.hpp>
 
+#include <boost/algorithm/string/case_conv.hpp>
+
 #include <brfc/exceptions.hpp>
 #include <brfc/DateTimeParser.hpp>
 #include <brfc/Variant.hpp>
@@ -26,7 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-String
+std::string
 Dialect::do_variant_to_string(const Variant& value) const {
     static DateTimeParser date_parser("yyyy-MM-dd");
     static DateTimeParser time_parser("HH:mm:ss.zzz");
@@ -42,7 +44,7 @@ Dialect::do_variant_to_string(const Variant& value) const {
         case Variant::DOUBLE:
             return value.to_string();
         case Variant::BOOL:
-            return value.to_string().to_lower();
+            return boost::to_lower_copy(value.to_string());
         case Variant::DATE:
             return "'" + date_parser.date_to_string(value.date()) + "'";
         case Variant::TIME:
@@ -50,7 +52,7 @@ Dialect::do_variant_to_string(const Variant& value) const {
         case Variant::DATETIME:
             return "'" + datetime_parser.to_string(value.datetime()) + "'";
         default:
-            throw value_error(value.to_string().to_std_string());
+            throw value_error("could not conv to sql: " + value.to_string());
     }
 }
 

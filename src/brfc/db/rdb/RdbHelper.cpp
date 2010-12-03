@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/RdbHelper.hpp>
 
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
@@ -264,7 +265,7 @@ RdbHelper::insert_file(RdbFileEntry& entry,
 
     std::stringstream ss;
     ss << u;
-    String uuid(ss.str());
+    std::string uuid(ss.str());
 
     DateTime stored_at = DateTime::utc_now();
     stored_at.time().msec(0);
@@ -292,7 +293,7 @@ RdbHelper::insert_file(RdbFileEntry& entry,
 }
 
 void
-RdbHelper::insert_file_content(RdbFileEntry& entry, const String& path) {
+RdbHelper::insert_file_content(RdbFileEntry& entry, const std::string& path) {
     // transfer the file to database
     shared_ptr<sql::LargeObject> lo = conn().large_object(path);
 
@@ -325,8 +326,8 @@ RdbHelper::load_file(RdbFileEntry& entry) {
 
     if (not result->next())
         throw brfc::lookup_error("no RdbFileEntry found by id=" +
-                                 String::number(entry.id()).to_std_string() +
-                                 " uuid=" + entry.uuid().to_std_string());
+                                 boost::lexical_cast<std::string>(entry.id()) +
+                                 " uuid=" + entry.uuid());
 
     entry.uuid(result->value_at("uuid").string());
     entry.source_id(result->value_at("source_id").int64_());
@@ -365,7 +366,7 @@ RdbHelper::select_source_id(const oh5::Source& src) {
     qry->where(sql_.bool_(false));
     
     sql::ExpressionPtr x;
-    BOOST_FOREACH(const String& key, src.keys()) {
+    BOOST_FOREACH(const std::string& key, src.keys()) {
         x = m_.source_kvs->column("key")->eq(sql_.string(key));
         x = x->and_(m_.source_kvs->column("value")->eq(sql_.string(src.get(key))));
         qry->where(qry->where()->or_(x->parentheses()));
@@ -427,7 +428,7 @@ RdbHelper::select_all_sources() {
             }
             prev_id = id;
             src.add("_name", r->value_at("name").string());
-            src.add("_id", String::number(id));
+            src.add("_id", boost::lexical_cast<std::string>(id));
         }
         if (r->value_at("key").is_null())
             continue; // no key:value pairs associated
@@ -449,7 +450,7 @@ RdbHelper::add_source(const oh5::Source& source) {
         shared_ptr<sql::Result> r = conn().execute(*qry);
         long long id = last_id(*r);
 
-        BOOST_FOREACH(const String& key, source.keys()) {
+        BOOST_FOREACH(const std::string& key, source.keys()) {
             qry = sql::Insert::create(m_.source_kvs);
             qry->value(m_.source_kvs->column("source_id"),
                        sql_.int64_(id));
@@ -469,11 +470,11 @@ RdbHelper::add_source(const oh5::Source& source) {
 
 void
 RdbHelper::update_source(const oh5::Source& source) {
-    long long id = source.get("_id").to_int();
+    long long id = boost::lexical_cast<long long>(source.get("_id"));
     try {
         conn().begin();
 
-        String stmt("UPDATE bdb_sources SET name = :name WHERE id = :id");
+        std::string stmt("UPDATE bdb_sources SET name = :name WHERE id = :id");
         sql::BindMap binds;
         binds.add(":name", Variant(source.get("_name")));
         binds.add(":id", Variant(id));
@@ -484,7 +485,7 @@ RdbHelper::update_source(const oh5::Source& source) {
         binds.add(":id", Variant(id));
         conn().execute(sql::Query(stmt, binds));
     
-        BOOST_FOREACH(const String& key, source.keys()) {
+        BOOST_FOREACH(const std::string& key, source.keys()) {
             sql::InsertPtr qry = sql::Insert::create(m_.source_kvs);
             qry->value(m_.source_kvs->column("source_id"),
                        sql_.int64_(id));
@@ -504,9 +505,9 @@ RdbHelper::update_source(const oh5::Source& source) {
 
 void
 RdbHelper::remove_source(const oh5::Source& source) {
-    String stmt("DELETE FROM bdb_sources WHERE id = :id");
+    std::string stmt("DELETE FROM bdb_sources WHERE id = :id");
     sql::BindMap binds;
-    binds.add(":id", Variant(source.get("_id").to_int()));
+    binds.add(":id", Variant(boost::lexical_cast<int>(source.get("_id"))));
     shared_ptr<sql::Result> r = conn().execute(sql::Query(stmt, binds));
     if (not r->affected_rows())
         throw lookup_error("source not stored in database");
@@ -534,7 +535,7 @@ RdbHelper::load_children(oh5::Node& node) {
     shared_ptr<sql::Result> r = conn().execute(*qry);
 
     while (r->next()) {
-        const String& name = r->value_at("name").string();
+        std::string name = r->value_at("name").string();
         long long id = r->value_at("id").int64_();
         long long type = r->value_at("type").int64_();
 

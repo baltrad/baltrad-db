@@ -37,13 +37,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
     
-FileCatalog::FileCatalog(const String& dsn, LocalStorage* storage)
+FileCatalog::FileCatalog(const std::string& dsn, LocalStorage* storage)
         : db_(new db::rdb::RelationalDatabase(dsn)) 
         , storage_() {
     this->storage(storage);
 }
 
-FileCatalog::FileCatalog(const String& dsn, const String& path)
+FileCatalog::FileCatalog(const std::string& dsn, const std::string& path)
         : db_(new db::rdb::RelationalDatabase(dsn))
         , storage_() {
     this->storage(new CacheDirStorage(path));
@@ -68,7 +68,7 @@ FileCatalog::storage(LocalStorage* storage) {
 }
 
 bool
-FileCatalog::is_stored(const String& path) const {
+FileCatalog::is_stored(const std::string& path) const {
     oh5::hl::HlFile f(path);
     return is_stored(f);
 }
@@ -79,7 +79,7 @@ FileCatalog::is_stored(const oh5::PhysicalFile& f) const {
 }
 
 shared_ptr<const db::FileEntry>
-FileCatalog::store(const String& path) {
+FileCatalog::store(const std::string& path) {
     oh5::hl::HlFile f(path);
     return store(f); 
 }
@@ -97,7 +97,7 @@ FileCatalog::store(const oh5::PhysicalFile& file) {
 }
 
 shared_ptr<const db::FileEntry>
-FileCatalog::get_or_store(const String& path) {
+FileCatalog::get_or_store(const std::string& path) {
     oh5::hl::HlFile f(path);
     return get_or_store(f);
 }
@@ -136,8 +136,8 @@ FileCatalog::query_attribute() const {
     return db::AttributeQuery(db_.get());
 }
 
-String
-FileCatalog::local_path_for_uuid(const String& uuid) {
+std::string
+FileCatalog::local_path_for_uuid(const std::string& uuid) {
     return storage().store(*database().entry_by_uuid(uuid));
 }
 

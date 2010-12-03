@@ -26,18 +26,18 @@ namespace brfc {
 namespace sql {
 
 ColumnPtr
-Table::add_column(const String& name) {
+Table::add_column(const std::string& name) {
     ColumnPtr column = Column::create(name, this->shared_from_this());
     if (not columns_.insert(std::make_pair(name, column)).second)
-        throw duplicate_entry(name.to_std_string());
+        throw duplicate_entry("duplicate column: " + name);
     return column;
 }
 
 ColumnPtr
-Table::column(const String& name) const {
+Table::column(const std::string& name) const {
     ColumnMap::const_iterator iter = columns_.find(name);
     if (iter == columns_.end())
-        throw lookup_error(name_.to_std_string() + "." + name.to_std_string());
+        throw lookup_error("no such column: " + name_ + "." + name);
     return iter->second;
 }
 

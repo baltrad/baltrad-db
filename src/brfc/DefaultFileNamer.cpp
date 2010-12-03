@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/DefaultFileNamer.hpp>
 
+#include <boost/algorithm/string/case_conv.hpp>
+
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
@@ -35,13 +37,13 @@ DefaultFileNamer::DefaultFileNamer() {
 
 }
 
-String
+std::string
 DefaultFileNamer::do_name(const oh5::File& file) const {
-    String name;
-    name.append(file.what_object().to_lower());
+    std::string name;
+    name.append(boost::to_lower_copy(file.what_object()));
     name.append("_");
     if (file.source().has("name")) {
-        name.append(file.source().get("name").to_lower());
+        name.append(boost::to_lower_copy(file.source().get("name")));
     } else {
         name.append("unknown");
     }
@@ -54,13 +56,13 @@ DefaultFileNamer::do_name(const oh5::File& file) const {
     return name;
 }
 
-String
+std::string
 DefaultFileNamer::do_name(const db::FileEntry& entry) const {
     const oh5::File& file = static_cast<const oh5::File&>(entry);
-    String name = this->name(file);
-    const String& uuid = entry.uuid();
-    const String& version = "_" + uuid.substr(0, uuid.index_of("-"));
-    name.insert(name.last_index_of("."), version);
+    std::string name = this->name(file);
+    const std::string& uuid = entry.uuid();
+    const std::string& version = "_" + uuid.substr(0, uuid.find("-"));
+    name.insert(name.rfind("."), version);
     return name;
 }
 

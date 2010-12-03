@@ -19,9 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/Url.hpp>
 
-#include <brfc/exceptions.hpp>
-
 #include <iostream>
+
+#include <boost/lexical_cast.hpp>
+
+#include <brfc/exceptions.hpp>
 
 namespace brfc {
 
@@ -36,7 +38,7 @@ Url::Url()
 
 }
 
-Url::Url(const String& str)
+Url::Url(const std::string& str)
         : scheme_()
         , user_name_()
         , password_()
@@ -73,25 +75,25 @@ Url::operator=(const Url& rhs) {
 }
 
 void
-Url::parse(const String& str) {
+Url::parse(const std::string& str) {
     // find required scheme
-    int scheme_end = str.index_of("://");
-    if (scheme_end == -1)
+    size_t scheme_end = str.find("://");
+    if (scheme_end == std::string::npos)
         throw value_error("invalid url");
     scheme(str.substr(0, scheme_end));
 
     scheme_end += 3; // advance past ://
     
-    int path_end = str.index_of("/", scheme_end);
-    if (path_end == -1) {
+    size_t path_end = str.find("/", scheme_end);
+    if (path_end == std::string::npos) {
         // entire remaining string is the authority section
         authority(str.substr(scheme_end));
         return;
     }
     authority(str.substr(scheme_end, path_end - scheme_end));
 
-    int query_end = str.index_of("?", path_end);
-    if (query_end == -1) {
+    size_t query_end = str.find("?", path_end);
+    if (query_end == std::string::npos) {
         // entire remaining string is the path
         path(str.substr(path_end));
         return;
@@ -104,9 +106,9 @@ Url::parse(const String& str) {
 }
 
 void
-Url::authority(const String& authority) {
-    int user_info_end = authority.index_of("@");
-    if (user_info_end == -1) {
+Url::authority(const std::string& authority) {
+    size_t user_info_end = authority.find("@");
+    if (user_info_end == std::string::npos) {
         host_info(authority);
     } else {
         user_info(authority.substr(0, user_info_end));
@@ -115,9 +117,9 @@ Url::authority(const String& authority) {
 }
 
 void
-Url::user_info(const String& user_info) {
-    int user_name_end = user_info.index_of(":");
-    if (user_name_end == -1) {
+Url::user_info(const std::string& user_info) {
+    size_t user_name_end = user_info.find(":");
+    if (user_name_end == std::string::npos) {
         user_name(user_info);
     } else {
         user_name(user_info.substr(0, user_name_end));
@@ -126,13 +128,13 @@ Url::user_info(const String& user_info) {
 }
 
 void
-Url::host_info(const String& host_info) {
-    int host_end = host_info.index_of(":");
-    if (host_end == -1) {
+Url::host_info(const std::string& host_info) {
+    size_t host_end = host_info.find(":");
+    if (host_end == std::string::npos) {
         host(host_info);
     } else {
         host(host_info.substr(0, host_end));
-        port(host_info.substr(host_end + 1).to_int());
+        port(boost::lexical_cast<int>(host_info.substr(host_end + 1)));
     }
 }
 

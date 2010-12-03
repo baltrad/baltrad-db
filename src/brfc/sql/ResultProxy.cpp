@@ -56,7 +56,7 @@ ResultProxy::do_value_at(unsigned int pos) const {
 }
 
 Variant
-ResultProxy::do_value_at(const String& pos) const {
+ResultProxy::do_value_at(const std::string& pos) const {
     return result_->value_at(pos);
 }
 

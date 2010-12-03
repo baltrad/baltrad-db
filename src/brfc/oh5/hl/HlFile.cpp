@@ -42,18 +42,18 @@ HlFile::HlFile()
     root_.backend(new MemoryNodeBackend());
 }
 
-HlFile::HlFile(const String& path)
+HlFile::HlFile(const std::string& path)
         : root_(this)
         , path_(path) {
     root_.backend(new MemoryNodeBackend());
     load();
 }
 
-HlFile::HlFile(const String& object,
+HlFile::HlFile(const std::string& object,
                const Date& date,
                const Time& time,
-               const String& source,
-               const String& version)
+               const std::string& source,
+               const std::string& version)
         : root_(this)
         , path_() {
     root_.backend(new MemoryNodeBackend());
@@ -72,7 +72,7 @@ HlFile::~HlFile() {
 
 namespace {
 
-void add_attribute(Node& parent, const String& name, HL_Node* node) {
+void add_attribute(Node& parent, const std::string& name, HL_Node* node) {
     shared_ptr<const Converter> converter =
         Converter::create_from_hlhdf_node(*node);
     if (not converter)
@@ -84,10 +84,10 @@ void add_attribute(Node& parent, const String& name, HL_Node* node) {
 }
 
 void add_node(Group& root, HL_Node* node) {
-    String pathname = String::from_utf8(HLNode_getName(node));
-    StringList path = pathname.split("/", String::SKIP_EMPTY_PARTS);
+    std::string pathname(HLNode_getName(node));
+    StringList path = StringList::split(pathname, "/", StringList::SKIP_EMPTY_PARTS);
 
-    String nodename = path.take_last();
+    std::string nodename = path.take_last();
     
     Node* parent = 0;
     if (path.empty())
@@ -117,7 +117,7 @@ void
 HlFile::load() {
     init_hlhdflib();
 
-    std::string path_utf8 = path().to_utf8();
+    std::string path_utf8 = path();
     shared_ptr<HL_NodeList> nodes(HLNodeList_read(path_utf8.c_str()),
                                   &HLNodeList_free);
     if (not nodes)

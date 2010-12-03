@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class FileHasher;
-class String;
 class Variant;
 
 namespace oh5 {
@@ -68,7 +67,7 @@ class RelationalDatabase : public Database {
      *
      * the only engine currently supported is 'postgresql'
      */
-    explicit RelationalDatabase(const String& dsn);
+    explicit RelationalDatabase(const std::string& dsn);
     
     explicit RelationalDatabase(shared_ptr<sql::ConnectionPool> pool);
 
@@ -97,7 +96,7 @@ class RelationalDatabase : public Database {
 
     virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file);
     virtual shared_ptr<FileEntry> do_entry_by_file(const oh5::PhysicalFile& file);
-    virtual shared_ptr<FileEntry> do_entry_by_uuid(const String& uuid);
+    virtual shared_ptr<FileEntry> do_entry_by_uuid(const std::string& uuid);
     
     virtual shared_ptr<FileResult> do_execute(const FileQuery& query);
 

@@ -71,8 +71,9 @@ Result::pqtype_to_variant(const pqxx::result::field& field,
         return Variant(Date::from_extended_iso_string(field.c_str()));
     else if (coltype == types_->time_oid)
         return Variant(Time::from_extended_iso_string(field.c_str()));
-    else
-        return Variant(String::from_utf8(field.c_str()));
+    else {
+        return Variant(field.c_str());
+    }
 }
 
 Variant
@@ -87,14 +88,13 @@ Result::do_value_at(unsigned int pos) const {
 }
 
 Variant
-Result::do_value_at(const String& col) const  {
-    std::string col_std = col.to_std_string();
+Result::do_value_at(const std::string& col) const  {
     try {
-        const pqxx::result::field& field = result_.at(row_).at(col_std);
-        pqxx::oid coltype = result_.column_type(col_std);
+        const pqxx::result::field& field = result_.at(row_).at(col);
+        pqxx::oid coltype = result_.column_type(col);
         return pqtype_to_variant(field, coltype);
     } catch (const std::invalid_argument&) {
-        throw lookup_error("invalid pqxx::result column");
+        throw lookup_error("invalid pqxx::result column: " + col);
     }
 }
 

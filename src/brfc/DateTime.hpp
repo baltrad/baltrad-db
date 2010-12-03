@@ -94,9 +94,9 @@ class DateTime {
     DateTime& date(const Date& date) { date_ = date; return *this; }
     DateTime& time(const Time& time) { time_ = time; return *this; }
 
-    String to_string(const String& format) const;
+    std::string to_string(const std::string& format) const;
 
-    static DateTime from_string(const String& str, const String& format);
+    static DateTime from_string(const std::string& str, const std::string& format);
     
     /**
      * @brief convert to tm

@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <vector>
 
-#include <brfc/String.hpp>
+#include <string>
 #include <brfc/sql/fwd.hpp>
 
 namespace brfc {
@@ -37,12 +37,12 @@ namespace rdb {
  * @brief Attribute mapping to database table/column
  */
 struct Mapping {
-    Mapping(const String& attribute_, sql::ColumnPtr column_)
+    Mapping(const std::string& attribute_, sql::ColumnPtr column_)
             : attribute(attribute_)
             , column(column_) {
     }
     
-    String attribute; ///< Attribute name
+    std::string attribute; ///< Attribute name
     sql::ColumnPtr column; ///< column in the table where value is stored
 };
 
@@ -98,7 +98,7 @@ class AttributeMapper {
      * @param attribute Attribute name
      * @return true if found
      */
-    bool has(const String& attribute) const; 
+    bool has(const std::string& attribute) const; 
 
     /**
      * @brief get Mapping
@@ -106,12 +106,12 @@ class AttributeMapper {
      * @return Mapping for the Attribute
      * @throw lookup_error if not found
      */
-    const Mapping& mapping(const String& attribute) const;
+    const Mapping& mapping(const std::string& attribute) const;
 
     void clear() { mappings_.clear(); }
 
   private:
-    typedef std::map<String, Mapping> MappingMap;
+    typedef std::map<std::string, Mapping> MappingMap;
 
     MappingMap mappings_;
 };

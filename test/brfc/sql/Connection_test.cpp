@@ -68,7 +68,7 @@ class sql_Connection_test : public testing::Test {
 };
 
 TEST_F(sql_Connection_test, test_no_transaction_execute) {
-    String stmt("query");
+    std::string stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false))  // execute()
         .WillOnce(Return(false))  // begin()
@@ -82,7 +82,7 @@ TEST_F(sql_Connection_test, test_no_transaction_execute) {
 }
 
 TEST_F(sql_Connection_test, test_no_transaction_excute_throws) {
-    String stmt("query");
+    std::string stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false)) // execute()
         .WillOnce(Return(false)) // being()
@@ -96,7 +96,7 @@ TEST_F(sql_Connection_test, test_no_transaction_excute_throws) {
 }
 
 TEST_F(sql_Connection_test, test_in_transaction_execute) {
-    String stmt("query");
+    std::string stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
@@ -106,7 +106,7 @@ TEST_F(sql_Connection_test, test_in_transaction_execute) {
 }
 
 TEST_F(sql_Connection_test, test_in_transaction_execute_throws) {
-    String stmt("query");
+    std::string stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
@@ -184,7 +184,7 @@ TEST_F(sql_Connection_test, test_commit_on_closed_connection) {
 }
 
 TEST_F(sql_Connection_test, test_execute_sqlquery) {
-    String stmt("query");
+    std::string stmt("query");
     BindMap binds;
     Query query(stmt, binds);
 
@@ -227,7 +227,7 @@ TEST_F(sql_Connection_test, test_execute_select) {
 }
 
 TEST_F(sql_Connection_test, test_execute_replaces_binds) {
-    String stmt(":bind");
+    std::string stmt(":bind");
     BindMap binds;
     binds.add(":bind", Variant(1));
 
@@ -236,7 +236,7 @@ TEST_F(sql_Connection_test, test_execute_replaces_binds) {
 
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(conn, do_execute(String("1")))
+    EXPECT_CALL(conn, do_execute("1"))
         .WillOnce(Return(shared_ptr<Result>()));
     
     conn.execute(Query(stmt, binds));

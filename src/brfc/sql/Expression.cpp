@@ -19,7 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Expression.hpp>
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Label.hpp>
@@ -28,9 +28,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-const String&
+const std::string&
 Expression::name() const {
-    static String empty;
+    static std::string empty;
     return empty;
 }
 
@@ -93,7 +93,7 @@ Expression::parentheses() const {
 }
 
 LabelPtr
-Expression::label(const String& label) const {
+Expression::label(const std::string& label) const {
     return Label::create(this->shared_from_this(), label);
 }
 

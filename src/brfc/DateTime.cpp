@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/DateTimeParser.hpp>
-#include <brfc/String.hpp>
+#include <string>
 #include <brfc/TimeDelta.hpp>
 
 namespace brfc {
@@ -58,13 +58,13 @@ DateTime::utc_now() {
     return DateTime(d, t);
 }
 
-String
-DateTime::to_string(const String& format) const {
+std::string
+DateTime::to_string(const std::string& format) const {
     return DateTimeParser(format).to_string(*this);
 }
 
 DateTime
-DateTime::from_string(const String& str, const String& format) {
+DateTime::from_string(const std::string& str, const std::string& format) {
     return DateTimeParser(format).from_string(str);
 }
 

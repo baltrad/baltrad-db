@@ -46,7 +46,7 @@ class Result : public sql::Result {
      */
     virtual Variant do_value_at(unsigned int pos) const;
 
-    virtual Variant do_value_at(const String& column) const;
+    virtual Variant do_value_at(const std::string& column) const;
 
     virtual int do_affected_rows() const;
 

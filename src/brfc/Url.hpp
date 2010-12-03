@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_URL_HPP
 #define BRFC_URL_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 
@@ -38,7 +38,7 @@ class Url {
   public:
     Url();
 
-    explicit Url(const String& str);
+    explicit Url(const std::string& str);
 
     Url(const Url& other);
 
@@ -47,47 +47,47 @@ class Url {
     /**
      * @brief set user_name, password, host and port from authority string
      */
-    void authority(const String& authority);
+    void authority(const std::string& authority);
     
     /**
      * @brief set user_name and password
      */
-    void user_info(const String& user_info);
+    void user_info(const std::string& user_info);
     
     /**
      * @brief set host and port
      */
-    void host_info(const String& host_info);
+    void host_info(const std::string& host_info);
 
-    const String& scheme() const {
+    const std::string& scheme() const {
         return scheme_;
     }
 
-    void scheme(const String& scheme) {
+    void scheme(const std::string& scheme) {
         scheme_ = scheme;
     }
 
-    const String& user_name() const {
+    const std::string& user_name() const {
         return user_name_;
     }
 
-    void user_name(const String& user_name) {
+    void user_name(const std::string& user_name) {
         user_name_ = user_name;
     }
 
-    const String& password() const {
+    const std::string& password() const {
         return password_;
     }
 
-    void password(const String& password) {
+    void password(const std::string& password) {
         password_ = password;
     }
 
-    const String& host() const {
+    const std::string& host() const {
         return host_;
     }
 
-    void host(const String& host) {
+    void host(const std::string& host) {
         host_ = host;
     }
 
@@ -102,11 +102,11 @@ class Url {
         port_ = port;
     }
 
-    const String& path() const {
+    const std::string& path() const {
         return path_;
     }
 
-    void path(const String& path) {
+    void path(const std::string& path) {
         path_ = path;
     }
     
@@ -115,24 +115,24 @@ class Url {
      *
      * @note don't use this. Has to be rewritten as a String:String map
      */
-    const String& query() const {
+    const std::string& query() const {
         return query_;
     }
 
-    void query(const String& query) {
+    void query(const std::string& query) {
         query_ = query;
     }
 
   private:
-    void parse(const String& str);
+    void parse(const std::string& str);
 
-    String scheme_;
-    String user_name_;
-    String password_;
-    String host_;
+    std::string scheme_;
+    std::string user_name_;
+    std::string password_;
+    std::string host_;
     int port_;
-    String path_;
-    String query_;
+    std::string path_;
+    std::string query_;
 };
 
 } // namespace brfc

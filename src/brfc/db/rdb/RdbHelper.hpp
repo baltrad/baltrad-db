@@ -117,7 +117,7 @@ class RdbHelper : boost::noncopyable {
      * @pre entry has database id
      * @post entry has large object id
      */
-    void insert_file_content(RdbFileEntry& entry, const String& path);
+    void insert_file_content(RdbFileEntry& entry, const std::string& path);
     
     /**
      * @brief lookup id for @c source

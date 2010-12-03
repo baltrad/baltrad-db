@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
-#include <brfc/String.hpp>
+#include <string>
 #include <brfc/TimeDelta.hpp>
 
 #include <brfc/test_common.hpp>

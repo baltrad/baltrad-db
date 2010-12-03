@@ -46,7 +46,7 @@ class FakeConnection : public Connection {
 
     virtual bool do_in_transaction() const { return in_transaction_; }
     
-    virtual shared_ptr<Result> do_execute(const String&) {
+    virtual shared_ptr<Result> do_execute(const std::string&) {
         throw std::runtime_error("not implemented");
     }
 
@@ -62,7 +62,7 @@ class FakeConnection : public Connection {
         throw std::runtime_error("not implemented");
     }
 
-    virtual shared_ptr<LargeObject> do_large_object(const String&) {
+    virtual shared_ptr<LargeObject> do_large_object(const std::string&) {
         throw std::runtime_error("not implemented");
     }
 

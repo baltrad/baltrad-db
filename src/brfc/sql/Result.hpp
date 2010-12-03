@@ -78,7 +78,7 @@ class Result : public boost::noncopyable {
      * @brief get value in @c column as Variant
      * @throw lookup_error if @c column is not in result
      */
-    Variant value_at(const String& column) const {
+    Variant value_at(const std::string& column) const {
         return do_value_at(column);
     }
     
@@ -114,7 +114,7 @@ class Result : public boost::noncopyable {
     /**
      * @brief value_at(const String&) implementation
      */
-    virtual Variant do_value_at(const String& column) const = 0;
+    virtual Variant do_value_at(const std::string& column) const = 0;
 
     virtual int do_affected_rows() const = 0;
 };

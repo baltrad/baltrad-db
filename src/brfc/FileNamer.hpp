@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_FILE_NAMER_HPP
 #define BRFC_FILE_NAMER_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 
@@ -44,7 +44,7 @@ class FileNamer {
      *
      * @sa do_name(const oh5::File&)
      */
-    String name(const oh5::File& file) const {
+    std::string name(const oh5::File& file) const {
         return do_name(file);
     }
     
@@ -55,7 +55,7 @@ class FileNamer {
      *
      * @sa do_name(const db::FileEntry&)
      */
-    String name(const db::FileEntry& entry) const {
+    std::string name(const db::FileEntry& entry) const {
         return do_name(entry);
     }
 
@@ -68,12 +68,12 @@ class FileNamer {
     /**
      * @brief name(const oh5::File&) implementation
      */
-    virtual String do_name(const oh5::File& file) const = 0;
+    virtual std::string do_name(const oh5::File& file) const = 0;
 
     /**
      * @brief name(const oh5::File&) implementation
      */
-    virtual String do_name(const db::FileEntry& entry) const = 0;
+    virtual std::string do_name(const db::FileEntry& entry) const = 0;
 };
 
 } // namespace brfc

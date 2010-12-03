@@ -257,7 +257,7 @@ TEST_P(db_rdb_RdbHelper_test, test_load_source_unicode) {
 
 TEST_P(db_rdb_RdbHelper_test, test_load_source_by_plc_unicode) {
     long long src_id = 0;
-    oh5::Source src = oh5::Source::from_string(String::from_utf8("PLC:Świdwin"));
+    oh5::Source src = oh5::Source::from_string("PLC:Świdwin");
     EXPECT_NO_THROW(src_id = helper.select_source_id(src));
     EXPECT_GT(src_id, 0);
 
@@ -265,7 +265,7 @@ TEST_P(db_rdb_RdbHelper_test, test_load_source_by_plc_unicode) {
     EXPECT_NO_THROW(src = helper.select_source(src_id));
 
     ASSERT_TRUE(src.has("PLC"));
-    EXPECT_EQ(String::from_utf8("Świdwin"), src.get("PLC"));
+    EXPECT_EQ("Świdwin", src.get("PLC"));
     ASSERT_TRUE(src.has("RAD"));
     EXPECT_EQ("PL46", src.get("RAD"));
     ASSERT_TRUE(src.has("_name"));
@@ -300,7 +300,7 @@ TEST_P(db_rdb_RdbHelper_test, test_load_children) {
     EXPECT_TRUE(helper.backend(r).loaded());
 
     EXPECT_EQ(3, r.children().size());
-    
+
     oh5::Group* g = r.group("g1");
     ASSERT_TRUE(g);
     EXPECT_EQ(helper.backend(*g1).id(), helper.backend(*g).id());

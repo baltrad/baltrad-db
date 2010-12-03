@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Group.hpp>
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <brfc/exceptions.hpp>
 #include <brfc/StringList.hpp>
 
@@ -28,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-Group::Group(const String& name)
+Group::Group(const std::string& name)
     : Node(name) {
 
 }
@@ -38,24 +40,24 @@ Group::~Group() {
 }
 
 Attribute*
-Group::attribute(const String& path) {
+Group::attribute(const std::string& path) {
     const Group* self = const_cast<const Group*>(this);
     return const_cast<Attribute*>(self->attribute(path));
 }
 
 const Attribute*
-Group::attribute(const String& path) const {
+Group::attribute(const std::string& path) const {
     return dynamic_cast<const Attribute*>(child(path));
 }
 
 Attribute*
-Group::effective_attribute(const String& name) {
+Group::effective_attribute(const std::string& name) {
     const Group* self = const_cast<const Group*>(this);
     return const_cast<Attribute*>(self->effective_attribute(name));
 }
 
 const Attribute*
-Group::effective_attribute(const String& name) const {
+Group::effective_attribute(const std::string& name) const {
     const Attribute* child = attribute(name);
     if (child)
         return child;
@@ -66,21 +68,21 @@ Group::effective_attribute(const String& name) const {
 }
 
 Group*
-Group::group(const String& path) {
+Group::group(const std::string& path) {
     return dynamic_cast<Group*>(child(path));
 }
 
 const Group*
-Group::group(const String& name) const {
+Group::group(const std::string& name) const {
     return dynamic_cast<const Group*>(child(name));
 }
 
 Group&
-Group::get_or_create_group(const String& pathstr) {
-    if (pathstr.starts_with("/") and not is_root())
+Group::get_or_create_group(const std::string& pathstr) {
+    if (boost::starts_with(pathstr, "/") and not is_root())
         throw value_error("path must not be absolute");
 
-    StringList path = pathstr.split("/", String::SKIP_EMPTY_PARTS);
+    const StringList& path = StringList::split(pathstr, "/", StringList::SKIP_EMPTY_PARTS);
 
     Group* last = this;
     Group* node = 0;

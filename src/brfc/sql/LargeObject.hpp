@@ -32,13 +32,13 @@ class LargeObject {
   
     long long id() const { return do_id(); }
 
-    void write_to_file(const String& path) const {
+    void write_to_file(const std::string& path) const {
         do_write_to_file(path);
     }
 
   protected:
     virtual long long do_id() const = 0;
-    virtual void do_write_to_file(const String& path) const = 0;
+    virtual void do_write_to_file(const std::string& path) const = 0;
 };
 
 } // namespace sql

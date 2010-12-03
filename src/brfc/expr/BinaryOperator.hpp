@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_BINARY_OPERATOR_HPP
 #define BRFC_EXPR_BINARY_OPERATOR_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/expr/Expression.hpp>
 
@@ -32,7 +32,7 @@ namespace expr {
  */
 class BinaryOperator : public Expression {
   public:
-    BinaryOperator(const String& op,
+    BinaryOperator(const std::string& op,
                    const Expression& lhs,
                    const Expression& rhs)
             : Expression()
@@ -50,7 +50,7 @@ class BinaryOperator : public Expression {
 
     ExpressionPtr lhs() const { return lhs_; }
     ExpressionPtr rhs() const { return rhs_; }
-    const String& op() const { return op_; }
+    const std::string& op() const { return op_; }
 
   protected:
     BinaryOperator(const BinaryOperator& other)
@@ -60,7 +60,7 @@ class BinaryOperator : public Expression {
     }
 
   private:
-    String op_;
+    std::string op_;
     ExpressionPtr lhs_;
     ExpressionPtr rhs_;
 };

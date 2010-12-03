@@ -21,15 +21,20 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_STRING_LIST_HPP
 
 #include <list>
+#include <string>
 
 #include <brfc/assert.hpp>
-#include <brfc/String.hpp>
 
 namespace brfc {
 
 class StringList {
   public:
-    typedef std::list<String> container_t;
+    enum SplitPolicy {
+        KEEP_EMPTY_PARTS,
+        SKIP_EMPTY_PARTS
+    };
+
+    typedef std::list<std::string> container_t;
 
     typedef container_t::iterator iterator;
     typedef container_t::const_iterator const_iterator;
@@ -39,17 +44,31 @@ class StringList {
 
     }
 
-    explicit StringList(const String& str)
+    explicit StringList(const std::string& str)
             : list_() {
         list_.push_back(str);
+    }
+
+    explicit StringList(const container_t& container)
+            : list_(container) {
+
+    }
+
+    StringList(container_t::const_iterator begin,
+               container_t::const_iterator end)
+            : list_(begin, end) {
     }
 
     StringList(const StringList& other)
             : list_(other.list_) {
 
     }
+
+    static StringList split(const std::string& str,
+                            const std::string& sep,
+                            SplitPolicy policy=KEEP_EMPTY_PARTS);
     
-    String join(const String& sep) const;
+    std::string join(const std::string& sep) const;
 
     bool empty() const {
         return list_.empty();
@@ -59,9 +78,9 @@ class StringList {
         return list_.size();
     }
 
-    bool contains(const String& value) const;
+    bool contains(const std::string& value) const;
 
-    void append(const String& value) {
+    void append(const std::string& value) {
         list_.push_back(value);
     }
 
@@ -69,27 +88,27 @@ class StringList {
         list_.sort();
     }
 
-    String& front() {
+    std::string& front() {
         return list_.front();
     }
 
-    const String& front() const {
+    const std::string& front() const {
         return list_.front();
     }
 
-    String& back() {
+    std::string& back() {
         return list_.back();
     }
 
-    const String& back() const {
+    const std::string& back() const {
         return list_.back();
     }
 
-    void push_front(const String& str) {
+    void push_front(const std::string& str) {
         list_.push_front(str);
     }
 
-    void push_back(const String& str) {
+    void push_back(const std::string& str) {
         list_.push_back(str);
     }
 
@@ -113,18 +132,18 @@ class StringList {
         return list_.end();
     }
 
-    const String& at(int i) const;
+    const std::string& at(int i) const;
 
-    String take_first() {
+    std::string take_first() {
         BRFC_ASSERT(not list_.empty());
-        String s = list_.front();
+        std::string s = list_.front();
         list_.pop_front();
         return s;
     }
 
-    String take_last() {
+    std::string take_last() {
         BRFC_ASSERT(not list_.empty());
-        String s = list_.back();
+        std::string s = list_.back();
         list_.pop_back();
         return s;
     }

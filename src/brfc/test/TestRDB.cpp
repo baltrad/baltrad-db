@@ -35,9 +35,9 @@ namespace fs = boost::filesystem;
 namespace brfc {
 namespace test {
 
-TestRDB::TestRDB(const String& dsn, const String& schema_dir)
+TestRDB::TestRDB(const std::string& dsn, const std::string& schema_dir)
         : RelationalDatabase(dsn)
-        , schema_dir_(schema_dir.to_utf8()) {
+        , schema_dir_(schema_dir) {
     if (not fs::path(schema_dir_).is_complete())
         throw value_error("schema dir must be a complete path");
 }
@@ -48,24 +48,24 @@ TestRDB::~TestRDB() {
 
 void
 TestRDB::create() {
-    exec_queries_from(String("create.sql"));
+    exec_queries_from("create.sql");
 }
 
 void
 TestRDB::drop() {
-    exec_queries_from(String("drop.sql"));
+    exec_queries_from("drop.sql");
 }
 
 void
 TestRDB::clean() {
-    conn()->execute(String("DELETE FROM bdb_files"));
+    conn()->execute("DELETE FROM bdb_files");
 }
 
 StringList
-TestRDB::load_queries(const String& filename) {
+TestRDB::load_queries(const std::string& filename) {
     fs::path qf_path = fs::path(schema_dir_)
-                       / conn()->dialect().name().to_utf8()
-                       / filename.to_utf8();
+                       / conn()->dialect().name()
+                       / filename;
     
     std::ifstream ifs(qf_path.string().c_str(), std::ios::binary);
     std::filebuf* rdbuf = ifs.rdbuf();
@@ -77,17 +77,16 @@ TestRDB::load_queries(const String& filename) {
     }
     ifs.close();
 
-    String content = String::from_utf8(str);
-    return content.split(";\n", String::SKIP_EMPTY_PARTS);
+    return StringList::split(str, ";", StringList::SKIP_EMPTY_PARTS);
 }
 
 void
-TestRDB::exec_queries_from(const String& file) {
+TestRDB::exec_queries_from(const std::string& file) {
     const StringList& queries = load_queries(file);
     shared_ptr<sql::Connection> c = conn();
     c->begin();
     try {
-        BOOST_FOREACH(const String& stmt, queries) {
+        BOOST_FOREACH(const std::string& stmt, queries) {
             c->execute(stmt);
         }
         c->commit();

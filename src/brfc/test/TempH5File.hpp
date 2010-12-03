@@ -54,9 +54,9 @@ class TempH5File {
     
     void write(const oh5::File& f);
     
-    String path() const;
+    std::string path() const;
 
-    void copy(const String& dest) const;
+    void copy(const std::string& dest) const;
 
   private:
     shared_ptr<char> path_;

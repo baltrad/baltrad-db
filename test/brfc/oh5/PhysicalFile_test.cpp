@@ -38,7 +38,7 @@ struct oh5_PhysicalFile_test : public testing::Test {
 };
 
 TEST_F(oh5_PhysicalFile_test, test_name) {
-    String path;
+    std::string path;
     EXPECT_CALL(file, do_path())
         .WillRepeatedly(ReturnRef(path));
     

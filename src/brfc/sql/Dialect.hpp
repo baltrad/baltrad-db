@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_DIALECT_HPP
 #define BRFC_SQL_DIALECT_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 
@@ -41,14 +41,14 @@ class Dialect {
         return do_has_feature(feature);
     }
 
-    const String& name() const {
+    const std::string& name() const {
         return do_name();
     }
 
     /**
      * @sa do_variant_to_string
      */
-    String variant_to_string(const Variant& value) const {
+    std::string variant_to_string(const Variant& value) const {
         return do_variant_to_string(value);
     }
 
@@ -58,7 +58,7 @@ class Dialect {
      */
     virtual bool do_has_feature(Feature feature) const = 0;
 
-    virtual const String& do_name() const = 0;
+    virtual const std::string& do_name() const = 0;
 
     /**
      * @brief default implementation
@@ -68,7 +68,7 @@ class Dialect {
      * - none as NULL
      * - string surrounded by apostrophes (')
      */
-    virtual String do_variant_to_string(const Variant& value) const;
+    virtual std::string do_variant_to_string(const Variant& value) const;
 };
 
 } // namespace sql

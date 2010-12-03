@@ -19,7 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/String.hpp>
+#include <string>
 #include <brfc/Variant.hpp>
 
 #include <brfc/sql/Alias.hpp>
@@ -45,8 +45,8 @@ class sql_Expression_test: public testing::Test {
 
 TEST_F(sql_Expression_test, test_utf_string_literal) {
     LiteralPtr lit = xpr.string("öäü");
-    String s = lit->value().string();
-    EXPECT_EQ(s.length(), 3);
+    std::string s = lit->value().string();
+    EXPECT_EQ("öäü", s);
 }
 
 TEST_F(sql_Expression_test, test_join_contains) {

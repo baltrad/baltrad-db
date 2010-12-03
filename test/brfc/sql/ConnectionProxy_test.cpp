@@ -121,7 +121,7 @@ TEST_F(sql_ConnectionProxy_test, test_in_transaction) {
 
 TEST_F(sql_ConnectionProxy_test, test_execute) {
     shared_ptr<Result> r = make_shared<MockResult>();
-    String stmt = "stmt";
+    std::string stmt = "stmt";
     EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Return(r));
     
@@ -162,7 +162,7 @@ TEST_F(sql_ConnectionProxy_test, test_large_object_longlong) {
 
 TEST_F(sql_ConnectionProxy_test, test_large_object_string) {
     shared_ptr<LargeObject> lo = make_shared<MockLargeObject>();
-    EXPECT_CALL(conn, do_large_object(TypedEq<const String&>("path")))
+    EXPECT_CALL(conn, do_large_object(TypedEq<const std::string&>("path")))
         .WillOnce(Return(lo));
     
     EXPECT_EQ(1, proxy.use_count());

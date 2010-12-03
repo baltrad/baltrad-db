@@ -32,7 +32,7 @@ class TempDir {
   public:
     TempDir();
     ~TempDir();
-    String path() const;
+    std::string path() const;
 
     void unlink();
 

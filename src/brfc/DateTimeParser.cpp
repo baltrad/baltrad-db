@@ -20,8 +20,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/DateTimeParser.hpp>
 
 #include <algorithm>
+#include <sstream>
 
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <brfc/exceptions.hpp>
 
@@ -38,30 +41,32 @@ IntToken::max_length() const {
 }
 
 int
-Literal::to_datetime(DateTime& dt, const String& str) const {
-    if (not str.starts_with(str_))
-        throw value_error("Literal token '" + str_.to_std_string() +
+Literal::to_datetime(DateTime& dt, const std::string& str) const {
+    if (not boost::starts_with(str, str_))
+        throw value_error("Literal token '" + str_ +
                           "' not encountered");
     return str_.length();
 }
 
-String
+std::string
 IntToken::to_string(const DateTime& dt) const {
-    int val = get_value(dt);
-    String str = String::number(val);
-    if (zero_prefixed_)
-        str = str.right_justified(max_length_, '0');
-    return str;
+    std::stringstream ss;
+    ss.fill('0');
+    ss.width(max_length_);
+    ss << get_value(dt);
+    return ss.str();
 }
 
 int
-IntToken::to_datetime(DateTime& dt, const String& str) const {
+IntToken::to_datetime(DateTime& dt, const std::string& str) const {
     // XXX: refactor me!
     if (str.length() == 0)
         throw value_error("string length == 0");
-    bool has_sign = str.char_at(0) == '-';
+    bool has_sign = str.at(0) == '-';
 
-    int val = -1, start = 0, nchar = std::min(max_length_, str.length());
+    int val = -1;
+    unsigned int start = 0;
+    unsigned int nchar = std::min((size_t)max_length_, str.length());
 
     if (has_sign) {
         if (not signed_)
@@ -70,22 +75,25 @@ IntToken::to_datetime(DateTime& dt, const String& str) const {
         nchar = std::min(nchar, str.length() - start);
     }
     if (zero_prefixed_) {
-        val = str.substr(start, nchar).to_int();
+        try {
+            val = boost::lexical_cast<int>(str.substr(start, nchar));
+        } catch (const boost::bad_lexical_cast&) {
+            throw value_error("could not cast '" + str.substr(start, nchar) +
+                              "' to int");
+        }
         if (str.length() < start + max_length_)
-            throw value_error("invalid zero prefixed integer: "
-                              + str.to_std_string());
+            throw value_error("invalid zero prefixed integer: " + str);
     } else {
         while (nchar > 0) {
             try {
-                val = str.substr(start, nchar).to_int();
+                val = boost::lexical_cast<int>(str.substr(start, nchar));
                 break;
-            } catch (const value_error&) {
+            } catch (const boost::bad_lexical_cast&) {
                 --nchar;
             }
         }
         if (nchar == 0)
-            throw value_error("unable to parse integer from: "
-                              + str.to_std_string());
+            throw value_error("unable to parse integer from: " + str);
     }
    
     if (has_sign)
@@ -98,9 +106,9 @@ IntToken::to_datetime(DateTime& dt, const String& str) const {
 } // namespace dttok
 
 shared_ptr<dttok::Token>
-DateTimeParser::token_from_string(const String& str) {
-    if (str.starts_with("'") and str.ends_with("'")) {
-        String lit = str.substr(1, str.length() - 2);
+DateTimeParser::token_from_string(const std::string& str) {
+    if (boost::starts_with(str, "'") and boost::ends_with(str, "'")) {
+        std::string lit = str.substr(1, str.length() - 2);
         if (lit.length() == 0)
             lit = "'";
         return make_shared<dttok::Literal>(lit);
@@ -136,7 +144,7 @@ DateTimeParser::token_from_string(const String& str) {
         return make_shared<dttok::Literal>(str);
 }
 
-DateTimeParser::DateTimeParser(const String& format)
+DateTimeParser::DateTimeParser(const std::string& format)
         : tokens_(tokenize(format)) {
 
 }
@@ -151,20 +159,20 @@ DateTimeParser::~DateTimeParser() {
 }
 
 DateTimeParser::TokenVector
-DateTimeParser::tokenize(const String& format) {
+DateTimeParser::tokenize(const std::string& format) {
     // yyyy/MM/dd'yy'hhmmqwesszzz
-    String tokchars = "yMdhHmsz", tokstr;
-    String::uchar pch = format.char_at(0);
+    std::string tokchars = "yMdhHmsz", tokstr;
+    char pch = format.at(0);
     tokstr += pch;
     TokenVector tokens;
     bool explicit_literal = false;
 
-    for (int i = 1; i < format.length(); ++i) {
-        String::uchar ch = format.char_at(i);
+    for (unsigned int i = 1; i < format.length(); ++i) {
+        char ch = format.at(i);
 
         if (ch != pch and not explicit_literal
-                      and (tokchars.contains(ch)
-                           or tokchars.contains(pch))) {
+                      and (tokchars.find(ch) != std::string::npos
+                           or tokchars.find(pch) != std::string::npos)) {
             tokens.push_back(token_from_string(tokstr));
             tokstr = "";
         }
@@ -199,19 +207,19 @@ DateTimeParser::is_format_time_only() const {
 }
 
 DateTime
-DateTimeParser::from_string(const String& str) {
+DateTimeParser::from_string(const std::string& str) {
     DateTime dt;
     int pos = 0;
     BOOST_FOREACH(shared_ptr<dttok::Token> token, tokens_) {
-        String substr = str.substr(pos, token->max_length());
+        std::string substr = str.substr(pos, token->max_length());
         pos += token->to_datetime(dt, substr);
     }
     return dt;
 }
 
-String
+std::string
 DateTimeParser::to_string(const DateTime& dt) {
-    String str;
+    std::string str;
     BOOST_FOREACH(shared_ptr<dttok::Token> token, tokens_) {
         str += token->to_string(dt);
     }
@@ -219,22 +227,22 @@ DateTimeParser::to_string(const DateTime& dt) {
 }
 
 Date
-DateTimeParser::date_from_string(const String& str) {
+DateTimeParser::date_from_string(const std::string& str) {
     return from_string(str).date();
 }
 
-String
+std::string
 DateTimeParser::date_to_string(const Date& date) {
     DateTime dt(date);
     return to_string(dt);
 }
 
 Time
-DateTimeParser::time_from_string(const String& str) {
+DateTimeParser::time_from_string(const std::string& str) {
     return from_string(str).time();
 }
 
-String
+std::string
 DateTimeParser::time_to_string(const Time& time) {
     DateTime dt(time);
     return to_string(dt);

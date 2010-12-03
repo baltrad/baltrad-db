@@ -76,7 +76,7 @@ TEST(Scalar_test, copy_assign) {
 }
 
 TEST(Scalar_test, string) {
-    String val = String::from_utf8("öäõxyz");
+    std::string val("öäõxyz");
     Scalar v(val);
     EXPECT_EQ(v.type(), Scalar::STRING);
     EXPECT_EQ(v.string(), val);

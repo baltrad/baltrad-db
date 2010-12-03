@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/Expression.hpp>
 
@@ -31,7 +31,7 @@ namespace sql {
 
 class Function : public Expression {
   public:
-    static FunctionPtr create(const String& name) {
+    static FunctionPtr create(const std::string& name) {
         return FunctionPtr(new Function(name));
     }
 
@@ -41,7 +41,7 @@ class Function : public Expression {
         return f;
     }
     
-    virtual const String& name() const { return name_; }
+    virtual const std::string& name() const { return name_; }
     
     std::vector<ExpressionPtr> args() const { return args_; }
 
@@ -50,13 +50,13 @@ class Function : public Expression {
     }
    
   protected:
-    explicit Function(const String& name)
+    explicit Function(const std::string& name)
             : name_(name)
             , args_() {
     }
 
   private:
-    String name_;
+    std::string name_;
     std::vector<ExpressionPtr> args_;
 };
 

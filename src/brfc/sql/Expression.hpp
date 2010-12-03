@@ -42,7 +42,7 @@ class Expression : public Element {
     /**
      * @return name of the expression or empty string if unnamed
      */
-    virtual const String& name() const;
+    virtual const std::string& name() const;
 
     /**
      * @name comparison operators
@@ -118,7 +118,7 @@ class Expression : public Element {
     /**
      * @brief label this expression
      */
-    LabelPtr label(const String& label) const;
+    LabelPtr label(const std::string& label) const;
 
   protected:
     Expression()

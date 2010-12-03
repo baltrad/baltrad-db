@@ -40,7 +40,7 @@ class MockDatabase : public Database {
     MOCK_METHOD1(do_entry_by_file,
         shared_ptr<FileEntry>(const oh5::PhysicalFile&));
     MOCK_METHOD1(do_entry_by_uuid,
-        shared_ptr<FileEntry>(const String&));
+        shared_ptr<FileEntry>(const std::string&));
     MOCK_METHOD1(do_execute,
         shared_ptr<FileResult>(const FileQuery&));
     MOCK_METHOD1(do_execute,

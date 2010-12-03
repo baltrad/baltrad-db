@@ -44,12 +44,12 @@ class MockConnection : public Connection {
     MOCK_METHOD0(do_commit, void());
     MOCK_METHOD0(do_rollback, void());
 
-    MOCK_METHOD1(do_execute, shared_ptr<Result>(const String&));
+    MOCK_METHOD1(do_execute, shared_ptr<Result>(const std::string&));
     MOCK_CONST_METHOD0(do_in_transaction, bool());
     MOCK_CONST_METHOD0(do_dialect, const Dialect&());
     MOCK_METHOD0(do_compiler, Compiler&());
     MOCK_METHOD1(do_large_object, shared_ptr<LargeObject>(long long));
-    MOCK_METHOD1(do_large_object, shared_ptr<LargeObject>(const String&));
+    MOCK_METHOD1(do_large_object, shared_ptr<LargeObject>(const std::string&));
 
     MOCK_CONST_METHOD0(do_last_insert_id, long long());
 

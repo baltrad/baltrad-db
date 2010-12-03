@@ -52,8 +52,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
                    brfc::DateTime,
                    brfc::StringList,
                    brfc::Time,
-                   brfc::Variant,
-                   std::vector<brfc::String> %{
+                   brfc::Variant %{
   private long swigCPtr;
   protected boolean swigCMemOwn;
 

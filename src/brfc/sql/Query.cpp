@@ -31,7 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-Query::Query(const String& stmt, const BindMap& binds)
+Query::Query(const std::string& stmt, const BindMap& binds)
         : stmt_(stmt)
         , binds_(binds) {
 }
@@ -54,13 +54,12 @@ namespace {
 
 struct formatter {
     typedef std::map<std::string, std::string> rpl_map;
-
     rpl_map map;
 
     formatter(const BindMap& binds, const Dialect& dialect)
             : map() {
         BOOST_FOREACH(const BindMap::value_type& kv, binds) {
-            map[kv.first.to_std_string()] = dialect.variant_to_string(kv.second).to_std_string();
+            map[kv.first] = dialect.variant_to_string(kv.second);
         }
     }
     
@@ -75,17 +74,15 @@ struct formatter {
 
 } // namespace anonymous
 
-String
+std::string
 Query::replace_binds(const Dialect& dialect) const {
-    std::string std_stmt = statement().to_std_string();
-
     formatter fmt(binds_, dialect);
 
     using namespace boost::xpressive;
+    // match :[:alpha:_]+[:alnum:_]* if not prefixed by ':' or '\'
     static const sregex re = ~after(as_xpr(':') | '\\') >> ":" >> +(alpha | '_') >> *(alnum | '_');
 
-    std::string replaced = regex_replace(std_stmt, re, fmt); 
-    return String(replaced);
+    return regex_replace(stmt_, re, fmt); 
 }
 
 } // namespace sql

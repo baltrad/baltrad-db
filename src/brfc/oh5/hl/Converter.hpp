@@ -125,7 +125,7 @@ class Converter {
 };
 
 /**
- * @brief Conversion from HLHDF_STRING to String
+ * @brief Conversion from HLHDF_STRING to std::string
  *
  * the string is assumed to be encoded in UTF-8.
  *

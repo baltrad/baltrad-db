@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-Attribute::Attribute(const String& name, const Scalar& value)
+Attribute::Attribute(const std::string& name, const Scalar& value)
         : Node(name)
         , value_(value) {
 }
@@ -36,11 +36,11 @@ Attribute::~Attribute() {
 
 }
 
-String
+std::string
 Attribute::full_name() const {
     const Group* grp = parent<Group>();
     if (grp) {
-        const String& grpname = grp->name();
+        const std::string& grpname = grp->name();
         if (grpname == "what" or grpname == "where" or grpname == "how")
             return grpname + "/" + name();
     }

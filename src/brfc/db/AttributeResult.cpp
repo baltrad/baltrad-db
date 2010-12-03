@@ -37,7 +37,7 @@ AttributeResult::is_null(unsigned int pos) const {
     return value_at(pos).is_null();
 }
 
-String
+std::string
 AttributeResult::string(unsigned int pos) const {
     return value_at(pos).to_string();
 }

@@ -78,10 +78,10 @@ class GatherHLNodes {
     }
 
     void operator()(const oh5::DataSet& dataset) {
-        const String& path = dataset.path();
+        const std::string& path = dataset.path();
 
         // create node
-        HL_Node* node = HLNode_newDataset(path.to_utf8().c_str());
+        HL_Node* node = HLNode_newDataset(path.c_str());
         if (node == 0)
             throw std::runtime_error("could not create dataset node");
         
@@ -95,10 +95,10 @@ class GatherHLNodes {
     }
 
     void operator()(const oh5::Group& group) {
-        const String& path = group.path();
+        const std::string& path = group.path();
 
         // create node
-        HL_Node* node = HLNode_newGroup(path.to_utf8().c_str());
+        HL_Node* node = HLNode_newGroup(path.c_str());
         if (node == 0)
             throw std::runtime_error("could not create group node");
         
@@ -109,10 +109,10 @@ class GatherHLNodes {
 
 
     void operator()(const oh5::Attribute& attr) {
-        const String& path = attr.path();
+        const std::string& path = attr.path();
 
         // create node
-        HL_Node* node = HLNode_newAttribute(path.to_utf8().c_str());
+        HL_Node* node = HLNode_newAttribute(path.c_str());
         if (node == 0)
             throw std::runtime_error("could not create attribute node");
         
@@ -157,14 +157,14 @@ class GatherHLNodes {
 } // namespace anonymous
 
 
-String
+std::string
 TempH5File::path() const {
-    return String::from_utf8(path_.get());
+    return std::string(path_.get());
 }
 
 void
-TempH5File::copy(const String& dest) const {
-    fs::copy_file(path().to_utf8(), dest.to_utf8());
+TempH5File::copy(const std::string& dest) const {
+    fs::copy_file(path(), dest);
 }
 
 void

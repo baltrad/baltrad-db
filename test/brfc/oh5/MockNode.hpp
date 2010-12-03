@@ -29,7 +29,7 @@ namespace oh5 {
 
 class MockNode : public Node {
   public:
-    MockNode(const String& name)
+    MockNode(const std::string& name)
             : Node(name) {
     }
 

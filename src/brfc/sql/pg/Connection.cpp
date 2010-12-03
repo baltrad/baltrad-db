@@ -19,6 +19,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/pg/Connection.hpp>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/erase.hpp>
+
 #include <brfc/exceptions.hpp>
 
 #include <brfc/sql/pg/Result.hpp>
@@ -42,7 +46,7 @@ Connection::~Connection() {
 
 void
 Connection::do_open() {
-    conn_.reset(new pqxx::connection(url_to_pg(url_).to_std_string()));
+    conn_.reset(new pqxx::connection(url_to_pg(url_)));
     conn_->set_client_encoding("utf8");
     conn_->set_variable("datestyle", "ISO");
     load_type_oids();
@@ -78,10 +82,10 @@ Connection::do_rollback() {
 }
 
 shared_ptr<sql::Result>
-Connection::do_execute(const String& query) {
+Connection::do_execute(const std::string& query) {
     shared_ptr<sql::Result> result;
     try {
-        pqxx::result pg_result = transaction_->exec(query.to_utf8());
+        pqxx::result pg_result = transaction_->exec(query);
         result = make_shared<Result>(pg_result, &types_);
     } catch (const std::runtime_error& e) {
         throw db_error(e.what());
@@ -90,9 +94,9 @@ Connection::do_execute(const String& query) {
     return result;
 }
 
-String
+std::string
 Connection::url_to_pg(const Url& url) {
-    String pgargs;
+    std::string pgargs;
     if (url.host() != "")
         pgargs += " host=" + url.host();
     if (url.user_name() != "")
@@ -100,10 +104,10 @@ Connection::url_to_pg(const Url& url) {
     if (url.password() != "")
         pgargs += " password=" + url.password();
     if (url.port())
-        pgargs += " port=" + String::number(url.port());
-    String database = url.path();
-    if (database.starts_with("/")) {
-        database.remove(0, 1); // remove slash
+        pgargs += " port=" + boost::lexical_cast<std::string>(url.port());
+    std::string database = url.path();
+    if (boost::starts_with(database, "/")) {
+        boost::erase_first(database, "/"); 
     }
     if (database != "")
         pgargs += " dbname=" + database;
@@ -117,7 +121,7 @@ Connection::do_large_object(long long id) {
 }
 
 shared_ptr<sql::LargeObject>
-Connection::do_large_object(const String& path) {
+Connection::do_large_object(const std::string& path) {
     return shared_ptr<sql::LargeObject>(new LargeObject(*transaction_, path));
 }
 

@@ -93,13 +93,13 @@ std::ostream& operator<<(std::ostream& out, const brfc::DateTime& value) {
 }
 
 std::ostream& operator<<(std::ostream& out, const brfc::Variant& value) {
-    out << value.to_string().to_std_string();
+    out << value.to_string();
     return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const brfc::oh5::Scalar& value) {
     out << "oh5::Scalar("
-        << value.to_string().to_std_string()
+        << value.to_string()
         << ")";
     return out;
 }

@@ -34,7 +34,7 @@ Factory::literal(const Variant& value) const {
 }
 
 LiteralPtr
-Factory::string(const String& value) const {
+Factory::string(const std::string& value) const {
     return Literal::create(Variant(value));
 }
 
@@ -94,7 +94,7 @@ Factory::bool_(bool value) const {
 }
 
 BindPtr
-Factory::bind(const String& name) const {
+Factory::bind(const std::string& name) const {
     return Bind::create(name);
 }
 

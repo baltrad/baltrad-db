@@ -93,7 +93,7 @@ TEST_F(sql_Query_test, test_replace_binds_find_simple_placeholders) {
     binds.add(":bind2", Variant(2));
     query.binds(binds);
 
-    String result;
+    std::string result;
     EXPECT_NO_THROW(result = query.replace_binds(dialect));
     EXPECT_EQ("1 asd 2 qwe", result);
 }
@@ -105,7 +105,7 @@ TEST_F(sql_Query_test, test_replace_binds_find_complex_placeholders) {
     binds.add(":bind_3", Variant(3));
     query.binds(binds);
     
-    String result;
+    std::string result;
     EXPECT_NO_THROW(result = query.replace_binds(dialect));
     EXPECT_EQ("(1), 2, 3+", result);
 }
@@ -116,7 +116,7 @@ TEST_F(sql_Query_test, test_replace_binds_large_replacement) {
     binds.add(":bind1", Variant(1234567));
     query.binds(binds);
     
-    String result;
+    std::string result;
     EXPECT_NO_THROW(result = query.replace_binds(dialect));
     EXPECT_EQ("1234567", result);
 }
@@ -128,7 +128,7 @@ TEST_F(sql_Query_test, test_replace_binds_replacement_with_colon) {
     binds.add(":bind3", Variant(":a:b:c:d:e:"));
     query.binds(binds);
 
-    String result;
+    std::string result;
     EXPECT_NO_THROW(result = query.replace_binds(dialect));
     EXPECT_EQ("':a:b:c:d:e:' texttext 'a:b:c:d:e' texttext ':a:b:c:d:e:'", result);
 }
@@ -136,7 +136,7 @@ TEST_F(sql_Query_test, test_replace_binds_replacement_with_colon) {
 TEST_F(sql_Query_test, test_replace_binds_escaped_placeholder_marker) {
     query.statement("\\:notabind");
 
-    String result;
+    std::string result;
     EXPECT_NO_THROW(result = query.replace_binds(dialect));
     EXPECT_EQ(result, "\\:notabind");
 }

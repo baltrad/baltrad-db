@@ -21,8 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_DB_RDB_MODEL_HPP
 
 #include <map>
+#include <string>
 
-#include <brfc/String.hpp>
 #include <brfc/sql/fwd.hpp>
 
 namespace brfc {
@@ -40,12 +40,12 @@ class Model {
     sql::TablePtr nodes;
     sql::TablePtr attrvals;
 
-    sql::TablePtr table_by_name(const String& name) const;
+    sql::TablePtr table_by_name(const std::string& name) const;
 
   private:
     Model();
 
-    typedef std::map<String, sql::TablePtr> TableMap;
+    typedef std::map<std::string, sql::TablePtr> TableMap;
     
     TableMap tables_;
 };

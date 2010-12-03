@@ -21,8 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_EXPR_ATTRIBUTE_PROTOTYPES_HPP
 
 #include <map>
+#include <string>
 
-#include <brfc/String.hpp>
 #include <brfc/expr/Attribute.hpp>
 
 namespace brfc {
@@ -41,16 +41,16 @@ class AttributePrototypes {
      */
     static AttributePrototypes default_odim_h5();
 
-    bool has(const String& name) const;
+    bool has(const std::string& name) const;
 
     void add(const Attribute& prototype);
 
-    const Attribute& get(const String& name) const;
+    const Attribute& get(const std::string& name) const;
 
     void clear();
 
   private:
-    typedef std::map<String, AttributePtr> PrototypeMap;
+    typedef std::map<std::string, AttributePtr> PrototypeMap;
     PrototypeMap prototypes_;
 };
 

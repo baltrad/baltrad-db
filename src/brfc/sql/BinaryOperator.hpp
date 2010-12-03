@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_BINARY_OPERATOR_HPP
 #define BRFC_SQL_BINARY_OPERATOR_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/Expression.hpp>
 
@@ -36,7 +36,7 @@ class BinaryOperator : public Expression {
      * @brief construct as a shared_ptr
      * @sa BinaryOperator()
      */
-    static BinaryOperatorPtr create(const String& op,
+    static BinaryOperatorPtr create(const std::string& op,
                                     ExpressionPtr lhs,
                                     ExpressionPtr rhs) {
         return BinaryOperatorPtr(new BinaryOperator(op, lhs, rhs));
@@ -45,7 +45,7 @@ class BinaryOperator : public Expression {
     /**
      * @brief the operator
      */
-    const String& op() const { return op_; }
+    const std::string& op() const { return op_; }
 
     /**
      * @brief left hand side of the operator
@@ -64,7 +64,7 @@ class BinaryOperator : public Expression {
      * @param lhs left hand side expression
      * @param rhs right hand side expression
      */
-    BinaryOperator(const String& op,
+    BinaryOperator(const std::string& op,
                    ExpressionPtr lhs,
                    ExpressionPtr rhs)
             : Expression()
@@ -74,7 +74,7 @@ class BinaryOperator : public Expression {
     }
 
   private:
-    String op_;
+    std::string op_;
     ExpressionPtr lhs_;
     ExpressionPtr rhs_;
 };

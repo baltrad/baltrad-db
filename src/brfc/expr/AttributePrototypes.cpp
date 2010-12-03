@@ -29,7 +29,7 @@ namespace expr {
 
 AttributePrototypes
 AttributePrototypes::default_odim_h5() {
-    typedef std::map<String, Attribute::Type> NameTypeMap;
+    typedef std::map<std::string, Attribute::Type> NameTypeMap;
     NameTypeMap defns;
 
     boost::assign::insert(defns)
@@ -227,25 +227,24 @@ AttributePrototypes::default_odim_h5() {
 }
 
 bool
-AttributePrototypes::has(const String& name) const {
+AttributePrototypes::has(const std::string& name) const {
     return prototypes_.find(name) != prototypes_.end();
 }
 
 void
 AttributePrototypes::add(const Attribute& prototype) {
     if (has(prototype.name()))
-        throw duplicate_entry(prototype.name().to_utf8());
+        throw duplicate_entry("duplicate prototype: " + prototype.name());
     AttributePtr ptr = static_pointer_cast<Attribute>(prototype.clone());
     prototypes_.insert(std::make_pair(prototype.name(), ptr));
 
 }
 
 const Attribute&
-AttributePrototypes::get(const String& name) const {
+AttributePrototypes::get(const std::string& name) const {
     PrototypeMap::const_iterator i = prototypes_.find(name);
     if (i == prototypes_.end())
-        throw lookup_error("no prototype for attribute: "
-                           + name.to_std_string());
+        throw lookup_error("no prototype for attribute: " + name);
     return *i->second;
 }
 

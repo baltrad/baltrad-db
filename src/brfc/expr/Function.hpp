@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/expr/Expression.hpp>
 
@@ -31,7 +31,7 @@ namespace expr {
 
 class Function : public Expression {
   public:
-    explicit Function(const String& name)
+    explicit Function(const std::string& name)
             : name_(name)
             , args_() {
     }
@@ -52,7 +52,7 @@ class Function : public Expression {
         return f;
     }
     
-    virtual const String& name() const { return name_; }
+    virtual const std::string& name() const { return name_; }
     
     std::vector<ExpressionPtr> args() const { return args_; }
 
@@ -70,7 +70,7 @@ class Function : public Expression {
     }
    
   private:
-    String name_;
+    std::string name_;
     std::vector<ExpressionPtr> args_;
 };
 

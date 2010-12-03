@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_BIND_HPP
 #define BRFC_SQL_BIND_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/Expression.hpp>
 
@@ -32,19 +32,19 @@ namespace sql {
  */
 class Bind : public Expression {
   public:
-    static BindPtr create(const String& name) {
+    static BindPtr create(const std::string& name) {
         return BindPtr(new Bind(name));
     }
 
-    virtual const String& name() const { return name_; }
+    virtual const std::string& name() const { return name_; }
   
   protected:
-    explicit Bind(const String& name)
+    explicit Bind(const std::string& name)
             : name_(name) {
     }
   
   private:
-    String name_;
+    std::string name_;
 };
 
 } // namespace sql

@@ -39,7 +39,7 @@ LargeObjectProxy::do_id() const {
 }
 
 void
-LargeObjectProxy::do_write_to_file(const String& path) const {
+LargeObjectProxy::do_write_to_file(const std::string& path) const {
     lobj_->write_to_file(path);
 }
 

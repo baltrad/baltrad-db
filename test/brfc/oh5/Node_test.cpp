@@ -66,7 +66,7 @@ class FakeNodeBackend : public NodeBackend {
 
 class FakeNode : public Node {
   public:
-    FakeNode(const String& name)
+    FakeNode(const std::string& name)
             : Node(name) {
         backend(new FakeNodeBackend());
     }

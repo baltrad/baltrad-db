@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/smart_ptr.hpp>
 
-#include <brfc/String.hpp>
+#include <string>
 
 /**
  * @brief main namespace
@@ -65,7 +65,7 @@ class FileCatalog {
      * @throw value_error if dsn is invalid
      */
     explicit
-    FileCatalog(const String& dsn, LocalStorage* storage=0);
+    FileCatalog(const std::string& dsn, LocalStorage* storage=0);
     
     /**
      * @brief constructor
@@ -76,7 +76,7 @@ class FileCatalog {
      * use CacheDirStorage(path) for local storage
      */
     explicit
-    FileCatalog(const String& dsn, const String& path);
+    FileCatalog(const std::string& dsn, const std::string& path);
 
     /**
      * @brief constructor
@@ -126,7 +126,7 @@ class FileCatalog {
      * @sa File::unique_identifier
      * @sa is_stored(const oh5::PhysicalFile&) const
      */
-    bool is_stored(const String& path) const;
+    bool is_stored(const std::string& path) const;
     
     /**
      * @brief has file been imported to this catalog
@@ -155,7 +155,7 @@ class FileCatalog {
      *
      * @sa store(oh5::PhysicalFile& file)
      */
-    shared_ptr<const db::FileEntry> store(const String& path);
+    shared_ptr<const db::FileEntry> store(const std::string& path);
     
     /**
      * @brief import file to catalog
@@ -183,7 +183,7 @@ class FileCatalog {
      * store(oh5::hl::HlFile(path))
      * @endcode
      */
-    shared_ptr<const db::FileEntry> get_or_store(const String& path);
+    shared_ptr<const db::FileEntry> get_or_store(const std::string& path);
 
     /**
      * @brief get db::FileEntry for a file, storing it if necessary
@@ -228,7 +228,7 @@ class FileCatalog {
      * storage().store(*database().entry_by_uuid(uuid));
      * @endcode
      */
-    String local_path_for_uuid(const String& uuid);
+    std::string local_path_for_uuid(const std::string& uuid);
     
   private:
     shared_ptr<db::Database> db_;

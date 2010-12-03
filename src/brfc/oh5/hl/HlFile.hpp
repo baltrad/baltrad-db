@@ -20,11 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_HL_HL_FILE_H
 #define BRFC_OH5_HL_HL_FILE_H
 
+#include <string>
 #include <vector>
 
 #include <boost/noncopyable.hpp>
-
-#include <brfc/String.hpp>
 
 #include <brfc/oh5/PhysicalFile.hpp>
 #include <brfc/oh5/RootGroup.hpp>
@@ -60,7 +59,7 @@ class HlFile : public PhysicalFile {
      * @param path absolute path to the file
      * @throw fs_error if file can not be opened
      */
-    explicit HlFile(const String& path);
+    explicit HlFile(const std::string& path);
     
     /**
      * @brief construct with mandatory attributes present
@@ -73,11 +72,11 @@ class HlFile : public PhysicalFile {
      * this is the minimal "correct" file, given that parameters are
      * correctly formed.
      */
-    HlFile(const String& object,
+    HlFile(const std::string& object,
            const Date& date,
            const Time& time,
-           const String& source,
-           const String& version=String("H5rad 2.0"));
+           const std::string& source,
+           const std::string& version="H5rad 2.0");
 
     /**
      * @brief destructor
@@ -86,7 +85,7 @@ class HlFile : public PhysicalFile {
 
     using oh5::PhysicalFile::path;
 
-    void path(const String& path) {
+    void path(const std::string& path) {
         path_ = path;
     }
      
@@ -94,7 +93,7 @@ class HlFile : public PhysicalFile {
     /**
      * @brief absolute file path
      */
-    virtual const String& do_path() const { return path_; }
+    virtual const std::string& do_path() const { return path_; }
 
     virtual const Group& do_root() const { return root_; }
 
@@ -102,7 +101,7 @@ class HlFile : public PhysicalFile {
     void load();
 
     RootGroup root_;
-    String path_;
+    std::string path_;
 };
 
 } // namesapce hl

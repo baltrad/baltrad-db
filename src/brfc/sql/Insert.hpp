@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <utility>
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/fwd.hpp>
 #include <brfc/sql/Element.hpp>
@@ -59,7 +59,7 @@ class Insert : public Element {
      * @throw lookup_error if table doesn't have the column
      * @throw duplicate_entry if a value is already bound for the column
      */
-    void value(const String& column, ExpressionPtr expr);
+    void value(const std::string& column, ExpressionPtr expr);
     
     /**
      * @brief bind value to a column

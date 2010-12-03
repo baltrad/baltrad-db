@@ -17,35 +17,17 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_TEST_SWIG_HPP
-#define BRFC_TEST_SWIG_HPP
-
-#include <string>
-
-#include <brfc/String.hpp>
+#include <brfc/oh5/PhysicalFile.hpp>
 
 namespace brfc {
-namespace test {
+namespace oh5 {
 
-class TestSwig {
-  public:
-    std::string
-    qstring_to_string(String str);
+std::string
+PhysicalFile::name() const {
+    const std::string& p = path();
+    size_t idx = p.rfind('/');
+    return idx == std::string::npos ? p : p.substr(idx + 1);
+}
 
-    std::string
-    qstringconstref_to_string(const String& str);
-
-    String
-    string_to_qstring(const std::string& str);
-
-    const String&
-    string_to_qstringconstref(const std::string& str);
-
-  private:
-    String for_constref_;
-};
-
-} // namespace test
+} // namespace oh5
 } // namespace brfc
-
-#endif // BRFC_TEST_SWIG_HPP

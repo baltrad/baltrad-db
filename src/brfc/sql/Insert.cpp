@@ -30,7 +30,7 @@ namespace brfc {
 namespace sql {
 
 void
-Insert::value(const String& column, ExpressionPtr expr) {
+Insert::value(const std::string& column, ExpressionPtr expr) {
     value(table_->column(column), expr);
 }
 
@@ -40,7 +40,7 @@ Insert::value(ColumnPtr column, ExpressionPtr expr) {
         throw lookup_error("table mismatch");
     BOOST_FOREACH(const ValueMap::value_type& val, values_) {
         if (val.first == column)
-            throw duplicate_entry(column->name().to_std_string());
+            throw duplicate_entry("duplicate column: " + column->name());
     }
     values_.push_back(std::make_pair(column, expr));
 }

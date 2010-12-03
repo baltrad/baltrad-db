@@ -35,10 +35,10 @@ class MockDialect : public Dialect {
     }
 
     MOCK_CONST_METHOD1(do_has_feature, bool(Dialect::Feature));
-    MOCK_CONST_METHOD0(do_name, String&());
-    MOCK_CONST_METHOD1(do_variant_to_string, String(const Variant&));
+    MOCK_CONST_METHOD0(do_name, std::string&());
+    MOCK_CONST_METHOD1(do_variant_to_string, std::string(const Variant&));
 
-    String do_variant_to_string_impl(const Variant& value) {
+    std::string do_variant_to_string_impl(const Variant& value) {
         return Dialect::do_variant_to_string(value);
     }
 };

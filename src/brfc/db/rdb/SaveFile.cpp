@@ -48,7 +48,7 @@ SaveFile::SaveFile(RelationalDatabase* rdb)
 
 oh5::Node&
 SaveFile::parent_on_entry(const oh5::Node& node) {
-    const String& path = node.parent()->path();
+    const std::string& path = node.parent()->path();
     oh5::Node* parent = entry_->node(path);
     BRFC_ASSERT(parent);
     return *parent;

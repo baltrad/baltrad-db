@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_PHSYICAL_FILE_HPP
 #define BRFC_OH5_PHSYICAL_FILE_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/oh5/File.hpp>
 
@@ -32,16 +32,14 @@ class PhysicalFile : public File {
     /**
      * @brief absolute file path
      */
-    const String& path() const {
+    const std::string& path() const {
         return do_path();
     }
 
-    String name() const {
-        return path().section("/", -1);
-    }
+    std::string name() const;
 
   protected:
-    virtual const String& do_path() const = 0;
+    virtual const std::string& do_path() const = 0;
 };
 
 } // namespace oh5

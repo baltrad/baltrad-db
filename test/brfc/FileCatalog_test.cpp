@@ -56,7 +56,7 @@ struct FileCatalog_test : public ::testing::Test {
     shared_ptr<db::FileEntry> entry_ptr;
     MockLocalStorage storage;
     FileCatalog fc;
-    String path;
+    std::string path;
     ::testing::NiceMock<oh5::MockPhysicalFile> file;
 };
 
@@ -80,7 +80,7 @@ TEST_F(FileCatalog_test, test_store) {
 }
 
 TEST_F(FileCatalog_test, test_store_on_db_failure) {
-    String orig_path = file.path();
+    std::string orig_path = file.path();
 
     EXPECT_CALL(db, do_store(Ref(file)))
         .WillOnce(Throw(db_error("")));
@@ -172,7 +172,7 @@ TEST_F(FileCatalog_test, test_remove_nx_file) {
 }
 
 TEST_F(FileCatalog_test, test_local_path_for_uuid) {
-    String uuid = "uuid";
+    std::string uuid = "uuid";
     EXPECT_CALL(db, do_entry_by_uuid(Ref(uuid)))
         .WillOnce(Return(entry_ptr));
     EXPECT_CALL(storage, do_store(Ref(entry)))

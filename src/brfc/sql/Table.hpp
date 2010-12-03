@@ -21,8 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_TABLE_HPP
 
 #include <map>
-
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/Selectable.hpp>
 
@@ -38,14 +37,14 @@ class Table : public Selectable {
      * @brief create as smart_ptr
      * @sa Table()
      */
-    static TablePtr create(const String& name) {
+    static TablePtr create(const std::string& name) {
         return TablePtr(new Table(name));
     }
     
     /**
      * @brief name of this table
      */
-    virtual String name() const {
+    virtual std::string name() const {
         return name_;
     }
     
@@ -54,9 +53,9 @@ class Table : public Selectable {
      *        with the same name
      * @return the created column
      */
-    ColumnPtr add_column(const String& column);
+    ColumnPtr add_column(const std::string& column);
     
-    virtual ColumnPtr column(const String& name) const;
+    virtual ColumnPtr column(const std::string& name) const;
 
     virtual std::vector<ColumnPtr> columns() const;
 
@@ -65,15 +64,15 @@ class Table : public Selectable {
      * @brief constructor
      * @param name the name of this table
      */
-    explicit Table(const String& name)
+    explicit Table(const std::string& name)
             : name_(name)
             , columns_() {
     }
 
   private:
-    typedef std::map<String, ColumnPtr> ColumnMap;
+    typedef std::map<std::string, ColumnPtr> ColumnMap;
 
-    String name_;
+    std::string name_;
     ColumnMap columns_;
 };
 

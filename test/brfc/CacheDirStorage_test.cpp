@@ -65,57 +65,57 @@ class CacheDirStorage_test : public ::testing::Test {
 };
 
 TEST_F(CacheDirStorage_test, test_prestore) {
-    const String& fpath = file.path();
-    const String& rpath = storage.prestore(entry, fpath);
+    const std::string& fpath = file.path();
+    const std::string& rpath = storage.prestore(entry, fpath);
 
     EXPECT_NE(rpath, fpath);
-    EXPECT_TRUE(fs::exists(rpath.to_utf8()));
-    EXPECT_TRUE(fs::exists(fpath.to_utf8()));
+    EXPECT_TRUE(fs::exists(rpath));
+    EXPECT_TRUE(fs::exists(fpath));
 }
 
 TEST_F(CacheDirStorage_test, test_store) {
     EXPECT_CALL(entry, do_write_to_file(_))
         .WillOnce(Invoke(&tmpfile, &test::TempH5File::copy));
 
-    const String& rpath = storage.store(entry);
+    const std::string& rpath = storage.store(entry);
 
-    EXPECT_TRUE(fs::exists(rpath.to_utf8()));
+    EXPECT_TRUE(fs::exists(rpath));
 }
 
 TEST_F(CacheDirStorage_test, test_double_store) {
     EXPECT_CALL(entry, do_write_to_file(_))
         .WillOnce(Invoke(&tmpfile, &test::TempH5File::copy));
     
-    const String& rpath1 = storage.store(entry);
-    EXPECT_TRUE(fs::exists(rpath1.to_utf8()));
+    const std::string& rpath1 = storage.store(entry);
+    EXPECT_TRUE(fs::exists(rpath1));
     
-    const String& rpath2 = storage.store(entry);
-    EXPECT_TRUE(fs::exists(rpath2.to_utf8()));
+    const std::string& rpath2 = storage.store(entry);
+    EXPECT_TRUE(fs::exists(rpath2));
     
     EXPECT_EQ(rpath1, rpath2);
 }
 
 TEST_F(CacheDirStorage_test, test_remove) {
-    const String& path = storage.entry_path(entry);
+    const std::string& path = storage.entry_path(entry);
     tmpfile.copy(path);
 
     EXPECT_TRUE(storage.remove(entry));
-    EXPECT_FALSE(fs::exists(path.to_utf8()));
+    EXPECT_FALSE(fs::exists(path));
 }
 
 TEST_F(CacheDirStorage_test, test_remove_nx) {
-    const String& path = storage.entry_path(entry);
+    const std::string& path = storage.entry_path(entry);
 
     EXPECT_TRUE(storage.remove(entry));
-    EXPECT_FALSE(fs::exists(path.to_utf8()));
+    EXPECT_FALSE(fs::exists(path));
 }
 
 TEST_F(CacheDirStorage_test, test_clean) {
-    const String& path = storage.entry_path(entry);
+    const std::string& path = storage.entry_path(entry);
     tmpfile.copy(path);
 
     EXPECT_NO_THROW(storage.clean());
-    EXPECT_FALSE(fs::exists(path.to_utf8()));
+    EXPECT_FALSE(fs::exists(path));
 }
 
 } // namespace brfc

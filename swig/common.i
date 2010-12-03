@@ -22,8 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %include "std_string.i"
 %include "std_vector.i"
 %include "stdint.i"
-%include "String.i"
-
 
 %{
     #include <brfc/exceptions.hpp>

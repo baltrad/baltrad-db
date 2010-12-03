@@ -19,7 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Expression.hpp>
 
-#include <brfc/String.hpp>
+#include <string>
 #include <brfc/Variant.hpp>
 
 #include <brfc/expr/BinaryOperator.hpp>
@@ -84,7 +84,7 @@ Expression::between(const Expression& low, const Expression& high) const {
 }
 
 BinaryOperatorPtr
-Expression::like(const String& pattern) const {
+Expression::like(const std::string& pattern) const {
     Variant v(pattern);
     Literal l(v);
     return like(l);
@@ -101,7 +101,7 @@ Expression::parentheses() const {
 }
 
 LabelPtr
-Expression::label(const String& label) const {
+Expression::label(const std::string& label) const {
     return make_shared<Label>(*this, label);
 }
 

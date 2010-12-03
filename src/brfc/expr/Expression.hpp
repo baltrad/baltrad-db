@@ -25,9 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/fwd.hpp>
 
 namespace brfc {
-
-class String;
-
 namespace expr {
 
 /**
@@ -100,12 +97,12 @@ class Expression : public boost::noncopyable {
      * In the pattern, '*' matches any number of characters, '?' matches
      * single character.
      */
-    BinaryOperatorPtr like(const String& pattern) const;
+    BinaryOperatorPtr like(const std::string& pattern) const;
     
     /**
      *  @brief this LIKE pattern
      *  @param pattern pattern to match against
-     *  @sa like(const String&) const
+     *  @sa like(const std::string&) const
      **/
     BinaryOperatorPtr like(const Expression& pattern) const;
     //@}
@@ -143,7 +140,7 @@ class Expression : public boost::noncopyable {
     /**
      * @brief label this expression
      */
-    LabelPtr label(const String& label) const;
+    LabelPtr label(const std::string& label) const;
 
   protected:
     /**

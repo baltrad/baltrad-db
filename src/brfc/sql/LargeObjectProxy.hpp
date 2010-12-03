@@ -46,7 +46,7 @@ class LargeObjectProxy : public LargeObject {
 
   protected:
     virtual long long do_id() const;
-    virtual void do_write_to_file(const String& path) const;
+    virtual void do_write_to_file(const std::string& path) const;
   
   private:
     shared_ptr<Connection> conn_;

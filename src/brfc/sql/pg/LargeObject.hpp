@@ -32,12 +32,12 @@ class LargeObject : public sql::LargeObject {
   public:
     LargeObject(pqxx::dbtransaction& tx, long long id);
 
-    LargeObject(pqxx::dbtransaction& tx, const String& path);
+    LargeObject(pqxx::dbtransaction& tx, const std::string& path);
  
   protected:
     virtual long long do_id() const;
 
-    virtual void do_write_to_file(const String& path) const;
+    virtual void do_write_to_file(const std::string& path) const;
   
   private:
     pqxx::largeobjectaccess lob_;

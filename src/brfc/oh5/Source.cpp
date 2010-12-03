@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Source.hpp>
 
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
@@ -29,12 +30,12 @@ namespace brfc {
 namespace oh5 {
 
 Source
-Source::from_string(const String& source) {
+Source::from_string(const std::string& source) {
     Source src;
-    StringList elems = source.split(",", String::SKIP_EMPTY_PARTS);
+    StringList elems = StringList::split(source, ",", StringList::SKIP_EMPTY_PARTS);
     try {
-        BOOST_FOREACH(const String& elem, elems) {
-            const StringList& kv = elem.split(":");
+        BOOST_FOREACH(const std::string& elem, elems) {
+            const StringList& kv = StringList::split(elem, ":");
             BRFC_ASSERT(kv.size() == 2);
             BRFC_ASSERT(kv.at(0).length() > 0);
             if (kv.at(1).length() == 0)
@@ -43,27 +44,27 @@ Source::from_string(const String& source) {
             src.add(kv.at(0), kv.at(1));
         }
     } catch (const assertion_error& e) {
-        throw value_error("Invalid source string: " + source.to_std_string());
+        throw value_error("Invalid source string: " + source);
     }
     return src;
 }
 
 void
-Source::add(const String& key, const String& value) {
+Source::add(const std::string& key, const std::string& value) {
     if (not map_.insert(std::make_pair(key, value)).second)
-        throw duplicate_entry(key.to_std_string());
+        throw duplicate_entry("duplicate source key: " + key);
 }
 
 bool
-Source::has(const String& key) const {
+Source::has(const std::string& key) const {
     return map_.find(key) != map_.end();
 }
 
-const String&
-Source::get(const String& key) const {
+const std::string&
+Source::get(const std::string& key) const {
     Map::const_iterator i = map_.find(key);
     if (i == map_.end())
-        throw lookup_error(key.to_std_string());
+        throw lookup_error("no source key: " + key);
     return i->second;
 }
 
@@ -71,7 +72,7 @@ StringList
 Source::keys() const {
     StringList keys;
     BOOST_FOREACH(const Map::value_type& kv, map_) {
-        if (not kv.first.starts_with("_"))
+        if (not boost::starts_with(kv.first, "_"))
            keys.push_back(kv.first);
     }
     return keys;
@@ -87,9 +88,9 @@ Source::all_keys() const {
 }
 
 void
-Source::remove(const String& key) {
+Source::remove(const std::string& key) {
     if (map_.erase(key) == 0)
-        throw lookup_error(key.to_std_string());
+        throw lookup_error("no source key: " + key);
 }
 
 void
@@ -102,11 +103,11 @@ Source::empty() const {
     return map_.empty();
 }
 
-String
+std::string
 Source::to_string() const {
     StringList elms;
     BOOST_FOREACH(const Map::value_type& kv, map_) {
-        if (not kv.first.starts_with("_"))
+        if (not boost::starts_with(kv.first, "_"))
             elms.push_back(kv.first + ":" + kv.second);
     }
     return elms.join(",");

@@ -29,8 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-class String;
-
 namespace sql {
 
 class Compiler;
@@ -134,7 +132,7 @@ class Connection : boost::noncopyable {
      */
     shared_ptr<Result> execute(const Query& query);
 
-    shared_ptr<Result> execute(const String& query);
+    shared_ptr<Result> execute(const std::string& query);
 
     const Dialect& dialect() const {
         return do_dialect();
@@ -152,7 +150,7 @@ class Connection : boost::noncopyable {
     /**
      * @brief create a new large object from file @c path
      */
-    shared_ptr<LargeObject> large_object(const String& path);
+    shared_ptr<LargeObject> large_object(const std::string& path);
 
     long long last_insert_id() const {
         return do_last_insert_id();
@@ -200,7 +198,7 @@ class Connection : boost::noncopyable {
     /**
      * @brief execute(const Sting& implementation)
      */
-    virtual shared_ptr<Result> do_execute(const String& query) = 0;
+    virtual shared_ptr<Result> do_execute(const std::string& query) = 0;
     
     /**
      * @brief dialect() implementation
@@ -218,9 +216,9 @@ class Connection : boost::noncopyable {
     virtual shared_ptr<LargeObject> do_large_object(long long id) = 0;
 
     /**
-     * @brief large_object(const String&) implementation
+     * @brief large_object(const std::string&) implementation
      */
-    virtual shared_ptr<LargeObject> do_large_object(const String& path) = 0;
+    virtual shared_ptr<LargeObject> do_large_object(const std::string& path) = 0;
     
     /**
      * @brief last_insert_id() implementation

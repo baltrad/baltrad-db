@@ -79,9 +79,9 @@ struct db_rdb_AttributeQuery_test : public testing::TestWithParam<const char*> {
             , query(db) {
     }
 
-    void add_attribute(oh5::File& file, const String& path, const oh5::Scalar& value) {
-        StringList names = path.split("/");
-        String attr_name = names.take_last();
+    void add_attribute(oh5::File& file, const std::string& path, const oh5::Scalar& value) {
+        StringList names = StringList::split(path, "/");
+        std::string attr_name = names.take_last();
 
         oh5::Group& g = file.root().get_or_create_group(names.join("/"));
         g.create_attribute(attr_name, value);
@@ -129,7 +129,7 @@ struct db_rdb_AttributeQuery_test : public testing::TestWithParam<const char*> {
     }
     
     expr::ExpressionFactory xpr;
-    String src1, src2;
+    std::string src1, src2;
     test::TestRDB* db;
     oh5::hl::HlFile td1, td2, td3, td4, td5;
     test::TempH5File tf1, tf2, tf3, tf4, tf5;

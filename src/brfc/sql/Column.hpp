@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_COLUMN_HPP
 #define BRFC_SQL_COLUMN_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/Expression.hpp>
 
@@ -47,7 +47,7 @@ class Column : public Expression {
      * @brief construct as a shared_ptr
      * @sa Column()
      */
-    static ColumnPtr create(const String& name,
+    static ColumnPtr create(const std::string& name,
                             SelectablePtr selectable,
                             ColumnPtr parent=ColumnPtr()) {
         return ColumnPtr(new Column(name, selectable, parent));
@@ -56,7 +56,7 @@ class Column : public Expression {
     /**
      * @brief name of this column
      */
-    virtual const String& name() const { return name_; }
+    virtual const std::string& name() const { return name_; }
     
     /**
      * @brief the Selectable this column is bound to
@@ -88,7 +88,7 @@ class Column : public Expression {
     /**
      * @brief proxy this column to another @c selectable with @c name
      */
-    ColumnPtr proxy(const String& name, SelectablePtr t) const;
+    ColumnPtr proxy(const std::string& name, SelectablePtr t) const;
     
     /**
      * @brief test if this column is a proxy of @c col
@@ -110,7 +110,7 @@ class Column : public Expression {
      * @param parent if specified, this column is considered a proxy
      *               of the parent column (default: null)
      */
-    Column(const String& name,
+    Column(const std::string& name,
            SelectablePtr selectable,
            ColumnPtr parent)
             : name_(name)
@@ -119,7 +119,7 @@ class Column : public Expression {
     }
 
   private:
-    String name_;
+    std::string name_;
     SelectablePtr selectable_;
     ColumnPtr parent_;
     ColumnPtr references_;

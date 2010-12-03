@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/variant.hpp>
 
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 
@@ -46,13 +46,13 @@ class Scalar {
      * @brief construct string value from char array
      */
     explicit Scalar(const char* value)
-            : value_(String::from_utf8(value)) {
+            : value_(std::string(value)) {
     }
     
     /**
      * @brief construct string value
      */
-    explicit Scalar(const String& value)
+    explicit Scalar(const std::string& value)
             : value_(value) {
     }
     
@@ -121,7 +121,7 @@ class Scalar {
     /**
      * @brief access string value
      */
-    const String& string() const;
+    const std::string& string() const;
     
     /**
      * @brief access int64 value
@@ -138,11 +138,9 @@ class Scalar {
      * @name value conversion
      */
     /**
-     * @brief convert to String
-     *
-     * convert int64 and double using String::number
+     * @brief convert to std::string
      */
-    String to_string() const;
+    std::string to_string() const;
     
     /**
      * @brief convert to int64
@@ -182,7 +180,7 @@ class Scalar {
     template<typename T>
     T get() const;
 
-    typedef boost::variant<String, long long, double> ScalarType;
+    typedef boost::variant<std::string, long long, double> ScalarType;
 
     ScalarType value_;
 };

@@ -20,10 +20,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_SOURCE_H
 #define BRFC_OH5_SOURCE_H
 
+#include <map>
+#include <string>
+
 #include <brfc/smart_ptr.hpp>
 #include <brfc/StringList.hpp>
-
-#include <map>
 
 namespace brfc {
 namespace oh5 {
@@ -65,24 +66,24 @@ class Source {
      * @param source key:value pairs separated by comma
      * @throw value_error when source is incorrectly formed
      */
-    static Source from_string(const String& source);
+    static Source from_string(const std::string& source);
     
     /**
      * @brief add a new key:value pair
      * @throw duplicate_entry when key already has a value
      */
-    void add(const String& key, const String& value);
+    void add(const std::string& key, const std::string& value);
     
     /**
      * @brief test if key is present
      */
-    bool has(const String& key) const;
+    bool has(const std::string& key) const;
     
     /**
      * @brief key value
      * @throw lookup_error when key does not exist
      */
-    const String& get(const String& key) const;
+    const std::string& get(const std::string& key) const;
     
     /**
      * @brief list of set keys
@@ -99,7 +100,7 @@ class Source {
     /**
      * @throw lookup_error when key does not exist
      */
-    void remove(const String& key);
+    void remove(const std::string& key);
     
     /**
      * @brief clear the contents
@@ -119,10 +120,10 @@ class Source {
      *
      * @note keys prefixed with "_" are not included in the string
      */
-    String to_string() const;
+    std::string to_string() const;
 
   private:
-    typedef std::map<String, String> Map;
+    typedef std::map<std::string, std::string> Map;
 
     Map map_;
 };

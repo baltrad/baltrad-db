@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 namespace test {
@@ -51,9 +51,9 @@ TempDir::unlink() {
     rmdir_recurse(path_.get());
 }
 
-String
+std::string
 TempDir::path() const {
-    return String::from_utf8(path_.get());
+    return std::string(path_.get());
 }
 
 void

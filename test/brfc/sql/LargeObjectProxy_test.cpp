@@ -53,7 +53,7 @@ TEST_F(sql_LargeObjectProxy_test, test_id) {
 }
 
 TEST_F(sql_LargeObjectProxy_test, test_write_to_file) {
-    String path = "/path/to/file";
+    std::string path = "/path/to/file";
     EXPECT_CALL(lo, do_write_to_file(path));
     
     proxy.write_to_file(path);

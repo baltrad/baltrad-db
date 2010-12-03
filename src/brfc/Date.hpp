@@ -20,9 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DATE_HPP
 #define BRFC_DATE_HPP
 
+#include <string>
+
 namespace brfc {
 
-class String;
 class TimeDelta;
 
 /**
@@ -122,23 +123,23 @@ class Date {
      *
      * @throw value_error if a valid date can not be parsed from the format
      */
-    static Date from_string(const String& str, const String& format);
+    static Date from_string(const std::string& str, const std::string& format);
     
     /**
      * @brief parse date in format 'yyyyMMdd' from @c str
      *
      * @throw value_error if a valid date can not be parsed
      */
-    static Date from_iso_string(const String& str);
+    static Date from_iso_string(const std::string& str);
 
     /**
      * @brief parse date in format 'yyyy-MM-dd' from @c str
      *
      * @throw value_error if a valid date can not be parsed
      */
-    static Date from_extended_iso_string(const String& str);
+    static Date from_extended_iso_string(const std::string& str);
 
-    String to_string(const String& format) const;
+    std::string to_string(const std::string& format) const;
 
   private:
     explicit Date(unsigned int jdn);

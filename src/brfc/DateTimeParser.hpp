@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/smart_ptr.hpp>
 #include <brfc/DateTime.hpp>
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 
@@ -44,7 +44,7 @@ class Token : public boost::noncopyable {
     /**
      * @brief convert this token to string from DateTime @a dt
      */
-    virtual String to_string(const DateTime& dt) const = 0;
+    virtual std::string to_string(const DateTime& dt) const = 0;
 
     /**
      * @brief convert this token from string to datetime field
@@ -53,7 +53,7 @@ class Token : public boost::noncopyable {
      * @return number of characters consumed (should be <= max_length())
      * @throw value_error
      */
-    virtual int to_datetime(DateTime& dt, const String& str) const = 0;
+    virtual int to_datetime(DateTime& dt, const std::string& str) const = 0;
     
     /**
      * @brief maximum length of this token
@@ -62,31 +62,31 @@ class Token : public boost::noncopyable {
 };
 
 /**
- * @brief Token containing a String literal
+ * @brief Token containing a std::string literal
  */
 class Literal : public Token {
   public:
-    explicit Literal(const String& str)
+    explicit Literal(const std::string& str)
         : str_(str) {
     }
     
-    virtual String to_string(const DateTime& d) const {
+    virtual std::string to_string(const DateTime& d) const {
         return str_;
     }
 
-    virtual int to_datetime(DateTime& dt, const String& str) const;
+    virtual int to_datetime(DateTime& dt, const std::string& str) const;
 
     virtual int max_length() const { return str_.length(); }
     
     /**
      * @brief contained literal
      */
-    const String& value() const {
+    const std::string& value() const {
         return str_;
     }
 
   private:
-    String str_;
+    std::string str_;
 };
 
 /**
@@ -107,9 +107,9 @@ class IntToken : public Token {
 
     virtual int max_length() const;
 
-    virtual String to_string(const DateTime& dt) const;
+    virtual std::string to_string(const DateTime& dt) const;
 
-    virtual int to_datetime(DateTime& dt, const String& str) const;  
+    virtual int to_datetime(DateTime& dt, const std::string& str) const;  
 
   protected:
     virtual int get_value(const DateTime& dt) const = 0;
@@ -274,7 +274,7 @@ class Day : public DateToken {
 } // namespace dttok;
 
 /**
- * @brief transform String to DateTime and vice-versa
+ * @brief transform std::string to DateTime and vice-versa
  */
 class DateTimeParser {
   public:
@@ -283,7 +283,7 @@ class DateTimeParser {
     /**
      * @brief construct from format string
      */ 
-    explicit DateTimeParser(const String& format);
+    explicit DateTimeParser(const std::string& format);
 
     /**
      * @brief construct from a vector of tokens
@@ -302,14 +302,14 @@ class DateTimeParser {
      */
     bool is_format_time_only() const;
 
-    DateTime from_string(const String& str);
-    String to_string(const DateTime& dt);
+    DateTime from_string(const std::string& str);
+    std::string to_string(const DateTime& dt);
 
-    Date date_from_string(const String& str);
-    String date_to_string(const Date& date);
+    Date date_from_string(const std::string& str);
+    std::string date_to_string(const Date& date);
 
-    Time time_from_string(const String& str);
-    String time_to_string(const Time& time);
+    Time time_from_string(const std::string& str);
+    std::string time_to_string(const Time& time);
 
     /**
      * @brief tokenize a format string
@@ -336,9 +336,9 @@ class DateTimeParser {
      * as string literals. Double single quotes ('') are treated as a
      * literal single quote.
      */
-    static TokenVector tokenize(const String& format);
+    static TokenVector tokenize(const std::string& format);
     
-    static shared_ptr<dttok::Token> token_from_string(const String& str);
+    static shared_ptr<dttok::Token> token_from_string(const std::string& str);
 
   private:
     TokenVector tokens_; 

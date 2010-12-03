@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Node.hpp>
 
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/StringList.hpp>
@@ -32,13 +33,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace oh5 {
 
-Node::Node(const String& name)
+Node::Node(const std::string& name)
         : boost::noncopyable()
         , name_(name)
         , parent_(0)
         , backend_(0) {
-    if (name.contains("/"))
-        throw value_error("invalid node name: " + name.to_std_string());
+    if (name.find("/") != std::string::npos)
+        throw value_error("invalid node name: " + name);
 }
 
 Node::~Node() {
@@ -65,7 +66,7 @@ Node::backend(NodeBackend* backend) {
     backend_->front(this);
 }
 
-String
+std::string
 Node::path() const {
     StringList names;
     const Node* node = this;
@@ -74,26 +75,26 @@ Node::path() const {
         node = node->parent();
     }
 
-    String path = names.join("/");
-    if (not path.starts_with("/"))
+    std::string path = names.join("/");
+    if (not boost::starts_with(path, "/"))
         path = "/" + path;
     return path;
 }
 
 Attribute&
-Node::create_attribute(const String& name, const Scalar& value) {
+Node::create_attribute(const std::string& name, const Scalar& value) {
     auto_ptr<Attribute> node(new Attribute(name, value));
     return static_cast<Attribute&>(create_child(node.release()));
 }
 
 DataSet&
-Node::create_dataset(const String& name) {
+Node::create_dataset(const std::string& name) {
     auto_ptr<DataSet> node(new DataSet(name));
     return static_cast<DataSet&>(create_child(node.release()));
 }
 
 Group&
-Node::create_group(const String& name) {
+Node::create_group(const std::string& name) {
     auto_ptr<Group> node(new Group(name));
     return static_cast<Group&>(create_child(node.release()));
 }
@@ -105,31 +106,31 @@ Node::create_child(Node* node) {
     if (not accepts_child(*node))
         throw value_error("node not accepted as child");
     if (child(node->name()) != 0)
-        throw duplicate_entry(node->name().to_std_string());
+        throw duplicate_entry("duplicate node child: " + node->name());
 
     node->parent(this);
     return backend().create_child(node);
 }
 
 bool
-Node::has_child(const String& path) const {
+Node::has_child(const std::string& path) const {
     return child(path) != 0;
 }
 
 Node*
-Node::child(const String& path) {
+Node::child(const std::string& path) {
     const Node* self = const_cast<const Node*>(this);
     return const_cast<Node*>(self->child(path));
 }
 
 const Node*
-Node::child(const String& path) const {
-    if (path.starts_with("/") and not is_root())
+Node::child(const std::string& path) const {
+    if (boost::starts_with(path, "/") and not is_root())
         throw value_error("path must not be absolute");
-    StringList names = path.split("/", String::SKIP_EMPTY_PARTS);
+    StringList names = StringList::split(path, "/", StringList::SKIP_EMPTY_PARTS);
     const Node* cur = this;
     const Node* child = 0;
-    BOOST_FOREACH(const String& name, names) {
+    BOOST_FOREACH(const std::string& name, names) {
         child = 0;
         BOOST_FOREACH(const Node* node, cur->children()) {
             if (node->name() == name) {

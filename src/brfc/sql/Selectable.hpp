@@ -27,8 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-class String;
-
 namespace sql {
 
 /**
@@ -47,12 +45,12 @@ class Selectable : public Element {
      *
      * by default, selectables are unnamed
      */
-    virtual String name() const;
+    virtual std::string name() const;
     
     /**
      * @brief access column by @c name
      */
-    virtual ColumnPtr column(const String& name) const;
+    virtual ColumnPtr column(const std::string& name) const;
     
     /**
      * @brief columns defined on this selectable
@@ -76,7 +74,7 @@ class Selectable : public Element {
     /**
      * @brief alias this selectable
      */
-    AliasPtr alias(const String& name);
+    AliasPtr alias(const std::string& name);
     
     /**
      * @brief create an inner join from this selectable to @c rhs

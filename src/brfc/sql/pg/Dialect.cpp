@@ -19,7 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/pg/Dialect.hpp>
 
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 namespace sql {
@@ -40,7 +40,7 @@ Dialect::do_has_feature(Feature feature) const {
     }
 }
 
-const String&
+const std::string&
 Dialect::do_name() const {
     return name_;
 }

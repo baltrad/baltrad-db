@@ -42,7 +42,7 @@ struct rdb_Result_test : public testing::TestWithParam<const char*> {
             : db(TestRDBEnv::get_database(GetParam())) {
     }
 
-    shared_ptr<Result> query(const String& stmt, const BindMap& binds) {
+    shared_ptr<Result> query(const std::string& stmt, const BindMap& binds) {
         return db->conn()->execute(Query(stmt, binds));
     }
     

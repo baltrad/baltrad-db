@@ -81,10 +81,10 @@ Model::Model()
 }
 
 sql::TablePtr
-Model::table_by_name(const String& name) const {
+Model::table_by_name(const std::string& name) const {
     TableMap::const_iterator iter = tables_.find(name);
     if (iter == tables_.end())
-        throw lookup_error(name.to_std_string());
+        throw lookup_error("no table by name: " + name);
     return iter->second;
 }
 

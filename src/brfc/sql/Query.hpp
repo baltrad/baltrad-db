@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_QUERY_HPP
 #define BRFC_SQL_QUERY_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 #include <brfc/StringList.hpp>
 
 
@@ -38,7 +38,7 @@ class Query {
      * @param stmt the sql statement string
      * @param binds bind placeholder values
      */
-    explicit Query(const String& stmt="", const BindMap& binds=BindMap());
+    explicit Query(const std::string& stmt="", const BindMap& binds=BindMap());
     
     /**
      * @brief copy constructor
@@ -54,7 +54,7 @@ class Query {
      * @brief bind a value
      * @throw lookup_error if no such bind is defined in binds
      */
-    void bind(const String& name, const Variant& value) {
+    void bind(const std::string& name, const Variant& value) {
         binds_.set(name, value);
     }
 
@@ -66,19 +66,21 @@ class Query {
         return binds_;
     }
 
-    void statement(const String& statement) { stmt_ = statement; }
+    void statement(const std::string& statement) { stmt_ = statement; }
 
-    const String& statement() const { return stmt_; }
+    const std::string& statement() const { return stmt_; }
 
     /**
      * @brief replace bind placeholders in the SQL statement
      * @param dialect database dialect the replacement is done for
      * @throw lookup_error if not all binds consumed
      */
-    String replace_binds(const Dialect& dialect) const;
+    std::string replace_binds(const Dialect& dialect) const;
     
   private:
-    String stmt_;
+    static StringList split_statement(const std::string& stmt);
+
+    std::string stmt_;
     BindMap binds_;
 };
 

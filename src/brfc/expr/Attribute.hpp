@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_ATTRIBUTE_HPP
 #define BRFC_EXPR_ATTRIBUTE_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/expr/Expression.hpp>
 
@@ -44,7 +44,7 @@ class Attribute : public Expression {
         SEQUENCE = STRING
     };
 
-    Attribute(const String& name, Type type)
+    Attribute(const std::string& name, Type type)
             : name_(name)
             , type_(type) {
     }
@@ -53,7 +53,7 @@ class Attribute : public Expression {
         return ExpressionPtr(new Attribute(*this));
     }
 
-    const String& name() const {
+    const std::string& name() const {
         return name_;
     }
 
@@ -68,7 +68,7 @@ class Attribute : public Expression {
     }
 
   private:
-    String name_;
+    std::string name_;
     Type type_;
 };
 

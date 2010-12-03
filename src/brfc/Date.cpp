@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/DateTimeParser.hpp>
-#include <brfc/String.hpp>
+#include <string>
 #include <brfc/TimeDelta.hpp>
 
 namespace brfc {
@@ -169,30 +169,28 @@ Date::operator+(const TimeDelta& td) const {
 }
 
 Date
-Date::from_string(const String& str, const String& format) {
+Date::from_string(const std::string& str, const std::string& format) {
     DateTimeParser parser(format);
     if (not parser.is_format_date_only())
-        throw value_error("invalid format for date: "
-                          + format.to_std_string());
+        throw value_error("invalid format for date: " + format);
     return parser.date_from_string(str);
 }
 
 Date
-Date::from_iso_string(const String& str) {
+Date::from_iso_string(const std::string& str) {
     return from_string(str, "yyyyMMdd");
 }
 
 Date
-Date::from_extended_iso_string(const String& str) {
+Date::from_extended_iso_string(const std::string& str) {
     return from_string(str, "yyyy-MM-dd");
 }
 
-String
-Date::to_string(const String& format) const {
+std::string
+Date::to_string(const std::string& format) const {
     DateTimeParser parser(format);
     if (not parser.is_format_date_only())
-        throw value_error("invalid format for date: "
-                          + format.to_std_string());
+        throw value_error("invalid format for date: " + format);
     return parser.date_to_string(*this);
 }
 

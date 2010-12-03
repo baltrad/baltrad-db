@@ -42,7 +42,7 @@ class DefaultFileNamer : public FileNamer {
      *   - @c timestamp is the value of "/what/date" and "/what/time" formatted
      *     as @c yyyyMMddThhmmssZ
      */
-    virtual String do_name(const oh5::File& file) const;
+    virtual std::string do_name(const oh5::File& file) const;
 
     /**
      * @brief name a FileEntry
@@ -50,7 +50,7 @@ class DefaultFileNamer : public FileNamer {
      * use the name given by name(const oh5::File&), but inject the first group
      * of the uuid before the file extension.
      */
-    virtual String do_name(const db::FileEntry& entry) const;
+    virtual std::string do_name(const db::FileEntry& entry) const;
 };
 
 } // namespace brfc

@@ -35,7 +35,7 @@ class MockResult : public Result {
     MOCK_CONST_METHOD0(do_size, int());
 
     MOCK_CONST_METHOD1(do_value_at, Variant(unsigned int));
-    MOCK_CONST_METHOD1(do_value_at, Variant(const String&));
+    MOCK_CONST_METHOD1(do_value_at, Variant(const std::string&));
     MOCK_CONST_METHOD0(do_affected_rows, int());
 };
 

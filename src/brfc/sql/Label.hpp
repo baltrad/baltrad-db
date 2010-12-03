@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_LABEL_HPP
 #define BRFC_SQL_LABEL_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/Expression.hpp>
 
@@ -36,14 +36,14 @@ class Label : public Expression {
      * @brief construct as a shared_ptr
      * @sa Label()
      */
-    static LabelPtr create(ExpressionPtr expression, const String& name) {
+    static LabelPtr create(ExpressionPtr expression, const std::string& name) {
         return LabelPtr(new Label(expression, name));
     }
     
     /**
      * @brief the label
      */
-    virtual const String& name() const {
+    virtual const std::string& name() const {
         return name_;
     }
 
@@ -60,14 +60,14 @@ class Label : public Expression {
      * @param expression the expression to label
      * @param name label name
      */
-    explicit Label(ExpressionPtr expression, const String& name)
+    explicit Label(ExpressionPtr expression, const std::string& name)
             : expression_(expression)
             , name_(name) {
     }
 
   private:
     ExpressionPtr expression_;
-    String name_;
+    std::string name_;
 };
 
 }

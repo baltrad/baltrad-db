@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_CACHE_DIR_STORAGE_HPP
 
 #include <brfc/LocalStorage.hpp>
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 
@@ -36,25 +36,25 @@ class CacheDirStorage : public LocalStorage {
      * @param dir path in local filesystem to use as storage root
      * @param namer namer used to name new files
      */
-    CacheDirStorage(const String& dir);
+    CacheDirStorage(const std::string& dir);
 
     virtual ~CacheDirStorage();
     
     /**
      * @brief absolute path this entry should be stored to
      */
-    String entry_path(const db::FileEntry& entry) const;
+    std::string entry_path(const db::FileEntry& entry) const;
  
   protected:
-    virtual String do_prestore(const db::FileEntry& entry, const String& path);
-    virtual String do_store(const db::FileEntry& entry);
+    virtual std::string do_prestore(const db::FileEntry& entry, const std::string& path);
+    virtual std::string do_store(const db::FileEntry& entry);
     virtual bool do_remove(const db::FileEntry& entry);
     virtual void do_clean();
   
   private:
     void check_dir() const;
 
-    String dir_;
+    std::string dir_;
 };
 
 } // namespace brfc

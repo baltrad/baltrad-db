@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_ALIAS_HPP
 #define BRFC_SQL_ALIAS_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/Selectable.hpp>
 
@@ -39,7 +39,7 @@ class Alias : public Selectable {
      * @sa Alias()
      */
     static AliasPtr create(SelectablePtr aliased,
-                           const String& alias) {
+                           const std::string& alias) {
         return AliasPtr(new Alias(aliased, alias));
     }
     
@@ -53,14 +53,14 @@ class Alias : public Selectable {
     /**
      * @brief the alias
      */
-    const String& alias() const {
+    const std::string& alias() const {
         return alias_;
     }
     
     /**
      * @brief the alias
      */
-    virtual String name() const {
+    virtual std::string name() const {
         return alias_;
     }
     
@@ -79,14 +79,14 @@ class Alias : public Selectable {
      * @param alias name of the alias
      */
     Alias(SelectablePtr aliased,
-          const String& alias)
+          const std::string& alias)
             : aliased_(aliased)
             , alias_(alias) {
     }
 
   private:
     SelectablePtr aliased_;
-    String alias_;
+    std::string alias_;
 };
 
 } // namespace sql

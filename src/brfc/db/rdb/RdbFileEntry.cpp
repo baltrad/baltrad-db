@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 #include <brfc/FileHasher.hpp>
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/db/rdb/AttributeMapper.hpp>
 #include <brfc/db/rdb/RdbNodeBackend.hpp>
@@ -55,7 +55,7 @@ RdbFileEntry::~RdbFileEntry() {
 
 }
 
-String
+std::string
 RdbFileEntry::do_uuid() const {
     if (not loaded())
         load();
@@ -100,7 +100,7 @@ RdbFileEntry::do_source() const {
     return source_;
 }
 
-String
+std::string
 RdbFileEntry::do_hash() const {
     if (hash_ == "" and not loaded())
         load();
@@ -115,7 +115,7 @@ RdbFileEntry::do_stored_at() const {
 }
 
 void
-RdbFileEntry::do_write_to_file(const String& path) const {
+RdbFileEntry::do_write_to_file(const std::string& path) const {
     shared_ptr<sql::Connection> conn = rdb().conn();
     conn->begin();
     try {

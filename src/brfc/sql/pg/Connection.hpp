@@ -43,7 +43,7 @@ class Connection : public sql::Connection {
 
     virtual ~Connection();
 
-    static String url_to_pg(const Url& url);
+    static std::string url_to_pg(const Url& url);
   
   protected:
     virtual void do_open();
@@ -66,10 +66,10 @@ class Connection : public sql::Connection {
         return compiler_;
     }
 
-    virtual shared_ptr<sql::Result> do_execute(const String& query);
+    virtual shared_ptr<sql::Result> do_execute(const std::string& query);
 
     virtual shared_ptr<sql::LargeObject> do_large_object(long long id);
-    virtual shared_ptr<sql::LargeObject> do_large_object(const String& path);
+    virtual shared_ptr<sql::LargeObject> do_large_object(const std::string& path);
 
     virtual long long do_last_insert_id() const {
         return 0;

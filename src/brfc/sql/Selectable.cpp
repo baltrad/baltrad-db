@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/Column.hpp>
@@ -31,14 +31,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-String
+std::string
 Selectable::name() const {
-    static String empty;
+    static std::string empty;
     return empty;
 }
 
 AliasPtr
-Selectable::alias(const String& name) {
+Selectable::alias(const std::string& name) {
     return Alias::create(this->shared_from_this(), name);
 }
 
@@ -58,17 +58,17 @@ Selectable::crossjoin(SelectablePtr rhs) {
 }
 
 ColumnPtr
-Selectable::column(const String& name) const {
+Selectable::column(const std::string& name) const {
     ColumnPtr found;
     BOOST_FOREACH(ColumnPtr col, columns()) {
         if (col->name() == name) {
             if (found)
-                throw lookup_error("ambiguous: " + name.to_std_string());
+                throw lookup_error("ambiguous column: " + name);
             found = col;
         }
     }
     if (not found)
-        throw lookup_error(name.to_std_string());
+        throw lookup_error("no such column: " + name);
     return found;
 }
 

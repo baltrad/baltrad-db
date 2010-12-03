@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/FileHasher.hpp>
-#include <brfc/String.hpp>
+#include <string>
 #include <brfc/SHA1AttributeHasher.hpp>
 #include <brfc/StringList.hpp>
 
@@ -56,7 +56,7 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
-RelationalDatabase::RelationalDatabase(const String& dsn)
+RelationalDatabase::RelationalDatabase(const std::string& dsn)
         : creator_(new sql::DefaultConnectionCreator(dsn))
         , pool_(new sql::BasicConnectionPool(creator_))
         , mapper_(new AttributeMapper())
@@ -114,7 +114,7 @@ shared_ptr<FileEntry>
 RelationalDatabase::do_entry_by_file(const oh5::PhysicalFile& file) {
     const Model& m = Model::instance();
 
-    const String& hash = file_hasher().hash(file);
+    const std::string& hash = file_hasher().hash(file);
     shared_ptr<sql::Connection> c = conn();
     long long src_id = RdbHelper(c).select_source_id(file.source());
 
@@ -131,13 +131,13 @@ RelationalDatabase::do_entry_by_file(const oh5::PhysicalFile& file) {
 
     shared_ptr<sql::Result> result = c->execute(*qry);
     if (result->size() > 1 or not result->next())
-        throw lookup_error(file.path().to_std_string() + " is not stored");
+        throw lookup_error(file.path() + " is not stored");
     
     return entry_by_uuid(result->value_at("uuid").string());
 }
 
 shared_ptr<FileEntry>
-RelationalDatabase::do_entry_by_uuid(const String& uuid) {
+RelationalDatabase::do_entry_by_uuid(const std::string& uuid) {
     shared_ptr<RdbFileEntry> entry(new RdbFileEntry(this));
     entry->uuid(uuid);
     entry->load();
@@ -180,7 +180,7 @@ RelationalDatabase::populate_hasher() {
 
 bool
 RelationalDatabase::do_remove(const FileEntry& entry) {
-    String qry("DELETE FROM bdb_files WHERE uuid = :uuid");
+    std::string qry("DELETE FROM bdb_files WHERE uuid = :uuid");
     sql::BindMap binds;
     binds.add(":uuid", Variant(entry.uuid()));
     shared_ptr<sql::Result> r = conn()->execute(sql::Query(qry, binds));

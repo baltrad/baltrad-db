@@ -30,8 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-class String;
-
 namespace oh5 {
 
 class PhysicalFile;
@@ -110,7 +108,7 @@ class Database : public boost::noncopyable {
      * @brief get FileEntry by UUID
      * @param uuid the UUID of requested entry
      */
-    shared_ptr<FileEntry> entry_by_uuid(const String& uuid) {
+    shared_ptr<FileEntry> entry_by_uuid(const std::string& uuid) {
         return do_entry_by_uuid(uuid);
     }
 
@@ -165,7 +163,7 @@ class Database : public boost::noncopyable {
     virtual bool do_remove(const FileEntry& entry) = 0;
     virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file) = 0;
     virtual shared_ptr<FileEntry> do_entry_by_file(const oh5::PhysicalFile& file) = 0;
-    virtual shared_ptr<FileEntry> do_entry_by_uuid(const String& uuid) = 0;
+    virtual shared_ptr<FileEntry> do_entry_by_uuid(const std::string& uuid) = 0;
 
     virtual shared_ptr<FileResult> do_execute(const FileQuery& query) = 0;
     virtual shared_ptr<AttributeResult> do_execute(const AttributeQuery& query) = 0;

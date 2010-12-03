@@ -55,12 +55,12 @@ AttributeMapper::~AttributeMapper() {
 void
 AttributeMapper::add(const Mapping& mapping) {
     if (has(mapping.attribute))
-        throw duplicate_entry(mapping.attribute.to_utf8());
+        throw duplicate_entry(mapping.attribute);
     mappings_.insert(std::make_pair(mapping.attribute, mapping));
 }
 
 bool
-AttributeMapper::has(const String& attribute) const {
+AttributeMapper::has(const std::string& attribute) const {
     return mappings_.find(attribute) != mappings_.end();
 }
 
@@ -77,11 +77,10 @@ AttributeMapper::specializations_on(sql::TablePtr table) const {
 }
 
 const Mapping&
-AttributeMapper::mapping(const String& attribute) const {
+AttributeMapper::mapping(const std::string& attribute) const {
     MappingMap::const_iterator i = mappings_.find(attribute);
     if (i == mappings_.end()) {
-        String err = String("no mapping for attribute:") + attribute;
-        throw lookup_error(err.to_utf8());
+        throw lookup_error("no mapping for attribute: " + attribute);
     }
     return i->second;
 }

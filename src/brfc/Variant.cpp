@@ -34,9 +34,9 @@ bool Variant::is_date() const { return type_ == DATE; }
 bool Variant::is_time() const { return type_ == TIME; }
 
 
-const String&
+const std::string&
 Variant::string() const {
-    return get<const String&>();
+    return get<const std::string&>();
 }
 
 long long
@@ -72,44 +72,44 @@ Variant::datetime() const {
 namespace {
 
 /**
- * @brief visitor converting Variant to String
+ * @brief visitor converting Variant to std::string
  */
-class variant_to_string : public boost::static_visitor<String> {
+class variant_to_string : public boost::static_visitor<std::string> {
   public:
-    String operator()(const String& value) const {
+    std::string operator()(const std::string& value) const {
         return value;
     }
 
-    String operator()(long long value) const {
-        return String::number(value);
+    std::string operator()(long long value) const {
+        return boost::lexical_cast<std::string>(value);
     }
 
-    String operator()(double value) const {
-        return String::number(value);
+    std::string operator()(double value) const {
+        return boost::lexical_cast<std::string>(value);
     }
 
-    String operator()(bool value) const {
+    std::string operator()(bool value) const {
         return value ? "True" : "False";
     }
 
-    String operator()(const Date& value) const {
+    std::string operator()(const Date& value) const {
         return value.to_string("yyyy-MM-dd");
     }
 
-    String operator()(const Time& value) const {
+    std::string operator()(const Time& value) const {
         return value.to_string("hh:mm:ss");
     }
 
-    String operator()(const DateTime& value) const {
+    std::string operator()(const DateTime& value) const {
         return value.to_string("yyyy-MM-dd hh:mm:ss");
     }
 };
 
 class variant_to_int64 : public boost::static_visitor<long long> {
   public:
-    long long operator()(const String& value) const {
+    long long operator()(const std::string& value) const {
         try {
-            return boost::lexical_cast<long long>(value.to_std_string());
+            return boost::lexical_cast<long long>(value);
         } catch (const boost::bad_lexical_cast& e) {
             throw value_error(e.what());
         }
@@ -129,9 +129,9 @@ class variant_to_int64 : public boost::static_visitor<long long> {
 
 class variant_to_double : public boost::static_visitor<double> {
   public:
-    double operator()(const String& value) const {
+    double operator()(const std::string& value) const {
         try {
-            return boost::lexical_cast<double>(value.to_std_string());
+            return boost::lexical_cast<double>(value);
         } catch (const boost::bad_lexical_cast& e) {
             throw value_error(e.what());
         }
@@ -151,7 +151,7 @@ class variant_to_double : public boost::static_visitor<double> {
 
 class variant_to_bool : public boost::static_visitor<bool> {
   public:
-    bool operator()(const String& value) const {
+    bool operator()(const std::string& value) const {
         if (value == "false" or value == "0" or value == "")
             return false;
         else
@@ -170,7 +170,7 @@ class variant_to_bool : public boost::static_visitor<bool> {
 
 class variant_to_time : public boost::static_visitor<Time> {
   public:
-    Time operator()(const String& value) const {
+    Time operator()(const std::string& value) const {
         return Time::from_string(value, "hh:mm:ss");
     }
 
@@ -188,7 +188,7 @@ class variant_to_time : public boost::static_visitor<Time> {
 
 class variant_to_date : public boost::static_visitor<Date> {
   public:
-    Date operator()(const String& value) const {
+    Date operator()(const std::string& value) const {
         return Date::from_string(value, "yyyy-MM-dd");
     }
 
@@ -206,7 +206,7 @@ class variant_to_date : public boost::static_visitor<Date> {
 
 class variant_to_datetime : public boost::static_visitor<DateTime> {
   public:
-    DateTime operator()(const String& value) const {
+    DateTime operator()(const std::string& value) const {
         return DateTime::from_string(value, "yyyy-MM-dd hh:mm:ss");
     }
 
@@ -222,7 +222,7 @@ class variant_to_datetime : public boost::static_visitor<DateTime> {
 
 } // namespace anonymous
 
-String
+std::string
 Variant::to_string() const {
     return boost::apply_visitor(variant_to_string(), value_);
 }

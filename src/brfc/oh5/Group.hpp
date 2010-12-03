@@ -38,7 +38,7 @@ class Group : public Node {
     /**
      * @brief constructor
      */
-    explicit Group(const String& name);
+    explicit Group(const std::string& name);
 
     /**
      * @brief destructor
@@ -51,12 +51,12 @@ class Group : public Node {
      * @return pointer to Attribute or null if not found
      * @sa Node::child()
      */
-    Attribute* attribute(const String& name);
+    Attribute* attribute(const std::string& name);
     
     /**
      * @copydoc attribute()
      */
-    const Attribute* attribute(const String& name) const;
+    const Attribute* attribute(const std::string& name) const;
     
     /**
      * @brief access a child attribute "in effect"
@@ -89,12 +89,12 @@ class Group : public Node {
      * - search for what/attr1 @ data2 would return /what/attr1
      * - search for what/attr1 @ data1 would return /dataset1/data1/what/attr1
      */
-    Attribute* effective_attribute(const String& name);
+    Attribute* effective_attribute(const std::string& name);
     
     /**
      * @copydoc effective_attribute()
      */
-    const Attribute* effective_attribute(const String& name) const;
+    const Attribute* effective_attribute(const std::string& name) const;
     
     /**
      * @brief access child group
@@ -102,12 +102,12 @@ class Group : public Node {
      * @return pointer to Group or null if not found
      * @sa Node::child()
      */
-    Group* group(const String& path);
+    Group* group(const std::string& path);
     
     /**
      * @copydoc group()
      */
-    const Group* group(const String& path) const;
+    const Group* group(const std::string& path) const;
     
     /**
      * @brief access child group by path, trying to create missing groups
@@ -119,7 +119,7 @@ class Group : public Node {
      *       groups after the first, the groups that have already been
      *       created, stay.
      */
-    Group& get_or_create_group(const String& path);
+    Group& get_or_create_group(const std::string& path);
     
   protected:
     virtual bool do_accepts_child(const Node& node) const;

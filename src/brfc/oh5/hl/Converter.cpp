@@ -20,13 +20,18 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/hl/Converter.hpp>
 
 #include <string>
+#include <vector>
 
 #include <boost/numeric/conversion/cast.hpp>
+
+#include <utf8/utf8.h>
 
 #include <brfc/exceptions.hpp>
 
 #include <brfc/oh5/Scalar.hpp>
 #include <brfc/oh5/hl/hlhdf.hpp>
+
+#include <iostream>
 
 namespace brfc {
 namespace oh5 {
@@ -146,8 +151,11 @@ Scalar
 StringConverter::do_convert(HL_FormatSpecifier format,
                            unsigned char* data) const {
     if (format != HLHDF_STRING)
-        throw value_error("invalid format for conversion to String");
-    String s = String::from_utf8(reinterpret_cast<char*>(data));
+        throw value_error("invalid format for conversion to std::string");
+    std::string s(reinterpret_cast<char*>(data));
+    std::string::iterator end = s.end();
+    if (utf8::find_invalid(s.begin(), s.end()) != s.end())
+        throw value_error("invalid utf-8: " + s);
     return Scalar(s);
 }
 
@@ -155,7 +163,7 @@ HL_Data
 StringConverter::do_convert(const Scalar& value) const {
     if (value.type() != Scalar::STRING)
         throw value_error("invalid Scalar conversion to HLHDF string");
-    std::string v = value.string().to_utf8();
+    std::string v = value.string();
     return HL_Data(v.size() + 1, "string",
                    reinterpret_cast<unsigned char*>(
                          const_cast<char*>(v.c_str())));

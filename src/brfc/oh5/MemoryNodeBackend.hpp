@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <brfc/smart_ptr.hpp>
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/oh5/NodeBackend.hpp>
 

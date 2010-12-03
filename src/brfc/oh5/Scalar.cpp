@@ -61,7 +61,7 @@ namespace {
 
 class scalar_type : public boost::static_visitor<Scalar::Type> {
   public:
-    Scalar::Type operator()(const String& value) const { return Scalar::STRING; }
+    Scalar::Type operator()(const std::string& value) const { return Scalar::STRING; }
     Scalar::Type operator()(long long value) const { return Scalar::INT64; }
     Scalar::Type operator()(double value) const {return Scalar::DOUBLE; }
 };
@@ -73,9 +73,9 @@ Scalar::type() const {
     return boost::apply_visitor(scalar_type(), value_);
 }
 
-const String&
+const std::string&
 Scalar::string() const {
-    return get<const String&>();
+    return get<const std::string&>();
 }
 
 long long
@@ -90,18 +90,26 @@ Scalar::double_() const {
 
 namespace {
 
-class scalar_to_string : public boost::static_visitor<String> {
+class scalar_to_string : public boost::static_visitor<std::string> {
   public:
-    String operator()(const String& value) const { return value; }
-    String operator()(long long value) const { return String::number(value); }
-    String operator()(double value) const { return String::number(value); }
+    std::string operator()(const std::string& value) const {
+        return value;
+    }
+
+    std::string operator()(long long value) const {
+        return boost::lexical_cast<std::string>(value);
+    }
+
+    std::string operator()(double value) const {
+        return boost::lexical_cast<std::string>(value);
+    }
 };
 
 class scalar_to_int64 : public boost::static_visitor<long long> {
   public:
-    long long operator()(const String& value) const {
+    long long operator()(const std::string& value) const {
         try {
-            return boost::lexical_cast<long long>(value.to_std_string());
+            return boost::lexical_cast<long long>(value);
         } catch (const boost::bad_lexical_cast& e) {
             throw value_error(e.what());
         }
@@ -113,9 +121,9 @@ class scalar_to_int64 : public boost::static_visitor<long long> {
 
 class scalar_to_double : public boost::static_visitor<double> {
   public:
-    double operator()(const String& value) const {
+    double operator()(const std::string& value) const {
         try {
-            return boost::lexical_cast<double>(value.to_std_string());
+            return boost::lexical_cast<double>(value);
         } catch (const boost::bad_lexical_cast& e) {
             throw value_error(e.what());
         }
@@ -127,15 +135,13 @@ class scalar_to_double : public boost::static_visitor<double> {
 
 class scalar_to_bool : public boost::static_visitor<bool> {
   public:
-    bool operator()(const String& value) const {
+    bool operator()(const std::string& value) const {
         if (value == "False")
             return false;
         else if (value == "True")
             return true;
         else
-            throw value_error("can't convert '" +
-                              value.to_std_string() +
-                              "' to bool");
+            throw value_error("can't convert '" + value + "' to bool");
     }
 
     bool operator()(long long value) const { return value; }
@@ -144,7 +150,7 @@ class scalar_to_bool : public boost::static_visitor<bool> {
 
 class scalar_to_date : public boost::static_visitor<Date> {
   public:
-    Date operator()(const String& value) const {
+    Date operator()(const std::string& value) const {
         static DateTimeParser parser("yyyyMMdd");
         if (value.length() != 8)
             throw value_error("oh5::Scalar not convertible to Date");
@@ -161,7 +167,7 @@ class scalar_to_date : public boost::static_visitor<Date> {
 
 class scalar_to_time : public boost::static_visitor<Time> {
   public:
-    Time operator()(const String& value) const {
+    Time operator()(const std::string& value) const {
         static DateTimeParser parser("hhmmss");
         if (value.length() != 6)
             throw value_error("oh5::Scalar not convertible to Time");
@@ -178,7 +184,7 @@ class scalar_to_time : public boost::static_visitor<Time> {
 
 } // namespace anonymous
 
-String
+std::string
 Scalar::to_string() const {
     return boost::apply_visitor(scalar_to_string(), value_);
 }

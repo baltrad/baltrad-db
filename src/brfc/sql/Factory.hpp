@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_FACTORY_HPP
 #define BRFC_SQL_FACTORY_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/fwd.hpp>
 
@@ -47,7 +47,7 @@ class Factory {
      * @brief construct Literal containing a string
      * @{
      */
-    LiteralPtr string(const String& value) const;
+    LiteralPtr string(const std::string& value) const;
     LiteralPtr string(const char* value) const;
 
     /**
@@ -105,7 +105,7 @@ class Factory {
      */
     LiteralPtr bool_(bool value) const;
 
-    BindPtr bind(const String& name) const;
+    BindPtr bind(const std::string& name) const;
 
     /**
      * @name comparison operators

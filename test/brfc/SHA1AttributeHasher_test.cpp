@@ -114,11 +114,11 @@ TEST_F(SHA1AttributeHasher_test, hash_different_meta) {
 }
 
 TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
-    String hash1 = hasher.hash(f1);
+    std::string hash1 = hasher.hash(f1);
     f1.root().create_attribute("ignore", oh5::Scalar("val"));
-    String hash2 = hasher.hash(f1);
+    std::string hash2 = hasher.hash(f1);
     f1.root().attribute("ignore")->value(oh5::Scalar("val2"));
-    String hash3 = hasher.hash(f1);
+    std::string hash3 = hasher.hash(f1);
 
     EXPECT_EQ(hash1, hash2);
     EXPECT_EQ(hash1, hash3);
@@ -126,11 +126,11 @@ TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
 }
 
 TEST_F(SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
-    String hash1 = hasher.hash(f1);
+    std::string hash1 = hasher.hash(f1);
     f1.root().create_attribute("attr", oh5::Scalar("val"));
-    String hash2 = hasher.hash(f1);
+    std::string hash2 = hasher.hash(f1);
     f1.root().attribute("attr")->value(oh5::Scalar("val2"));
-    String hash3 = hasher.hash(f1);
+    std::string hash3 = hasher.hash(f1);
 
     EXPECT_NE(hash1, hash2);
     EXPECT_NE(hash1, hash3);

@@ -22,6 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/StringList.hpp>
@@ -53,16 +55,16 @@ DialectCompiler::do_compile(const Element& expr) {
     return Query(stack_.back(), binds_);
 }
 
-String
+std::string
 DialectCompiler::pop() {
     BRFC_ASSERT(!stack_.empty());
-    String top = stack_.back();
+    std::string top = stack_.back();
     stack_.pop_back();
     return top;
 }
 
 void
-DialectCompiler::push(const String& top) {
+DialectCompiler::push(const std::string& top) {
     stack_.push_back(top);
 }
 
@@ -70,16 +72,16 @@ void
 DialectCompiler::operator()(const BinaryOperator& expr) {
     visit(*expr.lhs(), *this);
     visit(*expr.rhs(), *this);
-    const String& rhs = pop();
-    const String& lhs = pop();
+    const std::string& rhs = pop();
+    const std::string& lhs = pop();
     push(lhs + " " + expr.op() + " " + rhs);
 }
 
 void
 DialectCompiler::operator()(const Bind& bind) {
-    String name = bind.name();
-    if (not name.starts_with(":"))
-        name.prepend(":");
+    std::string name = bind.name();
+    if (not boost::starts_with(name, ":"))
+        name = ":" + name;
     binds_.add(name, Variant());
     push(name);
 }
@@ -113,7 +115,7 @@ DialectCompiler::operator()(const Alias& expr) {
 
 void
 DialectCompiler::operator()(const Join& join) {
-    String condition, lhs, rhs, jointype;
+    std::string condition, lhs, rhs, jointype;
     in_from_clause_ = true;
     visit(*join.rhs(), *this);
     visit(*join.lhs(), *this);
@@ -175,11 +177,11 @@ DialectCompiler::operator()(const Select& select) {
     if (select.where())
         visit(*select.where(), *this);
 
-    String where_clause;
+    std::string where_clause;
     if (select.where())
         where_clause = "\nWHERE " + pop();
 
-    String from_clause;
+    std::string from_clause;
     if (select.from()) {
         in_from_clause_ = true;
         visit(*select.from(), *this);
@@ -191,16 +193,16 @@ DialectCompiler::operator()(const Select& select) {
     const Select::OrderVector& order = select.order();
     BOOST_FOREACH(Select::OrderPair op, order) {
         visit(*op.first, *this);
-        String dir = (op.second == Select::ASC ? "ASC" : "DESC");
+        std::string dir = (op.second == Select::ASC ? "ASC" : "DESC");
         order_elm.append(pop() + " " + dir);
     }
-    String order_clause;
+    std::string order_clause;
     if (order.size() > 0)
         order_clause = "\nORDER BY " + order_elm.join(", ");
 
-    String limit_clause;
+    std::string limit_clause;
     if (select.limit() > 0) {
-        limit_clause = "\nLIMIT " + String::number(select.limit());
+        limit_clause = "\nLIMIT " + boost::lexical_cast<std::string>(select.limit());
     }
 
     StringList result_column_elm;
@@ -208,11 +210,11 @@ DialectCompiler::operator()(const Select& select) {
         result_column_elm.push_back(pop());
     }
     std::reverse(result_column_elm.begin(), result_column_elm.end());
-    String result_columns = result_column_elm.join(", ");
+    std::string result_columns = result_column_elm.join(", ");
 
-    String distinct = select.distinct() ? "DISTINCT " : "";
+    std::string distinct = select.distinct() ? "DISTINCT " : "";
     // SELECT columns FROM from_obj WHERE where_clause ORDER BY order_clause
-    String clause = "SELECT " + distinct
+    std::string clause = "SELECT " + distinct
                               + result_columns
                               + from_clause
                               + where_clause
@@ -231,7 +233,7 @@ DialectCompiler::operator()(const Insert& insert) {
         vals.append(pop());
     }
 
-    String stmt = "INSERT INTO " + insert.table()->name() + "(" +
+    std::string stmt = "INSERT INTO " + insert.table()->name() + "(" +
                   cols.join(", ") + ") VALUES (" + vals.join(", ") + ")";
     
     if (insert.returns().size() > 0) {

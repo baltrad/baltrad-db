@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/iterator/iterator_facade.hpp>
 
 #include <brfc/smart_ptr.hpp>
-#include <brfc/String.hpp>
+#include <string>
 
 namespace brfc {
 namespace oh5 {
@@ -59,7 +59,7 @@ class Node : public boost::noncopyable {
      *
      * the node has no parent and no backend
      */
-    Node(const String& name);
+    Node(const std::string& name);
 
     /**
      * @brief destructor
@@ -82,7 +82,7 @@ class Node : public boost::noncopyable {
     /**
      * @brief access node name
      */
-    const String& name() const { return name_; }
+    const std::string& name() const { return name_; }
     
     /**
      * @brief absolute path of this node
@@ -90,7 +90,7 @@ class Node : public boost::noncopyable {
      * path is the concatenation of all node names leading from root to
      * this node, separated by "/".
      */
-    String path() const;
+    std::string path() const;
 
     /**
      * @brief parent node
@@ -150,21 +150,21 @@ class Node : public boost::noncopyable {
      * @param value attribute value
      * @return reference to the created attribute
      */
-    Attribute& create_attribute(const String& name, const Scalar& value);
+    Attribute& create_attribute(const std::string& name, const Scalar& value);
     
     /**
      * @brief create a child dataset
      * @param name dataset name
      * @return reference to the created dataset
      */
-    DataSet& create_dataset(const String& name);
+    DataSet& create_dataset(const std::string& name);
     
     /**
      * @brief create a child group
      * @param name group name
      * @return reference to the created group
      */
-    Group& create_group(const String& name);
+    Group& create_group(const std::string& name);
     
     /**
      * @brief create a child node
@@ -177,7 +177,7 @@ class Node : public boost::noncopyable {
      * @throw value_error if the path is absolute and this node is not root
      * @return true if the child exists
      */
-    bool has_child(const String& path) const;
+    bool has_child(const std::string& path) const;
 
     /**
      * @brief access child node at @c path
@@ -185,12 +185,12 @@ class Node : public boost::noncopyable {
      * @throw value_error if the path is absolute and this node is not root
      * @return pointer to Node or null if not found.
      */
-    Node* child(const String& path);
+    Node* child(const std::string& path);
     
     /**
      * @copydoc child()
      */
-    const Node* child(const String& path) const;
+    const Node* child(const std::string& path) const;
 
     /**
      * @brief test if this node can have @c node as a child
@@ -243,7 +243,7 @@ class Node : public boost::noncopyable {
     virtual const File* do_file() const;
 
   private:
-    String name_;
+    std::string name_;
     Node* parent_;
     scoped_ptr<NodeBackend> backend_;
 };

@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_DEFAULT_CONNETION_CREATOR_HPP
 #define BRFC_SQL_DEFAULT_CONNETION_CREATOR_HPP
 
-#include <brfc/String.hpp>
+#include <string>
 
 #include <brfc/sql/ConnectionCreator.hpp>
 
@@ -36,7 +36,7 @@ class DefaultConnectionCreator : public ConnectionCreator {
      * @brief constructor
      * @param dsn database url
      */
-    DefaultConnectionCreator(const String& dsn);
+    DefaultConnectionCreator(const std::string& dsn);
     
     /**
      * @brief destructor
@@ -58,7 +58,7 @@ class DefaultConnectionCreator : public ConnectionCreator {
     virtual DefaultConnectionCreator* do_clone() const;
 
   private:
-    String dsn_;
+    std::string dsn_;
 };
 
 } // namespace sql
