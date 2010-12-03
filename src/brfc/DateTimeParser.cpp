@@ -65,8 +65,8 @@ IntToken::to_datetime(DateTime& dt, const std::string& str) const {
     bool has_sign = str.at(0) == '-';
 
     int val = -1;
-    unsigned int start = 0;
-    unsigned int nchar = std::min((size_t)max_length_, str.length());
+    size_t start = 0;
+    size_t nchar = std::min((size_t)max_length_, str.length());
 
     if (has_sign) {
         if (not signed_)
