@@ -17,33 +17,37 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/buildconfig.h>
+#ifndef BRFC_TOOL_CMD_MOUNT_HPP
+#define BRFC_TOOL_CMD_MOUNT_HPP
+
+#include <sys/types.h>
+
+#include <boost/program_options/options_description.hpp>
 
 #include <bdbtool/Command.hpp>
-#include <bdbtool/cmd/Benchmark.hpp>
-#include <bdbtool/cmd/Import.hpp>
-
-#ifdef BDB_BUILD_FUSE_FS
-    #include <bdbtool/cmd/Mount.hpp>
-#endif // BDB_BUILD_FUSE_FS
 
 namespace brfc {
 namespace tool {
+namespace cmd {
 
-shared_ptr<Command>
-Command::by_name(const std::string& name) {
-    shared_ptr<Command> c;
-    if (name == "import") {
-        c.reset(new cmd::Import());
-    } else if (name == "benchmark") {
-        c.reset(new cmd::Benchmark());
-#ifdef BDB_BUILD_FUSE_FS
-    } else if (name == "mount") {
-        c.reset(new cmd::Mount());
-#endif // BDB_BUILD_FUSE_FS
-    }
-    return c;
-}
+class Mount : public Command {
+  public:
+    Mount();
+  
+  protected:
+    virtual int do_execute(FileCatalog& fc,
+                           const std::vector<std::string>& args);
+    virtual void do_help(std::ostream& out) const;
+  
+  private:
+    boost::program_options::options_description optdesc_;
+    
+    uid_t uid_;
+    gid_t gid_;
+};
 
+} // namespace cmd
 } // namespace tool
 } // namespace brfc
+
+#endif // BRFC_TOOL_CMD_MOUNT_HPP

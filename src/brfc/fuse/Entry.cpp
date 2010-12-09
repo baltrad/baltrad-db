@@ -17,33 +17,38 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/buildconfig.h>
+#include <brfc/fuse/Entry.hpp>
 
-#include <bdbtool/Command.hpp>
-#include <bdbtool/cmd/Benchmark.hpp>
-#include <bdbtool/cmd/Import.hpp>
+#include <list>
 
-#ifdef BDB_BUILD_FUSE_FS
-    #include <bdbtool/cmd/Mount.hpp>
-#endif // BDB_BUILD_FUSE_FS
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+#include <brfc/fuse/NoEntry.hpp>
 
 namespace brfc {
-namespace tool {
+namespace fuse {
 
-shared_ptr<Command>
-Command::by_name(const std::string& name) {
-    shared_ptr<Command> c;
-    if (name == "import") {
-        c.reset(new cmd::Import());
-    } else if (name == "benchmark") {
-        c.reset(new cmd::Benchmark());
-#ifdef BDB_BUILD_FUSE_FS
-    } else if (name == "mount") {
-        c.reset(new cmd::Mount());
-#endif // BDB_BUILD_FUSE_FS
+Entry&
+Entry::find(const char* path) {
+    static NoEntry no_entry;
+
+    std::list<std::string> tokens;
+    std::string pathstr(path+1);
+    if (pathstr.empty())
+        return *this;
+
+    boost::split(tokens, pathstr, boost::is_any_of("/"));
+    
+    Entry* entry = this;
+    for (std::list<std::string>::const_iterator iter = tokens.begin();
+         iter != tokens.end() and entry;
+         ++iter) {
+        entry = entry->child(*iter);
     }
-    return c;
+    return entry ? *entry
+                 : no_entry;
 }
 
-} // namespace tool
+} // namespace fuse
 } // namespace brfc

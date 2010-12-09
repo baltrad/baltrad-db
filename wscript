@@ -93,18 +93,22 @@ def set_options(opt):
                    help="build tests [default: %default]")
     grp.add_option("--build_bdbtool", action="callback",
                    callback=_store_bool, type="string", nargs=1,
-                   default=False, metavar="BOOL",
+                   default=True, metavar="BOOL",
                    help="build bdbtool [default: %default]")
+    grp.add_option("--build_fuse_fs", action="callback",
+                   callback=_store_bool, type="string", nargs=1,
+                   default=False, metavar="BOOL",
+                   help="build with FUSE filesystem"),
     grp.add_option("--test_db_dsn", action="append",
                    dest="test_db_dsns", metavar="DSN",
                    default=[],
                    help="database to test against (specify multiple times "
                         "for different databases)")
 
-    libnames = ("boost", "hdf5", "hlhdf", "gmock", "gtest", "jdk", "pqxx")
+    libnames = ("boost", "hdf5", "hlhdf", "fuse", "gmock", "gtest", "jdk", "pqxx")
     for libname in libnames:
         _add_lib_path_options(grp, libname)
-    
+   
     opt.tool_options("ant", tooldir="misc/waf_tools")
     opt.tool_options("swig", tooldir="misc/waf_tools")
     opt.tool_options("compiler_cc")
@@ -130,6 +134,7 @@ def configure(conf):
     env.build_java = Options.options.build_java
     env.build_tests = Options.options.build_tests
     env.build_bdbtool = Options.options.build_bdbtool
+    env.build_fuse_fs = Options.options.build_fuse_fs
     
     if env.build_java:
         conf.check_tool("ant", tooldir="misc/waf_tools")
@@ -167,6 +172,17 @@ def configure(conf):
         uselib_store="HLHDF",
         uselib="HDF5",
         mandatory=True,
+    )
+
+    _lib_path_opts_to_env(env, "fuse")
+    conf.check_cc(
+        header_name="fuse.h",
+        lib="fuse",
+        defines=["_FILE_OFFSET_BITS=64", "FUSE_USE_VERSION=27"],
+        includes=env.fuse_inc_dir,
+        libpath=env.fuse_lib_dir,
+        uselib_store="FUSE",
+        mandatory=env.build_fuse_fs,
     )
     
     # check for boost
@@ -215,6 +231,7 @@ def configure(conf):
         "enable_shared_from_this.hpp",
         "foreach.hpp",
         "lexical_cast.hpp",
+        "multi_index_container.hpp",
         "noncopyable.hpp",
         "scoped_ptr.hpp",
         "shared_ptr.hpp",
@@ -288,6 +305,11 @@ def configure(conf):
     testenv.append_unique("CXXFLAGS", "-g")
     conf.set_env_name("testenv", testenv)
 
+    if env.build_fuse_fs:
+        conf.define("BDB_BUILD_FUSE_FS", 1);
+
+    conf.write_config_header("src/brfc/buildconfig.h")
+
 def build(bld):
     _build_shared_library(bld)
 
@@ -329,17 +351,25 @@ def _build_shared_library(bld):
     bld.add_group("build_shared_library")
 
     sources = sorted(bld.path.ant_glob("src/brfc/**/*.cpp").split(" "))
+    libs = [
+        "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM", "BOOST_THREAD",
+        "HDF5", "HLHDF",
+        "FUSE",
+        "PQXX",
+    ]
+
+    if not bld.env.build_fuse_fs:
+        for src in bld.path.ant_glob("src/brfc/fuse/*.cpp").split(" "):
+            sources.remove(src)
+        libs.remove("FUSE")
+
     bld(
         features="cxx cshlib",
         source=sources,
         target="brfc",
         includes="src",
         export_incdirs="src",
-        uselib=[
-            "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM", "BOOST_THREAD",
-            "HDF5", "HLHDF",
-            "PQXX",
-        ],
+        uselib=libs,
         install_path="${PREFIX}/lib",
     )
 
@@ -347,6 +377,10 @@ def _build_bdbtool(bld):
     bld.add_group("build_bdbtool")
 
     sources = sorted(bld.path.ant_glob("bin/bdbtool/**/*.cpp").split(" "))
+    
+    if not bld.env.build_fuse_fs:
+        sources.remove("bin/bdbtool/cmd/Mount.cpp")
+
     bld(
         features="cxx cprogram",
         source=sources,
@@ -390,7 +424,13 @@ def _build_gtest_tests(bld):
     cfg_hpp.dict = cfg_values
 
     sources = sorted(bld.path.ant_glob("test/brfc/**/*.cpp").split(" "))
+
+    if not bld.env.build_fuse_fs:
+        for src in bld.path.ant_glob("test/brfc/fuse/*.cpp").split(" "):
+            sources.remove(src)
+
     sources.insert(0, "test/brfc/test_config.cpp")
+
     lib = bld(
         features="cxx cprogram",
         source=sources,

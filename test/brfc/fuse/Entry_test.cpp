@@ -17,33 +17,43 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/buildconfig.h>
+#include <gtest/gtest.h>
 
-#include <bdbtool/Command.hpp>
-#include <bdbtool/cmd/Benchmark.hpp>
-#include <bdbtool/cmd/Import.hpp>
+#include <brfc/fuse/MockEntry.hpp>
+#include <brfc/fuse/NoEntry.hpp>
 
-#ifdef BDB_BUILD_FUSE_FS
-    #include <bdbtool/cmd/Mount.hpp>
-#endif // BDB_BUILD_FUSE_FS
+using ::testing::Return;
+using ::testing::ReturnNull;
 
 namespace brfc {
-namespace tool {
+namespace fuse {
 
-shared_ptr<Command>
-Command::by_name(const std::string& name) {
-    shared_ptr<Command> c;
-    if (name == "import") {
-        c.reset(new cmd::Import());
-    } else if (name == "benchmark") {
-        c.reset(new cmd::Benchmark());
-#ifdef BDB_BUILD_FUSE_FS
-    } else if (name == "mount") {
-        c.reset(new cmd::Mount());
-#endif // BDB_BUILD_FUSE_FS
-    }
-    return c;
+class fuse_Entry_test : public ::testing::Test {
+  public:
+    MockEntry e1, e2, e3;
+};
+
+TEST_F(fuse_Entry_test, test_find) {
+    EXPECT_CALL(e1, do_child("e2"))
+        .WillOnce(Return(&e2));
+    
+    EXPECT_CALL(e2, do_child("e3"))
+        .WillOnce(Return(&e3));
+    
+    EXPECT_EQ(&e3, &e1.find("/e2/e3"));
 }
 
-} // namespace tool
+TEST_F(fuse_Entry_test, test_find_nx) {
+    EXPECT_CALL(e1, do_child("e2"))
+        .WillOnce(ReturnNull());
+    
+    Entry& re = e1.find("/e2");
+    EXPECT_TRUE(dynamic_cast<NoEntry*>(&re));
+}
+
+TEST_F(fuse_Entry_test, test_find_root) {
+    EXPECT_EQ(&e1, &e1.find("/"));
+}
+
+} // namespace fuse
 } // namespace brfc

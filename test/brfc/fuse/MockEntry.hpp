@@ -17,33 +17,34 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/buildconfig.h>
+#ifndef BRFC_FUSE_MOCK_ENTRY_HPP
+#define BRFC_FUSE_MOCK_ENTRY_HPP
 
-#include <bdbtool/Command.hpp>
-#include <bdbtool/cmd/Benchmark.hpp>
-#include <bdbtool/cmd/Import.hpp>
+#include <gmock/gmock.h>
 
-#ifdef BDB_BUILD_FUSE_FS
-    #include <bdbtool/cmd/Mount.hpp>
-#endif // BDB_BUILD_FUSE_FS
+#include <brfc/fuse/Entry.hpp>
 
 namespace brfc {
-namespace tool {
+namespace fuse {
 
-shared_ptr<Command>
-Command::by_name(const std::string& name) {
-    shared_ptr<Command> c;
-    if (name == "import") {
-        c.reset(new cmd::Import());
-    } else if (name == "benchmark") {
-        c.reset(new cmd::Benchmark());
-#ifdef BDB_BUILD_FUSE_FS
-    } else if (name == "mount") {
-        c.reset(new cmd::Mount());
-#endif // BDB_BUILD_FUSE_FS
-    }
-    return c;
-}
+class MockEntry : public Entry {
+  public:
+    MOCK_METHOD1(do_stat,
+                 int(struct stat&));
+    MOCK_METHOD4(do_readdir,
+                 int(void*, fuse_fill_dir_t, off_t, fuse_file_info&));
+    MOCK_METHOD1(do_open,
+                 int(fuse_file_info&));
+    MOCK_METHOD4(do_read,
+                 int(char*, size_t, off_t, fuse_file_info&));
+    MOCK_METHOD1(do_close,
+                 int(fuse_file_info&));
+    MOCK_CONST_METHOD0(do_is_up_to_date, bool());
+    MOCK_METHOD0(do_update, void());
+    MOCK_METHOD1(do_child, Entry*(const std::string&));
+};
 
-} // namespace tool
+} // namespace fuse
 } // namespace brfc
+
+#endif // BRFC_FUSE_MOCK_ENTRY_HPP
