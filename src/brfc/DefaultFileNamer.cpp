@@ -42,8 +42,8 @@ DefaultFileNamer::do_name(const oh5::File& file) const {
     std::string name;
     name.append(boost::to_lower_copy(file.what_object()));
     name.append("_");
-    if (file.source().has("name")) {
-        name.append(boost::to_lower_copy(file.source().get("name")));
+    if (file.source().has("_name")) {
+        name.append(boost::to_lower_copy(file.source().get("_name")));
     } else {
         name.append("unknown");
     }
