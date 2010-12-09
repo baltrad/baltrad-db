@@ -28,6 +28,10 @@ namespace cmd {
 
 class Import : public Command {
   protected:
+    virtual std::string do_description() const;
+
+    virtual void do_help(std::ostream& out) const;
+
     virtual int do_execute(FileCatalog& fc,
                            const std::vector<std::string>& args);
 };

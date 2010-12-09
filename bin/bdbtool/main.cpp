@@ -21,6 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <cstdlib>
 #include <iostream>
+#include <iomanip>
 
 #include <boost/foreach.hpp>
 #include <boost/assign/ptr_map_inserter.hpp>
@@ -60,6 +61,13 @@ struct Commands {
         if (it != map_.end())
             return it->second;
         return 0;
+    }
+
+    void print_list(std::ostream& out) {
+        BOOST_FOREACH(const CommandMap::value_type& value, map_) {
+            out << " " << std::setw(15) << std::left << value.first
+                << value.second->description() << std::endl;
+        }
     }
     
     CommandMap map_;
@@ -129,13 +137,21 @@ main(int argc, char** argv) {
     
     // display help if requested or no command specified
     if (vm.count("help") or not cmd) {
-        std::cout << "usage: bdbtool [--dsn=] [--help] CMD [args]" << std::endl;
-        std::cout << std::endl;
-        std::cout << common_optdesc << std::endl;
-        std::cout << std::endl;
+        std::cout << "usage: bdbtool [--dsn=] [--help] CMD [args]"
+                  << std::endl << std::endl
+                  << common_optdesc << std::endl;
 
-        if (cmd)
+        if (cmd) {
             cmd->help(std::cout);
+        } else {
+            std::cout << "available commands: " << std::endl;
+            commands.print_list(std::cout);
+            std::cout << std::endl
+                      << "use 'bdbtool --help CMD' for more detailed help"
+                      << std::endl;
+        }
+
+        std::cout << std::endl;
 
         return 1;
     }

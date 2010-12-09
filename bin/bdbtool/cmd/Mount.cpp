@@ -45,12 +45,12 @@ namespace tool {
 namespace cmd {
 
 Mount::Mount()
-        : optdesc_()
+        : optdesc_("mount options")
         , uid_(getuid())
         , gid_(getgid()) {
     optdesc_.add_options()
         ("mount-point", po::value<std::string>(),
-            "directory where to mount the filesystem")
+            "directory where to mount the filesystem ")
         ("debug,d",
             "turn on debugging, implies -f")
         ("foreground,f",
@@ -60,6 +60,16 @@ Mount::Mount()
         ("gid", po::value<gid_t>(&gid_),
             "group id (default: current group)")
     ;
+}
+
+std::string
+Mount::do_description() const {
+    return "mount bdbfs";
+}
+
+void
+Mount::do_help(std::ostream& out) const {
+    out << optdesc_;
 }
 
 int
@@ -110,11 +120,6 @@ Mount::do_execute(FileCatalog& fc,
 
     daemon.root(&root);
     return daemon.run(dargs);
-}
-
-void
-Mount::do_help(std::ostream& out) const {
-    out << optdesc_ << std::endl;
 }
 
 } // namespace cmd

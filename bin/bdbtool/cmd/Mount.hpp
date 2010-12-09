@@ -35,6 +35,8 @@ class Mount : public Command {
     Mount();
   
   protected:
+    virtual std::string do_description() const;
+
     virtual int do_execute(FileCatalog& fc,
                            const std::vector<std::string>& args);
     virtual void do_help(std::ostream& out) const;

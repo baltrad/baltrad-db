@@ -32,6 +32,16 @@ namespace brfc {
 namespace tool {
 namespace cmd {
 
+std::string
+Import::do_description() const {
+    return "import file(s) to the database";
+}
+
+void
+Import::do_help(std::ostream& /*out*/) const {
+    
+}
+
 int
 Import::do_execute(FileCatalog& fc,
                    const std::vector<std::string>& args) {

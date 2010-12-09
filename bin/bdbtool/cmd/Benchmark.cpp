@@ -54,9 +54,14 @@ Benchmark::Benchmark()
     ;
 }
 
+std::string
+Benchmark::do_description() const {
+    return "benchmark importing file(s) to the database";
+}
+
 void
 Benchmark::do_help(std::ostream& out) const {
-    out << optdesc_ << std::endl;
+    out << optdesc_;
 }
 
 int

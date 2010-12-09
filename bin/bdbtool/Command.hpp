@@ -30,26 +30,45 @@ class FileCatalog;
 
 namespace tool {
 
+/**
+ * @brief ABC for bdbtool commands
+ */
 class Command {
   public:
     virtual ~Command() { };
 
-    void help(std::ostream& out) const {
-        return do_help(out);
+    /**
+     * @brief a short one-line description of the command
+     */
+    std::string description() const {
+        return do_description();
     }
-
+ 
+    /**
+     * @brief put help to @c out
+     */
+    void help(std::ostream& out) const {
+        do_help(out);
+    }
+        
+    /**
+     * @brief execute this command
+     * @param fc filecatalog to run on
+     * @param args arguments to the command
+     * @return execution status
+     */
     int execute(FileCatalog& fc,
                 const std::vector<std::string>& args) {
         return do_execute(fc, args);
     }
 
   protected:
+    virtual std::string do_description() const = 0;
+
+    virtual void do_help(std::ostream& out) const = 0;
+
     virtual int do_execute(FileCatalog& fc,
                            const std::vector<std::string>& args) = 0;
-    
-    virtual void do_help(std::ostream& /*out*/) const {
-        // no-op
-    }
 };
 
 } // namespace tool
