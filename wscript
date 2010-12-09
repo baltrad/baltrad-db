@@ -95,7 +95,7 @@ def set_options(opt):
                    callback=_store_bool, type="string", nargs=1,
                    default=True, metavar="BOOL",
                    help="build bdbtool [default: %default]")
-    grp.add_option("--build_fuse_fs", action="callback",
+    grp.add_option("--build_bdbfs", action="callback",
                    callback=_store_bool, type="string", nargs=1,
                    default=False, metavar="BOOL",
                    help="build with FUSE filesystem"),
@@ -134,7 +134,7 @@ def configure(conf):
     env.build_java = Options.options.build_java
     env.build_tests = Options.options.build_tests
     env.build_bdbtool = Options.options.build_bdbtool
-    env.build_fuse_fs = Options.options.build_fuse_fs
+    env.build_bdbfs = Options.options.build_bdbfs
     
     if env.build_java:
         conf.check_tool("ant", tooldir="misc/waf_tools")
@@ -182,7 +182,7 @@ def configure(conf):
         includes=env.fuse_inc_dir,
         libpath=env.fuse_lib_dir,
         uselib_store="FUSE",
-        mandatory=env.build_fuse_fs,
+        mandatory=env.build_bdbfs,
     )
     
     # check for boost
@@ -305,8 +305,8 @@ def configure(conf):
     testenv.append_unique("CXXFLAGS", "-g")
     conf.set_env_name("testenv", testenv)
 
-    if env.build_fuse_fs:
-        conf.define("BDB_BUILD_FUSE_FS", 1);
+    if env.build_bdbfs:
+        conf.define("BDB_BUILD_BDBFS", 1);
 
     conf.write_config_header("src/brfc/buildconfig.h")
 
@@ -358,7 +358,7 @@ def _build_shared_library(bld):
         "PQXX",
     ]
 
-    if not bld.env.build_fuse_fs:
+    if not bld.env.build_bdbfs:
         for src in bld.path.ant_glob("src/brfc/fuse/*.cpp").split(" "):
             sources.remove(src)
         libs.remove("FUSE")
@@ -378,7 +378,7 @@ def _build_bdbtool(bld):
 
     sources = sorted(bld.path.ant_glob("bin/bdbtool/**/*.cpp").split(" "))
     
-    if not bld.env.build_fuse_fs:
+    if not bld.env.build_bdbfs:
         sources.remove("bin/bdbtool/cmd/Mount.cpp")
 
     bld(
@@ -425,7 +425,7 @@ def _build_gtest_tests(bld):
 
     sources = sorted(bld.path.ant_glob("test/brfc/**/*.cpp").split(" "))
 
-    if not bld.env.build_fuse_fs:
+    if not bld.env.build_bdbfs:
         for src in bld.path.ant_glob("test/brfc/fuse/*.cpp").split(" "):
             sources.remove(src)
 

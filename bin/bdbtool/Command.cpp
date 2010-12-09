@@ -23,9 +23,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <bdbtool/cmd/Benchmark.hpp>
 #include <bdbtool/cmd/Import.hpp>
 
-#ifdef BDB_BUILD_FUSE_FS
+#ifdef BDB_BUILD_BDBFS
     #include <bdbtool/cmd/Mount.hpp>
-#endif // BDB_BUILD_FUSE_FS
+#endif // BDB_BUILD_BDBFS
 
 namespace brfc {
 namespace tool {
@@ -37,10 +37,10 @@ Command::by_name(const std::string& name) {
         c.reset(new cmd::Import());
     } else if (name == "benchmark") {
         c.reset(new cmd::Benchmark());
-#ifdef BDB_BUILD_FUSE_FS
+#ifdef BDB_BUILD_BDBFS
     } else if (name == "mount") {
         c.reset(new cmd::Mount());
-#endif // BDB_BUILD_FUSE_FS
+#endif // BDB_BUILD_BDBFS
     }
     return c;
 }
