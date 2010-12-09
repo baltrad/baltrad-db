@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
-#include <brfc/smart_ptr.hpp>
-
 namespace brfc {
 
 class FileCatalog;
@@ -34,8 +32,6 @@ namespace tool {
 
 class Command {
   public:
-    static shared_ptr<Command> by_name(const std::string& name);
-
     virtual ~Command() { };
 
     void help(std::ostream& out) const {

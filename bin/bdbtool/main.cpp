@@ -17,19 +17,53 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <brfc/buildconfig.h>
+
 #include <cstdlib>
 #include <iostream>
 
 #include <boost/foreach.hpp>
+#include <boost/assign/ptr_map_inserter.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
 #include <boost/program_options.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/smart_ptr.hpp>
 #include <brfc/FileCatalog.hpp>
 
+#include <bdbtool/cmd/Benchmark.hpp>
 #include <bdbtool/cmd/Import.hpp>
+#ifdef BDB_BUILD_BDBFS
+    #include <bdbtool/cmd/Mount.hpp>
+#endif // BDB_BUILD_BDBFS
+
 
 namespace po = boost::program_options;
+namespace cmd = brfc::tool::cmd;
+
+struct Commands {
+    typedef boost::ptr_map<std::string,
+                           brfc::tool::Command> CommandMap;
+
+    Commands()
+            : map_() {
+        using boost::assign::ptr_map_insert;
+        ptr_map_insert<cmd::Benchmark>(map_)("benchmark");
+        ptr_map_insert<cmd::Import>(map_)("import");
+#ifdef BDB_BUILD_BDBFS
+        ptr_map_insert<cmd::Mount>(map_)("mount");
+#endif // BDB_BUILD_BDBFS
+    }
+
+    brfc::tool::Command* by_name(const std::string& name) {
+        CommandMap::iterator it = map_.find(name);
+        if (it != map_.end())
+            return it->second;
+        return 0;
+    }
+    
+    CommandMap map_;
+};
 
 int
 main(int argc, char** argv) {
@@ -75,11 +109,12 @@ main(int argc, char** argv) {
     std::vector<std::string> cmd_args =
         po::collect_unrecognized(opts.options, po::exclude_positional);
     
+    Commands commands;
     // try to get a command handler
-    brfc::shared_ptr<brfc::tool::Command> cmd;
+    brfc::tool::Command* cmd = 0;
     if (pargs.size() >= 1) {
         std::string name = pargs.front();
-        cmd = brfc::tool::Command::by_name(name);
+        cmd = commands.by_name(name);
         if (not cmd) {
             std::cerr << "'" << name << "' "
                       << "is not a valid bdbtool command, see 'bdbtool --help'"
