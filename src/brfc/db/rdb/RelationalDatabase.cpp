@@ -166,6 +166,7 @@ RelationalDatabase::populate_mapper() {
     mapper_->add(Mapping("file:uuid", m.files->column("uuid")));
     mapper_->add(Mapping("file:hash", m.files->column("hash")));
     mapper_->add(Mapping("file:stored_at", m.files->column("stored_at")));
+    mapper_->add(Mapping("file:size", m.file_content->column("size")));
     mapper_->add(Mapping("source:_name", m.sources->column("name")));
     mapper_->add(Mapping("what/object", m.files->column("what_object")));
     mapper_->add(Mapping("what/date", m.files->column("what_date")));

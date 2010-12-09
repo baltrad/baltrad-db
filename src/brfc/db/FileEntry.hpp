@@ -45,6 +45,11 @@ class FileEntry : public oh5::File {
     }
 
     std::string hash() const { return do_hash(); }
+    
+    /**
+     * @brief file size in bytes
+     */
+    long long size() const { return do_size(); }
 
     DateTime stored_at() const { return do_stored_at(); }
 
@@ -54,6 +59,8 @@ class FileEntry : public oh5::File {
     virtual void do_write_to_file(const std::string& path) const = 0;
 
     virtual std::string do_hash() const = 0;
+
+    virtual long long do_size() const = 0;
 
     virtual DateTime do_stored_at() const = 0;
 };

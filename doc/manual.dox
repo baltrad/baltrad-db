@@ -157,6 +157,7 @@ Here's a list of them:
 
   - file\:uuid - universally unique id of the file in database
   - file\:stored_at - when was the file imported to the database
+  - file\:size - size of the file in bytes
   - src:_name - the name of the source in database
   - src:X - source key in database, where X is the source key (PLC, CTY, ...)
 

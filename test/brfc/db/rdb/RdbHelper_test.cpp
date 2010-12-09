@@ -102,6 +102,7 @@ TEST_P(db_rdb_RdbHelper_test, test_insert_file_content) {
  
     EXPECT_NO_THROW(helper.insert_file_content(entry, tf.path()));
     EXPECT_GT(entry.lo_id(), 0);
+    EXPECT_GT(entry.size(), 0);
 
     EXPECT_NO_THROW(conn->commit());
 }

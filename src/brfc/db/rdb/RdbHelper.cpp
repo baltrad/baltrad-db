@@ -21,6 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
@@ -295,15 +296,19 @@ RdbHelper::insert_file(RdbFileEntry& entry,
 void
 RdbHelper::insert_file_content(RdbFileEntry& entry, const std::string& path) {
     // transfer the file to database
+    long long size = boost::filesystem::file_size(path);
     shared_ptr<sql::LargeObject> lo = conn().large_object(path);
 
     sql::InsertPtr qry = sql::Insert::create(m_.file_content);
     qry->value("file_id", sql_.int64_(entry.id()));
     qry->value("lo_id", sql_.int64_(lo->id()));
+    qry->value("size", sql_.int64_(size));
+
 
     conn().execute(*qry);
 
     entry.lo_id(lo->id());
+    entry.size(size);
 }
 
 void
@@ -315,6 +320,7 @@ RdbHelper::load_file(RdbFileEntry& entry) {
     qry->what(m_.files->column("hash"));
     qry->what(m_.files->column("stored_at"));
     qry->what(m_.file_content->column("lo_id"));
+    qry->what(m_.file_content->column("size"));
     if (entry.id() != 0)
         qry->where(m_.files->column("id")->eq(sql_.int64_(entry.id())));
     else if (entry.uuid() != "")
@@ -333,6 +339,7 @@ RdbHelper::load_file(RdbFileEntry& entry) {
     entry.source_id(result->value_at("source_id").int64_());
     entry.hash(result->value_at("hash").string());
     entry.lo_id(result->value_at("lo_id").to_int64());
+    entry.size(result->value_at("size").to_int64());
     entry.stored_at(result->value_at("stored_at").to_datetime());
 }
 

@@ -91,6 +91,10 @@ class RdbFileEntry : public FileEntry {
 
     void hash(const std::string& hash) { hash_ = hash; }
 
+    using FileEntry::size;
+
+    void size(long long size) { size_ = size; }
+
     using FileEntry::stored_at;
 
     void stored_at(const DateTime& dt) { stored_at_ = dt; }
@@ -114,11 +118,13 @@ class RdbFileEntry : public FileEntry {
     /**
      * @brief source as stored in the database
      */
-    oh5::Source do_source() const;
+    virtual oh5::Source do_source() const;
 
-    std::string do_hash() const;
+    virtual std::string do_hash() const;
 
-    DateTime do_stored_at() const;
+    virtual long long do_size() const;
+
+    virtual DateTime do_stored_at() const;
     
   private:
     RelationalDatabase* rdb_;
@@ -130,6 +136,7 @@ class RdbFileEntry : public FileEntry {
     oh5::Source source_;
     std::string uuid_;
     std::string hash_;
+    long long size_;
     DateTime stored_at_;
     oh5::RootGroup root_;
 };

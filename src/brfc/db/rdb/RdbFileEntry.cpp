@@ -44,6 +44,7 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         , source_()
         , uuid_()
         , hash_()
+        , size_(0)
         , root_(this) {
     BRFC_ASSERT(rdb_ != 0);
     auto_ptr<RdbNodeBackend> be(new RdbNodeBackend());
@@ -57,21 +58,21 @@ RdbFileEntry::~RdbFileEntry() {
 
 std::string
 RdbFileEntry::do_uuid() const {
-    if (not loaded())
+    if (uuid_.empty() and not loaded())
         load();
     return uuid_;
 }
 
 long long
 RdbFileEntry::lo_id() const {
-    if (not loaded())
+    if (lo_id_ == 0 and not loaded())
         load();
     return lo_id_;
 }
 
 long long
 RdbFileEntry::source_id() const {
-    if (not loaded())
+    if (source_id_ == 0 and not loaded())
         load();
     return source_id_;
 }
@@ -102,9 +103,16 @@ RdbFileEntry::do_source() const {
 
 std::string
 RdbFileEntry::do_hash() const {
-    if (hash_ == "" and not loaded())
+    if (hash_.empty() and not loaded())
         load();
     return hash_;
+}
+
+long long
+RdbFileEntry::do_size() const {
+    if (size_ == 0 and not loaded())
+        load();
+    return size_;
 }
 
 DateTime

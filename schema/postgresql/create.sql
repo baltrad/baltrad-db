@@ -18,6 +18,7 @@ CREATE TABLE bdb_files (
 CREATE TABLE bdb_file_content (
     file_id INTEGER NOT NULL PRIMARY KEY
         REFERENCES bdb_files(id) ON DELETE CASCADE,
+    size INTEGER NOT NULL,
     lo_id INTEGER
 );
 
