@@ -22,7 +22,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 
-#include <brfc/FileCatalog.hpp>
+#include <brfc/db/Database.hpp>
+
+#include <brfc/oh5/hl/HlFile.hpp>
 
 #include <bdbtool/cmd/Import.hpp>
 
@@ -43,12 +45,13 @@ Import::do_help(std::ostream& /*out*/) const {
 }
 
 int
-Import::do_execute(FileCatalog& fc,
+Import::do_execute(db::Database& db,
                    const std::vector<std::string>& args) {
     BOOST_FOREACH(const std::string& path, args) {
         std::cout << "importing " << path << std::endl;;
         std::cout.flush();
-        fc.store(path);
+        oh5::hl::HlFile file(path);
+        db.store(file);
     }
     return 0;
 }

@@ -27,7 +27,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/program_options.hpp>
 
 #include <brfc/DefaultFileNamer.hpp>
-#include <brfc/FileCatalog.hpp>
+
+#include <brfc/db/Database.hpp>
 
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
@@ -73,7 +74,7 @@ Mount::do_help(std::ostream& out) const {
 }
 
 int
-Mount::do_execute(FileCatalog& fc,
+Mount::do_execute(db::Database& db,
                   const std::vector<std::string>& args) {
 
     po::positional_options_description p_optdesc_;
@@ -106,13 +107,13 @@ Mount::do_execute(FileCatalog& fc,
     expr::ExpressionFactory xpr;
     
     DefaultFileNamer namer;
-    fuse::FileFactory l3fac(&fc.database(), &namer);
+    fuse::FileFactory l3fac(&db, &namer);
 
-    fuse::DirFactory l2fac(&fc.database(),
+    fuse::DirFactory l2fac(&db,
                            *xpr.attribute("what/object"),
                            &l3fac);
     
-    fuse::DirFactory l1fac(&fc.database(),
+    fuse::DirFactory l1fac(&db,
                            *xpr.attribute("what/source:_name"),
                            &l2fac); 
 

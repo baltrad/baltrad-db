@@ -26,7 +26,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-class FileCatalog;
+namespace db {
+    class Database;
+}
 
 namespace tool {
 
@@ -57,9 +59,9 @@ class Command {
      * @param args arguments to the command
      * @return execution status
      */
-    int execute(FileCatalog& fc,
+    int execute(db::Database& db,
                 const std::vector<std::string>& args) {
-        return do_execute(fc, args);
+        return do_execute(db, args);
     }
 
   protected:
@@ -67,7 +69,7 @@ class Command {
 
     virtual void do_help(std::ostream& out) const = 0;
 
-    virtual int do_execute(FileCatalog& fc,
+    virtual int do_execute(db::Database& db,
                            const std::vector<std::string>& args) = 0;
 };
 

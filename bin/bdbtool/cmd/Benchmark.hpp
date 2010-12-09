@@ -35,7 +35,7 @@ class Benchmark : public Command {
   protected:
     virtual std::string do_description() const;
 
-    virtual int do_execute(FileCatalog& fc,
+    virtual int do_execute(db::Database& fc,
                            const std::vector<std::string>& args);
     virtual void do_help(std::ostream& out) const;
   

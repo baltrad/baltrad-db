@@ -32,7 +32,7 @@ class Import : public Command {
 
     virtual void do_help(std::ostream& out) const;
 
-    virtual int do_execute(FileCatalog& fc,
+    virtual int do_execute(db::Database& db,
                            const std::vector<std::string>& args);
 };
 

@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/smart_ptr.hpp>
-#include <brfc/FileCatalog.hpp>
+#include <brfc/db/rdb/RelationalDatabase.hpp>
 
 #include <bdbtool/cmd/Benchmark.hpp>
 #include <bdbtool/cmd/Import.hpp>
@@ -155,20 +155,21 @@ main(int argc, char** argv) {
 
         return 1;
     }
-
-    brfc::shared_ptr<brfc::FileCatalog> fc;
+    
+    // XXX: get from a factory
+    brfc::shared_ptr<brfc::db::Database> db;
 
     if (dsn.size() < 1) {
         std::cerr << "missing DSN" << std::endl;
         return 1;
     } else {
         try {
-            fc.reset(new brfc::FileCatalog(dsn));
+            db.reset(new brfc::db::rdb::RelationalDatabase(dsn));
         } catch (const brfc::brfc_error& e) {
             std::cerr << e.what() << std::endl;
             return 1;
         }
     }
      
-    return cmd->execute(*fc, cmd_args);
+    return cmd->execute(*db, cmd_args);
 }

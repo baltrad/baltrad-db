@@ -27,9 +27,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/timer.hpp>
 
 #include <brfc/DateTime.hpp>
-#include <brfc/FileCatalog.hpp>
 #include <brfc/StringList.hpp>
 #include <brfc/TimeDelta.hpp>
+
+#include <brfc/db/Database.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/RootGroup.hpp>
@@ -65,7 +66,7 @@ Benchmark::do_help(std::ostream& out) const {
 }
 
 int
-Benchmark::do_execute(FileCatalog& fc,
+Benchmark::do_execute(db::Database& db,
                       const std::vector<std::string>& args) {
     // read args
     po::variables_map vm;
@@ -97,7 +98,7 @@ Benchmark::do_execute(FileCatalog& fc,
         f.root().attribute("what/time")->value(oh5::Scalar(dt.time()));
 
         timer.restart();
-        stored_files.push_back(fc.store(f));
+        stored_files.push_back(db.store(f));
         store_secs += timer.elapsed();
 
         dt += delta;
@@ -114,7 +115,7 @@ Benchmark::do_execute(FileCatalog& fc,
     if (vm.count("keep") == 0) {
         std::cout << "cleaning up" << std::endl;
         BOOST_FOREACH(shared_ptr<const db::FileEntry> entry, stored_files) {
-            fc.remove(*entry);
+            db.remove(*entry);
         }
     }
 
