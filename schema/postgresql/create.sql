@@ -14,6 +14,11 @@ CREATE TABLE bdb_files (
     source_id INTEGER NOT NULL REFERENCES bdb_sources(id),
     UNIQUE (hash, source_id)
 );
+CREATE INDEX bdb_files_stored_at_key ON bdb_files(stored_at);
+CREATE INDEX bdb_files_what_object_key ON bdb_files(what_object);
+CREATE INDEX bdb_files_what_date_key ON bdb_files(what_date);
+CREATE INDEX bdb_files_what_time_key ON bdb_files(what_time);
+CREATE INDEX bdb_files_combined_datetime_key ON bdb_files((what_date + what_time));
 
 CREATE TABLE bdb_file_content (
     file_id INTEGER NOT NULL PRIMARY KEY
