@@ -145,13 +145,6 @@ class QueryToSelect {
     void push(sql::ExpressionPtr p);
 
     /**
-     * @brief join attributes if not already joined
-     *
-     * join 'bdb_nodes' as 'attrs' and 'bdb_nodes' as 'pnode1'
-     */
-    void join_attrs();
-    
-    /**
      * @brief look up sql::Column for a source attribute
      * @return the sql::Column where the attribute is stored
      *
@@ -191,8 +184,6 @@ class QueryToSelect {
     sql::Factory xpr_;
     std::vector<sql::ExpressionPtr> stack_; ///< stack of expression pointers
     const Model& m_;
-    sql::AliasPtr attrs_; ///< nodes aliased as 'attrs'
-    sql::AliasPtr pnode1_; ///< nodes aliased as 'pnode1'
     sql::SelectPtr select_; ///< the select statement
     sql::JoinPtr from_; ///< from clause for the statement
 };

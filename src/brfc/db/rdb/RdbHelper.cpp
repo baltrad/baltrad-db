@@ -269,7 +269,6 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     std::string uuid(ss.str());
 
     DateTime stored_at = DateTime::utc_now();
-    stored_at.time();
     
     sql::InsertPtr qry = sql::Insert::create(m_.files);
     qry->value("uuid", sql_.string(uuid));

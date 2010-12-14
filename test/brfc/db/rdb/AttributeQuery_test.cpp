@@ -206,13 +206,13 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_xsize_or_ysize) {
 
     EXPECT_EQ(4, r->size());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe1->uuid(), r->string(0)); // xsize matches
+    EXPECT_EQ(fe1->uuid(), r->string(0)); // xsize & ysize matches
     ASSERT_TRUE(r->next()); 
-    EXPECT_EQ(fe1->uuid(), r->string(0)); // ysize matches
-    ASSERT_TRUE(r->next()); 
-    EXPECT_EQ(fe2->uuid(), r->string(0));
+    EXPECT_EQ(fe2->uuid(), r->string(0)); // ysize matches
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe5->uuid(), r->string(0));
+    EXPECT_EQ(fe5->uuid(), r->string(0)); // ysize matches
+    ASSERT_TRUE(r->next()); 
+    EXPECT_EQ(fe5->uuid(), r->string(0)); // xsize matches
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_filter_by_xsize_distinct) {

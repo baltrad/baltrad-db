@@ -60,8 +60,6 @@ QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
         : mapper_(mapper)
         , stack_()
         , m_(Model::instance())
-        , attrs_(m_.nodes->alias("attrs"))
-        , pnode1_(m_.nodes->alias("pnode1"))
         , select_()
         , from_() {
 }
@@ -178,20 +176,32 @@ QueryToSelect::plain_attr_column(const expr::Attribute& attr) {
     std::string groupname;
     if (not path.empty())
         groupname = path.take_last();
-
-    join_attrs(); 
-
+    
     // alias the table (this attribute is always searched on this alias)
     boost::erase_all(name, "/");
-    std::string alias = name + "_values";
-    sql::AliasPtr value_t = m_.attrvals->alias(alias);
+    sql::AliasPtr value_t = m_.attrvals->alias(name + "_values");
     
     // join this table-alias if not already joined
     if (not from_->contains(value_t)) {
+        // join attribute layer to files
+        sql::SelectablePtr l0 = m_.nodes->alias(name + "_l0");
+        from_ = from_->outerjoin(l0,
+            xpr_.and_(
+                l0->column("file_id")->eq(m_.files->column("id")),
+                l0->column("name")->eq(xpr_.string(attrname))
+            )
+        );
+        // join group layer to attribute layer
+        sql::SelectablePtr l1 = m_.nodes->alias(name + "_l1");
+        from_ = from_->outerjoin(l1,
+            xpr_.and_(
+                l1->column("id")->eq(l0->column("parent_id")),
+                l1->column("name")->eq(xpr_.string(groupname))
+            )
+        );
+        // join attribute values to attribute layer
         from_ = from_->outerjoin(value_t,
-                    value_t->column("node_id")->eq(attrs_->column("id"))
-                    ->and_(attrs_->column("name")->eq(xpr_.string(attrname)))
-                    ->and_(pnode1_->column("name")->eq(xpr_.string(groupname)))->parentheses()
+            value_t->column("node_id")->eq(l0->column("id"))
         );
     }
 
@@ -228,19 +238,6 @@ QueryToSelect::operator()(const expr::Attribute& attr) {
 
     // replace the attribute with value column
     push(column);
-}
-
-void
-QueryToSelect::join_attrs() {
-    // join attrs if not already joined
-    if (not from_->contains(attrs_)) {
-        from_ = from_->join(attrs_,
-                            xpr_.eq(attrs_->column("file_id"),
-                                    m_.files->column("id")));
-        from_ = from_->join(pnode1_,
-                            xpr_.eq(pnode1_->column("id"),
-                                    attrs_->column("parent_id")));
-    }
 }
 
 namespace {

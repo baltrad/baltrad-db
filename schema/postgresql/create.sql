@@ -32,6 +32,7 @@ CREATE TABLE bdb_nodes (
     name TEXT NOT NULL,
     type INTEGER /* 1: group, 2: attribute, 3: dataset */
 );
+CREATE INDEX bdb_nodes_name_key ON bdb_nodes(name);
 
 CREATE TABLE bdb_attribute_values (
     node_id INTEGER NOT NULL PRIMARY KEY
