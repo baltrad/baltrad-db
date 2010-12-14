@@ -66,4 +66,5 @@ SELECT bdbupgrade_add_bdb_files_attribute_indexes();
 
 DROP FUNCTION bdbupgrade_add_size_to_bdb_file_content();
 DROP FUNCTION bdbupgrade_add_bdb_nodes_name_index();
+DROP FUNCTION bdbupgrade_add_bdb_files_attribute_indexes();
 DROP FUNCTION make_plpgsql();
