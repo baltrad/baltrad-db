@@ -26,16 +26,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION bdbupgrade_add_bdb_nodes_name_index() RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION bdbupgrade_add_bdb_nodes_indexes() RETURNS VOID AS $$
 BEGIN
   PERFORM true FROM pg_class WHERE relname = 'bdb_nodes_name_key';
   IF NOT FOUND THEN
     CREATE INDEX bdb_nodes_name_key ON bdb_nodes(name);
   END IF;
+  PERFORM true FROM pg_class WHERE relname = 'bdb_nodes_file_id_name_key';
+  IF NOT FOUND THEN
+    CREATE INDEX bdb_nodes_file_id_name_key ON bdb_nodes(file_id, name);
+  END IF;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION bdbupgrade_add_bdb_files_attribute_indexes() RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION bdbupgrade_add_bdb_files_indexes() RETURNS VOID AS $$
 BEGIN
   PERFORM true FROM pg_class WHERE relname = 'bdb_files_stored_at_key';
   IF NOT FOUND THEN
@@ -61,10 +65,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 SELECT bdbupgrade_add_size_to_bdb_file_content();
-SELECT bdbupgrade_add_bdb_nodes_name_index();
-SELECT bdbupgrade_add_bdb_files_attribute_indexes();
+SELECT bdbupgrade_add_bdb_nodes_indexes();
+SELECT bdbupgrade_add_bdb_files_indexes();
 
 DROP FUNCTION bdbupgrade_add_size_to_bdb_file_content();
-DROP FUNCTION bdbupgrade_add_bdb_nodes_name_index();
-DROP FUNCTION bdbupgrade_add_bdb_files_attribute_indexes();
+DROP FUNCTION bdbupgrade_add_bdb_nodes_indexes();
+DROP FUNCTION bdbupgrade_add_bdb_files_indexes();
 DROP FUNCTION make_plpgsql();
