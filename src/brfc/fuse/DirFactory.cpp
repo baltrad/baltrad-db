@@ -137,8 +137,8 @@ DirFactory::create_entry(const Variant& value) {
     static expr::ExpressionFactory xpr;
     shared_ptr<DirEntry> entry = make_shared<DirEntry>(value.to_string(),
                                                        *cfactory_);
-        
-    expr::ExpressionPtr cfilter = attr_->eq(expr::Literal((value)));
+    expr::Literal lit(value);
+    expr::ExpressionPtr cfilter = attr_->eq(lit);
     if (filter_)
         cfilter = xpr.and_(*filter_, *cfilter);
     entry->child_factory().filter(*cfilter);
