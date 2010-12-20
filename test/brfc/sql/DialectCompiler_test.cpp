@@ -212,7 +212,7 @@ TEST_F(sql_DialectCompiler_test, test_select) {
     select->what(column2);
     select->what(column3);
     select->where(column->lt(xpr.int64_(1)));
-    std::string expected("SELECT t1.c1, t1.c2, t2.c3\nFROM t1 CROSS JOIN t2\nWHERE t1.c1 < :lit_0");
+    std::string expected("SELECT t1.c1, t1.c2, t2.c3 FROM t1 CROSS JOIN t2 WHERE t1.c1 < :lit_0");
     const Query& q = compiler.compile(*select);
     EXPECT_EQ(expected, q.statement());
     EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
@@ -226,7 +226,7 @@ TEST_F(sql_DialectCompiler_test, test_select_order_by) {
     select->append_order_by(t1->column("c1"), Select::ASC);
     select->append_order_by(t1->column("c3"), Select::DESC);
     const Query& q = compiler.compile(*select);
-    std::string expected = "SELECT t1.c1, t1.c2\nFROM t1\nORDER BY t1.c1 ASC, t1.c3 DESC";
+    std::string expected = "SELECT t1.c1, t1.c2 FROM t1 ORDER BY t1.c1 ASC, t1.c3 DESC";
     EXPECT_EQ(expected, q.statement());
 }
 
@@ -236,7 +236,7 @@ TEST_F(sql_DialectCompiler_test, test_select_limit) {
     select->what(t1->column("c1"));
     select->limit(1);
     const Query& q = compiler.compile(*select);
-    std::string expected("SELECT t1.c1\nFROM t1\nLIMIT 1");
+    std::string expected("SELECT t1.c1 FROM t1 LIMIT 1");
     EXPECT_EQ(expected, q.statement());
 }
 

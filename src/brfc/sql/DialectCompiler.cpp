@@ -179,14 +179,14 @@ DialectCompiler::operator()(const Select& select) {
 
     std::string where_clause;
     if (select.where())
-        where_clause = "\nWHERE " + pop();
+        where_clause = " WHERE " + pop();
 
     std::string from_clause;
     if (select.from()) {
         in_from_clause_ = true;
         visit(*select.from(), *this);
         in_from_clause_ = false;
-        from_clause = "\nFROM " + pop();
+        from_clause = " FROM " + pop();
     }
 
     StringList order_elm;
@@ -198,11 +198,11 @@ DialectCompiler::operator()(const Select& select) {
     }
     std::string order_clause;
     if (order.size() > 0)
-        order_clause = "\nORDER BY " + order_elm.join(", ");
+        order_clause = " ORDER BY " + order_elm.join(", ");
 
     std::string limit_clause;
     if (select.limit() > 0) {
-        limit_clause = "\nLIMIT " + boost::lexical_cast<std::string>(select.limit());
+        limit_clause = " LIMIT " + boost::lexical_cast<std::string>(select.limit());
     }
 
     StringList result_column_elm;
