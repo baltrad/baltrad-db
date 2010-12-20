@@ -168,6 +168,19 @@ TEST_F(sql_DialectCompiler_test, test_aliased_table_column) {
     EXPECT_EQ("table_alias.c1", q.statement());
 }
 
+TEST_F(sql_DialectCompiler_test, test_aliased_select) {
+    SelectPtr subq = Select::create();
+    subq->from(t1);
+    subq->what(t1->column("c1"));
+    AliasPtr a = subq->alias("a");
+    SelectPtr select = Select::create();
+    select->from(a);
+    select->what(a->column("c1"));
+    std::string expected("SELECT a.c1 FROM (SELECT t1.c1 FROM t1) AS a");
+    const Query& q = compiler.compile(*select);
+    EXPECT_EQ(expected, q.statement());
+}
+
 TEST_F(sql_DialectCompiler_test, test_basic_join) {
     JoinPtr j = t1->join(t2, t1->column("c1")->eq(t2->column("c2")));
     const Query& q = compiler.compile(*j);
@@ -179,8 +192,6 @@ TEST_F(sql_DialectCompiler_test, test_outerjoin) {
     const Query& q = compiler.compile(*j);
     EXPECT_EQ("t1 LEFT JOIN t2 ON t1.c1 = t2.c2", q.statement());
 }
-
-
 
 TEST_F(sql_DialectCompiler_test, test_join_with_alias) {
     SelectablePtr a = t2->alias("a");
@@ -237,6 +248,26 @@ TEST_F(sql_DialectCompiler_test, test_select_limit) {
     select->limit(1);
     const Query& q = compiler.compile(*select);
     std::string expected("SELECT t1.c1 FROM t1 LIMIT 1");
+    EXPECT_EQ(expected, q.statement());
+}
+
+TEST_F(sql_DialectCompiler_test, test_order_by_asc) {
+    SelectPtr select = Select::create();
+    select->from(t1);
+    select->what(t1->column("c1"));
+    select->append_order_by(t1->column("c1"), Select::ASC);
+    const Query& q = compiler.compile(*select);
+    std::string expected("SELECT t1.c1 FROM t1 ORDER BY t1.c1 ASC");
+    EXPECT_EQ(expected, q.statement());
+}
+
+TEST_F(sql_DialectCompiler_test, test_order_by_desc) {
+    SelectPtr select = Select::create();
+    select->from(t1);
+    select->what(t1->column("c1"));
+    select->append_order_by(t1->column("c1"), Select::DESC);
+    const Query& q = compiler.compile(*select);
+    std::string expected("SELECT t1.c1 FROM t1 ORDER BY t1.c1 DESC");
     EXPECT_EQ(expected, q.statement());
 }
 

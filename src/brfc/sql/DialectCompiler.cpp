@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/DialectCompiler.hpp>
 
+#include <sstream>
 #include <algorithm>
 
 #include <boost/foreach.hpp>
@@ -105,8 +106,14 @@ DialectCompiler::operator()(const Function& func) {
 void
 DialectCompiler::operator()(const Alias& expr) {
     if (in_from_clause_) {
+        bool is_select = dynamic_pointer_cast<Select>(expr.aliased());
         visit(*expr.aliased(), *this);
-        push(pop() + " AS " + expr.alias());
+        std::stringstream ss;
+        if (is_select) ss << "(";
+        ss << pop();
+        if (is_select) ss << ")";
+        ss << " AS " << expr.alias();
+        push(ss.str());
     } else {
         // discard aliased content
         push(expr.alias()); // replace with an alias instead
