@@ -35,6 +35,12 @@ class Function : public Expression {
         return FunctionPtr(new Function(name));
     }
 
+    static FunctionPtr min(const ExpressionPtr& arg) {
+        FunctionPtr f = Function::create("MIN");
+        f->add_arg(arg);
+        return f;
+    }
+
     static FunctionPtr max(const ExpressionPtr& arg) {
         FunctionPtr f = Function::create("MAX");
         f->add_arg(arg);
