@@ -35,6 +35,14 @@ class FileResult;
  */
 class FileQuery {
   public:
+    enum SortDir {
+        ASC = 1,
+        DESC = 2
+    };
+
+    typedef std::pair<expr::ExpressionPtr, SortDir> OrderPair;
+    typedef std::vector<OrderPair> OrderVector;
+
     /**
      * @brief constructor
      * @param db Database instance this FileQuery executes on
@@ -63,6 +71,13 @@ class FileQuery {
     expr::ExpressionPtr filter() const {
         return filter_;
     }
+    
+    /**
+     * @brief append sort order
+     */
+    FileQuery& order_by(const expr::Expression& expr, SortDir dir);
+
+    OrderVector order() const { return order_; }
 
     /**
      * @brief execute this query
@@ -76,6 +91,7 @@ class FileQuery {
   private:
     Database* db_;
     expr::ExpressionPtr filter_;
+    OrderVector order_;
 };
 
 } // namespace db

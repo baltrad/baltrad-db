@@ -333,6 +333,25 @@ TEST_P(db_rdb_FileQuery_test, test_query_like) {
     EXPECT_EQ(fe5->uuid(), r->entry()->uuid());
 }
 
+TEST_P(db_rdb_FileQuery_test, test_order_by) {
+    shared_ptr<FileResult> r =
+        query.order_by(*xpr.attribute("where/xsize"), FileQuery::DESC)
+             .execute();
+
+    EXPECT_EQ(5, r->size());
+
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe4->uuid(), r->entry()->uuid());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe5->uuid(), r->entry()->uuid());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe3->uuid(), r->entry()->uuid());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+}
+
 TEST_P(db_rdb_FileQuery_test, test_query_missing) {
 
 }

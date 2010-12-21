@@ -35,7 +35,8 @@ namespace db {
 
 FileQuery::FileQuery(Database* db)
         : db_(db)
-        , filter_() {
+        , filter_()
+        , order_() {
 }
 
 FileQuery::FileQuery(const FileQuery& other)
@@ -59,6 +60,12 @@ FileQuery::execute() {
     if (not db_)
         throw std::runtime_error("FileQuery not associated with Database");
     return db_->execute(*this);
+}
+
+FileQuery&
+FileQuery::order_by(const expr::Expression& expr, SortDir dir) {
+    order_.push_back(std::make_pair(expr.clone(), dir));
+    return *this;
 }
 
 } // namespace db

@@ -81,16 +81,35 @@ sql::SelectPtr
 QueryToSelect::transform(const FileQuery& query) {
     reset();
 
-    select_->distinct(true);
     select_->what(m_.files->column("id"));
     select_->what(m_.file_content->column("lo_id"));
-    select_->append_order_by(m_.files->column("id"), sql::Select::ASC);
 
     // replace attributes in where clause with columns
     if (query.filter()) {
         visit(*query.filter(), *this);
         select_->where(pop());
     } 
+
+    if (query.order().size() > 0 ) {
+        BOOST_FOREACH(FileQuery::OrderPair op, query.order()) {
+            visit(*op.first, *this);
+            sql::ExpressionPtr order = pop();
+            if (op.second == FileQuery::ASC) {
+                order = sql::Function::min(order);
+            } else {
+                order = sql::Function::max(order);
+            }
+            select_->append_order_by(
+                order,
+                sql::Select::SortDirection(op.second)
+            );
+        }
+        select_->append_group_by(m_.files->column("id"));
+        select_->append_group_by(m_.file_content->column("lo_id"));
+    } else {
+        select_->append_order_by(m_.files->column("id"), sql::Select::ASC);
+        select_->distinct(true);
+    }
     
     // add the built join as from clause
     select_->from(from_);
