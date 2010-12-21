@@ -176,58 +176,63 @@ DialectCompiler::operator()(const Parentheses& expr) {
 
 void
 DialectCompiler::operator()(const Select& select) {
+    std::stringstream ss;
 
+    ss << "SELECT ";
+    if (select.distinct())
+        ss << "DISTINCT ";
+    
+    size_t elements_left = select.what().size();
     BOOST_FOREACH(ExpressionPtr col, select.what()) {
         visit(*col, *this);
+        ss << pop();
+        --elements_left;
+        if (elements_left != 0)
+            ss << ", ";
     }
     
-    if (select.where())
-        visit(*select.where(), *this);
-
-    std::string where_clause;
-    if (select.where())
-        where_clause = " WHERE " + pop();
-
-    std::string from_clause;
     if (select.from()) {
         in_from_clause_ = true;
         visit(*select.from(), *this);
         in_from_clause_ = false;
-        from_clause = " FROM " + pop();
+        ss << " FROM " << pop();
+    }
+    
+    if (select.where()) {
+        visit(*select.where(), *this);
+        ss << " WHERE " << pop();
     }
 
-    StringList order_elm;
-    const Select::OrderVector& order = select.order();
-    BOOST_FOREACH(Select::OrderPair op, order) {
-        visit(*op.first, *this);
-        std::string dir = (op.second == Select::ASC ? "ASC" : "DESC");
-        order_elm.append(pop() + " " + dir);
+    if (select.group_by().size() > 0) {
+        ss << " GROUP BY ";
+        elements_left = select.group_by().size();
+        BOOST_FOREACH(ExpressionPtr expr, select.group_by()) {
+            visit(*expr, *this);
+            ss << pop();
+            --elements_left;
+            if (elements_left != 0)
+                ss << ", ";
+        }
     }
-    std::string order_clause;
-    if (order.size() > 0)
-        order_clause = " ORDER BY " + order_elm.join(", ");
+    
+    if (select.order().size() > 0) {
+        ss << " ORDER BY ";
+        const Select::OrderVector& order = select.order();
+        elements_left = order.size();
+        BOOST_FOREACH(Select::OrderPair op, order) {
+            visit(*op.first, *this);
+            ss << pop() << " " << (op.second == Select::ASC ? "ASC" : "DESC");
+            --elements_left;
+            if (elements_left != 0)
+                ss << ", ";
+        }
+    }
 
-    std::string limit_clause;
     if (select.limit() > 0) {
-        limit_clause = " LIMIT " + boost::lexical_cast<std::string>(select.limit());
+        ss << " LIMIT " << boost::lexical_cast<std::string>(select.limit());
     }
 
-    StringList result_column_elm;
-    for (size_t i = 0; i < select.what().size(); ++i) {
-        result_column_elm.push_back(pop());
-    }
-    std::reverse(result_column_elm.begin(), result_column_elm.end());
-    std::string result_columns = result_column_elm.join(", ");
-
-    std::string distinct = select.distinct() ? "DISTINCT " : "";
-    // SELECT columns FROM from_obj WHERE where_clause ORDER BY order_clause
-    std::string clause = "SELECT " + distinct
-                              + result_columns
-                              + from_clause
-                              + where_clause
-                              + order_clause
-                              + limit_clause;
-    push(clause);
+    push(ss.str());
 }
 
 void

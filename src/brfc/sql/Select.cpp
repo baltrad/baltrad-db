@@ -35,6 +35,7 @@ Select::Select(SelectablePtr from)
         : what_()
         , from_(from)
         , where_()
+        , group_by_()
         , order_()
         , limit_(0)
         , distinct_(false) {

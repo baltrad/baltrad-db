@@ -98,6 +98,14 @@ class Select : public Selectable {
         return from_;
     }
 
+    void append_group_by(ExpressionPtr expr) {
+        group_by_.push_back(expr);
+    }
+
+    std::vector<ExpressionPtr> group_by() const {
+        return group_by_;
+    }
+
     void append_order_by(ExpressionPtr expr, SortDirection dir);
 
     OrderVector order() const { return order_; }
@@ -120,6 +128,7 @@ class Select : public Selectable {
     std::vector<ExpressionPtr> what_;
     SelectablePtr from_;
     ExpressionPtr where_;
+    std::vector<ExpressionPtr> group_by_;
     OrderVector order_;
     int limit_;
     bool distinct_;

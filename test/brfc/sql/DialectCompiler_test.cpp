@@ -229,6 +229,17 @@ TEST_F(sql_DialectCompiler_test, test_select) {
     EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
 }
 
+TEST_F(sql_DialectCompiler_test, test_select_group_by) {
+    SelectPtr select = Select::create();
+    select->from(t1);
+    select->what(t1->column("c1"));
+    select->append_group_by(t1->column("c1"));
+    select->append_group_by(t1->column("c2"));
+    const Query& q = compiler.compile(*select);
+    std::string expected = "SELECT t1.c1 FROM t1 GROUP BY t1.c1, t1.c2";
+    EXPECT_EQ(expected, q.statement());
+}
+
 TEST_F(sql_DialectCompiler_test, test_select_order_by) {
     SelectPtr select = Select::create();
     select->from(t1);
@@ -241,17 +252,7 @@ TEST_F(sql_DialectCompiler_test, test_select_order_by) {
     EXPECT_EQ(expected, q.statement());
 }
 
-TEST_F(sql_DialectCompiler_test, test_select_limit) {
-    SelectPtr select = Select::create();
-    select->from(t1);
-    select->what(t1->column("c1"));
-    select->limit(1);
-    const Query& q = compiler.compile(*select);
-    std::string expected("SELECT t1.c1 FROM t1 LIMIT 1");
-    EXPECT_EQ(expected, q.statement());
-}
-
-TEST_F(sql_DialectCompiler_test, test_order_by_asc) {
+TEST_F(sql_DialectCompiler_test, test_select_order_by_asc) {
     SelectPtr select = Select::create();
     select->from(t1);
     select->what(t1->column("c1"));
@@ -261,13 +262,23 @@ TEST_F(sql_DialectCompiler_test, test_order_by_asc) {
     EXPECT_EQ(expected, q.statement());
 }
 
-TEST_F(sql_DialectCompiler_test, test_order_by_desc) {
+TEST_F(sql_DialectCompiler_test, test_select_order_by_desc) {
     SelectPtr select = Select::create();
     select->from(t1);
     select->what(t1->column("c1"));
     select->append_order_by(t1->column("c1"), Select::DESC);
     const Query& q = compiler.compile(*select);
     std::string expected("SELECT t1.c1 FROM t1 ORDER BY t1.c1 DESC");
+    EXPECT_EQ(expected, q.statement());
+}
+
+TEST_F(sql_DialectCompiler_test, test_select_limit) {
+    SelectPtr select = Select::create();
+    select->from(t1);
+    select->what(t1->column("c1"));
+    select->limit(1);
+    const Query& q = compiler.compile(*select);
+    std::string expected("SELECT t1.c1 FROM t1 LIMIT 1");
     EXPECT_EQ(expected, q.statement());
 }
 
