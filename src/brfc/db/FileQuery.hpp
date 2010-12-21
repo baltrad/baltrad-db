@@ -80,6 +80,13 @@ class FileQuery {
     OrderVector order() const { return order_; }
 
     /**
+     * @brief limit query results
+     */
+    FileQuery& limit(int limit) { limit_ = limit; return *this; }
+
+    int limit() const { return limit_; }
+
+    /**
      * @brief execute this query
      * @return ResultSet containing executed query results
      *
@@ -92,6 +99,7 @@ class FileQuery {
     Database* db_;
     expr::ExpressionPtr filter_;
     OrderVector order_;
+    int limit_;
 };
 
 } // namespace db

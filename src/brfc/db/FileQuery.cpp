@@ -36,7 +36,8 @@ namespace db {
 FileQuery::FileQuery(Database* db)
         : db_(db)
         , filter_()
-        , order_() {
+        , order_()
+        , limit_(0) {
 }
 
 FileQuery::FileQuery(const FileQuery& other)

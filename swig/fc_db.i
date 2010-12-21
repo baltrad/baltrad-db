@@ -79,7 +79,7 @@ SWIG_SHARED_PTR_DERIVED(FileEntry,
 /***
  * brfc::db::FileQuery
  */
-%ignore brfc::db::FileQuery::FileQuery;
+%ignore brfc::db::FileQuery::order() const;
 
 %typemap(javaimports) brfc::db::FileQuery, brfc::db::FileQuery* %{
     import eu.baltrad.fc.expr.Expression;

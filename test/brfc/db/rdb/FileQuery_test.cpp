@@ -352,6 +352,16 @@ TEST_P(db_rdb_FileQuery_test, test_order_by) {
     EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
 }
 
+TEST_P(db_rdb_FileQuery_test, test_limit) {
+    shared_ptr<FileResult> r = query.limit(2).execute();
+    EXPECT_EQ(2, r->size());
+
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+}
+
 TEST_P(db_rdb_FileQuery_test, test_query_missing) {
 
 }

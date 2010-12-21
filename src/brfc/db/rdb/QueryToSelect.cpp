@@ -83,6 +83,7 @@ QueryToSelect::transform(const FileQuery& query) {
 
     select_->what(m_.files->column("id"));
     select_->what(m_.file_content->column("lo_id"));
+    select_->limit(query.limit());
 
     // replace attributes in where clause with columns
     if (query.filter()) {
