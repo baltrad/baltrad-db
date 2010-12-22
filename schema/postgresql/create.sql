@@ -37,6 +37,7 @@ CREATE TABLE bdb_nodes (
     name TEXT NOT NULL,
     type INTEGER /* 1: group, 2: attribute, 3: dataset */
 );
+CREATE INDEX bdb_nodes_id_name_key ON bdb_nodes(id, name);
 CREATE INDEX bdb_nodes_file_id_name_key ON bdb_nodes(file_id, name);
 CREATE UNIQUE INDEX bdb_nodes_parent_id_name_key ON bdb_nodes(parent_id, name);
 

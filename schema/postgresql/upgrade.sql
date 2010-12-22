@@ -44,6 +44,11 @@ BEGIN
     RAISE NOTICE 'adding index bdb_nodes_parent_id_name_key';
     CREATE UNIQUE INDEX bdb_nodes_parent_id_name_key ON bdb_nodes(parent_id, name);
   END IF;
+  PERFORM true FROM pg_class WHERE relname = 'bdb_nodes_id_name_key';
+  IF NOT FOUND THEN
+    RAISE NOTICE 'adding index bdb_nodes_id_name_key';
+    CREATE INDEX bdb_nodes_id_name_key ON bdb_nodes(id, name);
+  END IF;
   PERFORM true FROM pg_class WHERE relname = 'bdb_nodes_file_id_name_key';
   IF NOT FOUND THEN
     RAISE NOTICE 'adding index bdb_nodes_file_id_name_key';
