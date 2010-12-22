@@ -20,20 +20,33 @@ BEGIN
   PERFORM true FROM information_schema.columns
     WHERE table_name = 'bdb_file_content' AND column_name = 'size';
   IF NOT FOUND THEN
+    RAISE NOTICE 'adding column "size" to bdb_files';
     ALTER TABLE bdb_file_content ADD COLUMN size INTEGER DEFAULT 0;
     ALTER TABLE bdb_file_content ALTER COLUMN size DROP DEFAULT;
   END IF;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION bdbupgrade_add_bdb_nodes_indexes() RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION bdbupgrade_del_bdb_nodes_indexes() RETURNS VOID AS $$
 BEGIN
   PERFORM true FROM pg_class WHERE relname = 'bdb_nodes_name_key';
+  IF FOUND THEN
+    RAISE NOTICE 'removing index bdb_nodes_name_key';
+    DROP INDEX bdb_nodes_name_key;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION bdbupgrade_add_bdb_nodes_indexes() RETURNS VOID AS $$
+BEGIN
+  PERFORM true FROM pg_class WHERE relname = 'bdb_nodes_parent_id_name_key';
   IF NOT FOUND THEN
-    CREATE INDEX bdb_nodes_name_key ON bdb_nodes(name);
+    RAISE NOTICE 'adding index bdb_nodes_parent_id_name_key';
+    CREATE UNIQUE INDEX bdb_nodes_parent_id_name_key ON bdb_nodes(parent_id, name);
   END IF;
   PERFORM true FROM pg_class WHERE relname = 'bdb_nodes_file_id_name_key';
   IF NOT FOUND THEN
+    RAISE NOTICE 'adding index bdb_nodes_file_id_name_key';
     CREATE INDEX bdb_nodes_file_id_name_key ON bdb_nodes(file_id, name);
   END IF;
 END;
@@ -43,32 +56,39 @@ CREATE OR REPLACE FUNCTION bdbupgrade_add_bdb_files_indexes() RETURNS VOID AS $$
 BEGIN
   PERFORM true FROM pg_class WHERE relname = 'bdb_files_stored_at_key';
   IF NOT FOUND THEN
+    RAISE NOTICE 'adding index bdb_files_stored_at_key';
     CREATE INDEX bdb_files_stored_at_key ON bdb_files(stored_at);
   END IF;
   PERFORM true FROM pg_class WHERE relname = 'bdb_files_what_object_key';
   IF NOT FOUND THEN
+    RAISE NOTICE 'adding index bdb_files_what_object_key';
     CREATE INDEX bdb_files_what_object_key ON bdb_files(what_object);
   END IF;
   PERFORM true FROM pg_class WHERE relname = 'bdb_files_what_date_key';
   IF NOT FOUND THEN
+    RAISE NOTICE 'adding index bdb_files_what_date_key';
     CREATE INDEX bdb_files_what_date_key ON bdb_files(what_date);
   END IF;
   PERFORM true FROM pg_class WHERE relname = 'bdb_files_what_time_key';
   IF NOT FOUND THEN
+    RAISE NOTICE 'adding index bdb_files_what_time_key';
     CREATE INDEX bdb_files_what_time_key ON bdb_files(what_time);
   END IF;
   PERFORM true FROM pg_class WHERE relname = 'bdb_files_combined_datetime_key';
   IF NOT FOUND THEN
+    RAISE NOTICE 'adding index bdb_files_combined_datetime_key';
     CREATE INDEX bdb_files_combined_datetime_key ON bdb_files((what_date + what_time));
   END IF;
 END;
 $$ LANGUAGE plpgsql;
 
 SELECT bdbupgrade_add_size_to_bdb_file_content();
+SELECT bdbupgrade_del_bdb_nodes_indexes();
 SELECT bdbupgrade_add_bdb_nodes_indexes();
 SELECT bdbupgrade_add_bdb_files_indexes();
 
 DROP FUNCTION bdbupgrade_add_size_to_bdb_file_content();
+DROP FUNCTION bdbupgrade_del_bdb_nodes_indexes();
 DROP FUNCTION bdbupgrade_add_bdb_nodes_indexes();
 DROP FUNCTION bdbupgrade_add_bdb_files_indexes();
 DROP FUNCTION make_plpgsql();
