@@ -71,9 +71,6 @@ QueryToSelect::reset() {
     from_ = m_.files->join(m_.sources,
                            xpr_.eq(m_.files->column("source_id"),
                                    m_.sources->column("id")));
-    from_ = from_->join(m_.file_content,
-                        xpr_.eq(m_.file_content->column("file_id"),
-                                m_.files->column("id")));
     stack_.clear();
 }
 
@@ -82,7 +79,6 @@ QueryToSelect::transform(const FileQuery& query) {
     reset();
 
     select_->what(m_.files->column("id"));
-    select_->what(m_.file_content->column("lo_id"));
     select_->limit(query.limit());
 
     // replace attributes in where clause with columns
@@ -106,7 +102,6 @@ QueryToSelect::transform(const FileQuery& query) {
             );
         }
         select_->append_group_by(m_.files->column("id"));
-        select_->append_group_by(m_.file_content->column("lo_id"));
     } else {
         select_->append_order_by(m_.files->column("id"), sql::Select::ASC);
         select_->distinct(true);
