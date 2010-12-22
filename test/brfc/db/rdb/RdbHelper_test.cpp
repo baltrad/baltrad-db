@@ -140,7 +140,6 @@ TEST_P(db_rdb_RdbHelper_test, test_insert_node_dataset) {
     ds.backend(new RdbNodeBackend());
     ds.parent(parent);
 
-    helper.insert_node(ds);
     EXPECT_NO_THROW(helper.insert_node(ds));
     EXPECT_GT(helper.backend(ds).id(), 0);
 }
