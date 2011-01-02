@@ -60,7 +60,7 @@ TEST(DateTime_test, test_now) {
     localtime_r(&time, &t);
     DateTime dt = DateTime::now();
     EXPECT_EQ(1900 + t.tm_year, dt.date().year());
-    EXPECT_EQ(t.tm_mon, dt.date().month());
+    EXPECT_EQ(t.tm_mon + 1, dt.date().month());
     EXPECT_EQ(t.tm_mday, dt.date().day());
     EXPECT_EQ(t.tm_hour, dt.time().hour());
 }
@@ -71,7 +71,7 @@ TEST(DateTime_test, test_utc_now) {
     gmtime_r(&time, &t);
     DateTime dt = DateTime::utc_now();
     EXPECT_EQ(1900 + t.tm_year, dt.date().year());
-    EXPECT_EQ(t.tm_mon, dt.date().month());
+    EXPECT_EQ(t.tm_mon + 1, dt.date().month());
     EXPECT_EQ(t.tm_mday, dt.date().day());
     EXPECT_EQ(t.tm_hour, dt.time().hour());
 }
