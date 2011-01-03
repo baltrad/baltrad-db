@@ -83,7 +83,7 @@ TEST(DateTime_test, test_to_tm) {
     DateTime dt2(2010, 10, 27, 12, 13, 14, 567);
     struct tm t = dt2.to_tm();
     EXPECT_EQ(t.tm_year, 110);
-    EXPECT_EQ(t.tm_mon, 10);
+    EXPECT_EQ(t.tm_mon, 9);
     EXPECT_EQ(t.tm_mday, 27);
     EXPECT_EQ(t.tm_hour, 12);
     EXPECT_EQ(t.tm_min, 13);

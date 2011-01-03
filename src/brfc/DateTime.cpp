@@ -74,7 +74,7 @@ DateTime::to_tm() const {
         throw value_error("can't convert DateTime to tm: year < 1900");
     struct tm t;
     t.tm_year = date().year() - 1900;
-    t.tm_mon = date().month();
+    t.tm_mon = date().month() - 1;
     t.tm_mday = date().day();
     t.tm_hour = time().hour();
     t.tm_min = time().minute();
