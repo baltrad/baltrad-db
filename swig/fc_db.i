@@ -51,30 +51,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 /***
  * brfc::db::FileEntry
  */
-SWIG_SHARED_PTR_DERIVED(FileEntry,
-                        brfc::oh5::File,
-                        brfc::db::FileEntry);
-
 %typemap(javaimports) brfc::db::FileEntry, brfc::db::FileEntry* %{
     import eu.baltrad.fc.DateTime;
     import eu.baltrad.fc.oh5.File;
     import eu.baltrad.fc.oh5.Source;
 %}
 
-%typemap(javabody_derived) brfc::db::FileEntry %{
-  private long swigCPtr;
-  private boolean swigCMemOwnDerived;
-
-  public $javaclassname(long cPtr, boolean cMemoryOwn) {
-    super($imclassname.$javaclassname_SWIGSharedPtrUpcast(cPtr), true);
-    swigCMemOwnDerived = cMemoryOwn;
-    swigCPtr = cPtr;
-  }
-
-  public static long getCPtr($javaclassname obj) {
-    return (obj == null) ? 0 : obj.swigCPtr;
-  }
-%}
+SWIG_JAVABODY_METHODS(public, public, brfc::db::FileEntry);
 
 /***
  * brfc::db::FileQuery
@@ -86,13 +69,17 @@ SWIG_SHARED_PTR_DERIVED(FileEntry,
     import eu.baltrad.fc.expr.Attribute;
 %}
 
+%newobject brfc::db::FileQuery::execute;
+
 /***
  * brfc::db::FileResult
  */
-SWIG_SHARED_PTR(FileResult, brfc::db::FileResult);
 %ignore brfc::db::FileResult::FileResult;
 %ignore brfc::db::FileResult::operator=;
 
+SWIG_JAVABODY_METHODS(public, public, brfc::db::FileResult);
+
+%newobject brfc::db::FileResult::entry;
 
 /***
  * brfc::db::AttributeQuery
@@ -105,10 +92,12 @@ SWIG_SHARED_PTR(FileResult, brfc::db::FileResult);
     import eu.baltrad.fc.expr.Function;
 %}
 
-/**
+%newobject brfc::db::AttributeQuery::execute;
+
+/***
  * brfc::db::AttributeResult
  */
-SWIG_SHARED_PTR(AttributeResult, brfc::db::AttributeResult);
+SWIG_JAVABODY_METHODS(public, public, brfc::db::AttributeResult);
 
 %typemap(javaimports) brfc::db::AttributeResult, brfc::db::AttributeResult* %{
     import eu.baltrad.fc.Date;
@@ -120,7 +109,14 @@ SWIG_SHARED_PTR(AttributeResult, brfc::db::AttributeResult);
 /***
  * brfc::db::Database
  */
-SWIG_SHARED_PTR(Database, brfc::db::Database);
+
+%newobject brfc::db::Database::entry_by_file;
+%newobject brfc::db::Database::entry_by_uuid;
+%newobject brfc::db::Database::execute;
+%newobject brfc::db::Database::get_or_store;
+%newobject brfc::db::Database::store;
+
+SWIG_JAVABODY_METHODS(public, public, brfc::db::Database);
 
 %typemap(javaimports) brfc::db::Database, brfc::db::Database* %{
     import java.util.List;
@@ -141,23 +137,6 @@ SWIG_SHARED_PTR(Database, brfc::db::Database);
         srclist.add(srcvec.get(i));
     }
     return srclist;
-  }
-%}
-
-
-// make constructors for SWIG_SHARED_PTR public
-%typemap(javabody) brfc::db::Database,
-                   brfc::db::Expression %{
-  private long swigCPtr;
-  private boolean swigCMemOwnBase;
-
-  public $javaclassname(long cPtr, boolean cMemoryOwn) {
-    swigCMemOwnBase = cMemoryOwn;
-    swigCPtr = cPtr;
-  }
-
-  public static long getCPtr($javaclassname obj) {
-    return (obj == null) ? 0 : obj.swigCPtr;
   }
 %}
 

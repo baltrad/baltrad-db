@@ -76,14 +76,16 @@ class Database : public boost::noncopyable {
      * @return a FileEntry instance for the saved file
      * @throw db_error if a database error occurs
      * @throw duplicate_entry if file is already stored to database
+     * @note caller takes ownership of the entry
      */
-    shared_ptr<FileEntry> store(const oh5::PhysicalFile& file) {
+    FileEntry* store(const oh5::PhysicalFile& file) {
         return do_store(file);
     }
     
     /**
      * @brief get a FileEntry for @c file, storing it if not already stored
      * @throw db_error if a database error occurs
+     * @note caller takes ownership of the entry
      *
      * this is equivalent to:
      * @code
@@ -94,35 +96,37 @@ class Database : public boost::noncopyable {
      * }
      * @endcode
      */
-    shared_ptr<FileEntry> get_or_store(const oh5::PhysicalFile& file);
+    FileEntry* get_or_store(const oh5::PhysicalFile& file);
     
     /**
      * @brief get FileEntry by physical file
      * @param file the physical file to look up
+     * @note caller takes ownership of the entry
      */
-    shared_ptr<FileEntry> entry_by_file(const oh5::PhysicalFile& file) {
+    FileEntry* entry_by_file(const oh5::PhysicalFile& file) {
         return do_entry_by_file(file);
     }
 
     /**
      * @brief get FileEntry by UUID
      * @param uuid the UUID of requested entry
+     * @note caller takes ownership of the entry
      */
-    shared_ptr<FileEntry> entry_by_uuid(const std::string& uuid) {
+    FileEntry* entry_by_uuid(const std::string& uuid) {
         return do_entry_by_uuid(uuid);
     }
 
     /**
      * @brief execute a query
      */
-    shared_ptr<FileResult> execute(const FileQuery& query) {
+    FileResult* execute(const FileQuery& query) {
         return do_execute(query);
     }
     
     /**
      * @brief execute a query
      */
-    shared_ptr<AttributeResult> execute(const AttributeQuery& query) {
+    AttributeResult* execute(const AttributeQuery& query) {
         return do_execute(query);
     }
     
@@ -161,12 +165,12 @@ class Database : public boost::noncopyable {
   protected:
     virtual bool do_is_stored(const oh5::PhysicalFile& file) = 0;
     virtual bool do_remove(const FileEntry& entry) = 0;
-    virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file) = 0;
-    virtual shared_ptr<FileEntry> do_entry_by_file(const oh5::PhysicalFile& file) = 0;
-    virtual shared_ptr<FileEntry> do_entry_by_uuid(const std::string& uuid) = 0;
+    virtual FileEntry* do_store(const oh5::PhysicalFile& file) = 0;
+    virtual FileEntry* do_entry_by_file(const oh5::PhysicalFile& file) = 0;
+    virtual FileEntry* do_entry_by_uuid(const std::string& uuid) = 0;
 
-    virtual shared_ptr<FileResult> do_execute(const FileQuery& query) = 0;
-    virtual shared_ptr<AttributeResult> do_execute(const AttributeQuery& query) = 0;
+    virtual FileResult* do_execute(const FileQuery& query) = 0;
+    virtual AttributeResult* do_execute(const AttributeQuery& query) = 0;
 
     virtual std::vector<oh5::Source> do_sources() const = 0;
     virtual void do_add_source(const oh5::Source& source) = 0;

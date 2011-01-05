@@ -22,8 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/noncopyable.hpp>
 
-#include <brfc/smart_ptr.hpp>
-
 namespace brfc {
 namespace db {
 
@@ -61,8 +59,9 @@ class FileResult : public boost::noncopyable {
     
     /**
      * @brief get the entry
+     * @note caller takes owneship of the entry
      */
-    shared_ptr<FileEntry> entry() { return do_entry(); }
+    FileEntry* entry() { return do_entry(); }
 
   protected:
     /**
@@ -85,7 +84,7 @@ class FileResult : public boost::noncopyable {
     /**
      * @brief entry() implementation
      */
-    virtual shared_ptr<FileEntry> do_entry() = 0;
+    virtual FileEntry* do_entry() = 0;
 };
 
 } // namespace db

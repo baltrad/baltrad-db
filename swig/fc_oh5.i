@@ -91,20 +91,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
                       brfc::oh5::Source* %{
     import eu.baltrad.fc.StringList;
 %}
-
-%typemap(javabody) brfc::oh5::Source, std::vector<brfc::oh5::Source> %{
-  private long swigCPtr;
-  protected boolean swigCMemOwn;
-
-  public $javaclassname(long cPtr, boolean cMemoryOwn) {
-    swigCMemOwn = cMemoryOwn;
-    swigCPtr = cPtr;
-  }
-
-  public static long getCPtr($javaclassname obj) {
-    return (obj == null) ? 0 : obj.swigCPtr;
-  }
-%}
+SWIG_JAVABODY_METHODS(public, public, brfc::oh5::Source);
+SWIG_JAVABODY_METHODS(public, public, std::vector<brfc::oh5::Source>);
 
 %template(SourceVector) std::vector<brfc::oh5::Source>;
 
@@ -123,13 +111,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 
 /***
- * brfc::oh5::File;
+ * brfc::oh5::File
  */
-SWIG_SHARED_PTR(File, brfc::oh5::File);
-SWIG_SHARED_PTR_DERIVED(PhysicalFile,
-                        brfc::oh5::File,
-                        brfc::oh5::PhysicalFile);
-
 %ignore brfc::oh5::File::group(const brfc::string&) const;
 %ignore brfc::oh5::File::root() const;
 
@@ -140,34 +123,12 @@ SWIG_SHARED_PTR_DERIVED(PhysicalFile,
     import eu.baltrad.fc.StringList;
 %}
 
-%typemap(javabody) brfc::oh5::File %{
-  private long swigCPtr;
-  private boolean swigCMemOwnBase;
+SWIG_JAVABODY_METHODS(public, public, brfc::oh5::File);
 
-  public $javaclassname(long cPtr, boolean cMemoryOwn) {
-    swigCMemOwnBase = cMemoryOwn;
-    swigCPtr = cPtr;
-  }
-
-  public static long getCPtr($javaclassname obj) {
-    return (obj == null) ? 0 : obj.swigCPtr;
-  }
-%}
-
-%typemap(javabody_derived) brfc::oh5::PhysicalFile %{
-  private long swigCPtr;
-  private boolean swigCMemOwnDerived;
-
-  public $javaclassname(long cPtr, boolean cMemoryOwn) {
-    super($imclassname.$javaclassname_SWIGSharedPtrUpcast(cPtr), true);
-    swigCMemOwnDerived = cMemoryOwn;
-    swigCPtr = cPtr;
-  }
-
-  public static long getCPtr($javaclassname obj) {
-    return (obj == null) ? 0 : obj.swigCPtr;
-  }
-%}
+/***
+ * brfc::oh5::PhysicalFile
+ */
+SWIG_JAVABODY_METHODS(public, public, brfc::oh5::PhysicalFile);
 
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.Date;

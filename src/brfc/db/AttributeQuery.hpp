@@ -118,11 +118,12 @@ class AttributeQuery {
     /**
      * @brief execute this query
      * @return ResultSet containing executed query results
+     * @note caller takes ownership of the result
      *
      * each row in the results contains a value for each attribute marked
      * for fetching, in the order they were marked.
      */
-    shared_ptr<AttributeResult> execute();
+    AttributeResult* execute();
     
   private:
     Database* db_;

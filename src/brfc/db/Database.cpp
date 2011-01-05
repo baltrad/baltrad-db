@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace db {
 
-shared_ptr<FileEntry>
+FileEntry*
 Database::get_or_store(const oh5::PhysicalFile& file) {
     if (is_stored(file))
         return entry_by_file(file);

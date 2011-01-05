@@ -118,15 +118,19 @@ struct db_rdb_FileQuery_test : public testing::TestWithParam<const char*> {
         tf5.write(td5);
         td5.path(tf5.path());
 
-        fe1 = db->store(td1);
-        fe2 = db->store(td2);
-        fe3 = db->store(td3);
-        fe4 = db->store(td4);
-        fe5 = db->store(td5);
+        fe1.reset(db->store(td1));
+        fe2.reset(db->store(td2));
+        fe3.reset(db->store(td3));
+        fe4.reset(db->store(td4));
+        fe5.reset(db->store(td5));
     }
 
     virtual void TearDown() {
         db->clean();
+    }
+
+    auto_ptr<db::FileEntry> entry(FileResult& r) {
+        return auto_ptr<db::FileEntry>(r.entry());
     }
     
     expr::ExpressionFactory xpr;
@@ -134,21 +138,21 @@ struct db_rdb_FileQuery_test : public testing::TestWithParam<const char*> {
     test::TestRDB* db;
     oh5::hl::HlFile td1, td2, td3, td4, td5;
     test::TempH5File tf1, tf2, tf3, tf4, tf5;
-    shared_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
+    scoped_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     FileQuery query;
+    scoped_ptr<FileResult> r;
 };
 
 TEST_P(db_rdb_FileQuery_test, test_queried_entry_has_lob) {
-    shared_ptr<FileResult> r =
-            query.filter(*xpr.attribute("file:uuid")->eq(*xpr.string(fe1->uuid())))
-                 .execute();
+    query.filter(*xpr.attribute("file:uuid")->eq(*xpr.string(fe1->uuid())));
+    r.reset(query.execute());
+
     EXPECT_EQ(1, r->size());
     ASSERT_TRUE(r->next());
 
-    shared_ptr<RdbFileEntry> qre =
-        dynamic_pointer_cast<RdbFileEntry>(r->entry());
-    shared_ptr<RdbFileEntry> fre1 =
-        dynamic_pointer_cast<RdbFileEntry>(fe1);
+    auto_ptr<FileEntry> aqre(entry(*r));
+    RdbFileEntry* qre = dynamic_cast<RdbFileEntry*>(aqre.get());
+    RdbFileEntry* fre1 = dynamic_cast<RdbFileEntry*>(fe1.get());
     
     ASSERT_TRUE(qre);
     ASSERT_TRUE(fre1);
@@ -160,72 +164,67 @@ TEST_P(db_rdb_FileQuery_test, test_queried_entry_has_lob) {
 }
 
 TEST_P(db_rdb_FileQuery_test, test_simple) {
-    shared_ptr<FileResult> r = 
-            query.filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(1)))
-                 .execute();
+    query.filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(1)));
+    r.reset(query.execute());
+
     EXPECT_EQ(1, r->size());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_list_all_files) {
-    shared_ptr<FileResult> r = query.execute();
+    r.reset(query.execute());
 
     EXPECT_EQ(5, r->size());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe3->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe3->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe4->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe4->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe5->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_filter_by_object) {
-    shared_ptr<FileResult> r =
-        query.filter(*xpr.attribute("what/object")->eq(*xpr.string("PVOL")))
-             .execute();
+    query.filter(*xpr.attribute("what/object")->eq(*xpr.string("PVOL")));
+    r.reset(query.execute());
 
     EXPECT_EQ(3, r->size());
-
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe3->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe3->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_filter_by_xsize) {
-    shared_ptr<FileResult> r =
-        query.filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(2)))
-             .execute();
-    EXPECT_EQ(2, r->size());
+    query.filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(2)));
+    r.reset(query.execute());
 
+    EXPECT_EQ(2, r->size());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe5->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
-    shared_ptr<FileResult> r =
-        query.filter(*xsize->eq(*xpr.int64_(1))->or_(*ysize->eq(*xpr.int64_(2))))
-             .execute();
+    query.filter(*xsize->eq(*xpr.int64_(1))->or_(*ysize->eq(*xpr.int64_(2))));
+    r.reset(query.execute());
 
     ASSERT_EQ(r->size(), 3);
-
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe5->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_filter_by_combined_datetime) {
@@ -238,72 +237,66 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_combined_datetime) {
         )->parentheses();
 
     query.filter(*what_dt->between(*xpr.datetime(min), *xpr.datetime(max)));
-    shared_ptr<FileResult> r = query.execute();
+    r.reset(query.execute());
 
     EXPECT_EQ(3, r->size());
-
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe3->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe3->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe4->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe4->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_filter_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("what/source:WMO");
-    shared_ptr<FileResult> r =
-        query.filter(*wmo_code->eq(*xpr.string("02666")))
-             .execute();
+    query.filter(*wmo_code->eq(*xpr.string("02666")));
+    r.reset(query.execute());
 
     EXPECT_EQ(2, r->size());
-
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe4->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe4->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_filter_by_node_or_node) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
-    shared_ptr<FileResult> r =
-        query.filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))))
-             .execute();
-    EXPECT_EQ(r->size(), 5);
+    query.filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))));
+    r.reset(query.execute());
 
+    EXPECT_EQ(r->size(), 5);
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe3->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe3->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe4->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe4->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe5->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_filter_by_node_and_node) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
-    shared_ptr<FileResult> r =
-        query.filter(*node->eq(*xpr.string("seang"))->and_(*node->eq(*xpr.string("sekkr"))))
-             .execute();
+    query.filter(*node->eq(*xpr.string("seang"))->and_(*node->eq(*xpr.string("sekkr"))));
+    r.reset(query.execute());
+
     EXPECT_EQ(0, r->size());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_filter_by_place) {
-    shared_ptr<FileResult> r =
-        query.filter(*xpr.attribute("what/source:PLC")->eq(*xpr.string("Ängelholm")))
-             .execute();
+    query.filter(*xpr.attribute("what/source:PLC")->eq(*xpr.string("Ängelholm")));
+    r.reset(query.execute());
 
     EXPECT_EQ(3, r->size());
-
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe3->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe3->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe5->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_is_stored) {
@@ -320,46 +313,44 @@ TEST_P(db_rdb_FileQuery_test, test_has_nx_file) {
 }
 
 TEST_P(db_rdb_FileQuery_test, test_query_like) {
-    shared_ptr<FileResult> r =
-        query.filter(*xpr.attribute("what/source:_name")->like("sea*"))
-             .execute();
-    EXPECT_EQ(3, r->size());
+    query.filter(*xpr.attribute("what/source:_name")->like("sea*"));
+    r.reset(query.execute());
 
+    EXPECT_EQ(3, r->size());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe3->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe3->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe5->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_order_by) {
-    shared_ptr<FileResult> r =
-        query.order_by(*xpr.attribute("where/xsize"), FileQuery::DESC)
-             .execute();
+    query.order_by(*xpr.attribute("where/xsize"), FileQuery::DESC);
+    r.reset(query.execute());
 
     EXPECT_EQ(5, r->size());
-
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe4->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe4->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe5->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe3->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe3->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_limit) {
-    shared_ptr<FileResult> r = query.limit(2).execute();
-    EXPECT_EQ(2, r->size());
+    query.limit(2);
+    r.reset(query.execute());
 
+    EXPECT_EQ(2, r->size());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe1->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
     ASSERT_TRUE(r->next());
-    EXPECT_EQ(fe2->uuid(), r->entry()->uuid());
+    EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
 }
 
 TEST_P(db_rdb_FileQuery_test, test_query_missing) {

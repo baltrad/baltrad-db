@@ -36,15 +36,15 @@ class MockDatabase : public Database {
     MOCK_METHOD1(do_remove,
         bool(const FileEntry&));
     MOCK_METHOD1(do_store,
-        shared_ptr<FileEntry>(const oh5::PhysicalFile&));
+        FileEntry*(const oh5::PhysicalFile&));
     MOCK_METHOD1(do_entry_by_file,
-        shared_ptr<FileEntry>(const oh5::PhysicalFile&));
+        FileEntry*(const oh5::PhysicalFile&));
     MOCK_METHOD1(do_entry_by_uuid,
-        shared_ptr<FileEntry>(const std::string&));
+        FileEntry*(const std::string&));
     MOCK_METHOD1(do_execute,
-        shared_ptr<FileResult>(const FileQuery&));
+        FileResult*(const FileQuery&));
     MOCK_METHOD1(do_execute,
-        shared_ptr<AttributeResult>(const AttributeQuery&));
+        AttributeResult*(const AttributeQuery&));
     MOCK_CONST_METHOD0(do_sources,
         std::vector<oh5::Source>());
     MOCK_METHOD1(do_add_source,

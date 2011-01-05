@@ -89,11 +89,12 @@ class FileQuery {
     /**
      * @brief execute this query
      * @return ResultSet containing executed query results
+     * @note caller takes ownership of the result
      *
      * each row in the results contains a value for each attribute marked
      * for fetching, in the order they were marked.
      */
-    shared_ptr<FileResult> execute();
+    FileResult* execute();
 
   private:
     Database* db_;

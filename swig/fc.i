@@ -38,9 +38,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/db/FileQuery.hpp>
 %}
 
-%import "fc_db.i"
 %import "fc_expr.i"
 %import "fc_oh5.i"
+%import "fc_db.i"
 
 %typemap("javapackage") brfc::oh5::File,
                         brfc::oh5::File*,
@@ -160,14 +160,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     import eu.baltrad.fc.db.FileEntry;
 %}
 
-%pragma(java) jniclassimports=%{
-    import eu.baltrad.fc.db.Database;
-    import eu.baltrad.fc.db.FileEntry;
-    import eu.baltrad.fc.oh5.File;
-    import eu.baltrad.fc.oh5.PhysicalFile;
-    import eu.baltrad.fc.oh5.Source;
-%}
-
+/***
+ * brfc::FileCatalog
+ */
 %typemap(javaimports) brfc::FileCatalog, brfc::FileCatalog* %{
     import eu.baltrad.fc.db.AttributeQuery;
     import eu.baltrad.fc.db.Database;
@@ -176,9 +171,20 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     import eu.baltrad.fc.oh5.PhysicalFile;
 %}
 
+%newobject brfc::FileCatalog::store;
+%newobject brfc::FileCatalog::get_or_store;
+
 %typemap(javaimports) brfc::FileNamer, brfc::FileNamer* %{
     import eu.baltrad.fc.oh5.File;
     import eu.baltrad.fc.db.FileEntry;
+%}
+
+%pragma(java) jniclassimports=%{
+    import eu.baltrad.fc.db.Database;
+    import eu.baltrad.fc.db.FileEntry;
+    import eu.baltrad.fc.oh5.File;
+    import eu.baltrad.fc.oh5.PhysicalFile;
+    import eu.baltrad.fc.oh5.Source;
 %}
 
 // Enable the JNI class to load the required native library.

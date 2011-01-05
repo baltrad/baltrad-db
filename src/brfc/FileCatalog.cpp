@@ -78,40 +78,40 @@ FileCatalog::is_stored(const oh5::PhysicalFile& f) const {
     return db_->is_stored(f);
 }
 
-shared_ptr<const db::FileEntry>
+db::FileEntry*
 FileCatalog::store(const std::string& path) {
     oh5::hl::HlFile f(path);
     return store(f); 
 }
 
-shared_ptr<const db::FileEntry>
+db::FileEntry*
 FileCatalog::store(const oh5::PhysicalFile& file) {
-    shared_ptr<db::FileEntry> e = db_->store(file);
+    auto_ptr<db::FileEntry> e(db_->store(file));
     try {
         storage_->prestore(*e, file.path());
     } catch (const std::runtime_error& e) {
         std::cerr << "IGNORED EXCEPTION: LocalStorage::prestore: "
                   << e.what() << std::endl << std::flush;
     }
-    return e;
+    return e.release();
 }
 
-shared_ptr<const db::FileEntry>
+db::FileEntry*
 FileCatalog::get_or_store(const std::string& path) {
     oh5::hl::HlFile f(path);
     return get_or_store(f);
 }
 
-shared_ptr<const db::FileEntry>
+db::FileEntry*
 FileCatalog::get_or_store(const oh5::PhysicalFile& file) {
-    shared_ptr<db::FileEntry> e = db_->get_or_store(file);
+    auto_ptr<db::FileEntry> e(db_->get_or_store(file));
     try {
         storage_->prestore(*e, file.path());
     } catch (const std::runtime_error& e) {
         std::cerr << "IGNORED EXCEPTION: LocalStorage::prestore: "
                   << e.what() << std::endl << std::flush;
     }
-    return e;
+    return e.release();
 }
 
 bool

@@ -85,10 +85,9 @@ TEST_P(db_rdb_RelationalDatabase_test, store) {
     file.path(tf.path());
 
     
-    shared_ptr<FileEntry> e;
-    EXPECT_NO_THROW(e = db->store(file));
-    shared_ptr<RdbFileEntry> re =
-        dynamic_pointer_cast<RdbFileEntry>(e);
+    scoped_ptr<FileEntry> e;
+    EXPECT_NO_THROW(e.reset(db->store(file)));
+    RdbFileEntry* re = dynamic_cast<RdbFileEntry*>(e.get());
     ASSERT_TRUE(re);
     EXPECT_TRUE(re->id() > 0);
     EXPECT_TRUE(re->lo_id() > 0);
@@ -104,10 +103,10 @@ TEST_P(db_rdb_RelationalDatabase_test, entry_by_uuid) {
     tf.write(file);
     file.path(tf.path());
     
-    shared_ptr<FileEntry> e1, e2;
-    ASSERT_NO_THROW(e1 = db->store(file));
+    scoped_ptr<FileEntry> e1, e2;
+    ASSERT_NO_THROW(e1.reset(db->store(file)));
      
-    ASSERT_NO_THROW(e2 = db->entry_by_uuid(e1->uuid()));
+    ASSERT_NO_THROW(e2.reset(db->entry_by_uuid(e1->uuid())));
 
     EXPECT_EQ(e1->uuid(), e2->uuid());
     EXPECT_EQ(e1->hash(), e2->hash());
@@ -121,10 +120,10 @@ TEST_P(db_rdb_RelationalDatabase_test, entry_by_file) {
 
     EXPECT_THROW(db->entry_by_file(file), lookup_error);
     
-    shared_ptr<FileEntry> e1, e2;
-    ASSERT_NO_THROW(e1 = db->store(file));
+    scoped_ptr<FileEntry> e1, e2;
+    ASSERT_NO_THROW(e1.reset(db->store(file)));
     
-    ASSERT_NO_THROW(e2 = db->entry_by_file(file));
+    ASSERT_NO_THROW(e2.reset(db->entry_by_file(file)));
 
     EXPECT_EQ(e1->uuid(), e2->uuid());
     EXPECT_EQ(e1->hash(), e2->hash());
@@ -136,8 +135,8 @@ TEST_P(db_rdb_RelationalDatabase_test, remove) {
     tf.write(file);
     file.path(tf.path());
     
-    shared_ptr<FileEntry> e;
-    EXPECT_NO_THROW(e = db->store(file));
+    scoped_ptr<FileEntry> e;
+    EXPECT_NO_THROW(e.reset(db->store(file)));
     ASSERT_TRUE(e);
 
     bool removed = false;
@@ -155,8 +154,8 @@ TEST_P(db_rdb_RelationalDatabase_test, write_entry_to_file) {
     tf.write(file);
     file.path(tf.path());
     
-    shared_ptr<FileEntry> e;
-    EXPECT_NO_THROW(e = db->store(file));
+    scoped_ptr<FileEntry> e;
+    EXPECT_NO_THROW(e.reset(db->store(file)));
     ASSERT_TRUE(e);
     
     // test writing

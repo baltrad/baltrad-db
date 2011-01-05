@@ -20,7 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/db/AttributeQuery.hpp>
+#include <brfc/db/AttributeResult.hpp>
 #include <brfc/db/FileQuery.hpp>
+#include <brfc/db/FileResult.hpp>
 #include <brfc/db/rdb/RelationalDatabase.hpp>
 
 #include <brfc/sql/DialectCompiler.hpp>
@@ -81,7 +83,7 @@ TEST_F(db_rdb_RelationalDatabase_test2, test_execute_attribute_query) {
         .WillOnce(Return(result_ptr));
 
     AttributeQuery q;
-    shared_ptr<AttributeResult> r = rdb.execute(q);
+    scoped_ptr<AttributeResult> r(rdb.execute(q));
 }
 
 TEST_F(db_rdb_RelationalDatabase_test2, test_execute_file_query) {
@@ -91,7 +93,7 @@ TEST_F(db_rdb_RelationalDatabase_test2, test_execute_file_query) {
         .WillOnce(Return(result_ptr));
 
     FileQuery q;
-    shared_ptr<FileResult> r = rdb.execute(q);
+    scoped_ptr<FileResult> r(rdb.execute(q));
 }
 
 TEST_F(db_rdb_RelationalDatabase_test2, test_remove) {

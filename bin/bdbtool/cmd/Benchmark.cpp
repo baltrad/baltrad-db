@@ -25,12 +25,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/program_options.hpp>
 #include <boost/progress.hpp>
 #include <boost/timer.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <brfc/DateTime.hpp>
 #include <brfc/StringList.hpp>
 #include <brfc/TimeDelta.hpp>
 
 #include <brfc/db/Database.hpp>
+#include <brfc/db/FileEntry.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/RootGroup.hpp>
@@ -89,8 +91,8 @@ Benchmark::do_execute(db::Database& db,
     DateTime dt(Date(3000, 1, 1));
     TimeDelta delta;
     delta.add_days(1);
-    double store_secs;
-    std::vector<shared_ptr<const db::FileEntry> > stored_files;
+    double store_secs = 0;
+    boost::ptr_vector<db::FileEntry> stored_files;
     boost::progress_display progress(iterations_);
 
     for (int i=0; i < iterations_; ++i) {
@@ -114,8 +116,8 @@ Benchmark::do_execute(db::Database& db,
 
     if (vm.count("keep") == 0) {
         std::cout << "cleaning up" << std::endl;
-        BOOST_FOREACH(shared_ptr<const db::FileEntry> entry, stored_files) {
-            db.remove(*entry);
+        BOOST_FOREACH(const db::FileEntry& entry, stored_files) {
+            db.remove(entry);
         }
     }
 

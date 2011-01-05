@@ -72,13 +72,14 @@ FileFactory::do_update() {
     db::FileQuery qry;
     if (filter_)
         qry.filter(*filter_);
-    shared_ptr<db::FileResult> result = database().execute(qry);
+    scoped_ptr<db::FileResult> result(database().execute(qry));
 
     EntryByUuid_t& es = entries_.get<by_uuid>();
     EntryByUuid_t::iterator iter;
-
+    
+    scoped_ptr<db::FileEntry> fe;
     while (result->next()) {
-        shared_ptr<db::FileEntry> fe = result->entry();
+        fe.reset(result->entry());
         const std::string& uuid = fe->uuid();
         iter = es.find(uuid);
         if (iter != es.end()) {

@@ -92,4 +92,5 @@ public class TestFileCatalog extends TestCase {
     List<Source> sources = fc.database().sources();
     assertTrue(sources.size() > 0);
   }
+
 }

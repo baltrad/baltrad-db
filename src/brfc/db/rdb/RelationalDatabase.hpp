@@ -94,13 +94,13 @@ class RelationalDatabase : public Database {
     virtual bool do_is_stored(const oh5::PhysicalFile& file);
     virtual bool do_remove(const FileEntry& entry);
 
-    virtual shared_ptr<FileEntry> do_store(const oh5::PhysicalFile& file);
-    virtual shared_ptr<FileEntry> do_entry_by_file(const oh5::PhysicalFile& file);
-    virtual shared_ptr<FileEntry> do_entry_by_uuid(const std::string& uuid);
+    virtual FileEntry* do_store(const oh5::PhysicalFile& file);
+    virtual FileEntry* do_entry_by_file(const oh5::PhysicalFile& file);
+    virtual FileEntry* do_entry_by_uuid(const std::string& uuid);
     
-    virtual shared_ptr<FileResult> do_execute(const FileQuery& query);
+    virtual FileResult* do_execute(const FileQuery& query);
 
-    virtual shared_ptr<AttributeResult> do_execute(const AttributeQuery& query);
+    virtual AttributeResult* do_execute(const AttributeQuery& query);
 
     virtual std::vector<oh5::Source> do_sources() const;
     virtual void do_add_source(const oh5::Source& source);

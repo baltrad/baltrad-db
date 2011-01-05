@@ -39,7 +39,6 @@ struct FileCatalog_test : public ::testing::Test {
     FileCatalog_test()
             : db()
             , entry()
-            , entry_ptr(&entry, no_delete)
             , storage()
             , fc(&db, &storage)
             , path("/tmp/mockphsycialfile")
@@ -53,7 +52,6 @@ struct FileCatalog_test : public ::testing::Test {
 
     db::MockDatabase db;
     db::MockFileEntry entry;
-    shared_ptr<db::FileEntry> entry_ptr;
     MockLocalStorage storage;
     FileCatalog fc;
     std::string path;
@@ -70,11 +68,11 @@ TEST_F(FileCatalog_test, test_store_nx_file_by_path) {
 
 TEST_F(FileCatalog_test, test_store) {
     EXPECT_CALL(db, do_store(Ref(file)))
-        .WillOnce(Return(entry_ptr));
+        .WillOnce(Return(&entry));
     EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
         .WillOnce(Return("/path/to/file"));
     
-    shared_ptr<const db::FileEntry> e;
+    db::FileEntry* e = 0;
     EXPECT_NO_THROW(e = fc.store(file));
     EXPECT_TRUE(e);
 }
@@ -93,11 +91,11 @@ TEST_F(FileCatalog_test, test_store_on_db_failure) {
 
 TEST_F(FileCatalog_test, test_store_on_prestore_failure) {
     EXPECT_CALL(db, do_store(Ref(file)))
-        .WillOnce(Return(entry_ptr));
+        .WillOnce(Return(&entry));
     EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
         .WillOnce(Throw(std::runtime_error("error")));
     
-    shared_ptr<const db::FileEntry> e;
+    db::FileEntry* e = 0;
     EXPECT_NO_THROW(e = fc.store(file));
     EXPECT_TRUE(e);
 }
@@ -106,11 +104,11 @@ TEST_F(FileCatalog_test, test_get_or_store) {
     EXPECT_CALL(db, do_is_stored(Ref(file)))
         .WillOnce(Return(true));
     EXPECT_CALL(db, do_entry_by_file(Ref(file)))
-        .WillOnce(Return(entry_ptr));
+        .WillOnce(Return(&entry));
     EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
         .WillOnce(Return("/path/to/file"));
     
-    shared_ptr<const db::FileEntry> e;
+    db::FileEntry* e = 0;
     EXPECT_NO_THROW(e = fc.get_or_store(file));
     EXPECT_TRUE(e);
 }
@@ -126,11 +124,11 @@ TEST_F(FileCatalog_test, test_get_or_store_on_prestore_failure) {
     EXPECT_CALL(db, do_is_stored(Ref(file)))
         .WillOnce(Return(true));
     EXPECT_CALL(db, do_entry_by_file(Ref(file)))
-        .WillOnce(Return(entry_ptr));
+        .WillOnce(Return(&entry));
     EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
         .WillOnce(Throw(std::runtime_error("error")));
     
-    shared_ptr<const db::FileEntry> e;
+    db::FileEntry* e = 0;
     EXPECT_NO_THROW(e = fc.get_or_store(file));
     EXPECT_TRUE(e);
 }
@@ -174,7 +172,7 @@ TEST_F(FileCatalog_test, test_remove_nx_file) {
 TEST_F(FileCatalog_test, test_local_path_for_uuid) {
     std::string uuid = "uuid";
     EXPECT_CALL(db, do_entry_by_uuid(Ref(uuid)))
-        .WillOnce(Return(entry_ptr));
+        .WillOnce(Return(&entry));
     EXPECT_CALL(storage, do_store(Ref(entry)))
         .WillOnce(Return("/path/to/file"));
     

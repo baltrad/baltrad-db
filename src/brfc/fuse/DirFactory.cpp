@@ -79,7 +79,7 @@ DirFactory::do_update() {
     if (filter_)
         qry.filter(*filter_);
     
-    shared_ptr<db::AttributeResult> result = database().execute(qry);
+    scoped_ptr<db::AttributeResult> result(database().execute(qry));
 
     EntryByName_t& es = entries_.get<by_name>();
     EntryByName_t::iterator iter;

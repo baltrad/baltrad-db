@@ -76,7 +76,8 @@ struct db_rdb_AttributeQuery_test : public testing::TestWithParam<const char*> {
             , td3("PVOL", Date(2000, 1, 1), Time(12, 2), src1)
             , td4("CVOL", Date(2001, 1, 1), Time(12, 0), src2)
             , td5("SCAN", Date(2002, 2, 1), Time(12, 0), src1)
-            , query(db) {
+            , query(db)
+            , r() {
     }
 
     void add_attribute(oh5::File& file, const std::string& path, const oh5::Scalar& value) {
@@ -117,11 +118,11 @@ struct db_rdb_AttributeQuery_test : public testing::TestWithParam<const char*> {
         tf5.write(td5);
         td5.path(tf5.path());
 
-        fe1 = db->store(td1);
-        fe2 = db->store(td2);
-        fe3 = db->store(td3);
-        fe4 = db->store(td4);
-        fe5 = db->store(td5);
+        fe1.reset(db->store(td1));
+        fe2.reset(db->store(td2));
+        fe3.reset(db->store(td3));
+        fe4.reset(db->store(td4));
+        fe5.reset(db->store(td5));
     }
 
     virtual void TearDown() {
@@ -133,25 +134,25 @@ struct db_rdb_AttributeQuery_test : public testing::TestWithParam<const char*> {
     test::TestRDB* db;
     oh5::hl::HlFile td1, td2, td3, td4, td5;
     test::TempH5File tf1, tf2, tf3, tf4, tf5;
-    shared_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
+    scoped_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     AttributeQuery query;
+    scoped_ptr<AttributeResult> r;
 };
 
 
 TEST_P(db_rdb_AttributeQuery_test, test_simple) {
-    shared_ptr<AttributeResult> r = 
-            query.fetch(*xpr.attribute("file:uuid"))
-                 .filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(1)))
-                 .execute();
+    query.fetch(*xpr.attribute("file:uuid"))
+         .filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(1)));
+    r.reset(query.execute());
+
     ASSERT_TRUE(r->next());
     EXPECT_EQ(fe1->uuid(), r->string(0));
     ASSERT_TRUE(not r->next());
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_list_all_files) {
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("file:uuid"))
-             .execute();
+    query.fetch(*xpr.attribute("file:uuid"));
+    r.reset(query.execute());
 
     EXPECT_EQ(5, r->size());
     ASSERT_TRUE(r->next());
@@ -167,11 +168,10 @@ TEST_P(db_rdb_AttributeQuery_test, test_list_all_files) {
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_filter_by_object) {
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("file:uuid"))
-             .filter(*xpr.attribute("what/object")->eq(*xpr.string("PVOL")))
-             .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC)
-             .execute();
+    query.fetch(*xpr.attribute("file:uuid"))
+         .filter(*xpr.attribute("what/object")->eq(*xpr.string("PVOL")))
+         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    r.reset(query.execute());
 
     EXPECT_EQ(3, r->size());
     ASSERT_TRUE(r->next());
@@ -183,10 +183,9 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_object) {
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_fetch_xsize_filtering_by_xsize) {
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("where/xsize"))
-             .filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(2)))
-             .execute();
+    query.fetch(*xpr.attribute("where/xsize"))
+         .filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(2)));
+    r.reset(query.execute());
 
     EXPECT_EQ(2, r->size());
     ASSERT_TRUE(r->next());
@@ -198,11 +197,10 @@ TEST_P(db_rdb_AttributeQuery_test, test_fetch_xsize_filtering_by_xsize) {
 TEST_P(db_rdb_AttributeQuery_test, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("file:uuid"))
-             .filter(*xsize->eq(*xpr.int64_(1))->or_(*ysize->eq(*xpr.int64_(2))))
-             .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC)
-             .execute();
+    query.fetch(*xpr.attribute("file:uuid"))
+         .filter(*xsize->eq(*xpr.int64_(1))->or_(*ysize->eq(*xpr.int64_(2))))
+         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    r.reset(query.execute());
 
     EXPECT_EQ(4, r->size());
     ASSERT_TRUE(r->next());
@@ -217,13 +215,12 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_xsize_or_ysize) {
 
 TEST_P(db_rdb_AttributeQuery_test, test_filter_by_xsize_distinct) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
-    shared_ptr<AttributeResult> r = 
-        query.fetch(*xpr.attribute("file:uuid"))
-             .distinct(true)
-             .filter(*xsize->eq(*xpr.int64_(3)))
-             .execute();
-    EXPECT_EQ(1, r->size());
+    query.fetch(*xpr.attribute("file:uuid"))
+         .distinct(true)
+         .filter(*xsize->eq(*xpr.int64_(3)));
+    r.reset(query.execute());
 
+    EXPECT_EQ(1, r->size());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(fe3->uuid(), r->string(0));
 }
@@ -240,7 +237,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_combined_datetime) {
     query.fetch(*xpr.attribute("file:uuid"));
     query.filter(*what_dt->between(*xpr.datetime(min), *xpr.datetime(max)));
     query.order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
-    shared_ptr<AttributeResult> r = query.execute();
+    r.reset(query.execute());
 
     EXPECT_EQ(r->size(), 3);
     ASSERT_TRUE(r->next());
@@ -253,10 +250,9 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_combined_datetime) {
 
 TEST_P(db_rdb_AttributeQuery_test, test_select_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("what/source:WMO");
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("file:uuid"))
-             .filter(*wmo_code->eq(*xpr.string("02666")))
-             .execute();
+    query.fetch(*xpr.attribute("file:uuid"))
+         .filter(*wmo_code->eq(*xpr.string("02666")));
+    r.reset(query.execute());
 
     EXPECT_EQ(r->size(), 2);
     ASSERT_TRUE(r->next());
@@ -267,11 +263,10 @@ TEST_P(db_rdb_AttributeQuery_test, test_select_by_wmo_code) {
 
 TEST_P(db_rdb_AttributeQuery_test, test_select_by_or_node) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("file:uuid"))
-             .filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))))
-             .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC)
-             .execute();
+    query.fetch(*xpr.attribute("file:uuid"))
+         .filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))))
+         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    r.reset(query.execute());
     EXPECT_EQ(r->size(), 5);
     ASSERT_TRUE(r->next());
     EXPECT_EQ(fe1->uuid(), r->string(0));
@@ -287,18 +282,16 @@ TEST_P(db_rdb_AttributeQuery_test, test_select_by_or_node) {
 
 TEST_P(db_rdb_AttributeQuery_test, test_select_by_node_and_node) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("file:uuid"))
-             .filter(*node->eq(*xpr.string("seang"))->and_(*node->eq(*xpr.string("sekkr"))))
-             .execute();
+    query.fetch(*xpr.attribute("file:uuid"))
+         .filter(*node->eq(*xpr.string("seang"))->and_(*node->eq(*xpr.string("sekkr"))));
+    r.reset(query.execute());
     EXPECT_EQ(0, r->size());
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_select_by_place) {
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("file:uuid"))
-             .filter(*xpr.attribute("what/source:PLC")->eq(*xpr.string("Ängelholm")))
-             .execute();
+    query.fetch(*xpr.attribute("file:uuid"))
+         .filter(*xpr.attribute("what/source:PLC")->eq(*xpr.string("Ängelholm")));
+    r.reset(query.execute());
 
     EXPECT_EQ(3, r->size());
     ASSERT_TRUE(r->next());
@@ -317,10 +310,9 @@ TEST_P(db_rdb_AttributeQuery_test, DISABLED_test_duplicate_fetch_throws) {
 
 TEST_P(db_rdb_AttributeQuery_test, test_query_like) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("file:uuid"))
-             .filter(*node->like("sea*"))
-             .execute();
+    query.fetch(*xpr.attribute("file:uuid"))
+         .filter(*node->like("sea*"));
+    r.reset(query.execute());
 
     EXPECT_EQ(3, r->size());
     ASSERT_TRUE(r->next());
@@ -334,10 +326,9 @@ TEST_P(db_rdb_AttributeQuery_test, test_query_like) {
 TEST_P(db_rdb_AttributeQuery_test, test_order_by) {
     expr::ExpressionPtr dt =
         xpr.attribute("what/date")->add(*xpr.attribute("what/time"));
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("file:uuid"))
-             .order_by(*dt, AttributeQuery::DESC)
-             .execute();
+    query.fetch(*xpr.attribute("file:uuid"))
+         .order_by(*dt, AttributeQuery::DESC);
+    r.reset(query.execute());
 
     EXPECT_EQ(5, r->size());
     ASSERT_TRUE(r->next());
@@ -353,10 +344,9 @@ TEST_P(db_rdb_AttributeQuery_test, test_order_by) {
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_limit) {
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.attribute("file:uuid"))
-             .limit(2)
-             .execute();
+    query.fetch(*xpr.attribute("file:uuid")).limit(2);
+    r.reset(query.execute());
+
     EXPECT_EQ(2, r->size());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(fe1->uuid(), r->string(0));
@@ -365,9 +355,8 @@ TEST_P(db_rdb_AttributeQuery_test, test_limit) {
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_fetch_max_xsize) {
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.max(*xpr.attribute("where/xsize")))
-             .execute();
+    query.fetch(*xpr.max(*xpr.attribute("where/xsize")));
+    r.reset(query.execute());
     
     EXPECT_EQ(1, r->size());
     ASSERT_TRUE(r->next());
@@ -375,10 +364,9 @@ TEST_P(db_rdb_AttributeQuery_test, test_fetch_max_xsize) {
 }
 
 TEST_P(db_rdb_AttributeQuery_test, test_fetch_min_ysize_with_filter) {
-    shared_ptr<AttributeResult> r =
-        query.fetch(*xpr.min(*xpr.attribute("where/ysize")))
-             .filter(*xpr.attribute("what/object")->eq(*xpr.string("CVOL")))
-             .execute();
+    query.fetch(*xpr.min(*xpr.attribute("where/ysize")))
+         .filter(*xpr.attribute("what/object")->eq(*xpr.string("CVOL")));
+    r.reset(query.execute());
     
     EXPECT_EQ(1, r->size());
     ASSERT_TRUE(r->next());

@@ -45,7 +45,7 @@ class RdbFileResult : public FileResult {
     virtual bool do_seek(int pos);
     virtual bool do_next();
     virtual int do_size() const;
-    virtual shared_ptr<FileEntry> do_entry();
+    virtual FileEntry* do_entry();
   
   private:
     RelationalDatabase* rdb_;

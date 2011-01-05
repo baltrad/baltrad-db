@@ -82,13 +82,13 @@ class SaveFile {
      * @param file the file to be saved
      * @return file entry in the database
      */
-    shared_ptr<RdbFileEntry> operator()(const oh5::PhysicalFile& file);
+    RdbFileEntry* operator()(const oh5::PhysicalFile& file);
 
   private:
     oh5::Node& parent_on_entry(const oh5::Node& node);
 
     RelationalDatabase* rdb_;
-    shared_ptr<RdbFileEntry> entry_;
+    auto_ptr<RdbFileEntry> entry_;
 };
 
 } // namespace rdb

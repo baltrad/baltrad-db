@@ -42,25 +42,23 @@ class db_Database_test : public ::testing::Test {
 TEST_F(db_Database_test, test_get_or_store_stored) {
     oh5::MockPhysicalFile f; 
     MockFileEntry fe;
-    shared_ptr<MockFileEntry> fe_ptr(&fe, no_delete);
     EXPECT_CALL(db, do_is_stored(Ref(f)))
         .WillOnce(Return(true));
     EXPECT_CALL(db, do_entry_by_file(Ref(f)))
-        .WillOnce(Return(fe_ptr));
+        .WillOnce(Return(&fe));
     
-    EXPECT_EQ(fe_ptr, db.get_or_store(f));
+    EXPECT_EQ(&fe, db.get_or_store(f));
 }
 
 TEST_F(db_Database_test, test_get_or_store_not_stored) {
     oh5::MockPhysicalFile f; 
     MockFileEntry fe;
-    shared_ptr<MockFileEntry> fe_ptr(&fe, no_delete);
     EXPECT_CALL(db, do_is_stored(Ref(f)))
         .WillOnce(Return(false));
     EXPECT_CALL(db, do_store(Ref(f)))
-        .WillOnce(Return(fe_ptr));
+        .WillOnce(Return(&fe));
     
-    EXPECT_EQ(fe_ptr, db.get_or_store(f));
+    EXPECT_EQ(&fe, db.get_or_store(f));
 }
 
 

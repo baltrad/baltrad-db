@@ -42,13 +42,13 @@ RdbFileResult::do_size() const {
     return result_->size();
 }
 
-shared_ptr<FileEntry>
+FileEntry*
 RdbFileResult::do_entry() {
     long long id = result_->value_at(0).int64_();
 
-    shared_ptr<RdbFileEntry> entry(new RdbFileEntry(rdb_));
+    auto_ptr<RdbFileEntry> entry(new RdbFileEntry(rdb_));
     entry->id(id);
-    return entry;
+    return entry.release();
 }
 
 } // namespace rdb

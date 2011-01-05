@@ -75,7 +75,7 @@ SaveFile::operator()(const oh5::Attribute& attr) {
     parent_on_entry(attr).create_attribute(attr.name(), attr.value());
 }
 
-shared_ptr<RdbFileEntry>
+RdbFileEntry*
 SaveFile::operator()(const oh5::PhysicalFile& file) {
     entry_.reset(new RdbFileEntry(rdb_));
     entry_->hash(rdb_->file_hasher().hash(file));
@@ -105,7 +105,7 @@ SaveFile::operator()(const oh5::PhysicalFile& file) {
         throw;
     }
 
-    return entry_;
+    return entry_.release();
 }
 
 } // namespace rdb

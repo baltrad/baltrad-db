@@ -105,12 +105,12 @@ RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
     return true;
 }
 
-shared_ptr<FileEntry>
+FileEntry*
 RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
     return SaveFile(this)(file);
 }
 
-shared_ptr<FileEntry>
+FileEntry*
 RelationalDatabase::do_entry_by_file(const oh5::PhysicalFile& file) {
     const Model& m = Model::instance();
 
@@ -136,26 +136,26 @@ RelationalDatabase::do_entry_by_file(const oh5::PhysicalFile& file) {
     return entry_by_uuid(result->value_at("uuid").string());
 }
 
-shared_ptr<FileEntry>
+FileEntry*
 RelationalDatabase::do_entry_by_uuid(const std::string& uuid) {
-    shared_ptr<RdbFileEntry> entry(new RdbFileEntry(this));
+    auto_ptr<RdbFileEntry> entry(new RdbFileEntry(this));
     entry->uuid(uuid);
     entry->load();
-    return entry;
+    return entry.release();
 }
 
-shared_ptr<FileResult>
+FileResult*
 RelationalDatabase::do_execute(const FileQuery& query) {
     sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
     shared_ptr<sql::Result> res = conn()->execute(*select);
-    return shared_ptr<FileResult>(new RdbFileResult(this, res));
+    return new RdbFileResult(this, res);
 }
 
-shared_ptr<AttributeResult>
+AttributeResult*
 RelationalDatabase::do_execute(const AttributeQuery& query) {
     sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
     shared_ptr<sql::Result> res = conn()->execute(*select);
-    return shared_ptr<AttributeResult>(new RdbAttributeResult(res));
+    return new RdbAttributeResult(res);
 }
 
 void
