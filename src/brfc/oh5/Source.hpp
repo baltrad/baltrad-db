@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <string>
 
-#include <brfc/smart_ptr.hpp>
 #include <brfc/StringList.hpp>
 
 namespace brfc {

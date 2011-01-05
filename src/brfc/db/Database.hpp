@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/noncopyable.hpp>
 
-#include <brfc/smart_ptr.hpp>
-
 #include <brfc/oh5/Source.hpp>
 
 namespace brfc {

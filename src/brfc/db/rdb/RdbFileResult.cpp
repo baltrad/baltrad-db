@@ -17,11 +17,12 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <memory>
+
+#include <brfc/db/rdb/RdbFileEntry.hpp>
 #include <brfc/db/rdb/RdbFileResult.hpp>
 
 #include <brfc/sql/Result.hpp>
-
-#include <brfc/db/rdb/RdbFileEntry.hpp>
 
 namespace brfc {
 namespace db {

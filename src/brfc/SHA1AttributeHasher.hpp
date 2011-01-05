@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <string>
 
-#include <brfc/smart_ptr.hpp>
 #include <brfc/FileHasher.hpp>
 
 namespace brfc {

@@ -19,8 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_FILE_ENTRY_HPP
 #define BRFC_DB_FILE_ENTRY_HPP
 
-#include <brfc/smart_ptr.hpp>
-
 #include <brfc/DateTime.hpp>
 #include <brfc/oh5/File.hpp>
 
