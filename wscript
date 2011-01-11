@@ -589,7 +589,7 @@ def _run_tests(bld):
      
     bld.add_group("run_gtest_tests")
     bld(
-        rule="${SRC} --gtest_output=xml:%s || true" % os.path.join(bdir, "test/reports/gtest.xml"),
+        rule="${SRC} --catch_leaked_mocks=1 --gtest_output=xml:%s || true" % os.path.join(bdir, "test/reports/gtest.xml"),
         source="test_runner",
         uselib_local="brfc",
         env=env,

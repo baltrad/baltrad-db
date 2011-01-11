@@ -33,14 +33,16 @@ namespace sql {
 class sql_LargeObjectProxy_test : public ::testing::Test {
   public:
     sql_LargeObjectProxy_test()
-            : lo()
+            : lo_ptr(new MockLargeObject())
+            , lo(*lo_ptr)
             , conn()
             , proxy(shared_ptr<Connection>(&conn, no_delete),
-                    shared_ptr<LargeObject>(&lo, no_delete)) {
+                    lo_ptr.release()) {
     
     }
     
-    MockLargeObject lo;
+    auto_ptr<MockLargeObject> lo_ptr;
+    MockLargeObject& lo;
     MockConnection conn;
     LargeObjectProxy proxy;
 };

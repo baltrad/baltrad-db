@@ -120,16 +120,16 @@ TEST_F(sql_ConnectionProxy_test, test_in_transaction) {
 }
 
 TEST_F(sql_ConnectionProxy_test, test_execute) {
-    shared_ptr<Result> r = make_shared<MockResult>();
+    auto_ptr<Result> r(new MockResult());
     std::string stmt = "stmt";
     EXPECT_CALL(conn, do_execute(stmt))
-        .WillOnce(Return(r));
+        .WillOnce(Return(r.release()));
     
     EXPECT_EQ(1, proxy.use_count());
-    shared_ptr<Result> rr = proxy->execute(stmt);
-    ASSERT_TRUE(rr);
+    auto_ptr<Result> rr(proxy->execute(stmt));
+    ASSERT_TRUE(rr.get());
     EXPECT_EQ(2, proxy.use_count());
-    EXPECT_TRUE(dynamic_pointer_cast<ResultProxy>(rr));
+    EXPECT_TRUE(dynamic_cast<ResultProxy*>(rr.get()));
 }
 
 TEST_F(sql_ConnectionProxy_test, test_dialect) {
@@ -149,27 +149,27 @@ TEST_F(sql_ConnectionProxy_test, test_compiler) {
 }
 
 TEST_F(sql_ConnectionProxy_test, test_large_object_longlong) {
-    shared_ptr<LargeObject> lo = make_shared<MockLargeObject>();
+    auto_ptr<LargeObject> lo(new MockLargeObject());
     EXPECT_CALL(conn, do_large_object(1))
-        .WillOnce(Return(lo));
+        .WillOnce(Return(lo.release()));
     
     EXPECT_EQ(1, proxy.use_count());
-    shared_ptr<LargeObject> rlo = proxy->large_object(1);
-    ASSERT_TRUE(rlo);
+    auto_ptr<LargeObject> rlo(proxy->large_object(1));
+    ASSERT_TRUE(rlo.get());
     EXPECT_EQ(2, proxy.use_count());
-    EXPECT_TRUE(dynamic_pointer_cast<LargeObjectProxy>(rlo));
+    EXPECT_TRUE(dynamic_cast<LargeObjectProxy*>(rlo.get()));
 }
 
 TEST_F(sql_ConnectionProxy_test, test_large_object_string) {
-    shared_ptr<LargeObject> lo = make_shared<MockLargeObject>();
+    auto_ptr<LargeObject> lo(new MockLargeObject());
     EXPECT_CALL(conn, do_large_object(TypedEq<const std::string&>("path")))
-        .WillOnce(Return(lo));
+        .WillOnce(Return(lo.release()));
     
     EXPECT_EQ(1, proxy.use_count());
-    shared_ptr<LargeObject> rlo = proxy->large_object("path");
-    ASSERT_TRUE(rlo);
+    auto_ptr<LargeObject> rlo(proxy->large_object("path"));
+    ASSERT_TRUE(rlo.get());
     EXPECT_EQ(2, proxy.use_count());
-    EXPECT_TRUE(dynamic_pointer_cast<LargeObjectProxy>(rlo));
+    EXPECT_TRUE(dynamic_cast<LargeObjectProxy*>(rlo.get()));
 }
 
 TEST_F(sql_ConnectionProxy_test, test_last_insert_id) {

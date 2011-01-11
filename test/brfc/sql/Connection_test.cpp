@@ -68,6 +68,7 @@ class sql_Connection_test : public testing::Test {
 };
 
 TEST_F(sql_Connection_test, test_no_transaction_execute) {
+    MockResult result;
     std::string stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillOnce(Return(false))  // execute()
@@ -75,10 +76,10 @@ TEST_F(sql_Connection_test, test_no_transaction_execute) {
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_begin());
     EXPECT_CALL(conn, do_execute(stmt))
-        .WillOnce(Return(make_shared<MockResult>()));
+        .WillOnce(Return(&result));
     EXPECT_CALL(conn, do_commit());
 
-    conn.execute(stmt);
+    EXPECT_EQ(&result, conn.execute(stmt));
 }
 
 TEST_F(sql_Connection_test, test_no_transaction_excute_throws) {
@@ -96,13 +97,14 @@ TEST_F(sql_Connection_test, test_no_transaction_excute_throws) {
 }
 
 TEST_F(sql_Connection_test, test_in_transaction_execute) {
+    MockResult result;
     std::string stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
-        .WillOnce(Return(make_shared<MockResult>()));
+        .WillOnce(Return(&result));
     
-    conn.execute(stmt);
+    EXPECT_EQ(&result, conn.execute(stmt));
 }
 
 TEST_F(sql_Connection_test, test_in_transaction_execute_throws) {
@@ -187,57 +189,60 @@ TEST_F(sql_Connection_test, test_execute_sqlquery) {
     std::string stmt("query");
     BindMap binds;
     Query query(stmt, binds);
+    MockResult result;
 
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
-        .WillOnce(Return(make_shared<MockResult>()));
+        .WillOnce(Return(&result));
     
-    conn.execute(query);
+    EXPECT_EQ(&result, conn.execute(query));
 }
 
 TEST_F(sql_Connection_test, test_execute_insert) {
     TablePtr t = Table::create("t");
     InsertPtr query = Insert::create(t);
     Query compiled("query");
+    MockResult result;
 
     EXPECT_CALL(compiler, do_compile(Ref(*query)))
         .WillOnce(Return(compiled));
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(compiled.statement()))
-        .WillOnce(Return(make_shared<MockResult>()));
+        .WillOnce(Return(&result));
     
-    conn.execute(*query);
+    EXPECT_EQ(&result, conn.execute(*query));
 }
 
 TEST_F(sql_Connection_test, test_execute_select) {
     SelectPtr query = Select::create();
     Query compiled("query");
+    MockResult result;
 
     EXPECT_CALL(compiler, do_compile(Ref(*query)))
         .WillOnce(Return(compiled));
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(compiled.statement()))
-        .WillOnce(Return(make_shared<MockResult>()));
+        .WillOnce(Return(&result));
     
-    conn.execute(*query);
-
+    EXPECT_EQ(&result, conn.execute(*query));
 }
 
 TEST_F(sql_Connection_test, test_execute_replaces_binds) {
     std::string stmt(":bind");
     BindMap binds;
     binds.add(":bind", Variant(1));
+    MockResult result;
 
     ON_CALL(conn, do_execute(_))
-        .WillByDefault(Return(shared_ptr<Result>()));
+        .WillByDefault(Return(&result));
 
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute("1"))
-        .WillOnce(Return(shared_ptr<Result>()));
+        .WillOnce(Return(&result));
     
     conn.execute(Query(stmt, binds));
 }

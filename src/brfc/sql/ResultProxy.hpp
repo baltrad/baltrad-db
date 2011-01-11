@@ -39,8 +39,7 @@ class ResultProxy : public Result {
      * @param conn the database connection
      * @param result the result to proxy
      */
-    ResultProxy(shared_ptr<Connection> conn,
-                shared_ptr<Result> result);
+    ResultProxy(shared_ptr<Connection> conn, Result* result);
     
     virtual ~ResultProxy();
 
@@ -77,7 +76,7 @@ class ResultProxy : public Result {
 
   private:
     shared_ptr<Connection> conn_;
-    shared_ptr<Result> result_;
+    scoped_ptr<Result> result_;
 };
 
 } // namespace sql

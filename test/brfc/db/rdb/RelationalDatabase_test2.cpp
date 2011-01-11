@@ -51,8 +51,8 @@ class db_rdb_RelationalDatabase_test2 : public ::testing::Test {
             , compiler(&dialect)
             , pool()
             , pool_ptr(&pool, no_delete)
-            , result()
-            , result_ptr(&result, no_delete)
+            , result_ptr(new sql::MockResult())
+            , result(*result_ptr)
             , rdb(pool_ptr) {
     }
 
@@ -71,8 +71,8 @@ class db_rdb_RelationalDatabase_test2 : public ::testing::Test {
     sql::DialectCompiler compiler;
     sql::MockConnectionPool pool;
     shared_ptr<sql::ConnectionPool> pool_ptr;
-    sql::MockResult result;
-    shared_ptr<sql::Result> result_ptr;
+    auto_ptr<sql::MockResult> result_ptr;
+    sql::MockResult& result;
     RelationalDatabase rdb;
 };
 
@@ -80,7 +80,7 @@ TEST_F(db_rdb_RelationalDatabase_test2, test_execute_attribute_query) {
     EXPECT_CALL(pool, do_get())
         .WillOnce(Return(conn_ptr));
     EXPECT_CALL(conn, do_execute(_))
-        .WillOnce(Return(result_ptr));
+        .WillOnce(Return(result_ptr.release()));
 
     AttributeQuery q;
     scoped_ptr<AttributeResult> r(rdb.execute(q));
@@ -90,7 +90,7 @@ TEST_F(db_rdb_RelationalDatabase_test2, test_execute_file_query) {
     EXPECT_CALL(pool, do_get())
         .WillOnce(Return(conn_ptr));
     EXPECT_CALL(conn, do_execute(_))
-        .WillOnce(Return(result_ptr));
+        .WillOnce(Return(result_ptr.release()));
 
     FileQuery q;
     scoped_ptr<FileResult> r(rdb.execute(q));
@@ -103,7 +103,7 @@ TEST_F(db_rdb_RelationalDatabase_test2, test_remove) {
     EXPECT_CALL(e, do_uuid())
         .WillOnce(Return("abcdefg"));
     EXPECT_CALL(conn, do_execute(_)) // check statement
-        .WillOnce(Return(result_ptr));
+        .WillOnce(Return(result_ptr.release()));
     EXPECT_CALL(result, do_affected_rows())
         .WillOnce(Return(1));
 

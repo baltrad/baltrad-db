@@ -129,7 +129,8 @@ RdbFileEntry::do_write_to_file(const std::string& path) const {
     shared_ptr<sql::Connection> conn = rdb().conn();
     conn->begin();
     try {
-        conn->large_object(lo_id_)->write_to_file(path);
+        scoped_ptr<sql::LargeObject> lo(conn->large_object(lo_id_));
+        lo->write_to_file(path);
         conn->commit();
     } catch (...) {
         conn->rollback();

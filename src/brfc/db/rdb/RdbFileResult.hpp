@@ -36,7 +36,7 @@ class RelationalDatabase;
 
 class RdbFileResult : public FileResult {
   public:
-    RdbFileResult(RelationalDatabase* rdb, shared_ptr<sql::Result> result)
+    RdbFileResult(RelationalDatabase* rdb, sql::Result* result)
             : rdb_(rdb)
             , result_(result) {
     }
@@ -49,7 +49,7 @@ class RdbFileResult : public FileResult {
   
   private:
     RelationalDatabase* rdb_;
-    shared_ptr<sql::Result> result_;
+    scoped_ptr<sql::Result> result_;
 };
 
 } // namespace rdb

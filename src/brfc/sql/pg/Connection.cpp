@@ -81,17 +81,17 @@ Connection::do_rollback() {
     transaction_.reset();
 }
 
-shared_ptr<sql::Result>
+sql::Result*
 Connection::do_execute(const std::string& query) {
-    shared_ptr<sql::Result> result;
+    auto_ptr<sql::Result> result;
     try {
         pqxx::result pg_result = transaction_->exec(query);
-        result = make_shared<Result>(pg_result, &types_);
+        result.reset(new Result(pg_result, &types_));
     } catch (const std::runtime_error& e) {
         throw db_error(e.what());
     }
 
-    return result;
+    return result.release();
 }
 
 std::string
@@ -115,14 +115,14 @@ Connection::url_to_pg(const Url& url) {
     return pgargs;
 }
 
-shared_ptr<sql::LargeObject>
+sql::LargeObject*
 Connection::do_large_object(long long id) {
-    return shared_ptr<sql::LargeObject>(new LargeObject(*transaction_, id));
+    return new LargeObject(*transaction_, id);
 }
 
-shared_ptr<sql::LargeObject>
+sql::LargeObject*
 Connection::do_large_object(const std::string& path) {
-    return shared_ptr<sql::LargeObject>(new LargeObject(*transaction_, path));
+    return new LargeObject(*transaction_, path);
 }
 
 void

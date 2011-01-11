@@ -71,10 +71,10 @@ ConnectionProxy::do_rollback() {
     proxied_->do_rollback();
 }
 
-shared_ptr<Result>
+Result*
 ConnectionProxy::do_execute(const std::string& stmt) {
-    shared_ptr<Result> r = proxied_->do_execute(stmt);
-    return make_shared<ResultProxy>(shared_from_this(), r);
+    auto_ptr<Result> r(proxied_->do_execute(stmt));
+    return new ResultProxy(shared_from_this(), r.release());
 }
 
 bool
@@ -92,16 +92,16 @@ ConnectionProxy::do_compiler() {
     return proxied_->do_compiler();
 }
 
-shared_ptr<LargeObject>
+LargeObject*
 ConnectionProxy::do_large_object(long long id) {
-    shared_ptr<LargeObject> lo = proxied_->do_large_object(id);
-    return make_shared<LargeObjectProxy>(shared_from_this(), lo);
+    auto_ptr<LargeObject> lo(proxied_->do_large_object(id));
+    return new LargeObjectProxy(shared_from_this(), lo.release());
 }
 
-shared_ptr<LargeObject>
+LargeObject*
 ConnectionProxy::do_large_object(const std::string& path) {
-    shared_ptr<LargeObject> lo = proxied_->do_large_object(path);
-    return make_shared<LargeObjectProxy>(shared_from_this(), lo);
+    auto_ptr<LargeObject> lo(proxied_->do_large_object(path));
+    return new LargeObjectProxy(shared_from_this(), lo.release());
 }
 
 long long

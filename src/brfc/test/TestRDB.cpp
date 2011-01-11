@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
+#include <brfc/sql/Result.hpp>
 
 namespace fs = boost::filesystem;
 
@@ -58,7 +59,7 @@ TestRDB::drop() {
 
 void
 TestRDB::clean() {
-    conn()->execute("DELETE FROM bdb_files");
+    scoped_ptr<sql::Result> r(conn()->execute("DELETE FROM bdb_files"));
 }
 
 StringList
@@ -86,8 +87,9 @@ TestRDB::exec_queries_from(const std::string& file) {
     shared_ptr<sql::Connection> c = conn();
     c->begin();
     try {
+        scoped_ptr<sql::Result> result;
         BOOST_FOREACH(const std::string& stmt, queries) {
-            c->execute(stmt);
+            result.reset(c->execute(stmt));
         }
         c->commit();
     } catch (...) {

@@ -25,7 +25,7 @@ namespace brfc {
 namespace sql {
 
 ResultProxy::ResultProxy(shared_ptr<Connection> conn,
-                         shared_ptr<Result> result)
+                         Result* result)
         : conn_(conn)
         , result_(result) {
 

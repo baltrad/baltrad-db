@@ -175,15 +175,6 @@ TEST_P(db_rdb_RelationalDatabase_test, store_with_invalid_attributes) {
     EXPECT_NO_THROW(db->store(file));
 }
 
-TEST_P(db_rdb_RelationalDatabase_test, DISABLED_resultset_keeps_qsqldatabase_alive) {
-    shared_ptr<sql::Result> r;
-    {
-        RelationalDatabase db(GetParam());
-        r = db.conn()->execute("SELECT 1");
-    };
-    r->size();
-}
-
 TEST_P(db_rdb_RelationalDatabase_test, test_sources) {
     std::vector<oh5::Source> sources;
     EXPECT_NO_THROW(sources = db->sources());

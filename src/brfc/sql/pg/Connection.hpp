@@ -66,10 +66,10 @@ class Connection : public sql::Connection {
         return compiler_;
     }
 
-    virtual shared_ptr<sql::Result> do_execute(const std::string& query);
+    virtual sql::Result* do_execute(const std::string& query);
 
-    virtual shared_ptr<sql::LargeObject> do_large_object(long long id);
-    virtual shared_ptr<sql::LargeObject> do_large_object(const std::string& path);
+    virtual sql::LargeObject* do_large_object(long long id);
+    virtual sql::LargeObject* do_large_object(const std::string& path);
 
     virtual long long do_last_insert_id() const {
         return 0;

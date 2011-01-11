@@ -39,8 +39,7 @@ class LargeObjectProxy : public LargeObject {
      * @param conn the database connection
      * @param lobj the proxied large object
      */
-    LargeObjectProxy(shared_ptr<Connection> conn,
-                     shared_ptr<LargeObject> lobj);
+    LargeObjectProxy(shared_ptr<Connection> conn, LargeObject* lobj);
     
     virtual ~LargeObjectProxy();
 
@@ -50,7 +49,7 @@ class LargeObjectProxy : public LargeObject {
   
   private:
     shared_ptr<Connection> conn_;
-    shared_ptr<LargeObject> lobj_;
+    scoped_ptr<LargeObject> lobj_;
 };
 
 } // namespace sql

@@ -198,7 +198,7 @@ RdbHelper::insert_node(oh5::Node& node) {
     qry.bind(":file_id", Variant(file->id()));
     qry.bind(":name", Variant(node.name()));
 
-    shared_ptr<sql::Result> result = conn().execute(qry);
+    scoped_ptr<sql::Result> result(conn().execute(qry));
 
     long long db_id = last_id(*result);
     backend(node).id(db_id);
@@ -253,7 +253,7 @@ RdbHelper::insert_attribute(oh5::Attribute& attr) {
         } catch (const value_error&) { /* pass */ }
     }
 
-    conn().execute(qry);
+    scoped_ptr<sql::Result>(conn().execute(qry));
 }
 
 void
@@ -282,7 +282,7 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     if (dialect().has_feature(sql::Dialect::RETURNING))
         qry->add_return(m_.files->column("id"));
 
-    shared_ptr<sql::Result> result = conn().execute(*qry);
+    scoped_ptr<sql::Result> result(conn().execute(*qry));
 
     long long file_id = last_id(*result);
     entry.uuid(uuid);
@@ -296,7 +296,7 @@ void
 RdbHelper::insert_file_content(RdbFileEntry& entry, const std::string& path) {
     // transfer the file to database
     long long size = boost::filesystem::file_size(path);
-    shared_ptr<sql::LargeObject> lo = conn().large_object(path);
+    scoped_ptr<sql::LargeObject> lo(conn().large_object(path));
 
     sql::InsertPtr qry = sql::Insert::create(m_.file_content);
     qry->value("file_id", sql_.int64_(entry.id()));
@@ -304,7 +304,7 @@ RdbHelper::insert_file_content(RdbFileEntry& entry, const std::string& path) {
     qry->value("size", sql_.int64_(size));
 
 
-    conn().execute(*qry);
+    scoped_ptr<sql::Result>(conn().execute(*qry));
 
     entry.lo_id(lo->id());
     entry.size(size);
@@ -327,7 +327,7 @@ RdbHelper::load_file(RdbFileEntry& entry) {
     else
         throw std::runtime_error("no uuid or id to load file from db");
     
-    shared_ptr<sql::Result> result = conn().execute(*qry);
+    scoped_ptr<sql::Result> result(conn().execute(*qry));
 
     if (not result->next())
         throw brfc::lookup_error("no RdbFileEntry found by id=" +
@@ -355,7 +355,7 @@ RdbHelper::select_root_id(const RdbFileEntry& entry) {
     else
         throw std::runtime_error("no uuid or id to load file from db");
 
-    shared_ptr<sql::Result> r = conn().execute(*qry);
+    scoped_ptr<sql::Result> r(conn().execute(*qry));
     
     if (not r->next())
         return 0;
@@ -378,7 +378,7 @@ RdbHelper::select_source_id(const oh5::Source& src) {
         qry->where(qry->where()->or_(x->parentheses()));
     }
 
-    shared_ptr<sql::Result> r = conn().execute(*qry);
+    scoped_ptr<sql::Result> r(conn().execute(*qry));
     if (r->size() == 1 and r->next())
         return r->value_at(0).int64_();
     else
@@ -390,7 +390,7 @@ RdbHelper::select_source(long long id) {
     sql::SelectPtr qry = sql::Select::create(m_.source_kvs);
     qry->where(m_.source_kvs->column("source_id")->eq(sql_.int64_(id)));
 
-    shared_ptr<sql::Result> r = conn().execute(*qry);
+    scoped_ptr<sql::Result> r(conn().execute(*qry));
 
     oh5::Source src;
     
@@ -401,7 +401,7 @@ RdbHelper::select_source(long long id) {
     qry = sql::Select::create(m_.sources);
     qry->where(m_.sources->column("id")->eq(sql_.int64_(id)));
 
-    r = conn().execute(*qry);
+    r.reset(conn().execute(*qry));
 
     if (r->next()) {
         src.add("_name", r->value_at("name").string());
@@ -420,7 +420,7 @@ RdbHelper::select_all_sources() {
     qry->what(m_.source_kvs->column("key"));
     qry->what(m_.source_kvs->column("value"));
 
-    shared_ptr<sql::Result> r = conn().execute(*qry);
+    scoped_ptr<sql::Result> r(conn().execute(*qry));
 
     oh5::Source src;
     long long prev_id = 0, id = 0;
@@ -446,6 +446,7 @@ RdbHelper::select_all_sources() {
 
 void
 RdbHelper::add_source(const oh5::Source& source) {
+    scoped_ptr<sql::Result> r;
     try {
         conn().begin();
         sql::InsertPtr qry = sql::Insert::create(m_.sources);
@@ -453,7 +454,7 @@ RdbHelper::add_source(const oh5::Source& source) {
                    sql_.string(source.get("_name")));
         if (dialect().has_feature(sql::Dialect::RETURNING))
             qry->add_return(m_.sources->column("id"));
-        shared_ptr<sql::Result> r = conn().execute(*qry);
+        r.reset(conn().execute(*qry));
         long long id = last_id(*r);
 
         BOOST_FOREACH(const std::string& key, source.keys()) {
@@ -464,7 +465,7 @@ RdbHelper::add_source(const oh5::Source& source) {
                        sql_.string(key));
             qry->value(m_.source_kvs->column("value"),
                        sql_.string(source.get(key)));
-            conn().execute(*qry);
+            r.reset(conn().execute(*qry));
         }
 
         conn().commit();
@@ -477,6 +478,7 @@ RdbHelper::add_source(const oh5::Source& source) {
 void
 RdbHelper::update_source(const oh5::Source& source) {
     long long id = boost::lexical_cast<long long>(source.get("_id"));
+    scoped_ptr<sql::Result> r;
     try {
         conn().begin();
 
@@ -484,12 +486,12 @@ RdbHelper::update_source(const oh5::Source& source) {
         sql::BindMap binds;
         binds.add(":name", Variant(source.get("_name")));
         binds.add(":id", Variant(id));
-        conn().execute(sql::Query(stmt, binds));
+        r.reset(conn().execute(sql::Query(stmt, binds)));
 
         stmt = "DELETE FROM bdb_source_kvs WHERE source_id = :id";
         binds.clear();
         binds.add(":id", Variant(id));
-        conn().execute(sql::Query(stmt, binds));
+        r.reset(conn().execute(sql::Query(stmt, binds)));
     
         BOOST_FOREACH(const std::string& key, source.keys()) {
             sql::InsertPtr qry = sql::Insert::create(m_.source_kvs);
@@ -499,7 +501,7 @@ RdbHelper::update_source(const oh5::Source& source) {
                        sql_.string(key));
             qry->value(m_.source_kvs->column("value"),
                        sql_.string(source.get(key)));
-            conn().execute(*qry);
+            r.reset(conn().execute(*qry));
         }
 
         conn().commit();
@@ -514,7 +516,7 @@ RdbHelper::remove_source(const oh5::Source& source) {
     std::string stmt("DELETE FROM bdb_sources WHERE id = :id");
     sql::BindMap binds;
     binds.add(":id", Variant(boost::lexical_cast<int>(source.get("_id"))));
-    shared_ptr<sql::Result> r = conn().execute(sql::Query(stmt, binds));
+    scoped_ptr<sql::Result> r(conn().execute(sql::Query(stmt, binds)));
     if (not r->affected_rows())
         throw lookup_error("source not stored in database");
 }
@@ -538,7 +540,7 @@ RdbHelper::load_children(oh5::Node& node) {
 
     qry->where(m_.nodes->column("parent_id")->eq(sql_.int64_(id)));
 
-    shared_ptr<sql::Result> r = conn().execute(*qry);
+    scoped_ptr<sql::Result> r(conn().execute(*qry));
 
     while (r->next()) {
         std::string name = r->value_at("name").string();

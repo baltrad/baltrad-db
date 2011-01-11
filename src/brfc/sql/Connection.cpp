@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Query.hpp>
+#include <brfc/sql/Result.hpp>
 #include <brfc/sql/Select.hpp>
 
 namespace brfc {
@@ -75,28 +76,28 @@ Connection::commit() {
     do_commit();
 }
 
-shared_ptr<Result>
+Result*
 Connection::execute(const Insert& stmt) {
     return execute(compiler().compile(stmt));
 }
 
-shared_ptr<Result>
+Result*
 Connection::execute(const Select& stmt) {
     return execute(compiler().compile(stmt));
 }
 
-shared_ptr<Result>
+Result*
 Connection::execute(const Query& query) {
     return execute(query.replace_binds(dialect()));
 }
 
-shared_ptr<Result>
+Result*
 Connection::execute(const std::string& stmt) {
-    shared_ptr<Result> result;
+    auto_ptr<Result> result;
     if (not in_transaction()) {
         try {
             begin();
-            result = do_execute(stmt);
+            result.reset(do_execute(stmt));
             commit();
         } catch (const std::runtime_error& e) {
             rollback();
@@ -104,20 +105,20 @@ Connection::execute(const std::string& stmt) {
         }
     } else {
         try {
-            result = do_execute(stmt);
+            result.reset(do_execute(stmt));
         } catch (const std::runtime_error& e) {
             throw db_error(e.what());
         }
     }
-    return result;
+    return result.release();
 }
 
-shared_ptr<LargeObject>
+LargeObject*
 Connection::large_object(long long id) {
     return do_large_object(id);
 }
 
-shared_ptr<LargeObject>
+LargeObject*
 Connection::large_object(const std::string& path) {
     return do_large_object(path);
 }

@@ -33,14 +33,16 @@ namespace sql {
 class sql_ResultProxy_test : public ::testing::Test {
   public:
     sql_ResultProxy_test()
-            : result()
+            : result_ptr(new MockResult())
+            , result(*result_ptr)
             , conn()
             , proxy(shared_ptr<Connection>(&conn, no_delete),
-                    shared_ptr<Result>(&result, no_delete)) {
+                    result_ptr.release()) {
     
     }
-    
-    MockResult result;
+
+    auto_ptr<MockResult> result_ptr;
+    MockResult& result;
     MockConnection conn;
     ResultProxy proxy;
 };

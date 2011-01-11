@@ -129,7 +129,7 @@ RelationalDatabase::do_entry_by_file(const oh5::PhysicalFile& file) {
         )
     );
 
-    shared_ptr<sql::Result> result = c->execute(*qry);
+    auto_ptr<sql::Result> result(c->execute(*qry));
     if (result->size() > 1 or not result->next())
         throw lookup_error(file.path() + " is not stored");
     
@@ -147,15 +147,15 @@ RelationalDatabase::do_entry_by_uuid(const std::string& uuid) {
 FileResult*
 RelationalDatabase::do_execute(const FileQuery& query) {
     sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
-    shared_ptr<sql::Result> res = conn()->execute(*select);
-    return new RdbFileResult(this, res);
+    auto_ptr<sql::Result> res(conn()->execute(*select));
+    return new RdbFileResult(this, res.release());
 }
 
 AttributeResult*
 RelationalDatabase::do_execute(const AttributeQuery& query) {
     sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
-    shared_ptr<sql::Result> res = conn()->execute(*select);
-    return new RdbAttributeResult(res);
+    auto_ptr<sql::Result> res(conn()->execute(*select));
+    return new RdbAttributeResult(res.release());
 }
 
 void
@@ -184,7 +184,7 @@ RelationalDatabase::do_remove(const FileEntry& entry) {
     std::string qry("DELETE FROM bdb_files WHERE uuid = :uuid");
     sql::BindMap binds;
     binds.add(":uuid", Variant(entry.uuid()));
-    shared_ptr<sql::Result> r = conn()->execute(sql::Query(qry, binds));
+    auto_ptr<sql::Result> r (conn()->execute(sql::Query(qry, binds)));
     return r->affected_rows();
 }
 

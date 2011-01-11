@@ -23,7 +23,7 @@ namespace brfc {
 namespace sql {
 
 LargeObjectProxy::LargeObjectProxy(shared_ptr<Connection> conn,
-                                   shared_ptr<LargeObject> lobj)
+                                   LargeObject* lobj) 
         : conn_(conn)
         , lobj_(lobj) {
 

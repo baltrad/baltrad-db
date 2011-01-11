@@ -22,8 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/noncopyable.hpp>
 
-#include <brfc/smart_ptr.hpp>
-
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Compiler.hpp>
 
@@ -110,13 +108,15 @@ class Connection : boost::noncopyable {
 
     /**
      * @brief execute an Insert statement
+     * @note caller takes ownership of the result
      */
-    shared_ptr<Result> execute(const Insert& stmt);
+    Result* execute(const Insert& stmt);
 
     /**
      * @brief execute a Select statement
+     * @note caller takes ownership of the result
      */
-    shared_ptr<Result> execute(const Select& stmt);
+    Result* execute(const Select& stmt);
     
     /**
      * @brief execute an SQL query
@@ -128,11 +128,12 @@ class Connection : boost::noncopyable {
      * transaction, otherwise the statement executed as part of the ongoing
      * transaction.
      *
+     * @note caller takes ownership of the result
      * @sa do_execute
      */
-    shared_ptr<Result> execute(const Query& query);
+    Result* execute(const Query& query);
 
-    shared_ptr<Result> execute(const std::string& query);
+    Result* execute(const std::string& query);
 
     const Dialect& dialect() const {
         return do_dialect();
@@ -144,13 +145,15 @@ class Connection : boost::noncopyable {
     
     /**
      * @brief access large object identified by @c id
+     * @note caller takes ownership of the large object
      */
-    shared_ptr<LargeObject> large_object(long long id);
+    LargeObject* large_object(long long id);
     
     /**
      * @brief create a new large object from file @c path
+     * @note caller takes ownership of the large object
      */
-    shared_ptr<LargeObject> large_object(const std::string& path);
+    LargeObject* large_object(const std::string& path);
 
     long long last_insert_id() const {
         return do_last_insert_id();
@@ -197,8 +200,9 @@ class Connection : boost::noncopyable {
     
     /**
      * @brief execute(const Sting& implementation)
+     * @note caller takes ownership of the result
      */
-    virtual shared_ptr<Result> do_execute(const std::string& query) = 0;
+    virtual Result* do_execute(const std::string& query) = 0;
     
     /**
      * @brief dialect() implementation
@@ -212,13 +216,15 @@ class Connection : boost::noncopyable {
     
     /**
      * @brief large_object(long long) implementation
+     * @note caller takes ownership of the large object
      */
-    virtual shared_ptr<LargeObject> do_large_object(long long id) = 0;
+    virtual LargeObject* do_large_object(long long id) = 0;
 
     /**
      * @brief large_object(const std::string&) implementation
+     * @note caller takes ownership of the large object
      */
-    virtual shared_ptr<LargeObject> do_large_object(const std::string& path) = 0;
+    virtual LargeObject* do_large_object(const std::string& path) = 0;
     
     /**
      * @brief last_insert_id() implementation

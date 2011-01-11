@@ -21,6 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_CONNECTION_PROXY_HPP
 
 #include <brfc/sql/Connection.hpp>
+#include <brfc/smart_ptr.hpp>
 
 namespace brfc {
 namespace sql {
@@ -94,7 +95,7 @@ class ConnectionProxy : public Connection,
      *
      * proxy the result of the call with ResultProxy
      */
-    virtual shared_ptr<Result> do_execute(const std::string& stmt);
+    virtual Result* do_execute(const std::string& stmt);
 
     /**
      * @brief forward the call to the proxied database connection
@@ -109,12 +110,12 @@ class ConnectionProxy : public Connection,
     /**
      * @brief forward the call to the proxied database connection
      */
-    virtual shared_ptr<LargeObject> do_large_object(long long id);
+    virtual LargeObject* do_large_object(long long id);
     
     /**
      * @brief forward the call to the proxied database connection
      */
-    virtual shared_ptr<LargeObject> do_large_object(const std::string& path);
+    virtual LargeObject* do_large_object(const std::string& path);
     
     /**
      * @brief forward the call to the proxied database connection

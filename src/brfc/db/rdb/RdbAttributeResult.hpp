@@ -33,11 +33,15 @@ namespace db {
 namespace rdb {
 
 /**
- * @brief mediate rdb::Result to ResultSet
+ * @brief mediate sql::Result to AttributeResult
  */
 class RdbAttributeResult : public AttributeResult {
   public:
-    explicit RdbAttributeResult(shared_ptr<sql::Result> result)
+    /**
+     * @param result the sql query result
+     * @note ownership of @c result transfers to this
+     */
+    explicit RdbAttributeResult(sql::Result* result)
             : result_(result) {
     }
   
@@ -51,7 +55,7 @@ class RdbAttributeResult : public AttributeResult {
     virtual Variant do_value_at(unsigned int pos) const;
 
   private:
-    shared_ptr<sql::Result> result_;
+    scoped_ptr<sql::Result> result_;
 };
 
 } // namespace rdb
