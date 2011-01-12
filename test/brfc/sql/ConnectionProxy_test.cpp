@@ -43,8 +43,9 @@ class sql_ConnectionProxy_test : public ::testing::Test {
   public:
     sql_ConnectionProxy_test()
             : pool()
-            , conn() 
-            , proxy(ConnectionProxy::create(&pool, &conn)) {
+            , conn_ptr(new MockConnection())
+            , conn(*conn_ptr) 
+            , proxy(ConnectionProxy::create(0, conn_ptr.release())) {
     }
 
     virtual void SetUp() {
@@ -52,13 +53,37 @@ class sql_ConnectionProxy_test : public ::testing::Test {
             .WillByDefault(Return(true));
         ON_CALL(conn, do_in_transaction())
             .WillByDefault(Return(true));
-        EXPECT_CALL(pool, do_put(&conn));
     }
     
     MockConnectionPool pool;
-    ::testing::NiceMock<MockConnection> conn;
+    auto_ptr<MockConnection> conn_ptr;
+    MockConnection& conn;
     shared_ptr<ConnectionProxy> proxy;
 };
+
+TEST_F(sql_ConnectionProxy_test, test_dtor) {
+    auto_ptr<MockConnection> c(new MockConnection());
+    MockConnection* cptr = c.get();
+    EXPECT_CALL(pool, do_put(cptr));
+    {
+        shared_ptr<ConnectionProxy> p = ConnectionProxy::create(&pool, c.release());
+    }
+}
+
+TEST_F(sql_ConnectionProxy_test, test_dtor_released) {
+    auto_ptr<MockConnection> c(new MockConnection());
+    {
+        shared_ptr<ConnectionProxy> p = ConnectionProxy::create(&pool, c.release());
+        p->release();
+    }
+}
+
+TEST_F(sql_ConnectionProxy_test, test_release) {
+    auto_ptr<MockConnection> c(new MockConnection());
+    shared_ptr<ConnectionProxy> p = ConnectionProxy::create(&pool, c.release());
+    p->release();
+    EXPECT_FALSE(p->pool());
+}
 
 TEST_F(sql_ConnectionProxy_test, test_open) {
     EXPECT_CALL(conn, do_is_open())

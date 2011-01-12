@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 #define BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 
+#include <map>
+
 #include <boost/thread/mutex.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -29,6 +31,7 @@ namespace brfc {
 namespace sql {
 
 class ConnectionCreator;
+class ConnectionProxy;
 
 /**
  * @brief a very basic pool with no limits
@@ -64,9 +67,11 @@ class BasicConnectionPool : public ConnectionPool {
     virtual void do_put(Connection* db);
   
   private:
+    typedef std::map<Connection*, ConnectionProxy*> LeaseMap;
     shared_ptr<ConnectionCreator> creator_;
     boost::mutex lock_;
     boost::ptr_vector<Connection> pool_;
+    LeaseMap leased_;
 };
 
 } // namespace sql

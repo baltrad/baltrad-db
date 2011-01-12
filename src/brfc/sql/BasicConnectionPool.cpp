@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/BasicConnectionPool.hpp>
 
+#include <boost/foreach.hpp>
 #include <boost/thread/locks.hpp>
 
 #include <brfc/sql/ConnectionCreator.hpp>
@@ -30,11 +31,14 @@ namespace sql {
 BasicConnectionPool::BasicConnectionPool(shared_ptr<ConnectionCreator> creator)
         : creator_(creator)
         , lock_()
-        , pool_() {
+        , pool_()
+        , leased_() {
 }
 
 BasicConnectionPool::~BasicConnectionPool() {
-
+    BOOST_FOREACH(const LeaseMap::value_type& lease, leased_) {
+        lease.second->release();
+    }
 }
 
 shared_ptr<Connection>
@@ -47,12 +51,15 @@ BasicConnectionPool::do_get() {
         conn.reset(creator_->create());
         conn->open();
     }
-    return ConnectionProxy::create(this, conn.release());
+    shared_ptr<ConnectionProxy> proxy = ConnectionProxy::create(this, conn.release());
+    leased_.insert(std::make_pair(proxy->proxied(), proxy.get()));
+    return proxy;
 }
 
 void
 BasicConnectionPool::do_put(Connection* conn) {
     boost::lock_guard<boost::mutex> guard(lock_);
+    leased_.erase(conn);
     pool_.push_back(conn);
 }
 

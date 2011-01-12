@@ -38,7 +38,13 @@ ConnectionProxy::create(ConnectionPool* pool, Connection* proxied) {
 }
 
 ConnectionProxy::~ConnectionProxy() {
-    pool_->put(proxied_);
+    if (pool_)
+        pool_->put(proxied_.release());
+}
+
+void
+ConnectionProxy::release() {
+    pool_ = 0;
 }
 
 void

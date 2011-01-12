@@ -71,5 +71,16 @@ TEST_F(sql_BasicConnectionPool_test, test_get) {
     EXPECT_EQ(proxied, cp->proxied());
 }
 
+TEST_F(sql_BasicConnectionPool_test, test_dtor) {
+    shared_ptr<ConnectionProxy> cp;
+    {
+        BasicConnectionPool p(creator_ptr);
+        p.put(new MockConnection());
+        cp = dynamic_pointer_cast<ConnectionProxy>(p.get());
+    }
+    
+    EXPECT_FALSE(cp->pool());
+}
+
 } // namespace sql
 } // namespace brfc

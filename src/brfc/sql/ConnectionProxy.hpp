@@ -40,11 +40,19 @@ class ConnectionProxy : public Connection,
     /**
      * @brief destructor
      *
-     * return the connection back to pool
+     * if associated with a pool, return the connection back to pool,
+     * otherwise, destroy the connection
      */
     virtual ~ConnectionProxy();
 
-    Connection* proxied() { return proxied_; }
+    ConnectionPool* pool() const { return pool_; }
+
+    Connection* proxied() const { return proxied_.get(); }
+    
+    /**
+     * @brief disassociate from pool
+     */
+    void release();
     
   protected:
     /**
@@ -125,7 +133,7 @@ class ConnectionProxy : public Connection,
 
   private:
     ConnectionPool* pool_;
-    Connection* proxied_;
+    auto_ptr<Connection> proxied_;
 };
 
 } // namespace sql
