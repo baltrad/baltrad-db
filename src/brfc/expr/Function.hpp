@@ -51,6 +51,12 @@ class Function : public Expression {
         f->add_arg(arg);
         return f;
     }
+
+    static FunctionPtr sum(const Expression& arg) {
+        FunctionPtr f = make_shared<Function>("SUM");
+        f->add_arg(arg);
+        return f;
+    }
     
     virtual const std::string& name() const { return name_; }
     

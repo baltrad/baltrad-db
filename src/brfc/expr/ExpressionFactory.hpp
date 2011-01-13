@@ -195,6 +195,11 @@ class ExpressionFactory {
     FunctionPtr max(const Expression& expr) const;
 
     /**
+     * @brief SUM function
+     */
+    FunctionPtr sum(const Expression& expr) const;
+
+    /**
      * @brief combine date and time attribute to datetime
      * @param date name of the date attribute
      * @param time name of the time attribute

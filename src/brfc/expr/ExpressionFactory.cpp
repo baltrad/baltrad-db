@@ -174,6 +174,11 @@ ExpressionFactory::max(const Expression& expr) const {
     return Function::max(expr);
 }
 
+FunctionPtr
+ExpressionFactory::sum(const Expression& expr) const {
+    return Function::sum(expr);
+}
+
 ExpressionPtr
 ExpressionFactory::combined_datetime(const std::string& date,
                                      const std::string& time) const {
