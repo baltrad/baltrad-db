@@ -87,6 +87,12 @@ AttributeQuery::filter(const expr::Expression& expr) {
 }
 
 AttributeQuery&
+AttributeQuery::group(const expr::Expression& expr) {
+    group_.push_back(expr.clone());
+    return *this;
+}
+
+AttributeQuery&
 AttributeQuery::order_by(const expr::Expression& expr, SortDir dir) {
     order_.push_back(std::make_pair(expr.clone(), dir));
     return *this;

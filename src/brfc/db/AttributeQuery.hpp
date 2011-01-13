@@ -100,6 +100,15 @@ class AttributeQuery {
     const expr::ExpressionPtr filter() const {
         return filter_;
     }
+    
+    /**
+     * @brief add a grouping expression
+     * @param expr group expression
+     * @return this AttributeQuery (for chaining)
+     */
+    AttributeQuery& group(const expr::Expression& expr);
+
+    ExpressionVector group() const { return group_; }
 
     /**
      * @brief append sort order
@@ -130,6 +139,7 @@ class AttributeQuery {
     bool distinct_;
     ExpressionVector fetch_;
     expr::ExpressionPtr filter_;
+    ExpressionVector group_;
     OrderVector order_;
     int limit_;
 };

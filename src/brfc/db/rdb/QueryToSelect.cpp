@@ -132,6 +132,12 @@ QueryToSelect::transform(const AttributeQuery& query) {
         select_->where(pop());
     } 
 
+    // replace attributes in group by
+    BOOST_FOREACH(expr::ExpressionPtr expr, query.group()) {
+        visit(*expr, *this);
+        select_->append_group_by(pop());
+    }
+
     // replace attributes in order by
     BOOST_FOREACH(AttributeQuery::OrderPair op, query.order()) {
         visit(*op.first, *this);
