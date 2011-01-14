@@ -32,7 +32,6 @@ namespace sql {
 class Compiler;
 class Dialect;
 class Insert;
-class LargeObject;
 class Query;
 class Result;
 class Select;
@@ -144,16 +143,20 @@ class Connection : boost::noncopyable {
     }
     
     /**
-     * @brief access large object identified by @c id
-     * @note caller takes ownership of the large object
+     * @brief store large object from file to database
+     * @param path path to the file to store
+     * @return id of the stored large object
+     * @throw db_error if there is a problem storing the file in database
      */
-    LargeObject* large_object(long long id);
+    long long store_large_object(const std::string& path);
     
     /**
-     * @brief create a new large object from file @c path
-     * @note caller takes ownership of the large object
+     * @brief write a large object to file
+     * @param id id of the stored large object
+     * @param path path path to the file to write
+     * @throw db_error if there is a problem reading the file from database
      */
-    LargeObject* large_object(const std::string& path);
+    void large_object_to_file(long long id, const std::string& path);
 
     long long last_insert_id() const {
         return do_last_insert_id();
@@ -215,16 +218,14 @@ class Connection : boost::noncopyable {
     virtual Compiler& do_compiler() = 0;
     
     /**
-     * @brief large_object(long long) implementation
-     * @note caller takes ownership of the large object
+     * @brief store_large_object() implementation
      */
-    virtual LargeObject* do_large_object(long long id) = 0;
+    virtual long long do_store_large_object(const std::string& path) = 0;
 
     /**
-     * @brief large_object(const std::string&) implementation
-     * @note caller takes ownership of the large object
+     * @brief large_object_to_file() implementation
      */
-    virtual LargeObject* do_large_object(const std::string& path) = 0;
+    virtual void do_large_object_to_file(long long, const std::string& path) = 0;
     
     /**
      * @brief last_insert_id() implementation

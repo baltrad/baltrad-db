@@ -21,14 +21,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/ResultProxy.hpp>
-#include <brfc/sql/LargeObjectProxy.hpp>
 
 #include <brfc/test_common.hpp>
 #include <brfc/sql/MockCompiler.hpp>
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionPool.hpp>
 #include <brfc/sql/MockDialect.hpp>
-#include <brfc/sql/MockLargeObject.hpp>
 #include <brfc/sql/MockResult.hpp>
 
 using ::testing::Ref;
@@ -173,28 +171,17 @@ TEST_F(sql_ConnectionProxy_test, test_compiler) {
     EXPECT_EQ(&c, &proxy->compiler());
 }
 
-TEST_F(sql_ConnectionProxy_test, test_large_object_longlong) {
-    auto_ptr<LargeObject> lo(new MockLargeObject());
-    EXPECT_CALL(conn, do_large_object(1))
-        .WillOnce(Return(lo.release()));
+TEST_F(sql_ConnectionProxy_test, test_store_large_object) {
+    EXPECT_CALL(conn, do_store_large_object("/path/to/file"))
+        .WillOnce(Return(1));
     
-    EXPECT_EQ(1, proxy.use_count());
-    auto_ptr<LargeObject> rlo(proxy->large_object(1));
-    ASSERT_TRUE(rlo.get());
-    EXPECT_EQ(2, proxy.use_count());
-    EXPECT_TRUE(dynamic_cast<LargeObjectProxy*>(rlo.get()));
+    EXPECT_EQ(1, proxy->store_large_object("/path/to/file"));
 }
 
-TEST_F(sql_ConnectionProxy_test, test_large_object_string) {
-    auto_ptr<LargeObject> lo(new MockLargeObject());
-    EXPECT_CALL(conn, do_large_object(TypedEq<const std::string&>("path")))
-        .WillOnce(Return(lo.release()));
+TEST_F(sql_ConnectionProxy_test, test_large_object_to_file) {
+    EXPECT_CALL(conn, do_large_object_to_file(1, "/path/to/file"));
     
-    EXPECT_EQ(1, proxy.use_count());
-    auto_ptr<LargeObject> rlo(proxy->large_object("path"));
-    ASSERT_TRUE(rlo.get());
-    EXPECT_EQ(2, proxy.use_count());
-    EXPECT_TRUE(dynamic_cast<LargeObjectProxy*>(rlo.get()));
+    proxy->large_object_to_file(1, "/path/to/file");
 }
 
 TEST_F(sql_ConnectionProxy_test, test_last_insert_id) {

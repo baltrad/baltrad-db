@@ -58,11 +58,11 @@ class FakeConnection : public Connection {
         throw std::runtime_error("not implemented");
     }
 
-    virtual LargeObject* do_large_object(long long) {
+    virtual long long do_store_large_object(const std::string&) {
         throw std::runtime_error("not implemented");
     }
 
-    virtual LargeObject* do_large_object(const std::string&) {
+    virtual void do_large_object_to_file(long long, const std::string&) {
         throw std::runtime_error("not implemented");
     }
 

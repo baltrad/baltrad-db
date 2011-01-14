@@ -118,18 +118,17 @@ class ConnectionProxy : public Connection,
     /**
      * @brief forward the call to the proxied database connection
      */
-    virtual LargeObject* do_large_object(long long id);
+    virtual long long do_store_large_object(const std::string& path);
     
     /**
      * @brief forward the call to the proxied database connection
      */
-    virtual LargeObject* do_large_object(const std::string& path);
+    virtual void do_large_object_to_file(long long id, const std::string& path);
     
     /**
      * @brief forward the call to the proxied database connection
      */
     virtual long long do_last_insert_id() const;
-
 
   private:
     ConnectionPool* pool_;

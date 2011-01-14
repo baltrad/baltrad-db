@@ -31,7 +31,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/RelationalDatabase.hpp>
 
 #include <brfc/sql/Connection.hpp>
-#include <brfc/sql/LargeObject.hpp>
 
 namespace brfc {
 namespace db {
@@ -129,9 +128,7 @@ RdbFileEntry::do_write_to_file(const std::string& path) const {
     shared_ptr<sql::Connection> conn = rdb().conn();
     conn->begin();
     try {
-        scoped_ptr<sql::LargeObject> lo(conn->large_object(lo_id_));
-        lo->write_to_file(path);
-        lo.reset();
+        conn->large_object_to_file(lo_id_, path);
         conn->commit();
     } catch (...) {
         conn->rollback();

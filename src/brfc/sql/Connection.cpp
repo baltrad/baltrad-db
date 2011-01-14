@@ -113,14 +113,14 @@ Connection::execute(const std::string& stmt) {
     return result.release();
 }
 
-LargeObject*
-Connection::large_object(long long id) {
-    return do_large_object(id);
+long long
+Connection::store_large_object(const std::string& path) {
+    return do_store_large_object(path);
 }
 
-LargeObject*
-Connection::large_object(const std::string& path) {
-    return do_large_object(path);
+void
+Connection::large_object_to_file(long long id, const std::string& path) {
+    return do_large_object_to_file(id, path);
 }
 
 } // namespace sql

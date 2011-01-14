@@ -68,8 +68,8 @@ class Connection : public sql::Connection {
 
     virtual sql::Result* do_execute(const std::string& query);
 
-    virtual sql::LargeObject* do_large_object(long long id);
-    virtual sql::LargeObject* do_large_object(const std::string& path);
+    virtual long long do_store_large_object(const std::string& path);
+    virtual void do_large_object_to_file(long long id, const std::string& path);
 
     virtual long long do_last_insert_id() const {
         return 0;

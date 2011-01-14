@@ -22,11 +22,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/numeric/conversion/cast.hpp>
+
+#include <pqxx/largeobject>
 
 #include <brfc/exceptions.hpp>
 
 #include <brfc/sql/pg/Result.hpp>
-#include <brfc/sql/pg/LargeObject.hpp>
 
 namespace brfc {
 namespace sql {
@@ -115,14 +117,17 @@ Connection::url_to_pg(const Url& url) {
     return pgargs;
 }
 
-sql::LargeObject*
-Connection::do_large_object(long long id) {
-    return new LargeObject(*transaction_, id);
+long long
+Connection::do_store_large_object(const std::string& path) {
+    pqxx::largeobject lobj(*transaction_, path);
+    return boost::numeric_cast<long long >(lobj.id());
 }
 
-sql::LargeObject*
-Connection::do_large_object(const std::string& path) {
-    return new LargeObject(*transaction_, path);
+void
+Connection::do_large_object_to_file(long long id,
+                                    const std::string& path) {
+    pqxx::largeobject lobj(boost::numeric_cast<pqxx::oid>(id));
+    lobj.to_file(*transaction_, path);
 }
 
 void

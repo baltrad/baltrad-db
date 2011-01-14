@@ -21,7 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/ConnectionPool.hpp>
-#include <brfc/sql/LargeObjectProxy.hpp>
 #include <brfc/sql/ResultProxy.hpp>
 
 namespace brfc {
@@ -98,16 +97,14 @@ ConnectionProxy::do_compiler() {
     return proxied_->do_compiler();
 }
 
-LargeObject*
-ConnectionProxy::do_large_object(long long id) {
-    auto_ptr<LargeObject> lo(proxied_->do_large_object(id));
-    return new LargeObjectProxy(shared_from_this(), lo.release());
+void
+ConnectionProxy::do_large_object_to_file(long long id, const std::string& path) {
+    proxied_->do_large_object_to_file(id, path);
 }
 
-LargeObject*
-ConnectionProxy::do_large_object(const std::string& path) {
-    auto_ptr<LargeObject> lo(proxied_->do_large_object(path));
-    return new LargeObjectProxy(shared_from_this(), lo.release());
+long long
+ConnectionProxy::do_store_large_object(const std::string& path) {
+    return proxied_->do_store_large_object(path);
 }
 
 long long

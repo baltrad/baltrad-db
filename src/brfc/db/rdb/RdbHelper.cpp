@@ -43,7 +43,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Bind.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
-#include <brfc/sql/LargeObject.hpp>
 #include <brfc/sql/Query.hpp>
 #include <brfc/sql/Result.hpp>
 
@@ -296,17 +295,17 @@ void
 RdbHelper::insert_file_content(RdbFileEntry& entry, const std::string& path) {
     // transfer the file to database
     long long size = boost::filesystem::file_size(path);
-    scoped_ptr<sql::LargeObject> lo(conn().large_object(path));
+    long long lo_id = conn().store_large_object(path);
 
     sql::InsertPtr qry = sql::Insert::create(m_.file_content);
     qry->value("file_id", sql_.int64_(entry.id()));
-    qry->value("lo_id", sql_.int64_(lo->id()));
+    qry->value("lo_id", sql_.int64_(lo_id));
     qry->value("size", sql_.int64_(size));
 
 
     scoped_ptr<sql::Result>(conn().execute(*qry));
 
-    entry.lo_id(lo->id());
+    entry.lo_id(lo_id);
     entry.size(size);
 }
 
