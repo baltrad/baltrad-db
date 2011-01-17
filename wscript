@@ -442,10 +442,6 @@ def _build_gtest_itests(bld):
 
     sources = sorted(bld.path.ant_glob("itest/brfc/**/*.cpp").split(" "))
 
-    if not bld.env.build_bdbfs:
-        for src in bld.path.ant_glob("itest/brfc/fuse/*.cpp").split(" "):
-            sources.remove(src)
-
     sources.insert(0, "test/brfc/test_common.cpp")
     sources.insert(0, "itest/brfc/itest_config.cpp")
 
