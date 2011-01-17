@@ -80,9 +80,10 @@ def set_options(opt):
     grp.remove_option("--srcdir")
     grp.remove_option("--download")
 
-    grp.add_option("--debug", action="store_true",
-                   default=False,
-                   help="compile with debugging information")
+    grp.add_option("--debug", action="callback",
+                   callback=_store_bool, type="string", nargs=1,
+                   default=False, metavar="BOOL",
+                   help="compile with debugging information [default: %default]")
     grp.add_option("--build_java", action="callback",
                    callback=_store_bool, type="string", nargs=1,
                    default=True, metavar="BOOL",
