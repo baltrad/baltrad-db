@@ -449,6 +449,21 @@ TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_max_xsize_min_ysize) {
     EXPECT_EQ(2, r->value_at(2).int64_());
 }
 
+TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_missing_value) {
+    query.fetch(*xpr.attribute("what/source:_name"))
+         .fetch(*xpr.min(*xpr.attribute("where/elangle")))
+         .group(*xpr.attribute("what/source:_name"))
+         .order_by(*xpr.attribute("what/source:_name"), AttributeQuery::ASC);
+    r.reset(query.execute());
+
+    EXPECT_EQ(2, r->size());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ("seang", r->value_at(0).string());
+    EXPECT_TRUE(r->is_null(1));
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ("sekkr", r->value_at(0).string());
+    EXPECT_TRUE(r->is_null(1));
+}
 
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(db_rdb_AttributeQuery_test_p,
