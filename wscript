@@ -105,7 +105,7 @@ def set_options(opt):
                    help="database to test against (specify multiple times "
                         "for different databases)")
 
-    libnames = ("boost", "hdf5", "hlhdf", "fuse", "gmock", "gtest", "jdk", "pqxx")
+    libnames = ("boost", "hdf5", "hlhdf", "fuse", "jdk", "pqxx")
     for libname in libnames:
         _add_lib_path_options(grp, libname)
    
@@ -261,30 +261,6 @@ def configure(conf):
             mandatory=True,
         )
 
-    if env.build_tests:    
-        # check for gtest
-        _lib_path_opts_to_env(env, "gtest")
-        conf.check_cxx(
-            header_name="gtest/gtest.h",
-            lib="gtest",
-            includes=env.gtest_inc_dir,
-            libpath=env.gtest_lib_dir,
-            uselib_store="GTEST",
-            mandatory=True,
-        )
-        
-        # check for gmock
-        _lib_path_opts_to_env(env, "gmock")
-        conf.check_cxx(
-            header_name="gmock/gmock.h",
-            lib="gmock",
-            uselib="GTEST",
-            includes=env.gmock_inc_dir,
-            libpath=env.gmock_lib_dir,
-            uselib_store="GMOCK",
-            mandatory=True,
-        )
-    
     # default flags for all variants
     env.append_unique("CXXFLAGS", ["-Wall", "-Wno-long-long", "-pedantic"])
 
@@ -322,6 +298,7 @@ def build(bld):
         _build_bdbtool(bld)
 
     if env.build_tests:
+        _build_gtest_gmock_lib(bld)
         _build_gtest_tests(bld)
         if env.build_java:
             _build_java_tests(bld)
@@ -396,6 +373,19 @@ def _build_bdbtool(bld):
 def _strlit(var):
     return "\"%s\"" % var
 
+def _build_gtest_gmock_lib(bld):
+    bld.add_group("build_gtest_gmock_lib")
+
+    sources = bld.path.ant_glob("src/gmock-gtest-all/*.cc").split(" ")
+
+    bld(
+        features="cxx cstaticlib",
+        source=sources,
+        target="gtest-gmock",
+        env=bld.env_of_name("testenv").copy(),
+        includes="src",
+    )
+
 def _build_gtest_tests(bld):
     bld.add_group("build_gtest_tests")
     bld.use_the_magic()
@@ -439,11 +429,10 @@ def _build_gtest_tests(bld):
         includes="src test",
         uselib=[
             "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM",
-            "GMOCK", "GTEST",
             "HDF5", "HLHDF",
             "PQXX",
         ],
-        uselib_local="brfc",
+        uselib_local=["brfc", "gtest-gmock"],
         install_path=None,
     )
 
@@ -572,7 +561,6 @@ def _run_tests(bld):
 
     libs = [
        "BOOST_SYSTEM", "BOOST_FILESYSTEM",
-       "GMOCK", "GTEST",
        "HDF5", "HLHDF",
        "PQXX",
     ]
