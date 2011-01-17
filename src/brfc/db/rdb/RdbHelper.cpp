@@ -21,7 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
@@ -45,6 +44,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Query.hpp>
 #include <brfc/sql/Result.hpp>
+
+#include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {
 namespace db {
@@ -294,7 +295,7 @@ RdbHelper::insert_file(RdbFileEntry& entry,
 void
 RdbHelper::insert_file_content(RdbFileEntry& entry, const std::string& path) {
     // transfer the file to database
-    long long size = boost::filesystem::file_size(path);
+    long long size = BoostFileSystem().file_size(path);
     long long lo_id = conn().store_large_object(path);
 
     sql::InsertPtr qry = sql::Insert::create(m_.file_content);

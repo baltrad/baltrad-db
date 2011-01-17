@@ -25,6 +25,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+class FileSystem;
+
 /**
  * @brief Storage caching files in local filesystem
  * 
@@ -53,6 +55,8 @@ class CacheDirStorage : public LocalStorage {
   
   private:
     void check_dir() const;
+    
+    const FileSystem& fs() const;
 
     std::string dir_;
 };

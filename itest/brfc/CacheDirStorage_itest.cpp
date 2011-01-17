@@ -41,9 +41,9 @@ namespace fs = boost::filesystem;
 
 namespace brfc {
 
-class CacheDirStorage_test : public ::testing::Test {
+class CacheDirStorage_itest : public ::testing::Test {
   public:
-    CacheDirStorage_test()
+    CacheDirStorage_itest()
             : dir()
             , storage(dir.path())
             , tmpfile()
@@ -64,7 +64,7 @@ class CacheDirStorage_test : public ::testing::Test {
     ::testing::NiceMock<db::MockFileEntry> entry;
 };
 
-TEST_F(CacheDirStorage_test, test_prestore) {
+TEST_F(CacheDirStorage_itest, test_prestore) {
     const std::string& fpath = file.path();
     const std::string& rpath = storage.prestore(entry, fpath);
 
@@ -73,7 +73,7 @@ TEST_F(CacheDirStorage_test, test_prestore) {
     EXPECT_TRUE(fs::exists(fpath));
 }
 
-TEST_F(CacheDirStorage_test, test_store) {
+TEST_F(CacheDirStorage_itest, test_store) {
     EXPECT_CALL(entry, do_write_to_file(_))
         .WillOnce(Invoke(&tmpfile, &test::TempH5File::copy));
 
@@ -82,7 +82,7 @@ TEST_F(CacheDirStorage_test, test_store) {
     EXPECT_TRUE(fs::exists(rpath));
 }
 
-TEST_F(CacheDirStorage_test, test_double_store) {
+TEST_F(CacheDirStorage_itest, test_double_store) {
     EXPECT_CALL(entry, do_write_to_file(_))
         .WillOnce(Invoke(&tmpfile, &test::TempH5File::copy));
     
@@ -95,7 +95,7 @@ TEST_F(CacheDirStorage_test, test_double_store) {
     EXPECT_EQ(rpath1, rpath2);
 }
 
-TEST_F(CacheDirStorage_test, test_remove) {
+TEST_F(CacheDirStorage_itest, test_remove) {
     const std::string& path = storage.entry_path(entry);
     tmpfile.copy(path);
 
@@ -103,14 +103,14 @@ TEST_F(CacheDirStorage_test, test_remove) {
     EXPECT_FALSE(fs::exists(path));
 }
 
-TEST_F(CacheDirStorage_test, test_remove_nx) {
+TEST_F(CacheDirStorage_itest, test_remove_nx) {
     const std::string& path = storage.entry_path(entry);
 
     EXPECT_TRUE(storage.remove(entry));
     EXPECT_FALSE(fs::exists(path));
 }
 
-TEST_F(CacheDirStorage_test, test_clean) {
+TEST_F(CacheDirStorage_itest, test_clean) {
     const std::string& path = storage.entry_path(entry);
     tmpfile.copy(path);
 

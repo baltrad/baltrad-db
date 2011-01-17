@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 
 #include <boost/foreach.hpp>
-#include <boost/filesystem.hpp>
 
 #include <brfc/visit.hpp>
 #include <brfc/oh5/Attribute.hpp>
@@ -37,7 +36,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/hl/hlhdf.hpp>
 #include <brfc/oh5/hl/Converter.hpp>
 
-namespace fs = boost::filesystem;
+#include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {
 namespace test {
@@ -164,7 +163,7 @@ TempH5File::path() const {
 
 void
 TempH5File::copy(const std::string& dest) const {
-    fs::copy_file(path(), dest);
+    BoostFileSystem().copy_file(path(), dest);
 }
 
 void

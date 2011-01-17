@@ -21,7 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <fstream>
 
-#include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
@@ -31,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Result.hpp>
 
-namespace fs = boost::filesystem;
+#include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {
 namespace test {
@@ -39,7 +38,7 @@ namespace test {
 TestRDB::TestRDB(const std::string& dsn, const std::string& schema_dir)
         : RelationalDatabase(dsn)
         , schema_dir_(schema_dir) {
-    if (not fs::path(schema_dir_).is_complete())
+    if (not BoostFileSystem().is_absolute(schema_dir_))
         throw value_error("schema dir must be a complete path");
 }
 
@@ -64,11 +63,11 @@ TestRDB::clean() {
 
 StringList
 TestRDB::load_queries(const std::string& filename) {
-    fs::path qf_path = fs::path(schema_dir_)
-                       / conn()->dialect().name()
-                       / filename;
-    
-    std::ifstream ifs(qf_path.string().c_str(), std::ios::binary);
+    BoostFileSystem fs;
+    std::string qf_path = fs.join(schema_dir_, conn()->dialect().name());
+    qf_path = fs.join(qf_path, filename);
+
+    std::ifstream ifs(qf_path.c_str(), std::ios::binary);
     std::filebuf* rdbuf = ifs.rdbuf();
     
     char ch;

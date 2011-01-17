@@ -19,15 +19,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/CacheDirStorage.hpp>
 
-#include <boost/filesystem.hpp>
-
 #include <brfc/exceptions.hpp>
 
 #include <brfc/db/FileEntry.hpp>
 
 #include <brfc/oh5/File.hpp>
 
-namespace fs = boost::filesystem;
+#include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {
 
@@ -40,30 +38,31 @@ CacheDirStorage::~CacheDirStorage() {
 
 }
 
+const FileSystem&
+CacheDirStorage::fs() const {
+    static BoostFileSystem fs;
+    return fs;
+}
+
 void
 CacheDirStorage::check_dir() const {
-    fs::path fs_path = fs::path(dir_);
-    try {
-        if (not fs_path.is_complete())
-            throw fs_error("'" + dir_ + "' is not a complete path");
-        if (not fs::exists(fs_path))
-            throw fs_error("'" + dir_ + "' does not exist");
-        if (not fs::is_directory(fs_path))
-            throw fs_error("'" + dir_ + "' is not a directory");
-    } catch (const fs::filesystem_error& e) {
-        throw fs_error(e.what());
-    }
+    if (not fs().is_absolute(dir_))
+        throw fs_error("'" + dir_ + "' is not a complete path");
+    if (not fs().exists(dir_))
+        throw fs_error("'" + dir_ + "' does not exist");
+    if (not fs().is_directory(dir_))
+        throw fs_error("'" + dir_ + "' is not a directory");
 }
 
 std::string
 CacheDirStorage::entry_path(const db::FileEntry& entry) const {
-    return dir_ + "/" + entry.uuid() + ".h5";
+    return fs().join(dir_, entry.uuid() + ".h5");
 }
 
 std::string
 CacheDirStorage::do_store(const db::FileEntry& entry) {
     const std::string& path = entry_path(entry);
-    if (not fs::exists(path)) {
+    if (not fs().exists(path)) {
         entry.write_to_file(path);
     }
     return path;
@@ -72,28 +71,24 @@ CacheDirStorage::do_store(const db::FileEntry& entry) {
 std::string
 CacheDirStorage::do_prestore(const db::FileEntry& entry, const std::string& path) {
     const std::string& new_path = entry_path(entry);
-    
-    fs::copy_file(path, new_path);
+    fs().copy_file(path, new_path);
     return new_path;
 }
 
 bool
 CacheDirStorage::do_remove(const db::FileEntry& entry) {
-    fs::path fs_path(entry_path(entry));
+    const std::string& fs_path(entry_path(entry));
 
-    if (fs::exists(fs_path)) {
-        fs::remove(fs_path);
+    if (fs().exists(fs_path)) {
+        fs().remove(fs_path);
     }
 
-    return not fs::exists(fs_path);
+    return not fs().exists(fs_path);
 }
 
 void
 CacheDirStorage::do_clean() {
-    fs::directory_iterator iter(dir_);
-    for ( ; iter != fs::directory_iterator(); ++iter) {
-        fs::remove(iter->path());
-    }
+    fs().clear_directory(dir_);
 }
 
 } // namespace brfc
