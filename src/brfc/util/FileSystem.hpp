@@ -29,6 +29,8 @@ namespace brfc {
  */
 class FileSystem {
   public:
+    virtual ~FileSystem() { }
+
     /**
      * @brief test if @c path exists in the file system
      * @throw fs_error if the result could not be determined
