@@ -21,7 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_TEST_COMMON_HPP
 
 #include <iosfwd>
-#include <map>
 
 #include <gtest/gtest.h>
 
@@ -33,32 +32,8 @@ class Time;
 class Variant;
 
 namespace oh5 {
-
-class Scalar;
-
-}
-
-namespace test {
-
-class TestRDB;
-
-}
-
-class TestRDBEnv : public ::testing::Environment {
-  public:
-    
-    virtual ~TestRDBEnv() { }
-
-    static test::TestRDB* get_database(const char* dsn);
-
-    virtual void SetUp();
-
-    virtual void TearDown();
-
-  private:
-    typedef std::map<const char*, test::TestRDB*> DatabaseMap;
-    static DatabaseMap databases_;
-};
+    class Scalar;
+} // namespace oh5
 
 } // namespace brfc
 

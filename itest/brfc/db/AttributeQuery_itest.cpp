@@ -45,12 +45,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/test/TempH5File.hpp>
 
-#include <brfc/test_config.hpp>
-#include <brfc/test_common.hpp>
+#include <brfc/itest_config.hpp>
+#include <brfc/ITestEnv.hpp>
 
 namespace brfc {
 namespace db {
-namespace rdb {
 
 /**
  * test data for this fixture:
@@ -65,12 +64,12 @@ namespace rdb {
  *   1 td5  SCAN 2002-02-01 12:00     5     2
  *                                    2     5
  */
-struct db_rdb_AttributeQuery_test : public testing::TestWithParam<const char*> {
-    db_rdb_AttributeQuery_test()
+struct db_AttributeQuery_itest : public testing::TestWithParam<const char*> {
+    db_AttributeQuery_itest()
             : xpr()
             , src1("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , src2("WMO:02666,RAD:SE51,PLC:Karlskrona")
-            , db(TestRDBEnv::get_database(GetParam()))
+            , db(ITestEnv::get_database(GetParam()))
             , td1("PVOL", Date(2000, 1, 1), Time(12, 0), src1)
             , td2("PVOL", Date(2000, 1, 1), Time(12, 1), src2)
             , td3("PVOL", Date(2000, 1, 1), Time(12, 2), src1)
@@ -140,7 +139,7 @@ struct db_rdb_AttributeQuery_test : public testing::TestWithParam<const char*> {
 };
 
 
-TEST_P(db_rdb_AttributeQuery_test, test_simple) {
+TEST_P(db_AttributeQuery_itest, test_simple) {
     query.fetch(*xpr.attribute("file:uuid"))
          .filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(1)));
     r.reset(query.execute());
@@ -150,7 +149,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_simple) {
     ASSERT_TRUE(not r->next());
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_list_all_files) {
+TEST_P(db_AttributeQuery_itest, test_list_all_files) {
     query.fetch(*xpr.attribute("file:uuid"))
          .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(query.execute());
@@ -168,7 +167,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_list_all_files) {
     EXPECT_EQ(fe5->uuid(), r->string(0));
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_filter_by_object) {
+TEST_P(db_AttributeQuery_itest, test_filter_by_object) {
     query.fetch(*xpr.attribute("file:uuid"))
          .filter(*xpr.attribute("what/object")->eq(*xpr.string("PVOL")))
          .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
@@ -183,7 +182,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_object) {
     EXPECT_EQ(fe3->uuid(), r->string(0));
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_fetch_xsize_filtering_by_xsize) {
+TEST_P(db_AttributeQuery_itest, test_fetch_xsize_filtering_by_xsize) {
     query.fetch(*xpr.attribute("where/xsize"))
          .filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(2)))
          .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
@@ -196,7 +195,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_fetch_xsize_filtering_by_xsize) {
     EXPECT_EQ(2, r->int64_(0));
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_filter_by_xsize_or_ysize) {
+TEST_P(db_AttributeQuery_itest, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
     query.fetch(*xpr.attribute("file:uuid"))
@@ -215,7 +214,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_xsize_or_ysize) {
     EXPECT_EQ(fe5->uuid(), r->string(0)); // xsize matches
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_filter_by_xsize_distinct) {
+TEST_P(db_AttributeQuery_itest, test_filter_by_xsize_distinct) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     query.fetch(*xpr.attribute("file:uuid"))
          .distinct(true)
@@ -227,7 +226,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_xsize_distinct) {
     EXPECT_EQ(fe3->uuid(), r->string(0));
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_filter_by_combined_datetime) {
+TEST_P(db_AttributeQuery_itest, test_filter_by_combined_datetime) {
     DateTime min(2000, 1, 1, 12, 1);
     DateTime max(2001, 1, 1, 12, 0);
     expr::ExpressionPtr what_dt =
@@ -250,7 +249,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_filter_by_combined_datetime) {
     EXPECT_EQ(fe4->uuid(), r->string(0));
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_select_by_wmo_code) {
+TEST_P(db_AttributeQuery_itest, test_select_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("what/source:WMO");
     query.fetch(*xpr.attribute("file:uuid"))
          .filter(*wmo_code->eq(*xpr.string("02666")))
@@ -264,7 +263,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_select_by_wmo_code) {
     EXPECT_EQ(fe4->uuid(), r->string(0));
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_select_by_or_node) {
+TEST_P(db_AttributeQuery_itest, test_select_by_or_node) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
     query.fetch(*xpr.attribute("file:uuid"))
          .filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))))
@@ -283,7 +282,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_select_by_or_node) {
     EXPECT_EQ(fe5->uuid(), r->string(0));
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_select_by_node_and_node) {
+TEST_P(db_AttributeQuery_itest, test_select_by_node_and_node) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
     query.fetch(*xpr.attribute("file:uuid"))
          .filter(*node->eq(*xpr.string("seang"))->and_(*node->eq(*xpr.string("sekkr"))));
@@ -291,7 +290,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_select_by_node_and_node) {
     EXPECT_EQ(0, r->size());
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_select_by_place) {
+TEST_P(db_AttributeQuery_itest, test_select_by_place) {
     query.fetch(*xpr.attribute("file:uuid"))
          .filter(*xpr.attribute("what/source:PLC")->eq(*xpr.string("Ängelholm")))
          .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
@@ -307,12 +306,12 @@ TEST_P(db_rdb_AttributeQuery_test, test_select_by_place) {
 }
 
 // temporarily disabled, see Query::fetch() for details
-TEST_P(db_rdb_AttributeQuery_test, DISABLED_test_duplicate_fetch_throws) {
+TEST_P(db_AttributeQuery_itest, DISABLED_test_duplicate_fetch_throws) {
     query.fetch(*xpr.attribute("file:uuid"));
     EXPECT_THROW(query.fetch(*xpr.attribute("file:uuid")), duplicate_entry);
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_query_like) {
+TEST_P(db_AttributeQuery_itest, test_query_like) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
     query.fetch(*xpr.attribute("file:uuid"))
          .filter(*node->like("sea*"))
@@ -328,7 +327,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_query_like) {
     EXPECT_EQ(fe5->uuid(), r->string(0));
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_order_by) {
+TEST_P(db_AttributeQuery_itest, test_order_by) {
     expr::ExpressionPtr dt =
         xpr.attribute("what/date")->add(*xpr.attribute("what/time"));
     query.fetch(*xpr.attribute("file:uuid"))
@@ -348,7 +347,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_order_by) {
     EXPECT_EQ(fe1->uuid(), r->string(0));
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_limit) {
+TEST_P(db_AttributeQuery_itest, test_limit) {
     query.fetch(*xpr.attribute("file:uuid"))
          .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC)
          .limit(2);
@@ -361,7 +360,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_limit) {
     EXPECT_EQ(fe2->uuid(), r->string(0));
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_fetch_max_xsize) {
+TEST_P(db_AttributeQuery_itest, test_fetch_max_xsize) {
     query.fetch(*xpr.max(*xpr.attribute("where/xsize")));
     r.reset(query.execute());
     
@@ -370,7 +369,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_fetch_max_xsize) {
     EXPECT_EQ(6, r->value_at(0).int64_());
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_fetch_min_ysize_with_filter) {
+TEST_P(db_AttributeQuery_itest, test_fetch_min_ysize_with_filter) {
     query.fetch(*xpr.min(*xpr.attribute("where/ysize")))
          .filter(*xpr.attribute("what/object")->eq(*xpr.string("CVOL")));
     r.reset(query.execute());
@@ -380,7 +379,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_fetch_min_ysize_with_filter) {
     EXPECT_EQ(4, r->value_at(0).int64_());
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_sum_xsize) {
+TEST_P(db_AttributeQuery_itest, test_group_by_source_sum_xsize) {
     query.fetch(*xpr.attribute("what/source:_name"))
          .fetch(*xpr.sum(*xpr.attribute("where/xsize")))
          .group(*xpr.attribute("what/source:_name"))
@@ -396,7 +395,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_sum_xsize) {
     EXPECT_EQ(8, r->value_at(1).to_int64());
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_sum_xsize_with_filter) {
+TEST_P(db_AttributeQuery_itest, test_group_by_source_sum_xsize_with_filter) {
     query.fetch(*xpr.attribute("what/source:_name"))
          .fetch(*xpr.sum(*xpr.attribute("where/xsize")))
          .filter(*xpr.attribute("what/date")->eq(*xpr.date(2000, 1, 1)))
@@ -414,7 +413,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_sum_xsize_with_filter) {
 }
 
 
-TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_max_xsize) {
+TEST_P(db_AttributeQuery_itest, test_group_by_source_max_xsize) {
     query.fetch(*xpr.attribute("what/source:_name"))
          .fetch(*xpr.max(*xpr.attribute("where/xsize")))
          .group(*xpr.attribute("what/source:_name"))
@@ -430,7 +429,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_max_xsize) {
     EXPECT_EQ(6, r->value_at(1).int64_());
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_max_xsize_min_ysize) {
+TEST_P(db_AttributeQuery_itest, test_group_by_source_max_xsize_min_ysize) {
     query.fetch(*xpr.attribute("what/source:_name"))
          .fetch(*xpr.max(*xpr.attribute("where/xsize")))
          .fetch(*xpr.min(*xpr.attribute("where/ysize")))
@@ -449,7 +448,7 @@ TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_max_xsize_min_ysize) {
     EXPECT_EQ(2, r->value_at(2).int64_());
 }
 
-TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_missing_value) {
+TEST_P(db_AttributeQuery_itest, test_group_by_source_missing_value) {
     query.fetch(*xpr.attribute("what/source:_name"))
          .fetch(*xpr.min(*xpr.attribute("where/elangle")))
          .group(*xpr.attribute("what/source:_name"))
@@ -466,12 +465,11 @@ TEST_P(db_rdb_AttributeQuery_test, test_group_by_source_missing_value) {
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1
-INSTANTIATE_TEST_CASE_P(db_rdb_AttributeQuery_test_p,
-                        db_rdb_AttributeQuery_test,
-                        ::testing::ValuesIn(test_dsns));
+INSTANTIATE_TEST_CASE_P(db_AttributeQuery_itest_p,
+                        db_AttributeQuery_itest,
+                        ::testing::ValuesIn(TEST_DSNS));
 #endif // BRFC_TEST_DSN_COUNT
 
-} // namespace rdb
 } // namespace db
 } // namespace brfc
 

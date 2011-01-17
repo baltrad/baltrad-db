@@ -301,6 +301,7 @@ def build(bld):
     if env.build_tests:
         _build_gtest_gmock_lib(bld)
         _build_gtest_tests(bld)
+        _build_gtest_itests(bld)
         if env.build_java:
             _build_java_tests(bld)
 
@@ -389,6 +390,31 @@ def _build_gtest_gmock_lib(bld):
 
 def _build_gtest_tests(bld):
     bld.add_group("build_gtest_tests")
+
+    sources = sorted(bld.path.ant_glob("test/brfc/**/*.cpp").split(" "))
+
+    if not bld.env.build_bdbfs:
+        for src in bld.path.ant_glob("test/brfc/fuse/*.cpp").split(" "):
+            sources.remove(src)
+
+    lib = bld(
+        features="cxx cprogram",
+        source=sources,
+        target="test_runner",
+        env=bld.env_of_name("testenv").copy(),
+        includes="src test",
+        uselib=[
+            "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM",
+            "HDF5", "HLHDF",
+            "PQXX",
+        ],
+        uselib_local=["brfc", "gtest-gmock"],
+        install_path=None,
+    )
+
+
+def _build_gtest_itests(bld):
+    bld.add_group("build_gtest_itests")
     bld.use_the_magic()
 
     cfg_values = {
@@ -399,8 +425,8 @@ def _build_gtest_tests(bld):
 
     cfg_cpp = bld(
         features="subst",
-        source = "test/brfc/test_config.cpp.in",
-        target = "test/brfc/test_config.cpp",
+        source = "itest/brfc/itest_config.cpp.in",
+        target = "itest/brfc/itest_config.cpp",
         on_results=True,
     )
 
@@ -408,26 +434,27 @@ def _build_gtest_tests(bld):
 
     cfg_hpp = bld(
         features="subst",
-        source = "test/brfc/test_config.hpp.in",
-        target = "test/brfc/test_config.hpp",
+        source = "itest/brfc/itest_config.hpp.in",
+        target = "itest/brfc/itest_config.hpp",
         on_results=True,
     )
     cfg_hpp.dict = cfg_values
 
-    sources = sorted(bld.path.ant_glob("test/brfc/**/*.cpp").split(" "))
+    sources = sorted(bld.path.ant_glob("itest/brfc/**/*.cpp").split(" "))
 
     if not bld.env.build_bdbfs:
-        for src in bld.path.ant_glob("test/brfc/fuse/*.cpp").split(" "):
+        for src in bld.path.ant_glob("itest/brfc/fuse/*.cpp").split(" "):
             sources.remove(src)
 
-    sources.insert(0, "test/brfc/test_config.cpp")
+    sources.insert(0, "test/brfc/test_common.cpp")
+    sources.insert(0, "itest/brfc/itest_config.cpp")
 
     lib = bld(
         features="cxx cprogram",
         source=sources,
-        target="test_runner",
+        target="itest_runner",
         env=bld.env_of_name("testenv").copy(),
-        includes="src test",
+        includes="src test itest",
         uselib=[
             "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM",
             "HDF5", "HLHDF",
@@ -580,6 +607,15 @@ def _run_tests(bld):
     bld(
         rule="${SRC} --catch_leaked_mocks=1 --gtest_output=xml:%s || true" % os.path.join(bdir, "test/reports/gtest.xml"),
         source="test_runner",
+        uselib_local="brfc",
+        env=env,
+        always=True,
+    )
+
+    bld.add_group("run_gtest_itests")
+    bld(
+        rule="${SRC} --catch_leaked_mocks=1 --gtest_output=xml:%s || true" % os.path.join(bdir, "test/reports/gitest.xml"),
+        source="itest_runner",
         uselib_local="brfc",
         env=env,
         always=True,

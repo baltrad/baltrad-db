@@ -17,9 +17,32 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <map>
+
 #include <gtest/gtest.h>
 
-int main(int argc, char** argv) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+namespace brfc {
+
+namespace test {
+    class TestRDB;
+} // namespace test
+
+class ITestEnv : public ::testing::Environment {
+  public:
+    
+    virtual ~ITestEnv() { }
+
+    static test::TestRDB* get_database(const char* dsn);
+
+    virtual void SetUp();
+
+    virtual void TearDown();
+
+  private:
+    typedef std::map<const char*, test::TestRDB*> DatabaseMap;
+
+    static DatabaseMap databases_;
+};
+
+
+} // namespace brfc

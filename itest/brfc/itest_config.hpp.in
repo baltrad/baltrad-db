@@ -24,11 +24,11 @@ namespace brfc {
 
 #define BRFC_TEST_DSN_COUNT @test_dsn_count@
 
-extern const char* test_schema_dir;
+extern const char* TEST_SCHEMA_DIR;
 #if BRFC_TEST_DSN_COUNT >= 1
-extern const char* test_dsns[@test_dsn_count@];
+extern const char* TEST_DSNS[@test_dsn_count@];
 #else
-extern const char* test_dsns[1];
+extern const char* TEST_DSNS[1];
 #endif // BRFC_TEST_DSN_COUNT
 
 } // namespace brfc

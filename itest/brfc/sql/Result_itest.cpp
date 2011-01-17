@@ -31,15 +31,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test/TestRDB.hpp>
 
-#include <brfc/test_config.hpp>
+#include <brfc/itest_config.hpp>
+#include <brfc/ITestEnv.hpp>
+
 #include <brfc/test_common.hpp>
 
 namespace brfc {
 namespace sql {
 
-struct rdb_Result_test : public testing::TestWithParam<const char*> {
-    rdb_Result_test()
-            : db(TestRDBEnv::get_database(GetParam())) {
+struct sql_Result_itest : public testing::TestWithParam<const char*> {
+    sql_Result_itest()
+            : db(ITestEnv::get_database(GetParam())) {
     }
 
     shared_ptr<Result> query(const std::string& stmt, const BindMap& binds) {
@@ -49,66 +51,66 @@ struct rdb_Result_test : public testing::TestWithParam<const char*> {
     test::TestRDB* db;
 };
 
-TEST_P(rdb_Result_test, size) {
+TEST_P(sql_Result_itest, size) {
     shared_ptr<Result> r = query("SELECT 1", sql::BindMap());
     EXPECT_EQ(r->size(), 1);
 }
 
-TEST_P(rdb_Result_test, next) {
+TEST_P(sql_Result_itest, next) {
     shared_ptr<Result> r = query("SELECT 1", sql::BindMap());
     EXPECT_TRUE(r->next());
     EXPECT_TRUE(not r->next());
 }
 
-TEST_P(rdb_Result_test, int64) {
+TEST_P(sql_Result_itest, int64) {
     shared_ptr<Result> r = query("SELECT 1", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->value_at(0).int64_(), 1);
 }
 
-TEST_P(rdb_Result_test, double_) {
+TEST_P(sql_Result_itest, double_) {
     shared_ptr<Result> r = query("SELECT 1.1::real", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_NEAR(r->value_at(0).double_(), 1.1, 0.00001);
 }
 
-TEST_P(rdb_Result_test, string) {
+TEST_P(sql_Result_itest, string) {
     shared_ptr<Result> r = query("SELECT 'bla'", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->value_at(0).string(), "bla");
 }
 
-TEST_P(rdb_Result_test, bool_) {
+TEST_P(sql_Result_itest, bool_) {
     shared_ptr<Result> r = query("SELECT true", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->value_at(0).bool_(), true);
 }
 
-TEST_P(rdb_Result_test, bool_false) {
+TEST_P(sql_Result_itest, bool_false) {
     shared_ptr<Result> r = query("SELECT false", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->value_at(0).bool_(), false);
 }
 
-TEST_P(rdb_Result_test, date) {
+TEST_P(sql_Result_itest, date) {
     shared_ptr<Result> r = query("SELECT DATE '2001-01-02'", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->value_at(0).date(), Date(2001, 1, 2));
 }
 
-TEST_P(rdb_Result_test, time) {
+TEST_P(sql_Result_itest, time) {
     shared_ptr<Result> r = query("SELECT TIME '12:00:05'", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_EQ(Time(12, 0, 5), r->value_at(0).time());
 }
 
-TEST_P(rdb_Result_test, invalid_column) {
+TEST_P(sql_Result_itest, invalid_column) {
     shared_ptr<Result> r = query("SELECT 1", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_THROW(r->value_at(1), lookup_error);
 }
 
-TEST_P(rdb_Result_test, value_at_by_column) {
+TEST_P(sql_Result_itest, value_at_by_column) {
     shared_ptr<Result> r = query("SELECT 1 as i", sql::BindMap());
     ASSERT_TRUE(r->next());
     EXPECT_THROW(r->value_at("j"), lookup_error);
@@ -117,9 +119,9 @@ TEST_P(rdb_Result_test, value_at_by_column) {
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1
-INSTANTIATE_TEST_CASE_P(rdb_Result_test_p,
-                        rdb_Result_test,
-                        ::testing::ValuesIn(test_dsns));
+INSTANTIATE_TEST_CASE_P(sql_Result_itest_p,
+                        sql_Result_itest,
+                        ::testing::ValuesIn(TEST_DSNS));
 #endif // BRFC_TEST_DSN_COUNT
 
 } // namepsace sql

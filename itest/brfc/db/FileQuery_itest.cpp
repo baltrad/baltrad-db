@@ -29,29 +29,26 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileQuery.hpp>
 #include <brfc/db/FileResult.hpp>
 
-#include <brfc/db/rdb/RdbFileEntry.hpp>
-
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/RootGroup.hpp>
-#include <brfc/oh5/Source.hpp>
+#include <brfc/oh5/Scalar.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/test/TempH5File.hpp>
 
-#include <brfc/test_config.hpp>
-#include <brfc/test_common.hpp>
+#include <brfc/itest_config.hpp>
+#include <brfc/ITestEnv.hpp>
+
+//#include <brfc/test_common.hpp>
 
 namespace brfc {
 namespace db {
-namespace rdb {
 
 /**
  * test data for this fixture:
@@ -66,12 +63,12 @@ namespace rdb {
  *   1 td5  SCAN 2002-02-01 12:00     5     2
  *                                    2     5
  */
-struct db_rdb_FileQuery_test : public testing::TestWithParam<const char*> {
-    db_rdb_FileQuery_test()
+struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
+    db_FileQuery_itest()
             : xpr()
             , src1("WMO:02606,RAD:SE50,PLC:Ängelholm")
             , src2("WMO:02666,RAD:SE51,PLC:Karlskrona")
-            , db(TestRDBEnv::get_database(GetParam()))
+            , db(ITestEnv::get_database(GetParam()))
             , td1("PVOL", Date(2000, 1, 1), Time(12, 0), src1)
             , td2("PVOL", Date(2000, 1, 1), Time(12, 1), src2)
             , td3("PVOL", Date(2000, 1, 1), Time(12, 2), src1)
@@ -143,7 +140,8 @@ struct db_rdb_FileQuery_test : public testing::TestWithParam<const char*> {
     scoped_ptr<FileResult> r;
 };
 
-TEST_P(db_rdb_FileQuery_test, test_queried_entry_has_lob) {
+/*
+TEST_P(db_FileQuery_itest, test_queried_entry_has_lob) {
     query.filter(*xpr.attribute("file:uuid")->eq(*xpr.string(fe1->uuid())));
     r.reset(query.execute());
 
@@ -162,8 +160,9 @@ TEST_P(db_rdb_FileQuery_test, test_queried_entry_has_lob) {
     EXPECT_EQ(qre->id(), fre1->id());
     EXPECT_EQ(qre->lo_id(), fre1->lo_id());
 }
+*/
 
-TEST_P(db_rdb_FileQuery_test, test_simple) {
+TEST_P(db_FileQuery_itest, test_simple) {
     query.filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(1)));
     r.reset(query.execute());
 
@@ -172,7 +171,7 @@ TEST_P(db_rdb_FileQuery_test, test_simple) {
     EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_list_all_files) {
+TEST_P(db_FileQuery_itest, test_list_all_files) {
     r.reset(query.execute());
 
     EXPECT_EQ(5, r->size());
@@ -188,7 +187,7 @@ TEST_P(db_rdb_FileQuery_test, test_list_all_files) {
     EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_filter_by_object) {
+TEST_P(db_FileQuery_itest, test_filter_by_object) {
     query.filter(*xpr.attribute("what/object")->eq(*xpr.string("PVOL")));
     r.reset(query.execute());
 
@@ -201,7 +200,7 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_object) {
     EXPECT_EQ(fe3->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_filter_by_xsize) {
+TEST_P(db_FileQuery_itest, test_filter_by_xsize) {
     query.filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(2)));
     r.reset(query.execute());
 
@@ -212,7 +211,7 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_xsize) {
     EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_filter_by_xsize_or_ysize) {
+TEST_P(db_FileQuery_itest, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
     query.filter(*xsize->eq(*xpr.int64_(1))->or_(*ysize->eq(*xpr.int64_(2))));
@@ -227,7 +226,7 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_xsize_or_ysize) {
     EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_filter_by_combined_datetime) {
+TEST_P(db_FileQuery_itest, test_filter_by_combined_datetime) {
     DateTime min(2000, 1, 1, 12, 1);
     DateTime max(2001, 1, 1, 12, 0);
     expr::ExpressionPtr what_dt =
@@ -248,7 +247,7 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_combined_datetime) {
     EXPECT_EQ(fe4->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_filter_by_wmo_code) {
+TEST_P(db_FileQuery_itest, test_filter_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("what/source:WMO");
     query.filter(*wmo_code->eq(*xpr.string("02666")));
     r.reset(query.execute());
@@ -260,7 +259,7 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_wmo_code) {
     EXPECT_EQ(fe4->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_filter_by_node_or_node) {
+TEST_P(db_FileQuery_itest, test_filter_by_node_or_node) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
     query.filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))));
     r.reset(query.execute());
@@ -278,7 +277,7 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_node_or_node) {
     EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_filter_by_node_and_node) {
+TEST_P(db_FileQuery_itest, test_filter_by_node_and_node) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
     query.filter(*node->eq(*xpr.string("seang"))->and_(*node->eq(*xpr.string("sekkr"))));
     r.reset(query.execute());
@@ -286,7 +285,7 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_node_and_node) {
     EXPECT_EQ(0, r->size());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_filter_by_place) {
+TEST_P(db_FileQuery_itest, test_filter_by_place) {
     query.filter(*xpr.attribute("what/source:PLC")->eq(*xpr.string("Ängelholm")));
     r.reset(query.execute());
 
@@ -299,20 +298,20 @@ TEST_P(db_rdb_FileQuery_test, test_filter_by_place) {
     EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_is_stored) {
+TEST_P(db_FileQuery_itest, test_is_stored) {
     bool result = false;
     ASSERT_NO_THROW(result = db->is_stored(td1));
     EXPECT_TRUE(result);
 }
 
-TEST_P(db_rdb_FileQuery_test, test_has_nx_file) {
+TEST_P(db_FileQuery_itest, test_has_nx_file) {
     bool result = false;
     oh5::hl::HlFile td("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
     ASSERT_NO_THROW(result = db->is_stored(td));
     EXPECT_FALSE(result);
 }
 
-TEST_P(db_rdb_FileQuery_test, test_query_like) {
+TEST_P(db_FileQuery_itest, test_query_like) {
     query.filter(*xpr.attribute("what/source:_name")->like("sea*"));
     r.reset(query.execute());
 
@@ -325,7 +324,7 @@ TEST_P(db_rdb_FileQuery_test, test_query_like) {
     EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_order_by) {
+TEST_P(db_FileQuery_itest, test_order_by) {
     query.order_by(*xpr.attribute("where/xsize"), FileQuery::DESC);
     r.reset(query.execute());
 
@@ -342,7 +341,7 @@ TEST_P(db_rdb_FileQuery_test, test_order_by) {
     EXPECT_EQ(fe1->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_limit) {
+TEST_P(db_FileQuery_itest, test_limit) {
     query.limit(2);
     r.reset(query.execute());
 
@@ -353,17 +352,16 @@ TEST_P(db_rdb_FileQuery_test, test_limit) {
     EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_rdb_FileQuery_test, test_query_missing) {
+TEST_P(db_FileQuery_itest, test_query_missing) {
 
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1
-INSTANTIATE_TEST_CASE_P(db_rdb_FileQuery_test_p,
-                        db_rdb_FileQuery_test,
-                        ::testing::ValuesIn(test_dsns));
+INSTANTIATE_TEST_CASE_P(db_FileQuery_itest_p,
+                        db_FileQuery_itest,
+                        ::testing::ValuesIn(TEST_DSNS));
 #endif // BRFC_TEST_DSN_COUNT
 
-} // namespace rdb
 } // namespace db
 } // namespace brfc
 

@@ -19,49 +19,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 
-#include <boost/foreach.hpp>
-
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 #include <brfc/oh5/Scalar.hpp>
-#include <brfc/test/TestRDB.hpp>
 
-#include <brfc/test_config.hpp>
 #include <brfc/test_common.hpp>
-
-namespace brfc {
-
-test::TestRDB*
-TestRDBEnv::get_database(const char* dsn) {
-    test::TestRDB* db = databases_[dsn];
-    db->clean();
-    return db;
-}
-
-void
-TestRDBEnv::SetUp() {
-#if BRFC_TEST_DSN_COUNT >= 1
-    BOOST_FOREACH(const char* dsn, test_dsns) {
-        test::TestRDB* db = new test::TestRDB(dsn, test_schema_dir);
-        db->drop(); // just in case it's dirty, drops are conditional
-        db->create();
-        databases_[dsn] = db;
-    }
-#endif // BRFC_TEST_DSN_COUNT
-}
-
-void
-TestRDBEnv::TearDown() {
-    BOOST_FOREACH(DatabaseMap::value_type& entry, databases_) {
-        entry.second->drop();
-        delete entry.second;
-    }
-}
-
-TestRDBEnv::DatabaseMap TestRDBEnv::databases_;
-
-} // namespace brfc
 
 std::ostream& operator<<(std::ostream& out, const brfc::Date& value) {
     out << "Date("

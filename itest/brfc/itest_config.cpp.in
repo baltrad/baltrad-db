@@ -17,18 +17,18 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/test_config.hpp>
+#include <brfc/itest_config.hpp>
 
 namespace brfc {
 
-const char* test_schema_dir = @test_schema_dir@;
+const char* TEST_SCHEMA_DIR = @test_schema_dir@;
 
 #if BRFC_TEST_DSN_COUNT >= 1
-const char* test_dsns[@test_dsn_count@] = {
+const char* TEST_DSNS[@test_dsn_count@] = {
     @test_dsns@
 };
 #else
-const char* test_dsns[1] = {""};
+const char* TEST_DSNS[1] = {""};
 #endif // BRFC_TEST_DSN_COUNT
 
 } // namespace brfc

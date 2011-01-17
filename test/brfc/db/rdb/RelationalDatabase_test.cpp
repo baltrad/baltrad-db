@@ -18,238 +18,97 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-#include <boost/filesystem.hpp>
+#include <brfc/db/AttributeQuery.hpp>
+#include <brfc/db/AttributeResult.hpp>
+#include <brfc/db/FileQuery.hpp>
+#include <brfc/db/FileResult.hpp>
+#include <brfc/db/rdb/RelationalDatabase.hpp>
 
-#include <brfc/exceptions.hpp>
-#include <brfc/Date.hpp>
-#include <brfc/Time.hpp>
+#include <brfc/sql/DialectCompiler.hpp>
 
-#include <brfc/db/rdb/RdbFileEntry.hpp>
-#include <brfc/db/rdb/RdbHelper.hpp>
+#include <brfc/db/MockFileEntry.hpp>
+#include <brfc/oh5/MockPhysicalFile.hpp>
+#include <brfc/sql/MockDialect.hpp>
+#include <brfc/sql/MockConnection.hpp>
+#include <brfc/sql/MockConnectionPool.hpp>
+#include <brfc/sql/MockResult.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/File.hpp>
-#include <brfc/oh5/RootGroup.hpp>
-
-#include <brfc/oh5/hl/HlFile.hpp>
-
-#include <brfc/sql/BindMap.hpp>
-#include <brfc/sql/Connection.hpp>
-#include <brfc/sql/Result.hpp>
-
-#include <brfc/test/TestRDB.hpp>
-#include <brfc/test/TempH5File.hpp>
-
-#include <brfc/test_config.hpp>
-#include <brfc/test_common.hpp>
-
-using testing::_;
-using testing::Return;
-
-namespace fs = boost::filesystem;
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace brfc {
 namespace db {
 namespace rdb {
 
-class db_rdb_RelationalDatabase_test : public testing::TestWithParam<const char*> {
+class db_rdb_RelationalDatabase_test : public ::testing::Test {
   public:
     db_rdb_RelationalDatabase_test()
-            : db(TestRDBEnv::get_database(GetParam())) {
+            : conn()
+            , conn_ptr(&conn, no_delete)
+            , dialect()
+            , compiler(&dialect)
+            , pool()
+            , pool_ptr(&pool, no_delete)
+            , result_ptr(new sql::MockResult())
+            , result(*result_ptr)
+            , rdb(pool_ptr) {
     }
 
-    virtual void TearDown() {
-        db->clean();
+    virtual void SetUp() {
+        conn.delegate_to_fake();
+        conn.open();
+        ON_CALL(conn, do_dialect())
+            .WillByDefault(ReturnRef(dialect));
+        ON_CALL(conn, do_compiler())
+            .WillByDefault(ReturnRef(compiler));
     }
     
-    template<typename T>
-    typename T::const_iterator
-    source_by_name(const T& sources, const std::string& name) {
-        typename T::const_iterator i = sources.begin();
-        for ( ; i != sources.end(); ++i) {
-            if (i->get("_name") == name)
-                break;
-        }
-        return i;
-    }
-
-    test::TestRDB* db;
+    ::testing::NiceMock<sql::MockConnection> conn;
+    shared_ptr<sql::Connection> conn_ptr;
+    ::testing::NiceMock<sql::MockDialect> dialect;
+    sql::DialectCompiler compiler;
+    sql::MockConnectionPool pool;
+    shared_ptr<sql::ConnectionPool> pool_ptr;
+    auto_ptr<sql::MockResult> result_ptr;
+    sql::MockResult& result;
+    RelationalDatabase rdb;
 };
 
-TEST_P(db_rdb_RelationalDatabase_test, store) {
-    oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
+TEST_F(db_rdb_RelationalDatabase_test, test_execute_attribute_query) {
+    EXPECT_CALL(pool, do_get())
+        .WillOnce(Return(conn_ptr));
+    EXPECT_CALL(conn, do_execute(_))
+        .WillOnce(Return(result_ptr.release()));
 
-    
-    scoped_ptr<FileEntry> e;
-    EXPECT_NO_THROW(e.reset(db->store(file)));
-    RdbFileEntry* re = dynamic_cast<RdbFileEntry*>(e.get());
-    ASSERT_TRUE(re);
-    EXPECT_TRUE(re->id() > 0);
-    EXPECT_TRUE(re->lo_id() > 0);
-    EXPECT_FALSE(e->source().empty());
-    EXPECT_TRUE(e->source().has("_name"));
+    AttributeQuery q;
+    scoped_ptr<AttributeResult> r(rdb.execute(q));
 }
 
-TEST_P(db_rdb_RelationalDatabase_test, entry_by_uuid) {
-    EXPECT_THROW(db->entry_by_uuid("nxuuid"), lookup_error);
+TEST_F(db_rdb_RelationalDatabase_test, test_execute_file_query) {
+    EXPECT_CALL(pool, do_get())
+        .WillOnce(Return(conn_ptr));
+    EXPECT_CALL(conn, do_execute(_))
+        .WillOnce(Return(result_ptr.release()));
 
-    oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
-    
-    scoped_ptr<FileEntry> e1, e2;
-    ASSERT_NO_THROW(e1.reset(db->store(file)));
-     
-    ASSERT_NO_THROW(e2.reset(db->entry_by_uuid(e1->uuid())));
-
-    EXPECT_EQ(e1->uuid(), e2->uuid());
-    EXPECT_EQ(e1->hash(), e2->hash());
+    FileQuery q;
+    scoped_ptr<FileResult> r(rdb.execute(q));
 }
 
-TEST_P(db_rdb_RelationalDatabase_test, entry_by_file) {
-    oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
+TEST_F(db_rdb_RelationalDatabase_test, test_remove) {
+    MockFileEntry e;
+    EXPECT_CALL(pool, do_get())
+        .WillOnce(Return(conn_ptr));
+    EXPECT_CALL(e, do_uuid())
+        .WillOnce(Return("abcdefg"));
+    EXPECT_CALL(conn, do_execute(_)) // check statement
+        .WillOnce(Return(result_ptr.release()));
+    EXPECT_CALL(result, do_affected_rows())
+        .WillOnce(Return(1));
 
-    EXPECT_THROW(db->entry_by_file(file), lookup_error);
-    
-    scoped_ptr<FileEntry> e1, e2;
-    ASSERT_NO_THROW(e1.reset(db->store(file)));
-    
-    ASSERT_NO_THROW(e2.reset(db->entry_by_file(file)));
-
-    EXPECT_EQ(e1->uuid(), e2->uuid());
-    EXPECT_EQ(e1->hash(), e2->hash());
+    EXPECT_TRUE(rdb.remove(e));
 }
-
-TEST_P(db_rdb_RelationalDatabase_test, remove) {
-    oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
-    
-    scoped_ptr<FileEntry> e;
-    EXPECT_NO_THROW(e.reset(db->store(file)));
-    ASSERT_TRUE(e);
-
-    bool removed = false;
-    EXPECT_NO_THROW(removed = db->remove(*e));
-    EXPECT_TRUE(removed);
-
-    EXPECT_NO_THROW(removed = db->remove(*e));
-    EXPECT_FALSE(removed);
-}
-
-//XXX: this should be tested somewhere else?
-TEST_P(db_rdb_RelationalDatabase_test, write_entry_to_file) {
-    oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
-    
-    scoped_ptr<FileEntry> e;
-    EXPECT_NO_THROW(e.reset(db->store(file)));
-    ASSERT_TRUE(e);
-    
-    // test writing
-    test::TempH5File tef;
-    EXPECT_NO_THROW(e->write_to_file(tef.path()));
-    EXPECT_EQ(fs::file_size(tef.path()), fs::file_size(tf.path()));
-}
-
-TEST_P(db_rdb_RelationalDatabase_test, store_with_invalid_attributes) {
-    oh5::hl::HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
-    // add an invalid attribute
-    file.root().create_attribute("invalid", oh5::Scalar(1));
-
-    EXPECT_NO_THROW(db->store(file));
-}
-
-TEST_P(db_rdb_RelationalDatabase_test, test_sources) {
-    std::vector<oh5::Source> sources;
-    EXPECT_NO_THROW(sources = db->sources());
-
-    EXPECT_TRUE(sources.size() > 0);
-}
-
-TEST_P(db_rdb_RelationalDatabase_test, test_add_source) {
-    oh5::Source src;
-    EXPECT_THROW(db->add_source(src), lookup_error);
-
-    src.add("_name", "srcname1");
-
-    EXPECT_NO_THROW(db->add_source(src));
-
-    std::vector<oh5::Source> sources = db->sources();
-
-    EXPECT_TRUE(source_by_name(sources, "srcname1") != sources.end());
-
-    src = *source_by_name(sources, "srcname1");
-    EXPECT_EQ(0, src.keys().size());
-
-    EXPECT_THROW(db->add_source(src), db_error);
-}
-
-TEST_P(db_rdb_RelationalDatabase_test, test_update_source) {
-    oh5::Source src;
-    src.add("_name", "srcname2");
-    src.add("key1", "value1");
-    src.add("key2", "value2");
-    
-    EXPECT_NO_THROW(db->add_source(src));
-
-    std::vector<oh5::Source> sources = db->sources();
-    ASSERT_TRUE(source_by_name(sources, "srcname2") != sources.end());
-    src = *source_by_name(sources, "srcname2");
-    src.remove("_name");
-    src.remove("key2");
-    src.add("_name", "srcname3");
-    src.add("key3", "value3");
-    EXPECT_NO_THROW(db->update_source(src));
-
-    sources = db->sources();
-
-    ASSERT_TRUE(source_by_name(sources, "srcname2") == sources.end());
-    ASSERT_TRUE(source_by_name(sources, "srcname3") != sources.end());
-    src = *source_by_name(sources, "srcname3");
-    ASSERT_TRUE(src.has("key1"));
-    EXPECT_EQ("value1", src.get("key1"));
-    ASSERT_TRUE(src.has("key3"));
-    EXPECT_EQ("value3", src.get("key3"));
-}
-
-TEST_P(db_rdb_RelationalDatabase_test, test_remove_source) {
-    oh5::Source src;
-    src.add("_name", "srcname4");
-
-    EXPECT_THROW(db->remove_source(src), lookup_error);
-
-    db->add_source(src);
-    std::vector<oh5::Source> sources = db->sources(); 
-    ASSERT_TRUE(source_by_name(sources, "srcname4") != sources.end());
-    src = *source_by_name(sources, "srcname4");
-
-    EXPECT_NO_THROW(db->remove_source(src));
-
-    sources = db->sources();
-    EXPECT_TRUE(source_by_name(sources, "srcname4") == sources.end());
-}
-
-#if BRFC_TEST_DSN_COUNT >= 1
-INSTANTIATE_TEST_CASE_P(db_rdb_RelationalDatabase_test_p,
-                        db_rdb_RelationalDatabase_test,
-                        ::testing::ValuesIn(test_dsns));
-#endif // BRFC_TEST_DSN_COUNT
 
 } // namespace rdb
 } // namespace db
