@@ -30,8 +30,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 CacheDirStorage::CacheDirStorage(const std::string& dir)
-        : dir_(dir) {
-    check_dir();
+        : dir_(dir)
+        , fs_(new BoostFileSystem()) {
+}
+
+CacheDirStorage::CacheDirStorage(const std::string& dir, const FileSystem* fs)
+        : dir_(dir)
+        , fs_(fs, no_delete) {
 }
 
 CacheDirStorage::~CacheDirStorage() {
@@ -40,18 +45,7 @@ CacheDirStorage::~CacheDirStorage() {
 
 const FileSystem&
 CacheDirStorage::fs() const {
-    static BoostFileSystem fs;
-    return fs;
-}
-
-void
-CacheDirStorage::check_dir() const {
-    if (not fs().is_absolute(dir_))
-        throw fs_error("'" + dir_ + "' is not a complete path");
-    if (not fs().exists(dir_))
-        throw fs_error("'" + dir_ + "' does not exist");
-    if (not fs().is_directory(dir_))
-        throw fs_error("'" + dir_ + "' is not a directory");
+    return *fs_;
 }
 
 std::string

@@ -29,7 +29,7 @@ namespace brfc {
 /**
  * @brief access filesystem using boost::filesystem
  */
-class MockFileSystem : public FileSystem{
+class MockFileSystem : public FileSystem {
   public:
     MOCK_CONST_METHOD1(do_exists,
         bool(const std::string&));
@@ -45,7 +45,7 @@ class MockFileSystem : public FileSystem{
         std::string(const std::string&, const std::string&));
     MOCK_CONST_METHOD1(do_file_size,
         long long(const std::string&));
-    MOCK_CONST_MEHTOD1(do_clear_directory,
+    MOCK_CONST_METHOD1(do_clear_directory,
         void(const std::string&));
 };
 

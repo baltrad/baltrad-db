@@ -156,6 +156,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 /***
  * brfc::CacheDirStorage
  **/
+%ignore brfc::CacheDirStorage::CacheDirStorage(const std::string&, const FileSystem*);
 %typemap(javaimports) brfc::CacheDirStorage, brfc::CacheDirStorage* %{
     import eu.baltrad.fc.db.FileEntry;
 %}

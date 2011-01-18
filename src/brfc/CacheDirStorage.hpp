@@ -20,8 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_CACHE_DIR_STORAGE_HPP
 #define BRFC_CACHE_DIR_STORAGE_HPP
 
+#include <brfc/smart_ptr.hpp>
 #include <brfc/LocalStorage.hpp>
-#include <string>
 
 namespace brfc {
 
@@ -35,10 +35,22 @@ class FileSystem;
 class CacheDirStorage : public LocalStorage {
   public:
     /**
+     * @brief constructor
      * @param dir path in local filesystem to use as storage root
-     * @param namer namer used to name new files
+     *
+     * It is up to the user to ensure @c dir exists and new files can be
+     * created in it. BoostFileSystem is used for filesystem access.
      */
     CacheDirStorage(const std::string& dir);
+    
+    /**
+     * @brief constructor
+     * @param dir path in local filesystem to use as storage root
+     * @param fs filesystem access (caller retains ownership)
+     *
+     * @note this is for testing purposes
+     */
+    CacheDirStorage(const std::string& dir, const FileSystem* fs);
 
     virtual ~CacheDirStorage();
     
@@ -54,11 +66,10 @@ class CacheDirStorage : public LocalStorage {
     virtual void do_clean();
   
   private:
-    void check_dir() const;
-    
     const FileSystem& fs() const;
 
     std::string dir_;
+    shared_ptr<const FileSystem> fs_;
 };
 
 } // namespace brfc
