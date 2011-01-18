@@ -3,7 +3,7 @@
 namespace brfc {
 
 void
-no_delete(void* /*ptr*/) {
+no_delete(const void* /*ptr*/) {
     // pass
 }
 

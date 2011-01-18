@@ -47,7 +47,7 @@ using boost::static_pointer_cast;
  * @brief null deleter for shared_ptr
  */
 void
-no_delete(void* ptr);
+no_delete(const void* ptr);
 
 }
 
