@@ -58,8 +58,12 @@ struct FileCatalog_test : public ::testing::Test {
     ::testing::NiceMock<oh5::MockPhysicalFile> file;
 };
 
-TEST_F(FileCatalog_test, test_invalid_dsn_throws) {
+TEST_F(FileCatalog_test, test_ctor_invalid_dsn) {
     EXPECT_THROW(FileCatalog("invalid_dsn"), value_error);
+}
+
+TEST_F(FileCatalog_test, test_ctor_nx_storage_path) {
+    EXPECT_THROW(FileCatalog(&db, "/nxpath"), fs_error);
 }
 
 TEST_F(FileCatalog_test, test_store_nx_file_by_path) {

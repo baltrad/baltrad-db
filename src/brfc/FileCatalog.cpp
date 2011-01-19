@@ -34,8 +34,24 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
+#include <brfc/util/BoostFileSystem.hpp>
+
 
 namespace brfc {
+
+namespace {
+
+void check_storage_dir(const std::string& path) {
+    BoostFileSystem fs;
+    if (not fs.is_absolute(path))
+        throw fs_error("'" + path + "' is not a complete path");
+    if (not fs.exists(path))
+        throw fs_error("'" + path + "' does not exist");
+    if (not fs.is_directory(path))
+           throw fs_error("'" + path + "' is not a directory");
+}
+
+}
     
 FileCatalog::FileCatalog(const std::string& dsn, LocalStorage* storage)
         : db_(new db::rdb::RelationalDatabase(dsn)) 
@@ -46,6 +62,14 @@ FileCatalog::FileCatalog(const std::string& dsn, LocalStorage* storage)
 FileCatalog::FileCatalog(const std::string& dsn, const std::string& path)
         : db_(new db::rdb::RelationalDatabase(dsn))
         , storage_() {
+    check_storage_dir(path);
+    this->storage(new CacheDirStorage(path));
+}
+
+FileCatalog::FileCatalog(db::Database* db, const std::string& path)
+        : db_(db, no_delete)
+        , storage_() {
+    check_storage_dir(path);
     this->storage(new CacheDirStorage(path));
 }
 

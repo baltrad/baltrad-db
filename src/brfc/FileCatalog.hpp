@@ -75,8 +75,16 @@ class FileCatalog {
      *
      * use CacheDirStorage(path) for local storage
      */
-    explicit
     FileCatalog(const std::string& dsn, const std::string& path);
+
+    /**
+     * @brief constructor
+     * @param db database instance (caller retains ownership)
+     * @param path path to storage
+     *
+     * use CacheDirStorage(path) for local storage
+     */
+    FileCatalog(db::Database* db, const std::string& path);
 
     /**
      * @brief constructor
