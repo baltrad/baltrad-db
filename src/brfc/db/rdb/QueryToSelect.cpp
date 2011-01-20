@@ -19,13 +19,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/rdb/QueryToSelect.hpp>
 
+#include <list>
+
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <brfc/assert.hpp>
-#include <brfc/StringList.hpp>
 
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/FileQuery.hpp>
@@ -152,7 +155,8 @@ QueryToSelect::transform(const AttributeQuery& query) {
 
 sql::ColumnPtr
 QueryToSelect::source_attr_column(const expr::Attribute& attr) {
-    std::string key = StringList::split(attr.name(), ":").at(1);
+    const std::string& attr_name = attr.name();
+    const std::string& key = attr_name.substr(attr_name.find_first_of(':') + 1);
     if (key == "_name") {
         // sources is joined by default
         // this attribute can be accessed at sources.name
@@ -192,11 +196,15 @@ sql::ColumnPtr
 QueryToSelect::plain_attr_column(const expr::Attribute& attr) {
     std::string name = attr.name();
     
-    StringList path = StringList::split(name, "/");
-    std::string attrname = path.take_last();
+    std::list<std::string> path;
+    boost::split(path, name, boost::is_any_of("/"), boost::token_compress_on);
+    std::string attrname = path.back();
+    path.pop_back();
     std::string groupname;
-    if (not path.empty())
-        groupname = path.take_last();
+    if (not path.empty()) {
+        groupname = path.back();
+        path.pop_back();
+    }
     
     // alias the table (this attribute is always searched on this alias)
     boost::erase_all(name, "/");

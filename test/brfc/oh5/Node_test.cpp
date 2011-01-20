@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Node.hpp>
 #include <brfc/oh5/NodeBackend.hpp>
@@ -147,12 +146,11 @@ TEST_F(oh5_Node_test, test_iterator_end) {
 TEST_F(oh5_Node_test, test_iterate_tree) {
     a.create_child(new FakeNode("f"));
 
-    StringList names;
-    BOOST_FOREACH(Node& node, a) {
-        names.append(node.name());
-    }
-
-    EXPECT_EQ(names.join(""), "abfc");
+    Node::iterator i = a.begin();
+    EXPECT_EQ("a", (i++)->name());
+    EXPECT_EQ("b", (i++)->name());
+    EXPECT_EQ("f", (i++)->name());
+    EXPECT_EQ("c", (i++)->name());
 }
 
 } // namespace oh5

@@ -19,12 +19,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Source.hpp>
 
+#include <list>
+
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/StringList.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -32,16 +36,20 @@ namespace oh5 {
 Source
 Source::from_string(const std::string& source) {
     Source src;
-    StringList elems = StringList::split(source, ",", StringList::SKIP_EMPTY_PARTS);
+    std::list<std::string> elems;
+    boost::split(elems, source, boost::is_any_of(","), boost::token_compress_on);
     try {
         BOOST_FOREACH(const std::string& elem, elems) {
-            const StringList& kv = StringList::split(elem, ":");
-            BRFC_ASSERT(kv.size() == 2);
-            BRFC_ASSERT(kv.at(0).length() > 0);
-            if (kv.at(1).length() == 0)
+            if (elem.empty())
                 continue;
-            BRFC_ASSERT(kv.at(1).length() > 0);
-            src.add(kv.at(0), kv.at(1));
+            BRFC_ASSERT(std::count(elem.begin(), elem.end(), ':') == 1);
+            size_t colon_pos = elem.find(':');
+            const std::string key = elem.substr(0, colon_pos);
+            const std::string value = elem.substr(colon_pos + 1);
+            BRFC_ASSERT(not key.empty());
+            if (value.empty())
+                continue;
+            src.add(key, value);
         }
     } catch (const assertion_error& e) {
         throw value_error("Invalid source string: " + source);
@@ -68,9 +76,9 @@ Source::get(const std::string& key) const {
     return i->second;
 }
 
-StringList
+std::vector<std::string>
 Source::keys() const {
-    StringList keys;
+    std::vector<std::string> keys;
     BOOST_FOREACH(const Map::value_type& kv, map_) {
         if (not boost::starts_with(kv.first, "_"))
            keys.push_back(kv.first);
@@ -78,9 +86,9 @@ Source::keys() const {
     return keys;
 }
 
-StringList
+std::vector<std::string>
 Source::all_keys() const {
-    StringList keys;
+    std::vector<std::string> keys;
     BOOST_FOREACH(const Map::value_type& kv, map_) {
         keys.push_back(kv.first);
     }
@@ -105,12 +113,12 @@ Source::empty() const {
 
 std::string
 Source::to_string() const {
-    StringList elms;
+    std::list<std::string> elms;
     BOOST_FOREACH(const Map::value_type& kv, map_) {
         if (not boost::starts_with(kv.first, "_"))
             elms.push_back(kv.first + ":" + kv.second);
     }
-    return elms.join(",");
+    return boost::join(elms, ",");
 }
 
 } // namespace oh5

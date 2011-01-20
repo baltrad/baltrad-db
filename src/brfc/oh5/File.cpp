@@ -21,7 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
-#include <brfc/StringList.hpp>
 #include <brfc/Time.hpp>
 
 #include <brfc/oh5/Attribute.hpp>

@@ -20,7 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_FILE_HASHER_HPP
 #define BRFC_FILE_HASHER_HPP
 
-#include <brfc/StringList.hpp>
+#include <list>
+#include <string>
 
 namespace brfc {
 
@@ -61,15 +62,11 @@ class FileHasher {
         return do_hash(file);
     }
 
-    void ignore(const StringList& ignored) {
-        ignored_ = ignored;
-    }
-
     void ignore(const std::string& attribute) {
         ignored_.push_back(attribute);
     }
 
-    const StringList& ignored() const {
+    const std::list<std::string>& ignored() const {
         return ignored_;
     }
 
@@ -83,7 +80,7 @@ class FileHasher {
   
   private:
     std::string name_;
-    StringList ignored_;
+    std::list<std::string> ignored_;
 };
 
 } // namespace brfc

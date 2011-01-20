@@ -20,10 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/erase.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/DateTime.hpp>
-#include <brfc/StringList.hpp>
 
 #include <brfc/db/FileEntry.hpp>
 #include <brfc/db/FileQuery.hpp>
@@ -77,13 +77,14 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
             , query(db) {
     }
 
-    void add_attribute(oh5::File& file, const std::string& path, const oh5::Scalar& value) {
-        StringList names = StringList::split(path, "/");
-        std::string attr_name = names.take_last();
+    void add_attribute(oh5::File& file,
+                       std::string path,
+                       const oh5::Scalar& value) {
+        const std::string attr_name = path.substr(path.rfind('/') + 1);
+        boost::erase_tail(path, attr_name.length() + 1);
 
-        oh5::Group& g = file.root().get_or_create_group(names.join("/"));
+        oh5::Group& g = file.root().get_or_create_group(path);
         g.create_attribute(attr_name, value);
-
     }
 
     virtual void SetUp() {

@@ -21,8 +21,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/oh5/Source.hpp>
+#include <brfc/util/algorithm.hpp>
 
 #include <brfc/test_common.hpp>
+
 
 namespace brfc {
 namespace oh5 {
@@ -75,23 +77,29 @@ TEST(oh5_Source_test, test_at) {
 
 TEST(oh5_Source_test, test_keys) {
     Source s;
-    EXPECT_EQ((size_t)0, s.keys().size());
+    std::vector<std::string> keys = s.keys();
+    EXPECT_EQ((size_t)0, keys.size());
     s.add("_hidden", "value");
-    EXPECT_EQ((size_t)0, s.keys().size());
+    keys = s.keys();
+    EXPECT_EQ((size_t)0, keys.size());
     s.add("qwe", "asd");
-    EXPECT_EQ((size_t)1, s.keys().size());
-    EXPECT_TRUE(s.keys().contains("qwe"));
+    keys = s.keys();
+    EXPECT_EQ((size_t)1, keys.size());
+    EXPECT_TRUE(contains(keys.begin(), keys.end(), "qwe"));
 }
 
 TEST(oh5_Source_test, test_all_keys) {
     Source s;
-    EXPECT_EQ((size_t)0, s.all_keys().size());
+    std::vector<std::string> keys = s.all_keys();
+    EXPECT_EQ((size_t)0, keys.size());
     s.add("_hidden", "value");
-    EXPECT_EQ((size_t)1, s.all_keys().size());
-    EXPECT_TRUE(s.all_keys().contains("_hidden"));
+    keys = s.all_keys();
+    EXPECT_EQ((size_t)1, keys.size());
+    EXPECT_TRUE(contains(keys.begin(), keys.end(), "_hidden"));
     s.add("qwe", "asd");
-    EXPECT_EQ((size_t)2, s.all_keys().size());
-    EXPECT_TRUE(s.all_keys().contains("qwe"));
+    keys = s.all_keys();
+    EXPECT_EQ((size_t)2, keys.size());
+    EXPECT_TRUE(contains(keys.begin(), keys.end(), "qwe"));
 }
 
 TEST(oh5_Source_test, test_remove) {

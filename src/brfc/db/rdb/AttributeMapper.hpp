@@ -28,8 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-class StringList;
-
 namespace db {
 namespace rdb {
 

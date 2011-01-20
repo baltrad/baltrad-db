@@ -119,20 +119,20 @@ SWIG_JAVABODY_METHODS(public, public, brfc::db::AttributeResult);
 SWIG_JAVABODY_METHODS(public, public, brfc::db::Database);
 
 %typemap(javaimports) brfc::db::Database, brfc::db::Database* %{
+    import java.util.ArrayList;
     import java.util.List;
-    import java.util.Vector;
 
     import eu.baltrad.fc.oh5.PhysicalFile;
     import eu.baltrad.fc.oh5.Source;
-    import eu.baltrad.fc.oh5.SourceVector;
+    import eu.baltrad.fc.oh5._StdVectorSource;
 %}
 
 // brfc::db::Database::sources -> eu.baltrad.fc.db.Database._sources
 %rename(_sources) brfc::db::Database::sources;
 %typemap(javacode) brfc::db::Database %{
   public List<Source> sources() {
-    SourceVector srcvec = _sources();
-    List<Source> srclist = new Vector<Source>((int)srcvec.size());
+    _StdVectorSource srcvec = _sources();
+    List<Source> srclist = new ArrayList<Source>((int)srcvec.size());
     for (int i=0; i < srcvec.size(); i++) {
         srclist.add(srcvec.get(i));
     }

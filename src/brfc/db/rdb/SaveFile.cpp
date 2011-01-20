@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 #include <brfc/FileHasher.hpp>
-#include <brfc/StringList.hpp>
 
 #include <brfc/db/rdb/RdbHelper.hpp>
 #include <brfc/db/rdb/RdbFileEntry.hpp>

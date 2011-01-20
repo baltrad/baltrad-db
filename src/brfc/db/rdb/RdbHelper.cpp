@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/FileHasher.hpp>
 

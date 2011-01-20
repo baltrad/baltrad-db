@@ -45,12 +45,10 @@ class SHA1AttributeHasher_test : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        StringList ignored;
-        ignored.push_back("Conventions");
-        ignored.push_back("what/source");
-        ignored.push_back("what/version");
-        ignored.push_back("ignore");
-        hasher.ignore(ignored);
+        hasher.ignore("Conventions");
+        hasher.ignore("what/source");
+        hasher.ignore("what/version");
+        hasher.ignore("ignore");
     }
     
     oh5::hl::HlFile f1, f2, f3;

@@ -21,8 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_QUERY_HPP
 
 #include <string>
-#include <brfc/StringList.hpp>
-
 
 #include <brfc/sql/BindMap.hpp>
 
@@ -78,8 +76,6 @@ class Query {
     std::string replace_binds(const Dialect& dialect) const;
     
   private:
-    static StringList split_statement(const std::string& stmt);
-
     std::string stmt_;
     BindMap binds_;
 };

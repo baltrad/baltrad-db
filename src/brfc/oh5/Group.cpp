@@ -19,10 +19,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Group.hpp>
 
+#include <list>
+
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/RootGroup.hpp>
@@ -81,16 +84,19 @@ Group&
 Group::get_or_create_group(const std::string& pathstr) {
     if (boost::starts_with(pathstr, "/") and not is_root())
         throw value_error("path must not be absolute");
-
-    const StringList& path = StringList::split(pathstr, "/", StringList::SKIP_EMPTY_PARTS);
+    
+    std::list<std::string> path;
+    boost::split(path, pathstr, boost::is_any_of("/"), boost::token_compress_on);
 
     Group* last = this;
     Group* node = 0;
 
-    StringList::const_iterator iter = path.begin();
+    std::list<std::string>::const_iterator iter = path.begin();
 
     // seek existing nodes
     while (iter != path.end()) {
+        if (iter->empty())
+            continue;
         node = last->group(*iter);
         if (not node)
             break;

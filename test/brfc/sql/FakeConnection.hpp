@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_FAKE_CONNECTION_HPP
 #define BRFC_SQL_FAKE_CONNECTION_HPP
 
+#include <stdexcept>
+
 #include <brfc/sql/Connection.hpp>
 
 namespace brfc {

@@ -19,11 +19,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Node.hpp>
 
-#include <boost/foreach.hpp>
-#include <boost/algorithm/string/predicate.hpp>
+#include <list>
 
+#include <boost/foreach.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+#include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/StringList.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/DataSet.hpp>
@@ -68,14 +73,14 @@ Node::backend(NodeBackend* backend) {
 
 std::string
 Node::path() const {
-    StringList names;
+    std::list<std::string> names;
     const Node* node = this;
     while (node != 0) {
         names.push_front(node->name());
         node = node->parent();
     }
 
-    std::string path = names.join("/");
+    std::string path = boost::join(names, "/");
     if (not boost::starts_with(path, "/"))
         path = "/" + path;
     return path;
@@ -127,10 +132,13 @@ const Node*
 Node::child(const std::string& path) const {
     if (boost::starts_with(path, "/") and not is_root())
         throw value_error("path must not be absolute");
-    StringList names = StringList::split(path, "/", StringList::SKIP_EMPTY_PARTS);
+    std::list<std::string> names;
+    boost::split(names, path, boost::is_any_of("/"), boost::token_compress_on);
     const Node* cur = this;
     const Node* child = 0;
     BOOST_FOREACH(const std::string& name, names) {
+        if (name.empty())
+            continue;
         child = 0;
         BOOST_FOREACH(const Node* node, cur->children()) {
             if (node->name() == name) {

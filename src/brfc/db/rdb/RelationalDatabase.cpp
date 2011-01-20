@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileHasher.hpp>
 #include <string>
 #include <brfc/SHA1AttributeHasher.hpp>
-#include <brfc/StringList.hpp>
 
 #include <brfc/db/FileQuery.hpp>
 #include <brfc/db/FileResult.hpp>

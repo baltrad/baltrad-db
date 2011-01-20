@@ -19,10 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
+#include <boost/algorithm/string/erase.hpp>
+
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
-#include <brfc/StringList.hpp>
 #include <brfc/Time.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -84,16 +85,11 @@ void add_attribute(Node& parent, const std::string& name, HL_Node* node) {
 }
 
 void add_node(Group& root, HL_Node* node) {
-    std::string pathname(HLNode_getName(node));
-    StringList path = StringList::split(pathname, "/", StringList::SKIP_EMPTY_PARTS);
+    std::string path(HLNode_getName(node));
+    const std::string nodename = path.substr(path.rfind('/') + 1);
+    boost::erase_tail(path, nodename.length() + 1);
 
-    std::string nodename = path.take_last();
-    
-    Node* parent = 0;
-    if (path.empty())
-        parent = &root;
-    else
-        parent = root.child(path.join("/"));
+    Node* parent = path.empty() ? &root : root.child(path);
     BRFC_ASSERT(parent);
 
     switch (HLNode_getType(node)) {

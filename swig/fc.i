@@ -30,7 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/DateTime.hpp>
     #include <brfc/LocalStorage.hpp>
     #include <brfc/CacheDirStorage.hpp>
-    #include <brfc/StringList.hpp>
     #include <brfc/Time.hpp>
     #include <brfc/TimeDelta.hpp>
     #include <brfc/Variant.hpp>
@@ -50,7 +49,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %typemap(javabody) brfc::Date,
                    brfc::DateTime,
-                   brfc::StringList,
                    brfc::Time,
                    brfc::Variant %{
   private long swigCPtr;
@@ -130,14 +128,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 /***
- * brfc::StringList
+ * std::vector<std::string>
  */
-%ignore brfc::StringList::iterator;
-%ignore brfc::StringList::const_iterator;
-%ignore brfc::StringList::begin;
-%ignore brfc::StringList::end;
-%ignore brfc::StringList::front(); // nonconst
-%ignore brfc::StringList::back(); // nonconst
+SWIG_JAVABODY_METHODS(public, public, std::vector<std::string>);
+%template(_StdVectorString) std::vector<std::string>;
 
 /***
  * brfc::Variant
@@ -209,7 +203,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %include <brfc/Date.hpp>
 %include <brfc/Time.hpp>
 %include <brfc/DateTime.hpp>
-%include <brfc/StringList.hpp>
 %include <brfc/Variant.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:

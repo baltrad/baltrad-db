@@ -131,9 +131,7 @@ class Database : public boost::noncopyable {
     /**
      * @brief list sources defined in the database
      *
-     * @note in Java, this method is renamed to _sources(), returning a
-     *       eu.baltrad.fc.oh5.SourceVector. There is a wrapper method
-     *       sources() returning a List<eu.baltrad.fc.oh5.Source>.
+     * @note in Java this method returns List<eu.baltrad.fc.oh5.Source>
      */
     std::vector<oh5::Source> sources() const {
         return do_sources();

@@ -19,12 +19,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test/TestRDB.hpp>
 
+#include <list>
 #include <fstream>
 
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/StringList.hpp>
 
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
@@ -61,13 +63,11 @@ TestRDB::clean() {
     scoped_ptr<sql::Result> r(conn()->execute("DELETE FROM bdb_files"));
 }
 
-StringList
-TestRDB::load_queries(const std::string& filename) {
-    BoostFileSystem fs;
-    std::string qf_path = fs.join(schema_dir_, conn()->dialect().name());
-    qf_path = fs.join(qf_path, filename);
+namespace {
 
-    std::ifstream ifs(qf_path.c_str(), std::ios::binary);
+void
+load_queries(const std::string& filename, std::list<std::string>& queries) {
+    std::ifstream ifs(filename.c_str(), std::ios::binary);
     std::filebuf* rdbuf = ifs.rdbuf();
     
     char ch;
@@ -77,12 +77,20 @@ TestRDB::load_queries(const std::string& filename) {
     }
     ifs.close();
 
-    return StringList::split(str, ";", StringList::SKIP_EMPTY_PARTS);
+     
+    boost::split(queries, str, boost::is_any_of(";"), boost::token_compress_on);
 }
+
+} // namespace anonymous
 
 void
 TestRDB::exec_queries_from(const std::string& file) {
-    const StringList& queries = load_queries(file);
+    BoostFileSystem fs;
+    std::string qf_path = fs.join(schema_dir_, conn()->dialect().name());
+    qf_path = fs.join(qf_path, file);
+
+    std::list<std::string> queries;
+    load_queries(qf_path, queries);
     shared_ptr<sql::Connection> c = conn();
     c->begin();
     try {

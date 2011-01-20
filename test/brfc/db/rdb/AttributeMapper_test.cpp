@@ -19,8 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/StringList.hpp>
-
 #include <brfc/db/rdb/AttributeMapper.hpp>
 
 #include <brfc/sql/Table.hpp>

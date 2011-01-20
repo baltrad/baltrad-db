@@ -21,6 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
+
 #include <brfc/Date.hpp>
 #include <brfc/FileHasher.hpp>
 #include <brfc/Time.hpp>

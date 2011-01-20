@@ -20,10 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_SOURCE_H
 #define BRFC_OH5_SOURCE_H
 
+#include <vector>
 #include <map>
 #include <string>
-
-#include <brfc/StringList.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -85,16 +84,16 @@ class Source {
     const std::string& get(const std::string& key) const;
     
     /**
-     * @brief list of set keys
-     *
-     * @note keys prefixed with "_" are not included
+     * @brief list of keys (excluding those prefixed with "_")
+     * @note in Java this method returns List<String>
      */
-    StringList keys() const;
+    std::vector<std::string> keys() const;
 
     /**
      * @brief list of all keys (including those prefixed with "_")
+     * @note in Java this method returns List<String>
      */
-    StringList all_keys() const;
+    std::vector<std::string> all_keys() const;
     
     /**
      * @throw lookup_error when key does not exist

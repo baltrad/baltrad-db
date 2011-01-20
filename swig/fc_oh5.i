@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %{
     #include <brfc/Date.hpp>
     #include <brfc/Time.hpp>
-    #include <brfc/StringList.hpp>
     #include <brfc/oh5/Node.hpp>
     #include <brfc/oh5/Scalar.hpp>
     #include <brfc/oh5/Attribute.hpp>
@@ -81,21 +80,49 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %typemap(javaimports) brfc::oh5::Group,
                       brfc::oh5::Group* %{
-    import eu.baltrad.fc.StringList;
 %}
 
 /***
  * brfc::oh5::Source
  */
+SWIG_JAVABODY_METHODS(public, public, brfc::oh5::Source);
+
+%rename(_keys) brfc::oh5::Source::keys;
+%rename(_all_keys) brfc::oh5::Source::all_keys;
+
 %typemap(javaimports) brfc::oh5::Source,
                       brfc::oh5::Source* %{
-    import eu.baltrad.fc.StringList;
+    import java.util.List;
+    import java.util.ArrayList;
+    
+    import eu.baltrad.fc._StdVectorString;
 %}
-SWIG_JAVABODY_METHODS(public, public, brfc::oh5::Source);
+
+%typemap(javacode) brfc::oh5::Source %{
+  public List<String> keys() {
+    _StdVectorString std_keys = _keys();
+    List<String> keys = new ArrayList<String>((int)std_keys.size());
+    for (int i=0; i < std_keys.size(); i++) {
+      keys.add(std_keys.get(i));
+    }
+    return keys;
+  }
+
+  public List<String> all_keys() {
+    _StdVectorString std_keys = _all_keys();
+    List<String> keys = new ArrayList<String>((int)std_keys.size());
+    for (int i=0; i < std_keys.size(); i++) {
+      keys.add(std_keys.get(i));
+    }
+    return keys;
+  }
+%}
+
+/***
+ * std::vector<brfc::oh5::Source>
+ */
 SWIG_JAVABODY_METHODS(public, public, std::vector<brfc::oh5::Source>);
-
-%template(SourceVector) std::vector<brfc::oh5::Source>;
-
+%template(_StdVectorSource) std::vector<brfc::oh5::Source>;
 
 /***
  * brfc::oh5::Scalar
@@ -120,7 +147,6 @@ SWIG_JAVABODY_METHODS(public, public, std::vector<brfc::oh5::Source>);
                       brfc::oh5::File* %{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.Time;
-    import eu.baltrad.fc.StringList;
 %}
 
 SWIG_JAVABODY_METHODS(public, public, brfc::oh5::File);
@@ -133,7 +159,6 @@ SWIG_JAVABODY_METHODS(public, public, brfc::oh5::PhysicalFile);
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.Time;
-    import eu.baltrad.fc.StringList;
 %}
 
 %include <brfc/oh5/Scalar.hpp>

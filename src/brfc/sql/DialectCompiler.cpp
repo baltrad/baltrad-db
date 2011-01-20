@@ -19,15 +19,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/DialectCompiler.hpp>
 
-#include <sstream>
 #include <algorithm>
+#include <list>
+#include <sstream>
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/join.hpp>
 
 #include <brfc/assert.hpp>
-#include <brfc/StringList.hpp>
 
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>
@@ -95,12 +96,12 @@ DialectCompiler::operator()(const Column& expr) {
 
 void
 DialectCompiler::operator()(const Function& func) {
-    StringList args;
+    std::list<std::string> args;
     BOOST_FOREACH(ExpressionPtr arg, func.args()) {
         visit(*arg, *this);
-        args.append(pop());
+        args.push_back(pop());
     }
-    push(func.name() + "(" + args.join(", ") + ")");
+    push(func.name() + "(" + boost::join(args, ", ") + ")");
 }
 
 void
@@ -237,24 +238,25 @@ DialectCompiler::operator()(const Select& select) {
 
 void
 DialectCompiler::operator()(const Insert& insert) {
-    StringList cols;
-    StringList vals;
+    std::list<std::string> cols;
+    std::list<std::string> vals;
     BOOST_FOREACH(const Insert::ValueMap::value_type& bind, insert.values()) {
-        cols.append(bind.first->name());
+        cols.push_back(bind.first->name());
         visit(*bind.second, *this);
-        vals.append(pop());
+        vals.push_back(pop());
     }
 
     std::string stmt = "INSERT INTO " + insert.table()->name() + "(" +
-                  cols.join(", ") + ") VALUES (" + vals.join(", ") + ")";
+                       boost::join(cols, ", ") + ") VALUES (" +
+                       boost::join(vals, ", ") + ")";
     
     if (insert.returns().size() > 0) {
-        StringList rets;
+        std::list<std::string> rets;
         BOOST_FOREACH(ExpressionPtr expr, insert.returns()) {
             visit(*expr, *this);
-            rets.append(pop());
+            rets.push_back(pop());
         }
-        stmt += " RETURNING " + rets.join(", ");
+        stmt += " RETURNING " + boost::join(rets, ", ");
     }
     push(stmt);
 }
