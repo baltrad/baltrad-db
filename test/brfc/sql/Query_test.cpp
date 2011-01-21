@@ -33,10 +33,9 @@ using ::testing::Invoke;
 namespace brfc {
 namespace sql {
 
-template<typename T>
-T
-copy(const T& t) {
-    return t;
+std::string
+copystr(const std::string& str) {
+    return str;
 }
 
 class sql_Query_test : public testing::Test {
@@ -48,7 +47,7 @@ class sql_Query_test : public testing::Test {
 
     virtual void SetUp() {
         EXPECT_CALL(dialect, do_escape(An<const std::string&>()))
-            .WillRepeatedly(Invoke(copy<const std::string&>));
+            .WillRepeatedly(Invoke(copystr));
     }
 
     Query query;
