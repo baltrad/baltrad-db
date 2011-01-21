@@ -17,34 +17,43 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_SQL_MOCK_DIALECT_HPP
-#define BRFC_SQL_MOCK_DIALECT_HPP
+#include <gtest/gtest.h>
 
-#include <gmock/gmock.h>
-
+#include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
+
+#include <brfc/test/TestRDB.hpp>
+
+#include <brfc/itest_config.hpp>
+#include <brfc/ITestEnv.hpp>
 
 namespace brfc {
 namespace sql {
 
-class MockDialect : public Dialect {
+class sql_Dialect_itest : public testing::TestWithParam<const char*> {
   public:
-    MockDialect() {
-        ON_CALL(*this, do_variant_to_string(::testing::_))
-            .WillByDefault(::testing::Invoke(this, &MockDialect::do_variant_to_string_impl));
-    }
+    sql_Dialect_itest()
+        : db(ITestEnv::get_database(GetParam()))
+        , conn(db->conn())
+        , dialect(conn->dialect()) {
 
-    MOCK_CONST_METHOD1(do_has_feature, bool(Dialect::Feature));
-    MOCK_CONST_METHOD0(do_name, std::string&());
-    MOCK_CONST_METHOD1(do_variant_to_string, std::string(const Variant&));
-    MOCK_CONST_METHOD1(do_escape, std::string(const std::string&));
-
-    std::string do_variant_to_string_impl(const Variant& value) {
-        return Dialect::do_variant_to_string(value);
     }
+    
+    test::TestRDB* db;
+    shared_ptr<Connection> conn;
+    const Dialect& dialect;
 };
+
+TEST_P(sql_Dialect_itest, test_escape) {
+    EXPECT_EQ("''", dialect.escape("'"));
+    EXPECT_EQ("\\\\", dialect.escape("\\"));
+}
+
+#if BRFC_TEST_DSN_COUNT >= 1
+INSTANTIATE_TEST_CASE_P(sql_Dialect_itest_p,
+                        sql_Dialect_itest,
+                        ::testing::ValuesIn(TEST_DSNS));
+#endif // BRFC_TEST_DSN_COUNT
 
 } // namespace sql
 } // namespace brfc
-
-#endif // BRFC_SQL_MOCK_DIALECT_HPP

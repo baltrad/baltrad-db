@@ -23,6 +23,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/MockDialect.hpp>
 
+using ::testing::Return;
+
 namespace brfc {
 namespace sql {
 
@@ -36,7 +38,9 @@ class sql_Dialect_test : public testing::Test {
 };
 
 TEST_F(sql_Dialect_test, test_variant_to_string_string) {
-    EXPECT_EQ("'qweqwe'", dialect.variant_to_string(Variant("qweqwe")));
+    EXPECT_CALL(dialect, do_escape("qweqwe"))
+        .WillOnce(Return("asdasd"));
+    EXPECT_EQ("'asdasd'", dialect.variant_to_string(Variant("qweqwe")));
 }
 
 TEST_F(sql_Dialect_test, test_variant_to_string_integer) {

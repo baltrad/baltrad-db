@@ -21,6 +21,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <string>
 
+#include <pqxx/connection_base>
+
+#include <brfc/assert.hpp>
+
 namespace brfc {
 namespace sql {
 namespace pg {
@@ -38,6 +42,12 @@ Dialect::do_has_feature(Feature feature) const {
         default:
             return false;
     }
+}
+
+std::string
+Dialect::do_escape(const std::string& str) const {
+    BRFC_ASSERT(conn_);
+    return conn_->esc(str);
 }
 
 const std::string&

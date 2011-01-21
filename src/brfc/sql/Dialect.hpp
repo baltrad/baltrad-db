@@ -51,6 +51,13 @@ class Dialect {
     std::string variant_to_string(const Variant& value) const {
         return do_variant_to_string(value);
     }
+    
+    /**
+     * @brief escape @c str for use as an SQL string literal
+     */
+    std::string escape(const std::string& str) const {
+        return do_escape(str);
+    }
 
   protected:
     /**
@@ -66,9 +73,11 @@ class Dialect {
      * - date and time in ISO 8601 format
      * - bool values as TRUE or FALSE
      * - none as NULL
-     * - string surrounded by apostrophes (')
+     * - string surrounded by apostrophes (') and passed through escape()
      */
     virtual std::string do_variant_to_string(const Variant& value) const;
+
+    virtual std::string do_escape(const std::string& str) const = 0;
 };
 
 } // namespace sql

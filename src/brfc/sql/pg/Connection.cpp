@@ -53,6 +53,7 @@ Connection::do_open() {
     conn_->set_variable("datestyle", "ISO");
     load_type_oids();
     dialect_.version(conn_->server_version());
+    dialect_.conn(conn_.get());
 }
 
 bool

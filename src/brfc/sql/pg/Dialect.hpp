@@ -23,6 +23,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Dialect.hpp>
 #include <string>
 
+namespace pqxx {
+    class connection_base;
+} // namespace pqxx
+
 namespace brfc {
 namespace sql {
 namespace pg {
@@ -31,17 +35,22 @@ class Dialect : public sql::Dialect {
   public:
     explicit Dialect(int version=0)
             : name_("postgresql")
+            , conn_(0)
             , version_(version) {
     }
 
     void version(int version) { version_ = version; }
 
+    void conn(pqxx::connection_base* conn) { conn_ = conn; }
+
   protected:
     virtual bool do_has_feature(Feature feature) const;
     virtual const std::string& do_name() const;
+    virtual std::string do_escape(const std::string& str) const;
   
   private:
     std::string name_;
+    pqxx::connection_base* conn_;
     int version_;
 };
 

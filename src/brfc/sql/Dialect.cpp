@@ -38,8 +38,7 @@ Dialect::do_variant_to_string(const Variant& value) const {
         case Variant::NONE:
             return "NULL";
         case Variant::STRING:
-            // XXX: escape!!!
-            return "'" + value.string() + "'";
+            return "'" + escape(value.string()) + "'";
         case Variant::INT64:
         case Variant::DOUBLE:
             return value.to_string();

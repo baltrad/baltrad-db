@@ -27,8 +27,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test_common.hpp>
 #include <brfc/sql/MockDialect.hpp>
 
+using ::testing::An;
+using ::testing::Invoke;
+
 namespace brfc {
 namespace sql {
+
+template<typename T>
+T
+copy(const T& t) {
+    return t;
+}
 
 class sql_Query_test : public testing::Test {
   public:
@@ -37,9 +46,14 @@ class sql_Query_test : public testing::Test {
         , dialect() {
     }
 
+    virtual void SetUp() {
+        EXPECT_CALL(dialect, do_escape(An<const std::string&>()))
+            .WillRepeatedly(Invoke(copy<const std::string&>));
+    }
+
     Query query;
     BindMap binds;
-    ::testing::NiceMock<MockDialect> dialect;
+    MockDialect dialect;
 };
 
 TEST_F(sql_Query_test, test_statement) {
