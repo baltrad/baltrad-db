@@ -25,6 +25,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/Database.hpp>
 #include <brfc/db/FileQuery.hpp>
+#include <brfc/db/FileEntry.hpp>
+#include <brfc/oh5/PhysicalFile.hpp>
 
 namespace brfc {
 namespace db {

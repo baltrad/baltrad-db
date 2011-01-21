@@ -58,6 +58,16 @@ class FileQuery {
      * @brief destructor
      */
     ~FileQuery();
+    
+    /**
+     * @brief copy assignment
+     */
+    FileQuery& operator=(const FileQuery& rhs);
+    
+    /**
+     * @brief access bound database
+     */
+    db::Database* database() const { return db_; }
 
     /**
      * @brief add a filtering expression

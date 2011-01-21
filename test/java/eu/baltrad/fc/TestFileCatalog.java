@@ -28,6 +28,7 @@ import eu.baltrad.fc.Variant;
 import eu.baltrad.fc.FileSystemError;
 
 import eu.baltrad.fc.db.FileEntry;
+import eu.baltrad.fc.db.FileQuery;
 
 import eu.baltrad.fc.oh5.Source;
 import eu.baltrad.fc.oh5.hl.HlFile;
@@ -93,4 +94,8 @@ public class TestFileCatalog extends TestCase {
     assertTrue(sources.size() > 0);
   }
 
+  public void testFileQuery_default_limit() {
+    FileQuery q = fc.query_file();
+    assertEquals(0, q.limit());
+  }
 }

@@ -17,25 +17,26 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_DB_MOCK_RESULT_SET_HPP
-#define BRFC_DB_MOCK_RESULT_SET_HPP
+#ifndef BRFC_DB_MOCK_FILE_RESULT_HPP
+#define BRFC_DB_MOCK_FILE_RESULT_HPP
 
 #include <gmock/gmock.h>
+
+#include <brfc/db/FileResult.hpp>
 
 namespace brfc {
 namespace db {
 
-class MockResultSet : public ResultSet {
+class MockFileResult : public FileResult {
   public:
+    MOCK_CONST_METHOD0(do_size, int());
     MOCK_METHOD0(do_next, bool());
     MOCK_METHOD1(do_seek, bool(int));
-    MOCK_METHOD0(do_size, int());
 
-    MOCK_CONST_METHOD1(do_value_at, Variant(unsigned int));
-
+    MOCK_METHOD0(do_entry, FileEntry*());
 };
 
 } // namespace db
 } // namespace brfc
 
-#endif // BRFC_DB_MOCK_RESULT_SET_HPP
+#endif // BRFC_DB_MOCK_FILE_RESULT_HPP

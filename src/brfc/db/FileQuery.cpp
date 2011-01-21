@@ -42,12 +42,36 @@ FileQuery::FileQuery(Database* db)
 
 FileQuery::FileQuery(const FileQuery& other)
         : db_(other.db_)
-        , filter_(other.filter_) {
-
+        , filter_()
+        , order_()
+        , limit_(other.limit_) {
+    if (other.filter_)
+        filter_ = other.filter_->clone();
+    BOOST_FOREACH(const OrderPair& opair, other.order_) {
+        order_.push_back(std::make_pair(opair.first->clone(), opair.second));
+    }
 }
 
 FileQuery::~FileQuery() {
     
+}
+
+FileQuery&
+FileQuery::operator=(const FileQuery& rhs) {
+    if (this != &rhs) {
+        db_ = rhs.db_;
+        if (rhs.filter_) {
+            filter_ = rhs.filter_->clone();
+        } else {
+            filter_.reset();
+        }
+        order_.clear();
+        BOOST_FOREACH(const OrderPair& opair, rhs.order_) {
+            order_.push_back(std::make_pair(opair.first->clone(), opair.second));
+        }
+        limit_ = rhs.limit_;
+    }
+    return *this;
 }
 
 FileQuery&
