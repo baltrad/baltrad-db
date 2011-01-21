@@ -25,7 +25,7 @@ library dependencies:
 * boost::uuid                   1.43    (included in ./src)
 * boost::variant                1.40
 * boost::xpressive              1.40
-* libpqxx                       2.6.x
+* libpqxx                       3.1
 * libfuse                       2.7.x   (optional)
 * utf8-cpp                      2.3     (included in ./src)
 
