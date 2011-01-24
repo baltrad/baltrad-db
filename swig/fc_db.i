@@ -66,7 +66,6 @@ SWIG_JAVABODY_METHODS(public, public, brfc::db::FileEntry);
 
 %typemap(javaimports) brfc::db::FileQuery, brfc::db::FileQuery* %{
     import eu.baltrad.fc.expr.Expression;
-    import eu.baltrad.fc.expr.Attribute;
 %}
 
 %newobject brfc::db::FileQuery::execute;
@@ -87,9 +86,7 @@ SWIG_JAVABODY_METHODS(public, public, brfc::db::FileResult);
 %ignore brfc::db::AttributeQuery::order() const;
 %ignore brfc::db::AttributeQuery::fetch() const;
 %typemap(javaimports) brfc::db::AttributeQuery, brfc::db::AttributeQuery* %{
-    import eu.baltrad.fc.expr.Attribute;
     import eu.baltrad.fc.expr.Expression;
-    import eu.baltrad.fc.expr.Function;
 %}
 
 %newobject brfc::db::AttributeQuery::execute;

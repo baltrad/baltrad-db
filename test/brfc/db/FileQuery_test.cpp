@@ -70,6 +70,7 @@ TEST_F(db_FileQuery_test, test_copy_ctor) {
     const FileQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ((size_t)1, ovec.size());
     EXPECT_EQ(&oexpr3, ovec.at(0).first.get());
+    EXPECT_EQ(FileQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_FileQuery_test, test_copy_assign) {
@@ -96,6 +97,29 @@ TEST_F(db_FileQuery_test, test_copy_assign) {
     const FileQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ((size_t)1, ovec.size());
     EXPECT_EQ(&oexpr3, ovec.at(0).first.get());
+    EXPECT_EQ(FileQuery::ASC, ovec.at(0).second);
+}
+
+TEST_F(db_FileQuery_test, test_copy_assign_self) {
+    MockExpression fexpr1, fexpr2, oexpr1, oexpr2;
+
+    EXPECT_CALL(fexpr1, clone())
+        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr2, no_delete)));
+    EXPECT_CALL(oexpr1, clone())
+        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr2, no_delete)));
+
+    query.filter(fexpr1);
+    query.order_by(oexpr1, FileQuery::ASC);
+    query.limit(10);
+
+    query = query;
+    
+    EXPECT_EQ(&fexpr2, query.filter().get());
+    EXPECT_EQ(10, query.limit());
+    const FileQuery::OrderVector& ovec = query.order();
+    ASSERT_EQ((size_t)1, ovec.size());
+    EXPECT_EQ(&oexpr2, ovec.at(0).first.get());
+    EXPECT_EQ(FileQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_FileQuery_test, test_filter) {

@@ -48,11 +48,18 @@ AttributeQuery::AttributeQuery(Database* db)
 AttributeQuery::AttributeQuery(const AttributeQuery& other)
         : db_(other.db_)
         , distinct_(other.distinct_)
-        , fetch_(other.fetch_)
-        , filter_(other.filter_)
-        , order_(other.order_)
+        , fetch_()
+        , filter_()
+        , order_()
         , limit_(other.limit_) {
-
+    BOOST_FOREACH(expr::ExpressionPtr expr, other.fetch_) {
+        fetch_.push_back(expr->clone());
+    }
+    if (other.filter_)
+        filter_ = other.filter_->clone();
+    BOOST_FOREACH(const OrderPair& opair, other.order_) {
+        order_.push_back(std::make_pair(opair.first->clone(), opair.second));
+    }
 }
 
 AttributeQuery::~AttributeQuery() {
@@ -60,23 +67,41 @@ AttributeQuery::~AttributeQuery() {
 }
 
 AttributeQuery&
-AttributeQuery::distinct(bool distinct) {
-    distinct_ = true;
+AttributeQuery::operator=(const AttributeQuery& rhs) {
+    if (this == &rhs)
+        return *this;
+
+    db_ = rhs.db_;
+    distinct_ = rhs.distinct_;
+    fetch_.clear();
+    BOOST_FOREACH(expr::ExpressionPtr expr, rhs.fetch_) {
+        fetch_.push_back(expr->clone());
+    }
+    if (rhs.filter_) {
+        filter_ = rhs.filter_->clone();
+    } else {
+        filter_.reset();
+    }
+    order_.clear();
+    BOOST_FOREACH(const OrderPair& opair, rhs.order_) {
+        order_.push_back(std::make_pair(opair.first->clone(), opair.second));
+    }
+    limit_ = rhs.limit_;
     return *this;
 }
 
 AttributeQuery&
-AttributeQuery::fetch(const expr::Attribute& attribute) {
-    fetch_.push_back(attribute.clone());
+AttributeQuery::distinct(bool distinct) {
+    distinct_ = distinct;
+    return *this;
+}
+
+AttributeQuery&
+AttributeQuery::fetch(const expr::Expression& expr) {
+    fetch_.push_back(expr.clone());
     // XXX: there used to be duplicate check here, removed due to
     //      adding fetch(Function). This should be brought back
     //      and fetch(...) made to accept labeled expressions only.
-    return *this;
-}
-
-AttributeQuery&
-AttributeQuery::fetch(const expr::Function& function) {
-    fetch_.push_back(function.clone());
     return *this;
 }
 

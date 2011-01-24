@@ -58,19 +58,20 @@ FileQuery::~FileQuery() {
 
 FileQuery&
 FileQuery::operator=(const FileQuery& rhs) {
-    if (this != &rhs) {
-        db_ = rhs.db_;
-        if (rhs.filter_) {
-            filter_ = rhs.filter_->clone();
-        } else {
-            filter_.reset();
-        }
-        order_.clear();
-        BOOST_FOREACH(const OrderPair& opair, rhs.order_) {
-            order_.push_back(std::make_pair(opair.first->clone(), opair.second));
-        }
-        limit_ = rhs.limit_;
+    if (this == &rhs)
+        return *this;
+
+    db_ = rhs.db_;
+    if (rhs.filter_) {
+        filter_ = rhs.filter_->clone();
+    } else {
+        filter_.reset();
     }
+    order_.clear();
+    BOOST_FOREACH(const OrderPair& opair, rhs.order_) {
+        order_.push_back(std::make_pair(opair.first->clone(), opair.second));
+    }
+    limit_ = rhs.limit_;
     return *this;
 }
 

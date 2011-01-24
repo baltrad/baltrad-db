@@ -61,6 +61,11 @@ class AttributeQuery {
     ~AttributeQuery();
 
     /**
+     * @brief copy assign
+     */
+    AttributeQuery& operator=(const AttributeQuery& rhs);
+
+    /**
      * @brief fetch unique results
      */
     AttributeQuery& distinct(bool distinct);
@@ -68,22 +73,15 @@ class AttributeQuery {
     bool distinct() const { return distinct_; }
 
     /**
-     * @brief mark an attribute for fetching
-     * @param attribute Attribute to fetch to ResultSet
+     * @brief mark an expression for fetching
+     * @param expr expr::Expression to fetch
      * @return this AttributeQuery (for chaining)
      *
-     * attributes are returned in ResultSet in the same order as they
+     * expression are returned in AttributeResult in the same order as they
      * are marked.
      */
-    AttributeQuery& fetch(const expr::Attribute& attribute);
+    AttributeQuery& fetch(const expr::Expression& expr);
     
-    /**
-     * @brief mark a result for a function for fetching
-     * @param function Function whose result to fetch to ResultSet
-     * @return this AttributeQuery (for chaining)
-     */
-    AttributeQuery& fetch(const expr::Function& function);
-
     const ExpressionVector& fetch() const {
         return fetch_;
     }
