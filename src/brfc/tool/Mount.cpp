@@ -26,6 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/DefaultFileNamer.hpp>
 
 #include <brfc/db/Database.hpp>
@@ -46,11 +47,14 @@ namespace tool {
 
 Mount::Mount()
         : optdesc_("mount options")
+        , mount_point_()
+        , debug_(false)
+        , foreground_(false)
         , uid_(getuid())
         , gid_(getgid()) {
     optdesc_.add_options()
         ("mount-point", po::value<std::string>(),
-            "directory where to mount the filesystem ")
+            "directory where to mount the filesystem")
         ("debug,d",
             "turn on debugging, implies -f")
         ("foreground,f",
@@ -72,30 +76,38 @@ Mount::do_help(std::ostream& out) const {
     out << optdesc_;
 }
 
-int
-Mount::do_execute(db::Database& db,
-                  const std::vector<std::string>& args) {
-
+void
+Mount::do_parse_args(const ArgVector& args) {
     po::positional_options_description p_optdesc_;
     p_optdesc_.add("mount-point", 1);
 
     po::variables_map vm;
-    po::store(po::command_line_parser(args).
-              options(optdesc_).positional(p_optdesc_).run(), vm);
-    po::notify(vm);
-    
 
-    if (not vm.count("mount-point") == 1) {
-        help(std::cout);
-        return 1;
+    try {
+        po::store(po::command_line_parser(args).
+                  options(optdesc_).positional(p_optdesc_).run(), vm);
+        po::notify(vm);
+    } catch (const po::error& e) {
+        throw value_error(e.what());
     }
 
+    if (not vm.count("mount-point") == 1)
+        throw value_error("missing mount-point");
+
+    mount_point_ = vm["mount-point"].as<std::string>();
+
+    debug_ = vm.count("debug") > 0;
+    foreground_ = vm.count("foreground") > 0;
+}
+
+int
+Mount::do_execute(db::Database& db) {
     std::vector<std::string> dargs;
     dargs.push_back("bdbtool");
-    dargs.push_back(vm["mount-point"].as<std::string>());
-    if (vm.count("debug"))
+    dargs.push_back(mount_point_);
+    if (debug_)
         dargs.push_back("-d");
-    if (vm.count("foreground"))
+    if (foreground_)
         dargs.push_back("-f");
     dargs.push_back("-o");
     dargs.push_back("uid=" + boost::lexical_cast<std::string>(uid_));

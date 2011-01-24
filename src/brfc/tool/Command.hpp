@@ -37,6 +37,8 @@ namespace tool {
  */
 class Command {
   public:
+    typedef std::vector<std::string> ArgVector;
+
     virtual ~Command() { };
 
     /**
@@ -52,16 +54,33 @@ class Command {
     void help(std::ostream& out) const {
         do_help(out);
     }
+    
+    /**
+     * @brief parse command-line arguments
+     * @param args arguments to the command
+     * @throw value_error if @c args can't be parsed
+     *
+     * will split the args using whitespace as delimiter
+     */
+    void parse_args(const std::string& args);
+    
+    /**
+     * @brief parse command-line arguments
+     * @param args arguments to the command
+     * @throw value_error if @c args can't be parsed
+     */
+
+    void parse_args(const ArgVector& args) {
+        return do_parse_args(args);
+    }
         
     /**
      * @brief execute this command
      * @param fc filecatalog to run on
-     * @param args arguments to the command
      * @return execution status
      */
-    int execute(db::Database& db,
-                const std::vector<std::string>& args) {
-        return do_execute(db, args);
+    int execute(db::Database& db) {
+        return do_execute(db);
     }
 
   protected:
@@ -69,8 +88,10 @@ class Command {
 
     virtual void do_help(std::ostream& out) const = 0;
 
-    virtual int do_execute(db::Database& db,
-                           const std::vector<std::string>& args) = 0;
+    virtual void do_parse_args(const ArgVector& args) = 0;
+
+    virtual int do_execute(db::Database& db) = 0;
+    
 };
 
 } // namespace tool

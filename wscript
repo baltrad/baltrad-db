@@ -408,6 +408,8 @@ def _build_gtest_tests(bld):
     local_libs = ["brfc", "gtest-gmock"]
     
     if not bld.env.build_bdbtool:
+        for src in bld.path.ant_glob("test/brfc/tool/*.cpp").split(" "):
+            sources.remove(src)
         for src in bld.path.ant_glob("test/brfc/fuse/*.cpp").split(" "):
             sources.remove(src)
     else:

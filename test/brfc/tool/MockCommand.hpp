@@ -16,38 +16,31 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef BRFC_TOOL_MOCK_COMMAND_HPP
+#define BRFC_TOOL_MOCK_COMMAND_HPP
 
-#ifndef BRFC_TOOL_BENCHMARK_HPP
-#define BRFC_TOOL_BENCHMARK_HPP
+#include <gmock/gmock.h>
+
+#include <brfc/db/Database.hpp>
 
 #include <brfc/tool/Command.hpp>
-
-#include <boost/program_options/options_description.hpp>
 
 namespace brfc {
 namespace tool {
 
-class Benchmark : public Command {
+class MockCommand : public Command {
   public:
-    Benchmark();
-
-  protected:
-    virtual std::string do_description() const;
-
-    virtual void do_help(std::ostream& out) const;
-
-    virtual void do_parse_args(const ArgVector& args);
-
-    virtual int do_execute(db::Database& fc);
-  
-  private:
-    int iterations_;
-    bool keep_;
-    std::string infile_;
-    boost::program_options::options_description optdesc_;
+    MOCK_CONST_METHOD0(do_description,
+        std::string());
+    MOCK_CONST_METHOD1(do_help,
+        void(std::ostream&));
+    MOCK_METHOD1(do_parse_args,
+        void(const ArgVector&));
+    MOCK_METHOD1(do_execute,
+        int(db::Database&));
 };
 
 } // namespace tool
 } // namespace brfc
 
-#endif // BRFC_TOOL_BENCHMARK_HPP
+#endif // BRFC_TOOL_MOCK_COMMAND_HPP

@@ -36,13 +36,18 @@ class Mount : public Command {
   protected:
     virtual std::string do_description() const;
 
-    virtual int do_execute(db::Database& db,
-                           const std::vector<std::string>& args);
     virtual void do_help(std::ostream& out) const;
+
+    virtual void do_parse_args(const ArgVector& vec);
+
+    virtual int do_execute(db::Database& db);
   
   private:
     boost::program_options::options_description optdesc_;
     
+    std::string mount_point_;
+    bool debug_;
+    bool foreground_;
     uid_t uid_;
     gid_t gid_;
 };

@@ -27,6 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/timer.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/DateTime.hpp>
 #include <brfc/TimeDelta.hpp>
 
@@ -44,6 +45,8 @@ namespace tool {
 
 Benchmark::Benchmark()
         : iterations_(1)
+        , keep_(false)
+        , infile_()
         , optdesc_("benchmark options") {
     optdesc_.add_options()
         ("input-file", po::value<std::string>(),
@@ -65,25 +68,33 @@ Benchmark::do_help(std::ostream& out) const {
     out << optdesc_;
 }
 
-int
-Benchmark::do_execute(db::Database& db,
-                      const std::vector<std::string>& args) {
+void
+Benchmark::do_parse_args(const ArgVector& args) {
     // read args
     po::variables_map vm;
-    po::store(po::command_line_parser(args).
-              options(optdesc_).run(), vm);
-    po::notify(vm);
-    
-    if (not vm.count("input-file")) {
-        help(std::cout);
-        return 1;
+    try {
+        po::store(po::command_line_parser(args).
+                  options(optdesc_).run(), vm);
+        po::notify(vm);
+    } catch (const po::error& e) {
+        throw value_error(e.what());
     }
-    
 
+    if (not vm.count("input-file")) {
+        throw value_error("input-file not specified");
+    }
+
+    infile_ = vm["input-file"].as<std::string>();
+
+    keep_ = vm.count("keep") > 0;
+}
+
+int
+Benchmark::do_execute(db::Database& db) {
     boost::timer timer;
 
     // read the "template" file
-    oh5::hl::HlFile f(vm["input-file"].as<std::string>());
+    oh5::hl::HlFile f(infile_);
     double load_secs = timer.elapsed();
 
     DateTime dt(Date(3000, 1, 1));
@@ -112,7 +123,7 @@ Benchmark::do_execute(db::Database& db,
               << store_secs / iterations_ + load_secs
               << " (total) secs per file" << std::endl;
 
-    if (vm.count("keep") == 0) {
+    if (keep_) {
         std::cout << "cleaning up" << std::endl;
         BOOST_FOREACH(const db::FileEntry& entry, stored_files) {
             db.remove(entry);

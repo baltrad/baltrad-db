@@ -31,8 +31,12 @@ class Import : public Command {
 
     virtual void do_help(std::ostream& out) const;
 
-    virtual int do_execute(db::Database& db,
-                           const std::vector<std::string>& args);
+    virtual void do_parse_args(const ArgVector& args);
+
+    virtual int do_execute(db::Database& db);
+  
+  private:
+    ArgVector args_;
 };
 
 } // namespace tool

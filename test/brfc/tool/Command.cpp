@@ -17,37 +17,45 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_TOOL_BENCHMARK_HPP
-#define BRFC_TOOL_BENCHMARK_HPP
+#include <gtest/gtest.h>
 
-#include <brfc/tool/Command.hpp>
+#include <brfc/CacheDirStorage.hpp>
 
-#include <boost/program_options/options_description.hpp>
+#include <brfc/tool/MockCommand.hpp>
 
 namespace brfc {
 namespace tool {
 
-class Benchmark : public Command {
+class tool_Command_test : public ::testing::Test {
   public:
-    Benchmark();
+    tool_Command_test()
+            : cmd() {
+    }
 
-  protected:
-    virtual std::string do_description() const;
-
-    virtual void do_help(std::ostream& out) const;
-
-    virtual void do_parse_args(const ArgVector& args);
-
-    virtual int do_execute(db::Database& fc);
-  
-  private:
-    int iterations_;
-    bool keep_;
-    std::string infile_;
-    boost::program_options::options_description optdesc_;
+    MockCommand cmd;
 };
+
+TEST_F(tool_Command_test, test_parse_args_str) {
+    std::vector<std::string> expected;
+    expected.push_back("--arg1");
+    expected.push_back("val1");
+    expected.push_back("-o");
+
+    EXPECT_CALL(cmd, do_parse_args(expected));
+
+    cmd.parse_args("--arg1 val1 -o");
+}
+
+TEST_F(tool_Command_test, test_parse_args_str_extra_whitespace) {
+    std::vector<std::string> expected;
+    expected.push_back("--arg1");
+    expected.push_back("val1");
+    expected.push_back("-o");
+
+    EXPECT_CALL(cmd, do_parse_args(expected));
+
+    cmd.parse_args("--arg1  val1\t \t-o");
+}
 
 } // namespace tool
 } // namespace brfc
-
-#endif // BRFC_TOOL_BENCHMARK_HPP

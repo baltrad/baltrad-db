@@ -174,6 +174,13 @@ main(int argc, char** argv) {
             return 1;
         }
     }
-     
-    return cmd->execute(*db, cmd_args);
+
+    try {
+        cmd->parse_args(cmd_args);
+    } catch (const brfc::value_error& e) {
+        std::cout << "bdbtool: " << e.what() << std::endl;
+        return 1;
+    }
+
+    return cmd->execute(*db);
 }
