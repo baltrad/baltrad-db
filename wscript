@@ -333,14 +333,13 @@ def _build_shared_library(bld):
     libs = [
         "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM", "BOOST_THREAD",
         "HDF5", "HLHDF",
-        "FUSE",
         "PQXX",
     ]
 
-    if not bld.env.build_bdbfs:
-        for src in bld.path.ant_glob("src/brfc/fuse/*.cpp").split(" "):
-            sources.remove(src)
-        libs.remove("FUSE")
+    for src in bld.path.ant_glob("src/brfc/fuse/*.cpp").split(" "):
+        sources.remove(src)
+    for src in bld.path.ant_glob("src/brfc/tool/*.cpp").split(" "):
+        sources.remove(src)
 
     bld(
         features="cxx cshlib",
@@ -355,20 +354,34 @@ def _build_shared_library(bld):
 def _build_bdbtool(bld):
     bld.add_group("build_bdbtool")
 
-    sources = sorted(bld.path.ant_glob("bin/bdbtool/**/*.cpp").split(" "))
+    libs = ["BOOST_PROGRAM_OPTIONS"]
+    sources = bld.path.ant_glob("src/brfc/tool/*.cpp").split(" ")
+
+    if bld.env.build_bdbfs:
+        sources.extend(bld.path.ant_glob("src/brfc/fuse/*.cpp").split(" "))
+        libs.append("FUSE");
+    else:
+        sources.remove("srfc/brfc/tool/Import.cpp")
+
+    bld(
+        features="cxx cshlib",
+        source=sources,
+        target="brfc-tool",
+        includes="src",
+        export_incdirs="src",
+        uselib=libs,
+        uselib_local="brfc",
+        install_path="${PREFIX}/lib",
+    )
     
-    if not bld.env.build_bdbfs:
-        sources.remove("bin/bdbtool/cmd/Mount.cpp")
+    sources = sorted(bld.path.ant_glob("bin/bdbtool/**/*.cpp").split(" "))
 
     bld(
         features="cxx cprogram",
         source=sources,
         target="bdbtool",
         includes="bin",
-        uselib=[
-            "BOOST", "BOOST_PROGRAM_OPTIONS"
-        ],
-        uselib_local=["brfc"],
+        uselib_local=["brfc", "brfc-tool"],
         install_path="${PREFIX}/bin",
     )
 
@@ -392,10 +405,16 @@ def _build_gtest_tests(bld):
     bld.add_group("build_gtest_tests")
 
     sources = sorted(bld.path.ant_glob("test/brfc/**/*.cpp").split(" "))
-
-    if not bld.env.build_bdbfs:
+    local_libs = ["brfc", "gtest-gmock"]
+    
+    if not bld.env.build_bdbtool:
         for src in bld.path.ant_glob("test/brfc/fuse/*.cpp").split(" "):
             sources.remove(src)
+    else:
+        if not bld.env.build_bdbfs:
+            for src in bld.path.ant_glob("test/brfc/fuse/*.cpp").split(" "):
+                sources.remove(src)
+        local_libs.append("brfc-tool")
 
     lib = bld(
         features="cxx cprogram",
@@ -403,12 +422,7 @@ def _build_gtest_tests(bld):
         target="test_runner",
         env=bld.env_of_name("testenv").copy(),
         includes="src test",
-        uselib=[
-            "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM",
-            "HDF5", "HLHDF",
-            "PQXX",
-        ],
-        uselib_local=["brfc", "gtest-gmock"],
+        uselib_local=local_libs,
         install_path=None,
     )
 

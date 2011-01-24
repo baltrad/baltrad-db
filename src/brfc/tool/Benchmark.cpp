@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <bdbtool/cmd/Benchmark.hpp>
+#include <brfc/tool/Benchmark.hpp>
 
 #include <iostream>
 
@@ -41,7 +41,6 @@ namespace po = boost::program_options;
 
 namespace brfc {
 namespace tool {
-namespace cmd {
 
 Benchmark::Benchmark()
         : iterations_(1)
@@ -123,6 +122,5 @@ Benchmark::do_execute(db::Database& db,
     return 0;
 }
 
-} // namespace cmd
 } // namespace tool
 } // namespace brfc

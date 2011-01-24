@@ -32,31 +32,32 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/smart_ptr.hpp>
 #include <brfc/db/rdb/RelationalDatabase.hpp>
 
-#include <bdbtool/cmd/Benchmark.hpp>
-#include <bdbtool/cmd/Import.hpp>
+#include <brfc/tool/Benchmark.hpp>
+#include <brfc/tool/Import.hpp>
 #ifdef BDB_BUILD_BDBFS
-    #include <bdbtool/cmd/Mount.hpp>
+    #include <brfc/tool/Mount.hpp>
 #endif // BDB_BUILD_BDBFS
 
 
 namespace po = boost::program_options;
-namespace cmd = brfc::tool::cmd;
+
+namespace brfc {
+namespace tool {
 
 struct Commands {
-    typedef boost::ptr_map<std::string,
-                           brfc::tool::Command> CommandMap;
+    typedef boost::ptr_map<std::string, Command> CommandMap;
 
     Commands()
             : map_() {
         using boost::assign::ptr_map_insert;
-        ptr_map_insert<cmd::Benchmark>(map_)("benchmark");
-        ptr_map_insert<cmd::Import>(map_)("import");
+        ptr_map_insert<Benchmark>(map_)("benchmark");
+        ptr_map_insert<Import>(map_)("import");
 #ifdef BDB_BUILD_BDBFS
-        ptr_map_insert<cmd::Mount>(map_)("mount");
+        ptr_map_insert<Mount>(map_)("mount");
 #endif // BDB_BUILD_BDBFS
     }
 
-    brfc::tool::Command* by_name(const std::string& name) {
+    Command* by_name(const std::string& name) {
         CommandMap::iterator it = map_.find(name);
         if (it != map_.end())
             return it->second;
@@ -72,6 +73,9 @@ struct Commands {
     
     CommandMap map_;
 };
+
+} // namespace tool
+} // namespace brfc
 
 int
 main(int argc, char** argv) {
@@ -117,7 +121,7 @@ main(int argc, char** argv) {
     std::vector<std::string> cmd_args =
         po::collect_unrecognized(opts.options, po::exclude_positional);
     
-    Commands commands;
+    brfc::tool::Commands commands;
     // try to get a command handler
     brfc::tool::Command* cmd = 0;
     if (pargs.size() >= 1) {

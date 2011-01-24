@@ -17,45 +17,25 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
+#ifndef BRFC_TOOL_IMPORT_HPP
+#define BRFC_TOOL_IMPORT_HPP
 
-#include <boost/foreach.hpp>
-#include <boost/program_options.hpp>
-
-#include <brfc/db/Database.hpp>
-
-#include <brfc/oh5/hl/HlFile.hpp>
-
-#include <bdbtool/cmd/Import.hpp>
-
-namespace po = boost::program_options;
+#include <brfc/tool/Command.hpp>
 
 namespace brfc {
 namespace tool {
-namespace cmd {
 
-std::string
-Import::do_description() const {
-    return "import file(s) to the database";
-}
+class Import : public Command {
+  protected:
+    virtual std::string do_description() const;
 
-void
-Import::do_help(std::ostream& /*out*/) const {
-    
-}
+    virtual void do_help(std::ostream& out) const;
 
-int
-Import::do_execute(db::Database& db,
-                   const std::vector<std::string>& args) {
-    BOOST_FOREACH(const std::string& path, args) {
-        std::cout << "importing " << path << std::endl;;
-        std::cout.flush();
-        oh5::hl::HlFile file(path);
-        db.store(file);
-    }
-    return 0;
-}
+    virtual int do_execute(db::Database& db,
+                           const std::vector<std::string>& args);
+};
 
-} // namespace cmd
 } // namespace tool
 } // namespace brfc
+
+#endif // BRFC_TOOL_IMPORT_HPP

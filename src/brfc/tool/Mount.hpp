@@ -17,18 +17,17 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_TOOL_CMD_MOUNT_HPP
-#define BRFC_TOOL_CMD_MOUNT_HPP
+#ifndef BRFC_TOOL_MOUNT_HPP
+#define BRFC_TOOL_MOUNT_HPP
 
 #include <sys/types.h>
 
 #include <boost/program_options/options_description.hpp>
 
-#include <bdbtool/Command.hpp>
+#include <brfc/tool/Command.hpp>
 
 namespace brfc {
 namespace tool {
-namespace cmd {
 
 class Mount : public Command {
   public:
@@ -48,8 +47,7 @@ class Mount : public Command {
     gid_t gid_;
 };
 
-} // namespace cmd
 } // namespace tool
 } // namespace brfc
 
-#endif // BRFC_TOOL_CMD_MOUNT_HPP
+#endif // BRFC_TOOL_MOUNT_HPP

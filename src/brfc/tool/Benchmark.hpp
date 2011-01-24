@@ -17,27 +17,33 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_TOOL_CMD_IMPORT_HPP
-#define BRFC_TOOL_CMD_IMPORT_HPP
+#ifndef BRFC_TOOL_BENCHMARK_HPP
+#define BRFC_TOOL_BENCHMARK_HPP
 
-#include <bdbtool/Command.hpp>
+#include <brfc/tool/Command.hpp>
+
+#include <boost/program_options/options_description.hpp>
 
 namespace brfc {
 namespace tool {
-namespace cmd {
 
-class Import : public Command {
+class Benchmark : public Command {
+  public:
+    Benchmark();
+
   protected:
     virtual std::string do_description() const;
 
-    virtual void do_help(std::ostream& out) const;
-
-    virtual int do_execute(db::Database& db,
+    virtual int do_execute(db::Database& fc,
                            const std::vector<std::string>& args);
+    virtual void do_help(std::ostream& out) const;
+  
+  private:
+    int iterations_;
+    boost::program_options::options_description optdesc_;
 };
 
-} // namespace cmd
 } // namespace tool
 } // namespace brfc
 
-#endif // BRFC_TOOL_CMD_IMPORT_HPP
+#endif // BRFC_TOOL_BENCHMARK_HPP

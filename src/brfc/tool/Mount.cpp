@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <bdbtool/cmd/Mount.hpp>
+#include <brfc/tool/Mount.hpp>
 
 #include <iostream>
 
@@ -43,7 +43,6 @@ namespace po = boost::program_options;
 
 namespace brfc {
 namespace tool {
-namespace cmd {
 
 Mount::Mount()
         : optdesc_("mount options")
@@ -123,6 +122,5 @@ Mount::do_execute(db::Database& db,
     return daemon.run(dargs);
 }
 
-} // namespace cmd
 } // namespace tool
 } // namespace brfc
