@@ -361,7 +361,7 @@ def _build_bdbtool(bld):
         sources.extend(bld.path.ant_glob("src/brfc/fuse/*.cpp").split(" "))
         libs.append("FUSE");
     else:
-        sources.remove("srfc/brfc/tool/Import.cpp")
+        sources.remove("src/brfc/tool/Mount.cpp")
 
     bld(
         features="cxx cshlib",
