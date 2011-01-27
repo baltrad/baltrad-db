@@ -38,6 +38,7 @@ Select::Select(SelectablePtr from)
         , group_by_()
         , order_()
         , limit_(0)
+        , offset_(0)
         , distinct_(false) {
     if (from) {
         const std::vector<ColumnPtr>& cols = from->columns();

@@ -114,6 +114,10 @@ class Select : public Selectable {
 
     int limit() const { return limit_; }
 
+    void offset(int offset) { offset_ = offset; }
+
+    int offset() const { return offset_; }
+
   protected:
     /**
      * @brief constructor
@@ -131,6 +135,7 @@ class Select : public Selectable {
     std::vector<ExpressionPtr> group_by_;
     OrderVector order_;
     int limit_;
+    int offset_;
     bool distinct_;
 };
 

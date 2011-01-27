@@ -282,6 +282,27 @@ TEST_F(sql_DialectCompiler_test, test_select_limit) {
     EXPECT_EQ(expected, q.statement());
 }
 
+TEST_F(sql_DialectCompiler_test, test_select_offset) {
+    SelectPtr select = Select::create();
+    select->from(t1);
+    select->what(t1->column("c1"));
+    select->offset(2);
+    const Query& q = compiler.compile(*select);
+    std::string expected("SELECT t1.c1 FROM t1 OFFSET 2");
+    EXPECT_EQ(expected, q.statement());
+}
+
+TEST_F(sql_DialectCompiler_test, test_select_offset_with_limit) {
+    SelectPtr select = Select::create();
+    select->from(t1);
+    select->what(t1->column("c1"));
+    select->limit(1);
+    select->offset(2);
+    const Query& q = compiler.compile(*select);
+    std::string expected("SELECT t1.c1 FROM t1 LIMIT 1 OFFSET 2");
+    EXPECT_EQ(expected, q.statement());
+}
+
 TEST_F(sql_DialectCompiler_test, test_insert) {
     InsertPtr insert = Insert::create(t1);
     insert->value("c1", xpr.int64_(1));

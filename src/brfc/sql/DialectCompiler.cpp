@@ -233,6 +233,10 @@ DialectCompiler::operator()(const Select& select) {
         ss << " LIMIT " << boost::lexical_cast<std::string>(select.limit());
     }
 
+    if (select.offset() > 0) {
+        ss << " OFFSET " << boost::lexical_cast<std::string>(select.offset());
+    }
+
     push(ss.str());
 }
 
