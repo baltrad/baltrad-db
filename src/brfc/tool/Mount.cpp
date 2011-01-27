@@ -118,7 +118,11 @@ Mount::do_execute(db::Database& db) {
     expr::ExpressionFactory xpr;
     
     DefaultFileNamer namer;
-    fuse::FileFactory l3fac(&db, &namer);
+    fuse::FileFactory l4fac(&db, &namer);
+
+    fuse::DirFactory l3fac(&db,
+                           *xpr.attribute("what/date"),
+                           &l4fac);
 
     fuse::DirFactory l2fac(&db,
                            *xpr.attribute("what/object"),
