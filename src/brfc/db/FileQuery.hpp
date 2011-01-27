@@ -90,11 +90,19 @@ class FileQuery {
     OrderVector order() const { return order_; }
 
     /**
-     * @brief limit query results
+     * @brief limit query results to @c n entries
      */
-    FileQuery& limit(int limit) { limit_ = limit; return *this; }
+    FileQuery& limit(int n) { limit_ = n; return *this; }
 
     int limit() const { return limit_; }
+
+    /**
+     * @brief skip @c n entries in query results
+     * @return this FileQuery (for chaining)
+     */
+    FileQuery& skip(int n) { skip_ = n; return *this; }
+
+    int skip() const { return skip_; }
 
     /**
      * @brief execute this query
@@ -111,6 +119,7 @@ class FileQuery {
     expr::ExpressionPtr filter_;
     OrderVector order_;
     int limit_;
+    int skip_;
 };
 
 } // namespace db

@@ -37,14 +37,16 @@ FileQuery::FileQuery(Database* db)
         : db_(db)
         , filter_()
         , order_()
-        , limit_(0) {
+        , limit_(0)
+        , skip_(0) {
 }
 
 FileQuery::FileQuery(const FileQuery& other)
         : db_(other.db_)
         , filter_()
         , order_()
-        , limit_(other.limit_) {
+        , limit_(other.limit_)
+        , skip_(other.skip_) {
     if (other.filter_)
         filter_ = other.filter_->clone();
     BOOST_FOREACH(const OrderPair& opair, other.order_) {
@@ -72,6 +74,7 @@ FileQuery::operator=(const FileQuery& rhs) {
         order_.push_back(std::make_pair(opair.first->clone(), opair.second));
     }
     limit_ = rhs.limit_;
+    skip_ = rhs.skip_;
     return *this;
 }
 

@@ -17,6 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #include <gtest/gtest.h>
 
 #include <stdexcept>
@@ -62,11 +63,13 @@ TEST_F(db_FileQuery_test, test_copy_ctor) {
     query.filter(fexpr1);
     query.order_by(oexpr1, FileQuery::ASC);
     query.limit(10);
+    query.skip(5);
 
     FileQuery copy(query);
     
     EXPECT_EQ(&fexpr3, copy.filter().get());
     EXPECT_EQ(query.limit(), copy.limit());
+    EXPECT_EQ(query.skip(), copy.skip());
     const FileQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ((size_t)1, ovec.size());
     EXPECT_EQ(&oexpr3, ovec.at(0).first.get());
@@ -88,12 +91,14 @@ TEST_F(db_FileQuery_test, test_copy_assign) {
     query.filter(fexpr1);
     query.order_by(oexpr1, FileQuery::ASC);
     query.limit(10);
+    query.skip(5);
 
     FileQuery copy;
     copy = query;
     
     EXPECT_EQ(&fexpr3, copy.filter().get());
     EXPECT_EQ(query.limit(), copy.limit());
+    EXPECT_EQ(query.skip(), copy.skip());
     const FileQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ((size_t)1, ovec.size());
     EXPECT_EQ(&oexpr3, ovec.at(0).first.get());
@@ -111,11 +116,13 @@ TEST_F(db_FileQuery_test, test_copy_assign_self) {
     query.filter(fexpr1);
     query.order_by(oexpr1, FileQuery::ASC);
     query.limit(10);
+    query.skip(5);
 
     query = query;
     
     EXPECT_EQ(&fexpr2, query.filter().get());
     EXPECT_EQ(10, query.limit());
+    EXPECT_EQ(5, query.skip());
     const FileQuery::OrderVector& ovec = query.order();
     ASSERT_EQ((size_t)1, ovec.size());
     EXPECT_EQ(&oexpr2, ovec.at(0).first.get());
@@ -150,6 +157,11 @@ TEST_F(db_FileQuery_test, test_order_by) {
 TEST_F(db_FileQuery_test, test_limit) {
     query.limit(10);
     EXPECT_EQ(10, query.limit());
+}
+
+TEST_F(db_FileQuery_test, test_skip) {
+    query.skip(5);
+    EXPECT_EQ(5, query.skip());
 }
 
 TEST_F(db_FileQuery_test, test_execute) {

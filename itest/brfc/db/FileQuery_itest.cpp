@@ -353,9 +353,31 @@ TEST_P(db_FileQuery_itest, test_limit) {
     EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
 }
 
-TEST_P(db_FileQuery_itest, test_query_missing) {
+TEST_P(db_FileQuery_itest, test_skip) {
+    query.skip(3);
+    r.reset(query.execute());
 
+    EXPECT_EQ(2, r->size());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe4->uuid(), entry(*r)->uuid());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe5->uuid(), entry(*r)->uuid());
 }
+
+TEST_P(db_FileQuery_itest, test_skip_with_limit) {
+    query.skip(1);
+    query.limit(3);
+    r.reset(query.execute());
+
+    EXPECT_EQ(3, r->size());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe2->uuid(), entry(*r)->uuid());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe3->uuid(), entry(*r)->uuid());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(fe4->uuid(), entry(*r)->uuid());
+}
+
 
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(db_FileQuery_itest_p,
