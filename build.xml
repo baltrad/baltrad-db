@@ -66,6 +66,7 @@
       <classpath location="deplib/junit4.jar" />
       <classpath location="${waf.builddir}/jbrfc.jar" />
       <classpath location="${waf.builddir}/jbrfc_test.jar" />
+      <formatter type="brief" usefile="false" />
       <formatter type="xml" />
       <test name="eu.baltrad.fc.TestDate" todir="${waf.builddir}/test/reports" />
       <test name="eu.baltrad.fc.TestTime" todir="${waf.builddir}/test/reports" />

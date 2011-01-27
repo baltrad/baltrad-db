@@ -78,7 +78,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %rename(_op_eq) brfc::Date::operator==;
 %rename(_op_lt) brfc::Date::operator<;
 
-%typemap(javainterfaces) brfc::Time "Comparable<Date>";
+%typemap(javainterfaces) brfc::Date "Comparable<Date>";
 
 %typemap(javacode) brfc::Date %{
   public boolean equals(Object other) {
@@ -114,7 +114,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %rename(_op_eq) brfc::DateTime::operator==;
 %rename(_op_lt) brfc::DateTime::operator<;
 
-%typemap(javainterfaces) brfc::Time "Comparable<DateTime>";
+%typemap(javainterfaces) brfc::DateTime "Comparable<DateTime>";
 
 %typemap(javacode) brfc::DateTime %{
   public boolean equals(Object other) {

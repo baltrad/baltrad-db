@@ -48,6 +48,11 @@ public class TestTime extends TestCase {
     assertEquals(t2.compareTo(t1), 1);
   }
 
+  public void test_implementsComparable() {
+    Time t1 = new Time(12, 0);
+    assertTrue(t1 instanceof Comparable);
+  }
+
   public void test_add() {
     Time t = new Time(0, 0, 1);
     Time nt = t.add(new TimeDelta().add_seconds(60));

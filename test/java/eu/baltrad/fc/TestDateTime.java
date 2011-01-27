@@ -48,6 +48,12 @@ public class TestDateTime extends TestCase {
     assertEquals(dt2.compareTo(dt1), 1);
   }
 
+  public void test_implementsComparable() {
+    DateTime dt1 = new DateTime(2000, 5, 6);
+    
+    assertTrue(dt1 instanceof Comparable);
+  }
+
   public void test_add() {
     DateTime dt = new DateTime(2000, 5, 6, 0, 0, 1);
     DateTime ndt = dt.add(new TimeDelta().add_days(1).add_seconds(60));

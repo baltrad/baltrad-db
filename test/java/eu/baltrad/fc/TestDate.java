@@ -50,6 +50,11 @@ public class TestDate extends TestCase {
     assertEquals(d2.compareTo(d1), 1);
   }
 
+  public void test_implementsComparable() {
+    Date d1 = new Date(2000, 2, 1);
+    assertTrue(d1 instanceof Comparable);
+  }
+
   public void test_add() {
     Date d = new Date(2000, 1, 1);
     Date nd = d.add(new TimeDelta().add_days(1));
