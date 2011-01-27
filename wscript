@@ -305,7 +305,7 @@ def build(bld):
         if env.build_java:
             _build_java_tests(bld)
 
-    bld.install_files("${PREFIX}/sql/postgresql",
+    bld.install_files("${PREFIX}/share/baltrad-db/sql/postgresql",
                       bld.path.ant_glob("schema/postgresql/*.sql"))
 
 def test(ctx):
@@ -536,7 +536,7 @@ def _build_java_wrapper(bld):
         target="jbrfc.jar",
     )
 
-    bld.install_files("${PREFIX}/java", ["jbrfc.jar"])
+    bld.install_files("${PREFIX}/share/baltrad-db/java", ["jbrfc.jar"])
 
     jbrfc = bld.path.find_or_declare("jbrfc.jar")
     
