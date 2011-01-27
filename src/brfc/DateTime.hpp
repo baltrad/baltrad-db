@@ -110,6 +110,8 @@ class DateTime {
         return not (*this == rhs);
     }
 
+    bool operator<(const DateTime& rhs) const;
+
     DateTime& operator+=(const TimeDelta& td);
     
     DateTime operator+(const TimeDelta& td) const;

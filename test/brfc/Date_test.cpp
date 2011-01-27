@@ -141,6 +141,15 @@ TEST(Date_test, test_eq) {
     EXPECT_TRUE(d1 != d2);
 }
 
+TEST(Date_test, test_lt) {
+    Date d1(2000, 2, 1);
+    Date d2(2000, 2, 2);
+
+    EXPECT_TRUE(d1 < d2);
+    EXPECT_FALSE(d1 < d1);
+    EXPECT_FALSE(d2 < d1);
+}
+
 TEST(Date_test, test_add_days) {
     Date d1(2000, 2, 29);
     EXPECT_EQ(Date(2000, 3, 1), d1 + TimeDelta().add_days(1));

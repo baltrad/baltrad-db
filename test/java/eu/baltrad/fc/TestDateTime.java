@@ -38,6 +38,16 @@ public class TestDateTime extends TestCase {
     assertTrue(dt1.equals(dt3));
   }
 
+  public void test_compareTo() {
+    DateTime dt1 = new DateTime(2000, 5, 6);
+    DateTime dt2 = new DateTime(2000, 5, 6, 0, 0, 1);
+    
+    assertEquals(dt1.compareTo(dt1), 0);
+    assertEquals(dt2.compareTo(dt2), 0);
+    assertEquals(dt1.compareTo(dt2), -1);
+    assertEquals(dt2.compareTo(dt1), 1);
+  }
+
   public void test_add() {
     DateTime dt = new DateTime(2000, 5, 6, 0, 0, 1);
     DateTime ndt = dt.add(new TimeDelta().add_days(1).add_seconds(60));

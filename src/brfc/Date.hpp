@@ -117,6 +117,10 @@ class Date {
     bool operator!=(const Date& rhs) const {
         return not (*this == rhs);
     }
+
+    bool operator<(const Date& rhs) const {
+        return jdn_ < rhs.jdn_;
+    }
     
     /**
      * @brief parse time from string

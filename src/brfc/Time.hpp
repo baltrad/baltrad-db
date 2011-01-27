@@ -120,6 +120,10 @@ class Time {
     bool operator!=(const Time& rhs) const {
         return not (*this == rhs);
     }
+
+    bool operator<(const Time& rhs) const {
+        return msec_ < rhs.msec_;
+    }
     ///@}
 
     /**

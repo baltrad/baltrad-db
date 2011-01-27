@@ -38,6 +38,16 @@ public class TestTime extends TestCase {
     assertTrue(t1.equals(t3));
   }
 
+  public void test_compareTo() {
+    Time t1 = new Time(12, 0);
+    Time t2 = new Time(12, 0, 0, 1);
+
+    assertEquals(t1.compareTo(t1), 0);
+    assertEquals(t2.compareTo(t2), 0);
+    assertEquals(t1.compareTo(t2), -1);
+    assertEquals(t2.compareTo(t1), 1);
+  }
+
   public void test_add() {
     Time t = new Time(0, 0, 1);
     Time nt = t.add(new TimeDelta().add_seconds(60));

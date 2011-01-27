@@ -90,6 +90,15 @@ DateTime::operator==(const DateTime& rhs) const {
     return date_ == rhs.date_ and time_ == rhs.time_;
 }
 
+bool
+DateTime::operator<(const DateTime& rhs) const {
+    if (date_ < rhs.date_)
+        return true;
+    if (date_ == rhs.date_ and time_ < rhs.time_)
+        return true;
+    return false;
+}
+
 DateTime&
 DateTime::operator+=(const TimeDelta& td) {
     date_ += td;

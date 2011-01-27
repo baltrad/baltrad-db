@@ -127,6 +127,15 @@ TEST(Time_test, test_eq) {
     EXPECT_TRUE(t1 != t2);
 }
 
+TEST(Time_test, test_lt) {
+    Time t1(12, 0);
+    Time t2(12, 0, 0, 1);
+
+    EXPECT_TRUE(t1 < t2);
+    EXPECT_FALSE(t1 < t1);
+    EXPECT_FALSE(t2 < t1);
+}
+
 TEST(Time_test, test_add_hours) {
     Time t(12, 0);
     EXPECT_EQ(Time(13, 0), t + TimeDelta().add_hours(1));

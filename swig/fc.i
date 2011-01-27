@@ -76,12 +76,26 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 // brfc::Date::operator==() -> eu.baltrad.fc.Date.equals
 %rename(_op_eq) brfc::Date::operator==;
+%rename(_op_lt) brfc::Date::operator<;
+
+%typemap(javainterfaces) brfc::Time "Comparable<Date>";
+
 %typemap(javacode) brfc::Date %{
   public boolean equals(Object other) {
     if (other instanceof Date && other.getClass() == Date.class) {
       return _op_eq((Date)other);
     }
     return false;
+  }
+
+  public int compareTo(Date other) {
+    if (_op_eq(other)) {
+        return 0;
+    } else if (_op_lt(other)) {
+        return -1;
+    } else {
+        return 1;
+    }
   }
 %}
 
@@ -98,12 +112,26 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 // brfc::Datetime::operator==() -> eu.baltrad.fc.DateTime.equals
 %rename(_op_eq) brfc::DateTime::operator==;
+%rename(_op_lt) brfc::DateTime::operator<;
+
+%typemap(javainterfaces) brfc::Time "Comparable<DateTime>";
+
 %typemap(javacode) brfc::DateTime %{
   public boolean equals(Object other) {
     if (other instanceof DateTime && other.getClass() == DateTime.class) {
       return _op_eq((DateTime)other);
     }
     return false;
+  }
+
+  public int compareTo(DateTime other) {
+    if (_op_eq(other)) {
+        return 0;
+    } else if (_op_lt(other)) {
+        return -1;
+    } else {
+        return 1;
+    }
   }
 %}
 
@@ -118,12 +146,26 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 // brfc::Time::operator==() -> eu.baltrad.fc.Time.equals
 %rename(_op_eq) brfc::Time::operator==;
+%rename(_op_lt) brfc::Time::operator<;
+
+%typemap(javainterfaces) brfc::Time "Comparable<Time>";
+
 %typemap(javacode) brfc::Time %{
   public boolean equals(Object other) {
     if (other instanceof Time && other.getClass() == Time.class) {
       return _op_eq((Time)other);
     }
     return false;
+  }
+
+  public int compareTo(Time other) {
+    if (_op_eq(other)) {
+        return 0;
+    } else if (_op_lt(other)) {
+        return -1;
+    } else {
+        return 1;
+    }
   }
 %}
 

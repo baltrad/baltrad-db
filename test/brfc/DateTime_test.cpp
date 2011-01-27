@@ -40,6 +40,21 @@ TEST(DateTime_test, test_eq) {
     EXPECT_TRUE(dt1 != dt2);
 }
 
+TEST(DateTime_test, test_lt) {
+    DateTime dt1(2000, 2, 1);
+    DateTime dt2(2000, 2, 1, 0, 0, 0, 1);
+    DateTime dt3(2000, 2, 2);
+
+    EXPECT_TRUE(dt1 < dt2);
+    EXPECT_TRUE(dt1 < dt3);
+    EXPECT_TRUE(dt2 < dt3);
+
+    EXPECT_FALSE(dt1 < dt1);
+    EXPECT_FALSE(dt2 < dt1);
+    EXPECT_FALSE(dt3 < dt1);
+    EXPECT_FALSE(dt3 < dt2);
+}
+
 TEST(Datetime_test, test_add) {
     DateTime dt1(2000, 2, 1, 12);
     

@@ -40,6 +40,16 @@ public class TestDate extends TestCase {
     assertTrue(d1.equals(d3));
   }
 
+  public void test_compareTo() {
+    Date d1 = new Date(2000, 2, 1);
+    Date d2 = new Date(2000, 2, 2);
+
+    assertEquals(d1.compareTo(d1), 0);
+    assertEquals(d2.compareTo(d2), 0);
+    assertEquals(d1.compareTo(d2), -1);
+    assertEquals(d2.compareTo(d1), 1);
+  }
+
   public void test_add() {
     Date d = new Date(2000, 1, 1);
     Date nd = d.add(new TimeDelta().add_days(1));
