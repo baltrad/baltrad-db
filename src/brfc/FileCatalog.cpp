@@ -30,7 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/Database.hpp>
 #include <brfc/db/FileEntry.hpp>
 #include <brfc/db/FileQuery.hpp>
-#include <brfc/db/rdb/RelationalDatabase.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
@@ -54,13 +53,13 @@ void check_storage_dir(const std::string& path) {
 }
     
 FileCatalog::FileCatalog(const std::string& dsn, LocalStorage* storage)
-        : db_(new db::rdb::RelationalDatabase(dsn)) 
+        : db_(db::Database::create(dsn))
         , storage_() {
     this->storage(storage);
 }
 
 FileCatalog::FileCatalog(const std::string& dsn, const std::string& path)
-        : db_(new db::rdb::RelationalDatabase(dsn))
+        : db_(db::Database::create(dsn))
         , storage_() {
     check_storage_dir(path);
     this->storage(new CacheDirStorage(path));

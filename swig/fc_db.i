@@ -107,6 +107,7 @@ SWIG_JAVABODY_METHODS(public, public, brfc::db::AttributeResult);
  * brfc::db::Database
  */
 
+%newobject brfc::db::Database::create;
 %newobject brfc::db::Database::entry_by_file;
 %newobject brfc::db::Database::entry_by_uuid;
 %newobject brfc::db::Database::execute;

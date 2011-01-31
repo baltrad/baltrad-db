@@ -48,6 +48,13 @@ class FileResult;
 class Database : public boost::noncopyable {
   public:
     /**
+     * @brief create a database instance from a string
+     * @param dsn database connection string
+     * @return the created database instance (caller takes ownership)
+     */
+    static Database* create(const std::string& dsn);
+
+    /**
      * @brief destructor
      */
     virtual ~Database() { }
