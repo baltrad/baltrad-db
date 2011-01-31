@@ -92,6 +92,13 @@ RdbFileEntry::load() const {
     helper.backend(self->root()).id(helper.select_root_id(*this));
 }
 
+const oh5::Group&
+RdbFileEntry::do_root() const {
+    if ((id_ or not uuid_.empty()) and not loaded())
+        load();
+    return root_;
+}
+
 oh5::Source
 RdbFileEntry::do_source() const {
     RdbHelper helper(rdb().conn());

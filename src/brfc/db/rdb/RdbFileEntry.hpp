@@ -113,7 +113,7 @@ class RdbFileEntry : public FileEntry {
 
     virtual void do_write_to_file(const std::string& path) const;
 
-    virtual const oh5::Group& do_root() const { return root_; }
+    virtual const oh5::Group& do_root() const;
     
     /**
      * @brief source as stored in the database

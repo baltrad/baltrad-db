@@ -42,6 +42,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/test/TempH5File.hpp>
 
+#include <brfc/test_common.hpp>
+
 #include <brfc/itest_config.hpp>
 #include <brfc/ITestEnv.hpp>
 
@@ -141,27 +143,21 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
     scoped_ptr<FileResult> r;
 };
 
-/*
-TEST_P(db_FileQuery_itest, test_queried_entry_has_lob) {
+TEST_P(db_FileQuery_itest, test_queried_entry) {
     query.filter(*xpr.attribute("file:uuid")->eq(*xpr.string(fe1->uuid())));
     r.reset(query.execute());
 
     EXPECT_EQ(1, r->size());
     ASSERT_TRUE(r->next());
-
-    auto_ptr<FileEntry> aqre(entry(*r));
-    RdbFileEntry* qre = dynamic_cast<RdbFileEntry*>(aqre.get());
-    RdbFileEntry* fre1 = dynamic_cast<RdbFileEntry*>(fe1.get());
     
-    ASSERT_TRUE(qre);
-    ASSERT_TRUE(fre1);
+    auto_ptr<FileEntry> e(r->entry());
     
-    EXPECT_TRUE(qre->lo_id() > 0);
-    EXPECT_TRUE(qre->id() > 0);
-    EXPECT_EQ(qre->id(), fre1->id());
-    EXPECT_EQ(qre->lo_id(), fre1->lo_id());
+    ASSERT_TRUE(e.get());
+    
+    EXPECT_EQ(td1.what_object(), e->what_object());
+    EXPECT_EQ(td1.what_date(), e->what_date());
+    EXPECT_EQ(td1.what_time(), e->what_time());
 }
-*/
 
 TEST_P(db_FileQuery_itest, test_simple) {
     query.filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(1)));

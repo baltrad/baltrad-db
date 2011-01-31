@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 
-#include <brfc/db/rdb/RdbFileEntry.hpp>
+#include <brfc/db/FileEntry.hpp>
 
 #include <brfc/oh5/Scalar.hpp>
 
@@ -33,6 +33,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/test/TempH5File.hpp>
+
+#include <brfc/test_common.hpp>
 
 #include <brfc/itest_config.hpp>
 #include <brfc/ITestEnv.hpp>
@@ -76,12 +78,11 @@ TEST_P(db_Database_itest, store) {
     
     scoped_ptr<FileEntry> e;
     EXPECT_NO_THROW(e.reset(db->store(file)));
-    RdbFileEntry* re = dynamic_cast<RdbFileEntry*>(e.get());
-    ASSERT_TRUE(re);
-    EXPECT_TRUE(re->id() > 0);
-    EXPECT_TRUE(re->lo_id() > 0);
+    ASSERT_TRUE(e);
     EXPECT_FALSE(e->source().empty());
     EXPECT_TRUE(e->source().has("_name"));
+    EXPECT_EQ(file.what_date(), e->what_date());
+    EXPECT_EQ(file.what_time(), e->what_time());
 }
 
 TEST_P(db_Database_itest, entry_by_uuid) {
@@ -99,6 +100,8 @@ TEST_P(db_Database_itest, entry_by_uuid) {
 
     EXPECT_EQ(e1->uuid(), e2->uuid());
     EXPECT_EQ(e1->hash(), e2->hash());
+    EXPECT_EQ(e1->what_date(), e2->what_date());
+    EXPECT_EQ(e1->what_time(), e2->what_time());
 }
 
 TEST_P(db_Database_itest, entry_by_file) {
