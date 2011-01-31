@@ -21,6 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/filesystem.hpp>
 
+#include <brfc/exceptions.hpp>
+
 namespace fs = boost::filesystem;
 
 namespace brfc {
@@ -38,7 +40,11 @@ BoostFileSystem::do_is_directory(const std::string& path) const {
 void
 BoostFileSystem::do_copy_file(const std::string& src,
                               const std::string& dst) const {
-    fs::copy_file(src, dst);
+    try {
+        fs::copy_file(src, dst);
+    } catch (const fs::filesystem_error& e) {
+        throw fs_error(e.what());
+    }
 }
 
 void
@@ -59,14 +65,22 @@ BoostFileSystem::do_join(const std::string& path,
 
 long long
 BoostFileSystem::do_file_size(const std::string& path) const {
-    return fs::file_size(path);
+    try {
+        return fs::file_size(path);
+    } catch (const fs::filesystem_error& e) {
+        throw fs_error(e.what());
+    }
 }
 
 void
 BoostFileSystem::do_clear_directory(const std::string& path) const {
-    fs::directory_iterator iter(path);
-    for ( ; iter != fs::directory_iterator(); ++iter) {
-        fs::remove(iter->path());
+    try {
+        fs::directory_iterator iter(path);
+        for ( ; iter != fs::directory_iterator(); ++iter) {
+            fs::remove(iter->path());
+        }
+    } catch (const fs::filesystem_error& e) {
+        throw fs_error(e.what());
     }
 }
 
