@@ -1,0 +1,20 @@
+/**
+@page bdbfs bdbfs
+
+baltrad-db can be built with support for mounting the database as a local
+filesystem through FUSE. This is experimental and has many deficiencies at the
+time of this writing (read: expect occasional crashes, slow performance, etc.)
+You can see what's going on by mounting with @b -d switch.
+
+The filesystem is read-only. It is hard-coded to list files in hierarchy: @b /
+what/source:_name @b / what/object @b / what/date @b / file.h5
+
+Consult you operating system manual for what you have to do in order to
+mount/unmount FUSE filesystems as a regular user. For example in Debian you
+have to be a member of 'fuse' group.
+
+You can mount with 'bdbtool mount <target>' and unmount with 'fusermount -u
+<target>'.
+
+*/
+// vim:filetype=doxygen:et:ts=4:sw=4:tw=79:

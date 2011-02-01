@@ -6,18 +6,19 @@
   <li>@ref intro</li>
   <li>@ref setup</li>
   <li>@ref file_storing</li>
-  <ul>
-    <li>@ref file_loading</li>
-    <li>@ref file_naming</li>
-    <li>@ref file_uniqueness</li>
-  </ul>
+  <li>@ref file_entry</li>
   <li>@ref querying</li>
   <ul>
-    <li>@ref querying_files</li>
+    <li>@ref query_filtering</li>
+    <li>@ref query_limiting</li>
+    <li>@ref query_ordering</li>
     <li>@ref virtual_attributes</li>
     <li>@ref querying_attributes</li>
     <li>@ref combine_datetime</li>
+  </ul>
   <li>@ref removing</li>
+  <li>@ref source_management</li>
+  <li>@ref file_catalog</li>
   <li>@ref java_bindings</li>
   <li>@ref java_samples</li>
 </ul>
@@ -25,58 +26,55 @@
 @section intro Introduction
 
 baltrad-db is a library for storing ODIM_H5 files in a database and providing
-queries on the file metadata.
+queries on the file metadata. The following is an overview of the capabilities
+and common tasks. You should refer to the API documentation for details.
 
-The central class is brfc::db::Database (with implementation in
-brfc::db::rdb::RelationalDatabase). This provides access to the database where
-files and metadata are stored.
+@note The examples used here use plain pointers for simplicity. A lot of
+methods actually expect you to take the ownership of the returned pointers -
+so do that and avoid memory leaks.
 
-Another important class is brfc::LocalStorage. This provides access to files in
-the local filesystem and can bring files from database to disk.
+@section setup Setting up
 
-These instances of these two core classes are tied together for convenience in
-brfc::FileCatalog.
-
-@section setup Setting Up
-
-The simplest way to get running is just to give a database URI string to
-brfc::FileCatalog, this will create a catalog with brfc::db::RelationalDatabase
-instance, connected to the specified database. It will use brfc::NullStorage as
-node local storage, meaning it will no store the files in the local filesystem,
-just in the database.
+You can establish a database connection through brfc::db::Database::create(). It
+accepts the connection string as an URI. Currently only postgresql:// is
+supported.
 
 @code
-// define database connection
-brfc::String dsn("postgresql://baltrad:baltrad@localhost/baltrad");
-
+brfc::db::Database* db = 0;
 try {
-    brfc::FileCatalog fc(dsn);
+    db = brfc::db::Database::create("postgresql://baltrad:baltrad@localhost/baltrad");
 } catch (const brfc::db_error& e) {
-    // problem connecting to database
+    // problem connecting to the database
 }
 @endcode
 
 @section file_storing Storing files in the database
 
-Importing a file requires feeding an absolute pathname (or a
-brfc::oh5::PhysicalFile instance) to brfc::FileCatalog::store.
-This method, on success, returns a pointer to a brfc::db::FileEntry
-instance. This is the file, as stored in the database.
+Importing a file requires feeding a brfc::oh5::PhysicalFile instance to
+brfc::db::Database::store(). This call will first perform a source lookup
+in the database. The attribute /what/source in the file must uniquely identify
+a source definition in the database (see @ref source_management). Second, it
+will determine if the file itself is unique - i.e this file is not stored
+already in the database. If one of those steps fails, the file will not be
+stored in the database. On success, a brfc::db::FileEntry instance is
+returned - this is the file, as stored in the database. You can now remove
+the file from your filesystem if you want - you can bring it back later from
+the database.
 
-If you have associated the catalog with a brfc::LocalStorage instance, it will
-be given a chance to "prestore" or cache the file in the local filesystem. This
-might be handy, as the files imported to the database are probably going to get
-used in some way in immediate future. Prestoring them avoids the overhead of
-fetching the file back from the database to local disk (opting to copy it on
-import).
+The database will assign an UUID to the entry. Same file imported twice will
+have a different UUID (but the same metadata hash).
 
 @code
-brfc::FileCatalog fc(...);
+brfc::db::Database* db; // assuming a database
 
-std::shared_ptr<FileEntry> file;
+brfc::oh5::hl::HlFile file("/path/to/file.h5");
+
+brfc::db::FileEntry* entry = 0;
+std::string uuid;
 
 try {
-    file = fc.catalog("/path/to/file.h5");
+    entry = db->store(file);
+    uuid = entry->uuid();
 } catch (const brfc::db_error& e) {
     // problem storing file in database
 } catch (const brfc::duplicate_entry& e) {
@@ -84,59 +82,80 @@ try {
 }
 @endcode
 
-The procedure for importing the file is as follows.
+There are also methods for checking if a file is already stored
+(brfc::db::Database::is_stored()) and storing it "safely"
+(brfc::db::Database::get_or_store()), refer to their documentation for details.
 
-First, metadata is loaded from the file. Attribute '/what/source' is then
-used to look up a source definition in the database. A hash is calculated
-over the rest of the metadata. The combination of the source and metadata
-hash determines file uniqueness: if such a combo exists, file is taken to
-be already stored. Finally a UUID is generated for the file, the metadata
-and file content are stored in the database.
+@section file_entry FileEntry - files in the database
 
-@section querying Querying
+brfc::db::FileEntry implements brfc::oh5::File, using the database as a
+backend. It also provides access to some additional metadata - storage time,
+UUID, file size. As this represents the file in the database, there's also a
+method for writing the file back from the database to the local disk.
 
-BDB provides two types of queries: a more flexible brfc::db::AttributeQuery
-and a simple way to get brfc::db::FileEntry instances - brfc::db::FileQuery.
-
-@section querying_files Querying files
-
-Lets focus on querying files first. You can get hold of a query instance
-using brfc::FileCatalog::query_file. The simplest thing you can do, is
-get all brfc::db::FileEntry instances stored in the database, this requires
-no work: just create and execute it.
+You can get a hold of an entry in three ways: by knowing the UUID of the entry,
+by the physical file or by querying the database.
 
 @code
-// assuming we have a filecatalog instance
-brfc::FileCatalog fc;
+brfc::db::Database* db; // assuming a database
 
-brfc::db::FileQuery q = fc.query_file();
-shared_ptr<brfc::db::FileResult> r = q.execute();
+std::string uuid = "8774632c-dfd9-4016-bebb-f9f8cf41459a";
+brfc::db::FileEntry* entry = db->entry_by_uuid(uuid);
 
-r->size(); // how many files
+// access ODIM_H5 metadata as brfc::oh5::File
+std::string what_object = entry->what_object();
+brfc::oh5::Group* grp = entry->group("/dataset1/what");
+brfc::oh5::Attribute* attr = grp->attribute("elangle");
+brfc::oh5::Scalar elangle = attr->value();
+
+// access additional metadata
+brfc::DateTime dt = entry->stored_at();
+std::string uuid = entry->uuid();
+int64_t size = entry->size();
+
+// write to disk
+entry->write_to_file("/path/to/file.h5");
+@endcode
+
+@section querying Querying the database
+
+To query for entries in the database, you must create a brfc::db::FileQuery
+instance and execute it on the database. This will return a
+brfc::db::FileResult instance. Simply creating the query (and not specifying
+any details) will query for all the files in the database.
+
+@code
+brfc::db::Database* db; // assuming a database
+
+brfc::db::FileQuery query;
+
+brfc::db::FileResult* rset = db->execute(query);
+
+rset->size(); // how many files
 
 // loop through the entries
-shared_ptr<brfc::db::FileEntry> entry;
-while (r->next()) {
-    entry = r->entry();
+brfc::db::FileEntry* entry;
+while (rset->next()) {
+    entry = rset->entry();
     // do something useful
 }
 @endcode
 
+@section query_filtering Adding filters to a query
+
 To be more useful, you can add a filter to the query. Filters are composed of
 brfc::expr::Expression elements. The easiest way to create these is using
-brfc::expr::ExpressionFactory. To give an example:
+brfc::expr::ExpressionFactory. To give an example, lets filter for all file
+that have an attribute "what/object" equal to "PVOL":
 
 @code
 // create the factory
 brfc::expr::ExpressionFactory xpr;
 
 // create the query
-brfc::AttributeQuery q = fc.query_file();
+brfc::db::FileQuery q;
 q.filter(xpr.eq(xpr.attribute("what/object"), xpr.string("PVOL")));
 @endcode
-
-this filters for all files that have an attribute "what/object" and it
-contains a string "PVOL".
 
 Successive filters can be given, meaning all specified filters must match and
 is equivalent to using operator brfc::expr::Expression::and_ between the filter
@@ -161,6 +180,25 @@ Here's a list of them:
   - src:_name - the name of the source in database
   - src:X - source key in database, where X is the source key (PLC, CTY, ...)
 
+@section query_limiting Skipping/limiting query results
+
+@code
+brfc::db::FileQuery q;
+q.limit(10) // fetch 10 files
+q.skip(5) // skipping 5 files 
+@endcode
+
+@section query_ordering Ordering query results
+
+Query results can be ordered through brfc::db::FileQuery::order_by(). By default,
+they are ordered by the time of storing, oldest files first. For an example,
+to sort the smallest files first:
+
+@code
+brfc::db::FileQuery q;
+q.order_by(xpr.attribute("file:size"), brfc::db::FileQuery::ASC);
+@endcode
+
 @section querying_attributes Querying attributes
 
 Sometimes you will want to query for specific attributes instead of files.
@@ -169,22 +207,20 @@ you can specify which attributes to fetch from the database. So to query for
 all files in the database, you would do this:
 
 @code
-// assuming we have a filecatalog instance
-brfc::FileCatalog fc;
-// create expression factory
+brfc::db::Database* db; // assuming a database
 brfc::expr::ExpressionFactory xpr;
 
-brfc::Query q = fc.query();
+brfc::db::AttributeQuery q;
 
 // mark attribute for fetching
 q.fetch(xpr.attribute("file:uuid"));
 // execute
-shared_ptr<brfc::ResultSet> r = q.execute();
+brfc::db::AttributeResult* r = q.execute();
 
 // loop through results
 while (r->next()) {
     // access the values
-    brfc::String path = r->string(0);
+    std::string path = r->string(0);
 }
 @endcode
 
@@ -212,34 +248,55 @@ dt.add_minutes(-15);
 DateTime past = now - dt;
 
 // use in filter;
-brfc::db::FileQuery q = fc.query_file();
+brfc::db::FileQuery q;
 q.filter(x->between(past, now));
 @endcode
 
 @section removing Removing files
 
 File removal is done using a brfc::db::FileEntry instance, probably attained
-thorugh querying.
+through querying.
 
-for example, removing files older than from 2009.
+for example, removing files older than from 2009:
+
 @code
-brfc::FileCatalog fc(dsn, storage_dir);
+brfc::db::Database* db; // assuming a database
 brfc::expr::ExpressionFactory xpr;
 
-brfc::db::FileQuery q = fc.query_file();
-
+brfc::db::FileQuery q;
 q.filter(xpr.attribute("what/date")->lt(xpr.date(2009, 1, 1)));
 
-shared_ptr<brfc::db::FileResult> r = q.execute();
+brfc::db::FileResult* r = q.execute();
 
 while (r->next()) {
     try {
-        fc.remove(r->entry());
+        db->remove(r->entry());
     } catch (const brfc::db_error& e) {
         // removing from database failed
     }
 }
 @endcode
+
+@section source_management Managing source definitions
+
+As mentioned before, you can't import files to the database if the database
+can't look up and associate a source with the file. You can manage to source
+definitions in the database through brfc::db::Database::sources(),
+brfc::db::Database::add_source(), brfc::db::Database::update_source() and
+brfc::db::Database::remove_source().
+
+@section file_catalog FileCatalog - combining Database with LocalStorage
+
+To simplify the interaction, you can combine a database and local storage in
+brfc::FileCatalog. This class provides methods for storing and removing files
+from the database, which in addition will store/remove the file to/from
+local storage. By default brfc::FileCatalog uses brfc::NullStorage, so it's
+pretty much equivalent to just using a brfc::db::Database on its own.
+
+Combining the two might be handy, as the files imported to the database are
+probably going to get used in some way in the immeditate future. Prestoring
+them avoids the overhead of fetching the file back from the database to local
+disk (opting to copy it on import instead).
 
 @section java_bindings Java bindings
 
@@ -262,19 +319,21 @@ Querying:
 
 @code
 import eu.baltrad.fc.FileCatalog;
+import eu.baltrad.fc.db.Database;
 import eu.baltrad.fc.db.FileEntry;
 import eu.baltrad.fc.db.FileQuery;
 import eu.baltrad.fc.expr.ExpressionFactory;
 
 // setting up
 String dsn("postgresql://baltrad:baltrad@localhost/baltrad");
-FileCatalog fc;
-
+Database db = null;
 try {
-    fc = new FileCatalog(dsn);
+    Database db = Database.create(dsn);        
 } catch (DatabaseError e) {
     // problem connecting to database
 }
+
+FileCatalog fc(db);
 
 // querying
 ExpressionFactory xpr;
