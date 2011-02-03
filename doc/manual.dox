@@ -215,7 +215,7 @@ brfc::db::AttributeQuery q;
 // mark attribute for fetching
 q.fetch(xpr.attribute("file:uuid"));
 // execute
-brfc::db::AttributeResult* r = q.execute();
+brfc::db::AttributeResult* r = db->execute(q);
 
 // loop through results
 while (r->next()) {
@@ -266,7 +266,7 @@ brfc::expr::ExpressionFactory xpr;
 brfc::db::FileQuery q;
 q.filter(xpr.attribute("what/date")->lt(xpr.date(2009, 1, 1)));
 
-brfc::db::FileResult* r = q.execute();
+brfc::db::FileResult* r = db->execute(q.);
 
 while (r->next()) {
     try {
@@ -290,8 +290,7 @@ brfc::db::Database::remove_source().
 To simplify the interaction, you can combine a database and local storage in
 brfc::FileCatalog. This class provides methods for storing and removing files
 from the database, which in addition will store/remove the file to/from
-local storage. By default brfc::FileCatalog uses brfc::NullStorage, so it's
-pretty much equivalent to just using a brfc::db::Database on its own.
+local storage.
 
 Combining the two might be handy, as the files imported to the database are
 probably going to get used in some way in the immeditate future. Prestoring
@@ -342,7 +341,7 @@ FileQuery q = fc.query_file();
 q.filter(xpr.attribute("what/source:_name").eq(xpr.string("seang"));
 
 // execute
-FileResult r = q.execute();
+FileResult r = db->execute(q);
 
 // loop through results
 while (r.next()) {
