@@ -46,7 +46,18 @@
     </sql>
   </target>
 
-  <target name="execute-database-tests" depends="create-postgresql-testdb" unless="db.test_db_dsn">
+  <target name="drop-postgresql-testdb">
+    <sql rdbms="postgres"
+         driver="org.postgresql.Driver"
+         url="${db.url}"
+         userid="${db.username}" 
+         password="${db.password}">
+      <classpath location="deplib/postgresql-8.4-701.jdbc4.jar" />
+      <transaction src="schema/postgresql/drop.sql" />
+    </sql>
+  </target>
+
+  <target name="execute-database-tests" depends="create-postgresql-testdb" if="db.test_db_dsn">
     <mkdir dir="${waf.builddir}/test/reports"/>
     <junit showoutput="true" printsummary="no" fork="yes">
       <classpath location="deplib/junit4.jar" />
@@ -54,6 +65,7 @@
       <classpath location="${waf.builddir}/jbrfc_test.jar" />
       <sysproperty key="db.test_db_dsn" value="${db.test_db_dsn}"/>
       <sysproperty key="db.test_db_schema_dir" value="${db.test_db_schema_dir}"/>
+      <formatter type="brief" usefile="false" />
       <formatter type="xml" />
       <test name="eu.baltrad.fc.TestFileCatalog" todir="${waf.builddir}/test/reports" />
     </junit>
