@@ -64,6 +64,7 @@ class CacheDirStorage : public LocalStorage {
     virtual std::string do_store(const db::FileEntry& entry);
     virtual bool do_remove(const db::FileEntry& entry);
     virtual void do_clean();
+    virtual bool do_is_valid() const;
   
   private:
     const FileSystem& fs() const;

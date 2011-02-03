@@ -85,4 +85,15 @@ CacheDirStorage::do_clean() {
     fs().clear_directory(dir_);
 }
 
+bool
+CacheDirStorage::do_is_valid() const {
+    if (not fs().is_absolute(dir_))
+        return false;
+    if (not fs().exists(dir_))
+        return false;
+    if (not fs().is_directory(dir_))
+        return false;
+    return true;
+}
+
 } // namespace brfc

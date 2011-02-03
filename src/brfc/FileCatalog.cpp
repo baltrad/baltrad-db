@@ -38,20 +38,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace {
-
-void check_storage_dir(const std::string& path) {
-    BoostFileSystem fs;
-    if (not fs.is_absolute(path))
-        throw fs_error("'" + path + "' is not a complete path");
-    if (not fs.exists(path))
-        throw fs_error("'" + path + "' does not exist");
-    if (not fs.is_directory(path))
-           throw fs_error("'" + path + "' is not a directory");
-}
-
-}
-    
 FileCatalog::FileCatalog(const std::string& dsn, LocalStorage* storage)
         : db_(db::Database::create(dsn))
         , storage_() {
@@ -61,14 +47,12 @@ FileCatalog::FileCatalog(const std::string& dsn, LocalStorage* storage)
 FileCatalog::FileCatalog(const std::string& dsn, const std::string& path)
         : db_(db::Database::create(dsn))
         , storage_() {
-    check_storage_dir(path);
     this->storage(new CacheDirStorage(path));
 }
 
 FileCatalog::FileCatalog(db::Database* db, const std::string& path)
         : db_(db, no_delete)
         , storage_() {
-    check_storage_dir(path);
     this->storage(new CacheDirStorage(path));
 }
 
@@ -86,8 +70,12 @@ void
 FileCatalog::storage(LocalStorage* storage) {
     if (storage == 0)
         storage_.reset(new NullStorage());
-    else
+    else {
+        if (not storage->is_valid()) {
+            throw fs_error("invalid LocalStorage");
+        }
         storage_.reset(storage, no_delete);
+    }
 }
 
 bool

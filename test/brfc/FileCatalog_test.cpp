@@ -40,7 +40,7 @@ struct FileCatalog_test : public ::testing::Test {
             : db()
             , entry()
             , storage()
-            , fc(&db, &storage)
+            , fc(&db)
             , path("/tmp/mockphsycialfile")
             , file() {
     }
@@ -48,6 +48,10 @@ struct FileCatalog_test : public ::testing::Test {
     virtual void SetUp() {
         ON_CALL(file, do_path())
             .WillByDefault(ReturnRef(path));
+        ON_CALL(storage, do_is_valid())
+            .WillByDefault(Return(true));
+        
+        fc.storage(&storage);
     }
 
     db::MockDatabase db;
@@ -137,13 +141,21 @@ TEST_F(FileCatalog_test, test_get_or_store_on_prestore_failure) {
     EXPECT_TRUE(e);
 }
 
-
-
-/*
-TEST_F(FileCatalog_test, test_double_import_throws) {
-    EXPECT_THROW(fc.store(file), duplicate_entry);
+TEST_F(FileCatalog_test, test_set_storage) {
+    MockLocalStorage s;
+    EXPECT_CALL(s, do_is_valid())
+        .WillOnce(Return(true));
+    
+    EXPECT_NO_THROW(fc.storage(&s));
 }
-*/
+
+TEST_F(FileCatalog_test, test_set_storage_invalid) {
+    MockLocalStorage s;
+    EXPECT_CALL(s, do_is_valid())
+        .WillOnce(Return(false));
+    
+    EXPECT_THROW(fc.storage(&s), fs_error);
+}
 
 TEST_F(FileCatalog_test, test_is_stored_nx_file_by_path) {
     EXPECT_THROW(fc.is_stored("/path/to/nxfile"), fs_error);

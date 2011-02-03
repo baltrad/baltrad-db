@@ -50,6 +50,11 @@ class NullStorage : public LocalStorage {
     }
 
     virtual void do_clean() { }
+    
+    /**
+     * @return always true
+     */
+    virtual bool do_is_valid() const { return true; }
 };
 
 } // namespace brfc

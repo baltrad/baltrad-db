@@ -32,6 +32,7 @@ class MockLocalStorage : public LocalStorage {
     MOCK_METHOD2(do_prestore, std::string(const db::FileEntry&, const std::string&));
     MOCK_METHOD1(do_remove, bool(const db::FileEntry&));
     MOCK_METHOD0(do_clean, void());
+    MOCK_CONST_METHOD0(do_is_valid, bool());
 };
 
 } // namespace brfc

@@ -108,4 +108,42 @@ TEST_F(CacheDirStorage_test, test_clean) {
     storage.clean();
 }
 
+TEST_F(CacheDirStorage_test, test_is_valid) {
+    EXPECT_CALL(fs, do_is_absolute(dir))
+        .WillOnce(Return(true));
+    EXPECT_CALL(fs, do_exists(dir))
+        .WillOnce(Return(true));
+    EXPECT_CALL(fs, do_is_directory(dir))
+        .WillOnce(Return(true));
+    
+    EXPECT_TRUE(storage.is_valid());
+}
+
+TEST_F(CacheDirStorage_test, test_is_valid_not_absolute) {
+    EXPECT_CALL(fs, do_is_absolute(dir))
+        .WillOnce(Return(false));
+    
+    EXPECT_FALSE(storage.is_valid());
+}
+
+TEST_F(CacheDirStorage_test, test_is_valid_nonexistant_dir) {
+    EXPECT_CALL(fs, do_is_absolute(dir))
+        .WillOnce(Return(true));
+    EXPECT_CALL(fs, do_exists(dir))
+        .WillOnce(Return(false));
+    
+    EXPECT_FALSE(storage.is_valid());
+}
+
+TEST_F(CacheDirStorage_test, test_is_valid_not_directory) {
+    EXPECT_CALL(fs, do_is_absolute(dir))
+        .WillOnce(Return(true));
+    EXPECT_CALL(fs, do_exists(dir))
+        .WillOnce(Return(true));
+    EXPECT_CALL(fs, do_is_directory(dir))
+        .WillOnce(Return(false));
+    
+    EXPECT_FALSE(storage.is_valid());
+}
+
 } // namespace brfc

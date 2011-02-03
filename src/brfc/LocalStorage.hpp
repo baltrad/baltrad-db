@@ -71,6 +71,13 @@ class LocalStorage {
         do_clean();
     }
 
+    /**
+     * @brief check if the storage is valid
+     */
+    bool is_valid() const {
+        return do_is_valid();
+    }
+
   protected:
     /**
      * @return absolute path to the stored file
@@ -88,6 +95,8 @@ class LocalStorage {
     virtual bool do_remove(const db::FileEntry& entry) = 0;
 
     virtual void do_clean() = 0;
+
+    virtual bool do_is_valid() const = 0;
 };
 
 } // namespace brfc
