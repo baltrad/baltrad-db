@@ -30,6 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/DateTime.hpp>
     #include <brfc/LocalStorage.hpp>
     #include <brfc/CacheDirStorage.hpp>
+    #include <brfc/NullStorage.hpp>
     #include <brfc/Time.hpp>
     #include <brfc/TimeDelta.hpp>
     #include <brfc/Variant.hpp>
@@ -241,6 +242,7 @@ SWIG_JAVABODY_METHODS(public, public, std::vector<std::string>);
 %include <brfc/FileCatalog.hpp>
 %include <brfc/LocalStorage.hpp>
 %include <brfc/CacheDirStorage.hpp>
+%include <brfc/NullStorage.hpp>
 %include <brfc/TimeDelta.hpp>
 %include <brfc/Date.hpp>
 %include <brfc/Time.hpp>
