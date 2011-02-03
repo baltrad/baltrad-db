@@ -40,7 +40,7 @@ struct FileCatalog_test : public ::testing::Test {
             : db()
             , entry()
             , storage()
-            , fc(&db)
+            , fc(&db, &storage)
             , path("/tmp/mockphsycialfile")
             , file() {
     }
@@ -48,8 +48,6 @@ struct FileCatalog_test : public ::testing::Test {
     virtual void SetUp() {
         ON_CALL(file, do_path())
             .WillByDefault(ReturnRef(path));
-        ON_CALL(storage, do_is_valid())
-            .WillByDefault(Return(true));
         
         fc.storage(&storage);
     }
@@ -62,12 +60,22 @@ struct FileCatalog_test : public ::testing::Test {
     ::testing::NiceMock<oh5::MockPhysicalFile> file;
 };
 
-TEST_F(FileCatalog_test, test_ctor_invalid_storage) {
-    MockLocalStorage s;
-    EXPECT_CALL(s, do_is_valid())
-        .WillOnce(Return(false));
+TEST_F(FileCatalog_test, test_ctor_null_db) {
+    EXPECT_THROW(FileCatalog(0, &storage), value_error);
+}
 
-    EXPECT_THROW(FileCatalog(&db, &s), fs_error);
+TEST_F(FileCatalog_test, test_ctor_null_storage) {
+    EXPECT_THROW(FileCatalog(&db, 0), value_error);
+}
+
+TEST_F(FileCatalog_test, test_database_nullptr) {
+    EXPECT_THROW(fc.database(0), value_error);
+    EXPECT_EQ(&db, &fc.database());
+}
+
+TEST_F(FileCatalog_test, test_storage_nullptr) {
+    EXPECT_THROW(fc.storage(0), value_error);
+    EXPECT_EQ(&storage, &fc.storage());
 }
 
 TEST_F(FileCatalog_test, test_store_nx_file_by_path) {
@@ -139,22 +147,6 @@ TEST_F(FileCatalog_test, test_get_or_store_on_prestore_failure) {
     db::FileEntry* e = 0;
     EXPECT_NO_THROW(e = fc.get_or_store(file));
     EXPECT_TRUE(e);
-}
-
-TEST_F(FileCatalog_test, test_set_storage) {
-    MockLocalStorage s;
-    EXPECT_CALL(s, do_is_valid())
-        .WillOnce(Return(true));
-    
-    EXPECT_NO_THROW(fc.storage(&s));
-}
-
-TEST_F(FileCatalog_test, test_set_storage_invalid) {
-    MockLocalStorage s;
-    EXPECT_CALL(s, do_is_valid())
-        .WillOnce(Return(false));
-    
-    EXPECT_THROW(fc.storage(&s), fs_error);
 }
 
 TEST_F(FileCatalog_test, test_is_stored_nx_file_by_path) {

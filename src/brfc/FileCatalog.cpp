@@ -22,9 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/DefaultFileNamer.hpp>
-#include <brfc/NullStorage.hpp>
-#include <brfc/CacheDirStorage.hpp>
+#include <brfc/LocalStorage.hpp>
 
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/Database.hpp>
@@ -39,8 +37,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 FileCatalog::FileCatalog(db::Database* db, LocalStorage* storage)
-        : db_(db)
-        , storage_() {
+        : db_(0)
+        , storage_(0) {
+    this->database(db);
     this->storage(storage);
 }
 
@@ -49,15 +48,17 @@ FileCatalog::~FileCatalog() {
 }
 
 void
+FileCatalog::database(db::Database* db) {
+    if (not db)
+        throw value_error("null db::Database");
+    db_ = db;
+}
+
+void
 FileCatalog::storage(LocalStorage* storage) {
-    if (storage == 0)
-        storage_.reset(new NullStorage());
-    else {
-        if (not storage->is_valid()) {
-            throw fs_error("invalid LocalStorage");
-        }
-        storage_.reset(storage, no_delete);
-    }
+    if (not storage)
+        throw value_error("null LocalStorage");
+    storage_ = storage;
 }
 
 bool

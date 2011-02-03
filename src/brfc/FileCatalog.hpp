@@ -20,8 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_FILE_CATALOG_HPP
 #define BRFC_FILE_CATALOG_HPP
 
-#include <brfc/smart_ptr.hpp>
-
 #include <string>
 
 /**
@@ -70,22 +68,28 @@ class FileCatalog {
     ~FileCatalog();
     
     /**
-     * @brief access bound Database instance
+     * @brief access bound db::Database instance
      */
-    db::Database& database() {
+    db::Database& database() const {
         return *db_;
     }
     
     /**
+     * @brief bind a db::Database instance
+     * @param db the database to bind (caller retains ownership)
+     * @throw value_error if db is null
+     */
+    void database(db::Database* db);
+    
+    /**
      * @brief access bound LocalStorage instance
      */
-    LocalStorage& storage() { return *storage_; }
+    LocalStorage& storage() const { return *storage_; }
     
     /**
      * @brief bind a LocalStorage instance
-     * @param storage local storage (caller retains ownership)
-     *
-     * if @c storage is null, bind NullStorage
+     * @param storage the storage to bind (caller retains ownership)
+     * @throw value_error if storage is null
      */
     void storage(LocalStorage* storage);
 
@@ -214,9 +218,9 @@ class FileCatalog {
     
   private:
     db::Database* db_;
-    shared_ptr<LocalStorage> storage_;
+    LocalStorage* storage_;
 };
 
-}
+} // namespace brfc
 
 #endif // BRFC_FILE_CATALOG_HPP
