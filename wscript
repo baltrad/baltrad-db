@@ -617,7 +617,7 @@ def _run_tests(bld):
      
     bld.add_group("run_gtest_tests")
     bld(
-        rule="${SRC} --catch_leaked_mocks=1 --gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gtest.xml"),
+        rule="${SRC} --gmock_catch_leaked_mocks=1 --gmock_verbose=error --gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gtest.xml"),
         source="test_runner",
         uselib_local="brfc",
         env=env,
@@ -626,7 +626,7 @@ def _run_tests(bld):
 
     bld.add_group("run_gtest_itests")
     bld(
-        rule="${SRC} --catch_leaked_mocks=1 --gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gitest.xml"),
+        rule="${SRC} --gmock_catch_leaked_mocks=1 --gmock_verbose=error --gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gitest.xml"),
         source="itest_runner",
         uselib_local="brfc",
         env=env,

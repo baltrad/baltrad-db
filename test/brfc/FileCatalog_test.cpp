@@ -174,10 +174,13 @@ TEST_F(FileCatalog_test, test_remove_nx_file) {
 }
 
 TEST_F(FileCatalog_test, test_local_path_for_uuid) {
+    db::MockFileEntry* e = new db::MockFileEntry();
+    ON_CALL(*e, do_uuid()).WillByDefault(Return("")); // for leak detection
+
     std::string uuid = "uuid";
     EXPECT_CALL(db, do_entry_by_uuid(Ref(uuid)))
-        .WillOnce(Return(&entry));
-    EXPECT_CALL(storage, do_store(Ref(entry)))
+        .WillOnce(Return(e));
+    EXPECT_CALL(storage, do_store(Ref(*e)))
         .WillOnce(Return("/path/to/file"));
     
     EXPECT_EQ("/path/to/file", fc.local_path_for_uuid(uuid));

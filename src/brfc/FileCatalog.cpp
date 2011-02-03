@@ -161,7 +161,8 @@ FileCatalog::query_attribute() const {
 
 std::string
 FileCatalog::local_path_for_uuid(const std::string& uuid) {
-    return storage().store(*database().entry_by_uuid(uuid));
+    auto_ptr<db::FileEntry> e(database().entry_by_uuid(uuid));
+    return storage().store(*e);
 }
 
 } // namespace brfc
