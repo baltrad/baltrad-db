@@ -32,11 +32,13 @@ namespace brfc {
 CacheDirStorage::CacheDirStorage(const std::string& dir)
         : dir_(dir)
         , fs_(new BoostFileSystem()) {
+
 }
 
 CacheDirStorage::CacheDirStorage(const std::string& dir, const FileSystem* fs)
         : dir_(dir)
         , fs_(fs, no_delete) {
+
 }
 
 CacheDirStorage::~CacheDirStorage() {

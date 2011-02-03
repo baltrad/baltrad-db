@@ -58,36 +58,6 @@ class FileCatalog {
   public:
     /**
      * @brief constructor
-     * @param dsn database connection string (using URL-like syntax)
-     * @param storage local storage (caller retains ownership)
-     *
-     * @throw db_error if DB could not be opened
-     * @throw value_error if dsn is invalid
-     */
-    explicit
-    FileCatalog(const std::string& dsn, LocalStorage* storage=0);
-    
-    /**
-     * @brief constructor
-     * @param dsn database connection string
-     * @param path path to storage
-     * @note this is provided for backward compatibility and will go away!
-     *
-     * use CacheDirStorage(path) for local storage
-     */
-    FileCatalog(const std::string& dsn, const std::string& path);
-
-    /**
-     * @brief constructor
-     * @param db database instance (caller retains ownership)
-     * @param path path to storage
-     *
-     * use CacheDirStorage(path) for local storage
-     */
-    FileCatalog(db::Database* db, const std::string& path);
-
-    /**
-     * @brief constructor
      * @param db database instance (caller retains ownership)
      * @param storage local storage (caller retains ownership)
      */
@@ -243,7 +213,7 @@ class FileCatalog {
     std::string local_path_for_uuid(const std::string& uuid);
     
   private:
-    shared_ptr<db::Database> db_;
+    db::Database* db_;
     shared_ptr<LocalStorage> storage_;
 };
 

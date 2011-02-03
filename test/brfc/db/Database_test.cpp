@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <brfc/exceptions.hpp>
+
 #include <brfc/db/MockDatabase.hpp>
 #include <brfc/db/MockFileEntry.hpp>
 
@@ -38,6 +40,10 @@ class db_Database_test : public ::testing::Test {
 
     MockDatabase db;
 };
+
+TEST_F(db_Database_test, test_create_invalid_dsn) {
+    EXPECT_THROW(Database::create("invalid_dsn"), value_error);
+}
 
 TEST_F(db_Database_test, test_get_or_store_stored) {
     oh5::MockPhysicalFile f; 

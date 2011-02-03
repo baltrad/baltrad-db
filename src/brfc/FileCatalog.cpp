@@ -38,26 +38,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-FileCatalog::FileCatalog(const std::string& dsn, LocalStorage* storage)
-        : db_(db::Database::create(dsn))
-        , storage_() {
-    this->storage(storage);
-}
-
-FileCatalog::FileCatalog(const std::string& dsn, const std::string& path)
-        : db_(db::Database::create(dsn))
-        , storage_() {
-    this->storage(new CacheDirStorage(path));
-}
-
-FileCatalog::FileCatalog(db::Database* db, const std::string& path)
-        : db_(db, no_delete)
-        , storage_() {
-    this->storage(new CacheDirStorage(path));
-}
-
 FileCatalog::FileCatalog(db::Database* db, LocalStorage* storage)
-        : db_(db, no_delete)
+        : db_(db)
         , storage_() {
     this->storage(storage);
 }
@@ -139,12 +121,12 @@ FileCatalog::remove(const db::FileEntry& entry) {
 
 db::FileQuery
 FileCatalog::query_file() const {
-    return db::FileQuery(db_.get());
+    return db::FileQuery(db_);
 }
 
 db::AttributeQuery
 FileCatalog::query_attribute() const {
-    return db::AttributeQuery(db_.get());
+    return db::AttributeQuery(db_);
 }
 
 std::string

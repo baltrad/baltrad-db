@@ -38,8 +38,7 @@ class CacheDirStorage : public LocalStorage {
      * @brief constructor
      * @param dir path in local filesystem to use as storage root
      *
-     * It is up to the user to ensure @c dir exists and new files can be
-     * created in it. BoostFileSystem is used for filesystem access.
+     * BoostFileSystem is used for filesystem access.
      */
     CacheDirStorage(const std::string& dir);
     
@@ -47,8 +46,6 @@ class CacheDirStorage : public LocalStorage {
      * @brief constructor
      * @param dir path in local filesystem to use as storage root
      * @param fs filesystem access (caller retains ownership)
-     *
-     * @note this is for testing purposes
      */
     CacheDirStorage(const std::string& dir, const FileSystem* fs);
 
