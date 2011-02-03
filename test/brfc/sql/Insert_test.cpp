@@ -40,7 +40,7 @@ TEST(sql_Insert_test, test_value) {
     EXPECT_THROW(stmt->value("nxcol", val), lookup_error);
 
     stmt->value("c", val);
-    EXPECT_EQ(stmt->values().size(), 1);
+    EXPECT_EQ(1u, stmt->values().size());
 
     EXPECT_THROW(stmt->value("c", val), duplicate_entry);
 }

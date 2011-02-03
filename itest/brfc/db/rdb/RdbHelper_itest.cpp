@@ -309,7 +309,7 @@ TEST_P(db_rdb_RdbHelper_itest, test_load_children) {
     EXPECT_NO_THROW(helper.load_children(r));
     EXPECT_TRUE(helper.backend(r).loaded());
 
-    EXPECT_EQ(3, r.children().size());
+    EXPECT_EQ(3u, r.children().size());
 
     oh5::Group* g = r.group("g1");
     ASSERT_TRUE(g);

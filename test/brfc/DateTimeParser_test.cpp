@@ -172,42 +172,42 @@ TEST(DateTimeParser_test, test_tokenize_format1) {
     DateTimeParser::TokenVector f = DateTimeParser::tokenize("yyyy/MM/dd'yy'hhmmqwesszzz");
     shared_ptr<dttok::Literal> lit;
 
-    EXPECT_EQ(11, f.size());
-    ASSERT_GT(f.size(), 0);
+    EXPECT_EQ(11u, f.size());
+    ASSERT_GT(f.size(), 0u);
     EXPECT_TRUE(get_token_at<dttok::Year>(f, 0));
 
-    ASSERT_GT(f.size(), 1);
+    ASSERT_GT(f.size(), 1u);
     EXPECT_TRUE(lit = get_token_at<dttok::Literal>(f, 1));
     if (lit) { EXPECT_EQ("/", lit->value()); }
 
-    ASSERT_GT(f.size(), 2);
+    ASSERT_GT(f.size(), 2u);
     EXPECT_TRUE(get_token_at<dttok::Month>(f, 2));
 
-    ASSERT_GT(f.size(), 3);
+    ASSERT_GT(f.size(), 3u);
     EXPECT_TRUE(lit = get_token_at<dttok::Literal>(f, 3));
     if (lit) { EXPECT_EQ("/", lit->value()); }
 
-    ASSERT_GT(f.size(), 4);
+    ASSERT_GT(f.size(), 4u);
     EXPECT_TRUE(get_token_at<dttok::Day>(f, 4));
 
-    ASSERT_GT(f.size(), 5);
+    ASSERT_GT(f.size(), 5u);
     EXPECT_TRUE(lit = get_token_at<dttok::Literal>(f, 5));
     if (lit) { EXPECT_EQ("yy", lit->value()); }
 
-    ASSERT_GT(f.size(), 6);
+    ASSERT_GT(f.size(), 6u);
     EXPECT_TRUE(get_token_at<dttok::Hour>(f, 6));
 
-    ASSERT_GT(f.size(), 7);
+    ASSERT_GT(f.size(), 7u);
     EXPECT_TRUE(get_token_at<dttok::Minute>(f, 7));
 
-    ASSERT_GT(f.size(), 8);
+    ASSERT_GT(f.size(), 8u);
     EXPECT_TRUE(lit = get_token_at<dttok::Literal>(f, 8));
     if (lit) { EXPECT_EQ("qwe", lit->value()); }
 
-    ASSERT_GT(f.size(), 9);
+    ASSERT_GT(f.size(), 9u);
     EXPECT_TRUE(get_token_at<dttok::Second>(f, 9));
 
-    ASSERT_GT(f.size(), 10);
+    ASSERT_GT(f.size(), 10u);
     EXPECT_TRUE(get_token_at<dttok::Msec>(f, 10));
 }
 
@@ -215,26 +215,26 @@ TEST(DateTimeParser_test, test_tokenize_format2) {
     DateTimeParser::TokenVector f = DateTimeParser::tokenize("aedyyyM''zz");
     shared_ptr<dttok::Literal> lit;
 
-    EXPECT_EQ(6, f.size());
-    ASSERT_GT(f.size(), 0);
+    EXPECT_EQ(6u, f.size());
+    ASSERT_GT(f.size(), 0u);
     EXPECT_TRUE(lit = get_token_at<dttok::Literal>(f, 0));
     if (lit) { EXPECT_EQ("ae", lit->value()); }
 
-    ASSERT_GT(f.size(), 1);
+    ASSERT_GT(f.size(), 1u);
     EXPECT_TRUE(get_token_at<dttok::Day>(f, 1));
 
-    ASSERT_GT(f.size(), 2);
+    ASSERT_GT(f.size(), 2u);
     EXPECT_TRUE(lit = get_token_at<dttok::Literal>(f, 2));
     if (lit) { EXPECT_EQ("yyy", lit->value()); }
 
-    ASSERT_GT(f.size(), 3);
+    ASSERT_GT(f.size(), 3u);
     EXPECT_TRUE(get_token_at<dttok::Month>(f, 3));
 
-    ASSERT_GT(f.size(), 4);
+    ASSERT_GT(f.size(), 4u);
     EXPECT_TRUE(lit = get_token_at<dttok::Literal>(f, 4));
     if (lit) { EXPECT_EQ("'", lit->value()); }
 
-    ASSERT_GT(f.size(), 5);
+    ASSERT_GT(f.size(), 5u);
     EXPECT_TRUE(lit = get_token_at<dttok::Literal>(f, 5));
     if (lit) { EXPECT_EQ("zz", lit->value()); }
 }

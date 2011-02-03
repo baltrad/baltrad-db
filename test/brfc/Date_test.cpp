@@ -41,7 +41,7 @@ TEST(Date_test, test_is_leap_year) {
 
 TEST(Date_test, test_jdn_from_date) {
     int year = -4713, month = 11, day = 24;
-    EXPECT_EQ(0, Date::jdn_from_date(year, month, day));
+    EXPECT_EQ(0u, Date::jdn_from_date(year, month, day));
 }
 
 TEST(Date_test, test_date_from_jdn) {

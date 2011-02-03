@@ -187,7 +187,7 @@ TEST_P(db_Database_itest, test_add_source) {
     EXPECT_TRUE(source_by_name(sources, "srcname1") != sources.end());
 
     src = *source_by_name(sources, "srcname1");
-    EXPECT_EQ(0, src.keys().size());
+    EXPECT_EQ(0u, src.keys().size());
 
     EXPECT_THROW(db->add_source(src), db_error);
 }

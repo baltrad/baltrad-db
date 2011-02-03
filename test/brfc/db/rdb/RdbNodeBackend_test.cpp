@@ -81,7 +81,7 @@ TEST_F(db_rdb_RdbNodeBackend_test, test_children) {
 
 TEST_F(db_rdb_RdbNodeBackend_test, test_children_loaded) {
     backend.loaded(true);
-    EXPECT_EQ(0, backend.children().size());
+    EXPECT_EQ(0u, backend.children().size());
 }
 
 /*
