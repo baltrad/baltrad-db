@@ -31,10 +31,8 @@ class LocalStorage;
 
 namespace db {
 
-class AttributeQuery;
 class Database;
 class FileEntry;
-class FileQuery;
 
 } // namespace db
 
@@ -198,13 +196,6 @@ class FileCatalog {
      * local storage is considered failed.
      */
     bool remove(const db::FileEntry& entry);
-
-    /**
-     * @brief get a query object bound to owned database
-     */
-    db::FileQuery query_file() const;
-
-    db::AttributeQuery query_attribute() const;
 
     /**
      * @brief absolute local path for database entry idenified by @c uuid

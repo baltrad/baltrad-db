@@ -47,8 +47,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/itest_config.hpp>
 #include <brfc/ITestEnv.hpp>
 
-//#include <brfc/test_common.hpp>
-
 namespace brfc {
 namespace db {
 
@@ -76,7 +74,7 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
             , td3("PVOL", Date(2000, 1, 1), Time(12, 2), src1)
             , td4("CVOL", Date(2001, 1, 1), Time(12, 0), src2)
             , td5("SCAN", Date(2002, 2, 1), Time(12, 0), src1)
-            , query(db) {
+            , query() {
     }
 
     void add_attribute(oh5::File& file,
@@ -145,7 +143,7 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
 
 TEST_P(db_FileQuery_itest, test_queried_entry) {
     query.filter(*xpr.attribute("file:uuid")->eq(*xpr.string(fe1->uuid())));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(1, r->size());
     ASSERT_TRUE(r->next());
@@ -161,7 +159,7 @@ TEST_P(db_FileQuery_itest, test_queried_entry) {
 
 TEST_P(db_FileQuery_itest, test_simple) {
     query.filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(1)));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(1, r->size());
     ASSERT_TRUE(r->next());
@@ -169,7 +167,7 @@ TEST_P(db_FileQuery_itest, test_simple) {
 }
 
 TEST_P(db_FileQuery_itest, test_list_all_files) {
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(5, r->size());
     ASSERT_TRUE(r->next());
@@ -186,7 +184,7 @@ TEST_P(db_FileQuery_itest, test_list_all_files) {
 
 TEST_P(db_FileQuery_itest, test_filter_by_object) {
     query.filter(*xpr.attribute("what/object")->eq(*xpr.string("PVOL")));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(3, r->size());
     ASSERT_TRUE(r->next());
@@ -199,7 +197,7 @@ TEST_P(db_FileQuery_itest, test_filter_by_object) {
 
 TEST_P(db_FileQuery_itest, test_filter_by_xsize) {
     query.filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(2)));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
     ASSERT_TRUE(r->next());
@@ -212,7 +210,7 @@ TEST_P(db_FileQuery_itest, test_filter_by_xsize_or_ysize) {
     expr::AttributePtr xsize = xpr.attribute("where/xsize");
     expr::AttributePtr ysize = xpr.attribute("where/ysize");
     query.filter(*xsize->eq(*xpr.int64_(1))->or_(*ysize->eq(*xpr.int64_(2))));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     ASSERT_EQ(r->size(), 3);
     ASSERT_TRUE(r->next());
@@ -233,7 +231,7 @@ TEST_P(db_FileQuery_itest, test_filter_by_combined_datetime) {
         )->parentheses();
 
     query.filter(*what_dt->between(*xpr.datetime(min), *xpr.datetime(max)));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(3, r->size());
     ASSERT_TRUE(r->next());
@@ -247,7 +245,7 @@ TEST_P(db_FileQuery_itest, test_filter_by_combined_datetime) {
 TEST_P(db_FileQuery_itest, test_filter_by_wmo_code) {
     expr::AttributePtr wmo_code = xpr.attribute("what/source:WMO");
     query.filter(*wmo_code->eq(*xpr.string("02666")));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
     ASSERT_TRUE(r->next());
@@ -259,7 +257,7 @@ TEST_P(db_FileQuery_itest, test_filter_by_wmo_code) {
 TEST_P(db_FileQuery_itest, test_filter_by_node_or_node) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
     query.filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(r->size(), 5);
     ASSERT_TRUE(r->next());
@@ -277,14 +275,14 @@ TEST_P(db_FileQuery_itest, test_filter_by_node_or_node) {
 TEST_P(db_FileQuery_itest, test_filter_by_node_and_node) {
     expr::AttributePtr node = xpr.attribute("what/source:_name");
     query.filter(*node->eq(*xpr.string("seang"))->and_(*node->eq(*xpr.string("sekkr"))));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(0, r->size());
 }
 
 TEST_P(db_FileQuery_itest, test_filter_by_place) {
     query.filter(*xpr.attribute("what/source:PLC")->eq(*xpr.string("Ängelholm")));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(3, r->size());
     ASSERT_TRUE(r->next());
@@ -310,7 +308,7 @@ TEST_P(db_FileQuery_itest, test_has_nx_file) {
 
 TEST_P(db_FileQuery_itest, test_query_like) {
     query.filter(*xpr.attribute("what/source:_name")->like("sea*"));
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(3, r->size());
     ASSERT_TRUE(r->next());
@@ -323,7 +321,7 @@ TEST_P(db_FileQuery_itest, test_query_like) {
 
 TEST_P(db_FileQuery_itest, test_order_by) {
     query.order_by(*xpr.attribute("where/xsize"), FileQuery::DESC);
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(5, r->size());
     ASSERT_TRUE(r->next());
@@ -340,7 +338,7 @@ TEST_P(db_FileQuery_itest, test_order_by) {
 
 TEST_P(db_FileQuery_itest, test_limit) {
     query.limit(2);
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
     ASSERT_TRUE(r->next());
@@ -351,7 +349,7 @@ TEST_P(db_FileQuery_itest, test_limit) {
 
 TEST_P(db_FileQuery_itest, test_skip) {
     query.skip(3);
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
     ASSERT_TRUE(r->next());
@@ -363,7 +361,7 @@ TEST_P(db_FileQuery_itest, test_skip) {
 TEST_P(db_FileQuery_itest, test_skip_with_limit) {
     query.skip(1);
     query.limit(3);
-    r.reset(query.execute());
+    r.reset(db->execute(query));
 
     EXPECT_EQ(3, r->size());
     ASSERT_TRUE(r->next());

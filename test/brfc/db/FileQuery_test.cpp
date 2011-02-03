@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileQuery.hpp>
 
-#include <brfc/db/MockDatabase.hpp>
-#include <brfc/db/MockFileResult.hpp>
 #include <brfc/expr/MockExpression.hpp>
 
 using ::testing::Matcher;
@@ -40,11 +38,9 @@ namespace db {
 class db_FileQuery_test : public ::testing::Test {
   public:
     db_FileQuery_test()
-        : db()
-        , query(&db) {
+        : query() {
     }
     
-    MockDatabase db;
     FileQuery query;
 };
 
@@ -162,19 +158,6 @@ TEST_F(db_FileQuery_test, test_limit) {
 TEST_F(db_FileQuery_test, test_skip) {
     query.skip(5);
     EXPECT_EQ(5, query.skip());
-}
-
-TEST_F(db_FileQuery_test, test_execute) {
-    MockFileResult r;
-    EXPECT_CALL(db, do_execute(Matcher<const FileQuery&>(Ref(query))))
-        .WillOnce(Return(&r));
-    
-    EXPECT_EQ(&r, query.execute());
-}
-
-TEST_F(db_FileQuery_test, test_execute_no_db) {
-    FileQuery q;
-    EXPECT_THROW(q.execute(), std::runtime_error);
 }
 
 } // namespace db

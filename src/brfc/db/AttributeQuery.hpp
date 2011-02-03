@@ -27,9 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace db {
 
-class Database;
-class AttributeResult;
-
 /**
  * @brief query against the database
  */
@@ -46,9 +43,8 @@ class AttributeQuery {
 
     /**
      * @brief constructor
-     * @param db Database instance this AttributeQuery executes on
      */
-    AttributeQuery(Database* db=0);
+    AttributeQuery();
 
     /**
      * @brief copy constructor
@@ -121,19 +117,8 @@ class AttributeQuery {
     AttributeQuery& limit(int limit) { limit_ = limit; return *this; }
 
     int limit() const { return limit_; }
-
-    /**
-     * @brief execute this query
-     * @return ResultSet containing executed query results
-     * @note caller takes ownership of the result
-     *
-     * each row in the results contains a value for each attribute marked
-     * for fetching, in the order they were marked.
-     */
-    AttributeResult* execute();
     
   private:
-    Database* db_;
     bool distinct_;
     ExpressionVector fetch_;
     expr::ExpressionPtr filter_;

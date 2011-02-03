@@ -21,12 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdexcept>
 
-#include <brfc/Variant.hpp>
-
 #include <brfc/db/AttributeQuery.hpp>
 
-#include <brfc/db/MockDatabase.hpp>
-#include <brfc/db/MockAttributeResult.hpp>
 #include <brfc/expr/MockExpression.hpp>
 
 using ::testing::Matcher;
@@ -41,11 +37,9 @@ namespace db {
 class db_AttributeQuery_test : public ::testing::Test {
   public:
     db_AttributeQuery_test()
-        : db()
-        , query(&db) {
+        : query() {
     }
     
-    MockDatabase db;
     AttributeQuery query;
 };
 
@@ -218,19 +212,6 @@ TEST_F(db_AttributeQuery_test, test_group) {
     const AttributeQuery::ExpressionVector& vec = query.group();
     ASSERT_EQ((size_t)1, vec.size());
     EXPECT_EQ(cexpr, vec.at(0));
-}
-
-TEST_F(db_AttributeQuery_test, test_execute) {
-    MockAttributeResult r;
-    EXPECT_CALL(db, do_execute(Matcher<const AttributeQuery&>(Ref(query))))
-        .WillOnce(Return(&r));
-    
-    EXPECT_EQ(&r, query.execute());
-}
-
-TEST_F(db_AttributeQuery_test, test_execute_no_db) {
-    AttributeQuery q;
-    EXPECT_THROW(q.execute(), std::runtime_error);
 }
 
 } // namespace db

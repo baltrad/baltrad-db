@@ -23,9 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/db/Database.hpp>
-#include <brfc/db/FileResult.hpp>
-
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Expression.hpp>
@@ -33,17 +30,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace db {
 
-FileQuery::FileQuery(Database* db)
-        : db_(db)
-        , filter_()
+FileQuery::FileQuery()
+        : filter_()
         , order_()
         , limit_(0)
         , skip_(0) {
 }
 
 FileQuery::FileQuery(const FileQuery& other)
-        : db_(other.db_)
-        , filter_()
+        : filter_()
         , order_()
         , limit_(other.limit_)
         , skip_(other.skip_) {
@@ -63,7 +58,6 @@ FileQuery::operator=(const FileQuery& rhs) {
     if (this == &rhs)
         return *this;
 
-    db_ = rhs.db_;
     if (rhs.filter_) {
         filter_ = rhs.filter_->clone();
     } else {
@@ -82,13 +76,6 @@ FileQuery&
 FileQuery::filter(const expr::Expression& expr) {
     filter_ = filter_ ? filter_->and_(expr) : expr.clone();
     return *this;
-}
-
-FileResult*
-FileQuery::execute() {
-    if (not db_)
-        throw std::runtime_error("FileQuery not associated with Database");
-    return db_->execute(*this);
 }
 
 FileQuery&

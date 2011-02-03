@@ -27,9 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace db {
 
-class Database;
-class FileResult;
-
 /**
  * @brief query against the database
  */
@@ -45,9 +42,8 @@ class FileQuery {
 
     /**
      * @brief constructor
-     * @param db Database instance this FileQuery executes on
      */
-    FileQuery(Database* db=0);
+    FileQuery();
 
     /**
      * @brief copy constructor
@@ -64,11 +60,6 @@ class FileQuery {
      */
     FileQuery& operator=(const FileQuery& rhs);
     
-    /**
-     * @brief access bound database
-     */
-    db::Database* database() const { return db_; }
-
     /**
      * @brief add a filtering expression
      * @param expr filter expression
@@ -104,18 +95,7 @@ class FileQuery {
 
     int skip() const { return skip_; }
 
-    /**
-     * @brief execute this query
-     * @return ResultSet containing executed query results
-     * @note caller takes ownership of the result
-     *
-     * each row in the results contains a value for each attribute marked
-     * for fetching, in the order they were marked.
-     */
-    FileResult* execute();
-
   private:
-    Database* db_;
     expr::ExpressionPtr filter_;
     OrderVector order_;
     int limit_;

@@ -25,9 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/db/Database.hpp>
-#include <brfc/db/AttributeResult.hpp>
-
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Expression.hpp>
@@ -36,9 +33,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace db {
 
-AttributeQuery::AttributeQuery(Database* db)
-        : db_(db)
-        , distinct_()
+AttributeQuery::AttributeQuery()
+        : distinct_()
         , fetch_()
         , filter_()
         , order_()
@@ -46,8 +42,7 @@ AttributeQuery::AttributeQuery(Database* db)
 }
 
 AttributeQuery::AttributeQuery(const AttributeQuery& other)
-        : db_(other.db_)
-        , distinct_(other.distinct_)
+        : distinct_(other.distinct_)
         , fetch_()
         , filter_()
         , order_()
@@ -71,7 +66,6 @@ AttributeQuery::operator=(const AttributeQuery& rhs) {
     if (this == &rhs)
         return *this;
 
-    db_ = rhs.db_;
     distinct_ = rhs.distinct_;
     fetch_.clear();
     BOOST_FOREACH(expr::ExpressionPtr expr, rhs.fetch_) {
@@ -121,13 +115,6 @@ AttributeQuery&
 AttributeQuery::order_by(const expr::Expression& expr, SortDir dir) {
     order_.push_back(std::make_pair(expr.clone(), dir));
     return *this;
-}
-
-AttributeResult*
-AttributeQuery::execute() {
-    if (not db_)
-        throw std::runtime_error("AttributeQuery not associated with Database");
-    return db_->execute(*this);
 }
 
 } // namespace db

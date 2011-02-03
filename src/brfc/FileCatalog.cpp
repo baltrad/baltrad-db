@@ -24,10 +24,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/LocalStorage.hpp>
 
-#include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/Database.hpp>
 #include <brfc/db/FileEntry.hpp>
-#include <brfc/db/FileQuery.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
@@ -118,16 +116,6 @@ FileCatalog::remove(const db::FileEntry& entry) {
                   << e.what() << std::endl << std::flush;
     }
     return removed;
-}
-
-db::FileQuery
-FileCatalog::query_file() const {
-    return db::FileQuery(db_);
-}
-
-db::AttributeQuery
-FileCatalog::query_attribute() const {
-    return db::AttributeQuery(db_);
 }
 
 std::string
