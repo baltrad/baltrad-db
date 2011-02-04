@@ -32,6 +32,7 @@ import eu.baltrad.fc.db.Database;
 import eu.baltrad.fc.db.FileEntry;
 import eu.baltrad.fc.db.FileQuery;
 
+import eu.baltrad.fc.oh5.File;
 import eu.baltrad.fc.oh5.Source;
 import eu.baltrad.fc.oh5.hl.HlFile;
 
@@ -85,14 +86,15 @@ public class TestFileCatalog extends TestCase {
     }
   }
 
-/*
-  XXX: this test fails because of invalid method signature
   public void testCustomFileNamer() {
-    FileNamer namer = new IncrementalFileNamer(0);
-    assertEquals("1", namer.name(file));
-    assertEquals("2", namer.name(file));
+    FileNamer namer = new FileNamer() {
+      protected String do_name(File file) {
+        return "file";
+      }
+    };
+
+    assertEquals("file", namer.name(file));
   }
-*/
 
   public void testSourceList() {
     List<Source> sources = fc.database().sources();
