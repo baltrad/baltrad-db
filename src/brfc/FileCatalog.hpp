@@ -58,7 +58,7 @@ class FileCatalog {
      * @param storage local storage (caller retains ownership)
      */
     explicit
-    FileCatalog(db::Database* db, LocalStorage* storage=0);
+    FileCatalog(db::Database* db, LocalStorage* storage);
 
     /**
      * @brief destructor
