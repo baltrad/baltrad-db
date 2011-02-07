@@ -74,6 +74,18 @@ class Function : public Expression {
             args_.push_back(other.args_.at(i)->clone());
         }
     }
+
+    virtual bool do_equals(const Expression& other) const {
+        const Function* optr = dynamic_cast<const Function*>(&other);
+        if (optr and name_ == optr->name_ and args_.size() == optr->args_.size()) {
+            for (size_t i = 0; i < args_.size(); ++i) {
+                if (not args_.at(i)->equals(*optr->args_.at(i)))
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    }
    
   private:
     std::string name_;

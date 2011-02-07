@@ -16,23 +16,29 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef BRFC_EXPR_MOCK_EXPRESSION_HPP
-#define BRFC_EXPR_MOCK_EXPRESSION_HPP
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include <brfc/expr/Expression.hpp>
+#include <brfc/expr/Attribute.hpp>
 
 namespace brfc {
 namespace expr {
 
-class MockExpression : public Expression {
-  public:
-    MOCK_CONST_METHOD0(clone, ExpressionPtr());
-    MOCK_CONST_METHOD1(do_equals, bool(const Expression&));
-};
+TEST(expr_Attribute_test, test_equals) {
+    Attribute a1("a1", Attribute::STRING);
+    Attribute a2("a1", Attribute::INT64);
+    Attribute a3("a2", Attribute::STRING);
+    
+    EXPECT_TRUE(a1.equals(a1));
+    EXPECT_FALSE(a1.equals(a2));
+    EXPECT_FALSE(a1.equals(a3));
+    EXPECT_FALSE(a2.equals(a1));
+    EXPECT_TRUE(a2.equals(a2));
+    EXPECT_FALSE(a2.equals(a3));
+    EXPECT_FALSE(a3.equals(a1));
+    EXPECT_FALSE(a3.equals(a2));
+    EXPECT_TRUE(a3.equals(a3));
+}
 
 } // namespace expr
 } // namespace brfc
-
-#endif // BRFC_EXPR_MOCK_EXPRESSION_HPP

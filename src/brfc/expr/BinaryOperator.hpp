@@ -59,6 +59,18 @@ class BinaryOperator : public Expression {
             , rhs_(other.rhs_->clone()) {
     }
 
+    bool do_equals(const Expression& other) const {
+        const BinaryOperator* optr = dynamic_cast<const BinaryOperator*>(&other);
+        if (optr and op_ == optr->op_) {
+            if (lhs_->equals(*optr->lhs_) and rhs_->equals(*optr->rhs_)) {
+                return true;
+            } else if (lhs_->equals(*optr->rhs_) and rhs_->equals(*optr->lhs_)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
   private:
     std::string op_;
     ExpressionPtr lhs_;

@@ -67,6 +67,13 @@ class Attribute : public Expression {
             , type_(other.type_) {
     }
 
+    bool do_equals(const Expression& other) const {
+        const Attribute* optr = dynamic_cast<const Attribute*>(&other);
+        if (optr and name_ == optr->name_ and type_ == optr->type_)
+            return true;
+        return false;
+    }
+
   private:
     std::string name_;
     Type type_;

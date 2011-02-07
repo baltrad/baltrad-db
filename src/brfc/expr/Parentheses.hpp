@@ -52,6 +52,13 @@ class Parentheses : public Expression {
             : expr_(other.expr_->clone()) {
     }
 
+    virtual bool do_equals(const Expression& other) const {
+        const Parentheses* optr = dynamic_cast<const Parentheses*>(&other);
+        if (optr and expr_->equals(*optr->expr_))
+            return true;
+        return false;
+    }
+
   private:
     ExpressionPtr expr_;
 };

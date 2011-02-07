@@ -69,6 +69,13 @@ class Label : public Expression {
             , name_(other.name_) {
     }
 
+    virtual bool do_equals(const Expression& other) const {
+        const Label* optr = dynamic_cast<const Label*>(&other);
+        if (optr and name_ == optr->name_ and expr_->equals(*optr->expr_))
+            return true;
+        return false;
+    }
+
   private:
     ExpressionPtr expr_;
     std::string name_;

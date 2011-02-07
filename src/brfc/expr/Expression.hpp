@@ -50,6 +50,14 @@ class Expression : public boost::noncopyable {
     virtual ~Expression() { }
 
     /**
+     * @brief test equality of two expressions
+     * @return true if this is equal to @c other
+     */
+    bool equals(const Expression& other) const {
+        return do_equals(other);
+    }
+    
+    /**
      * @name comparison operators
      * @{
      */
@@ -147,6 +155,8 @@ class Expression : public boost::noncopyable {
      * @brief copy-constructor
      */
     Expression(const Expression& other);
+
+    virtual bool do_equals(const Expression& other) const = 0;
 };
 
 }

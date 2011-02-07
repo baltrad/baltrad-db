@@ -48,6 +48,13 @@ class Literal : public Expression {
             : value_(other.value_) {
     }
 
+    virtual bool do_equals(const Expression& other) const {
+        const Literal* optr = dynamic_cast<const Literal*>(&other);
+        if (optr and value_ == optr->value_)
+            return true;
+        return false;
+    }
+
   private:
     Variant value_;
 };
