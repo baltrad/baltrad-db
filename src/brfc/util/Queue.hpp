@@ -48,10 +48,6 @@ template<typename T>
 class Queue {
   public:
     /**
-     * @brief 
-     */
-
-    /**
      * @param max maximum size of the queue (0 means no limit on size)
      */
     Queue(size_t max_size=0)
@@ -64,11 +60,12 @@ class Queue {
     
     /**
      * @brief get a value from the front of the queue
-     * @param timeout time to wait (in msecs). value < 0 means wait forever
+     * @param timeout time to wait (in msecs). A negative value means not
+     *        to wait, a zero value means to wait until a value is available
      * @throw queue_empty if timeout occurs and no value available
      * @return value from the front of the queue
      */
-    T get(int timeout=-1) {
+    T get(int timeout=0) {
         boost::unique_lock<boost::mutex> lock(mutex_);
         
         if (timeout < 0) { // don't wait
@@ -96,12 +93,19 @@ class Queue {
     }
     
     /**
+     * @brief get a value from the front of the queue
+     * @throw queue_empty if a value is not immediately available
+     */
+    T get_nowait() { return get(-1); }
+
+    /**
      * @brief put a value to the end of the queue
      * @param value the value to put
-     * @param timeout time to wait (in msecs). value < 0 means wait forever
+     * @param timeout time to wait (in msecs). A negative value means not
+     *        to wait, a zero value means to wait until value can be inserted
      * @throw queue_full if timeout occurs and queue is still full
      */
-    void put(const T& value, int timeout=-1) {
+    void put(const T& value, int timeout=0) {
         boost::unique_lock<boost::mutex> lock(mutex_);
         
         if (timeout < 0) { // don't wait
@@ -125,6 +129,13 @@ class Queue {
         lock.unlock();
         not_empty_.notify_one(); // one value can be added now
     }
+    
+    /**
+     * @brief put a value to the end of the queue
+     * @param value the value to put
+     * @throw queue_full if queue is full
+     */
+    void put_nowait(const T& value) { put(value, -1); }
 
     size_t size() const {
         boost::unique_lock<boost::mutex> lock(mutex_);

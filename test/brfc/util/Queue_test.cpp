@@ -31,10 +31,10 @@ TEST(util_Queue_test, test_put) {
     EXPECT_EQ(2u, q.size());
 }
 
-TEST(util_Queue_test, test_put_nonblocking_throws_on_full) {
+TEST(util_Queue_test, test_put_nowait_throws_on_full) {
     Queue<int> q(1);
     q.put(1);
-    EXPECT_THROW(q.put(1), queue_full);
+    EXPECT_THROW(q.put_nowait(1), queue_full);
 }
 
 TEST(util_Queue_test, test_put_timeout_throws_on_full) {
@@ -54,9 +54,9 @@ TEST(util_Queue_test, test_get) {
     EXPECT_EQ(0u, q.size());
 }
 
-TEST(util_Queue_test, test_get_nonblocking_throws_on_empty) {
+TEST(util_Queue_test, test_get_nowait_throws_on_empty) {
     Queue<int> q;
-    EXPECT_THROW(q.get(), queue_empty);
+    EXPECT_THROW(q.get_nowait(), queue_empty);
 }
 
 TEST(util_Queue_test, test_get_timeout_throws_on_empty) {
