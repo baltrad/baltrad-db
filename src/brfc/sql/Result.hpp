@@ -38,6 +38,13 @@ class Result : public boost::noncopyable {
     virtual ~Result() { }
 
     /**
+     * @brief close this result
+     */
+    void close() {
+        do_close();
+    }
+
+    /**
      * @name seeking
      * @{
      */
@@ -89,8 +96,12 @@ class Result : public boost::noncopyable {
         return do_affected_rows();
     }
 
-
   protected:
+    /**
+     * @brief close() implementation
+     */
+    virtual void do_close() = 0;
+
     /**
      * @brief next() implementation
      */

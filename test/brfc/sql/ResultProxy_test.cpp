@@ -47,6 +47,12 @@ class sql_ResultProxy_test : public ::testing::Test {
     ResultProxy proxy;
 };
 
+TEST_F(sql_ResultProxy_test, test_close) {
+    EXPECT_CALL(result, do_close());
+
+    proxy.close();
+}
+
 TEST_F(sql_ResultProxy_test, test_next) {
     EXPECT_CALL(result, do_next())
         .WillOnce(Return(true));

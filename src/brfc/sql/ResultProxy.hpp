@@ -47,6 +47,11 @@ class ResultProxy : public Result {
     /**
      * @brief forward the call to the proxied result
      */
+    virtual void do_close();
+
+    /**
+     * @brief forward the call to the proxied result
+     */
     virtual bool do_next();
 
     /**

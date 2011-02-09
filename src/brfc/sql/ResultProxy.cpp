@@ -35,6 +35,11 @@ ResultProxy::~ResultProxy() {
 
 }
 
+void
+ResultProxy::do_close() {
+    return result_->close();
+}
+
 bool
 ResultProxy::do_next() {
     return result_->next();

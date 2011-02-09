@@ -21,8 +21,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_PG_RESULT_HPP
 
 #include <brfc/sql/Result.hpp>
+#include <brfc/smart_ptr.hpp>
 
-#include <pqxx/result>
+
+namespace pqxx {
+    class result;
+} // namespace pqxx
 
 namespace brfc {
 namespace sql {
@@ -35,6 +39,7 @@ class Result : public sql::Result {
     Result(const pqxx::result& result, const Types* types);
   
   protected:
+    virtual void do_close();
     virtual bool do_next();
     virtual bool do_seek(int idx);
     virtual int do_size() const;
@@ -51,10 +56,10 @@ class Result : public sql::Result {
     virtual int do_affected_rows() const;
 
   private:
-    Variant pqtype_to_variant(const pqxx::result::field& field,
-                              pqxx::oid coltype) const;
+    pqxx::result& result();
+    const pqxx::result& result() const;
 
-    pqxx::result result_;
+    scoped_ptr<pqxx::result> result_;
     const Types* types_;
     int row_;
 };

@@ -17,30 +17,42 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_SQL_MOCK_RESULT_HPP
-#define BRFC_SQL_MOCK_RESULT_HPP
+#include <gtest/gtest.h>
 
-#include <gmock/gmock.h>
+#include <brfc/exceptions.hpp>
+#include <brfc/sql/pg/Result.hpp>
+#include <brfc/sql/pg/Types.hpp>
 
-#include <brfc/sql/Result.hpp>
+#include <pqxx/result>
 
 namespace brfc {
-
 namespace sql {
+namespace pg {
 
-class MockResult : public Result {
+class sql_pg_Result_test : public ::testing::Test {
   public:
-    MOCK_METHOD0(do_close, void());
-    MOCK_METHOD0(do_next, bool());
-    MOCK_METHOD1(do_seek, bool(int));
-    MOCK_CONST_METHOD0(do_size, int());
+    sql_pg_Result_test()
+            : pqxx_result()
+            , types()
+            , r(pqxx_result, &types) {
+    }
 
-    MOCK_CONST_METHOD1(do_value_at, Variant(unsigned int));
-    MOCK_CONST_METHOD1(do_value_at, Variant(const std::string&));
-    MOCK_CONST_METHOD0(do_affected_rows, int());
+    pqxx::result pqxx_result;
+    Types types;
+    Result r;
 };
 
+TEST_F(sql_pg_Result_test, test_closed_result_throws) {
+    r.close();
+
+    EXPECT_THROW(r.next(), db_error);
+    EXPECT_THROW(r.seek(1), db_error);
+    EXPECT_THROW(r.size(), db_error);
+    EXPECT_THROW(r.value_at(0), db_error);
+    EXPECT_THROW(r.value_at("column"), db_error);
+    EXPECT_THROW(r.affected_rows(), db_error);
+}
+
+} // namespace pg
 } // namespace sql
 } // namespace brfc
-
-#endif // BRFC_SQL_MOCK_RESULT_HPP

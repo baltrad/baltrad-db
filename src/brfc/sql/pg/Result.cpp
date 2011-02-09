@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/pg/Result.hpp>
 
+#include <pqxx/result>
+
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 
@@ -30,10 +32,29 @@ namespace pg {
 
 Result::Result(const pqxx::result& result,
                const Types* types)
-        : result_(result)
+        : result_(new pqxx::result(result))
         , types_(types)
         , row_(-1) {
 
+}
+
+void
+Result::do_close() {
+    result_.reset();
+}
+
+pqxx::result&
+Result::result() {
+    if (not result_)
+        throw db_error("result is closed");
+    return *result_;
+}
+
+const pqxx::result&
+Result::result() const {
+    if (not result_)
+        throw db_error("result is closed");
+    return *result_;
 }
 
 bool
@@ -50,38 +71,43 @@ Result::do_seek(int idx) {
 
 int
 Result::do_size() const {
-    return result_.size();
+    return result().size();
 }
 
+namespace {
+
 Variant
-Result::pqtype_to_variant(const pqxx::result::field& field,
-                                  pqxx::oid coltype) const {
+pqtype_to_variant(const pqxx::result::field& field,
+                  pqxx::oid coltype,
+                  const Types& types) {
     if (field.is_null())
         return Variant();
-    else if (coltype == types_->int2_oid or
-             coltype == types_->int4_oid or
-             coltype == types_->int8_oid)
+    else if (coltype == types.int2_oid or
+             coltype == types.int4_oid or
+             coltype == types.int8_oid)
         return Variant(field.as<long long>());
-    else if (coltype == types_->float4_oid or
-             coltype == types_->float8_oid)
+    else if (coltype == types.float4_oid or
+             coltype == types.float8_oid)
         return Variant(field.as<double>());
-    else if (coltype == types_->bool_oid)
+    else if (coltype == types.bool_oid)
         return Variant(field.as<bool>());
-    else if (coltype == types_->date_oid)
+    else if (coltype == types.date_oid)
         return Variant(Date::from_extended_iso_string(field.c_str()));
-    else if (coltype == types_->time_oid)
+    else if (coltype == types.time_oid)
         return Variant(Time::from_extended_iso_string(field.c_str()));
     else {
         return Variant(field.c_str());
     }
 }
 
+} // namespace anonymous
+
 Variant
 Result::do_value_at(unsigned int pos) const {
     try {
-        const pqxx::result::field& field = result_.at(row_).at(pos);
-        pqxx::oid coltype = result_.column_type(pos);
-        return pqtype_to_variant(field, coltype);
+        const pqxx::result::field& field = result().at(row_).at(pos);
+        pqxx::oid coltype = result().column_type(pos);
+        return pqtype_to_variant(field, coltype, *types_);
     } catch (const std::out_of_range&) {
         throw lookup_error("invalid pqxx::result position");
     }
@@ -90,9 +116,9 @@ Result::do_value_at(unsigned int pos) const {
 Variant
 Result::do_value_at(const std::string& col) const  {
     try {
-        const pqxx::result::field& field = result_.at(row_).at(col);
-        pqxx::oid coltype = result_.column_type(col);
-        return pqtype_to_variant(field, coltype);
+        const pqxx::result::field& field = result().at(row_).at(col);
+        pqxx::oid coltype = result().column_type(col);
+        return pqtype_to_variant(field, coltype, *types_);
     } catch (const std::invalid_argument&) {
         throw lookup_error("invalid pqxx::result column: " + col);
     }
@@ -100,7 +126,7 @@ Result::do_value_at(const std::string& col) const  {
 
 int
 Result::do_affected_rows() const {
-    return result_.affected_rows();
+    return result().affected_rows();
 }
 
 } // namespace pg
