@@ -16,20 +16,48 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef BRFC_SQL_POOL_RETURNER_HPP
+#define BRFC_SQL_POOL_RETURNER_HPP
 
-#include <gmock/gmock.h>
-
-#include <brfc/sql/ConnectionPool.hpp>
+#include <brfc/sql/ConnectionDtor.hpp>
 
 namespace brfc {
 namespace sql {
 
-class MockConnectionPool : public ConnectionPool {
+class ConnectionPool;
+
+/**
+ * @brief return a connection to pool
+ */
+class PoolReturner : public ConnectionDtor {
   public:
-    MOCK_METHOD0(do_get, Connection*());
-    MOCK_METHOD1(do_put, void(Connection*));
+    /**
+     * @brief constructor
+     * @param pool the connection pool to return connections to
+     */
+    PoolReturner(ConnectionPool* pool=0)
+            : pool_(pool) {
+    }
+    
+    /**
+     * @brief associate with a pool
+     */
+    void pool(ConnectionPool* pool) {
+        pool_ = pool;
+    }
+
+    ConnectionPool* pool() const { return pool_; }
+
+  private:
+    /**
+     * @brief put the connection back to pool or delete the connection
+     */
+    virtual void do_destroy(Connection* c);
+    
+    ConnectionPool* pool_;
 };
 
 } // namespace sql
 } // namespace brfc
 
+#endif // BRFC_SQL_POOL_RETURNER_HPP

@@ -20,55 +20,50 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_CONNECTION_PROXY_HPP
 #define BRFC_SQL_CONNECTION_PROXY_HPP
 
-#include <brfc/sql/Connection.hpp>
+#include <list>
+
 #include <brfc/smart_ptr.hpp>
+#include <brfc/sql/Connection.hpp>
 
 namespace brfc {
 namespace sql {
 
-class ConnectionPool;
+class ConnectionDtor;
+class ResultProxy;
 
 /**
  * @brief a proxy for a database connection held by a pool
  */
-class ConnectionProxy : public Connection,
-                        public enable_shared_from_this<ConnectionProxy> {
-  public:    
-    static shared_ptr<ConnectionProxy> create(ConnectionPool* pool,
-                                              Connection* proxied);
+class ConnectionProxy : public Connection {
+  public:
+    /**
+     * @brief constructor
+     * @param proxied the proxied database connection
+     * @param conn_dtor destructor used when this proxy is closed
+     */
+    ConnectionProxy(Connection* proxied,
+                    shared_ptr<ConnectionDtor> conn_dtor);
 
     /**
      * @brief destructor
      *
-     * if associated with a pool, return the connection back to pool,
-     * otherwise, destroy the connection
+     * close, if not closed
      */
     virtual ~ConnectionProxy();
 
-    ConnectionPool* pool() const { return pool_; }
+    void remove(ResultProxy* result);
 
-    Connection* proxied() const { return proxied_.get(); }
-    
-    /**
-     * @brief disassociate from pool
-     */
-    void release();
+    Connection& proxied();
+    const Connection& proxied() const;
     
   protected:
-    /**
-     * @brief constructor
-     * @param pool the pool the proxied connection is from
-     * @param proxied the proxied database connection
-     */
-    ConnectionProxy(ConnectionPool* pool, Connection* proxied);
-
     /**
      * @brief forward the call to the proxied database connection
      */
     virtual void do_open();
 
     /**
-     * @brief forward the call to the proxied database connection
+     * @brief call ConnectionDtor::destroy for the proxied connection
      */
     virtual void do_close();
 
@@ -131,8 +126,10 @@ class ConnectionProxy : public Connection,
     virtual long long do_last_insert_id() const;
 
   private:
-    ConnectionPool* pool_;
-    auto_ptr<Connection> proxied_;
+
+    Connection* proxied_;
+    shared_ptr<ConnectionDtor> conn_dtor_;
+    std::list<ResultProxy*> results_;
 };
 
 } // namespace sql

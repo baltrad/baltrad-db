@@ -111,7 +111,7 @@ class RelationalDatabase : public Database {
     void populate_mapper();
     void populate_hasher();
 
-    shared_ptr<sql::ConnectionCreator> creator_;
+    scoped_ptr<sql::ConnectionCreator> creator_;
     shared_ptr<sql::ConnectionPool> pool_;
     shared_ptr<AttributeMapper> mapper_;
     shared_ptr<FileHasher> file_hasher_;

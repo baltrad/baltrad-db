@@ -41,14 +41,16 @@ namespace sql {
 
 struct sql_Result_itest : public testing::TestWithParam<const char*> {
     sql_Result_itest()
-            : db(ITestEnv::get_database(GetParam())) {
+            : db(ITestEnv::get_database(GetParam()))
+            , conn(db->conn()) {
     }
 
     shared_ptr<Result> query(const std::string& stmt, const BindMap& binds) {
-        return shared_ptr<Result>(db->conn()->execute(Query(stmt, binds)));
+        return shared_ptr<Result>(conn->execute(Query(stmt, binds)));
     }
     
     test::TestRDB* db;
+    shared_ptr<sql::Connection> conn;
 };
 
 TEST_P(sql_Result_itest, size) {

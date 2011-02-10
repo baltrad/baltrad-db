@@ -19,97 +19,121 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/ConnectionProxy.hpp>
 
-#include <brfc/sql/Connection.hpp>
-#include <brfc/sql/ConnectionPool.hpp>
+#include <boost/foreach.hpp>
+
+#include <brfc/exceptions.hpp>
+#include <brfc/sql/ConnectionDtor.hpp>
 #include <brfc/sql/ResultProxy.hpp>
 
 namespace brfc {
 namespace sql {
 
-ConnectionProxy::ConnectionProxy(ConnectionPool* pool, Connection* proxied)
-        : pool_(pool)
-        , proxied_(proxied) {
-}
-
-shared_ptr<ConnectionProxy>
-ConnectionProxy::create(ConnectionPool* pool, Connection* proxied) {
-    return shared_ptr<ConnectionProxy>(new ConnectionProxy(pool, proxied));
+ConnectionProxy::ConnectionProxy(Connection* proxied,
+                                 shared_ptr<ConnectionDtor> conn_dtor)
+        : proxied_(proxied)
+        , conn_dtor_(conn_dtor)
+        , results_() {
 }
 
 ConnectionProxy::~ConnectionProxy() {
-    if (pool_)
-        pool_->put(proxied_.release());
+    if (proxied_)
+        do_close();
+}
+
+Connection&
+ConnectionProxy::proxied() {
+    if (not proxied_)
+        throw db_error("ConnectionProxy is closed");
+    return *proxied_;
+}
+
+const Connection&
+ConnectionProxy::proxied() const {
+    if (not proxied_)
+        throw db_error("ConnectionProxy is closed");
+    return *proxied_;
 }
 
 void
-ConnectionProxy::release() {
-    pool_ = 0;
+ConnectionProxy::remove(ResultProxy* result) {
+    results_.remove(result);
 }
 
 void
 ConnectionProxy::do_open() {
-    proxied_->do_open();
+    proxied().do_open();
 }
 
 void
 ConnectionProxy::do_close() {
-    proxied_->do_close();
+    if (proxied_) {
+        conn_dtor_->destroy(proxied_);
+        proxied_ = 0;
+    }
+    BOOST_FOREACH(ResultProxy* rp, results_) {
+        rp->invalidate();
+    }
+    results_.clear();
 }
 
 bool
 ConnectionProxy::do_is_open() const {
-    return proxied_->do_is_open();
+    if (proxied_)
+        return proxied_->do_is_open();
+    return false;
 }
 
 void
 ConnectionProxy::do_begin() {
-    proxied_->do_begin();
+    proxied().do_begin();
 }
 
 void
 ConnectionProxy::do_commit() {
-    proxied_->do_commit();
+    proxied().do_commit();
 }
 
 void
 ConnectionProxy::do_rollback() {
-    proxied_->do_rollback();
+    proxied().do_rollback();
 }
 
 Result*
 ConnectionProxy::do_execute(const std::string& stmt) {
-    auto_ptr<Result> r(proxied_->do_execute(stmt));
-    return new ResultProxy(shared_from_this(), r.release());
+    auto_ptr<Result> r(proxied().do_execute(stmt));
+    auto_ptr<ResultProxy> rp(new ResultProxy(this, r.release()));
+    results_.push_back(rp.get());
+    return rp.release();
 }
 
 bool
 ConnectionProxy::do_in_transaction() const {
-    return proxied_->do_in_transaction();
+    return proxied().do_in_transaction();
 }
 
 const Dialect&
 ConnectionProxy::do_dialect() const {
-    return proxied_->do_dialect();
+    return proxied().do_dialect();
 }
 
 Compiler&
 ConnectionProxy::do_compiler() {
-    return proxied_->do_compiler();
+    return proxied().do_compiler();
 }
 
 void
 ConnectionProxy::do_large_object_to_file(long long id, const std::string& path) {
-    proxied_->do_large_object_to_file(id, path);
+    proxied().do_large_object_to_file(id, path);
 }
 
 long long
 ConnectionProxy::do_store_large_object(const std::string& path) {
-    return proxied_->do_store_large_object(path);
+    return proxied().do_store_large_object(path);
 }
 
 long long
 ConnectionProxy::do_last_insert_id() const {
-    return proxied_->do_last_insert_id();
+    return proxied().do_last_insert_id();
 }
 
 } // namespace sql

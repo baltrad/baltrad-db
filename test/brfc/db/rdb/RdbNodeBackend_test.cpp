@@ -43,7 +43,6 @@ class db_rdb_RdbNodeBackend_test : public ::testing::Test {
   public:
     db_rdb_RdbNodeBackend_test()
             : conn()
-            , conn_ptr(&conn, no_delete)
             , pool()
             , pool_ptr(&pool, no_delete)
             , db(pool_ptr)
@@ -55,14 +54,13 @@ class db_rdb_RdbNodeBackend_test : public ::testing::Test {
 
     virtual void SetUp() {
         ON_CALL(pool, do_get())
-            .WillByDefault(Return(conn_ptr));
+            .WillByDefault(Return(&conn));
         ON_CALL(node, do_file())
             .WillByDefault(Return(&entry));
         backend.front(&node);
     }
 
     sql::MockConnection conn;
-    shared_ptr<sql::Connection> conn_ptr;
     sql::MockConnectionPool pool;
     shared_ptr<sql::ConnectionPool> pool_ptr;
     RelationalDatabase db;

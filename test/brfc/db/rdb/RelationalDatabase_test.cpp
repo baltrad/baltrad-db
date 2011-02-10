@@ -45,8 +45,7 @@ namespace rdb {
 class db_rdb_RelationalDatabase_test : public ::testing::Test {
   public:
     db_rdb_RelationalDatabase_test()
-            : conn()
-            , conn_ptr(&conn, no_delete)
+            : conn(new ::testing::NiceMock<sql::MockConnection>())
             , dialect()
             , compiler(&dialect)
             , pool()
@@ -57,16 +56,15 @@ class db_rdb_RelationalDatabase_test : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        conn.delegate_to_fake();
-        conn.open();
-        ON_CALL(conn, do_dialect())
+        conn->delegate_to_fake();
+        conn->open();
+        ON_CALL(*conn, do_dialect())
             .WillByDefault(ReturnRef(dialect));
-        ON_CALL(conn, do_compiler())
+        ON_CALL(*conn, do_compiler())
             .WillByDefault(ReturnRef(compiler));
     }
     
-    ::testing::NiceMock<sql::MockConnection> conn;
-    shared_ptr<sql::Connection> conn_ptr;
+    ::testing::NiceMock<sql::MockConnection>* conn;
     ::testing::NiceMock<sql::MockDialect> dialect;
     sql::DialectCompiler compiler;
     sql::MockConnectionPool pool;
@@ -78,8 +76,8 @@ class db_rdb_RelationalDatabase_test : public ::testing::Test {
 
 TEST_F(db_rdb_RelationalDatabase_test, test_execute_attribute_query) {
     EXPECT_CALL(pool, do_get())
-        .WillOnce(Return(conn_ptr));
-    EXPECT_CALL(conn, do_execute(_))
+        .WillOnce(Return(conn));
+    EXPECT_CALL(*conn, do_execute(_))
         .WillOnce(Return(result_ptr.release()));
 
     AttributeQuery q;
@@ -88,8 +86,8 @@ TEST_F(db_rdb_RelationalDatabase_test, test_execute_attribute_query) {
 
 TEST_F(db_rdb_RelationalDatabase_test, test_execute_file_query) {
     EXPECT_CALL(pool, do_get())
-        .WillOnce(Return(conn_ptr));
-    EXPECT_CALL(conn, do_execute(_))
+        .WillOnce(Return(conn));
+    EXPECT_CALL(*conn, do_execute(_))
         .WillOnce(Return(result_ptr.release()));
 
     FileQuery q;
@@ -99,10 +97,10 @@ TEST_F(db_rdb_RelationalDatabase_test, test_execute_file_query) {
 TEST_F(db_rdb_RelationalDatabase_test, test_remove) {
     MockFileEntry e;
     EXPECT_CALL(pool, do_get())
-        .WillOnce(Return(conn_ptr));
+        .WillOnce(Return(conn));
     EXPECT_CALL(e, do_uuid())
         .WillOnce(Return("abcdefg"));
-    EXPECT_CALL(conn, do_execute(_)) // check statement
+    EXPECT_CALL(*conn, do_execute(_)) // check statement
         .WillOnce(Return(result_ptr.release()));
     EXPECT_CALL(result, do_affected_rows())
         .WillOnce(Return(1));

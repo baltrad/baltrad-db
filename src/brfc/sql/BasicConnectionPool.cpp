@@ -24,24 +24,34 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/ConnectionCreator.hpp>
 #include <brfc/sql/ConnectionProxy.hpp>
+#include <brfc/sql/PoolReturner.hpp>
 
 namespace brfc {
 namespace sql {
 
-BasicConnectionPool::BasicConnectionPool(shared_ptr<ConnectionCreator> creator)
+BasicConnectionPool::BasicConnectionPool(ConnectionCreator* creator)
         : creator_(creator)
+        , returner_(new PoolReturner(this))
         , lock_()
-        , pool_()
-        , leased_() {
+        , pool_() {
+
 }
+
+BasicConnectionPool::BasicConnectionPool(ConnectionCreator* creator,
+                                         PoolReturner* returner)
+        : creator_(creator)
+        , returner_(returner, no_delete)
+        , lock_()
+        , pool_() {
+    returner->pool(this);
+}
+
 
 BasicConnectionPool::~BasicConnectionPool() {
-    BOOST_FOREACH(const LeaseMap::value_type& lease, leased_) {
-        lease.second->release();
-    }
+    returner_->pool(0);
 }
 
-shared_ptr<Connection>
+Connection*
 BasicConnectionPool::do_get() {
     boost::lock_guard<boost::mutex> guard(lock_);
     std::auto_ptr<Connection> conn;
@@ -51,15 +61,12 @@ BasicConnectionPool::do_get() {
         conn.reset(creator_->create());
         conn->open();
     }
-    shared_ptr<ConnectionProxy> proxy = ConnectionProxy::create(this, conn.release());
-    leased_.insert(std::make_pair(proxy->proxied(), proxy.get()));
-    return proxy;
+    return new ConnectionProxy(conn.release(), returner_);
 }
 
 void
 BasicConnectionPool::do_put(Connection* conn) {
     boost::lock_guard<boost::mutex> guard(lock_);
-    leased_.erase(conn);
     pool_.push_back(conn);
 }
 

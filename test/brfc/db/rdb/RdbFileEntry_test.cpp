@@ -42,7 +42,6 @@ class db_rdb_RdbFileEntry_test : public ::testing::Test {
   public:
     db_rdb_RdbFileEntry_test()
             : conn()
-            , conn_ptr(&conn, no_delete)
             , pool()
             , pool_ptr(&pool, no_delete)
             , db(pool_ptr)
@@ -52,11 +51,10 @@ class db_rdb_RdbFileEntry_test : public ::testing::Test {
 
     virtual void SetUp() {
         ON_CALL(pool, do_get())
-            .WillByDefault(Return(conn_ptr));
+            .WillByDefault(Return(&conn));
     }
     
     sql::MockConnection conn;
-    shared_ptr<sql::Connection> conn_ptr;
     sql::MockConnectionPool pool;
     shared_ptr<sql::ConnectionPool> pool_ptr;
     RelationalDatabase db;
@@ -71,36 +69,6 @@ TEST_F(db_rdb_RdbFileEntry_test, test_ctor) {
     EXPECT_FALSE(be->loaded());
 }
 
-/*
-TEST_F(db_rdb_RdbFileEntry_test, test_source_id) {
-    EXPECT_CALL(helper, load_file(Ref(entry)));
-    entry.source_id();
-
-    entry.source_id(10);
-    entry.source_id();
-}
-
-TEST_F(db_rdb_RdbFileEntry_test, test_source) {
-    entry.source_id(10);
-
-    oh5::Source src;
-    src.add("name", "test");
-
-    EXPECT_CALL(helper, select_source(10))
-        .WillOnce(Return(src));
-
-    entry.source();
-    entry.source();
-}
-
-TEST_F(db_rdb_RdbFileEntry_test, test_lo_id) {
-    EXPECT_CALL(helper, load_file(Ref(entry)));
-    entry.lo_id();
-
-    entry.lo_id(10);
-    entry.lo_id();
-}
-*/
 } // namespace rdb
 } // namespace db
 } // namespace brfc

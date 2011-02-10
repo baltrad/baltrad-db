@@ -18,56 +18,83 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <brfc/sql/ResultProxy.hpp>
+#include <brfc/sql/ConnectionProxy.hpp>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 
 namespace brfc {
 namespace sql {
 
-ResultProxy::ResultProxy(shared_ptr<Connection> conn,
-                         Result* result)
+ResultProxy::ResultProxy(ConnectionProxy* conn, Result* result)
         : conn_(conn)
         , result_(result) {
 
 }
 
 ResultProxy::~ResultProxy() {
+    if (result_)
+        do_close();
+}
 
+Result&
+ResultProxy::proxied() {
+    if (not result_)
+        throw db_error("ResultProxy is closed");
+    return *result_;
+}
+
+const Result&
+ResultProxy::proxied() const {
+    if (not result_)
+        throw db_error("ResultProxy is closed");
+    return *result_;
+}
+
+void
+ResultProxy::invalidate() {
+    conn_ = 0;
+    do_close();
 }
 
 void
 ResultProxy::do_close() {
-    return result_->close();
+    if (conn_)
+        conn_->remove(this);
+    if (result_) {
+        result_->close();
+        result_.reset();
+    }
 }
 
 bool
 ResultProxy::do_next() {
-    return result_->next();
+    return proxied().next();
 }
 
 bool
 ResultProxy::do_seek(int idx) {
-    return result_->seek(idx);
+    return proxied().seek(idx);
 }
 
 int
 ResultProxy::do_size() const {
-    return result_->size();
+    return proxied().size();
 }
 
 Variant
 ResultProxy::do_value_at(unsigned int pos) const {
-    return result_->value_at(pos);
+    return proxied().value_at(pos);
 }
 
-Variant
+ Variant
 ResultProxy::do_value_at(const std::string& pos) const {
-    return result_->value_at(pos);
+    return proxied().value_at(pos);
 }
 
 int
 ResultProxy::do_affected_rows() const {
-    return result_->affected_rows();
+    return proxied().affected_rows();
 }
 
 } // namespace sql

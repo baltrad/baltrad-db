@@ -16,20 +16,39 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef BRFC_SQL_CONNECTION_DTOR_HPP
+#define BRFC_SQL_CONNECTION_DTOR_HPP
 
-#include <gmock/gmock.h>
-
-#include <brfc/sql/ConnectionPool.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace brfc {
 namespace sql {
 
-class MockConnectionPool : public ConnectionPool {
+class Connection;
+
+/**
+ * @brief ABC for destroying connections
+ */
+class ConnectionDtor : public boost::noncopyable {
   public:
-    MOCK_METHOD0(do_get, Connection*());
-    MOCK_METHOD1(do_put, void(Connection*));
+    virtual ~ConnectionDtor() { }
+    
+    /**
+     * @brief destroy connection @c c
+     */
+    void destroy(Connection* c) {
+        do_destroy(c);
+    }
+  
+  private:
+    /**
+     * @brief destroy() implementation
+     */
+    virtual void do_destroy(Connection* c) = 0;
+
 };
 
 } // namespace sql
 } // namespace brfc
 
+#endif // BRFC_SQL_CONNECTION_DTOR_HPP

@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/thread/mutex.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
+#include <brfc/smart_ptr.hpp>
 #include <brfc/sql/ConnectionPool.hpp>
 
 namespace brfc {
@@ -32,6 +33,7 @@ namespace sql {
 
 class ConnectionCreator;
 class ConnectionProxy;
+class PoolReturner;
 
 /**
  * @brief a very basic pool with no limits
@@ -42,7 +44,14 @@ class BasicConnectionPool : public ConnectionPool {
      * @brief constructor
      * @param creator the database connection creator
      */
-    explicit BasicConnectionPool(shared_ptr<ConnectionCreator> creator);
+    explicit BasicConnectionPool(ConnectionCreator* creator);
+
+    /**
+     * @brief constructor
+     * @param creator the database connection creator
+     * @param returner PoolReturner instance
+     */
+    BasicConnectionPool(ConnectionCreator* creator, PoolReturner* returner);
     
     /**
      * @brief destructor
@@ -56,7 +65,7 @@ class BasicConnectionPool : public ConnectionPool {
      *
      * @note ownership of the database connection transfers to the proxy
      */
-    virtual shared_ptr<Connection> do_get();
+    virtual Connection* do_get();
     
     /**
      * @brief give a database connection back to the pool
@@ -67,11 +76,10 @@ class BasicConnectionPool : public ConnectionPool {
     virtual void do_put(Connection* db);
   
   private:
-    typedef std::map<Connection*, ConnectionProxy*> LeaseMap;
-    shared_ptr<ConnectionCreator> creator_;
+    ConnectionCreator* creator_;
+    shared_ptr<PoolReturner> returner_;
     boost::mutex lock_;
     boost::ptr_vector<Connection> pool_;
-    LeaseMap leased_;
 };
 
 } // namespace sql

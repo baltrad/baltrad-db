@@ -26,6 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 namespace sql {
+    class Connection;
     class Result;
 } // namespace sql
 
@@ -36,8 +37,11 @@ class RelationalDatabase;
 
 class RdbFileResult : public FileResult {
   public:
-    RdbFileResult(RelationalDatabase* rdb, sql::Result* result)
+    RdbFileResult(RelationalDatabase* rdb,
+                  shared_ptr<sql::Connection> conn,
+                  sql::Result* result)
             : rdb_(rdb)
+            , conn_(conn)
             , result_(result) {
     }
 
@@ -49,6 +53,7 @@ class RdbFileResult : public FileResult {
   
   private:
     RelationalDatabase* rdb_;
+    shared_ptr<sql::Connection> conn_;
     scoped_ptr<sql::Result> result_;
 };
 

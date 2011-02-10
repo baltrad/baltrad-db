@@ -20,8 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_CONNECTION_POOL_HPP
 #define BRFC_SQL_CONNECTION_POOL_HPP
 
-#include <brfc/smart_ptr.hpp>
-
 namespace brfc {
 namespace sql {
 
@@ -40,7 +38,7 @@ class ConnectionPool {
     /**
      * @brief get a free database connection
      */
-    shared_ptr<Connection> get() {
+    Connection* get() {
         return do_get();
     }
     
@@ -55,7 +53,7 @@ class ConnectionPool {
     /**
      * @brief get() implementation
      */
-    virtual shared_ptr<Connection> do_get() = 0;
+    virtual Connection* do_get() = 0;
     
     /**
      * @brief put() implementation

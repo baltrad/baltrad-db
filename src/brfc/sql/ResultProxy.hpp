@@ -21,13 +21,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_RESULT_PROXY_HPP
 
 #include <brfc/smart_ptr.hpp>
-
 #include <brfc/sql/Result.hpp>
 
 namespace brfc {
 namespace sql {
 
-class Connection;
+class ConnectionProxy;
 
 /**
  * @brief a proxy for Result
@@ -39,9 +38,12 @@ class ResultProxy : public Result {
      * @param conn the database connection
      * @param result the result to proxy
      */
-    ResultProxy(shared_ptr<Connection> conn, Result* result);
+    ResultProxy(ConnectionProxy* conn, Result* result);
     
     virtual ~ResultProxy();
+    
+    Result& proxied();
+    const Result& proxied() const;
 
   protected: 
     /**
@@ -80,7 +82,14 @@ class ResultProxy : public Result {
     virtual int do_affected_rows() const;
 
   private:
-    shared_ptr<Connection> conn_;
+    friend class ConnectionProxy;
+    
+    /**
+     * @brief set connection to 0
+     */
+    void invalidate();
+
+    ConnectionProxy* conn_;
     scoped_ptr<Result> result_;
 };
 

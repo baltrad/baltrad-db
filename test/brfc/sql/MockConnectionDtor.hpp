@@ -17,19 +17,23 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef BRFC_SQL_MOCK_CONNECTION_DTOR_HPP
+#define BRFC_SQL_MOCK_CONNECTION_DTOR_HPP
+
 #include <gmock/gmock.h>
 
-#include <brfc/sql/ConnectionPool.hpp>
+#include <brfc/sql/Connection.hpp>
+#include <brfc/sql/ConnectionDtor.hpp>
 
 namespace brfc {
 namespace sql {
 
-class MockConnectionPool : public ConnectionPool {
+class MockConnectionDtor : public ConnectionDtor {
   public:
-    MOCK_METHOD0(do_get, Connection*());
-    MOCK_METHOD1(do_put, void(Connection*));
+    MOCK_METHOD1(do_destroy, void(Connection* c));
 };
 
 } // namespace sql
 } // namespace brfc
 
+#endif // BRFC_SQL_MOCK_CONNECTION_DTOR_HPP

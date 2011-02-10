@@ -26,6 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 namespace sql {
+    class Connection;
     class Result;
 }
 
@@ -41,8 +42,10 @@ class RdbAttributeResult : public AttributeResult {
      * @param result the sql query result
      * @note ownership of @c result transfers to this
      */
-    explicit RdbAttributeResult(sql::Result* result)
-            : result_(result) {
+    RdbAttributeResult(shared_ptr<sql::Connection> conn,
+                       sql::Result* result)
+            : conn_(conn)
+            , result_(result) {
     }
   
   protected:
@@ -55,6 +58,7 @@ class RdbAttributeResult : public AttributeResult {
     virtual Variant do_value_at(unsigned int pos) const;
 
   private:
+    shared_ptr<sql::Connection> conn_;
     scoped_ptr<sql::Result> result_;
 };
 

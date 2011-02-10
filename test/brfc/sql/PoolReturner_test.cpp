@@ -17,19 +17,34 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <gmock/gmock.h>
+#include <brfc/sql/MockConnectionPool.hpp>
+#include <brfc/sql/MockConnection.hpp>
+#include <brfc/sql/PoolReturner.hpp>
 
-#include <brfc/sql/ConnectionPool.hpp>
+using ::testing::Return;
 
 namespace brfc {
 namespace sql {
 
-class MockConnectionPool : public ConnectionPool {
-  public:
-    MOCK_METHOD0(do_get, Connection*());
-    MOCK_METHOD1(do_put, void(Connection*));
-};
+TEST(sql_PoolReturner_test, test_destroy) {
+    MockConnectionPool p;
+    MockConnection c;
+    PoolReturner r(&p);
+
+    EXPECT_CALL(p, do_put(&c));
+
+    r.destroy(&c);
+}
+
+TEST(sql_PoolReturner_test, test_destroy_no_pool) {
+    MockConnection* c = new MockConnection();
+    PoolReturner r;
+    
+    ON_CALL(*c, do_is_open())
+        .WillByDefault(Return(true)); // for leak detection
+    
+    r.destroy(c);
+}
 
 } // namespace sql
 } // namespace brfc
-

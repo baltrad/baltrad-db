@@ -17,19 +17,22 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <gmock/gmock.h>
+#include <brfc/sql/PoolReturner.hpp>
 
+#include <brfc/sql/Connection.hpp>
 #include <brfc/sql/ConnectionPool.hpp>
 
 namespace brfc {
 namespace sql {
 
-class MockConnectionPool : public ConnectionPool {
-  public:
-    MOCK_METHOD0(do_get, Connection*());
-    MOCK_METHOD1(do_put, void(Connection*));
-};
+void
+PoolReturner::do_destroy(Connection* c) {
+    if (pool_) {
+        pool_->put(c);
+    } else {
+        delete c;
+    }
+}
 
 } // namespace sql
 } // namespace brfc
-

@@ -21,9 +21,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/ConnectionProxy.hpp>
-
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionCreator.hpp>
+#include <brfc/sql/PoolReturner.hpp>
 
 using ::testing::Return;
 
@@ -34,52 +34,49 @@ class sql_BasicConnectionPool_test : public ::testing::Test {
   public:
     sql_BasicConnectionPool_test()
         : creator()
-        , creator_ptr(&creator, no_delete)
-        , pool(creator_ptr) {
+        , pool(&creator) {
 
     }
 
     virtual void SetUp() {
     }
     
-    Connection* create_conn() {
-        return new MockConnection();
-    }
-    
     MockConnectionCreator creator;
-    shared_ptr<ConnectionCreator> creator_ptr;
     BasicConnectionPool pool;
 };
 
 TEST_F(sql_BasicConnectionPool_test, test_get) {
-    auto_ptr<MockConnection> conn(new MockConnection());
+    MockConnection* conn = new MockConnection();
+
     EXPECT_CALL(creator, do_create())
-        .WillOnce(Return(conn.get()));
+        .WillOnce(Return(conn));
     EXPECT_CALL(*conn, do_is_open())
         .WillOnce(Return(false));
     EXPECT_CALL(*conn, do_open());
     
-    shared_ptr<ConnectionProxy> cp =
-        dynamic_pointer_cast<ConnectionProxy>(pool.get());
-    conn.release();
+    auto_ptr<Connection> c(pool.get());
+    ConnectionProxy* cp = dynamic_cast<ConnectionProxy*>(c.get());
+
     ASSERT_TRUE(cp);
-    Connection* proxied = cp->proxied();
-    cp.reset();
+    Connection* proxied = &cp->proxied();
+
+    c.reset(); // put back to pool
     
-    cp = dynamic_pointer_cast<ConnectionProxy>(pool.get());
+    // same connection
+    c.reset(pool.get());
+    cp = dynamic_cast<ConnectionProxy*>(c.get());
     ASSERT_TRUE(cp);
-    EXPECT_EQ(proxied, cp->proxied());
+    EXPECT_EQ(proxied, &cp->proxied());
 }
 
 TEST_F(sql_BasicConnectionPool_test, test_dtor) {
-    shared_ptr<ConnectionProxy> cp;
+    PoolReturner returner;
     {
-        BasicConnectionPool p(creator_ptr);
-        p.put(new MockConnection());
-        cp = dynamic_pointer_cast<ConnectionProxy>(p.get());
+        BasicConnectionPool p(&creator, &returner);
+        EXPECT_EQ(&p, returner.pool());
     }
     
-    EXPECT_FALSE(cp->pool());
+    EXPECT_FALSE(returner.pool());
 }
 
 } // namespace sql

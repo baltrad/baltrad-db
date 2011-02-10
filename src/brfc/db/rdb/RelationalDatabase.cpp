@@ -57,7 +57,7 @@ namespace rdb {
 
 RelationalDatabase::RelationalDatabase(const std::string& dsn)
         : creator_(new sql::DefaultConnectionCreator(dsn))
-        , pool_(new sql::BasicConnectionPool(creator_))
+        , pool_(new sql::BasicConnectionPool(creator_.get()))
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher()) {
     conn(); // check if connection is valid
@@ -81,7 +81,7 @@ RelationalDatabase::~RelationalDatabase() {
 
 shared_ptr<sql::Connection>
 RelationalDatabase::conn() const {
-    return pool_->get();
+    return shared_ptr<sql::Connection>(pool_->get());
 }
 
 AttributeMapper&
@@ -146,15 +146,17 @@ RelationalDatabase::do_entry_by_uuid(const std::string& uuid) {
 FileResult*
 RelationalDatabase::do_execute(const FileQuery& query) {
     sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
-    auto_ptr<sql::Result> res(conn()->execute(*select));
-    return new RdbFileResult(this, res.release());
+    shared_ptr<sql::Connection> c = conn();
+    auto_ptr<sql::Result> res(c->execute(*select));
+    return new RdbFileResult(this, c, res.release());
 }
 
 AttributeResult*
 RelationalDatabase::do_execute(const AttributeQuery& query) {
     sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
-    auto_ptr<sql::Result> res(conn()->execute(*select));
-    return new RdbAttributeResult(res.release());
+    shared_ptr<sql::Connection> c = conn();
+    auto_ptr<sql::Result> res(c->execute(*select));
+    return new RdbAttributeResult(c, res.release());
 }
 
 void
@@ -183,7 +185,8 @@ RelationalDatabase::do_remove(const FileEntry& entry) {
     std::string qry("DELETE FROM bdb_files WHERE uuid = :uuid");
     sql::BindMap binds;
     binds.add(":uuid", Variant(entry.uuid()));
-    auto_ptr<sql::Result> r (conn()->execute(sql::Query(qry, binds)));
+    shared_ptr<sql::Connection> c = conn();
+    auto_ptr<sql::Result> r (c->execute(sql::Query(qry, binds)));
     return r->affected_rows();
 }
 
