@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/MockConnection.hpp>
@@ -34,19 +35,21 @@ class sql_BasicConnectionPool_test : public ::testing::Test {
   public:
     sql_BasicConnectionPool_test()
         : creator()
-        , pool(&creator) {
+        , pool(&creator, 2) {
 
     }
 
     virtual void SetUp() {
     }
     
-    MockConnectionCreator creator;
+    ::testing::StrictMock<MockConnectionCreator> creator;
     BasicConnectionPool pool;
 };
 
 TEST_F(sql_BasicConnectionPool_test, test_get) {
     MockConnection* conn = new MockConnection();
+    ON_CALL(*conn, do_is_open())
+        .WillByDefault(Return(true)); // for leak detection
 
     EXPECT_CALL(creator, do_create())
         .WillOnce(Return(conn));
@@ -66,10 +69,45 @@ TEST_F(sql_BasicConnectionPool_test, test_get) {
     EXPECT_EQ(proxied, &cp->proxied());
 }
 
+TEST_F(sql_BasicConnectionPool_test, test_get_limit_reached) {
+    MockConnection* conn1 = new MockConnection();
+    MockConnection* conn2 = new MockConnection();
+    ON_CALL(*conn1, do_is_open())
+        .WillByDefault(Return(true)); // for leak detection
+    ON_CALL(*conn2, do_is_open())
+        .WillByDefault(Return(true)); // for leak detection
+
+    EXPECT_CALL(creator, do_create())
+        .WillOnce(Return(conn1))
+        .WillOnce(Return(conn2));
+     
+    auto_ptr<Connection> c1(pool.get()); 
+    auto_ptr<Connection> c2(pool.get());
+    EXPECT_THROW(pool.get(), db_error);
+    c2.reset();
+    EXPECT_NO_THROW(c2.reset(pool.get()));
+}
+
+TEST_F(sql_BasicConnectionPool_test, test_size) {
+    MockConnection* conn1 = new MockConnection();
+    ON_CALL(*conn1, do_is_open())
+        .WillByDefault(Return(true)); // for leak detection
+
+    EXPECT_CALL(creator, do_create())
+        .WillOnce(Return(conn1));
+
+    EXPECT_EQ(0u, pool.size());
+    auto_ptr<Connection> c1(pool.get());
+    EXPECT_EQ(1u, pool.size());
+    c1.reset();
+    EXPECT_EQ(1u, pool.size());
+}
+
 TEST_F(sql_BasicConnectionPool_test, test_dtor) {
     PoolReturner returner;
     {
-        BasicConnectionPool p(&creator, &returner);
+        BasicConnectionPool p(&creator);
+        p.returner(&returner);
         EXPECT_EQ(&p, returner.pool());
     }
     

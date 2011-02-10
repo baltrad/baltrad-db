@@ -20,13 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 #define BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 
-#include <map>
-
-#include <boost/thread/mutex.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-
 #include <brfc/smart_ptr.hpp>
 #include <brfc/sql/ConnectionPool.hpp>
+#include <brfc/util/Queue.hpp>
 
 namespace brfc {
 namespace sql {
@@ -43,20 +39,25 @@ class BasicConnectionPool : public ConnectionPool {
     /**
      * @brief constructor
      * @param creator the database connection creator
+     * @param max_size maximum number of connections allowed to allocate
      */
-    explicit BasicConnectionPool(ConnectionCreator* creator);
-
-    /**
-     * @brief constructor
-     * @param creator the database connection creator
-     * @param returner PoolReturner instance
-     */
-    BasicConnectionPool(ConnectionCreator* creator, PoolReturner* returner);
+    explicit BasicConnectionPool(ConnectionCreator* creator, int max_size=5);
     
     /**
      * @brief destructor
      */
     virtual ~BasicConnectionPool();
+
+    size_t size() const { return size_; }
+    
+    /**
+     * @brief set a returner
+     * @param returner the returner to set (caller retains ownership)
+     *
+     * this is for testing purposes, already created connections keep the
+     * old returner
+     */
+    void returner(PoolReturner* returner);
 
   protected:
     /**
@@ -76,10 +77,22 @@ class BasicConnectionPool : public ConnectionPool {
     virtual void do_put(Connection* db);
   
   private:
+    /**
+     * @brief create, locking size_mutex_
+     * @throw db_error if size limit reached
+     */
+    Connection* create();
+
+    /**
+     * @brief delete @c c locking size_mutex_
+     */
+    void dispose(Connection* conn);
+
     ConnectionCreator* creator_;
     shared_ptr<PoolReturner> returner_;
-    boost::mutex lock_;
-    boost::ptr_vector<Connection> pool_;
+    size_t size_; ///< number of allocated connections
+    boost::mutex size_mutex_;
+    Queue<Connection*> pool_;
 };
 
 } // namespace sql
