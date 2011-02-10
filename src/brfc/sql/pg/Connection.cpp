@@ -40,20 +40,20 @@ Connection::Connection(const Url& url)
         , transaction_()
         , dialect_()
         , compiler_(&dialect_) {
-}
-
-Connection::~Connection() {
-
-}
-
-void
-Connection::do_open() {
-    conn_.reset(new pqxx::connection(url_to_pg(url_)));
+    try {
+        conn_.reset(new pqxx::connection(url_to_pg(url_)));
+    } catch (const pqxx::broken_connection& e) {
+        throw db_error(e.what());
+    }
     conn_->set_client_encoding("utf8");
     conn_->set_variable("datestyle", "ISO");
     load_type_oids();
     dialect_.version(conn_->server_version());
     dialect_.conn(conn_.get());
+}
+
+Connection::~Connection() {
+
 }
 
 bool

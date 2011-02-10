@@ -59,7 +59,6 @@ BasicConnectionPool::do_get() {
         conn.reset(pool_.pop_back().release());
     } else {
         conn.reset(creator_->create());
-        conn->open();
     }
     return new ConnectionProxy(conn.release(), returner_);
 }

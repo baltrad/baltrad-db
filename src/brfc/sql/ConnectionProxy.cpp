@@ -60,11 +60,6 @@ ConnectionProxy::remove(ResultProxy* result) {
 }
 
 void
-ConnectionProxy::do_open() {
-    proxied().do_open();
-}
-
-void
 ConnectionProxy::do_close() {
     if (proxied_) {
         conn_dtor_->destroy(proxied_);

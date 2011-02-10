@@ -46,7 +46,6 @@ class Connection : public sql::Connection {
     static std::string url_to_pg(const Url& url);
   
   protected:
-    virtual void do_open();
     virtual void do_close();
     virtual bool do_is_open() const;
 

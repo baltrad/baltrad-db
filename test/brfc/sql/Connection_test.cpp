@@ -67,6 +67,21 @@ class sql_Connection_test : public testing::Test {
     ::testing::NiceMock<MockConnection> conn;
 };
 
+TEST_F(sql_Connection_test, test_close) {
+    EXPECT_CALL(conn, do_is_open())
+        .WillOnce(Return(true));
+    EXPECT_CALL(conn, do_close());
+    
+    conn.close();
+}
+
+TEST_F(sql_Connection_test, test_close_on_closed) {
+    EXPECT_CALL(conn, do_is_open())
+        .WillOnce(Return(false));
+
+    EXPECT_NO_THROW(conn.close());
+}
+
 TEST_F(sql_Connection_test, test_no_transaction_execute) {
     MockResult result;
     std::string stmt("query");

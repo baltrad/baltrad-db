@@ -34,7 +34,6 @@ namespace sql {
 
 class MockConnection : public Connection {
   public:
-    MOCK_METHOD0(do_open, void());
     MOCK_CONST_METHOD0(do_is_open, bool());
     MOCK_METHOD0(do_close, void());
 
@@ -53,8 +52,6 @@ class MockConnection : public Connection {
 
     void delegate_to_fake() {
         using ::testing::Invoke;
-        ON_CALL(*this, do_open())
-            .WillByDefault(Invoke(&fake_, &FakeConnection::do_open));
         ON_CALL(*this, do_close())
             .WillByDefault(Invoke(&fake_, &FakeConnection::do_close));
         ON_CALL(*this, do_is_open())

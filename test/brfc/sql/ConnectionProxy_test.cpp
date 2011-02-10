@@ -69,14 +69,6 @@ TEST_F(sql_ConnectionProxy_test, test_dtor) {
     }
 }
 
-TEST_F(sql_ConnectionProxy_test, test_open) {
-    EXPECT_CALL(conn, do_is_open())
-        .WillOnce(Return(false));
-    EXPECT_CALL(conn, do_open());
-
-    proxy.open();
-}
-
 TEST_F(sql_ConnectionProxy_test, test_close) {
     MockConnection c;
     EXPECT_CALL(c, do_is_open())
@@ -89,6 +81,8 @@ TEST_F(sql_ConnectionProxy_test, test_close) {
 
 TEST_F(sql_ConnectionProxy_test, test_close_on_closed) {
     ConnectionProxy p(0, conn_dtor_ptr);
+
+    p.close();
 }
 
 TEST_F(sql_ConnectionProxy_test, test_throws_when_closed) {

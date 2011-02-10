@@ -57,7 +57,6 @@ class db_rdb_RelationalDatabase_test : public ::testing::Test {
 
     virtual void SetUp() {
         conn->delegate_to_fake();
-        conn->open();
         ON_CALL(*conn, do_dialect())
             .WillByDefault(ReturnRef(dialect));
         ON_CALL(*conn, do_compiler())

@@ -58,11 +58,6 @@ class ConnectionProxy : public Connection {
     
   protected:
     /**
-     * @brief forward the call to the proxied database connection
-     */
-    virtual void do_open();
-
-    /**
      * @brief call ConnectionDtor::destroy for the proxied connection
      */
     virtual void do_close();

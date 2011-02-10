@@ -50,9 +50,6 @@ TEST_F(sql_BasicConnectionPool_test, test_get) {
 
     EXPECT_CALL(creator, do_create())
         .WillOnce(Return(conn));
-    EXPECT_CALL(*conn, do_is_open())
-        .WillOnce(Return(false));
-    EXPECT_CALL(*conn, do_open());
     
     auto_ptr<Connection> c(pool.get());
     ConnectionProxy* cp = dynamic_cast<ConnectionProxy*>(c.get());

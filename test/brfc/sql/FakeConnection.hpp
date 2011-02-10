@@ -30,11 +30,9 @@ namespace sql {
 class FakeConnection : public Connection {
   public:
     FakeConnection()
-        : open_(false)
+        : open_(true)
         , in_transaction_(false) {
     }
-
-    virtual void do_open() { open_ = true; }
 
     virtual void do_close() {open_ = false; }
 

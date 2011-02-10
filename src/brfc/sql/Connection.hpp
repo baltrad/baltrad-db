@@ -41,15 +41,8 @@ class Select;
  */
 class Connection : boost::noncopyable {
   public:
-    virtual ~Connection();    
+    virtual ~Connection();
 
-    /**
-     * @brief open the connection
-     * @throw db_error if connection is already open
-     * @sa do_open
-     */
-    void open();
-    
     /**
      * @brief test for open connection
      * @sa do_is_open
@@ -166,11 +159,6 @@ class Connection : boost::noncopyable {
     // allow access to protected virtuals
     friend class ConnectionProxy;
     
-    /**
-     * @brief open() implementation
-     */
-    virtual void do_open() = 0;
-
     /**
      * @brief close() implementation
      */

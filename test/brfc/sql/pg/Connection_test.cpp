@@ -19,26 +19,18 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/exceptions.hpp>
-#include <brfc/smart_ptr.hpp>
-
-#include <brfc/sql/Connection.hpp>
-#include <brfc/sql/DefaultConnectionCreator.hpp>
+#include <brfc/Url.hpp>
+#include <brfc/sql/pg/Connection.hpp>
 
 namespace brfc {
 namespace sql {
+namespace pg {
 
-TEST(sql_DefaultConnectionCreator_test, test_create_valid_url) {
-    DefaultConnectionCreator c("postgresql://user:password@unknown-host/dbname");
-    auto_ptr<Connection> p;    
-    EXPECT_THROW(p.reset(c.create()), db_error); // url is valid, no db though
+TEST(sql_pg_Connection, test_ctor_no_connection) {
+    Url url("postgresql://user:password@unknown-host/dbase");
+    EXPECT_THROW(Connection c(url), db_error);
 }
 
-TEST(sql_DefaultConnectionCreator_test, test_create_invalid_url) {
-    DefaultConnectionCreator c("bla://user:password@localhost/dbname");
-    auto_ptr<Connection> p;
-    EXPECT_THROW(p.reset(c.create()), value_error);
-}
-
+} // namespace pg
 } // namespace sql
 } // namespace brfc

@@ -35,17 +35,9 @@ Connection::~Connection() {
 }
 
 void
-Connection::open() {
-    if (is_open())
-        throw db_error("connection already open");
-    do_open();
-}
-
-void
 Connection::close() {
-    if (not is_open())
-        throw db_error("connection already closed");
-    do_close();
+    if (is_open())
+        do_close();
 }
 
 void
