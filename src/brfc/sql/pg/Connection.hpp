@@ -19,11 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_PG_CONNECTION_HPP
 #define BRFC_SQL_PG_CONNECTION_HPP
 
-#include <pqxx/connection>
-#include <pqxx/transaction>
 
 #include <brfc/smart_ptr.hpp>
-#include <brfc/Url.hpp>
 
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/DialectCompiler.hpp>
@@ -31,9 +28,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/pg/Types.hpp>
 #include <brfc/sql/pg/Dialect.hpp>
 
-class String;
+namespace pqxx {
+    class connection_base;
+    class dbtransaction;
+} // namespace pqxx
 
 namespace brfc {
+
+class Url;
+
 namespace sql {
 namespace pg {
 
@@ -41,9 +44,15 @@ class Connection : public sql::Connection {
   public:
     explicit Connection(const Url& url);
 
+    explicit Connection(pqxx::connection_base* conn);
+
     virtual ~Connection();
 
     static std::string url_to_pg(const Url& url);
+
+    bool has_pqxx_connection() const { return conn_; }
+    
+    void pqxx_transaction(pqxx::dbtransaction* tx);
   
   protected:
     virtual void do_close();
@@ -77,10 +86,9 @@ class Connection : public sql::Connection {
   private:
     void load_type_oids();
 
-    Url url_;
     Types types_;
-    scoped_ptr<pqxx::connection> conn_;
-    scoped_ptr<pqxx::transaction<> > transaction_;
+    shared_ptr<pqxx::connection_base> conn_;
+    shared_ptr<pqxx::dbtransaction> transaction_;
     Dialect dialect_;
     DialectCompiler compiler_;
 };

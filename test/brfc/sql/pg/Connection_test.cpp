@@ -19,8 +19,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <pqxx/connection>
+
 #include <brfc/Url.hpp>
 #include <brfc/sql/pg/Connection.hpp>
+
+#include <brfc/sql/pg/MockDbtransaction.hpp>
+
+using ::testing::StrEq;
+using ::testing::Throw;
 
 namespace brfc {
 namespace sql {
@@ -29,6 +36,34 @@ namespace pg {
 TEST(sql_pg_Connection, test_ctor_no_connection) {
     Url url("postgresql://user:password@unknown-host/dbase");
     EXPECT_THROW(Connection c(url), db_error);
+}
+
+TEST(sql_pg_Connection, test_exec_on_broken_connection) {
+    pqxx::nullconnection pqxx_c;
+    pqxx::MockDbtransaction tx(pqxx_c);
+
+    Connection c(&pqxx_c);
+    c.pqxx_transaction(&tx);
+    
+    EXPECT_CALL(tx, do_exec(StrEq("stmt")))
+        .WillOnce(Throw(pqxx::broken_connection("")));
+    
+    EXPECT_THROW(c.execute("stmt"), db_error);
+    EXPECT_FALSE(c.has_pqxx_connection());
+}
+
+TEST(sql_pg_Connection, test_exec_on_sql_error) {
+    pqxx::nullconnection pqxx_c;
+    pqxx::MockDbtransaction tx(pqxx_c);
+
+    Connection c(&pqxx_c);
+    c.pqxx_transaction(&tx);
+    
+    EXPECT_CALL(tx, do_exec(StrEq("stmt")))
+        .WillOnce(Throw(pqxx::sql_error("")));
+    
+    EXPECT_THROW(c.execute("stmt"), db_error);
+    EXPECT_TRUE(c.has_pqxx_connection());
 }
 
 } // namespace pg

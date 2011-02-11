@@ -24,10 +24,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
+#include <pqxx/connection>
 #include <pqxx/largeobject>
+#include <pqxx/transaction>
 
 #include <brfc/exceptions.hpp>
-
+#include <brfc/Url.hpp>
 #include <brfc/sql/pg/Result.hpp>
 
 namespace brfc {
@@ -35,13 +37,12 @@ namespace sql {
 namespace pg {
 
 Connection::Connection(const Url& url)
-        : url_(url)
-        , conn_()
+        : conn_()
         , transaction_()
         , dialect_()
         , compiler_(&dialect_) {
     try {
-        conn_.reset(new pqxx::connection(url_to_pg(url_)));
+        conn_.reset(new pqxx::connection(url_to_pg(url)));
     } catch (const pqxx::broken_connection& e) {
         throw db_error(e.what());
     }
@@ -52,8 +53,21 @@ Connection::Connection(const Url& url)
     dialect_.conn(conn_.get());
 }
 
+Connection::Connection(pqxx::connection_base* conn)
+        : conn_(conn, no_delete)
+        , transaction_()
+        , dialect_()
+        , compiler_(&dialect_) {
+
+}
+
 Connection::~Connection() {
 
+}
+
+void
+Connection::pqxx_transaction(pqxx::dbtransaction* tx) {
+    transaction_.reset(tx, no_delete);
 }
 
 bool
@@ -90,7 +104,10 @@ Connection::do_execute(const std::string& query) {
     try {
         pqxx::result pg_result = transaction_->exec(query);
         result.reset(new Result(pg_result, &types_));
-    } catch (const std::runtime_error& e) {
+    } catch (const pqxx::broken_connection& e) {
+        conn_.reset();
+        throw db_error(e.what());
+    } catch (const pqxx::failure& e) {
         throw db_error(e.what());
     }
 
