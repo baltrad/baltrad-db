@@ -110,8 +110,21 @@ TEST_F(sql_BasicConnectionPool_test, test_dtor) {
         p.returner(&returner);
         EXPECT_EQ(&p, returner.pool());
     }
-    
     EXPECT_FALSE(returner.pool());
+}
+
+TEST_F(sql_BasicConnectionPool_test, test_put_closed_conn) {
+    MockConnection* conn1 = new MockConnection();
+     
+    EXPECT_CALL(creator, do_create())
+        .WillOnce(Return(conn1));
+    EXPECT_CALL(*conn1, do_is_open())
+        .WillOnce(Return(false));
+
+    auto_ptr<Connection> c1(pool.get());
+    c1.reset();
+
+    EXPECT_EQ(0u, pool.size()); // has gone through dispose();
 }
 
 } // namespace sql

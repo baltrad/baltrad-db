@@ -70,6 +70,11 @@ BasicConnectionPool::do_get() {
 
 void
 BasicConnectionPool::do_put(Connection* conn) {
+    if (not conn->is_open()) {
+        dispose(conn);
+        return;
+    }
+
     try {
         pool_.put_nowait(conn);
     } catch (const queue_full&) {
