@@ -49,6 +49,8 @@ class BasicConnectionPool : public ConnectionPool {
     virtual ~BasicConnectionPool();
 
     size_t size() const { return size_; }
+
+    size_t max_size() const { return pool_.max_size(); }
     
     /**
      * @brief set a returner

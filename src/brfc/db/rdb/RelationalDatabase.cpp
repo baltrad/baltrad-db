@@ -55,9 +55,9 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
-RelationalDatabase::RelationalDatabase(const std::string& dsn)
+RelationalDatabase::RelationalDatabase(const Url& dsn)
         : creator_(new sql::DefaultConnectionCreator(dsn))
-        , pool_(new sql::BasicConnectionPool(creator_.get()))
+        , pool_(create_pool(creator_.get(), dsn))
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher()) {
     conn(); // check if connection is valid
@@ -78,6 +78,23 @@ RelationalDatabase::RelationalDatabase(shared_ptr<sql::ConnectionPool> pool)
 RelationalDatabase::~RelationalDatabase() {
 
 }
+
+sql::ConnectionPool*
+RelationalDatabase::create_pool(sql::ConnectionCreator* conn_ctor,
+                                const Url& dsn) {
+    std::map<std::string, std::string> opts = dsn.http_searchpart();
+    size_t max_size = 5;
+    if (opts.find("pool_max_size") != opts.end()) {
+        try {
+            max_size = boost::lexical_cast<size_t>(opts["pool_max_size"]);
+        } catch (const boost::bad_lexical_cast& e) {
+            throw value_error("invalid value for pool_max_size: "
+                              + opts["pool_max_size"]);
+        }
+    }
+    return new sql::BasicConnectionPool(conn_ctor, max_size);
+}
+                                
 
 shared_ptr<sql::Connection>
 RelationalDatabase::conn() const {

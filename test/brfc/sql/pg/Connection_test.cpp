@@ -38,6 +38,12 @@ TEST(sql_pg_Connection, test_ctor_no_connection) {
     EXPECT_THROW(Connection c(url), db_error);
 }
 
+TEST(sql_pg_Connection, test_url_to_pg) {
+    Url url("postgresql://myuser:mypass@myhost/mydbase?arg1=val1");
+    EXPECT_EQ("host=myhost user=myuser password=mypass dbname=mydbase",
+              Connection::url_to_pg(url));
+}
+
 TEST(sql_pg_Connection, test_exec_on_broken_connection) {
     pqxx::nullconnection pqxx_c;
     pqxx::MockDbtransaction tx(pqxx_c);

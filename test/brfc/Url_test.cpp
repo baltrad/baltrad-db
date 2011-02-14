@@ -82,4 +82,35 @@ TEST(Url_test, test_invalid_url_throws) {
     EXPECT_THROW(Url("scheme://:@:/"), value_error);
 }
 
+TEST(Url_test, test_http_path) {
+    Url url;
+    url.path("path/to/resource?arg1=val1&arg2=val2");
+    EXPECT_EQ("path/to/resource", url.http_path());
+}
+
+TEST(Url_test, test_http_searchpart) {
+    Url url;
+    url.path("path/to/resource?arg1=val1&arg2=val2&arg3=val3");
+    std::map<std::string, std::string> q = url.http_searchpart();
+    EXPECT_EQ(3u, q.size());
+    EXPECT_TRUE(q.find("arg1") != q.end());
+    EXPECT_TRUE(q.find("arg2") != q.end());
+    EXPECT_TRUE(q.find("arg3") != q.end());
+    EXPECT_EQ("val1", q["arg1"]);
+    EXPECT_EQ("val2", q["arg2"]);
+    EXPECT_EQ("val3", q["arg3"]);
+}
+
+TEST(Url_test, test_http_searchpath_empty) {
+    Url url;
+    url.path("path/to/resource");
+    std::map<std::string, std::string> q;
+    EXPECT_NO_THROW(q = url.http_searchpart());
+    EXPECT_EQ(0u, q.size());
+
+    url.path("path/to/resource?");
+    EXPECT_NO_THROW(q = url.http_searchpart());
+    EXPECT_EQ(0u, q.size());
+}
+
 } // namespace brfc

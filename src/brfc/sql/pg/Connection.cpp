@@ -20,8 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/pg/Connection.hpp>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
 #include <pqxx/connection>
@@ -116,23 +115,20 @@ Connection::do_execute(const std::string& query) {
 
 std::string
 Connection::url_to_pg(const Url& url) {
-    std::string pgargs;
+    std::vector<std::string> pgargs;
     if (url.host() != "")
-        pgargs += " host=" + url.host();
+        pgargs.push_back("host=" + url.host());
     if (url.user_name() != "")
-        pgargs += " user=" + url.user_name();
+        pgargs.push_back("user=" + url.user_name());
     if (url.password() != "")
-        pgargs += " password=" + url.password();
+        pgargs.push_back("password=" + url.password());
     if (url.port())
-        pgargs += " port=" + boost::lexical_cast<std::string>(url.port());
-    std::string database = url.path();
-    if (boost::starts_with(database, "/")) {
-        boost::erase_first(database, "/"); 
-    }
+        pgargs.push_back("port=" + boost::lexical_cast<std::string>(url.port()));
+    const std::string& database = url.http_path();
     if (database != "")
-        pgargs += " dbname=" + database;
+        pgargs.push_back("dbname=" + database);
 
-    return pgargs;
+    return boost::join(pgargs, " ");
 }
 
 long long

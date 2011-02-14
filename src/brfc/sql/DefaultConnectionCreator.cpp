@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-DefaultConnectionCreator::DefaultConnectionCreator(const std::string& dsn)
+DefaultConnectionCreator::DefaultConnectionCreator(const Url& dsn)
         : dsn_(dsn) {
 }
 
@@ -36,12 +36,10 @@ DefaultConnectionCreator::~DefaultConnectionCreator() {
 
 Connection*
 DefaultConnectionCreator::do_create() const {
-    // rdb is our only implementation
-    Url url(dsn_);
-    if (url.scheme() == "postgresql")
-        return new pg::Connection(url);
+    if (dsn_.scheme() == "postgresql")
+        return new pg::Connection(dsn_);
     else
-        throw value_error("no mapping found for dsn scheme: " + url.scheme());
+        throw value_error("no mapping found for dsn scheme: " + dsn_.scheme());
 
 }
 

@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_URL_HPP
 #define BRFC_URL_HPP
 
+#include <map>
 #include <string>
 
 namespace brfc {
@@ -37,7 +38,7 @@ class Url {
   public:
     Url();
 
-    explicit Url(const std::string& str);
+    Url(const std::string& str);
 
     Url(const Url& other);
 
@@ -93,6 +94,21 @@ class Url {
     void path(const std::string& path) {
         path_ = path;
     }
+    
+    /**
+     * @brief parse http path from path()
+     *
+     * for a path path/to/rsrc?arg1=val1&arg2=val2 return path/to/rsrc
+     */
+    std::string http_path() const;
+    
+    /**
+     * @brief parse http searchpart from path()
+     *
+     * for a path path/to/rsrc?arg1=val1&arg2=val2 return a map
+     * {arg1: val1, arg2: val2}
+     */
+    std::map<std::string, std::string> http_searchpart() const;
     
   private:
     void parse(const std::string& str);

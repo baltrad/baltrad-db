@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <brfc/Url.hpp>
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/AttributeResult.hpp>
 #include <brfc/db/FileQuery.hpp>
@@ -29,8 +30,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/MockFileEntry.hpp>
 #include <brfc/oh5/MockPhysicalFile.hpp>
+#include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/MockDialect.hpp>
 #include <brfc/sql/MockConnection.hpp>
+#include <brfc/sql/MockConnectionCreator.hpp>
 #include <brfc/sql/MockConnectionPool.hpp>
 #include <brfc/sql/MockResult.hpp>
 
@@ -72,6 +75,41 @@ class db_rdb_RelationalDatabase_test : public ::testing::Test {
     sql::MockResult& result;
     RelationalDatabase rdb;
 };
+
+TEST_F(db_rdb_RelationalDatabase_test, test_create_pool) {
+    delete conn; // XXX: shows up leaked, fix the fixture/tests
+    sql::MockConnectionCreator c;
+
+    Url url("scheme://user:password@host/database?pool_max_size=3");
+    auto_ptr<sql::ConnectionPool> cp(RelationalDatabase::create_pool(&c, url));
+
+    sql::BasicConnectionPool* bcp =
+        dynamic_cast<sql::BasicConnectionPool*>(cp.get());
+    ASSERT_TRUE(bcp);
+    EXPECT_EQ(3u, bcp->max_size());
+}
+
+TEST_F(db_rdb_RelationalDatabase_test, test_create_pool_invalid) {
+    delete conn; // XXX: shows up leaked, fix the fixture/tests
+    sql::MockConnectionCreator c;
+
+    Url url("scheme://user:password@host/database?pool_max_size=-3");
+    EXPECT_THROW(RelationalDatabase::create_pool(&c, url), value_error);
+}
+
+TEST_F(db_rdb_RelationalDatabase_test, test_create_pool_default) {
+    delete conn; // XXX: shows up leaked, fix the fixture/tests
+    sql::MockConnectionCreator c;
+
+    Url url("scheme://user:password@host/database");
+    auto_ptr<sql::ConnectionPool> cp(RelationalDatabase::create_pool(&c, url));
+
+    sql::BasicConnectionPool* bcp =
+        dynamic_cast<sql::BasicConnectionPool*>(cp.get());
+    ASSERT_TRUE(bcp);
+    EXPECT_EQ(5u, bcp->max_size());
+}
+
 
 TEST_F(db_rdb_RelationalDatabase_test, test_execute_attribute_query) {
     EXPECT_CALL(pool, do_get())

@@ -168,7 +168,7 @@ main(int argc, char** argv) {
         return 1;
     } else {
         try {
-            db.reset(new brfc::db::rdb::RelationalDatabase(dsn));
+            db.reset(brfc::db::Database::create(dsn));
         } catch (const brfc::brfc_error& e) {
             std::cerr << e.what() << std::endl;
             return 1;

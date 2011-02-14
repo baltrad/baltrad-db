@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class FileHasher;
+class Url;
 class Variant;
 
 namespace oh5 {
@@ -67,7 +68,7 @@ class RelationalDatabase : public Database {
      *
      * the only engine currently supported is 'postgresql'
      */
-    explicit RelationalDatabase(const std::string& dsn);
+    explicit RelationalDatabase(const Url& dsn);
     
     explicit RelationalDatabase(shared_ptr<sql::ConnectionPool> pool);
 
@@ -86,6 +87,9 @@ class RelationalDatabase : public Database {
     shared_ptr<sql::Connection> conn() const;    
 
     FileHasher& file_hasher() { return *file_hasher_; }
+
+    static sql::ConnectionPool* create_pool(sql::ConnectionCreator* conn_ctor,
+                                            const Url& dsn);
 
   protected:
     /**

@@ -21,6 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/lexical_cast.hpp>
 #include <boost/xpressive/xpressive_static.hpp>
+#include <boost/xpressive/regex_actions.hpp>
 
 #include <brfc/exceptions.hpp>
 
@@ -71,12 +72,9 @@ Url::operator=(const Url& rhs) {
 
 void
 Url::parse(const std::string& str) {
-    // find required scheme
-    
     using namespace boost::xpressive;
 
     mark_tag t_scheme(1), t_user(2), t_passwd(3), t_host(4), t_port(5), t_path(6);
-    
     sregex re = 
         (t_scheme = +(alpha)) >> "://" >> 
         !((t_user=+~(set=':','@')) >>
@@ -97,8 +95,25 @@ Url::parse(const std::string& str) {
     if (match[t_port])
         port(boost::lexical_cast<int>(match[t_port]));
     path(match[t_path]);
-    return;
-    
+}
+
+std::string
+Url::http_path() const {
+    return path_.substr(0, path_.find('?'));
+}
+
+std::map<std::string, std::string>
+Url::http_searchpart() const {
+    using namespace boost::xpressive;
+
+    std::map<std::string, std::string> spart;
+
+    sregex pair = ((s1=+_w) >> "=" >> (s2=*_w)) [ref(spart)[s1] = s2];
+    sregex re = "?" >> pair >> *("&" >> pair);
+
+    regex_search(path_, re);
+
+    return spart;
 }
 
 } // namespace brfc
