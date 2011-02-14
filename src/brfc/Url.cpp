@@ -19,9 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/Url.hpp>
 
-#include <iostream>
-
 #include <boost/lexical_cast.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 
 #include <brfc/exceptions.hpp>
 
@@ -33,8 +32,7 @@ Url::Url()
         , password_()
         , host_()
         , port_(0)
-        , path_()
-        , query_() {
+        , path_() {
 
 }
 
@@ -44,8 +42,7 @@ Url::Url(const std::string& str)
         , password_()
         , host_()
         , port_(0)
-        , path_()
-        , query_() {
+        , path_() {
     parse(str);
 }
 
@@ -55,8 +52,7 @@ Url::Url(const Url& other)
         , password_(other.password_)
         , host_(other.host_)
         , port_(other.port_)
-        , path_(other.path_)
-        , query_(other.query_) {
+        , path_(other.path_) {
     
 }
 
@@ -69,7 +65,6 @@ Url::operator=(const Url& rhs) {
         host_ = rhs.host_;
         port_ = rhs.port_;
         path_ = rhs.path_;
-        query_ = rhs.query_;
     }
     return *this;
 }
@@ -77,65 +72,33 @@ Url::operator=(const Url& rhs) {
 void
 Url::parse(const std::string& str) {
     // find required scheme
-    size_t scheme_end = str.find("://");
-    if (scheme_end == std::string::npos)
-        throw value_error("invalid url");
-    scheme(str.substr(0, scheme_end));
-
-    scheme_end += 3; // advance past ://
     
-    size_t path_end = str.find("/", scheme_end);
-    if (path_end == std::string::npos) {
-        // entire remaining string is the authority section
-        authority(str.substr(scheme_end));
-        return;
-    }
-    authority(str.substr(scheme_end, path_end - scheme_end));
+    using namespace boost::xpressive;
 
-    size_t query_end = str.find("?", path_end);
-    if (query_end == std::string::npos) {
-        // entire remaining string is the path
-        path(str.substr(path_end));
-        return;
-    }
-    path(str.substr(path_end, query_end - path_end));
+    mark_tag t_scheme(1), t_user(2), t_passwd(3), t_host(4), t_port(5), t_path(6);
+    
+    sregex re = 
+        (t_scheme = +(alpha)) >> "://" >> 
+        !((t_user=+~(set=':','@')) >>
+          !(":" >> (t_passwd=+~(set='@'))) >> "@") >>
+        ((t_host=+~(set=':','/')) >>
+         !(":" >> (t_port=+(digit)))) >> 
+        !("/" >> (t_path = *_));
 
-    // remaining string is the query
-    // XXX: currently not dealing with #fragment
-    query(str.substr(query_end));
-}
-
-void
-Url::authority(const std::string& authority) {
-    size_t user_info_end = authority.find("@");
-    if (user_info_end == std::string::npos) {
-        host_info(authority);
-    } else {
-        user_info(authority.substr(0, user_info_end));
-        host_info(authority.substr(user_info_end + 1));
+    smatch match;
+    if (not regex_match(str, match, re)) {
+        throw value_error("invalid url");
     }
-}
 
-void
-Url::user_info(const std::string& user_info) {
-    size_t user_name_end = user_info.find(":");
-    if (user_name_end == std::string::npos) {
-        user_name(user_info);
-    } else {
-        user_name(user_info.substr(0, user_name_end));
-        password(user_info.substr(user_name_end + 1));
-    }
-}
-
-void
-Url::host_info(const std::string& host_info) {
-    size_t host_end = host_info.find(":");
-    if (host_end == std::string::npos) {
-        host(host_info);
-    } else {
-        host(host_info.substr(0, host_end));
-        port(boost::lexical_cast<int>(host_info.substr(host_end + 1)));
-    }
+    scheme(match[t_scheme]);
+    user_name(match[t_user]);
+    password(match[t_passwd]);
+    host(match[t_host]);
+    if (match[t_port])
+        port(boost::lexical_cast<int>(match[t_port]));
+    path(match[t_path]);
+    return;
+    
 }
 
 } // namespace brfc

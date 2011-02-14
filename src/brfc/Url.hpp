@@ -27,12 +27,11 @@ namespace brfc {
 /**
  * @brief a naive URL implementation
  *
- * <scheme>://<user_name>:<password>@<host>:<port>/<path>?<query>
+ * this follows the common internet scheme syntax of RFC-1738:
+ * <scheme>://<user_name>:<password>@<host>:<port>/<path>
  *
  * @note currently doesn't support encoded URLs (this might be problematic
  *       for passwords containing '/', '@', ':', etc.)
- * @note scheme is always followed by '://' not ':'
- * @note there is not difference between an empty and an unspecified password
  */
 class Url {
   public:
@@ -44,21 +43,6 @@ class Url {
 
     Url& operator=(const Url& rhs);
     
-    /**
-     * @brief set user_name, password, host and port from authority string
-     */
-    void authority(const std::string& authority);
-    
-    /**
-     * @brief set user_name and password
-     */
-    void user_info(const std::string& user_info);
-    
-    /**
-     * @brief set host and port
-     */
-    void host_info(const std::string& host_info);
-
     const std::string& scheme() const {
         return scheme_;
     }
@@ -110,19 +94,6 @@ class Url {
         path_ = path;
     }
     
-    /**
-     * @brief access query
-     *
-     * @note don't use this. Has to be rewritten as a String:String map
-     */
-    const std::string& query() const {
-        return query_;
-    }
-
-    void query(const std::string& query) {
-        query_ = query;
-    }
-
   private:
     void parse(const std::string& str);
 
@@ -132,7 +103,6 @@ class Url {
     std::string host_;
     int port_;
     std::string path_;
-    std::string query_;
 };
 
 } // namespace brfc

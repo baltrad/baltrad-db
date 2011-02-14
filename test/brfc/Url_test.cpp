@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
+along with baltrad-db. If not, see <scheme://www.gnu.org/licenses/>.
 */
 
 #include <gtest/gtest.h>
@@ -24,18 +24,62 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-TEST(Url_test, test_complete_url) {
-    Url url("http://user:password@example.com:1234/path/to/resource");
-    EXPECT_EQ("http", url.scheme());
+TEST(Url_test, test_ctor1) {
+    Url url("scheme://user:password@example.com:1234/path/to/resource");
+    EXPECT_EQ("scheme", url.scheme());
     EXPECT_EQ("user", url.user_name());
     EXPECT_EQ("password", url.password());
     EXPECT_EQ("example.com", url.host());
     EXPECT_EQ(1234, url.port());
-    EXPECT_EQ("/path/to/resource", url.path());
+    EXPECT_EQ("path/to/resource", url.path());
+}
+
+TEST(Url_test, test_ctor2) {
+    Url url("scheme://user@example.com:1234/path/to/resource");
+    EXPECT_EQ("scheme", url.scheme());
+    EXPECT_EQ("user", url.user_name());
+    EXPECT_EQ("", url.password());
+    EXPECT_EQ("example.com", url.host());
+    EXPECT_EQ(1234, url.port());
+    EXPECT_EQ("path/to/resource", url.path());
+}
+
+TEST(Url_test, test_ctor3) {
+    Url url("scheme://user@example.com/path/to/resource");
+    EXPECT_EQ("scheme", url.scheme());
+    EXPECT_EQ("user", url.user_name());
+    EXPECT_EQ("", url.password());
+    EXPECT_EQ("example.com", url.host());
+    EXPECT_EQ(0, url.port());
+    EXPECT_EQ("path/to/resource", url.path());
+}
+
+TEST(Url_test, test_ctor4) {
+    Url url("scheme://example.com/path/to/resource");
+    EXPECT_EQ("scheme", url.scheme());
+    EXPECT_EQ("", url.user_name());
+    EXPECT_EQ("", url.password());
+    EXPECT_EQ("example.com", url.host());
+    EXPECT_EQ(0, url.port());
+    EXPECT_EQ("path/to/resource", url.path());
+}
+
+TEST(Url_test, test_ctor5) {
+    Url url("scheme://example.com");
+    EXPECT_EQ("scheme", url.scheme());
+    EXPECT_EQ("", url.user_name());
+    EXPECT_EQ("", url.password());
+    EXPECT_EQ("example.com", url.host());
+    EXPECT_EQ(0, url.port());
+    EXPECT_EQ("", url.path());
 }
 
 TEST(Url_test, test_invalid_url_throws) {
     EXPECT_THROW(Url("invalid_url"), value_error);
+    EXPECT_THROW(Url("scheme://example.com:port/"), value_error);
+    EXPECT_THROW(Url("scheme:///"), value_error);
+    EXPECT_THROW(Url("scheme://"), value_error);
+    EXPECT_THROW(Url("scheme://:@:/"), value_error);
 }
 
 } // namespace brfc
