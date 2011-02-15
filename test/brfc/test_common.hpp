@@ -29,6 +29,7 @@ namespace brfc {
 class Date;
 class DateTime;
 class Time;
+class TimeDelta;
 class Variant;
 
 namespace oh5 {
@@ -45,6 +46,9 @@ operator<<(std::ostream& out, const brfc::Time& value);
 
 std::ostream&
 operator<<(std::ostream& out, const brfc::DateTime& value);
+
+std::ostream&
+operator<<(std::ostream& out, const brfc::TimeDelta& value);
 
 std::ostream&
 operator<<(std::ostream& out, const brfc::Variant& value);

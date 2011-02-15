@@ -64,6 +64,19 @@ class TimeDelta {
 
     TimeDelta& add_msecs(int msecs);
 
+    /**
+     * @name comparison
+     * @{
+     */
+    bool operator==(const TimeDelta& rhs) const {
+        return msecs_ == rhs.msecs_ and days_ == rhs.days_;
+    }
+
+    bool operator!=(const TimeDelta& rhs) const {
+        return not (*this == rhs);
+    }
+    ///@}
+
   private:
     int days_;
     int msecs_;

@@ -55,6 +55,13 @@ std::ostream& operator<<(std::ostream& out, const brfc::DateTime& value) {
     return out;
 }
 
+std::ostream& operator<<(std::ostream& out, const brfc::TimeDelta& value) {
+    out << "DateTime("
+        << value.days() << ", "
+        << value.msecs() << ")";
+    return out;
+}
+
 std::ostream& operator<<(std::ostream& out, const brfc::Variant& value) {
     out << value.to_string();
     return out;

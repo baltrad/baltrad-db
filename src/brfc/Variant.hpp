@@ -25,6 +25,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/variant.hpp>
 
 #include <brfc/DateTime.hpp>
+#include <brfc/TimeDelta.hpp>
+#include <brfc/TimeDelta.hpp>
 
 namespace brfc {
 
@@ -41,7 +43,8 @@ class Variant {
         BOOL,
         DATE,
         TIME,
-        DATETIME
+        DATETIME,
+        TIMEDELTA
     };
 
     /**
@@ -144,6 +147,14 @@ class Variant {
     }
 
     /**
+     * @brief construct timedelta variant
+     */
+    explicit Variant(const TimeDelta& value)
+            : type_(TIMEDELTA)
+            , value_(value) {
+    }
+
+    /**
      * @brief copy assignment
      */
     Variant& operator=(const Variant& rhs) {
@@ -196,11 +207,17 @@ class Variant {
     /**
      * @brief test for DATETIME variant
      */
+    bool is_datetime() const;
     
     /**
      * @brief test for TIME variant
      */
     bool is_time() const;
+    
+    /**
+     * @brief test for TIMEDELTA variant
+     */
+    bool is_timedelta() const;
     ///@}
     
     /**
@@ -248,6 +265,12 @@ class Variant {
      * @throw value_error if type() != DATETIME
      */
     const DateTime& datetime() const;
+
+    /**
+     * @brief access TIMEDELTA variant
+     * @throw value_error if type() != TIMEDELTA
+     */
+    const TimeDelta& timedelta() const;
     ///@}
     
     /**
@@ -266,6 +289,8 @@ class Variant {
      *  - Date variant is converted to ISO 8601 format yyyy-MM-dd
      *  - Time variant is converted to ISO 8601 format hh:mm:ss
      *  - DateTime variant is converted to ISO 8601 format yyyy-MM-dd hh:mm:ss
+     *  - TimeDelta variant is converted to ISO 8601 duration format 'P?DT?S' where
+     *    is the value for days and seconds. Milliseconds are truncated.
      */
     std::string to_string() const;
     
@@ -336,6 +361,14 @@ class Variant {
      */
     DateTime to_datetime() const;
 
+    /**
+     * @brief convert to TimeDelta value
+     *
+     * conversions:
+     *  - no conversions implemented
+     */
+    TimeDelta to_timedelta() const;
+
   private:
     friend bool operator==(const Variant&, const Variant&);
 
@@ -349,7 +382,8 @@ class Variant {
                            bool,
                            Date,
                            Time,
-                           DateTime> ValueType;
+                           DateTime,
+                           TimeDelta> ValueType;
     ValueType value_;
 };
 

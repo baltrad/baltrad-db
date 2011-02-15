@@ -17,6 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <sstream>
+
 #include <brfc/Variant.hpp>
 
 #include <boost/lexical_cast.hpp>
@@ -32,6 +34,7 @@ bool Variant::is_double() const { return type_ == DOUBLE; }
 bool Variant::is_bool() const { return type_ == BOOL; }
 bool Variant::is_date() const { return type_ == DATE; }
 bool Variant::is_time() const { return type_ == TIME; }
+bool Variant::is_timedelta() const { return type_ == TIMEDELTA; }
 
 
 const std::string&
@@ -69,6 +72,11 @@ Variant::datetime() const {
     return get<const DateTime&>();
 }
 
+const TimeDelta&
+Variant::timedelta() const {
+    return get<const TimeDelta&>();
+}
+
 namespace {
 
 /**
@@ -102,6 +110,12 @@ class variant_to_string : public boost::static_visitor<std::string> {
 
     std::string operator()(const DateTime& value) const {
         return value.to_string("yyyy-MM-dd hh:mm:ss");
+    }
+
+    std::string operator()(const TimeDelta& value) const {
+        std::stringstream ss;
+        ss << "P" << value.days() << "DT" << value.msecs() / 1000 << "S";
+        return ss.str();
     }
 };
 
@@ -161,6 +175,7 @@ class variant_to_bool : public boost::static_visitor<bool> {
     bool operator()(const Time&) const { return true; }
     bool operator()(const Date&) const { return true; }
     bool operator()(const DateTime&) const { return true; }
+    bool operator()(const TimeDelta&) const { return true; }
 
     template<typename T>
     bool operator()(const T& value) const {
@@ -220,6 +235,19 @@ class variant_to_datetime : public boost::static_visitor<DateTime> {
     }
 };
 
+class variant_to_timedelta : public boost::static_visitor<TimeDelta> {
+  public:
+    TimeDelta operator()(const TimeDelta& value) const { return value; }
+
+    template<typename T>
+    TimeDelta operator()(const T&) const {
+        throw value_error("held variant (" +
+                          std::string(typeid(T).name()) + ") "
+                          "can't be converted to TimeDelta");
+    }
+};
+
+
 } // namespace anonymous
 
 std::string
@@ -263,8 +291,15 @@ Variant::to_date() const {
 DateTime
 Variant::to_datetime() const {
     if (type_ == NONE)
-        throw value_error("held valiant (NULL) can't be converted to DateTime");
+        throw value_error("held variant (NULL) can't be converted to DateTime");
     return boost::apply_visitor(variant_to_datetime(), value_);
+}
+
+TimeDelta
+Variant::to_timedelta() const {
+    if (type_ == NONE)
+        throw value_error("held variant (NULL) can't be converted to TimeDelta");
+    return boost::apply_visitor(variant_to_timedelta(), value_);
 }
 
 template<typename T>

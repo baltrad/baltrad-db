@@ -100,6 +100,7 @@ TEST(Variant_test, to_string) {
     EXPECT_EQ(Variant(Date(2000, 11, 12)).to_string(), "2000-11-12");
     EXPECT_EQ(Variant(Time(12, 34, 56)).to_string(), "12:34:56");
     EXPECT_EQ(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_string(), "2000-11-12 23:45:56");
+    EXPECT_EQ("P1DT1234S", Variant(TimeDelta(1, 1234567)).to_string());
 }
 
 TEST(Variant_test, to_int64) {
@@ -113,6 +114,7 @@ TEST(Variant_test, to_int64) {
     EXPECT_THROW(Variant(Date(2000, 11, 12)).to_int64(), value_error);
     EXPECT_THROW(Variant(Time(12, 34, 56)).to_int64(), value_error);
     EXPECT_THROW(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_int64(), value_error);
+    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_double(), value_error);
 }
 
 TEST(Variant_test, to_double) {
@@ -126,6 +128,7 @@ TEST(Variant_test, to_double) {
     EXPECT_THROW(Variant(Date(2000, 11, 12)).to_double(), value_error);
     EXPECT_THROW(Variant(Time(12, 34, 56)).to_double(), value_error);
     EXPECT_THROW(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_double(), value_error);
+    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_double(), value_error);
 }
 
 TEST(Variant_test, to_bool) {
@@ -142,6 +145,7 @@ TEST(Variant_test, to_bool) {
     EXPECT_EQ(true, Variant(Date(2000, 11, 12)).to_bool());
     EXPECT_EQ(true, Variant(Time(12, 34, 56)).to_bool());
     EXPECT_EQ(true, Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_bool());
+    EXPECT_EQ(true, Variant(TimeDelta(1, 2)).to_bool());
 }
 
 TEST(Variant_test, to_time) {
@@ -155,6 +159,7 @@ TEST(Variant_test, to_time) {
     EXPECT_THROW(Variant(Date(2000, 11, 12)).to_time(), value_error);
     EXPECT_EQ(Time(12, 34, 56), Variant(Time(12, 34, 56)).to_time());
     EXPECT_EQ(Time(23, 45, 56), Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_time());
+    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_time(), value_error);
 }
 
 TEST(Variant_test, to_date) {
@@ -168,6 +173,7 @@ TEST(Variant_test, to_date) {
     EXPECT_EQ(Date(2000, 11, 12), Variant(Date(2000, 11, 12)).to_date());
     EXPECT_THROW(Variant(Time(12, 34, 56)).to_date(), value_error);
     EXPECT_EQ(Date(2000, 11, 12), Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_date());
+    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_date(), value_error);
 }
 
 TEST(Variant_test, to_datetime) {
@@ -181,6 +187,21 @@ TEST(Variant_test, to_datetime) {
     EXPECT_THROW(Variant(Date(2000, 11, 12)).to_datetime(), value_error);
     EXPECT_THROW(Variant(Time(12, 34, 56)).to_datetime(), value_error);
     EXPECT_EQ(DateTime(2000, 11, 12, 23, 45, 56), Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_datetime());
+    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_datetime(), value_error);
 }
+
+TEST(Variant_test, to_timedelta) {
+    EXPECT_THROW(Variant().to_timedelta(), value_error);
+    EXPECT_THROW(Variant("foo").to_timedelta(), value_error);
+    EXPECT_THROW(Variant(10).to_timedelta(), value_error);
+    EXPECT_THROW(Variant(1.2).to_timedelta(), value_error);
+    EXPECT_THROW(Variant(true).to_timedelta(), value_error);
+    EXPECT_THROW(Variant(false).to_timedelta(), value_error);
+    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_timedelta(), value_error);
+    EXPECT_THROW(Variant(Time(12, 34, 56)).to_timedelta(), value_error);
+    EXPECT_THROW(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_timedelta(), value_error);
+    EXPECT_EQ(TimeDelta(1, 2), Variant(TimeDelta(1, 2)).to_timedelta());
+}
+
 
 } // namespace brfc
