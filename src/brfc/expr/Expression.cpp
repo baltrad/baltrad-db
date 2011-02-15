@@ -76,6 +76,21 @@ Expression::add(const Expression& rhs) const {
 }
 
 BinaryOperatorPtr
+Expression::sub(const Expression& rhs) const {
+    return make_shared<BinaryOperator>("-", *this, rhs);
+}
+
+BinaryOperatorPtr
+Expression::mul(const Expression& rhs) const {
+    return make_shared<BinaryOperator>("*", *this, rhs);
+}
+
+BinaryOperatorPtr
+Expression::div(const Expression& rhs) const {
+    return make_shared<BinaryOperator>("/", *this, rhs);
+}
+
+BinaryOperatorPtr
 Expression::between(const Expression& low, const Expression& high) const {
     // this >= low and this <= high
     ExpressionPtr rhs = le(high);

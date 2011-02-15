@@ -138,6 +138,21 @@ class Expression : public boost::noncopyable {
      * @brief this + rhs
      */
     BinaryOperatorPtr add(const Expression& rhs) const;
+
+    /**
+     * @brief this - rhs
+     */
+    BinaryOperatorPtr sub(const Expression& rhs) const;
+
+    /**
+     * @brief this * rhs
+     */
+    BinaryOperatorPtr mul(const Expression& rhs) const;
+
+    /**
+     * @brief this * rhs
+     */
+    BinaryOperatorPtr div(const Expression& rhs) const;
     //@}
 
     /**

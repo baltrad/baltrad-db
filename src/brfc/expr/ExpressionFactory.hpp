@@ -175,9 +175,29 @@ class ExpressionFactory {
     //@}
     
     /**
+     * @name arithmetic operators
+     * @{
+     */
+    /**
      * @brief lhs + rhs
      */
     BinaryOperatorPtr add(const Expression& lhs, const Expression& rhs) const;
+    
+    /**
+     * @brief lhs - rhs
+     */
+    BinaryOperatorPtr sub(const Expression& lhs, const Expression& rhs) const;
+
+    /**
+     * @brief lhs * rhs
+     */
+    BinaryOperatorPtr mul(const Expression& lhs, const Expression& rhs) const;
+
+    /**
+     * @brief lhs / rhs
+     */
+    BinaryOperatorPtr div(const Expression& lhs, const Expression& rhs) const;
+    ///@}
 
     /**
      * @brief surround expr with parentheses

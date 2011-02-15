@@ -158,6 +158,21 @@ ExpressionFactory::add(const Expression& lhs, const Expression& rhs) const {
     return lhs.add(rhs);
 }
 
+BinaryOperatorPtr
+ExpressionFactory::sub(const Expression& lhs, const Expression& rhs) const {
+    return lhs.sub(rhs);
+}
+
+BinaryOperatorPtr
+ExpressionFactory::mul(const Expression& lhs, const Expression& rhs) const {
+    return lhs.mul(rhs);
+}
+
+BinaryOperatorPtr
+ExpressionFactory::div(const Expression& lhs, const Expression& rhs) const {
+    return lhs.div(rhs);
+}
+
 ParenthesesPtr
 ExpressionFactory::parentheses(const Expression& expr) const {
     return expr.parentheses();
