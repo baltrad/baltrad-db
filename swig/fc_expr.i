@@ -68,6 +68,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.DateTime;
     import eu.baltrad.fc.Time;
+    import eu.baltrad.fc.TimeDelta;
 %}
 
 SWIG_SHARED_PTR(Expression,
@@ -126,6 +127,7 @@ SWIG_SHARED_PTR_DERIVED(Attribute,
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.DateTime;
     import eu.baltrad.fc.Time;
+    import eu.baltrad.fc.TimeDelta;
     import eu.baltrad.fc.Variant;
 %}
 

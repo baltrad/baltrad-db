@@ -102,6 +102,11 @@ ExpressionFactory::datetime(const DateTime& datetime) const {
 }
 
 LiteralPtr
+ExpressionFactory::timedelta(const TimeDelta& delta) const {
+    return make_shared<Literal>(Variant(delta));
+}
+
+LiteralPtr
 ExpressionFactory::bool_(bool value) const {
     return make_shared<Literal>(Variant(value));
 }

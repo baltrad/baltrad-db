@@ -52,26 +52,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %feature("director") brfc::FileNamer;
 
-%typemap(javabody) brfc::Date,
-                   brfc::DateTime,
-                   brfc::Time,
-                   brfc::Variant %{
-  private long swigCPtr;
-  protected boolean swigCMemOwn;
-
-  public $javaclassname(long cPtr, boolean cMemoryOwn) {
-    swigCMemOwn = cMemoryOwn;
-    swigCPtr = cPtr;
-  }
-
-  public static long getCPtr($javaclassname obj) {
-    return (obj == null) ? 0 : obj.swigCPtr;
-  }
-%}
-
 /***
  * brfc::Date
  */
+SWIG_JAVABODY_METHODS(public, public, brfc::Date);
 %ignore brfc::Date::date_from_jdn; // uses int references
 %ignore brfc::Date::operator=;
 %ignore brfc::Date::operator+=;
@@ -107,6 +91,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 /***
  * brfc::DateTime
  */
+SWIG_JAVABODY_METHODS(public, public, brfc::DateTime);
 %ignore brfc::DateTime::operator=;
 %ignore brfc::DateTime::operator+=;
 %ignore brfc::DateTime::operator!=;
@@ -143,6 +128,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 /***
  * brfc::Time
  */
+SWIG_JAVABODY_METHODS(public, public, brfc::Time);
 %ignore brfc::Time::operator=;
 %ignore brfc::Time::operator+=;
 %ignore brfc::Time::operator!=;
@@ -175,6 +161,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 /***
+ * brfc::TimeDelta
+ */
+SWIG_JAVABODY_METHODS(public, public, brfc::TimeDelta);
+
+/***
  * std::vector<std::string>
  */
 SWIG_JAVABODY_METHODS(public, public, std::vector<std::string>);
@@ -183,6 +174,7 @@ SWIG_JAVABODY_METHODS(public, public, std::vector<std::string>);
 /***
  * brfc::Variant
  */
+SWIG_JAVABODY_METHODS(public, public, brfc::Variant);
 %ignore brfc::Variant::Variant(unsigned int);
 %ignore brfc::Variant::Variant(const char* value);
 %ignore brfc::Variant::operator=;

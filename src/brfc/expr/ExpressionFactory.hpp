@@ -28,8 +28,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class Date;
-class Time;
 class DateTime;
+class Time;
+class TimeDelta;
 
 namespace expr {
 
@@ -111,6 +112,11 @@ class ExpressionFactory {
      * @brief construct expr::Literal containing a datetime
      */
     LiteralPtr datetime(const DateTime& datetime) const;
+
+    /**
+     * @brief construct expr::Literal containing a timedelta
+     */
+    LiteralPtr timedelta(const TimeDelta& delta) const;
 
     /**
      * @brief construct expr::Literal containing a bool
