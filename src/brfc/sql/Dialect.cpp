@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Dialect.hpp>
 
+#include <sstream>
+
 #include <boost/algorithm/string/case_conv.hpp>
 
 #include <brfc/exceptions.hpp>
@@ -27,6 +29,28 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 namespace sql {
+
+std::string
+ansi_sql_interval_str(const TimeDelta& delta) {
+    std::stringstream ss;
+    ss.fill('0');
+
+    int msecs = delta.msecs();
+    ss << delta.days() << " ";
+    ss.width(2);
+    ss << msecs / MSECS_IN_HOUR << ":";
+    msecs %= MSECS_IN_HOUR;
+    ss.width(2);
+    ss << msecs / MSECS_IN_MIN << ":";
+    msecs %= MSECS_IN_MIN;
+    ss.width(2);
+    ss << msecs / MSECS_IN_SEC << ".";
+    msecs %= MSECS_IN_SEC;
+    ss.width(3);
+    ss << msecs; // msec
+    
+    return ss.str();
+}
 
 std::string
 Dialect::do_variant_to_string(const Variant& value) const {
@@ -50,6 +74,8 @@ Dialect::do_variant_to_string(const Variant& value) const {
             return "'" + time_parser.time_to_string(value.time()) + "'";
         case Variant::DATETIME:
             return "'" + datetime_parser.to_string(value.datetime()) + "'";
+        case Variant::TIMEDELTA:
+            return "INTERVAL '" + ansi_sql_interval_str(value.timedelta()) +  "'";
         default:
             throw value_error("could not conv to sql: " + value.to_string());
     }

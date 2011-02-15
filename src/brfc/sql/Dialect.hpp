@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+class TimeDelta;
 class Variant;
 
 namespace sql {
@@ -71,6 +72,7 @@ class Dialect {
      * @brief default implementation
      * 
      * - date and time in ISO 8601 format
+     * - timedelta as "INTERVAL 'ansi_sql_interval_str()'"
      * - bool values as TRUE or FALSE
      * - none as NULL
      * - string surrounded by apostrophes (') and passed through escape()
@@ -79,6 +81,13 @@ class Dialect {
 
     virtual std::string do_escape(const std::string& str) const = 0;
 };
+
+/**
+ * @brief format @c delta as ANSI SQL INTERVAL string
+ */
+std::string
+ansi_sql_interval_str(const TimeDelta& delta);
+
 
 } // namespace sql
 } // namespace brfc

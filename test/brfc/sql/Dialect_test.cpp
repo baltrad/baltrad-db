@@ -37,6 +37,34 @@ class sql_Dialect_test : public testing::Test {
     ::testing::NiceMock<MockDialect> dialect;
 };
 
+
+TEST_F(sql_Dialect_test, test_ansi_sql_interval_str_nulls) {
+    TimeDelta delta;
+    EXPECT_EQ("0 00:00:00.000", ansi_sql_interval_str(delta));
+}
+
+TEST_F(sql_Dialect_test, test_ansi_sql_interval_str_single_digit) {
+    TimeDelta delta;
+    delta.add_days(10);
+    delta.add_hours(5);
+    delta.add_minutes(6);
+    delta.add_seconds(7);
+    delta.add_msecs(8);
+
+    EXPECT_EQ("10 05:06:07.008", ansi_sql_interval_str(delta));
+}
+
+TEST_F(sql_Dialect_test, test_ansi_sql_interval_str_maxwidth) {
+    TimeDelta delta;
+    delta.add_days(10);
+    delta.add_hours(20);
+    delta.add_minutes(30);
+    delta.add_seconds(40);
+    delta.add_msecs(500);
+
+    EXPECT_EQ("10 20:30:40.500", ansi_sql_interval_str(delta));
+}
+
 TEST_F(sql_Dialect_test, test_variant_to_string_string) {
     EXPECT_CALL(dialect, do_escape("qweqwe"))
         .WillOnce(Return("asdasd"));
@@ -57,6 +85,16 @@ TEST_F(sql_Dialect_test, test_variant_to_string_date) {
 
 TEST_F(sql_Dialect_test, test_variant_to_string_time) {
     EXPECT_EQ("'13:05:59.001'", dialect.variant_to_string(Variant(Time(13, 5, 59, 1))));
+}
+
+TEST_F(sql_Dialect_test, test_variant_to_string_timedelta) {
+    TimeDelta delta;
+    delta.add_days(1);
+    delta.add_hours(23);
+    delta.add_minutes(34);
+    delta.add_seconds(45);
+    delta.add_msecs(567);
+    EXPECT_EQ("INTERVAL '1 23:34:45.567'", dialect.variant_to_string(Variant(delta)));
 }
 
 TEST_F(sql_Dialect_test, test_variant_to_string_null) {
