@@ -81,5 +81,33 @@ TEST_F(expr_Function_test, test_equals) {
     EXPECT_TRUE(f4.equals(f4));
 }
 
+TEST_F(expr_Function_test, test_min) {
+    FunctionPtr f = Function::min(xpr1);
+    EXPECT_EQ("MIN", f->name());
+    ASSERT_EQ(1u, f->args().size());
+    EXPECT_TRUE(f->args().at(0)->equals(xpr1));
+}
+
+TEST_F(expr_Function_test, test_max) {
+    FunctionPtr f = Function::max(xpr1);
+    EXPECT_EQ("MAX", f->name());
+    ASSERT_EQ(1u, f->args().size());
+    EXPECT_TRUE(f->args().at(0)->equals(xpr1));
+}
+
+TEST_F(expr_Function_test, test_sum) {
+    FunctionPtr f = Function::sum(xpr1);
+    EXPECT_EQ("SUM", f->name());
+    ASSERT_EQ(1u, f->args().size());
+    EXPECT_TRUE(f->args().at(0)->equals(xpr1));
+}
+
+TEST_F(expr_Function_test, test_count) {
+    FunctionPtr f = Function::count(xpr1);
+    EXPECT_EQ("COUNT", f->name());
+    ASSERT_EQ(1u, f->args().size());
+    EXPECT_TRUE(f->args().at(0)->equals(xpr1));
+}
+
 } // namespace expr
 } // namespace brfc

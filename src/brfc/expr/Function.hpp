@@ -57,6 +57,12 @@ class Function : public Expression {
         f->add_arg(arg);
         return f;
     }
+
+    static FunctionPtr count(const Expression& arg) {
+        FunctionPtr f = make_shared<Function>("COUNT");
+        f->add_arg(arg);
+        return f;
+    }
     
     virtual const std::string& name() const { return name_; }
     

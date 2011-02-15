@@ -371,6 +371,15 @@ TEST_P(db_AttributeQuery_itest, test_fetch_max_xsize) {
     EXPECT_EQ(6, r->value_at(0).int64_());
 }
 
+TEST_P(db_AttributeQuery_itest, test_count_ysize) {
+    query.fetch(*xpr.count(*xpr.attribute("where/ysize")));
+    r.reset(db->execute(query));
+
+    EXPECT_EQ(1, r->size());
+    ASSERT_TRUE(r->next());
+    EXPECT_EQ(6, r->value_at(0).int64_());
+}
+
 TEST_P(db_AttributeQuery_itest, test_fetch_min_ysize_with_filter) {
     query.fetch(*xpr.min(*xpr.attribute("where/ysize")))
          .filter(*xpr.attribute("what/object")->eq(*xpr.string("CVOL")));

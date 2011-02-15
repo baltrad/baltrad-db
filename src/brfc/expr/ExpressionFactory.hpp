@@ -185,6 +185,10 @@ class ExpressionFactory {
     ParenthesesPtr parentheses(const Expression& expr) const;
     
     /**
+     * @name aggregate functions
+     * @{
+     */
+    /**
      * @brief MIN function
      */
     FunctionPtr min(const Expression& expr) const;
@@ -198,6 +202,12 @@ class ExpressionFactory {
      * @brief SUM function
      */
     FunctionPtr sum(const Expression& expr) const;
+    
+    /**
+     * @brief COUNT function
+     */
+    FunctionPtr count(const Expression& expr) const;
+    //@}
 
     /**
      * @brief combine date and time attribute to datetime

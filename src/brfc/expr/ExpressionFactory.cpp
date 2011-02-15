@@ -179,6 +179,11 @@ ExpressionFactory::sum(const Expression& expr) const {
     return Function::sum(expr);
 }
 
+FunctionPtr
+ExpressionFactory::count(const Expression& expr) const {
+    return Function::count(expr);
+}
+
 ExpressionPtr
 ExpressionFactory::combined_datetime(const std::string& date,
                                      const std::string& time) const {
