@@ -20,9 +20,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_ATTRIBUTE_QUERY_HPP
 #define BRFC_DB_ATTRIBUTE_QUERY_HPP
 
-#include <brfc/expr/fwd.hpp>
-
+#include <map>
+#include <string>
 #include <vector>
+
+#include <brfc/expr/fwd.hpp>
 
 namespace brfc {
 namespace db {
@@ -37,6 +39,7 @@ class AttributeQuery {
         DESC = 2
     };
 
+    typedef std::map<std::string, expr::ExpressionPtr> FetchMap;
     typedef std::vector<expr::ExpressionPtr> ExpressionVector;
     typedef std::pair<expr::ExpressionPtr, SortDir> OrderPair;
     typedef std::vector<OrderPair> OrderVector;
@@ -70,15 +73,17 @@ class AttributeQuery {
 
     /**
      * @brief mark an expression for fetching
+     * @param name the name this expression will be accessible with in results
      * @param expr expr::Expression to fetch
      * @return this AttributeQuery (for chaining)
      *
      * expression are returned in AttributeResult in the same order as they
      * are marked.
      */
-    AttributeQuery& fetch(const expr::Expression& expr);
+    AttributeQuery& fetch(const std::string& name,
+                          const expr::Expression& expr);
     
-    const ExpressionVector& fetch() const {
+    const FetchMap& fetch() const {
         return fetch_;
     }
 
@@ -120,7 +125,7 @@ class AttributeQuery {
     
   private:
     bool distinct_;
-    ExpressionVector fetch_;
+    FetchMap fetch_;
     expr::ExpressionPtr filter_;
     ExpressionVector group_;
     OrderVector order_;

@@ -55,7 +55,7 @@ class RdbAttributeResult : public AttributeResult {
 
     virtual int do_size() const;
 
-    virtual Variant do_value_at(unsigned int pos) const;
+    virtual Variant do_value_at(const std::string& name) const;
 
   private:
     shared_ptr<sql::Connection> conn_;

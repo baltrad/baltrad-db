@@ -47,8 +47,8 @@ AttributeQuery::AttributeQuery(const AttributeQuery& other)
         , filter_()
         , order_()
         , limit_(other.limit_) {
-    BOOST_FOREACH(expr::ExpressionPtr expr, other.fetch_) {
-        fetch_.push_back(expr->clone());
+    BOOST_FOREACH(const FetchMap::value_type& val, other.fetch_) {
+        fetch_[val.first] = val.second->clone();
     }
     if (other.filter_)
         filter_ = other.filter_->clone();
@@ -68,8 +68,8 @@ AttributeQuery::operator=(const AttributeQuery& rhs) {
 
     distinct_ = rhs.distinct_;
     fetch_.clear();
-    BOOST_FOREACH(expr::ExpressionPtr expr, rhs.fetch_) {
-        fetch_.push_back(expr->clone());
+    BOOST_FOREACH(const FetchMap::value_type& val, rhs.fetch_) {
+        fetch_[val.first] = val.second->clone();
     }
     if (rhs.filter_) {
         filter_ = rhs.filter_->clone();
@@ -91,11 +91,12 @@ AttributeQuery::distinct(bool distinct) {
 }
 
 AttributeQuery&
-AttributeQuery::fetch(const expr::Expression& expr) {
-    fetch_.push_back(expr.clone());
-    // XXX: there used to be duplicate check here, removed due to
-    //      adding fetch(Function). This should be brought back
-    //      and fetch(...) made to accept labeled expressions only.
+AttributeQuery::fetch(const std::string& name, const expr::Expression& expr) {
+    if (name.empty())
+        throw value_error("empty name for AttributeQuery::fetch");
+    if (fetch_.find(name) != fetch_.end())
+        throw duplicate_entry("duplicate AttributeQuery::fetch: " + name);
+    fetch_[name] = expr.clone();
     return *this;
 }
 

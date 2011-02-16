@@ -72,67 +72,67 @@ class AttributeResult : public boost::noncopyable {
     //@}
     
     /**
-     * @brief test if value at \c pos is NULL
+     * @brief test if value at \c name is NULL
      */
-    bool is_null(unsigned int pos) const;
+    bool is_null(const std::string& name) const;
     
     /**
      * @name value access
      * @{
      */
     /**
-     * @brief get value at @c pos as Variant
-     * @throw lookup_error if @c pos is out of range
+     * @brief get value at @c name as Variant
+     * @throw lookup_error if result doesn't contain a value by @c name
      */
-    Variant value_at(unsigned int pos) const;
+    Variant value_at(const std::string& name) const;
 
     /**
-     * @brief get string value at \c pos
-     * @throw lookup_error if @c pos is out of range
+     * @brief get string value at \c name
+     * @throw lookup_error if result doesn't contain a value by @c name
      *
-     * equivalent to: @code value_at(pos).to_string(); @endcode
+     * equivalent to: @code value_at(name).to_string(); @endcode
      */
-    std::string string(unsigned int pos) const;
+    std::string string(const std::string& name) const;
 
     /**
-     * @brief get a 64-bit integer value at \c pos
-     * @throw lookup_error if @c pos is out of range
+     * @brief get a 64-bit integer value at \c name
+     * @throw lookup_error if result doesn't contain a value by @c name
      *
-     * equivalent to: @code value_at(pos).to_int64(); @endcode
+     * equivalent to: @code value_at(name).to_int64(); @endcode
      */
-    long long int64_(unsigned int pos) const;
+    long long int64_(const std::string& name) const;
 
     /**
-     * @brief get a double precision floating-point value at \c pos
-     * @throw lookup_error if @c pos is out of range
+     * @brief get a double precision floating-point value at \c name
+     * @throw lookup_error if result doesn't contain a value by @c name
      *
-     * equivalent to: @code value_at(pos).to_double(); @endcode
+     * equivalent to: @code value_at(name).to_double(); @endcode
      */
-    double double_(unsigned int pos) const;
+    double double_(const std::string& name) const;
 
     /**
-     * @brief get boolean value at \c pos
-     * @throw lookup_error if @c pos is out of range
+     * @brief get boolean value at \c name
+     * @throw lookup_error if result doesn't contain a value by @c name
      *
-     * equivalent to: @code value_at(pos).to_bool(); @endcode
+     * equivalent to: @code value_at(name).to_bool(); @endcode
      */
-    bool bool_(unsigned int pos) const;
+    bool bool_(const std::string& name) const;
 
     /**
-     * @brief get date value at \c pos
-     * @throw lookup_error if @c pos is out of range
+     * @brief get date value at \c name
+     * @throw lookup_error if result doesn't contain a value by @c name
      *
-     * equivalent to: @code value_at(pos).to_date(); @endcode
+     * equivalent to: @code value_at(name).to_date(); @endcode
      */
-    Date date(unsigned int pos) const;
+    Date date(const std::string& name) const;
 
     /**
-     * @brief get time value at \c pos
-     * @throw lookup_error if @c pos is out of range
+     * @brief get time value at \c name
+     * @throw lookup_error if result doesn't contain a value by @c name
      *
-     * equivalent to: @code value_at(pos).to_time(); @endcode
+     * equivalent to: @code value_at(name).to_time(); @endcode
      */
-    Time time(unsigned int pos) const;    
+    Time time(const std::string& name) const;    
     //@}
      
   
@@ -155,7 +155,7 @@ class AttributeResult : public boost::noncopyable {
     /**
      * @brief value_at() implementation
      */
-    virtual Variant do_value_at(unsigned int pos) const = 0;
+    virtual Variant do_value_at(const std::string& name) const = 0;
 };
 
 } // namespace db

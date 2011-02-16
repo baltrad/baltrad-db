@@ -43,8 +43,8 @@ RdbAttributeResult::do_size() const {
 }
 
 Variant
-RdbAttributeResult::do_value_at(unsigned int pos) const {
-    return result_->value_at(pos);
+RdbAttributeResult::do_value_at(const std::string& name) const {
+    return result_->value_at("l_" + name);
 }
 
 } // namespace rdb

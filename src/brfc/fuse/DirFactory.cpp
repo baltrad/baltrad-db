@@ -75,7 +75,7 @@ DirFactory::do_update() {
     invalidate_all();
 
     db::AttributeQuery qry;
-    qry.fetch(*attr_);
+    qry.fetch("val", *attr_);
     if (filter_)
         qry.filter(*filter_);
     
@@ -85,7 +85,7 @@ DirFactory::do_update() {
     EntryByName_t::iterator iter;
 
     while (result->next()) {
-        const Variant& value = result->value_at(0);
+        const Variant& value = result->value_at("val");
         iter = es.find(value.to_string());
         if (iter != es.end()) {
             es.modify(iter, set_valid(true));

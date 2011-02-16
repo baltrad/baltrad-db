@@ -28,43 +28,43 @@ namespace brfc {
 namespace db {
 
 Variant
-AttributeResult::value_at(unsigned int pos) const {
-    return do_value_at(pos);
+AttributeResult::value_at(const std::string& name) const {
+    return do_value_at(name);
 }
 
 bool
-AttributeResult::is_null(unsigned int pos) const {
-    return value_at(pos).is_null();
+AttributeResult::is_null(const std::string& name) const {
+    return value_at(name).is_null();
 }
 
 std::string
-AttributeResult::string(unsigned int pos) const {
-    return value_at(pos).to_string();
+AttributeResult::string(const std::string& name) const {
+    return value_at(name).to_string();
 }
 
 long long
-AttributeResult::int64_(unsigned int pos) const {
-    return value_at(pos).to_int64();
+AttributeResult::int64_(const std::string& name) const {
+    return value_at(name).to_int64();
 }
 
 double
-AttributeResult::double_(unsigned int pos) const {
-    return value_at(pos).to_double();
+AttributeResult::double_(const std::string& name) const {
+    return value_at(name).to_double();
 }
 
 bool
-AttributeResult::bool_(unsigned int pos) const {
-    return value_at(pos).to_bool();
+AttributeResult::bool_(const std::string& name) const {
+    return value_at(name).to_bool();
 }
 
 Date
-AttributeResult::date(unsigned int pos) const {
-    return value_at(pos).to_date();
+AttributeResult::date(const std::string& name) const {
+    return value_at(name).to_date();
 }
 
 Time
-AttributeResult::time(unsigned int pos) const {
-    return value_at(pos).to_time();
+AttributeResult::time(const std::string& name) const {
+    return value_at(name).to_time();
 }
 
 } // namespace db

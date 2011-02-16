@@ -213,14 +213,14 @@ brfc::expr::ExpressionFactory xpr;
 brfc::db::AttributeQuery q;
 
 // mark attribute for fetching
-q.fetch(xpr.attribute("file:uuid"));
+q.fetch("uuid", xpr.attribute("file:uuid"));
 // execute
 brfc::db::AttributeResult* r = db->execute(q);
 
 // loop through results
 while (r->next()) {
     // access the values
-    std::string path = r->string(0);
+    std::string path = r->string("uuid");
 }
 @endcode
 

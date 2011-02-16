@@ -125,9 +125,9 @@ QueryToSelect::transform(const AttributeQuery& query) {
     select_->limit(query.limit());
 
     // replace attributes with columns
-    BOOST_FOREACH(expr::ExpressionPtr expr, query.fetch()) {
-        visit(*expr, *this);
-        select_->what(pop());
+    BOOST_FOREACH(const AttributeQuery::FetchMap::value_type& val, query.fetch()) {
+        visit(*val.second, *this);
+        select_->what(pop()->label("l_" + val.first));
     }
 
     // replace attributes in where clause with columns
