@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Variant.hpp>
 
 #include <brfc/expr/BinaryOperator.hpp>
-#include <brfc/expr/Label.hpp>
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
 
@@ -113,11 +112,6 @@ Expression::like(const Expression& pattern) const {
 ParenthesesPtr
 Expression::parentheses() const {
     return make_shared<Parentheses>(*this);
-}
-
-LabelPtr
-Expression::label(const std::string& label) const {
-    return make_shared<Label>(*this, label);
 }
 
 } // namespace expr

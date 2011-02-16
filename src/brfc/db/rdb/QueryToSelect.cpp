@@ -39,7 +39,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Function.hpp>
-#include <brfc/expr/Label.hpp>
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
 
@@ -309,12 +308,6 @@ QueryToSelect::operator()(const expr::Function& func) {
     }
 
     push(f);
-}
-
-void
-QueryToSelect::operator()(const expr::Label& label) {
-    visit(label.expression(), *this);
-    push(sql::Label::create(pop(), label.name()));
 }
 
 void

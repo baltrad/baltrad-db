@@ -41,7 +41,6 @@ typedef shared_ptr<Attribute> AttributePtr;
 typedef shared_ptr<BinaryOperator> BinaryOperatorPtr;
 typedef shared_ptr<Expression> ExpressionPtr;
 typedef shared_ptr<Function> FunctionPtr;
-typedef shared_ptr<Label> LabelPtr;
 typedef shared_ptr<Literal> LiteralPtr;
 typedef shared_ptr<Parentheses> ParenthesesPtr;
 

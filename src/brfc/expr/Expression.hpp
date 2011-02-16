@@ -160,11 +160,6 @@ class Expression : public boost::noncopyable {
      */
     ParenthesesPtr parentheses() const;
 
-    /**
-     * @brief label this expression
-     */
-    LabelPtr label(const std::string& label) const;
-
   protected:
     /**
      * @brief copy-constructor

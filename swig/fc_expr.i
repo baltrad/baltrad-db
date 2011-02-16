@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/expr/Function.hpp>
     #include <brfc/expr/Attribute.hpp>
     #include <brfc/expr/Parentheses.hpp>
-    #include <brfc/expr/Label.hpp>
     #include <brfc/expr/BinaryOperator.hpp>
     #include <brfc/expr/Literal.hpp>
 %}
@@ -82,9 +81,6 @@ SWIG_SHARED_PTR_DERIVED(Function,
 SWIG_SHARED_PTR_DERIVED(Literal,
                         brfc::expr::Expression,
                         brfc::expr::Literal);
-SWIG_SHARED_PTR_DERIVED(Label,
-                        brfc::expr::Expression,
-                        brfc::expr::Label);
 SWIG_SHARED_PTR_DERIVED(Parentheses,
                         brfc::expr::Expression,
                         brfc::expr::Parentheses);
@@ -134,7 +130,6 @@ SWIG_SHARED_PTR_DERIVED(Attribute,
 %include <brfc/expr/fwd.hpp>
 %include <brfc/expr/AttributePrototypes.hpp>
 %include <brfc/expr/Expression.hpp>
-%include <brfc/expr/Label.hpp>
 %include <brfc/expr/ExpressionFactory.hpp>
 %include <brfc/expr/Function.hpp>
 %include <brfc/expr/Attribute.hpp>
