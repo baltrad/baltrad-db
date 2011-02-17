@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 #include <brfc/sql/BinaryOperator.hpp>
+#include <brfc/sql/ExpressionList.hpp>
 #include <brfc/sql/Label.hpp>
 #include <brfc/sql/Parentheses.hpp>
 
@@ -85,6 +86,16 @@ Expression::between(ExpressionPtr low, ExpressionPtr high) const {
     ExpressionPtr rhs = le(high);
     ExpressionPtr lhs = ge(low);
     return lhs->and_(rhs);
+}
+
+BinaryOperatorPtr
+Expression::in(ExpressionListPtr values) const {
+    return BinaryOperator::create("IN", this->shared_from_this(), values->parentheses());
+}
+
+BinaryOperatorPtr
+Expression::not_in(ExpressionListPtr values) const {
+    return BinaryOperator::create("NOT IN", this->shared_from_this(), values->parentheses());
 }
 
 ParenthesesPtr

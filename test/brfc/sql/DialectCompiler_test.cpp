@@ -30,6 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/DialectCompiler.hpp>
+#include <brfc/sql/ExpressionList.hpp>
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Function.hpp>
 #include <brfc/sql/Insert.hpp>
@@ -123,6 +124,16 @@ TEST_F(sql_DialectCompiler_test, test_between) {
     EXPECT_EQ(Variant(0), replacer.value(":lit_1"));
     EXPECT_EQ(Variant(1), replacer.value(":lit_2"));
     EXPECT_EQ(Variant(2), replacer.value(":lit_3"));
+}
+
+TEST_F(sql_DialectCompiler_test, test_expressionlist) {
+    ExpressionListPtr exprs = ExpressionList::create();
+    exprs->add(xpr.string("asd"));
+    exprs->add(xpr.string("qwe"));
+    const Query& q = compiler.compile(*exprs);
+    EXPECT_EQ(":lit_0, :lit_1", q.statement());
+    EXPECT_EQ(Variant("asd"), replacer.value(":lit_0"));
+    EXPECT_EQ(Variant("qwe"), replacer.value(":lit_1"));
 }
 
 TEST_F(sql_DialectCompiler_test, test_string_literal) {

@@ -17,21 +17,40 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <gtest/gtest.h>
+#ifndef BRFC_SQL_EXPRESSION_LIST_HPP
+#define BRFC_SQL_EXPRESSION_LIST_HPP
 
-#include <brfc/sql/Function.hpp>
-#include <brfc/sql/Literal.hpp>
+#include <vector>
+
+#include <brfc/sql/Expression.hpp>
 
 namespace brfc {
 namespace sql {
 
-TEST(sql_Function_test, test_max) {
-    LiteralPtr l = Literal::create(Variant(1));
-    FunctionPtr f = Function::max(l);
-    EXPECT_EQ("MAX", f->name());
-    ASSERT_EQ(1u, f->args()->expressions().size());
-    EXPECT_EQ(l, f->args()->expressions().at(0));
-}
+class ExpressionList : public Expression {
+  public:
+    static ExpressionListPtr create() {
+        return ExpressionListPtr(new ExpressionList());
+    }
+
+    void add(ExpressionPtr expr) {
+        expressions_.push_back(expr);
+    }
+
+    std::vector<ExpressionPtr> expressions() const {
+        return expressions_;
+    }
+
+  protected:
+    ExpressionList()
+            : expressions_() {
+    }
+
+  private:
+    std::vector<ExpressionPtr> expressions_;
+};
 
 } // namespace sql
 } // namespace brfc
+
+#endif // BRFC_SQL_EXPRESSION_LIST_HPP

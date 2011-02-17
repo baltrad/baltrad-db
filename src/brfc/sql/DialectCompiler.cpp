@@ -35,6 +35,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Bind.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Dialect.hpp>
+#include <brfc/sql/ExpressionList.hpp>
 #include <brfc/sql/Function.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Join.hpp>
@@ -95,13 +96,21 @@ DialectCompiler::operator()(const Column& expr) {
 }
 
 void
-DialectCompiler::operator()(const Function& func) {
-    std::list<std::string> args;
-    BOOST_FOREACH(ExpressionPtr arg, func.args()) {
-        visit(*arg, *this);
-        args.push_back(pop());
+DialectCompiler::operator()(const ExpressionList& list) {
+    std::vector<std::string> expr_strs;
+
+    BOOST_FOREACH(ExpressionPtr expr, list.expressions()) {
+        visit(*expr, *this);
+        expr_strs.push_back(pop());
     }
-    push(func.name() + "(" + boost::join(args, ", ") + ")");
+
+    push(boost::join(expr_strs, ", "));
+}
+
+void
+DialectCompiler::operator()(const Function& func) {
+    visit(*func.args(), *this);
+    push(func.name() + "(" + pop() + ")");
 }
 
 void

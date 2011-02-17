@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
+#include <brfc/sql/ExpressionList.hpp>
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Literal.hpp>
@@ -47,6 +48,28 @@ TEST_F(sql_Expression_test, test_utf_string_literal) {
     LiteralPtr lit = xpr.string("öäü");
     std::string s = lit->value().string();
     EXPECT_EQ("öäü", s);
+}
+
+TEST_F(sql_Expression_test, test_in) {
+    LiteralPtr lit = xpr.int64_(1);
+    ExpressionListPtr vals = ExpressionList::create();
+    BinaryOperatorPtr op = lit->in(vals);
+    EXPECT_EQ("IN", op->op());
+    EXPECT_EQ(lit, op->lhs());
+    ParenthesesPtr rhs = dynamic_pointer_cast<Parentheses>(op->rhs());
+    ASSERT_TRUE(rhs);
+    EXPECT_EQ(vals, rhs->expression());
+}
+
+TEST_F(sql_Expression_test, test_not_in) {
+    LiteralPtr lit = xpr.int64_(1);
+    ExpressionListPtr vals = ExpressionList::create();
+    BinaryOperatorPtr op = lit->not_in(vals);
+    EXPECT_EQ("NOT IN", op->op());
+    EXPECT_EQ(lit, op->lhs());
+    ParenthesesPtr rhs = dynamic_pointer_cast<Parentheses>(op->rhs());
+    ASSERT_TRUE(rhs);
+    EXPECT_EQ(vals, rhs->expression());
 }
 
 TEST_F(sql_Expression_test, test_join_contains) {

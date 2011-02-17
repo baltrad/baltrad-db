@@ -42,6 +42,7 @@ class DialectCompiler : public Compiler {
                         const BinaryOperator,
                         const Bind,
                         const Column,
+                        const ExpressionList,
                         const Function,
                         const Insert,
                         const Join,
@@ -89,6 +90,12 @@ class DialectCompiler : public Compiler {
      * @post top of the stack contains compiled column
      */
     void operator()(const Column& expr);
+
+    /**
+     * @brief compile an expression list to string form
+     * @post top of the stack contains 'expr1, expr2, ...'
+     */
+    void operator()(const ExpressionList& list);
 
     /**
      * @brief compile function call to string form
