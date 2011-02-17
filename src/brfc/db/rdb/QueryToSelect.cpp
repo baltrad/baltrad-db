@@ -38,6 +38,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/ExpressionList.hpp>
 #include <brfc/expr/Function.hpp>
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
@@ -46,6 +47,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/BinaryOperator.hpp>
 #include <brfc/sql/Column.hpp>
 #include <brfc/sql/Expression.hpp>
+#include <brfc/sql/ExpressionList.hpp>
 #include <brfc/sql/Function.hpp>
 #include <brfc/sql/Join.hpp>
 #include <brfc/sql/Label.hpp>
@@ -296,6 +298,17 @@ QueryToSelect::operator()(const expr::BinaryOperator& op) {
         rhs = replace_pattern(rhs);
     }
     push(sql::BinaryOperator::create(op.op(), lhs, rhs));
+}
+
+void
+QueryToSelect::operator()(const expr::ExpressionList& exprs) {
+    sql::ExpressionListPtr sql_exprs = sql::ExpressionList::create();
+    for (size_t i = 0; i < exprs.size(); ++i) {
+        visit(exprs.at(i), *this);
+        sql_exprs->add(pop());
+    }
+
+    push(sql_exprs->parentheses());
 }
 
 void

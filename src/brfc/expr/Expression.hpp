@@ -113,6 +113,16 @@ class Expression : public boost::noncopyable {
      *  @sa like(const std::string&) const
      **/
     BinaryOperatorPtr like(const Expression& pattern) const;
+    
+    /**
+     * @brief this IN values
+     */
+    BinaryOperatorPtr in(const ExpressionList& values) const;
+    
+    /**
+     * @brief this NOT IN values
+     */
+    BinaryOperatorPtr not_in(const ExpressionList& values) const;
     //@}
 
     /**

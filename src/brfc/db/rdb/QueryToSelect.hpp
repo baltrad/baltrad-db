@@ -48,6 +48,7 @@ class QueryToSelect {
   public:
     typedef mpl::vector<const expr::Attribute,
                         const expr::BinaryOperator,
+                        const expr::ExpressionList,
                         const expr::Function,
                         const expr::Literal,
                         const expr::Parentheses> accepted_types;
@@ -99,7 +100,13 @@ class QueryToSelect {
      * @post the expression stack contains equivalent sql::BinaryOperator
      */
     void operator()(const expr::BinaryOperator& op);
-    
+
+     /**
+     * @brief turn expr::ExpressionList into sql::ExpressionList
+     * @post the expression stack contains equivalent sql::ExpressionList
+     */
+    void operator()(const expr::ExpressionList& exprs);
+   
     /**
      * @brief turn expr::Function into sql::Function
      * @post the expression stack contains equivalent sql::Function

@@ -16,37 +16,23 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef BRFC_EXPR_MOCK_EXPRESSION_LIST_HPP
+#define BRFC_EXPR_MOCK_EXPRESSION_LIST_HPP
 
-#ifndef BRFC_EXPR_FWD_HPP
-#define BRFC_EXPR_FWD_HPP
+#include <gmock/gmock.h>
 
-#include <brfc/smart_ptr.hpp>
+#include <brfc/expr/ExpressionList.hpp>
 
 namespace brfc {
-
-/**
- * @brief query expressions
- */
 namespace expr {
 
-class Attribute;
-class BinaryOperator;
-class Expression;
-class ExpressionList;
-class Function;
-class Label;
-class Literal;
-class Parentheses;
+class MockExpressionList : public ExpressionList {
+  public:
+    MOCK_CONST_METHOD0(clone, ExpressionPtr());
+    MOCK_CONST_METHOD1(do_equals, bool(const Expression&));
+};
 
-typedef shared_ptr<Attribute> AttributePtr;
-typedef shared_ptr<BinaryOperator> BinaryOperatorPtr;
-typedef shared_ptr<Expression> ExpressionPtr;
-typedef shared_ptr<ExpressionList> ExpressionListPtr;
-typedef shared_ptr<Function> FunctionPtr;
-typedef shared_ptr<Literal> LiteralPtr;
-typedef shared_ptr<Parentheses> ParenthesesPtr;
+} // namespace expr
+} // namespace brfc
 
-}
-}
-
-#endif // BRFC_EXPR_FWD_HPP
+#endif // BRFC_EXPR_MOCK_EXPRESSION_LIST_HPP

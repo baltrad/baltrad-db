@@ -32,6 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
+#include <brfc/expr/ExpressionList.hpp>
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
 
@@ -372,6 +373,35 @@ TEST_P(db_FileQuery_itest, test_skip_with_limit) {
     EXPECT_EQ(fe4->uuid(), entry(*r)->uuid());
 }
 
+TEST_P(db_FileQuery_itest, test_in) {
+    expr::ExpressionList l;
+    l.append(*xpr.string("CVOL"));
+    l.append(*xpr.string("SCAN"));
+
+    query.filter(*xpr.attribute("what/object")->in(l));
+    r.reset(db->execute(query));
+
+    EXPECT_EQ(2, r->size());
+    ASSERT_TRUE(r->next());
+    ASSERT_EQ(fe4->uuid(), entry(*r)->uuid());
+    ASSERT_TRUE(r->next());
+    ASSERT_EQ(fe5->uuid(), entry(*r)->uuid());
+}
+
+TEST_P(db_FileQuery_itest, test_not_in) {
+    expr::ExpressionList l;
+    l.append(*xpr.int64_(2));
+    l.append(*xpr.int64_(4));
+
+    query.filter(*xpr.attribute("where/ysize")->not_in(l));
+    r.reset(db->execute(query));
+    
+    EXPECT_EQ(2, r->size());
+    ASSERT_TRUE(r->next());
+    ASSERT_EQ(fe4->uuid(), entry(*r)->uuid());
+    ASSERT_TRUE(r->next());
+    ASSERT_EQ(fe5->uuid(), entry(*r)->uuid());
+}
 
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(db_FileQuery_itest_p,

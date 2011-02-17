@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Variant.hpp>
 
 #include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/ExpressionList.hpp>
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
 
@@ -107,6 +108,16 @@ Expression::like(const std::string& pattern) const {
 BinaryOperatorPtr
 Expression::like(const Expression& pattern) const {
     return make_shared<BinaryOperator>("LIKE", *this, pattern);
+}
+
+BinaryOperatorPtr
+Expression::in(const ExpressionList& values) const {
+    return make_shared<BinaryOperator>("IN", *this, values);
+}
+
+BinaryOperatorPtr
+Expression::not_in(const ExpressionList& values) const {
+    return make_shared<BinaryOperator>("NOT IN", *this, values);
 }
 
 ParenthesesPtr

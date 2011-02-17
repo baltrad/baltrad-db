@@ -26,6 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/expr/AttributePrototypes.hpp>
     #include <brfc/expr/Expression.hpp>
     #include <brfc/expr/ExpressionFactory.hpp>
+    #include <brfc/expr/ExpressionList.hpp>
     #include <brfc/expr/Function.hpp>
     #include <brfc/expr/Attribute.hpp>
     #include <brfc/expr/Parentheses.hpp>
@@ -87,6 +88,9 @@ SWIG_SHARED_PTR_DERIVED(Parentheses,
 SWIG_SHARED_PTR_DERIVED(Attribute,
                         brfc::expr::Expression,
                         brfc::expr::Attribute);
+SWIG_SHARED_PTR_DERIVED(ExpressionList,
+                        brfc::expr::Expression,
+                        brfc::expr::ExpressionList);
 
 %typemap(javabody) std::vector<brfc::shared_ptr<brfc::expr::Attribute> > %{
                    
@@ -131,6 +135,7 @@ SWIG_SHARED_PTR_DERIVED(Attribute,
 %include <brfc/expr/AttributePrototypes.hpp>
 %include <brfc/expr/Expression.hpp>
 %include <brfc/expr/ExpressionFactory.hpp>
+%include <brfc/expr/ExpressionList.hpp>
 %include <brfc/expr/Function.hpp>
 %include <brfc/expr/Attribute.hpp>
 %include <brfc/expr/Parentheses.hpp>
