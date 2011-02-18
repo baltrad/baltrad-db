@@ -122,6 +122,51 @@ SWIG_SHARED_PTR_DERIVED(ExpressionList,
   }
 %}
 
+%typemap(javaimports) brfc::expr::Expression %{
+  import java.util.Collection;
+%}
+
+%typemap(javacode) brfc::expr::Expression %{
+  public BinaryOperator in(Collection<? extends Expression> values) {
+    return this.in(new ExpressionList(values));
+  }
+
+  public BinaryOperator in(Expression[] values) {
+    return this.in(new ExpressionList(values));
+  }
+
+  public BinaryOperator not_in(Collection<? extends Expression> values) {
+    return this.not_in(new ExpressionList(values));
+  }
+
+  public BinaryOperator not_in(Expression[] values) {
+    return this.not_in(new ExpressionList(values));
+  }
+%}
+
+
+/**
+ * brfc::expr::ExpressionList
+ */
+%typemap(javaimports) brfc::expr::ExpressionList %{
+  import java.util.Collection;
+%}
+
+%typemap(javacode) brfc::expr::ExpressionList %{
+  public ExpressionList(Collection<? extends Expression> values) {
+    this();
+    for (Expression e : values) {
+      append(e);
+    }
+  }
+
+  public ExpressionList(Expression[] values) {
+    this();
+    for (int i=0; i < values.length; i++) {
+      append(values[i]);
+    }
+  }
+%}
 
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.Date;
