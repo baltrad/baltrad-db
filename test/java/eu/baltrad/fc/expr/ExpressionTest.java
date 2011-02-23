@@ -46,28 +46,28 @@ public class ExpressionTest extends TestCase {
 
   public void testIn_Collection() {
     BinaryOperator op = attr.in(valueList);
-    assertEquals("IN", op.op());
+    assertEquals(BinaryOperator.Op.IN, op.op());
     assertTrue(op.lhs().equals(attr));
     assertTrue(op.rhs().equals(valueElist));
   }
 
   public void testIn_Array() {
     BinaryOperator op = attr.in(valueArray);
-    assertEquals("IN", op.op());
+    assertEquals(BinaryOperator.Op.IN, op.op());
     assertTrue(op.lhs().equals(attr));
     assertTrue(op.rhs().equals(valueElist));
   }
 
   public void testNotIn_Collection() {
     BinaryOperator op = attr.not_in(valueList);
-    assertEquals("NOT IN", op.op());
+    assertEquals(BinaryOperator.Op.NOT_IN, op.op());
     assertTrue(op.lhs().equals(attr));
     assertTrue(op.rhs().equals(valueElist));
   }
 
   public void testNotIn_Array() {
     BinaryOperator op = attr.not_in(valueArray);
-    assertEquals("NOT IN", op.op());
+    assertEquals(BinaryOperator.Op.NOT_IN, op.op());
     assertTrue(op.lhs().equals(attr));
     assertTrue(op.rhs().equals(valueElist));
   }

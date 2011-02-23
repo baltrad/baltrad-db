@@ -53,9 +53,9 @@ class expr_BinaryOperator_test : public ::testing::Test {
 };
 
 TEST_F(expr_BinaryOperator_test, test_equals) {
-    BinaryOperator op1("op1", xpr1, xpr2);
-    BinaryOperator op2("op1", xpr2, xpr1);
-    BinaryOperator op3("op3", xpr1, xpr2);
+    BinaryOperator op1(BinaryOperator::ADD, xpr1, xpr2);
+    BinaryOperator op2(BinaryOperator::ADD, xpr2, xpr1);
+    BinaryOperator op3(BinaryOperator::MUL, xpr1, xpr2);
 
     EXPECT_TRUE(op1.equals(op1));
     EXPECT_TRUE(op1.equals(op2));

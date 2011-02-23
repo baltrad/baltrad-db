@@ -285,6 +285,28 @@ replace_pattern(sql::ExpressionPtr expr) {
     }
     return expr;
 }
+
+std::string
+sql_operator(expr::BinaryOperator::Op op) {
+    switch (op) {
+        case expr::BinaryOperator::NE: return "!=";
+        case expr::BinaryOperator::EQ: return "=";
+        case expr::BinaryOperator::GT: return ">";
+        case expr::BinaryOperator::LT: return "<";
+        case expr::BinaryOperator::LE: return "<=";
+        case expr::BinaryOperator::GE: return ">=";
+        case expr::BinaryOperator::LIKE: return "LIKE";
+        case expr::BinaryOperator::IN: return "IN";
+        case expr::BinaryOperator::NOT_IN: return "NOT IN";
+        case expr::BinaryOperator::AND: return "AND";
+        case expr::BinaryOperator::OR: return "OR";
+        case expr::BinaryOperator::ADD: return "+";
+        case expr::BinaryOperator::SUB: return "-";
+        case expr::BinaryOperator::MUL: return "*";
+        case expr::BinaryOperator::DIV: return "/";
+    }
+    throw std::runtime_error("");
+}
  
 } // namespace anonymous
 
@@ -294,10 +316,10 @@ QueryToSelect::operator()(const expr::BinaryOperator& op) {
     visit(*op.rhs(), *this);
     sql::ExpressionPtr rhs = pop();
     sql::ExpressionPtr lhs = pop();
-    if (op.op() == "LIKE") {
+    if (op.op() == expr::BinaryOperator::LIKE) {
         rhs = replace_pattern(rhs);
     }
-    push(sql::BinaryOperator::create(op.op(), lhs, rhs));
+    push(sql::BinaryOperator::create(sql_operator(op.op()), lhs, rhs));
 }
 
 void

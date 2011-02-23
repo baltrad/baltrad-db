@@ -32,62 +32,62 @@ namespace expr {
 
 BinaryOperatorPtr
 Expression::ne(const Expression& rhs) const {
-    return make_shared<BinaryOperator>("!=", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::NE, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::eq(const Expression& rhs) const {
-    return make_shared<BinaryOperator>("=", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::EQ, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::gt(const Expression& rhs) const {
-    return make_shared<BinaryOperator>(">", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::GT, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::lt(const Expression& rhs) const {
-    return make_shared<BinaryOperator>("<", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::LT, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::le(const Expression& rhs) const {
-    return make_shared<BinaryOperator>("<=", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::LE, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::ge(const Expression& rhs) const {
-    return make_shared<BinaryOperator>(">=", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::GE, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::and_(const Expression& rhs) const {
-    return make_shared<BinaryOperator>("AND", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::AND, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::or_(const Expression& rhs) const {
-    return make_shared<BinaryOperator>("OR", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::OR, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::add(const Expression& rhs) const {
-    return make_shared<BinaryOperator>("+", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::ADD, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::sub(const Expression& rhs) const {
-    return make_shared<BinaryOperator>("-", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::SUB, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::mul(const Expression& rhs) const {
-    return make_shared<BinaryOperator>("*", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::MUL, *this, rhs);
 }
 
 BinaryOperatorPtr
 Expression::div(const Expression& rhs) const {
-    return make_shared<BinaryOperator>("/", *this, rhs);
+    return make_shared<BinaryOperator>(BinaryOperator::DIV, *this, rhs);
 }
 
 BinaryOperatorPtr
@@ -107,17 +107,17 @@ Expression::like(const std::string& pattern) const {
 
 BinaryOperatorPtr
 Expression::like(const Expression& pattern) const {
-    return make_shared<BinaryOperator>("LIKE", *this, pattern);
+    return make_shared<BinaryOperator>(BinaryOperator::LIKE, *this, pattern);
 }
 
 BinaryOperatorPtr
 Expression::in(const ExpressionList& values) const {
-    return make_shared<BinaryOperator>("IN", *this, values);
+    return make_shared<BinaryOperator>(BinaryOperator::IN, *this, values);
 }
 
 BinaryOperatorPtr
 Expression::not_in(const ExpressionList& values) const {
-    return make_shared<BinaryOperator>("NOT IN", *this, values);
+    return make_shared<BinaryOperator>(BinaryOperator::NOT_IN, *this, values);
 }
 
 ParenthesesPtr

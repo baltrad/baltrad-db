@@ -18,6 +18,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define SWIG_SHARED_PTR_NAMESPACE brfc
+%include "enums.swg"
 %include "boost_shared_ptr.i"
 %include "std_string.i"
 %include "std_vector.i"

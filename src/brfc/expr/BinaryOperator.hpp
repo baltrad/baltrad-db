@@ -32,7 +32,25 @@ namespace expr {
  */
 class BinaryOperator : public Expression {
   public:
-    BinaryOperator(const std::string& op,
+    enum Op {
+        NE,
+        EQ,
+        GT,
+        LT,
+        LE,
+        GE,
+        LIKE,
+        IN,
+        NOT_IN,
+        AND,
+        OR,
+        ADD,
+        SUB,
+        MUL,
+        DIV
+    };
+
+    BinaryOperator(Op op,
                    const Expression& lhs,
                    const Expression& rhs)
             : Expression()
@@ -50,7 +68,7 @@ class BinaryOperator : public Expression {
 
     ExpressionPtr lhs() const { return lhs_; }
     ExpressionPtr rhs() const { return rhs_; }
-    const std::string& op() const { return op_; }
+    Op op() const { return op_; }
 
   protected:
     BinaryOperator(const BinaryOperator& other)
@@ -72,7 +90,7 @@ class BinaryOperator : public Expression {
     }
 
   private:
-    std::string op_;
+    Op op_;
     ExpressionPtr lhs_;
     ExpressionPtr rhs_;
 };
