@@ -106,7 +106,7 @@ def set_options(opt):
                    help="database to test against (specify multiple times "
                         "for different databases)")
 
-    libnames = ("boost", "hdf5", "hlhdf", "fuse", "jdk", "pqxx")
+    libnames = ("boost", "hdf5", "hlhdf", "fuse", "jdk", "pqxx", "pthread")
     for libname in libnames:
         _add_lib_path_options(grp, libname)
    
@@ -184,6 +184,16 @@ def configure(conf):
         libpath=env.fuse_lib_dir,
         uselib_store="FUSE",
         mandatory=env.build_bdbfs,
+    )
+    
+    _lib_path_opts_to_env(env, "pthread")
+    conf.check_cc(
+        header_name="pthread.h",
+        lib="pthread",
+        includes=env.pthread_inc_dir,
+        libpath=env.pthread_lib_dir,
+        uselib_store="PTHREAD",
+        mandatory=True,
     )
     
     # check for boost
@@ -334,6 +344,7 @@ def _build_shared_library(bld):
         "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM", "BOOST_THREAD",
         "HDF5", "HLHDF",
         "PQXX",
+        "PTHREAD",
     ]
 
     for src in bld.path.ant_glob("src/brfc/fuse/*.cpp").split(" "):
