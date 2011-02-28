@@ -31,7 +31,14 @@ namespace expr {
 
 class Function : public Expression {
   public:
-    explicit Function(const std::string& name)
+    enum Name {
+        COUNT = 1,
+        MAX,
+        MIN,
+        SUM
+    };
+
+    explicit Function(Name name)
             : name_(name)
             , args_() {
     }
@@ -41,30 +48,30 @@ class Function : public Expression {
     }
 
     static FunctionPtr max(const Expression& arg) {
-        FunctionPtr f = make_shared<Function>("MAX");
+        FunctionPtr f = make_shared<Function>(MAX);
         f->add_arg(arg);
         return f;
     }
 
     static FunctionPtr min(const Expression& arg) {
-        FunctionPtr f = make_shared<Function>("MIN");
+        FunctionPtr f = make_shared<Function>(MIN);
         f->add_arg(arg);
         return f;
     }
 
     static FunctionPtr sum(const Expression& arg) {
-        FunctionPtr f = make_shared<Function>("SUM");
+        FunctionPtr f = make_shared<Function>(SUM);
         f->add_arg(arg);
         return f;
     }
 
     static FunctionPtr count(const Expression& arg) {
-        FunctionPtr f = make_shared<Function>("COUNT");
+        FunctionPtr f = make_shared<Function>(COUNT);
         f->add_arg(arg);
         return f;
     }
     
-    virtual const std::string& name() const { return name_; }
+    Name name() const { return name_; }
     
     std::vector<ExpressionPtr> args() const { return args_; }
 
@@ -94,7 +101,7 @@ class Function : public Expression {
     }
    
   private:
-    std::string name_;
+    Name name_;
     std::vector<ExpressionPtr> args_;
 };
 

@@ -307,6 +307,17 @@ sql_operator(expr::BinaryOperator::Op op) {
     }
     throw std::runtime_error("");
 }
+
+std::string
+sql_function_name(expr::Function::Name name) {
+    switch (name) {
+        case expr::Function::COUNT: return "COUNT";
+        case expr::Function::MAX: return "MAX";
+        case expr::Function::MIN: return "MIN";
+        case expr::Function::SUM: return "SUM";
+    }
+    throw std::runtime_error("");
+}
  
 } // namespace anonymous
 
@@ -335,7 +346,7 @@ QueryToSelect::operator()(const expr::ExpressionList& exprs) {
 
 void
 QueryToSelect::operator()(const expr::Function& func) {
-    sql::FunctionPtr f = sql::Function::create(func.name());
+    sql::FunctionPtr f = sql::Function::create(sql_function_name(func.name()));
 
     BOOST_FOREACH(expr::ExpressionPtr arg, func.args()) {
         visit(*arg, *this);

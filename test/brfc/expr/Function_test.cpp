@@ -53,14 +53,14 @@ class expr_Function_test : public ::testing::Test {
 };
 
 TEST_F(expr_Function_test, test_equals) {
-    Function f1("f1");
+    Function f1(Function::MIN);
     f1.add_arg(xpr1);
-    Function f2("f2");
+    Function f2(Function::MAX);
     f2.add_arg(xpr1);
-    Function f3("f3");
+    Function f3(Function::COUNT);
     f3.add_arg(xpr1);
     f3.add_arg(xpr2);
-    Function f4("f3");
+    Function f4(Function::COUNT);
     f4.add_arg(xpr2);
     f4.add_arg(xpr1);
 
@@ -83,28 +83,28 @@ TEST_F(expr_Function_test, test_equals) {
 
 TEST_F(expr_Function_test, test_min) {
     FunctionPtr f = Function::min(xpr1);
-    EXPECT_EQ("MIN", f->name());
+    EXPECT_EQ(Function::MIN, f->name());
     ASSERT_EQ(1u, f->args().size());
     EXPECT_TRUE(f->args().at(0)->equals(xpr1));
 }
 
 TEST_F(expr_Function_test, test_max) {
     FunctionPtr f = Function::max(xpr1);
-    EXPECT_EQ("MAX", f->name());
+    EXPECT_EQ(Function::MAX, f->name());
     ASSERT_EQ(1u, f->args().size());
     EXPECT_TRUE(f->args().at(0)->equals(xpr1));
 }
 
 TEST_F(expr_Function_test, test_sum) {
     FunctionPtr f = Function::sum(xpr1);
-    EXPECT_EQ("SUM", f->name());
+    EXPECT_EQ(Function::SUM, f->name());
     ASSERT_EQ(1u, f->args().size());
     EXPECT_TRUE(f->args().at(0)->equals(xpr1));
 }
 
 TEST_F(expr_Function_test, test_count) {
     FunctionPtr f = Function::count(xpr1);
-    EXPECT_EQ("COUNT", f->name());
+    EXPECT_EQ(Function::COUNT, f->name());
     ASSERT_EQ(1u, f->args().size());
     EXPECT_TRUE(f->args().at(0)->equals(xpr1));
 }
