@@ -121,9 +121,12 @@ def _opts_to_env(env, opts):
         setattr(env, opt, (Utils.subst_vars(val, env)))
 
 def _lib_path_opts_to_env(env, libname):
-    suffixes = ("_dir", "_lib_dir", "_inc_dir")
-    _opts_to_env(env, [libname + suffix for suffix in suffixes])
-        
+    exclude = ["/usr/lib", "/usr/include"]
+    vars = [libname + suffix for suffix in ("_dir", "_lib_dir", "_inc_dir")]
+    _opts_to_env(env, vars)
+    for var in vars:
+        if getattr(env, var) in exclude:
+            setattr(env, var, None)
 
 def configure(conf):
     conf.check_tool("compiler_cc")
@@ -617,9 +620,12 @@ def _run_tests(bld):
     ]
 
     for libname in libs:
-        libpath = env["LIBPATH_%s" % libname][0]
+        try:
+            libpath = env["LIBPATH_%s" % libname][0]
+        except LookupError:
+            continue
         libpath = os.path.abspath(libpath)
-        if libpath not in ("/lib", "/usr/lib") and libpath not in ld_path:
+        if libpath not in ld_path:
             ld_path.append(libpath)
     
     if not env["env"]:
