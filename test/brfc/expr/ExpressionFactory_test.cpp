@@ -45,7 +45,7 @@ TEST_F(expr_ExpressionFactory_test, test_combined_datetime) {
     BinaryOperatorPtr op = dynamic_pointer_cast<BinaryOperator>(x);
     ASSERT_TRUE(op);
 
-    EXPECT_EQ(BinaryOperator::ADD, op->op());
+    EXPECT_EQ(BinaryOperator::ADD, op->type());
 
     AttributePtr p = dynamic_pointer_cast<Attribute>(op->lhs());
     ASSERT_TRUE(p);

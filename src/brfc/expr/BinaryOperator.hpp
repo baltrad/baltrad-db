@@ -32,7 +32,7 @@ namespace expr {
  */
 class BinaryOperator : public Expression {
   public:
-    enum Op {
+    enum Type {
         NE,
         EQ,
         GT,
@@ -50,11 +50,11 @@ class BinaryOperator : public Expression {
         DIV
     };
 
-    BinaryOperator(Op op,
+    BinaryOperator(Type type,
                    const Expression& lhs,
                    const Expression& rhs)
             : Expression()
-            , op_(op)
+            , type_(type)
             , lhs_(lhs.clone())
             , rhs_(rhs.clone()) {
     }
@@ -68,18 +68,18 @@ class BinaryOperator : public Expression {
 
     ExpressionPtr lhs() const { return lhs_; }
     ExpressionPtr rhs() const { return rhs_; }
-    Op op() const { return op_; }
+    Type type() const { return type_; }
 
   protected:
     BinaryOperator(const BinaryOperator& other)
-            : op_(other.op_)
+            : type_(other.type_)
             , lhs_(other.lhs_->clone())
             , rhs_(other.rhs_->clone()) {
     }
 
     bool do_equals(const Expression& other) const {
         const BinaryOperator* optr = dynamic_cast<const BinaryOperator*>(&other);
-        if (optr and op_ == optr->op_) {
+        if (optr and type_ == optr->type_) {
             if (lhs_->equals(*optr->lhs_) and rhs_->equals(*optr->rhs_)) {
                 return true;
             } else if (lhs_->equals(*optr->rhs_) and rhs_->equals(*optr->lhs_)) {
@@ -90,7 +90,7 @@ class BinaryOperator : public Expression {
     }
 
   private:
-    Op op_;
+    Type type_;
     ExpressionPtr lhs_;
     ExpressionPtr rhs_;
 };

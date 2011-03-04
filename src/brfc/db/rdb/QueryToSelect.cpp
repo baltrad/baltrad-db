@@ -287,8 +287,8 @@ replace_pattern(sql::ExpressionPtr expr) {
 }
 
 std::string
-sql_operator(expr::BinaryOperator::Op op) {
-    switch (op) {
+sql_operator(expr::BinaryOperator::Type type) {
+    switch (type) {
         case expr::BinaryOperator::NE: return "!=";
         case expr::BinaryOperator::EQ: return "=";
         case expr::BinaryOperator::GT: return ">";
@@ -327,10 +327,10 @@ QueryToSelect::operator()(const expr::BinaryOperator& op) {
     visit(*op.rhs(), *this);
     sql::ExpressionPtr rhs = pop();
     sql::ExpressionPtr lhs = pop();
-    if (op.op() == expr::BinaryOperator::LIKE) {
+    if (op.type() == expr::BinaryOperator::LIKE) {
         rhs = replace_pattern(rhs);
     }
-    push(sql::BinaryOperator::create(sql_operator(op.op()), lhs, rhs));
+    push(sql::BinaryOperator::create(sql_operator(op.type()), lhs, rhs));
 }
 
 void

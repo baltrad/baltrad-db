@@ -56,7 +56,7 @@ class expr_Expression_test : public ::testing::Test {
 TEST_F(expr_Expression_test, test_add) {
     BinaryOperatorPtr op = xpr1.add(xpr2);
 
-    EXPECT_EQ(BinaryOperator::ADD, op->op());
+    EXPECT_EQ(BinaryOperator::ADD, op->type());
     EXPECT_TRUE(op->lhs()->equals(xpr1));
     EXPECT_TRUE(op->rhs()->equals(xpr2));
 }
@@ -64,7 +64,7 @@ TEST_F(expr_Expression_test, test_add) {
 TEST_F(expr_Expression_test, test_sub) {
     BinaryOperatorPtr op = xpr1.sub(xpr2);
 
-    EXPECT_EQ(BinaryOperator::SUB, op->op());
+    EXPECT_EQ(BinaryOperator::SUB, op->type());
     EXPECT_TRUE(op->lhs()->equals(xpr1));
     EXPECT_TRUE(op->rhs()->equals(xpr2));
 }
@@ -72,7 +72,7 @@ TEST_F(expr_Expression_test, test_sub) {
 TEST_F(expr_Expression_test, test_mul) {
     BinaryOperatorPtr op = xpr1.mul(xpr2);
 
-    EXPECT_EQ(BinaryOperator::MUL, op->op());
+    EXPECT_EQ(BinaryOperator::MUL, op->type());
     EXPECT_TRUE(op->lhs()->equals(xpr1));
     EXPECT_TRUE(op->rhs()->equals(xpr2));
 }
@@ -80,7 +80,7 @@ TEST_F(expr_Expression_test, test_mul) {
 TEST_F(expr_Expression_test, test_div) {
     BinaryOperatorPtr op = xpr1.div(xpr2);
 
-    EXPECT_EQ(BinaryOperator::DIV, op->op());
+    EXPECT_EQ(BinaryOperator::DIV, op->type());
     EXPECT_TRUE(op->lhs()->equals(xpr1));
     EXPECT_TRUE(op->rhs()->equals(xpr2));
 }
@@ -94,7 +94,7 @@ TEST_F(expr_Expression_test, test_in) {
         .WillByDefault(Return(true));
 
     BinaryOperatorPtr op = xpr1.in(el);
-    EXPECT_EQ(BinaryOperator::IN, op->op());
+    EXPECT_EQ(BinaryOperator::IN, op->type());
     EXPECT_TRUE(op->lhs()->equals(xpr1));
     EXPECT_TRUE(op->rhs()->equals(el));
 }
@@ -108,7 +108,7 @@ TEST_F(expr_Expression_test, test_not_in) {
         .WillByDefault(Return(true));
 
     BinaryOperatorPtr op = xpr1.not_in(el);
-    EXPECT_EQ(BinaryOperator::NOT_IN, op->op());
+    EXPECT_EQ(BinaryOperator::NOT_IN, op->type());
     EXPECT_TRUE(op->lhs()->equals(xpr1));
     EXPECT_TRUE(op->rhs()->equals(el));
 }
