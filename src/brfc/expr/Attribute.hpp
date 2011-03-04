@@ -36,6 +36,7 @@ class Attribute : public Expression {
         UNKNOWN,
         STRING,
         INT64,
+        LONG = INT64,
         DOUBLE,
         BOOL,
         DATE,

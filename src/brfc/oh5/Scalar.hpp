@@ -39,6 +39,7 @@ class Scalar {
     enum Type {
         STRING,
         INT64,
+        LONG = INT64,
         DOUBLE
     };
   
@@ -129,6 +130,11 @@ class Scalar {
     long long int64_() const;
     
     /**
+     * @brief access int64 value
+     */
+    long long long_() const { return int64_(); }
+    
+    /**
      * @brief access double value
      */
     double double_() const;
@@ -146,6 +152,11 @@ class Scalar {
      * @brief convert to int64
      */
     long long to_int64() const;
+
+    /**
+     * @brief convert to int64
+     */
+    long long to_long() const { return to_int64(); }
 
     /**
      * @brief convert to double
