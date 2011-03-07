@@ -1,5 +1,5 @@
 /*
-Copyright 2010 Estonian Meteorological and Hydrological Institute
+Copyright 2010-2011 Estonian Meteorological and Hydrological Institute
 
 This file is part of baltrad-db.
 
