@@ -83,11 +83,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   }
 
   public Expression or_(Collection<? extends Expression> values) {
-    return this.and_(new ExpressionList(values));
+    return this.or_(new ExpressionList(values));
   }
 
   public Expression or_(Expression[] values) {
-    return this.and_(new ExpressionList(values));
+    return this.or_(new ExpressionList(values));
   }
 %}
 
