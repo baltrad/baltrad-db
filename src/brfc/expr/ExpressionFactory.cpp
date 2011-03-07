@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Expression.hpp>
+#include <brfc/expr/ExpressionList.hpp>
 #include <brfc/expr/Function.hpp>
 #include <brfc/expr/Literal.hpp>
 
@@ -153,9 +154,31 @@ ExpressionFactory::and_(const Expression& lhs, const Expression& rhs) const {
     return lhs.and_(rhs);
 }
 
+ExpressionPtr
+ExpressionFactory::and_(const ExpressionList& exprs) const {
+  if (exprs.size() < 1)
+    throw value_error("ExpressionList must have at least 1 element");
+  ExpressionPtr expr = exprs.at(0).clone();
+  for (size_t i = 1; i < exprs.size(); ++i) {
+    expr = expr->and_(exprs.at(i));
+  }
+  return expr;
+}
+
 BinaryOperatorPtr
 ExpressionFactory::or_(const Expression& lhs, const Expression& rhs) const {
     return lhs.or_(rhs);
+}
+
+ExpressionPtr
+ExpressionFactory::or_(const ExpressionList& exprs) const {
+  if (exprs.size() < 1)
+    throw value_error("ExpressionList must have at least 1 element");
+  ExpressionPtr expr = exprs.at(0).clone();
+  for (size_t i = 1; i < exprs.size(); ++i) {
+    expr = expr->or_(exprs.at(i));
+  }
+  return expr;
 }
 
 BinaryOperatorPtr

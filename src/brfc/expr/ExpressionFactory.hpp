@@ -71,6 +71,13 @@ class ExpressionFactory {
      * @brief construct expr::Literal containing a 64-bit integer
      */
     LiteralPtr int64_(long long value) const;
+    
+    /**
+     * @brief construct expr::Literal containing a 64-bit integer
+     */
+    LiteralPtr long_(long long value) const {
+        return int64_(value);
+    }
 
     /**
      * @brief construct expr::Literal containing a double precision float
@@ -175,9 +182,19 @@ class ExpressionFactory {
     BinaryOperatorPtr and_(const Expression& lhs, const Expression& rhs) const;
     
     /**
+     * @brief expr1 AND expr2 AND ...
+     */
+    ExpressionPtr and_(const ExpressionList& exprs) const;
+
+    /**
      * @brief lhs OR rhs
      */
     BinaryOperatorPtr or_(const Expression& lhs, const Expression& rhs) const;
+    
+    /**
+     * @brief expr1 OR expr2 OR ...
+     */
+    ExpressionPtr or_(const ExpressionList& exprs) const;
     //@}
     
     /**

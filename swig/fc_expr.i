@@ -61,14 +61,34 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 /***
- * brfc::expr::EXpressionFactory
+ * brfc::expr::ExpressionFactory
  */
 %ignore brfc::expr::ExpressionFactory::string(const char* value) const;
 %typemap(javaimports) brfc::expr::ExpressionFactory %{
-    import eu.baltrad.fc.Date;
-    import eu.baltrad.fc.DateTime;
-    import eu.baltrad.fc.Time;
-    import eu.baltrad.fc.TimeDelta;
+  import java.util.Collection;
+
+  import eu.baltrad.fc.Date;
+  import eu.baltrad.fc.DateTime;
+  import eu.baltrad.fc.Time;
+  import eu.baltrad.fc.TimeDelta;
+%}
+
+%typemap(javacode) brfc::expr::ExpressionFactory %{
+  public Expression and_(Collection<? extends Expression> values) {
+    return this.and_(new ExpressionList(values));
+  }
+
+  public Expression and_(Expression[] values) {
+    return this.and_(new ExpressionList(values));
+  }
+
+  public Expression or_(Collection<? extends Expression> values) {
+    return this.and_(new ExpressionList(values));
+  }
+
+  public Expression or_(Expression[] values) {
+    return this.and_(new ExpressionList(values));
+  }
 %}
 
 SWIG_SHARED_PTR(Expression,

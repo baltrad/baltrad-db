@@ -25,6 +25,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
+#include <brfc/expr/ExpressionList.hpp>
+#include <brfc/expr/Literal.hpp>
 
 namespace brfc {
 namespace expr {
@@ -70,6 +72,59 @@ TEST_F(expr_ExpressionFactory_test, test_combined_datetime_invalid) {
     EXPECT_THROW(x = xpr.combined_datetime("what/object", "what/object"),
                  value_error);
 }
+
+TEST_F(expr_ExpressionFactory_test, test_and_ExpressionList) {
+    ExpressionList exprs;
+    exprs.append(*xpr.long_(1));
+    exprs.append(*xpr.long_(2));
+    exprs.append(*xpr.long_(3));
+
+    ExpressionPtr expected = xpr.long_(1);
+    expected = expected->and_(*xpr.long_(2));
+    expected = expected->and_(*xpr.long_(3));
+    
+    EXPECT_TRUE(xpr.and_(exprs)->equals(*expected));
+}
+
+TEST_F(expr_ExpressionFactory_test, test_and_ExpressionList_empty) {
+    ExpressionList exprs;
+
+    EXPECT_THROW(xpr.and_(exprs), value_error);
+}
+
+TEST_F(expr_ExpressionFactory_test, test_and_ExpressionList_single) {
+    ExpressionList exprs;
+    exprs.append(*xpr.long_(1));
+
+    EXPECT_TRUE(xpr.and_(exprs)->equals(*xpr.long_(1)));
+}
+
+TEST_F(expr_ExpressionFactory_test, test_or_ExpressionList) {
+    ExpressionList exprs;
+    exprs.append(*xpr.long_(1));
+    exprs.append(*xpr.long_(2));
+    exprs.append(*xpr.long_(3));
+
+    ExpressionPtr expected = xpr.long_(1);
+    expected = expected->or_(*xpr.long_(2));
+    expected = expected->or_(*xpr.long_(3));
+    
+    EXPECT_TRUE(xpr.or_(exprs)->equals(*expected));
+}
+
+TEST_F(expr_ExpressionFactory_test, test_or_ExpressionList_empty) {
+    ExpressionList exprs;
+
+    EXPECT_THROW(xpr.or_(exprs), value_error);
+}
+
+TEST_F(expr_ExpressionFactory_test, test_or_ExpressionList_single) {
+    ExpressionList exprs;
+    exprs.append(*xpr.long_(1));
+
+    EXPECT_TRUE(xpr.or_(exprs)->equals(*xpr.long_(1)));
+}
+
 
 } // namespace expr
 } // namespace brfc
