@@ -9,22 +9,23 @@ for building:
 
 library dependencies:
 * HLHDF library                 0.7.7
-* boost::filesystem             1.40
-* boost::foreach                1.40
-* boost::iterator               1.40
-* boost::lexical_cast           1.40
-* boost::mpl                    1.40
-* boost::multi_index            1.40
-* boost::program_options        1.40
-* boost::ptr_container		1.40
-* boost::smart_ptr              1.40
-* boost::sting_algo             1.40
-* boost::thread                 1.40
-* boost::timer                  1.40
-* boost::utility                1.40
+* boost::filesystem             1.42
+* boost::foreach                1.42
+* boost::iterator               1.42
+* boost::lexical_cast           1.42
+* boost::mpl                    1.42
+* boost::multi_index            1.42
+* boost::program_options        1.42
+* boost::ptr_container		1.42
+* boost::smart_ptr              1.42
+* boost::spirit			1.42
+* boost::sting_algo             1.42
+* boost::thread                 1.42
+* boost::timer                  1.42
+* boost::utility                1.42
 * boost::uuid                   1.43    (included in ./src)
-* boost::variant                1.40
-* boost::xpressive              1.40
+* boost::variant                1.42
+* boost::xpressive              1.42
 * libpqxx                       3.1
 * libfuse                       2.7.x   (optional)
 * utf8-cpp                      2.3     (included in ./src)

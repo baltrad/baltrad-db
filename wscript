@@ -265,7 +265,7 @@ def configure(conf):
     conf.check_cxx(
         msg="Checking for boost::spirit >= 2.2",
         fragment="""#include <boost/spirit/include/version.hpp>
-                    #if SPIRIT_VERSION <= 0x2020
+                    #if SPIRIT_VERSION < 0x2020
                     #error
                     #endif
                     int main() { return 0; }""",
