@@ -176,32 +176,22 @@ TEST(Time_test, test_add_msecs) {
     EXPECT_EQ(Time(11, 58, 0, 999), t + TimeDelta().add_msecs(-172919001));
 }
 
-TEST(Time_test, test_from_string) {
-    EXPECT_EQ(Time(12, 13, 14, 15),
-              Time::from_string("12:13:14.015", "hh:mm:ss.zzz"));
-    EXPECT_EQ(Time(12, 13, 14, 15),
-              Time::from_string("121314015", "hhmmsszzz"));
-    EXPECT_THROW(Time::from_string("11:22:33", "hh:mm:ss.zzz"), value_error);
-}
-
 TEST(Time_test, test_from_iso_string) {
-    EXPECT_EQ(Time(12, 13, 14, 0),
-              Time::from_iso_string("121314"));
-    EXPECT_THROW(Time::from_iso_string("12:13:14"), value_error);
+    EXPECT_EQ(Time(12, 13, 14, 15), Time::from_iso_string("12:13:14.015"));
+    EXPECT_EQ(Time(12, 13, 14, 15), Time::from_iso_string("121314.015"));
+    EXPECT_EQ(Time(12, 13, 14, 0), Time::from_iso_string("12:13:14"));
+    EXPECT_THROW(Time::from_iso_string("121314015"), value_error);
+    EXPECT_THROW(Time::from_iso_string("12-13-14"), value_error);
 }
 
-TEST(Time_test, test_from_extended_iso_string) {
-    EXPECT_EQ(Time(12, 13, 14, 0),
-              Time::from_extended_iso_string("12:13:14"));
-    EXPECT_THROW(Time::from_extended_iso_string("12-13-14"), value_error);
-    EXPECT_THROW(Time::from_extended_iso_string("121314"), value_error);
+TEST(Time_test, test_to_iso_string) {
+    EXPECT_EQ("121314.015000", Time(12, 13, 14, 15).to_iso_string());
+    EXPECT_EQ("121314", Time(12, 13, 14).to_iso_string());
 }
 
-TEST(Time_test, test_to_string) {
-    EXPECT_EQ("12:13:14.015",
-              Time(12, 13, 14, 15).to_string("hh:mm:ss.zzz"));
-    EXPECT_EQ("121314015",
-              Time(12, 13, 14 ,15).to_string("hhmmsszzz"));
+TEST(Time_test, test_to_iso_string_extended) {
+    EXPECT_EQ("12:13:14.015000", Time(12, 13, 14, 15).to_iso_string(true));
+    EXPECT_EQ("12:13:14", Time(12, 13, 14).to_iso_string(true));
 }
 
 } // namespace brfc

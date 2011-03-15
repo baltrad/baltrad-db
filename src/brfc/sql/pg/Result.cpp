@@ -92,9 +92,9 @@ pqtype_to_variant(const pqxx::result::field& field,
     else if (coltype == types.bool_oid)
         return Variant(field.as<bool>());
     else if (coltype == types.date_oid)
-        return Variant(Date::from_extended_iso_string(field.c_str()));
+        return Variant(Date::from_iso_string(field.c_str()));
     else if (coltype == types.time_oid)
-        return Variant(Time::from_extended_iso_string(field.c_str()));
+        return Variant(Time::from_iso_string(field.c_str()));
     else {
         return Variant(field.c_str());
     }

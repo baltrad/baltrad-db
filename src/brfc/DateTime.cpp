@@ -26,9 +26,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <sys/time.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/DateTimeParser.hpp>
-#include <string>
 #include <brfc/TimeDelta.hpp>
+#include <brfc/util/iso8601.hpp>
 
 namespace brfc {
 
@@ -59,13 +58,24 @@ DateTime::utc_now() {
 }
 
 std::string
-DateTime::to_string(const std::string& format) const {
-    return DateTimeParser(format).to_string(*this);
+DateTime::to_iso_string(bool extended) const {
+    iso8601::datetime dt(date().year(), date().month(), date().day(),
+                         time().hour(), time().minute(), time().second(),
+                         time().msec() * 1000);
+    if (extended)
+        return iso8601::to_string(dt, iso8601::format::EXTENDED);
+    else
+        return iso8601::to_string(dt, iso8601::format::BASIC);
 }
 
 DateTime
-DateTime::from_string(const std::string& str, const std::string& format) {
-    return DateTimeParser(format).from_string(str);
+DateTime::from_iso_string(const std::string& str) {
+    iso8601::datetime dt;
+    if (not iso8601::parse_datetime(str, dt))
+        throw value_error("invalid ISO8601 datetime: " + str);
+    return DateTime(dt.date.year, dt.date.month, dt.date.day,
+                    dt.time.hour, dt.time.minute, dt.time.second,
+                    dt.time.usec / 1000);
 }
 
 struct tm

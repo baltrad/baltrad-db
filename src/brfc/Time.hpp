@@ -127,13 +127,6 @@ class Time {
     ///@}
 
     /**
-     * @brief parse time from string
-     *
-     * @throw value_error if a valid time can not be parsed from the format
-     */
-    static Time from_string(const std::string& str, const std::string& format);
-    
-    /**
      * @brief parse time in format 'hhmmss' from @c str
      *
      * @throw value_error if a valid time can not be parsed
@@ -141,17 +134,10 @@ class Time {
     static Time from_iso_string(const std::string& str);
     
     /**
-     * @brief parse time in format 'hh:mm:ss' from @c str
-     *
-     * @throw value_error if a valid time can not be parsed
-     */
-    static Time from_extended_iso_string(const std::string& str);
-
-    /**
      * @brief format time to string
      *
      */
-    std::string to_string(const std::string& format) const;
+    std::string to_iso_string(bool extended=false) const;
 
   private:
     explicit Time(unsigned int msec);

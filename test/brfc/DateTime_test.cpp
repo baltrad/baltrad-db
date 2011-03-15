@@ -63,9 +63,14 @@ TEST(Datetime_test, test_add) {
     EXPECT_EQ(DateTime(2000, 2, 4, 1), dt1);
 }
 
-TEST(DateTime_test, test_to_string) {
+TEST(DateTime_test, test_to_iso_string) {
     DateTime dt1(2010, 10, 27, 12, 13, 14, 567);
-    EXPECT_EQ("2010-10-27 12:13:14.567", dt1.to_string("yyyy-MM-dd hh:mm:ss.zzz"));
+    EXPECT_EQ("20101027T121314.567000", dt1.to_iso_string());
+}
+
+TEST(DateTime_test, test_to_iso_string_extended) {
+    DateTime dt1(2010, 10, 27, 12, 13, 14, 567);
+    EXPECT_EQ("2010-10-27T12:13:14.567000", dt1.to_iso_string(true));
 }
 
 TEST(DateTime_test, test_now) {

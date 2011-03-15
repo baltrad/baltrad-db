@@ -23,9 +23,14 @@ import junit.framework.TestCase;
 
 public class TestTime extends TestCase {
 
-  public void test_to_string() {
+  public void test_to_iso_string() {
     Time t = new Time(12, 00, 01);
-    assertEquals(t.to_string("hhmmss"), "120001");
+    assertEquals(t.to_iso_string(), "120001");
+  }
+
+  public void test_to_iso_string_extended() {
+    Time t = new Time(12, 00, 01);
+    assertEquals(t.to_iso_string(true), "12:00:01");
   }
 
   public void test_equals() {

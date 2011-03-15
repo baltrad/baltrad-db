@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string/case_conv.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/DateTimeParser.hpp>
 #include <brfc/Variant.hpp>
 
 namespace brfc {
@@ -54,10 +53,6 @@ ansi_sql_interval_str(const TimeDelta& delta) {
 
 std::string
 Dialect::do_variant_to_string(const Variant& value) const {
-    static DateTimeParser date_parser("yyyy-MM-dd");
-    static DateTimeParser time_parser("HH:mm:ss.zzz");
-    static DateTimeParser datetime_parser("yyyy-MM-dd hh:mm:ss.zzz");
-
     switch (value.type()) {
         case Variant::NONE:
             return "NULL";
@@ -69,11 +64,11 @@ Dialect::do_variant_to_string(const Variant& value) const {
         case Variant::BOOL:
             return boost::to_lower_copy(value.to_string());
         case Variant::DATE:
-            return "'" + date_parser.date_to_string(value.date()) + "'";
+            return "'" + value.date().to_iso_string(true) + "'";
         case Variant::TIME:
-            return "'" + time_parser.time_to_string(value.time()) + "'";
+            return "'" + value.time().to_iso_string(true) + "'";
         case Variant::DATETIME:
-            return "'" + datetime_parser.to_string(value.datetime()) + "'";
+            return "'" + value.datetime().to_iso_string(true) + "'";
         case Variant::TIMEDELTA:
             return "INTERVAL '" + ansi_sql_interval_str(value.timedelta()) +  "'";
         default:

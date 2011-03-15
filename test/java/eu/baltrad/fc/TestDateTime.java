@@ -25,7 +25,7 @@ public class TestDateTime extends TestCase {
 
   public void test_to_string() {
     DateTime dt = new DateTime(2000, 5, 6, 12, 0, 1);
-    assertEquals(dt.to_string("hhmmss yyyyMMdd"), "120001 20000506");
+    assertEquals("20000506T120001", dt.to_iso_string());
   }
 
   public void test_equals() {

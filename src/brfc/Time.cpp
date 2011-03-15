@@ -20,11 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/DateTimeParser.hpp>
-#include <string>
+#include <brfc/DateTime.hpp>
 #include <brfc/TimeDelta.hpp>
-
-#include <iostream>
+#include <brfc/util/iso8601.hpp>
 
 namespace brfc {
 
@@ -142,29 +140,20 @@ Time::operator+(const TimeDelta& td) const {
 }
 
 Time
-Time::from_string(const std::string& str, const std::string& format) {
-    DateTimeParser parser(format);
-    if (not parser.is_format_time_only())
-        throw value_error("invalid format for time: " + format);
-    return parser.time_from_string(str);
-}
-
-Time
 Time::from_iso_string(const std::string& str) {
-    return from_string(str, "hhmmss");
-}
-
-Time
-Time::from_extended_iso_string(const std::string& str) {
-    return from_string(str, "hh:mm:ss");
+    iso8601::time t;
+    if (not iso8601::parse_time(str, t))
+        throw value_error("invalid ISO8601 time: " + str);
+    return Time(t.hour, t.minute, t.second, t.usec / 1000);
 }
 
 std::string
-Time::to_string(const std::string& format) const {
-    DateTimeParser parser(format);
-    if (not parser.is_format_time_only())
-        throw value_error("invalid format for time: " + format);
-    return parser.time_to_string(*this);
+Time::to_iso_string(bool extended) const {
+    iso8601::time t(hour(), minute(), second(), msec() * 1000);
+    if (extended)
+        return iso8601::to_string(t, iso8601::format::EXTENDED);
+    else
+        return iso8601::to_string(t, iso8601::format::BASIC);
 }
 
 } // namespace brfc

@@ -48,9 +48,9 @@ DefaultFileNamer::do_name(const oh5::File& file) const {
         name.append("unknown");
     }
     name.append("_");
-    name.append(file.what_date().to_string("yyyyMMdd"));
+    name.append(file.what_date().to_iso_string());
     name.append("T");
-    name.append(file.what_time().to_string("hhmmss"));
+    name.append(file.what_time().to_iso_string());
     name.append("Z");
     name.append(".h5");
     return name;

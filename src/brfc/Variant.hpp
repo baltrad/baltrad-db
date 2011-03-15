@@ -287,10 +287,12 @@ class Variant {
      *  - double and int64 variants are converted using boost::lexical_cast
      *  - bool variant maps is converted to "True" or "False"
      *  - Date variant is converted to ISO 8601 format yyyy-MM-dd
-     *  - Time variant is converted to ISO 8601 format hh:mm:ss
-     *  - DateTime variant is converted to ISO 8601 format yyyy-MM-dd hh:mm:ss
-     *  - TimeDelta variant is converted to ISO 8601 duration format 'P?DT?S' where
-     *    is the value for days and seconds. Milliseconds are truncated.
+     *  - Time variant is converted to ISO 8601 format hh:mm:ss.usec
+     *  - DateTime variant is converted to ISO 8601 format
+     *    yyyy-MM-ddThh:mm:ss.usec
+     *  - TimeDelta variant is converted to ISO 8601 duration format 'P?DT?S'
+     *    where ? is the value for days and seconds. Milliseconds are
+     *    truncated.
      */
     std::string to_string() const;
     

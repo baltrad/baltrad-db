@@ -262,6 +262,17 @@ def configure(conf):
             mandatory=True,
         )
     
+    conf.check_cxx(
+        msg="Checking for boost::spirit >= 2.2",
+        fragment="""#include <boost/spirit/include/version.hpp>
+                    #if SPIRIT_VERSION <= 0x2020
+                    #error
+                    #endif
+                    int main() { return 0; }""",
+        includes=env.boost_inc_dir,
+        mandatory=True,
+    )
+    
     if env.build_java:
         # check for jni
         _lib_path_opts_to_env(env, "jdk")

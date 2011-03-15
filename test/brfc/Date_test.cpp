@@ -158,28 +158,19 @@ TEST(Date_test, test_add_days) {
     EXPECT_EQ(Date(1999, 12, 31), d1 + TimeDelta().add_days(-60));
 }
 
-TEST(Date_test, test_to_string) {
-    EXPECT_EQ("20000102", Date(2000, 1, 2).to_string("yyyyMMdd"));
-    EXPECT_EQ("2000-01-02", Date(2000, 1, 2).to_string("yyyy-MM-dd"));
+TEST(Date_test, test_to_iso_string) {
+    EXPECT_EQ("20000102", Date(2000, 1, 2).to_iso_string());
 }
 
-TEST(Date_test, test_from_string) {
-    EXPECT_EQ(Date(2000, 1, 2),
-              Date::from_string("20000102", "yyyyMMdd"));
-    EXPECT_EQ(Date(2000, 1, 2),
-              Date::from_string("2000-01-02", "yyyy-MM-dd"));
-    EXPECT_THROW(Date::from_string("200122", "yyyyMMdd"), value_error);
+TEST(Date_test, test_to_iso_string_extended) {
+    EXPECT_EQ("2000-01-02", Date(2000, 1, 2).to_iso_string(true));
 }
 
 TEST(Date_test, test_from_iso_string) {
     EXPECT_EQ(Date(2000, 1, 2), Date::from_iso_string("20000102"));
+    EXPECT_EQ(Date(2000, 1, 2), Date::from_iso_string("2000-01-02"));
     EXPECT_THROW(Date::from_iso_string("2000:01:02"), value_error);
-}
-
-TEST(Date_test, test_from_extended_iso_string) {
-    EXPECT_EQ(Date(2000, 1, 2), Date::from_extended_iso_string("2000-01-02"));
-    EXPECT_THROW(Date::from_extended_iso_string("2000:01:02"), value_error);
-    EXPECT_THROW(Date::from_extended_iso_string("20000102"), value_error);
+    EXPECT_THROW(Date::from_iso_string("200000102"), value_error);
 }
 
 } // namespace brfc

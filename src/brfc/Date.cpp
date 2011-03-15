@@ -19,15 +19,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/Date.hpp>
 
-#include <cmath>
-#include <algorithm>
-
 #include <boost/lexical_cast.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/DateTimeParser.hpp>
-#include <string>
+#include <brfc/DateTime.hpp>
 #include <brfc/TimeDelta.hpp>
+#include <brfc/util/iso8601.hpp>
 
 namespace brfc {
 
@@ -169,29 +166,22 @@ Date::operator+(const TimeDelta& td) const {
 }
 
 Date
-Date::from_string(const std::string& str, const std::string& format) {
-    DateTimeParser parser(format);
-    if (not parser.is_format_date_only())
-        throw value_error("invalid format for date: " + format);
-    return parser.date_from_string(str);
-}
-
-Date
 Date::from_iso_string(const std::string& str) {
-    return from_string(str, "yyyyMMdd");
-}
-
-Date
-Date::from_extended_iso_string(const std::string& str) {
-    return from_string(str, "yyyy-MM-dd");
+    iso8601::date d;
+    if (not iso8601::parse_date(str, d))
+        throw value_error("invalid ISO8601 date: " + str);
+    return Date(d.year, d.month, d.day);
 }
 
 std::string
-Date::to_string(const std::string& format) const {
-    DateTimeParser parser(format);
-    if (not parser.is_format_date_only())
-        throw value_error("invalid format for date: " + format);
-    return parser.date_to_string(*this);
+Date::to_iso_string(bool extended) const {
+    int year, month, day;
+    date_from_jdn(jdn_, year, month, day);
+    iso8601::date d(year, month, day);
+    if (extended)
+        return iso8601::to_string(d, iso8601::format::EXTENDED);
+    else
+        return iso8601::to_string(d, iso8601::format::BASIC);
 }
 
 } // namespace brfc

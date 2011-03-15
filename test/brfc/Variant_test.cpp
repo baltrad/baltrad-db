@@ -99,7 +99,7 @@ TEST(Variant_test, to_string) {
     EXPECT_EQ(Variant(false).to_string(), "False");
     EXPECT_EQ(Variant(Date(2000, 11, 12)).to_string(), "2000-11-12");
     EXPECT_EQ(Variant(Time(12, 34, 56)).to_string(), "12:34:56");
-    EXPECT_EQ(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_string(), "2000-11-12 23:45:56");
+    EXPECT_EQ(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_string(), "2000-11-12T23:45:56");
     EXPECT_EQ("P1DT1234S", Variant(TimeDelta(1, 1234567)).to_string());
 }
 

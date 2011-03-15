@@ -80,11 +80,18 @@ TEST_F(sql_Dialect_test, test_variant_to_string_float) {
 }
 
 TEST_F(sql_Dialect_test, test_variant_to_string_date) {
-    EXPECT_EQ("'2001-05-01'", dialect.variant_to_string(Variant(Date(2001, 5, 1))));
+    Date d(2001, 5, 1);
+    EXPECT_EQ("'2001-05-01'", dialect.variant_to_string(Variant(d)));
 }
 
 TEST_F(sql_Dialect_test, test_variant_to_string_time) {
-    EXPECT_EQ("'13:05:59.001'", dialect.variant_to_string(Variant(Time(13, 5, 59, 1))));
+    Time t(13, 5, 59, 1);
+    EXPECT_EQ("'13:05:59.001000'", dialect.variant_to_string(Variant(t)));
+}
+
+TEST_F(sql_Dialect_test, test_variant_to_string_datetime) {
+    DateTime dt(2001, 5, 1, 13, 5, 59, 1);
+    EXPECT_EQ("'2001-05-01T13:05:59.001000'", dialect.variant_to_string(Variant(dt)));
 }
 
 TEST_F(sql_Dialect_test, test_variant_to_string_timedelta) {

@@ -25,9 +25,14 @@ import junit.framework.TestCase;
 
 public class TestDate extends TestCase {
 
-  public void test_to_string() {
+  public void test_to_iso_string() {
     Date d = new Date(2000, 5, 1);
-    assertEquals(d.to_string("yyyyMMdd"), "20000501");
+    assertEquals(d.to_iso_string(), "20000501");
+  }
+
+  public void test_to_iso_string_extended() {
+    Date d = new Date(2000, 5, 1);
+    assertEquals(d.to_iso_string(true), "2000-05-01");
   }
 
   public void test_equals() {

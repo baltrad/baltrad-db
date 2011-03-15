@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
-#include <brfc/DateTimeParser.hpp>
 #include <brfc/Time.hpp>
 
 namespace brfc {
@@ -35,13 +34,14 @@ Scalar::Scalar(bool value)
 }
 
 Scalar::Scalar(const Date& value)
-        : value_(value.to_string("yyyyMMdd")) {
+        : value_(value.to_iso_string()) {
 
 }
 
-Scalar::Scalar(const Time& value)
-        : value_(value.to_string("hhmmss")) {
-
+Scalar::Scalar(Time value)
+        : value_() {
+     value.msec(0);
+     value_ = value.to_iso_string();
 }
 
 template<typename T>
@@ -151,10 +151,9 @@ class scalar_to_bool : public boost::static_visitor<bool> {
 class scalar_to_date : public boost::static_visitor<Date> {
   public:
     Date operator()(const std::string& value) const {
-        static DateTimeParser parser("yyyyMMdd");
         if (value.length() != 8)
             throw value_error("oh5::Scalar not convertible to Date");
-        return parser.date_from_string(value);
+        return Date::from_iso_string(value);
     }
 
     template<typename T>
@@ -168,10 +167,9 @@ class scalar_to_date : public boost::static_visitor<Date> {
 class scalar_to_time : public boost::static_visitor<Time> {
   public:
     Time operator()(const std::string& value) const {
-        static DateTimeParser parser("hhmmss");
         if (value.length() != 6)
             throw value_error("oh5::Scalar not convertible to Time");
-        return parser.time_from_string(value);
+        return Time::from_iso_string(value);
     }
 
     template<typename T>

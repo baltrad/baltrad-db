@@ -101,15 +101,15 @@ class variant_to_string : public boost::static_visitor<std::string> {
     }
 
     std::string operator()(const Date& value) const {
-        return value.to_string("yyyy-MM-dd");
+        return value.to_iso_string(true);
     }
 
     std::string operator()(const Time& value) const {
-        return value.to_string("hh:mm:ss");
+        return value.to_iso_string(true);
     }
 
     std::string operator()(const DateTime& value) const {
-        return value.to_string("yyyy-MM-dd hh:mm:ss");
+        return value.to_iso_string(true);
     }
 
     std::string operator()(const TimeDelta& value) const {
@@ -186,7 +186,7 @@ class variant_to_bool : public boost::static_visitor<bool> {
 class variant_to_time : public boost::static_visitor<Time> {
   public:
     Time operator()(const std::string& value) const {
-        return Time::from_string(value, "hh:mm:ss");
+        return Time::from_iso_string(value);
     }
 
     Time operator()(const Time& value) const { return value; }
@@ -204,7 +204,7 @@ class variant_to_time : public boost::static_visitor<Time> {
 class variant_to_date : public boost::static_visitor<Date> {
   public:
     Date operator()(const std::string& value) const {
-        return Date::from_string(value, "yyyy-MM-dd");
+        return Date::from_iso_string(value);
     }
 
     Date operator()(const Date& value) const { return value; }
@@ -222,7 +222,7 @@ class variant_to_date : public boost::static_visitor<Date> {
 class variant_to_datetime : public boost::static_visitor<DateTime> {
   public:
     DateTime operator()(const std::string& value) const {
-        return DateTime::from_string(value, "yyyy-MM-dd hh:mm:ss");
+        return DateTime::from_iso_string(value);
     }
 
     DateTime operator()(const DateTime& value) const { return value; }

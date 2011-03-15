@@ -93,7 +93,7 @@ class Scalar {
     /**
      * @brief construct string value from Time
      */
-    explicit Scalar(const Time& value);
+    explicit Scalar(Time value);
    
     /**
      * @brief copy constructor
