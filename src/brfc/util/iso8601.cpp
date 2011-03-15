@@ -91,13 +91,17 @@ struct fraction_impl {
         size_t digit_count = count_digits(n);
         size_t total_count = zero_count + digit_count;
         if (total_count < 6) {
-            return n * std::pow(10, (6 - zero_count - digit_count));
+            return n * pow(10, 6 - zero_count - digit_count);
         } else if (total_count > 6) {
-            return n / std::pow(10, (total_count - 6));
+            return n / pow(10, (total_count - 6));
         } else {
             return n;
         }
     }
+
+    unsigned int pow(unsigned int n, unsigned int p) const {
+   		return boost::numeric_cast<unsigned int>(std::pow((float)n, (int)p));
+	}
 
     template <class T>
     size_t count_digits(T n) const {
