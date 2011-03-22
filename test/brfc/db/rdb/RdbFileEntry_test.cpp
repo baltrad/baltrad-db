@@ -62,11 +62,10 @@ class db_rdb_RdbFileEntry_test : public ::testing::Test {
 };
 
 TEST_F(db_rdb_RdbFileEntry_test, test_ctor) {
-    EXPECT_EQ(&entry, entry.root().file());
     EXPECT_EQ(0, entry.root().parent());
     RdbNodeBackend* be = dynamic_cast<RdbNodeBackend*>(&entry.root().backend());
     ASSERT_TRUE(be);
-    EXPECT_FALSE(be->loaded());
+    EXPECT_FALSE(be->loaded(entry.root()));
 }
 
 } // namespace rdb

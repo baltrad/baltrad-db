@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/SHA1AttributeHasher.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/Group.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
@@ -81,12 +81,12 @@ TEST_F(SHA1AttributeHasher_test, test_fips180_1_sample3) {
 }
 
 TEST_F(SHA1AttributeHasher_test, attribute_string) {
-    oh5::Attribute& a1 = f1.root().create_attribute("a1", oh5::Scalar(1));
+    oh5::Attribute& a1 = static_cast<oh5::Attribute&>(f1.root().add(new oh5::Attribute("a1", oh5::Scalar(1))));
     EXPECT_EQ("/a1=1", SHA1AttributeHasher::attribute_string(a1));
 
-    oh5::Group& dataset1 = f1.root().create_group("dataset1");
-    oh5::Group& what = dataset1.create_group("what");
-    oh5::Attribute& a2 = what.create_attribute("a2", oh5::Scalar(1));
+    oh5::Group& dataset1 = static_cast<oh5::Group&>(f1.root().add(new oh5::Group("dataset1")));
+    oh5::Group& what = static_cast<oh5::Group&>(dataset1.add(new oh5::Group("what")));
+    oh5::Attribute& a2 = static_cast<oh5::Attribute&>(what.add(new oh5::Attribute("a2", oh5::Scalar(1))));
     EXPECT_EQ("/dataset1/what/a2=1", SHA1AttributeHasher::attribute_string(a2));
 
     a2.value(oh5::Scalar(Date(2000, 12, 13)));
@@ -112,7 +112,7 @@ TEST_F(SHA1AttributeHasher_test, hash_different_meta) {
 
 TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
     std::string hash1 = hasher.hash(f1);
-    f1.root().create_attribute("ignore", oh5::Scalar("val"));
+    f1.root().add(new oh5::Attribute("ignore", oh5::Scalar("val")));
     std::string hash2 = hasher.hash(f1);
     f1.root().attribute("ignore")->value(oh5::Scalar("val2"));
     std::string hash3 = hasher.hash(f1);
@@ -124,7 +124,7 @@ TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
 
 TEST_F(SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
     std::string hash1 = hasher.hash(f1);
-    f1.root().create_attribute("attr", oh5::Scalar("val"));
+    f1.root().add(new oh5::Attribute("attr", oh5::Scalar("val")));
     std::string hash2 = hasher.hash(f1);
     f1.root().attribute("attr")->value(oh5::Scalar("val2"));
     std::string hash3 = hasher.hash(f1);

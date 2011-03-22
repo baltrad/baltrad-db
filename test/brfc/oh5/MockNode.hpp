@@ -34,7 +34,7 @@ class MockNode : public Node {
     }
 
     MOCK_CONST_METHOD1(do_accepts_child, bool(const Node&));
-    MOCK_CONST_METHOD0(do_file, const File*());
+    MOCK_CONST_METHOD0(do_clone, Node*());
 };
 
 } // namespace oh5

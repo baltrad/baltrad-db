@@ -21,11 +21,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/DataSet.hpp>
+#include <brfc/oh5/MockNode.hpp>
 #include <brfc/oh5/MemoryNodeBackend.hpp>
-#include <brfc/oh5/RootGroup.hpp>
-#include <brfc/oh5/Scalar.hpp>
+
+using ::testing::_;
+using ::testing::Return;
 
 namespace brfc {
 namespace oh5 {
@@ -33,40 +33,70 @@ namespace oh5 {
 class oh5_MemoryNodeBackend_test : public ::testing::Test {
   public:
     oh5_MemoryNodeBackend_test()
-            : root() {
-        root.backend(new MemoryNodeBackend());
+            : backend() {
     }
   
-  RootGroup root;
+    MemoryNodeBackend backend;
 };
 
-TEST_F(oh5_MemoryNodeBackend_test, test_root_create_Attribute) {
-    Attribute* node = 0;
-    EXPECT_NO_THROW(node = &root.create_attribute("attr", Scalar(1)));
-    EXPECT_TRUE(node);
-    EXPECT_THROW(root.create_attribute("attr", Scalar(1)), duplicate_entry);
-    EXPECT_THROW(root.create_group("attr"), duplicate_entry);
+TEST_F(oh5_MemoryNodeBackend_test, test_add) {
+    MockNode* n = new MockNode("n");
+    ON_CALL(*n, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+
+    Node& rn = backend.root().add(n);
+
+    EXPECT_EQ(n, &rn); // reuses node
 }
 
-TEST_F(oh5_MemoryNodeBackend_test, test_create_group) {
-    Group* node = 0;
-    EXPECT_NO_THROW(node = &root.create_group("dataset1"));
-    EXPECT_TRUE(node);
-
-    EXPECT_THROW(root.create_attribute("dataset1", Scalar(1)), duplicate_entry);
-    EXPECT_THROW(root.create_group("dataset1"), duplicate_entry);
+TEST_F(oh5_MemoryNodeBackend_test, test_add_duplicate_entry) {
+    MockNode* n1 = new MockNode("n");
+    MockNode* n2 = new MockNode("n");
+    ON_CALL(*n1, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+    ON_CALL(*n2, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+    
+    backend.root().add(n1);
+    EXPECT_THROW(backend.root().add(n2), duplicate_entry);
 }
 
-TEST_F(oh5_MemoryNodeBackend_test, test_create_attribute_invalid_names) {
-//    EXPECT_THROW(root.create_attribute("", Scalar(1)), value_error);
-    EXPECT_THROW(root.create_attribute("qwe/asd", Scalar(1)), value_error);
-    EXPECT_THROW(root.create_attribute("/", Scalar(1)), value_error);
+TEST_F(oh5_MemoryNodeBackend_test, test_has) {
+    MockNode* n = new MockNode("n");
+    ON_CALL(*n, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+    
+    EXPECT_TRUE(backend.has(backend.root()));
+    EXPECT_FALSE(backend.has(*n));
+    backend.root().add(n);
+    EXPECT_TRUE(backend.has(*n));
 }
 
-TEST_F(oh5_MemoryNodeBackend_test, test_create_group_invalid_names) {
-//    EXPECT_THROW(root.create_group(""), value_error);
-    EXPECT_THROW(root.create_group("qwe/asd"), value_error);
-    EXPECT_THROW(root.create_group("/"), value_error);
+TEST_F(oh5_MemoryNodeBackend_test, test_parent) {
+    MockNode* n = new MockNode("n");
+    ON_CALL(*n, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+    
+    backend.root().add(n);
+    EXPECT_FALSE(backend.parent(backend.root()));
+    EXPECT_EQ(&backend.root(), backend.parent(*n));
+}
+
+TEST_F(oh5_MemoryNodeBackend_test, test_children) {
+    MockNode* n = new MockNode("n");
+    ON_CALL(*n, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+    
+    std::vector<Node*> children = backend.children(backend.root());
+    EXPECT_TRUE(children.empty());
+
+    backend.root().add(n);
+    children = backend.children(*n);
+    EXPECT_TRUE(children.empty());
+    
+    children = backend.children(backend.root());
+    ASSERT_EQ(1u, children.size());
+    EXPECT_EQ(n, children.at(0));
 }
 
 } // namespace oh5

@@ -24,8 +24,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/DefaultFileNamer.hpp>
 #include <brfc/Time.hpp>
 
+#include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/MemoryNodeBackend.hpp>
-#include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
 #include <brfc/test_common.hpp>
@@ -41,36 +42,35 @@ class DefaultFileNamer_test : public ::testing::Test {
   public:
     DefaultFileNamer_test()
             : namer()
-            , root()
-            , what()
+            , node_backend()
+            , root(node_backend.root())
+            , what(node_backend.add(node_backend.root(), new oh5::Group("what")))
             , file()
             , entry() {
     }
     
     virtual void SetUp() {
-        root.backend(new oh5::MemoryNodeBackend());
         ON_CALL(entry, do_uuid())
             .WillByDefault(Return("abcd0123-0000-0000-0000-000000000000"));
         ON_CALL(entry, do_root())
             .WillByDefault(ReturnRef(root));
         ON_CALL(file, do_root())
             .WillByDefault(ReturnRef(root));
-
-        what = &root.create_group("what");
-        what->create_attribute("object", oh5::Scalar("pvol"));
-        what->create_attribute("date", oh5::Scalar(Date(2010, 11, 12)));
-        what->create_attribute("time", oh5::Scalar(Time(14, 15)));
+        
+        what.add(new oh5::Attribute("object", oh5::Scalar("pvol")));
+        what.add(new oh5::Attribute("date", oh5::Scalar(Date(2010, 11, 12))));
+        what.add(new oh5::Attribute("time", oh5::Scalar(Time(14, 15))));
     }
     
     DefaultFileNamer namer;
-    oh5::RootGroup root;
-    oh5::Group* what;
+    oh5::MemoryNodeBackend node_backend;
+    oh5::Node& root, &what;
     ::testing::NiceMock<oh5::MockFile> file;
     ::testing::NiceMock<db::MockFileEntry> entry;
 };
 
 TEST_F(DefaultFileNamer_test, name_file) {
-    what->create_attribute("source", oh5::Scalar("_name:seang"));
+    what.add(new oh5::Attribute("source", oh5::Scalar("_name:seang")));
     
     EXPECT_EQ("pvol_seang_20101112T141500Z.h5", namer.name(file));
 }
@@ -80,7 +80,7 @@ TEST_F(DefaultFileNamer_test, name_file_unknown_source) {
 }
 
 TEST_F(DefaultFileNamer_test, name_entry) {
-    what->create_attribute("source", oh5::Scalar("_name:seang"));
+    what.add(new oh5::Attribute("source", oh5::Scalar("_name:seang")));
 
     ON_CALL(entry, do_source())
         .WillByDefault(Return(oh5::Source::from_string("_name:seang")));

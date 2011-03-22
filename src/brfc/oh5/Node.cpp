@@ -19,13 +19,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Node.hpp>
 
-#include <list>
+#include <memory>
 
 #include <boost/foreach.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/split.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
@@ -41,10 +37,15 @@ namespace oh5 {
 Node::Node(const std::string& name)
         : boost::noncopyable()
         , name_(name)
-        , parent_(0)
         , backend_(0) {
     if (name.find("/") != std::string::npos)
         throw value_error("invalid node name: " + name);
+}
+
+Node::Node(const Node& other)
+        : name_(other.name_)
+        , backend_(0) {
+
 }
 
 Node::~Node() {
@@ -67,54 +68,34 @@ Node::backend() const {
 
 void
 Node::backend(NodeBackend* backend) {
-    backend_.reset(backend);
-    backend_->front(this);
+    if (has_backend())
+        throw std::runtime_error("can't change backend of already bound node");
+    backend_ = backend;
+}
+
+const Node*
+Node::parent() const {
+    const Node* p = 0;
+    if (has_backend())
+        p = backend().parent(*this);
+    return p;
+}
+
+Node*
+Node::parent() {
+    return const_cast<Node*>(const_cast<const Node*>(this)->parent());
 }
 
 std::string
 Node::path() const {
-    std::list<std::string> names;
-    const Node* node = this;
-    while (node != 0) {
-        names.push_front(node->name());
-        node = node->parent();
-    }
-
-    std::string path = boost::join(names, "/");
-    if (not boost::starts_with(path, "/"))
-        path = "/" + path;
-    return path;
-}
-
-Attribute&
-Node::create_attribute(const std::string& name, const Scalar& value) {
-    auto_ptr<Attribute> node(new Attribute(name, value));
-    return static_cast<Attribute&>(create_child(node.release()));
-}
-
-DataSet&
-Node::create_dataset(const std::string& name) {
-    auto_ptr<DataSet> node(new DataSet(name));
-    return static_cast<DataSet&>(create_child(node.release()));
-}
-
-Group&
-Node::create_group(const std::string& name) {
-    auto_ptr<Group> node(new Group(name));
-    return static_cast<Group&>(create_child(node.release()));
+    return backend().path(*this);
 }
 
 Node&
-Node::create_child(Node* node) {
-    // XXX: possible leak. Ownership of node is transfered to backend,
-    //      but if this throws, memory is not released
-    if (not accepts_child(*node))
-        throw value_error("node not accepted as child");
-    if (child(node->name()) != 0)
-        throw duplicate_entry("duplicate node child: " + node->name());
-
-    node->parent(this);
-    return backend().create_child(node);
+Node::add(Node* node) {
+    std::auto_ptr<Node> nodep(node);
+    NodeBackend& be = backend();
+    return be.add(*this, nodep.release());
 }
 
 bool
@@ -130,27 +111,7 @@ Node::child(const std::string& path) {
 
 const Node*
 Node::child(const std::string& path) const {
-    if (boost::starts_with(path, "/") and not is_root())
-        throw value_error("path must not be absolute");
-    std::list<std::string> names;
-    boost::split(names, path, boost::is_any_of("/"), boost::token_compress_on);
-    const Node* cur = this;
-    const Node* child = 0;
-    BOOST_FOREACH(const std::string& name, names) {
-        if (name.empty())
-            continue;
-        child = 0;
-        BOOST_FOREACH(const Node* node, cur->children()) {
-            if (node->name() == name) {
-                child = node;
-                break;
-            }
-        }
-        if (not child)
-            break;
-        cur = child;
-    }
-    return child;
+    return backend().child_by_path(*this, path);
 }
 
 Node::iterator
@@ -173,21 +134,6 @@ Node::end() const {
     return const_iterator();
 }
 
-const Node&
-Node::root() const {
-    const Node* root = this;
-    while (root->parent()) {
-        root = root->parent();
-    }
-    return *root;
-}
-
-Node&
-Node::root() {
-    const Node* self = const_cast<const Node*>(this);
-    return const_cast<Node&>(self->root());
-}
-
 bool
 Node::accepts_child(const Node& node) const {
     return do_accepts_child(node);
@@ -195,21 +141,32 @@ Node::accepts_child(const Node& node) const {
 
 std::vector<const Node*>
 Node::children() const {
-    return backend().children();
+    return backend().children(*this);
 }
 
 std::vector<Node*>
 Node::children() {
-    return backend().children();
+    return backend().children(*this);
 }
 
-const File*
-Node::do_file() const {
-    if (is_root()) {
-        return 0;
-    } else {
-        return root().file();
-    }
+Attribute*
+Node::attribute(const std::string& path) {
+    return child<Attribute>(path);
+}
+
+const Attribute*
+Node::attribute(const std::string& path) const {
+    return child<Attribute>(path);
+}
+
+Group*
+Node::group(const std::string& path) {
+    return child<Group>(path);
+}
+
+const Group*
+Node::group(const std::string& path) const {
+    return child<Group>(path);
 }
 
 /***
@@ -262,7 +219,7 @@ NodeIterator<T>::equal(const NodeIterator<OtherT>& rhs) const {
     }
 }
 
-// explicitly instatitate the templates
+// explicitly instantitate the templates
 template class NodeIterator<Node>;
 template class NodeIterator<const Node>;
 

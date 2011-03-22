@@ -19,7 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/db/rdb/RdbFileEntry.hpp>
+#include <brfc/exceptions.hpp>
+
 #include <brfc/db/rdb/RdbNodeBackend.hpp>
 #include <brfc/db/rdb/RelationalDatabase.hpp>
 
@@ -39,6 +40,8 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
+// XXX: test for loading unloaded nodes from DB!
+
 class db_rdb_RdbNodeBackend_test : public ::testing::Test {
   public:
     db_rdb_RdbNodeBackend_test()
@@ -46,50 +49,100 @@ class db_rdb_RdbNodeBackend_test : public ::testing::Test {
             , pool()
             , pool_ptr(&pool, no_delete)
             , db(pool_ptr)
-            , entry(&db)
             , node("mocknode")
-            , backend() {
+            , backend(&db) {
     
     }
 
     virtual void SetUp() {
         ON_CALL(pool, do_get())
             .WillByDefault(Return(&conn));
-        ON_CALL(node, do_file())
-            .WillByDefault(Return(&entry));
-        backend.front(&node);
     }
 
     sql::MockConnection conn;
     sql::MockConnectionPool pool;
     shared_ptr<sql::ConnectionPool> pool_ptr;
     RelationalDatabase db;
-    RdbFileEntry entry;
     ::testing::NiceMock<oh5::MockNode> node;
     RdbNodeBackend backend;
 };
 
-/*
+TEST_F(db_rdb_RdbNodeBackend_test, test_ctor) {
+    EXPECT_EQ(0, backend.id(backend.root()));
+    EXPECT_TRUE(backend.loaded(backend.root()));
+}
+
+TEST_F(db_rdb_RdbNodeBackend_test, test_set_id) {
+    backend.id(backend.root(), 1);
+    EXPECT_EQ(1, backend.id(backend.root()));
+}
+
+TEST_F(db_rdb_RdbNodeBackend_test, test_set_loaded) {
+    backend.loaded(backend.root(), false);
+    EXPECT_FALSE(backend.loaded(backend.root()));
+}
+
+TEST_F(db_rdb_RdbNodeBackend_test, test_add) {
+    oh5::MockNode* n = new oh5::MockNode("n");
+    ON_CALL(*n, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+
+    oh5::Node& rn = backend.root().add(n);
+
+    EXPECT_EQ(n, &rn); // reuses node
+    EXPECT_TRUE(backend.loaded(*n));
+    EXPECT_EQ(0, backend.id(*n));
+}
+
+TEST_F(db_rdb_RdbNodeBackend_test, test_add_duplicate_entry) {
+    oh5::MockNode* n1 = new oh5::MockNode("n");
+    oh5::MockNode* n2 = new oh5::MockNode("n");
+    ON_CALL(*n1, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+    ON_CALL(*n2, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+    
+    backend.root().add(n1);
+    EXPECT_THROW(backend.root().add(n2), duplicate_entry);
+}
+
+TEST_F(db_rdb_RdbNodeBackend_test, test_has) {
+    oh5::MockNode* n = new oh5::MockNode("n");
+    ON_CALL(*n, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+    
+    EXPECT_TRUE(backend.has(backend.root()));
+    EXPECT_FALSE(backend.has(*n));
+    backend.root().add(n);
+    EXPECT_TRUE(backend.has(*n));
+}
+
+TEST_F(db_rdb_RdbNodeBackend_test, test_parent) {
+    oh5::MockNode* n = new oh5::MockNode("n");
+    ON_CALL(*n, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+    
+    backend.root().add(n);
+    EXPECT_FALSE(backend.parent(backend.root()));
+    EXPECT_EQ(&backend.root(), backend.parent(*n));
+}
+
 TEST_F(db_rdb_RdbNodeBackend_test, test_children) {
-    EXPECT_CALL(helper, load_children(Ref(node)));
+    oh5::MockNode* n = new oh5::MockNode("n");
+    ON_CALL(*n, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+    
+    std::vector<oh5::Node*> children = backend.children(backend.root());
+    EXPECT_TRUE(children.empty());
 
-    backend.children();
+    backend.root().add(n);
+    children = backend.children(*n);
+    EXPECT_TRUE(children.empty());
+    
+    children = backend.children(backend.root());
+    ASSERT_EQ(1u, children.size());
+    EXPECT_EQ(n, children.at(0));
 }
-*/
-
-TEST_F(db_rdb_RdbNodeBackend_test, test_children_loaded) {
-    backend.loaded(true);
-    EXPECT_EQ(0u, backend.children().size());
-}
-
-/*
-TEST_F(db_rdb_RdbNodeBackend_test, test_create_child) {
-    oh5::Node* n = new oh5::MockNode("n");
-    EXPECT_CALL(helper, insert_node(Ref(*n)));
-
-    backend.create_child(n);
-}
-*/
 
 } // namespace rdb
 } // namespace db

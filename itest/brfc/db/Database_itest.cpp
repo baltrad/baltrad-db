@@ -27,6 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileEntry.hpp>
 
+#include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
@@ -162,7 +163,7 @@ TEST_P(db_Database_itest, store_with_invalid_attributes) {
     tf.write(file);
     file.path(tf.path());
     // add an invalid attribute
-    file.root().create_attribute("invalid", oh5::Scalar(1));
+    file.root().add(new oh5::Attribute("invalid", oh5::Scalar(1)));
 
     EXPECT_NO_THROW(db->store(file));
 }

@@ -24,9 +24,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/RootGroup.hpp>
-#include <brfc/oh5/Source.hpp>
+#include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/MemoryNodeBackend.hpp>
+#include <brfc/oh5/Source.hpp>
 
 #include <brfc/test_common.hpp>
 #include <brfc/oh5/MockFile.hpp>
@@ -39,27 +39,25 @@ namespace oh5 {
 struct oh5_File_test : public testing::Test {
     oh5_File_test()
             : file()
-            , root()
-            , emptyroot()
+            , node_backend()
+            , root(node_backend.root())
             , what() {
     }
 
     virtual void SetUp() {
-        root.backend(new MemoryNodeBackend());
-        emptyroot.backend(new MemoryNodeBackend());
-        what = &root.create_group("what");
-
         ON_CALL(file, do_root())
             .WillByDefault(ReturnRef(root));
 
-        what->create_attribute("object", Scalar("pvol"));
-        what->create_attribute("date", Scalar(Date(2000, 1, 2)));
-        what->create_attribute("time", Scalar(Time(12, 5)));
-        what->create_attribute("source", Scalar("WMO:02606"));
+        what = static_cast<Group*>(&root.add(new oh5::Group("what")));
+        what->add(new Attribute("object", Scalar("pvol")));
+        what->add(new Attribute("date", Scalar(Date(2000, 1, 2))));
+        what->add(new Attribute("time", Scalar(Time(12, 5))));
+        what->add(new Attribute("source", Scalar("WMO:02606")));
     }
 
     ::testing::NiceMock<MockFile> file;
-    RootGroup root, emptyroot;
+    MemoryNodeBackend node_backend;
+    Node& root;
     Group* what;
 };
 
@@ -85,8 +83,9 @@ TEST_F(oh5_File_test, required_attribute_shortcuts) {
 }
 
 TEST_F(oh5_File_test, required_attribute_shortcuts_when_missing) {
+    MemoryNodeBackend be;
     EXPECT_CALL(file, do_root())
-        .WillRepeatedly(ReturnRef(emptyroot));
+        .WillRepeatedly(ReturnRef(be.root()));
 
     EXPECT_THROW(file.what_object(), lookup_error);
     EXPECT_THROW(file.what_date(), lookup_error);
@@ -112,10 +111,11 @@ TEST_F(oh5_File_test, what_time_conversion) {
 
 TEST_F(oh5_File_test, test_source_get) {
     EXPECT_EQ("WMO:02606", file.source().to_string());
-
+    
     // missing /what/source
+    MemoryNodeBackend be;
     EXPECT_CALL(file, do_root())
-        .WillRepeatedly(ReturnRef(emptyroot));
+        .WillRepeatedly(ReturnRef(be.root()));
 
     EXPECT_EQ("", file.source().to_string());
 }

@@ -20,37 +20,39 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_MEMORY_NODE_BACKEND_HPP
 #define BRFC_OH5_MEMORY_NODE_BACKEND_HPP
 
-#include <boost/ptr_container/ptr_vector.hpp>
-
-#include <string>
-
 #include <brfc/oh5/NodeBackend.hpp>
+
+#include <boost/scoped_ptr.hpp>
 
 namespace brfc {
 namespace oh5 {
 
 /**
- * @brief NodeBackend storing nodes in memory
+ * @brief NodeBackend storing nodes only in memory
  */
 class MemoryNodeBackend : public NodeBackend {
   public:
     /**
      * @brief constructor
-     * @param name name of this node
-     * @throw value_error if name contains "/"
      */
-    explicit MemoryNodeBackend(Node* front=0);
+    MemoryNodeBackend();
 
     virtual ~MemoryNodeBackend();
   
-  protected:
-    virtual Node& do_create_child(Node* node);
-
-    virtual std::vector<const Node*> do_children() const;
-    virtual std::vector<Node*> do_children();
-
   private:
-    boost::ptr_vector<Node> children_;
+
+    virtual Node& do_add(const Node& parent, Node* node);
+
+    virtual bool do_has(const Node& node) const;
+
+    virtual const Node& do_root() const;
+
+    virtual const Node* do_parent(const Node& node) const;
+    
+    virtual std::vector<const Node*> do_children(const Node& node) const;
+
+    struct Impl;
+    boost::scoped_ptr<Impl> impl_;
 };
 
 } // namespace oh5

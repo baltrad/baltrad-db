@@ -181,10 +181,7 @@ RdbHelper::compile_insert_node_query() {
 }
 
 void
-RdbHelper::insert_node(oh5::Node& node) {
-    RdbFileEntry* file = dynamic_cast<RdbFileEntry*>(node.file());
-    BRFC_ASSERT(file != 0);
-
+RdbHelper::insert_node(long long file_id, oh5::Node& node) {
     if (insert_node_qry_.get() == 0)
         compile_insert_node_query();
     sql::Query qry(*insert_node_qry_); // make a copy not to mess up defaults
@@ -192,23 +189,23 @@ RdbHelper::insert_node(oh5::Node& node) {
     Variant parent_id;
     const oh5::Node* parent = node.parent();
     if (parent) {
-        parent_id = Variant(backend(*parent).id());
+        parent_id = Variant(backend(*parent).id(*parent));
     }
     qry.bind(":parent_id", parent_id);
     qry.bind(":type", Variant(node_sql_type(node)));
-    qry.bind(":file_id", Variant(file->id()));
+    qry.bind(":file_id", Variant(file_id));
     qry.bind(":name", Variant(node.name()));
 
     scoped_ptr<sql::Result> result(conn().execute(qry));
 
     long long db_id = last_id(*result);
-    backend(node).id(db_id);
+    backend(node).id(node, db_id);
 
     if (oh5::Attribute* attr = dynamic_cast<oh5::Attribute*>(&node)) {
         insert_attribute(*attr);
     }
 
-    backend(node).loaded(true);
+    backend(node).loaded(node, true);
 }
 
 void
@@ -233,7 +230,7 @@ RdbHelper::insert_attribute(oh5::Attribute& attr) {
         compile_insert_attr_query();
     sql::Query qry(*insert_attr_qry_); // make a copy not to mess up defaults
     
-    qry.bind(":node_id", Variant(backend(attr).id()));
+    qry.bind(":node_id", Variant(backend(attr).id(attr)));
 
     qry.bind(attr_sql_column(attr)->name(), attr_sql_value(attr));
 
@@ -537,7 +534,9 @@ RdbHelper::load_children(oh5::Node& node) {
     qry->what(m_.attrvals->column("value_date"));
     qry->what(m_.attrvals->column("value_time"));
 
-    long long id = backend(node).id();
+    RdbNodeBackend& be = backend(node);
+
+    long long id = be.id(node);
 
     qry->where(m_.nodes->column("parent_id")->eq(sql_.int64_(id)));
 
@@ -569,12 +568,12 @@ RdbHelper::load_children(oh5::Node& node) {
             BRFC_ASSERT(false);
         }
         
-        oh5::Node& c = backend(node).create_child(child.release());
-        backend(c).id(id);
-        backend(c).loaded(false);
+        oh5::Node& c = be.add(node, child.release());
+        be.id(c, id);
+        be.loaded(c, false);
     }
 
-    backend(node).loaded(true);
+    be.loaded(node, true);
 }
 
 } // namespace rdb

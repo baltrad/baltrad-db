@@ -36,6 +36,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Literal.hpp>
 #include <brfc/expr/Parentheses.hpp>
 
+#include <brfc/oh5/Attribute.hpp>
+#include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
@@ -84,8 +86,8 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
         const std::string attr_name = path.substr(path.rfind('/') + 1);
         boost::erase_tail(path, attr_name.length() + 1);
 
-        oh5::Group& g = file.root().get_or_create_group(path);
-        g.create_attribute(attr_name, value);
+        oh5::Node& g = static_cast<oh5::Group&>(file.root()).get_or_create_group(path);
+        g.add(new oh5::Attribute(attr_name, value));
     }
 
     virtual void SetUp() {

@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/MemoryNodeBackend.hpp>
 
 #include <brfc/test_common.hpp>
@@ -44,24 +44,18 @@ struct oh5_Attribute_test : public ::testing::Test {
 };
 
 TEST_F(oh5_Attribute_test, test_full_name) {
-    RootGroup root;
-    root.backend(new MemoryNodeBackend());
+    MemoryNodeBackend be;
 
-    Attribute& a1 = root.create_attribute("a1", Scalar(1));
+    Attribute& a1 = static_cast<Attribute&>(be.root().add(new Attribute("a1", Scalar(1))));
     EXPECT_EQ("a1", a1.full_name());
 
-    Group& what = root.create_group("what");
-    Attribute& a2 = what.create_attribute("a2", Scalar(1));
+    Group& what = static_cast<Group&>(be.root().add(new Group("what")));
+    Attribute& a2 = static_cast<Attribute&>(what.add(new Attribute("a2", Scalar(1))));
     EXPECT_EQ("what/a2", a2.full_name());
 }
 
 TEST_F(oh5_Attribute_test, test_accepts_child_Attribute) {
     Attribute node("attr", Scalar(1));
-    EXPECT_FALSE(attr.accepts_child(node));
-}
-
-TEST_F(oh5_Attribute_test, test_accepts_child_RootGroup) {
-    RootGroup node;
     EXPECT_FALSE(attr.accepts_child(node));
 }
 

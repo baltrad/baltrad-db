@@ -47,8 +47,8 @@ File::do_source() const {
 namespace {
 
 const Attribute&
-get_attribute(const Group& grp, const std::string& name) {
-    const Attribute* attr = grp.attribute(name);
+get_attribute(const Node& node, const std::string& name) {
+    const Attribute* attr = node.attribute(name);
     if (not attr)
         throw lookup_error("missing attribute: " + name);
     return *attr;

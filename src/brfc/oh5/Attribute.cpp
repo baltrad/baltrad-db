@@ -32,6 +32,12 @@ Attribute::Attribute(const std::string& name, const Scalar& value)
         , value_(value) {
 }
 
+Attribute::Attribute(const Attribute& other)
+        : Node(other)
+        , value_(other.value_) {
+
+}
+
 Attribute::~Attribute() {
 
 }
@@ -45,6 +51,11 @@ Attribute::full_name() const {
             return grpname + "/" + name();
     }
     return name();
+}
+
+Node*
+Attribute::do_clone() const {
+    return new Attribute(*this);
 }
 
 } // namespace oh5

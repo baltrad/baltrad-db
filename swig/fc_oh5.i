@@ -30,7 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/oh5/File.hpp>
     #include <brfc/oh5/PhysicalFile.hpp>
     #include <brfc/oh5/Group.hpp>
-    #include <brfc/oh5/RootGroup.hpp>
     #include <brfc/oh5/Source.hpp>
 %}
 
@@ -67,7 +66,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::oh5::Dataset::Dataset;
 %ignore brfc::oh5::Group::Group;
 %ignore brfc::oh5::Node::Node;
-%ignore brfc::oh5::RootGroup::RootGroup;
 
 %template(NodeVector) std::vector<brfc::oh5::Node* >;
 
@@ -164,7 +162,6 @@ SWIG_JAVABODY_METHODS(public, public, brfc::oh5::PhysicalFile);
 %include <brfc/oh5/Scalar.hpp>
 %include <brfc/oh5/Node.hpp>
 %include <brfc/oh5/Group.hpp>
-%include <brfc/oh5/RootGroup.hpp>
 %include <brfc/oh5/Attribute.hpp>
 %include <brfc/oh5/Source.hpp>
 %include <brfc/oh5/File.hpp>

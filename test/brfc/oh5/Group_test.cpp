@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/MemoryNodeBackend.hpp>
-#include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/Group.hpp>
 
 #include <brfc/test_common.hpp>
 
@@ -33,11 +33,13 @@ namespace oh5 {
 
 struct oh5_Group_test : public ::testing::Test {
     oh5_Group_test()
-            : g("g") {
-        g.backend(new MemoryNodeBackend());
+            : backend()
+            , g(static_cast<Group&>(backend.root().add(new Group("g")))) {
+
     }
     
-    Group g;
+    MemoryNodeBackend backend;
+    Group& g;
 };
 
 TEST_F(oh5_Group_test, test_accepts_child_Attribute) {
@@ -50,28 +52,25 @@ TEST_F(oh5_Group_test, test_accepts_child_Group) {
     EXPECT_TRUE(g.accepts_child(node));
 }
 
-TEST_F(oh5_Group_test, test_accepts_child_RootGroup) {
-    RootGroup node;
-    EXPECT_FALSE(g.accepts_child(node));
-}
-
 TEST_F(oh5_Group_test, test_accepts_child_DataSet) {
     DataSet node("data");
     EXPECT_TRUE(g.accepts_child(node));
 }
 
+// XXX: implemented in Node
 TEST_F(oh5_Group_test, test_attribute_access) {
-    Group& what = g.create_group("what");
-    Attribute& a1 = what.create_attribute("a1", Scalar(1));
+    Group& what = static_cast<Group&>(g.add(new Group("what")));
+    Attribute& a1 = static_cast<Attribute&>(what.add(new Attribute("a1", Scalar(1))));
 
     EXPECT_EQ(&a1, g.attribute("what/a1"));
     EXPECT_FALSE(g.attribute("a1"));
     EXPECT_FALSE(g.attribute("what"));
 }
 
+// XXX: implemented in Node
 TEST_F(oh5_Group_test, test_group_access) {
-    Group& g2 = g.create_group("g2");
-    Group& g3 = g2.create_group("g3");
+    Group& g2 = static_cast<Group&>(g.add(new Group("g2")));
+    Group& g3 = static_cast<Group&>(g2.add(new Group("g3")));
     
     EXPECT_EQ(&g2, g.group("g2"));
     EXPECT_EQ(&g3, g2.group("g3"));
@@ -94,18 +93,18 @@ TEST_F(oh5_Group_test, test_group_access) {
 TEST_F(oh5_Group_test, test_effective_attribute_access) {
     Scalar val(1);
 
-    Group& w = g.create_group("what");
-    Attribute& w_attr1 = w.create_attribute("attr1", val);
-    Attribute& w_attr2 = w.create_attribute("attr2", val);
+    Group& w = static_cast<Group&>(g.add(new Group("what")));
+    Attribute& w_attr1 = static_cast<Attribute&>(w.add(new Attribute("attr1", val)));
+    Attribute& w_attr2 = static_cast<Attribute&>(w.add(new Attribute("attr2", val)));
     (void)w_attr2;
-    Group& ds1 = g.create_group("dataset1");
-    Attribute& ds1_attr1 = ds1.create_attribute("attr1", val);
-    Group& ds1_d1 = ds1.create_group("data1");
-    Group& ds1_d1_w = ds1_d1.create_group("what");
-    Attribute& ds1_d1_w_attr1 = ds1_d1_w.create_attribute("attr1", val);
-    Attribute& ds1_d1_w_attr2 = ds1_d1_w.create_attribute("attr2", val);
+    Group& ds1 = static_cast<Group&>(g.add(new Group("dataset1")));
+    Attribute& ds1_attr1 = static_cast<Attribute&>(ds1.add(new Attribute("attr1", val)));
+    Group& ds1_d1 = static_cast<Group&>(ds1.add(new Group("data1")));
+    Group& ds1_d1_w = static_cast<Group&>(ds1_d1.add(new Group("what")));
+    Attribute& ds1_d1_w_attr1 = static_cast<Attribute&>(ds1_d1_w.add(new Attribute("attr1", val)));
+    Attribute& ds1_d1_w_attr2 = static_cast<Attribute&>(ds1_d1_w.add(new Attribute("attr2", val)));
     (void)ds1_d1_w_attr2;
-    Group& ds1_d2 = ds1.create_group("data2");
+    Group& ds1_d2 = static_cast<Group&>(ds1.add(new Group("data2")));
 
 
     EXPECT_EQ(&ds1_attr1, ds1_d2.effective_attribute("attr1"));
@@ -115,7 +114,7 @@ TEST_F(oh5_Group_test, test_effective_attribute_access) {
 }
 
 TEST_F(oh5_Group_test, test_get_or_create_group_absolute_path_throws) {
-    Group& g2 = g.create_group("g2");
+    Group& g2 = static_cast<Group&>(g.add(new Group("g2")));
     EXPECT_THROW(g2.get_or_create_group("/dataset1"), value_error);
     EXPECT_FALSE(g2.has_child("dataset1"));
 }

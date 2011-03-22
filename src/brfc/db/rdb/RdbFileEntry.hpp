@@ -22,7 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/oh5/RootGroup.hpp>
+#include <brfc/db/rdb/RdbNodeBackend.hpp>
+
 #include <brfc/oh5/Source.hpp>
 
 namespace brfc {
@@ -107,13 +108,16 @@ class RdbFileEntry : public FileEntry {
      * @brief load database entry
      */
     void load() const;
+    
+    RdbNodeBackend& node_backend() { return nodes_; }
+    const RdbNodeBackend& node_backend() const { return nodes_; }
 
   protected:
     virtual std::string do_uuid() const;
 
     virtual void do_write_to_file(const std::string& path) const;
 
-    virtual const oh5::Group& do_root() const;
+    virtual const oh5::Node& do_root() const;
     
     /**
      * @brief source as stored in the database
@@ -138,7 +142,7 @@ class RdbFileEntry : public FileEntry {
     std::string hash_;
     long long size_;
     DateTime stored_at_;
-    oh5::RootGroup root_;
+    RdbNodeBackend nodes_;
 };
 
 } // namespace rdb

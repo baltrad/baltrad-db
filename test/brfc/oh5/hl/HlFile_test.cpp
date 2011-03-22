@@ -54,19 +54,19 @@ TEST_F(oh5_hl_HlFile_test, test_load_from_filesystem) {
     Scalar t_12_05_01(Time(12, 5, 1));
     Scalar d_2000_01_02(Date(2000, 1, 2));
 
-    file.root().create_attribute("date", d_2000_01_02);
-    file.root().create_attribute("time", t_12_05_01);
-    Group& what = file.root().create_group("what");
-    what.create_attribute("date", d_2000_01_02);
-    Group& data1 = file.root().create_group("data1");
-    data1.create_dataset("data");
+    file.root().add(new Attribute("date", d_2000_01_02));
+    file.root().add(new Attribute("time", t_12_05_01));
+    Node& what = file.root().add(new Group("what"));
+    what.add(new Attribute("date", d_2000_01_02));
+    Node& data1 = file.root().add(new Group("data1"));
+    data1.add(new DataSet("data"));
 
     test::TempH5File tempfile;
     tempfile.write(file);
 
     HlFile g(tempfile.path());
     EXPECT_EQ(g.path(), tempfile.path());
-    Group& root = g.root();
+    Node& root = g.root();
     EXPECT_EQ((size_t)4, root.children().size());
     EXPECT_TRUE(root.has_child("date"));
     EXPECT_TRUE(root.has_child("time"));

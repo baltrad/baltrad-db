@@ -37,8 +37,12 @@ class DataSet : public Node {
     virtual ~DataSet();
 
   protected:
+    DataSet(const DataSet& other);
 
+  private:
     virtual bool do_accepts_child(const Node& node) const;
+
+    virtual Node* do_clone() const;
 };
 
 } // namespace oh5

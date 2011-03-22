@@ -24,13 +24,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <stdexcept>
 #include <unistd.h>
 
-#include <boost/foreach.hpp>
-
 #include <brfc/visit.hpp>
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/File.hpp>
-#include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
 #include <brfc/oh5/hl/hlhdf.hpp>
@@ -62,18 +60,13 @@ namespace {
 
 class GatherHLNodes {
   public:
-    typedef mpl::vector<const oh5::RootGroup,
-                        const oh5::DataSet,
+    typedef mpl::vector<const oh5::DataSet,
                         const oh5::Group,
                         const oh5::Attribute> accepted_types;
     
     GatherHLNodes()
         : nodes_(HLNodeList_new(), &HLNodeList_free) {
 
-    }
-
-    void operator()(const oh5::RootGroup& root) {
-        // pass, the file already has a root group by default
     }
 
     void operator()(const oh5::DataSet& dataset) {
@@ -169,11 +162,14 @@ TempH5File::copy(const std::string& dest) const {
 void
 TempH5File::write(const oh5::File& file) {
     GatherHLNodes node_gather;
-
-    BOOST_FOREACH(const oh5::Node& node, file.root()) {
-        visit(node, node_gather);
-    }
     
+    oh5::Node::const_iterator iter = file.root().begin();
+    
+    ++iter; // skip root
+    for ( ; iter != file.root().end(); ++iter) {
+        visit(*iter, node_gather);
+    }
+
     node_gather.write(path_.get());
 }
 

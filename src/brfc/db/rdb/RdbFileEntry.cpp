@@ -46,11 +46,9 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         , uuid_()
         , hash_()
         , size_(0)
-        , root_(this) {
+        , nodes_(rdb) {
     BRFC_ASSERT(rdb_ != 0);
-    auto_ptr<RdbNodeBackend> be(new RdbNodeBackend());
-    be->loaded(false);
-    root_.backend(be.release());
+    nodes_.loaded(nodes_.root(), false);
 }
 
 RdbFileEntry::~RdbFileEntry() {
@@ -89,14 +87,15 @@ RdbFileEntry::load() const {
         self->loaded(false);
         throw;
     }
-    helper.backend(self->root()).id(helper.select_root_id(*this));
+    self->nodes_.id(nodes_.root(), helper.select_root_id(*this));
+    self->nodes_.loaded(nodes_.root(), false);
 }
 
-const oh5::Group&
+const oh5::Node&
 RdbFileEntry::do_root() const {
     if ((id_ or not uuid_.empty()) and not loaded())
         load();
-    return root_;
+    return nodes_.root();
 }
 
 oh5::Source

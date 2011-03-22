@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
-#include <brfc/smart_ptr.hpp>
 #include <string>
 
 namespace brfc {
@@ -59,26 +58,25 @@ class Node : public boost::noncopyable {
      *
      * the node has no parent and no backend
      */
-    Node(const std::string& name);
+    explicit Node(const std::string& name);
 
     /**
      * @brief destructor
      */
     virtual ~Node();
+    
+    /**
+     * @brief clone this node
+     *
+     * @note the cloned node is not associated with a backend
+     */
+    virtual Node* clone() const { return do_clone(); }
 
-    bool has_backend() const { return backend_.get() != 0; }
+    bool has_backend() const { return backend_ != 0; }
     
     NodeBackend& backend();
     const NodeBackend& backend() const;
-    
-    /**
-     * @brief associate with backend
-     *
-     * ownership of @c backend is transfered
-     * backend.front() is set to this node
-     */
-    void backend(NodeBackend* backend);
-    
+        
     /**
      * @brief access node name
      */
@@ -91,19 +89,24 @@ class Node : public boost::noncopyable {
      * this node, separated by "/".
      */
     std::string path() const;
+    
+    /**
+     * @brief add a child node
+     * @param node the node to add
+     * @pre this node must be associated with a backend
+     */
+    Node& add(Node* node);
 
     /**
      * @brief parent node
      * @return pointer to a parent or null pointer if this node has no parent
      */
-    Node* parent() { return parent_; }
+    Node* parent();
     
     /**
      * @copydoc parent()
      */
-    const Node* parent() const { return parent_; }
-
-    void parent(Node* parent) { parent_ = parent; }
+    const Node* parent() const;
     
     /**
      * @brief parent node of type T
@@ -128,50 +131,6 @@ class Node : public boost::noncopyable {
     }
 
     /**
-     * @brief is this node the root node
-     */
-    bool is_root() const {
-        return parent() == 0;
-    }
-    
-    /**
-     * @brief get root node
-     */
-    Node& root();
-    
-    /**
-     * @copydoc root()
-     */
-    const Node& root() const;
-    
-    /**
-     * @brief create a child attribute
-     * @param name attribute name
-     * @param value attribute value
-     * @return reference to the created attribute
-     */
-    Attribute& create_attribute(const std::string& name, const Scalar& value);
-    
-    /**
-     * @brief create a child dataset
-     * @param name dataset name
-     * @return reference to the created dataset
-     */
-    DataSet& create_dataset(const std::string& name);
-    
-    /**
-     * @brief create a child group
-     * @param name group name
-     * @return reference to the created group
-     */
-    Group& create_group(const std::string& name);
-    
-    /**
-     * @brief create a child node
-     */
-    Node& create_child(Node* node);
-
-    /**
      * @brief test for a child node
      * @param path path to the child, relative to this node
      * @throw value_error if the path is absolute and this node is not root
@@ -191,6 +150,28 @@ class Node : public boost::noncopyable {
      * @copydoc child()
      */
     const Node* child(const std::string& path) const;
+
+    /**
+     * @brief child node of type T
+     * @tparam T type to test parent against
+     * @param path path to the child, relative to this node
+     * @return pointer to a child node of type T or null pointer if not found
+     */
+    template<typename T>
+    T* child(const std::string& path) {
+        return dynamic_cast<T*>(child(path));
+    }
+
+    /**
+     * @brief child node of type T
+     * @tparam T type to test parent against
+     * @param path path to the child, relative to this node
+     * @return pointer to a child node of type T or null pointer if not found
+     */
+    template<typename T>
+    const T* child(const std::string& path) const {
+        return dynamic_cast<const T*>(child(path));
+    }
 
     /**
      * @brief test if this node can have @c node as a child
@@ -213,39 +194,54 @@ class Node : public boost::noncopyable {
     std::vector<Node*> children();
 
     /**
-     * @brief file this node is associated with
-     * @return pointer to File or null if not associated with a file
-     *
-     * default implementation returns the file associated with root and
-     * for root returns a null pointer.
+     * @brief access a child attribute
+     * @param path path to the attribute
+     * @return pointer to Attribute or null if not found
+     * @sa child()
      */
-    File* file() {
-        const Node* self = const_cast<const Node*>(this);
-        return const_cast<File*>(self->file());
-    }
+    Attribute* attribute(const std::string& name);
+    
+    /**
+     * @copydoc attribute()
+     */
+    const Attribute* attribute(const std::string& name) const;
 
     /**
-     * @copydoc file()
+     * @brief access child group
+     * @param path path to the group
+     * @return pointer to Group or null if not found
+     * @sa Node::child()
      */
-    const File* file() const {
-        return do_file();
-    }
-        
+    Group* group(const std::string& path);
+    
+    /**
+     * @copydoc group()
+     */
+    const Group* group(const std::string& path) const;
+    
     iterator begin();
     const_iterator begin() const;
     
     iterator end();
     const_iterator end() const;
-
+  
   protected:
-    virtual bool do_accepts_child(const Node& node) const = 0;
-
-    virtual const File* do_file() const;
+    Node(const Node& other);
 
   private:
+    friend class NodeBackend; // access to backend(NodeBackend*)
+
+    /**
+     * @brief associate with backend
+     */
+    void backend(NodeBackend* backend);
+
+    virtual bool do_accepts_child(const Node& node) const = 0;
+
+    virtual Node* do_clone() const = 0;
+
     std::string name_;
-    Node* parent_;
-    scoped_ptr<NodeBackend> backend_;
+    NodeBackend* backend_;
 };
 
 template<typename T>

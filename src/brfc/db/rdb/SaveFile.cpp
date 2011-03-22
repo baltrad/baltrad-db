@@ -22,16 +22,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <brfc/assert.hpp>
+#include <brfc/smart_ptr.hpp>
 #include <brfc/FileHasher.hpp>
 
 #include <brfc/db/rdb/RdbHelper.hpp>
 #include <brfc/db/rdb/RdbFileEntry.hpp>
 #include <brfc/db/rdb/RelationalDatabase.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/DataSet.hpp>
+#include <brfc/oh5/Node.hpp>
 #include <brfc/oh5/PhysicalFile.hpp>
-#include <brfc/oh5/RootGroup.hpp>
 #include <brfc/oh5/Source.hpp>
 
 #include <brfc/sql/Connection.hpp>
@@ -41,61 +40,37 @@ namespace db {
 namespace rdb {
 
 SaveFile::SaveFile(RelationalDatabase* rdb)
-        : rdb_(rdb)
-        , entry_() {
-}
-
-oh5::Node&
-SaveFile::parent_on_entry(const oh5::Node& node) {
-    const std::string& path = node.parent()->path();
-    oh5::Node* parent = entry_->node(path);
-    BRFC_ASSERT(parent);
-    return *parent;
-}
-
-void
-SaveFile::operator()(const oh5::RootGroup& root) {
-    // no-op
-}
-
-void
-SaveFile::operator()(const oh5::Group& group) {
-    // XXX: set loaded to prevent (failing) child lookup?
-    parent_on_entry(group).create_group(group.name());
-}
-
-void
-SaveFile::operator()(const oh5::DataSet& dataset) {
-    parent_on_entry(dataset).create_dataset(dataset.name()); 
-}
-
-void
-SaveFile::operator()(const oh5::Attribute& attr) {
-    parent_on_entry(attr).create_attribute(attr.name(), attr.value());
+        : rdb_(rdb) {
 }
 
 RdbFileEntry*
 SaveFile::operator()(const oh5::PhysicalFile& file) {
+    auto_ptr<RdbFileEntry> entry_(new RdbFileEntry(rdb_));
     entry_.reset(new RdbFileEntry(rdb_));
     entry_->hash(rdb_->file_hasher().hash(file));
     entry_->loaded(true);
 
+    oh5::NodeBackend& be = entry_->root().backend();
+
     // copy nodes from file to entry
-    BOOST_FOREACH(const oh5::Node& node, file.root()) {
-        visit(node, *this);
+    oh5::Node::const_iterator iter = file.root().begin();
+    oh5::Node::const_iterator end = file.root().end();
+    ++iter; // skip root;
+    for ( ; iter != end; ++iter) {
+        be.add(iter->parent()->path(), iter->clone());
     }
 
     shared_ptr<sql::Connection> conn = rdb_->conn();
-
+    
     conn->begin();
     try { 
         RdbHelper helper(conn);
-
         helper.insert_file(*entry_, file);
         helper.insert_file_content(*entry_, file.path());
-
+        long long file_id = entry_->id();
+        
         BOOST_FOREACH(oh5::Node& node, entry_->root()) {
-            helper.insert_node(node);
+            helper.insert_node(file_id, node);
         }
 
         conn->commit();

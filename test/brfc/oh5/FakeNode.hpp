@@ -16,54 +16,31 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef BRFC_OH5_FAKE_NODE
+#define BRFC_OH5_FAKE_NODE
 
-#ifndef BRFC_OH5_ROOT_GROUP_HPP
-#define BRFC_OH5_ROOT_GROUP_HPP
-
-#include <brfc/oh5/Group.hpp>
+#include <brfc/oh5/Node.hpp>
 
 namespace brfc {
 namespace oh5 {
 
-/**
- * @brief the root group
- */
-class RootGroup : public Group {
+class FakeNode : public Node {
   public:
-    /**
-     * @brief constructor
-     */
-    explicit RootGroup(File* file=0);
-
-    virtual ~RootGroup();
-
-    using Group::file;
-
-    /**
-     * @brief associate with a file
-     */
-    void file(File* file) {
-        file_ = file;
+    FakeNode(const std::string& name)
+            : Node(name) {
     }
 
   protected:
-    /**
-     * accepts Attribute, Group and Dataset as children
-     */
-    virtual bool do_accepts_child(const Node& node) const;
-
-    /**
-     * @return pointer to File or null if not associated
-     */
-    virtual const File* do_file() const {
-        return file_;
+    FakeNode(const FakeNode& other)
+            : Node(other) {
     }
   
   private:
-    File* file_;
+    virtual bool do_accepts_child(const Node&) const { return true; }
+    virtual Node* do_clone() const { return new FakeNode(*this); }
 };
 
 } // namespace oh5
 } // namespace brfc
 
-#endif // BRFC_OH5_ROOT_GROUP_HPP
+#endif // BRFC_OH5_FAKE_NODE

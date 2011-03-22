@@ -20,12 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_RDB_RDB_NODE_BACKEND_HPP
 #define BRFC_DB_RDB_RDB_NODE_BACKEND_HPP
 
-#include <boost/ptr_container/ptr_vector.hpp>
-
-#include <string>
-
 #include <brfc/oh5/NodeBackend.hpp>
-
+#include <boost/scoped_ptr.hpp>
 
 namespace brfc {
 namespace db {
@@ -35,32 +31,32 @@ class RelationalDatabase;
 
 class RdbNodeBackend : public oh5::NodeBackend {
   public:
-    explicit RdbNodeBackend(long long id=0);
+    explicit RdbNodeBackend(RelationalDatabase* rdb);
 
     virtual ~RdbNodeBackend();
 
-    void id(long long id) { id_ = id; }
+    void id(const oh5::Node& node, long long id);
     
-    long long id() const { return id_; }
+    long long id(const oh5::Node& node) const;
 
-    bool loaded() const { return loaded_; }
+    bool loaded(const oh5::Node& node) const;
 
-    void loaded(bool loaded) { loaded_ = loaded; }
-
-  protected:
-    virtual oh5::Node& do_create_child(oh5::Node* node);
-
-    virtual std::vector<oh5::Node*> do_children();
-    virtual std::vector<const oh5::Node*> do_children() const;
-
-    RelationalDatabase& rdb() const;
+    void loaded(const oh5::Node& node, bool loaded);
 
   private:
-    void load() const;
+    virtual oh5::Node& do_add(const oh5::Node& parent, oh5::Node* node);
 
-    boost::ptr_vector<oh5::Node> children_;
-    long long id_;
-    mutable bool loaded_;
+    virtual bool do_has(const oh5::Node& node) const;
+
+    virtual const oh5::Node& do_root() const;
+
+    virtual const oh5::Node* do_parent(const oh5::Node& node) const;
+
+    virtual std::vector<const oh5::Node*>
+        do_children(const oh5::Node& node) const;
+
+    struct Impl;
+    const boost::scoped_ptr<Impl> impl_;
 };
 
 } // namespace rdb

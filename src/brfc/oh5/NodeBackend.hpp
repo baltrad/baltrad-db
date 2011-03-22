@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_NODE_BACKEND_HPP
 #define BRFC_OH5_NODE_BACKEND_HPP
 
+#include <string>
 #include <vector>
 
 #include <boost/noncopyable.hpp>
@@ -34,39 +35,141 @@ class Node;
  */
 class NodeBackend : public boost::noncopyable {
   public:
-    explicit NodeBackend(Node* front=0)
-            : front_(front) {
-    }
-
     /**
      * @brief destructor
      */
     virtual ~NodeBackend();
-
-    void front(Node* front) { front_ = front; }
-
-    Node* front() const { return front_; }
     
     /**
-     * @brief add a child node, creating it on backend
+     * @brief add a node to this backend
+     * @param parent the parent node
+     * @param node the node to add (ownership transfered)
+     * @return reference to the added node
      *
-     * ownership of @c node is transfered
+     * @throw duplicate_entry if parent already has a child with name
+     * @throw lookup_error if parent is not associated with this backend
+     * 
+     * @note don't rely on @c node pointer after this call. The ownership
+     *       transfers, but the backend might create a copy instead. Use
+     *       the returned reference instead.
      */
-    Node& create_child(Node* node);
+    Node& add(const Node& parent, Node* node);
+    
+    /**
+     * @brief add a node to this backend
+     * @param path path to parent node
+     * @param node the node to add (ownership transfered)
+     * @return reference to the added node
+     *
+     * @throw lookup_error if no parent by path
+     * @sa add(const Node&, Node*)
+     */
+    Node& add(const std::string& path, Node* node);
+    
+    /**
+     * @brief test if this backend owns @c node
+     */
+    bool has(const oh5::Node& node) const {
+        return do_has(node);
+    }
 
-    std::vector<Node*> children() { return do_children(); }
-    std::vector<const Node*> children() const { return do_children(); }
+    /**
+     * @brief access the root node
+     */
+    Node& root() {
+        return const_cast<Node&>(const_this().do_root());
+    }
+    
+    /**
+     * @brief access the root node
+     */
+    const Node& root() const {
+        return do_root();
+    }
+     
+    /**
+     * @brief access node by @c path
+     */
+    Node* node(const std::string& path) {
+        return child_by_path(root(), path);
+    }
+    
+    /**
+     * @brief access node by @c path
+     */
+    const Node* node(const std::string& path) const {
+        return child_by_path(root(), path);
+    }
+    
+    Node* parent(const Node& node) {
+        return const_cast<Node*>(const_this().do_parent(node));
+    }
+
+    const Node* parent(const Node& node) const {
+        return do_parent(node);
+    }
+
+    /**
+     * @brief access children of @c node
+     */
+    std::vector<Node*> children(const Node& node);    
+
+    /**
+     * @brief access children of @c node
+     */
+    std::vector<const Node*> children(const Node& node) const {
+        return do_children(node);
+    }
+    
+    /**
+     * @brief access child of @c node by @c name
+     */
+    Node* child_by_name(const Node& node, const std::string& name) {
+        return const_cast<Node*>(const_this().child_by_name(node, name));
+    }
+
+    /**
+     * @brief access child of @c node by @c name
+     */
+    const Node* child_by_name(const Node& node,
+                              const std::string& name) const;
+
+    /**
+     * @brief access child of @c node by @c path
+     */
+    Node* child_by_path(const Node& node, const std::string& path) {
+        return const_cast<Node*>(const_this().child_by_path(node, path));
+    }
+
+    /**
+     * @brief access child node of @c node by @c path
+     */
+    const Node* child_by_path(const Node& node,
+                              const std::string& path) const;
+    
+    /**
+     * @brief get absolute path of @c node
+     */
+    std::string path(const Node& node) const;
 
   protected:
-    virtual Node& do_create_child(Node* node) = 0;
+    void root(Node& node);
 
-    virtual std::vector<Node*> do_children() = 0;
-    virtual std::vector<const Node*> do_children() const = 0;
-    
   private:
-    Node* front_;
-};
+    const NodeBackend& const_this() {
+        return const_cast<const NodeBackend&>(*this);
+    }
 
+    virtual Node& do_add(const Node& parent, Node* node) = 0;
+
+    virtual bool do_has(const Node& node) const = 0;
+
+    virtual const Node& do_root() const = 0;
+
+    virtual const Node* do_parent(const Node& node) const = 0;
+
+    virtual std::vector<const Node*> do_children(const Node& node) const = 0;
+};
 
 } // namespace oh5
 } // namespace brfc

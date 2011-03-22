@@ -79,12 +79,12 @@ class File : public boost::noncopyable {
     /**
      * @brief get the root group
      */
-    const Group& root() const { return do_root(); }
+    const Node& root() const { return do_root(); }
     
     /**
      * @copydoc root() const
      */
-    Group& root() { return const_cast<Group&>(do_root()); }
+    Node& root() { return const_cast<Node&>(do_root()); }
     
     /**
      * @brief get Source associated with file
@@ -131,7 +131,7 @@ class File : public boost::noncopyable {
     /**
      * @brief root() implementation
      */
-    virtual const Group& do_root() const = 0;
+    virtual const Node& do_root() const = 0;
 
     /**
      * @brief source() default implementation

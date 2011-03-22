@@ -63,8 +63,11 @@ class Attribute : public Node {
      * name prefixed with parent group, otherwise return name
      */
     std::string full_name() const;
-    
+  
   protected:
+    Attribute(const Attribute& other);
+    
+  private:
     /**
      * @return false
      *
@@ -73,8 +76,9 @@ class Attribute : public Node {
     virtual bool do_accepts_child(const Node& node) const {
         return false;
     }
+    
+    virtual Node* do_clone() const;
 
-  private:
     Scalar value_;
 };
 

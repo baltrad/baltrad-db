@@ -42,19 +42,6 @@ class Group : public Node {
      * @brief destructor
      */
     virtual ~Group();
-
-    /**
-     * @brief access a child attribute
-     * @param path path to the attribute
-     * @return pointer to Attribute or null if not found
-     * @sa Node::child()
-     */
-    Attribute* attribute(const std::string& name);
-    
-    /**
-     * @copydoc attribute()
-     */
-    const Attribute* attribute(const std::string& name) const;
     
     /**
      * @brief access a child attribute "in effect"
@@ -95,19 +82,6 @@ class Group : public Node {
     const Attribute* effective_attribute(const std::string& name) const;
     
     /**
-     * @brief access child group
-     * @param path path to the group
-     * @return pointer to Group or null if not found
-     * @sa Node::child()
-     */
-    Group* group(const std::string& path);
-    
-    /**
-     * @copydoc group()
-     */
-    const Group* group(const std::string& path) const;
-    
-    /**
      * @brief access child group by path, trying to create missing groups
      * @throw value_error if an invalid name is encountered in @c path
      * @throw value_error if the path is absolute and this not is not root
@@ -120,7 +94,12 @@ class Group : public Node {
     Group& get_or_create_group(const std::string& path);
     
   protected:
+    Group(const Group& other);
+  
+  private:
     virtual bool do_accepts_child(const Node& node) const;
+
+    virtual Node* do_clone() const;
 };
 
 } // namespace oh5

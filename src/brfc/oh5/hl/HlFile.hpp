@@ -26,19 +26,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/noncopyable.hpp>
 
 #include <brfc/oh5/PhysicalFile.hpp>
-#include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/MemoryNodeBackend.hpp>
 
 namespace brfc {
-
-class Date;
-class Time;
-
 namespace oh5 {
-
-class Attribute;
-class Group;
-class Source;
-
 namespace hl {
 
 /**
@@ -94,12 +85,12 @@ class HlFile : public PhysicalFile {
      */
     virtual const std::string& do_path() const { return path_; }
 
-    virtual const Group& do_root() const { return root_; }
+    virtual const Node& do_root() const { return nodes_.root(); }
 
   private:
     void load();
-
-    RootGroup root_;
+    
+    MemoryNodeBackend nodes_;
     std::string path_;
 };
 

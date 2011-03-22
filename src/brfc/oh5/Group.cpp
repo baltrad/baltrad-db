@@ -28,29 +28,23 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/RootGroup.hpp>
+#include <brfc/oh5/NodeBackend.hpp>
 
 namespace brfc {
 namespace oh5 {
 
 Group::Group(const std::string& name)
-    : Node(name) {
+        : Node(name) {
+
+}
+
+Group::Group(const Group& other)
+        : Node(other) {
 
 }
 
 Group::~Group() {
 
-}
-
-Attribute*
-Group::attribute(const std::string& path) {
-    const Group* self = const_cast<const Group*>(this);
-    return const_cast<Attribute*>(self->attribute(path));
-}
-
-const Attribute*
-Group::attribute(const std::string& path) const {
-    return dynamic_cast<const Attribute*>(child(path));
 }
 
 Attribute*
@@ -70,26 +64,16 @@ Group::effective_attribute(const std::string& name) const {
     return 0;
 }
 
-Group*
-Group::group(const std::string& path) {
-    return dynamic_cast<Group*>(child(path));
-}
-
-const Group*
-Group::group(const std::string& name) const {
-    return dynamic_cast<const Group*>(child(name));
-}
-
 Group&
 Group::get_or_create_group(const std::string& pathstr) {
-    if (boost::starts_with(pathstr, "/") and not is_root())
+    if (boost::starts_with(pathstr, "/") and parent())
         throw value_error("path must not be absolute");
     
     std::list<std::string> path;
     boost::split(path, pathstr, boost::is_any_of("/"), boost::token_compress_on);
 
-    Group* last = this;
-    Group* node = 0;
+    Node* last = this;
+    Node* node = 0;
 
     std::list<std::string>::const_iterator iter = path.begin();
 
@@ -106,17 +90,20 @@ Group::get_or_create_group(const std::string& pathstr) {
     
     // create missing nodes
     while (iter != path.end()) {
-        last = &last->create_group(*(iter++));
+        last = &last->backend().add(*last, new Group(*(iter++)));
     }
 
-    return *last;
+    return static_cast<Group&>(*last);
 }
 
 bool
 Group::do_accepts_child(const Node& node) const {
-    if (dynamic_cast<const RootGroup*>(&node))
-        return false;
     return true;
+}
+
+Node*
+Group::do_clone() const {
+    return new Group(*this);
 }
 
 } // namespace oh5

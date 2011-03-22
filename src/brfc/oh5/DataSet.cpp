@@ -29,6 +29,11 @@ DataSet::DataSet(const std::string& name)
 
 }
 
+DataSet::DataSet(const DataSet& other)
+        : Node(other) {
+
+}
+
 DataSet::~DataSet() {
 
 }
@@ -40,6 +45,11 @@ DataSet::do_accepts_child(const Node& node) const {
     } else {
         return false;
     }
+}
+
+Node*
+DataSet::do_clone() const {
+    return new DataSet(*this);
 }
 
 } // namespace oh5

@@ -22,8 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gmock/gmock.h>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/Group.hpp>
+#include <brfc/oh5/Node.hpp>
 #include <brfc/oh5/NodeBackend.hpp>
 
 namespace brfc {
@@ -31,15 +30,15 @@ namespace oh5 {
 
 class MockNodeBackend : public NodeBackend {
   public:
-    MOCK_METHOD1(do_create_group, Group*(const String&));
-    MOCK_METHOD2(do_create_attribute,
-                 Attribute*(const String&, const Scalar&));
-    MOCK_CONST_METHOD0(do_name, String&());
-    MOCK_METHOD0(do_parent, Node*());
-    MOCK_CONST_METHOD0(do_parent, Node*());
-    MOCK_METHOD1(do_create_child, Node&(Node* node));
-    MOCK_METHOD0(do_children, std::vector<Node*>());
-    MOCK_CONST_METHOD0(do_children, std::vector<const Node*>());
+    MockNodeBackend(Node& r) {
+        root(r);
+    }
+
+    MOCK_METHOD2(do_add, Node&(const Node&, Node*));
+    MOCK_CONST_METHOD1(do_has, bool(const Node&));
+    MOCK_CONST_METHOD0(do_root, const Node&());
+    MOCK_CONST_METHOD1(do_parent, const Node*(const Node&));
+    MOCK_CONST_METHOD1(do_children, std::vector<const Node*>(const Node&));
 };
 
 } // namespace oh5

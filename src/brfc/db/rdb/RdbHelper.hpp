@@ -87,7 +87,7 @@ class RdbHelper : boost::noncopyable {
      *
      * if @c node is oh5::Attribute, call insert_attribute
      */
-    void insert_node(oh5::Node& node);
+    void insert_node(long long file_id, oh5::Node& node);
     
     /**
      * @brief insert @c attr to database
