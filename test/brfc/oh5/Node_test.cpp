@@ -25,12 +25,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/oh5/FakeNode.hpp>
+#include <brfc/oh5/MockNode.hpp>
 #include <brfc/oh5/MockNodeBackend.hpp>
 
 #include <brfc/test_common.hpp>
 
 using ::testing::_;
+using ::testing::InSequence;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnNull;
@@ -60,7 +61,7 @@ struct oh5_Node_test : public ::testing::Test {
         backend.add(r, &a);
     }
     
-    FakeNode r, a, f;
+    MockNode r, a, f;
     MockNodeBackend backend;
 };
 
@@ -90,76 +91,69 @@ TEST_F(oh5_Node_test, test_add) {
 }
 
 TEST_F(oh5_Node_test, test_has_child) {
-/*
-    EXPECT_CALL(backend, do_has_child(Ref(r), Ref(a)))
-        .WillOnce(Return(true));
+    std::vector<const oh5::Node*> c;
+    c.push_back(&a);
+
+    EXPECT_CALL(backend, do_children(Ref(r)))
+        .WillOnce(Return(c))
+        .WillOnce(Return(c));
     
-    EXPECT_TRUE(r.has_child("f"));
-*/
+    EXPECT_TRUE(r.has_child("a"));
+    EXPECT_FALSE(r.has_child("f"));
 }
 
-TEST_F(oh5_Node_test, test_child) {
+TEST_F(oh5_Node_test, test_children) {
+    std::vector<const oh5::Node*> c;
+    c.push_back(&a);
 
+    EXPECT_CALL(backend, do_children(Ref(r)))
+        .WillOnce(Return(c));
+
+    std::vector<oh5::Node*> rc = r.children();
+    ASSERT_EQ(1u, rc.size());
+    EXPECT_EQ(&a, rc.at(0));
 }
 
-/*
-TEST_F(oh5_Node_test, test_has_child) {
-    EXPECT_TRUE(a.has_child("b"));
-    EXPECT_TRUE(a.has_child("b/c"));
-    EXPECT_FALSE(a.has_child("c"));
+TEST_F(oh5_Node_test, test_iterator_dereference) {
+    Node::iterator i = r.begin();
+    EXPECT_EQ(&r, &(*i));
 }
 
-TEST_F(oh5_Node_test, test_child) {
-    EXPECT_EQ(&b, a.child("b"));
-    EXPECT_EQ(0,  a.child("c"));
-    EXPECT_EQ(&c, a.child("b/c"));
-    EXPECT_EQ(0,  a.child("b/q"));
-}
+TEST_F(oh5_Node_test, test_iterator_increment) {
+    std::vector<const oh5::Node*> c;
+    std::vector<const oh5::Node*> ce;
+    c.push_back(&a);
+    backend.add(r, &f);
+    c.push_back(&f);
 
-TEST_F(oh5_Node_test, test_has_child_absolute_path_throws) {
-    EXPECT_NO_THROW(a.has_child("/b")); // can access by absolute path on root
-    EXPECT_THROW(b.has_child("/c"), value_error);
-}
-
-TEST_F(oh5_Node_test, test_parent) {
-    EXPECT_EQ(0, a.parent());
-    EXPECT_EQ(&a, b.parent());
-}
-
-TEST_F(oh5_Node_test, path) {
-    EXPECT_EQ("/a", a.path());
-    EXPECT_EQ("/a/b/c", c.path());
-
-    MockNode root("");
-    EXPECT_EQ("/", root.path());
-}
-*/
-
-/*
-TEST_F(oh5_Node_test, test_iterator) {
-    Node::iterator i = a.begin();
-    EXPECT_EQ(&a, &(*i));
+    {
+        InSequence s;
+        EXPECT_CALL(backend, do_children(Ref(r)))
+            .WillOnce(Return(c));
+        EXPECT_CALL(backend, do_children(Ref(a)))
+            .WillOnce(Return(ce));
+        EXPECT_CALL(backend, do_children(Ref(f)))
+            .WillOnce(Return(ce));
+    }
+    
+    Node::iterator i = r.begin();
     ++i;
-    EXPECT_EQ(&b, &(*i));
+    EXPECT_EQ("a", i->name());
+    ++i;
+    EXPECT_EQ("f", i->name());
+    ++i;
 }
 
 TEST_F(oh5_Node_test, test_iterator_end) {
-    Node::iterator i = f.begin();
-    EXPECT_TRUE(i != f.end());
+    std::vector<const oh5::Node*> c;
+    EXPECT_CALL(backend, do_children(Ref(r)))
+        .WillOnce(Return(c));
+
+    Node::iterator i = r.begin();
+    EXPECT_TRUE(i != r.end());
     ++i;
-    EXPECT_TRUE(i == f.end());
+    EXPECT_TRUE(i == r.end());
 }
-
-TEST_F(oh5_Node_test, test_iterate_tree) {
-    a.create_child(new FakeNode("f"));
-
-    Node::iterator i = a.begin();
-    EXPECT_EQ("a", (i++)->name());
-    EXPECT_EQ("b", (i++)->name());
-    EXPECT_EQ("f", (i++)->name());
-    EXPECT_EQ("c", (i++)->name());
-}
-*/
 
 } // namespace oh5
 } // namespace brfc
