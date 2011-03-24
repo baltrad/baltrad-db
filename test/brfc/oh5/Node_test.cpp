@@ -41,7 +41,7 @@ namespace brfc {
 namespace oh5 {
 
 
-ACTION_P(SetBackend, n) { return *arg1; }
+ACTION(ReturnDerefArg) { return *arg0; }
 
 struct oh5_Node_test : public ::testing::Test {
     oh5_Node_test()
@@ -53,10 +53,8 @@ struct oh5_Node_test : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        ON_CALL(backend, do_has(Ref(r)))
-            .WillByDefault(Return(true));
-        ON_CALL(backend, do_add(_, _))
-            .WillByDefault(SetBackend(&backend));
+        ON_CALL(backend, do_add(_))
+            .WillByDefault(ReturnDerefArg());
         
         backend.add(r, &a);
     }
@@ -75,16 +73,8 @@ TEST_F(oh5_Node_test, test_backend) {
     EXPECT_THROW(f.backend(), std::runtime_error);
 }
 
-TEST_F(oh5_Node_test, test_parent) {
-    EXPECT_CALL(backend, do_parent(Ref(a)))
-        .WillOnce(Return(&r));
-
-    EXPECT_EQ(&r, a.parent());
-    EXPECT_FALSE(f.parent());
-}
-
 TEST_F(oh5_Node_test, test_add) {
-    EXPECT_CALL(backend, do_add(Ref(r), &f))
+    EXPECT_CALL(backend, do_add(&f))
         .WillOnce(ReturnRef(f));
     
     EXPECT_EQ(&f, &r.add(&f));
@@ -112,6 +102,17 @@ TEST_F(oh5_Node_test, test_children) {
     std::vector<oh5::Node*> rc = r.children();
     ASSERT_EQ(1u, rc.size());
     EXPECT_EQ(&a, rc.at(0));
+}
+
+
+TEST_F(oh5_Node_test, test_path_root) {
+    EXPECT_EQ("/", r.path());
+}
+
+TEST_F(oh5_Node_test, test_path) {
+    backend.add(a, &f);
+
+    EXPECT_EQ("/a/f", f.path());
 }
 
 TEST_F(oh5_Node_test, test_iterator_dereference) {

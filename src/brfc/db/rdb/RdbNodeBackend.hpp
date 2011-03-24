@@ -44,13 +44,11 @@ class RdbNodeBackend : public oh5::NodeBackend {
     void loaded(const oh5::Node& node, bool loaded);
 
   private:
-    virtual oh5::Node& do_add(const oh5::Node& parent, oh5::Node* node);
+    virtual oh5::Node& do_add(oh5::Node* node);
 
     virtual bool do_has(const oh5::Node& node) const;
 
     virtual const oh5::Node& do_root() const;
-
-    virtual const oh5::Node* do_parent(const oh5::Node& node) const;
 
     virtual std::vector<const oh5::Node*>
         do_children(const oh5::Node& node) const;

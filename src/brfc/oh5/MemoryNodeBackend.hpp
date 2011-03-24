@@ -41,14 +41,12 @@ class MemoryNodeBackend : public NodeBackend {
   
   private:
 
-    virtual Node& do_add(const Node& parent, Node* node);
+    virtual Node& do_add(Node* node);
 
     virtual bool do_has(const Node& node) const;
 
     virtual const Node& do_root() const;
 
-    virtual const Node* do_parent(const Node& node) const;
-    
     virtual std::vector<const Node*> do_children(const Node& node) const;
 
     struct Impl;

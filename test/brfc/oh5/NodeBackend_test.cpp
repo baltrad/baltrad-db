@@ -43,17 +43,18 @@ struct oh5_NodeBackend_test : public ::testing::Test {
 
 TEST_F(oh5_NodeBackend_test, test_add) {
     MockNode n("n");
-    EXPECT_CALL(backend, do_add(Ref(root), &n))
+    EXPECT_CALL(backend, do_add(&n))
         .WillOnce(ReturnRef(n));
 
     Node& rn = backend.add(root, &n);
     EXPECT_EQ(&n, &rn);
     EXPECT_EQ(&backend, &rn.backend());
+    EXPECT_EQ(&root, rn.parent());
 }
 
 TEST_F(oh5_NodeBackend_test, test_add_duplicate) {
     MockNode n("n");
-    EXPECT_CALL(backend, do_add(Ref(root), &n))
+    EXPECT_CALL(backend, do_add(&n))
         .WillOnce(ReturnRef(n));
     
     backend.add(root, &n);
@@ -107,27 +108,6 @@ TEST_F(oh5_NodeBackend_test, test_node_missing) {
         .WillOnce(Return(c1));
 
     EXPECT_FALSE(backend.node("foo"));
-}
-
-TEST_F(oh5_NodeBackend_test, test_path) {
-    MockNode n1("n1");
-    MockNode n2("n2");
-
-    EXPECT_CALL(backend, do_parent(Ref(n2)))
-        .WillOnce(Return(&n1));
-    EXPECT_CALL(backend, do_parent(Ref(n1)))
-        .WillOnce(Return(&root));
-    EXPECT_CALL(backend, do_parent(Ref(root)))
-        .WillOnce(ReturnNull());
-
-    EXPECT_EQ("/n1/n2", backend.path(n2));
-}
-
-TEST_F(oh5_NodeBackend_test, test_path_root) {
-    EXPECT_CALL(backend, do_parent(Ref(root)))
-        .WillOnce(ReturnNull());
-    
-    EXPECT_EQ("/", backend.path(root));
 }
 
 } // namespace oh5

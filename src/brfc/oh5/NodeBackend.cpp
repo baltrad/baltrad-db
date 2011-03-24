@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -53,7 +52,8 @@ NodeBackend::add(const Node& parent, Node* node) {
     std::auto_ptr<Node> nodep(node); // take ownership
     if (&parent.backend() != this)
         throw value_error("parent not attached to this backend");
-    Node& rnode = do_add(parent, nodep.release());
+    node->parent(const_cast<Node*>(&parent));
+    Node& rnode = do_add(nodep.release());
     rnode.backend(this);
     return rnode;
 }
@@ -90,7 +90,7 @@ NodeBackend::child_by_name(const Node& node, const std::string& name) const {
 
 const Node*
 NodeBackend::child_by_path(const Node& node, const std::string& path) const {
-    if (boost::starts_with(path, "/") and parent(node))
+    if (boost::starts_with(path, "/") and node.parent())
         throw value_error("path must not be absolute");
     std::list<std::string> names;
     boost::split(names, path, boost::is_any_of("/"),
@@ -106,21 +106,6 @@ NodeBackend::child_by_path(const Node& node, const std::string& path) const {
         cur_n = child_n;
     }
     return child_n;
-}
-
-std::string
-NodeBackend::path(const Node& node) const {
-    std::list<std::string> names;
-    const Node* nodep = &node;
-    while (nodep != 0) {
-        names.push_front(nodep->name());
-        nodep = do_parent(*nodep);
-    }
-
-    std::string path = boost::join(names, "/");
-    if (not boost::starts_with(path, "/"))
-        path = "/" + path;
-    return path;
 }
 
 } // namespace oh5

@@ -101,14 +101,6 @@ class NodeBackend : public boost::noncopyable {
         return child_by_path(root(), path);
     }
     
-    Node* parent(const Node& node) {
-        return const_cast<Node*>(const_this().do_parent(node));
-    }
-
-    const Node* parent(const Node& node) const {
-        return do_parent(node);
-    }
-
     /**
      * @brief access children of @c node
      */
@@ -160,13 +152,11 @@ class NodeBackend : public boost::noncopyable {
         return const_cast<const NodeBackend&>(*this);
     }
 
-    virtual Node& do_add(const Node& parent, Node* node) = 0;
+    virtual Node& do_add(Node* node) = 0;
 
     virtual bool do_has(const Node& node) const = 0;
 
     virtual const Node& do_root() const = 0;
-
-    virtual const Node* do_parent(const Node& node) const = 0;
 
     virtual std::vector<const Node*> do_children(const Node& node) const = 0;
 };

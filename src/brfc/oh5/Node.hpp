@@ -21,12 +21,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_OH5_NODE_HPP
 
 #include <deque>
+#include <string>
 #include <vector>
 
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
-
-#include <string>
 
 namespace brfc {
 namespace oh5 {
@@ -80,7 +79,7 @@ class Node : public boost::noncopyable {
     /**
      * @brief access node name
      */
-    const std::string& name() const { return name_; }
+    std::string name() const { return name_; }
     
     /**
      * @brief absolute path of this node
@@ -101,12 +100,12 @@ class Node : public boost::noncopyable {
      * @brief parent node
      * @return pointer to a parent or null pointer if this node has no parent
      */
-    Node* parent();
+    Node* parent() { return parent_; }
     
     /**
      * @copydoc parent()
      */
-    const Node* parent() const;
+    const Node* parent() const { return parent_; }
     
     /**
      * @brief parent node of type T
@@ -229,12 +228,14 @@ class Node : public boost::noncopyable {
     Node(const Node& other);
 
   private:
-    friend class NodeBackend; // access to backend(NodeBackend*)
+    friend class NodeBackend; // access to backend(NodeBackend*), parent(Node*)
 
     /**
      * @brief associate with backend
      */
     void backend(NodeBackend* backend);
+
+    void parent(Node* parent) { parent_ = parent; }
 
     virtual bool do_accepts_child(const Node& node) const = 0;
 
@@ -242,6 +243,7 @@ class Node : public boost::noncopyable {
 
     std::string name_;
     NodeBackend* backend_;
+    Node* parent_;
 };
 
 template<typename T>

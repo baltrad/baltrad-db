@@ -78,8 +78,8 @@ TEST_F(oh5_MemoryNodeBackend_test, test_parent) {
         .WillByDefault(Return(true)); // for leak detection
     
     backend.root().add(n);
-    EXPECT_FALSE(backend.parent(backend.root()));
-    EXPECT_EQ(&backend.root(), backend.parent(*n));
+    EXPECT_FALSE(backend.root().parent());
+    EXPECT_EQ(&backend.root(), n->parent());
 }
 
 TEST_F(oh5_MemoryNodeBackend_test, test_children) {

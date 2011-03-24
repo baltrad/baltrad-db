@@ -45,12 +45,10 @@ namespace rdb {
 
 struct RdbNodeBackend::Impl {
     struct node_entry {
-        node_entry(const oh5::Node* node_,
-                   const oh5::Node* parent_,
-                   long long id_=0,
-                   bool loaded_=true)
+        explicit node_entry(const oh5::Node* node_,
+                            long long id_=0,
+                            bool loaded_=true)
                 : node(node_)
-                , parent(parent_)
                 , id(id_)
                 , loaded(loaded_) {
 
@@ -58,8 +56,9 @@ struct RdbNodeBackend::Impl {
 
         std::string name() const { return node->name(); }
 
+        const oh5::Node* parent() const { return node->parent(); }
+
         const oh5::Node* node;
-        const oh5::Node* parent;
         long long id;
         bool loaded;
     };
@@ -77,13 +76,13 @@ struct RdbNodeBackend::Impl {
             >,
             mi::hashed_non_unique<
                 mi::tag<by_parent>,
-                mi::member<
+                mi::const_mem_fun<
                     node_entry, const oh5::Node*, &node_entry::parent>
             >,
             mi::hashed_unique<
                 mi::composite_key<
                     node_entry,
-                    mi::member<node_entry, const oh5::Node*, &node_entry::parent>,
+                    mi::const_mem_fun<node_entry, const oh5::Node*, &node_entry::parent>,
                     mi::const_mem_fun<node_entry, std::string, &node_entry::name>
                 >
             >
@@ -163,10 +162,10 @@ struct RdbNodeBackend::Impl {
         return entries.get<by_node>().find(&node);
     }
 
-    void add(const oh5::Node& parent, oh5::Node* _node) {
+    void add(oh5::Node* _node) {
         auto_ptr<oh5::Node> node(_node);
-        if (not entries.insert(node_entry(_node, &parent)).second)
-            throw duplicate_entry(parent.path() + "/" + node->name());
+        if (not entries.insert(node_entry(_node)).second)
+            throw duplicate_entry(node->path());
         nodes.push_back(node);
     }
 
@@ -196,15 +195,6 @@ struct RdbNodeBackend::Impl {
     oh5::Node& root() { return nodes.front(); }
 
     const oh5::Node& root() const { return nodes.front(); }
-
-    const oh5::Node* parent(const oh5::Node& node) const {
-        const oh5::Node* p = 0;
-        const EntryByNode_t& nentries = entries.get<by_node>();
-        EntryByNode_t::const_iterator iter = nentries.find(&node);
-        if (iter != nentries.end())
-            p = iter->parent;
-        return p;
-    }
 
     std::vector<const oh5::Node*> children(const oh5::Node& node) const {
         load(node);
@@ -257,8 +247,8 @@ RdbNodeBackend::loaded(const oh5::Node& node) const {
 }
 
 oh5::Node&
-RdbNodeBackend::do_add(const oh5::Node& parent, oh5::Node* node) {
-    impl_->add(parent, node);
+RdbNodeBackend::do_add(oh5::Node* node) {
+    impl_->add(node);
     return *node;
 }
 
@@ -270,11 +260,6 @@ RdbNodeBackend::do_has(const oh5::Node& node) const {
 const oh5::Node&
 RdbNodeBackend::do_root() const {
     return impl_->root();
-}
-
-const oh5::Node*
-RdbNodeBackend::do_parent(const oh5::Node& node) const {
-    return impl_->parent(node);
 }
 
 std::vector<const oh5::Node*>

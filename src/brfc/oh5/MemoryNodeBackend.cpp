@@ -21,12 +21,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/composite_key.hpp>
+#include <boost/multi_index/identity.hpp>
 #include <boost/multi_index/indexed_by.hpp>
-#include <boost/multi_index/member.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/tag.hpp>
 
+#include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <brfc/exceptions.hpp>
@@ -40,39 +41,26 @@ namespace brfc {
 namespace oh5 {
 
 struct MemoryNodeBackend::Impl {
-    struct node_entry {
-        node_entry(const Node* node_,
-                   const Node* parent_)
-                : node(node_)
-                , parent(parent_) {
-
-        }
-
-        std::string name() const { return node->name(); }
-
-        const Node* node;
-        const Node* parent;
-    };
 
     struct by_node {};
     struct by_parent {};
 
     typedef boost::multi_index_container<
-        node_entry,
+        const Node*,
         mi::indexed_by<
             mi::hashed_unique<
                 mi::tag<by_node>,
-                mi::member<node_entry, const Node*, &node_entry::node>
+                mi::identity<const Node*>
             >,
             mi::hashed_non_unique<
                 mi::tag<by_parent>,
-                mi::member<node_entry, const Node*, &node_entry::parent>
+                mi::const_mem_fun<Node, const Node*, &Node::parent>
             >,
             mi::hashed_unique<
                 mi::composite_key<
-                    node_entry,
-                    mi::member<node_entry, const Node*, &node_entry::parent>,
-                    mi::const_mem_fun<node_entry, std::string, &node_entry::name>
+                    const Node*,
+                    mi::const_mem_fun<Node, const Node*, &Node::parent>,
+                    mi::const_mem_fun<Node, std::string, &Node::name>
                 >
             >
         >
@@ -93,17 +81,17 @@ struct MemoryNodeBackend::Impl {
             : nodes()
             , entries() {
         nodes.push_back(new Group(""));
-        entries.insert(node_entry(&root(), 0));
+        entries.insert(&root());
     }
 
     ~Impl() {
 
     }
 
-    void add(const Node& parent, oh5::Node* _node) {
+    void add(oh5::Node* _node) {
         std::auto_ptr<Node> node(_node);
-        if (not entries.insert(node_entry(_node, &parent)).second)
-            throw duplicate_entry(parent.path() + "/" + node->name());
+        if (not entries.insert(_node).second)
+            throw duplicate_entry(node->path());
         nodes.push_back(node);
     }
 
@@ -116,15 +104,6 @@ struct MemoryNodeBackend::Impl {
 
     const Node& root() const { return nodes.front(); }
 
-    const Node* parent(const Node& node) const {
-        const Node* p = 0;
-        const EntryByNode_t& nentries = entries.get<by_node>();
-        EntryByNode_t::const_iterator iter = nentries.find(&node);
-        if (iter != nentries.end())
-            p = iter->parent;
-        return p;
-    }
-
     std::vector<const Node*> children(const oh5::Node& node) const {
         const EntryByParent_t& nentries = entries.get<by_parent>();
 
@@ -134,7 +113,7 @@ struct MemoryNodeBackend::Impl {
         
         std::vector<const Node*> vec;
         for ( ; range.first != range.second; ++range.first) {
-            vec.push_back(range.first->node);
+            vec.push_back(*range.first);
         }
         return vec;
     }
@@ -153,8 +132,8 @@ MemoryNodeBackend::~MemoryNodeBackend() {
 }
 
 Node&
-MemoryNodeBackend::do_add(const Node& parent, oh5::Node* node) {
-    impl_->add(parent, node);
+MemoryNodeBackend::do_add(oh5::Node* node) {
+    impl_->add(node);
     return *node;
 }
 
@@ -166,11 +145,6 @@ MemoryNodeBackend::do_has(const Node& node) const {
 const Node&
 MemoryNodeBackend::do_root() const {
     return impl_->root();
-}
-
-const Node*
-MemoryNodeBackend::do_parent(const Node& node) const {
-    return impl_->parent(node);
 }
 
 std::vector<const Node*>

@@ -20,8 +20,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Node.hpp>
 
 #include <memory>
+#include <list>
 
 #include <boost/foreach.hpp>
+
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
@@ -37,14 +41,16 @@ namespace oh5 {
 Node::Node(const std::string& name)
         : boost::noncopyable()
         , name_(name)
-        , backend_(0) {
+        , backend_(0)
+        , parent_(0) {
     if (name.find("/") != std::string::npos)
         throw value_error("invalid node name: " + name);
 }
 
 Node::Node(const Node& other)
         : name_(other.name_)
-        , backend_(0) {
+        , backend_(0)
+        , parent_(0) {
 
 }
 
@@ -73,22 +79,19 @@ Node::backend(NodeBackend* backend) {
     backend_ = backend;
 }
 
-const Node*
-Node::parent() const {
-    const Node* p = 0;
-    if (has_backend())
-        p = backend().parent(*this);
-    return p;
-}
-
-Node*
-Node::parent() {
-    return const_cast<Node*>(const_cast<const Node*>(this)->parent());
-}
-
 std::string
 Node::path() const {
-    return backend().path(*this);
+    std::list<std::string> names;
+    const Node* nodep = this;
+    while (nodep != 0) {
+        names.push_front(nodep->name());
+        nodep = nodep->parent();
+    }
+
+    std::string path = boost::join(names, "/");
+    if (not boost::starts_with(path, "/"))
+        path = "/" + path;
+    return path;
 }
 
 Node&
