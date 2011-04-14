@@ -22,9 +22,20 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
+#include <brfc/expr/sexp.hpp>
 #include <brfc/oh5/Scalar.hpp>
 
 #include <brfc/test_common.hpp>
+
+namespace brfc {
+namespace expr {
+
+void PrintTo(const sexp& x, ::std::ostream* os) {
+  *os << x;
+}
+
+}
+}
 
 std::ostream& operator<<(std::ostream& out, const brfc::Date& value) {
     out << "Date("
