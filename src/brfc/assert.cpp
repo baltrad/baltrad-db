@@ -17,12 +17,19 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_ASSERT_H
-#define BRFC_ASSERT_H
+#include <brfc/exceptions.hpp>
+#include <sstream>
 
-#define BOOST_ENABLE_ASSERT_HANDLER
-#include <boost/assert.hpp>
+namespace boost {
 
-#define BRFC_ASSERT(expr) BOOST_ASSERT(expr)
+void
+assertion_failed(char const* expr,
+                 char const* function,
+                 char const* file,
+                 long line) {
+    std::stringstream ss;
+    ss << file << ":" << line << ": " << function << ": " << expr;
+    throw ::brfc::assertion_error(ss.str());
+}
 
-#endif // BRFC_ASSERT_H
+} // namespace boost

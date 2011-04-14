@@ -22,11 +22,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <deque>
 
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/FileHasher.hpp>
-#include <string>
 #include <brfc/SHA1AttributeHasher.hpp>
 
 #include <brfc/db/FileQuery.hpp>

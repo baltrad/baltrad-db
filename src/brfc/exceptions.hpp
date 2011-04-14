@@ -29,6 +29,13 @@ namespace brfc {
  * @defgroup exceptions Exceptions
  * @{
  */
+class assertion_error : public std::logic_error {
+  public:
+    assertion_error(const std::string& msg)
+            : std::logic_error(msg) {
+    }
+};
+
 /**
  * @brief base class for all errors from this library
  *
