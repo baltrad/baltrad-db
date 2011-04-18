@@ -22,6 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <iosfwd>
 #include <list>
 
+#include <brfc/DateTime.hpp>
+
 #include <boost/variant.hpp>
 #include <boost/ptr_container/ptr_list.hpp>
 
@@ -39,6 +41,9 @@ class sexp {
             INT64,
             DOUBLE,
             STRING,
+            DATE,
+            TIME,
+            DATETIME,
             SYMBOL
         };
     };
@@ -50,7 +55,10 @@ class sexp {
                 std::string,
                 long long,
                 double,
-                bool
+                bool,
+                Date,
+                Time,
+                DateTime
             > value_t;
     
     typedef list_t::const_iterator const_iterator;
@@ -64,7 +72,10 @@ class sexp {
      * @brief construct bool
      */
     sexp(bool value);
-
+    
+    /**
+     * @brief construct in64
+     */
     sexp(int value);
 
     /**
@@ -98,6 +109,21 @@ class sexp {
     sexp(const list_t& value);
     
     /**
+     * @brief construct date
+     */
+    sexp(const Date& value);
+    
+    /**
+     * @brief construct time
+     */
+    sexp(const Time& value);
+    
+    /**
+     * @brief construct datetime
+     */
+    sexp(const DateTime& value);
+    
+    /**
      * @brief construct list from iterators
      */
     template<typename Iter>
@@ -124,6 +150,9 @@ class sexp {
     bool is_double() const { return type() == type::DOUBLE; }
     bool is_string() const { return type() == type::STRING; }
     bool is_symbol() const { return type() == type::SYMBOL; }
+    bool is_date() const { return type() == type::DATE; }
+    bool is_time() const { return type() == type::TIME; }
+    bool is_datetime() const { return type() == type::DATETIME; }
     
     list_t list() const;
     bool bool_() const;
@@ -131,6 +160,9 @@ class sexp {
     double double_() const;
     std::string string() const;
     std::string symbol() const;
+    Date date() const;
+    Time time() const;
+    DateTime datetime() const;
 
     size_t size() const;
     bool empty() const;

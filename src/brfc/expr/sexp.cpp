@@ -59,6 +59,18 @@ sexp::sexp(const list_t& value)
         : value_(value) {
 }
 
+sexp::sexp(const Date& value)
+        : value_(value) {
+}
+
+sexp::sexp(const Time& value)
+        : value_(value) {
+}
+
+sexp::sexp(const DateTime& value)
+        : value_(value) {
+}
+
 /*
 sexp::sexp(const value_t& value)
         : value_(value) {
@@ -119,6 +131,18 @@ struct type_visitor : public boost::static_visitor<sexp::type::_> {
             return sexp::type::SYMBOL;
         else
             return sexp::type::STRING;
+    }
+
+    sexp::type::_ operator()(const Date&) const {
+        return sexp::type::DATE;
+    }
+
+    sexp::type::_ operator()(const Time&) const {
+        return sexp::type::TIME;
+    }
+
+    sexp::type::_ operator()(const DateTime&) const {
+        return sexp::type::DATETIME;
     }
 };
 
@@ -306,6 +330,18 @@ struct to_ostream : public static_visitor<void> {
                 out << " ";
         }
         out << ")";
+    }
+
+    void operator()(const Date& d) const {
+        out << "(date \"" << d.to_iso_string() << "\")";
+    }
+
+    void operator()(const Time& t) const {
+        out << "(time \"" << t.to_iso_string() << "\")";
+    }
+
+    void operator()(const DateTime& dt) const {
+        out << "(datetime \"" << dt.to_iso_string() << "\")";
     }
 };
 
