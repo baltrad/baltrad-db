@@ -187,24 +187,28 @@ sexp::symbol() const {
 
 size_t
 sexp::size() const {
+    BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.size();
 }
 
 bool
 sexp::empty() const {
+    BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.empty();
 }
 
 const sexp&
 sexp::front() const {
+    BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.front();
 }
 
 void
 sexp::pop_front() {
+    BRFC_ASSERT(is_list());
     list_t& l = boost::get<list_t>(value_);
     BRFC_ASSERT(not l.empty());
     l.pop_front();
@@ -212,18 +216,21 @@ sexp::pop_front() {
 
 void
 sexp::push_back(const sexp& value) {
+    BRFC_ASSERT(is_list());
     list_t& l = boost::get<list_t>(value_);
     l.push_back(value);
 }
 
 sexp::const_iterator
 sexp::begin() const {
+    BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.begin();
 }
 
 sexp::const_iterator
 sexp::end() const {
+    BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.end();
 }
