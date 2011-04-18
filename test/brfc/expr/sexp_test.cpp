@@ -217,5 +217,42 @@ TEST(expr_sexp_test, test_to_ostream) {
     EXPECT_EQ(expected, ss.str());
 }
 
+namespace {
+
+struct noncopyable_visitor : static_visitor<void> {
+    noncopyable_visitor() { }
+
+    template<typename T>
+    void operator()(const T& t) { }
+  
+  private:
+    noncopyable_visitor(const noncopyable_visitor&);
+    noncopyable_visitor& operator=(const noncopyable_visitor&);
+};
+
+struct noncopyable_const_visitor : static_visitor<void> {
+    noncopyable_const_visitor() { }
+
+    template<typename T>
+    void operator()(const T& t) const { }
+  
+  private:
+    noncopyable_const_visitor(const noncopyable_const_visitor&);
+    noncopyable_const_visitor& operator=(const noncopyable_const_visitor&);
+};
+
+}
+
+TEST(expr_sexp_test, test_apply_visitor_noncopyable_visitor) {
+    sexp e;
+    noncopyable_visitor v;
+    apply_visitor(v, e);
+}
+
+TEST(expr_sexp_test, test_apply_visitor_noncopyable_const_visitor) {
+    sexp e;
+    apply_visitor(noncopyable_const_visitor(), e);
+}
+
 } // namespace expr
 } // namespace brfc

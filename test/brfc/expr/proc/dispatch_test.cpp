@@ -34,7 +34,7 @@ struct swap {
     typedef sexp result_type;
     
     template<typename T, typename U>
-    sexp operator()(const T& a1, const U& a2) {
+    sexp operator()(const T& a1, const U& a2) const {
         sexp result;
         result.push_back(sexp(a1));
         result.push_back(sexp(a2));
@@ -46,7 +46,7 @@ struct unary_cb {
     typedef sexp result_type;
 
     template<typename T>
-    sexp operator()(const T&) {
+    sexp operator()(const T&) const {
         return sexp(4321);
     }
 };

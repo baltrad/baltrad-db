@@ -176,13 +176,25 @@ class sexp {
 
     template<typename Visitor>
     typename Visitor::result_type
-    apply_visitor(Visitor v, const sexp& rhs) const {
+    apply_visitor(Visitor& v, const sexp& rhs) const {
         return ::boost::apply_visitor(v, value_, rhs.value_);
     }
 
     template<typename Visitor>
     typename Visitor::result_type
-    apply_visitor(Visitor v) const {
+    apply_visitor(const Visitor& v, const sexp& rhs) const {
+        return ::boost::apply_visitor(v, value_, rhs.value_);
+    }
+
+    template<typename Visitor>
+    typename Visitor::result_type
+    apply_visitor(Visitor& v) const {
+        return ::boost::apply_visitor(v, value_);
+    }
+
+    template<typename Visitor>
+    typename Visitor::result_type
+    apply_visitor(const Visitor& v) const {
         return ::boost::apply_visitor(v, value_);
     }
 
@@ -195,13 +207,25 @@ struct static_visitor : public ::boost::static_visitor<Result> { };
 
 template<typename Visitor>
 typename Visitor::result_type
-apply_visitor(Visitor v, const sexp& lhs, const sexp& rhs) {
+apply_visitor(Visitor& v, const sexp& lhs, const sexp& rhs) {
     return lhs.apply_visitor(v, rhs);
 }
 
 template<typename Visitor>
 typename Visitor::result_type
-apply_visitor(Visitor v, const sexp& x) {
+apply_visitor(const Visitor& v, const sexp& lhs, const sexp& rhs) {
+    return lhs.apply_visitor(v, rhs);
+}
+
+template<typename Visitor>
+typename Visitor::result_type
+apply_visitor(Visitor& v, const sexp& x) {
+    return x.apply_visitor(v);
+}
+
+template<typename Visitor>
+typename Visitor::result_type
+apply_visitor(const Visitor& v, const sexp& x) {
     return x.apply_visitor(v);
 }
 
