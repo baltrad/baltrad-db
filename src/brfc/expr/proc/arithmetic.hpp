@@ -23,8 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/mpl/and.hpp>
 #include <boost/type_traits/is_arithmetic.hpp>
 
-#include <brfc/assert.hpp>
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/proc/dispatch.hpp>
 
 namespace brfc {
 namespace expr {
@@ -50,6 +49,10 @@ struct add : public static_visitor<sexp> {
                             boost::is_arithmetic<T>,
                             boost::is_arithmetic<U> >());
     }
+
+    sexp operator()(const sexp& args) const {
+        return binary_dispatch(*this, args);
+    }
 };
 
 struct sub : public static_visitor<sexp> {
@@ -70,6 +73,10 @@ struct sub : public static_visitor<sexp> {
                         boost::mpl::and_<
                             boost::is_arithmetic<T>,
                             boost::is_arithmetic<U> >());
+    }
+
+    sexp operator()(const sexp& args) const {
+        return binary_dispatch(*this, args);
     }
 };
 
@@ -92,6 +99,10 @@ struct mul : public static_visitor<sexp> {
                             boost::is_arithmetic<T>,
                             boost::is_arithmetic<U> >());
     }
+
+    sexp operator()(const sexp& args) const {
+        return binary_dispatch(*this, args);
+    }
 };
 
 
@@ -113,6 +124,10 @@ struct div : public static_visitor<sexp> {
                         boost::mpl::and_<
                             boost::is_arithmetic<T>,
                             boost::is_arithmetic<U> >());
+    }
+
+    sexp operator()(const sexp& args) const {
+        return binary_dispatch(*this, args);
     }
 };
 

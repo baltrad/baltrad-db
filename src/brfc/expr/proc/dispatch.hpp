@@ -28,27 +28,24 @@ namespace expr {
 namespace proc {
 
 template<typename Function>
-struct unary {
-    typedef typename Function::result_type result_type;
-
-    result_type operator()(const expr::sexp& args) {
-        BRFC_ASSERT(args.is_list());
-        BRFC_ASSERT(args.size() == 1);
-        return expr::apply_visitor(Function(), args.front());
-    }
-};
+typename Function::result_type
+unary_dispatch(const Function& func, const sexp& args) {
+    BRFC_ASSERT(args.is_list());
+    BRFC_ASSERT(args.size() == 1);
+    return expr::apply_visitor(func, args.front());
+}
 
 template<typename Function>
-struct binary {
-    typedef typename Function::result_type result_type;
-
-    result_type operator()(const expr::sexp& args) {
-        BRFC_ASSERT(args.is_list());
-        BRFC_ASSERT(args.size() == 2);
-        expr::sexp::const_iterator it = args.begin();
-        return expr::apply_visitor(Function(), *(it++), *(it++));
-    }
-};
+typename Function::result_type
+binary_dispatch(const Function& func, const sexp& args) {
+    BRFC_ASSERT(args.is_list());
+    BRFC_ASSERT(args.size() == 2);
+    expr::sexp::const_iterator it = args.begin();
+    const sexp& arg1 = *it;
+    ++it;
+    const sexp& arg2 = *it;
+    return expr::apply_visitor(func, arg1, arg2);
+}
 
 } // namespace proc
 } // namespace expr

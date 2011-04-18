@@ -20,8 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_PROC_LOGIC_HPP
 #define BRFC_EXPR_PROC_LOGIC_HPP
 
-#include <brfc/assert.hpp>
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/proc/dispatch.hpp>
 
 namespace brfc {
 namespace expr {
@@ -39,6 +38,10 @@ struct and_ : public static_visitor<sexp> {
     sexp operator()(bool lhs, bool rhs) const {
         return sexp(lhs and rhs);
     }
+
+    sexp operator()(const sexp& args) const {
+        return binary_dispatch(*this, args);
+    }
 };
 
 struct or_ : public static_visitor<sexp> {
@@ -51,6 +54,10 @@ struct or_ : public static_visitor<sexp> {
     sexp operator()(bool lhs, bool rhs) const {
         return sexp(lhs or rhs);
     }
+
+    sexp operator()(const sexp& args) const {
+        return binary_dispatch(*this, args);
+    }
 };
 
 struct not_ : public static_visitor<sexp> {
@@ -62,6 +69,10 @@ struct not_ : public static_visitor<sexp> {
 
     sexp operator()(bool val) const {
         return sexp(not val);
+    }
+
+    sexp operator()(const sexp& args) const {
+        return unary_dispatch(*this, args);
     }
 };
 

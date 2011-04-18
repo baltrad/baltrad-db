@@ -21,11 +21,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdexcept>
 
+#include <brfc/test_common.hpp>
+#include <brfc/expr/listcons.hpp>
 #include <brfc/expr/proc/like.hpp>
 
 namespace brfc {
 namespace expr {
 namespace proc {
+
+TEST(expr_proc_like_test, test_sexp_dispatch) {
+    EXPECT_EQ(sexp(false), like()(listcons().string("foo").string("bar").get()));
+}
 
 TEST(expr_proc_like_test, test_invalid_types) {
     EXPECT_THROW(like()(1, 2), std::logic_error);

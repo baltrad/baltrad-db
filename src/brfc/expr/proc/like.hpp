@@ -20,8 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_PROC_LIKE_HPP
 #define BRFC_EXPR_PROC_LIKE_HPP
 
-#include <brfc/assert.hpp>
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/proc/dispatch.hpp>
 
 namespace brfc {
 namespace expr {
@@ -35,6 +34,10 @@ struct like : public static_visitor<sexp> {
     }
 
     sexp operator()(const std::string& str, std::string pattern) const;
+
+    sexp operator()(const sexp& args) const {
+        return binary_dispatch(*this, args);
+    }
 };
 
 } // namespace proc

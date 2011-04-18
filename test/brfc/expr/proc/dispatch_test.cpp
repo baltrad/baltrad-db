@@ -17,10 +17,13 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <gtest/gtest.h>
-
 #include <stdexcept>
 
+#include <boost/ref.hpp>
+
+#include <gtest/gtest.h>
+
+#include <brfc/test_common.hpp>
 #include <brfc/expr/listcons.hpp>
 #include <brfc/expr/proc/dispatch.hpp>
 
@@ -30,73 +33,72 @@ namespace proc {
 
 namespace {
 
-struct swap {
-    typedef sexp result_type;
+struct binary_op {
+    typedef void result_type;
+
+    mutable sexp arg1, arg2;
     
     template<typename T, typename U>
-    sexp operator()(const T& a1, const U& a2) const {
-        sexp result;
-        result.push_back(sexp(a1));
-        result.push_back(sexp(a2));
-        return result;
+    result_type operator()(const T& a1, const U& a2) const {
+        arg1 = sexp(a1);
+        arg2 = sexp(a2);
     }
 };
 
-struct unary_cb {
-    typedef sexp result_type;
+struct unary_op {
+    typedef void result_type;
+
+    mutable sexp arg;
 
     template<typename T>
-    sexp operator()(const T&) const {
-        return sexp(4321);
+    void operator()(const T& a) const {
+        arg = sexp(a);
     }
 };
 
 }
 
 TEST(expr_proc_dispatch_test, test_binary) {
-    binary<swap> dp;
-
+    binary_op op;
     sexp in = listcons().int64(1).int64(2).get();
-    sexp out = listcons().int64(2).int64(1).get();
 
-    sexp result;
-    EXPECT_NO_THROW(result = dp(in));
-
-    EXPECT_EQ(out, result);
+    EXPECT_NO_THROW(binary_dispatch(op, in));
+    
+    EXPECT_EQ(sexp(1), op.arg1);
+    EXPECT_EQ(sexp(2), op.arg2);
 }
 
 TEST(expr_proc_dispatch_test, test_binary_invalid_arg_count) {
-    binary<swap> dp;
+    binary_op op;
     
-    EXPECT_THROW(dp(sexp()), std::logic_error);
+    EXPECT_THROW(binary_dispatch(op, sexp()), std::logic_error);
 }
 
 TEST(expr_proc_dispatch_test, test_binary_invalid_type) {
-    binary<swap> dp;
+    binary_op op;
     
-    EXPECT_THROW(dp(sexp(1)), std::logic_error);
+    EXPECT_THROW(binary_dispatch(op, sexp(1)), std::logic_error);
 }
 
 TEST(expr_proc_dispatch_test, test_unary) {
-    unary<unary_cb> dp;
+    unary_op op;
     sexp in = listcons().int64(1).get();
     
-    sexp result;
-    EXPECT_NO_THROW(result = dp(in));
+    EXPECT_NO_THROW(unary_dispatch(op, in));
 
-    EXPECT_EQ(sexp(4321), result);
+    EXPECT_EQ(sexp(1), op.arg);
 }
 
 TEST(expr_proc_dispatch_test, test_unary_invalid_arg_count) {
-    unary<unary_cb> dp;
+    unary_op op;
     
-    EXPECT_THROW(dp(sexp()), std::logic_error);
+    EXPECT_THROW(unary_dispatch(op, sexp()), std::logic_error);
 }
 
 TEST(expr_proc_dispatch_test, test_unary_invalid_type) {
-    unary<unary_cb> dp;
+    unary_op op;
     
-    EXPECT_THROW(dp(sexp(1)), std::logic_error);
+    EXPECT_THROW(unary_dispatch(op, sexp(1)), std::logic_error);
 }
 
 

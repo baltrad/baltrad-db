@@ -21,11 +21,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdexcept>
 
+#include <brfc/test_common.hpp>
+#include <brfc/expr/listcons.hpp>
 #include <brfc/expr/proc/logic.hpp>
 
 namespace brfc {
 namespace expr {
 namespace proc {
+
+/* and_ */
+
+TEST(expr_proc_logic_and_test, test_sexp_dispatch) {
+    EXPECT_EQ(sexp(true), and_()(listcons().bool_(true).bool_(true).get()));
+}
 
 TEST(expr_proc_logic_and_test, test_bool_bool) {
     EXPECT_EQ(sexp(true), and_()(true, true));
@@ -36,6 +44,12 @@ TEST(expr_proc_logic_and_test, test_bool_int) {
     EXPECT_THROW(and_()(true, 1), std::logic_error);
 }
 
+/* or_ */
+
+TEST(expr_proc_logic_or_test, test_sexp_dispatch) {
+    EXPECT_EQ(sexp(true), or_()(listcons().bool_(true).bool_(true).get()));
+}
+
 TEST(expr_proc_logic_or_test, test_bool_bool) {
     EXPECT_EQ(sexp(true), or_()(true, false));
     EXPECT_EQ(sexp(false), or_()(false, false));
@@ -43,6 +57,12 @@ TEST(expr_proc_logic_or_test, test_bool_bool) {
 
 TEST(expr_proc_logic_or_test, test_bool_int) {
     EXPECT_THROW(or_()(true, 1), std::logic_error);
+}
+
+/* not_ */
+
+TEST(expr_proc_logic_not_test, test_sexp_dispatch) {
+    EXPECT_EQ(sexp(false), not_()(listcons().bool_(true).get()));
 }
 
 TEST(expr_proc_logic_not_test, test_bool) {
