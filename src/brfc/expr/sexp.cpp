@@ -178,6 +178,21 @@ sexp::string() const {
     return boost::get<std::string>(value_);
 }
 
+Date
+sexp::date() const {
+    return boost::get<Date>(value_);
+}
+
+Time
+sexp::time() const {
+    return boost::get<Time>(value_);
+}
+
+DateTime
+sexp::datetime() const {
+    return boost::get<DateTime>(value_);
+}
+
 std::string
 sexp::symbol() const {
     BRFC_ASSERT(is_symbol());
