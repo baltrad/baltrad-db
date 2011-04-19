@@ -42,8 +42,11 @@ TEST(expr_listcons_test, test_construct_many) {
                        .double_(2.1)
                        .bool_(true)
                        .string("foo")
+                       .date(2011, 12, 13)
+                       .time(14, 15, 16, 17)
+                       .datetime(2011, 12, 13, 14, 15, 16, 17)
                        .get();
-    ASSERT_EQ(5u, e.size());
+    ASSERT_EQ(8u, e.size());
     sexp::const_iterator it = e.begin();
     ASSERT_TRUE(it->is_symbol());
     ASSERT_EQ("+", it->symbol());
@@ -59,6 +62,15 @@ TEST(expr_listcons_test, test_construct_many) {
     ++it;
     ASSERT_TRUE(it->is_string());
     ASSERT_EQ("foo", it->string());
+    ++it;
+    ASSERT_TRUE(it->is_date());
+    ASSERT_EQ(Date(2011, 12, 13), it->date());
+    ++it;
+    ASSERT_TRUE(it->is_time());
+    ASSERT_EQ(Time(14, 15, 16, 17), it->time());
+    ++it;
+    ASSERT_TRUE(it->is_datetime());
+    ASSERT_EQ(DateTime(2011, 12, 13, 14, 15, 16, 17), it->datetime());
 }
 
 }

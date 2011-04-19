@@ -55,6 +55,38 @@ class listcons {
         return *this;
     }
 
+    listcons& date(int year, int month, int day) {
+        sexp_.push_back(sexp(Date(year, month, day)));
+        return *this;
+    }
+
+    listcons& date(const Date& date) {
+        sexp_.push_back(sexp(date));
+        return *this;
+    }
+
+    listcons& time(int hour, int minute, int second=0, int msec=0) {
+        sexp_.push_back(sexp(Time(hour, minute, second, msec)));
+        return *this;
+    }
+
+    listcons& time(const Time& time) {
+        sexp_.push_back(sexp(time));
+        return *this;
+    }
+
+    listcons& datetime(int year, int month, int day,
+                       int hour, int minute, int second=0, int msec=0) {
+        sexp_.push_back(sexp(DateTime(year, month, day,
+                                      hour, minute, second, msec)));
+        return *this;
+    }
+
+    listcons& datetime(const DateTime& dt) {
+        sexp_.push_back(sexp(dt));
+        return *this;
+    }
+
     listcons& append(const sexp& value) {
         sexp_.push_back(value);
         return *this;
