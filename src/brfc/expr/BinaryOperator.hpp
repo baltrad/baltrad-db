@@ -63,6 +63,8 @@ class BinaryOperator : public Expression {
         return ExpressionPtr(new BinaryOperator(*this));
     }
 
+    virtual sexp to_sexp() const;
+
     void lhs(ExpressionPtr lhs) { lhs_ = lhs; }
     void rhs(ExpressionPtr rhs) { rhs_ = rhs; }
 

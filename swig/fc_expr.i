@@ -52,7 +52,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %ignore brfc::expr::Compiler;
 %ignore brfc::expr::Select;
 
-%ignore brfc::expr::Expression::shared_from_this;
+%ignore brfc::expr::Expression::to_sexp;
 %ignore brfc::expr::Function::args;
 %ignore brfc::expr::Literal::value;
 

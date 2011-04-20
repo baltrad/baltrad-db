@@ -39,6 +39,8 @@ class ExpressionList : public Expression {
         return ExpressionPtr(new ExpressionList(*this));
     }
 
+    virtual sexp to_sexp() const;
+
     void append(const Expression& expr);
 
     const Expression& at(size_t pos) const { return *exprs_.at(pos); }

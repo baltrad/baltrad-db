@@ -39,6 +39,8 @@ class Literal : public Expression {
         return ExpressionPtr(new Literal(*this));
     }
 
+    virtual sexp to_sexp() const;
+
     const Variant& value() const {
         return value_;
     }

@@ -54,6 +54,8 @@ class Attribute : public Expression {
         return ExpressionPtr(new Attribute(*this));
     }
 
+    virtual sexp to_sexp() const;
+
     const std::string& name() const {
         return name_;
     }
@@ -68,7 +70,7 @@ class Attribute : public Expression {
             , type_(other.type_) {
     }
 
-    bool do_equals(const Expression& other) const {
+    virtual bool do_equals(const Expression& other) const {
         const Attribute* optr = dynamic_cast<const Attribute*>(&other);
         if (optr and name_ == optr->name_ and type_ == optr->type_)
             return true;

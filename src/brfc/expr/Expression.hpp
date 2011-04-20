@@ -27,6 +27,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace expr {
 
+class sexp;
+
 /**
  * @brief ABC for query expressions
  */
@@ -43,6 +45,8 @@ class Expression : public boost::noncopyable {
      * @brief create a copy of this expression
      */
     virtual ExpressionPtr clone() const = 0;
+
+    virtual sexp to_sexp() const = 0;
     
     /**
      * @brief destructor

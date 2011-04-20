@@ -22,6 +22,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gmock/gmock.h>
 
 #include <brfc/expr/Expression.hpp>
+#include <brfc/expr/sexp.hpp>
+
+#include <brfc/test_common.hpp>
 
 namespace brfc {
 namespace expr {
@@ -29,6 +32,7 @@ namespace expr {
 class MockExpression : public Expression {
   public:
     MOCK_CONST_METHOD0(clone, ExpressionPtr());
+    MOCK_CONST_METHOD0(to_sexp, sexp());
     MOCK_CONST_METHOD1(do_equals, bool(const Expression&));
 };
 

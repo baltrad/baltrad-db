@@ -39,6 +39,8 @@ class Parentheses : public Expression {
         return ExpressionPtr(new Parentheses(*this));
     }
 
+    virtual sexp to_sexp() const;
+
     void expression(const Expression& expr) {
         expr_ = expr.clone();
     }

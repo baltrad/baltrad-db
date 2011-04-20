@@ -18,8 +18,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <brfc/expr/ExpressionList.hpp>
-
 #include <boost/foreach.hpp>
+
+#include <brfc/expr/listcons.hpp>
 
 namespace brfc {
 namespace expr {
@@ -30,6 +31,15 @@ ExpressionList::ExpressionList(const ExpressionList& other)
     BOOST_FOREACH(ExpressionPtr expr, other.exprs_) {
         exprs_.push_back(expr->clone());
     }
+}
+
+sexp
+ExpressionList::to_sexp() const {
+    listcons lc;
+    BOOST_FOREACH(ExpressionPtr expr, exprs_) {
+        lc.append(expr->to_sexp());
+    }
+    return lc.get();
 }
 
 void

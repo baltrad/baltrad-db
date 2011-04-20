@@ -47,6 +47,8 @@ class Function : public Expression {
         return ExpressionPtr(new Function(*this));
     }
 
+    virtual sexp to_sexp() const;
+
     static FunctionPtr max(const Expression& arg) {
         FunctionPtr f = make_shared<Function>(MAX);
         f->add_arg(arg);
