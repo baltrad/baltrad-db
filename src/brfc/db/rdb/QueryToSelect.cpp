@@ -341,7 +341,7 @@ QueryToSelect::operator()(const expr::ExpressionList& exprs) {
         sql_exprs->add(pop());
     }
 
-    push(sql_exprs->parentheses());
+    push(sql_exprs);
 }
 
 void

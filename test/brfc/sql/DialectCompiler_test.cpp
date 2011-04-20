@@ -131,7 +131,7 @@ TEST_F(sql_DialectCompiler_test, test_expressionlist) {
     exprs->add(xpr.string("asd"));
     exprs->add(xpr.string("qwe"));
     const Query& q = compiler.compile(*exprs);
-    EXPECT_EQ(":lit_0, :lit_1", q.statement());
+    EXPECT_EQ("(:lit_0, :lit_1)", q.statement());
     EXPECT_EQ(Variant("asd"), replacer.value(":lit_0"));
     EXPECT_EQ(Variant("qwe"), replacer.value(":lit_1"));
 }

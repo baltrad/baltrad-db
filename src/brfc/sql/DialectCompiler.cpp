@@ -104,13 +104,13 @@ DialectCompiler::operator()(const ExpressionList& list) {
         expr_strs.push_back(pop());
     }
 
-    push(boost::join(expr_strs, ", "));
+    push("(" + boost::join(expr_strs, ", ") + ")");
 }
 
 void
 DialectCompiler::operator()(const Function& func) {
     visit(*func.args(), *this);
-    push(func.name() + "(" + pop() + ")");
+    push(func.name() + pop());
 }
 
 void
