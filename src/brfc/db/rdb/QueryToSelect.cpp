@@ -507,23 +507,23 @@ QueryToSelect::Impl::transform(const AttributeQuery& query) {
 
     // replace attributes with columns
     BOOST_FOREACH(const AttributeQuery::FetchMap::value_type& val, query.fetch()) {
-        sql::ExpressionPtr col = eval(val.second->to_sexp());
+        sql::ExpressionPtr col = eval(val.second);
         select_->what(col->label("l_" + val.first));
     }
 
     // replace attributes in where clause with columns
-    if (query.filter()) {
-        select_->where(eval(query.filter()->to_sexp()));
+    if (not query.filter().empty()) {
+        select_->where(eval(query.filter()));
     } 
 
     // replace attributes in group by
-    BOOST_FOREACH(expr::ExpressionPtr expr, query.group()) {
-        select_->append_group_by(eval(expr->to_sexp()));
+    BOOST_FOREACH(const expr::sexp& x, query.group()) {
+        select_->append_group_by(eval(x));
     }
 
     // replace attributes in order by
     BOOST_FOREACH(AttributeQuery::OrderPair op, query.order()) {
-        select_->append_order_by(eval(op.first->to_sexp()),
+        select_->append_order_by(eval(op.first),
                                  sql::Select::SortDirection(op.second));
     }
     

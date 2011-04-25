@@ -24,11 +24,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
-
-#include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/listcons.hpp>
 #include <brfc/expr/Expression.hpp>
-#include <brfc/expr/Function.hpp>
 
 namespace brfc {
 namespace db {
@@ -43,18 +40,10 @@ AttributeQuery::AttributeQuery()
 
 AttributeQuery::AttributeQuery(const AttributeQuery& other)
         : distinct_(other.distinct_)
-        , fetch_()
-        , filter_()
-        , order_()
+        , fetch_(other.fetch_)
+        , filter_(other.filter_)
+        , order_(other.order_)
         , limit_(other.limit_) {
-    BOOST_FOREACH(const FetchMap::value_type& val, other.fetch_) {
-        fetch_[val.first] = val.second->clone();
-    }
-    if (other.filter_)
-        filter_ = other.filter_->clone();
-    BOOST_FOREACH(const OrderPair& opair, other.order_) {
-        order_.push_back(std::make_pair(opair.first->clone(), opair.second));
-    }
 }
 
 AttributeQuery::~AttributeQuery() {
@@ -62,26 +51,18 @@ AttributeQuery::~AttributeQuery() {
 }
 
 AttributeQuery&
-AttributeQuery::operator=(const AttributeQuery& rhs) {
-    if (this == &rhs)
-        return *this;
-
-    distinct_ = rhs.distinct_;
-    fetch_.clear();
-    BOOST_FOREACH(const FetchMap::value_type& val, rhs.fetch_) {
-        fetch_[val.first] = val.second->clone();
-    }
-    if (rhs.filter_) {
-        filter_ = rhs.filter_->clone();
-    } else {
-        filter_.reset();
-    }
-    order_.clear();
-    BOOST_FOREACH(const OrderPair& opair, rhs.order_) {
-        order_.push_back(std::make_pair(opair.first->clone(), opair.second));
-    }
-    limit_ = rhs.limit_;
+AttributeQuery::operator=(AttributeQuery rhs) {
+    rhs.swap(*this);
     return *this;
+}
+
+void
+AttributeQuery::swap(AttributeQuery& other) {
+    std::swap(distinct_, other.distinct_);
+    std::swap(fetch_, other.fetch_);
+    std::swap(filter_, other.filter_);
+    std::swap(order_, other.order_);
+    std::swap(limit_, other.limit_);
 }
 
 AttributeQuery&
@@ -96,25 +77,32 @@ AttributeQuery::fetch(const std::string& name, const expr::Expression& expr) {
         throw value_error("empty name for AttributeQuery::fetch");
     if (fetch_.find(name) != fetch_.end())
         throw duplicate_entry("duplicate AttributeQuery::fetch: " + name);
-    fetch_[name] = expr.clone();
+    fetch_[name] = expr.to_sexp();
     return *this;
 }
 
 AttributeQuery&
 AttributeQuery::filter(const expr::Expression& expr) {
-    filter_ = filter_ ? filter_->and_(expr) : expr.clone();
+    if (not filter_.empty()) {
+        filter_ = expr::listcons().symbol("and")
+                                  .append(filter_)
+                                  .append(expr.to_sexp())
+                                  .get();
+    } else {
+        filter_ = expr.to_sexp();
+    }
     return *this;
 }
 
 AttributeQuery&
 AttributeQuery::group(const expr::Expression& expr) {
-    group_.push_back(expr.clone());
+    group_.push_back(expr.to_sexp());
     return *this;
 }
 
 AttributeQuery&
 AttributeQuery::order_by(const expr::Expression& expr, SortDir dir) {
-    order_.push_back(std::make_pair(expr.clone(), dir));
+    order_.push_back(std::make_pair(expr.to_sexp(), dir));
     return *this;
 }
 

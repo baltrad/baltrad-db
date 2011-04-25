@@ -42,110 +42,95 @@ class db_AttributeQuery_test : public ::testing::Test {
 };
 
 TEST_F(db_AttributeQuery_test, test_copy_ctor) {
-    MockExpression fexpr1, fexpr2, fexpr3;
-    MockExpression gexpr1, gexpr2, gexpr3;
-    MockExpression oexpr1, oexpr2, oexpr3;
+    MockExpression fexpr, gexpr, oexpr;
+    expr::sexp fsexp(1), gsexp(2), osexp(3);
 
-    EXPECT_CALL(fexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr2, no_delete)));
-    EXPECT_CALL(fexpr2, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr3, no_delete)));
-    EXPECT_CALL(gexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&gexpr2, no_delete)));
-    EXPECT_CALL(gexpr2, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&gexpr3, no_delete)));
-    EXPECT_CALL(oexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr2, no_delete)));
-    EXPECT_CALL(oexpr2, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr3, no_delete)));
+    EXPECT_CALL(fexpr, to_sexp())
+        .WillOnce(Return(fsexp));
+    EXPECT_CALL(gexpr, to_sexp())
+        .WillOnce(Return(gsexp));
+    EXPECT_CALL(oexpr, to_sexp())
+        .WillOnce(Return(osexp));
     
     query.distinct(true);
-    query.fetch("name", gexpr1);
-    query.filter(fexpr1);
-    query.order_by(oexpr1, AttributeQuery::ASC);
+    query.fetch("name", gexpr);
+    query.filter(fexpr);
+    query.order_by(oexpr, AttributeQuery::ASC);
     query.limit(10);
 
     AttributeQuery copy(query);
     
-    EXPECT_EQ(&fexpr3, copy.filter().get());
+    EXPECT_EQ(fsexp, copy.filter());
     EXPECT_EQ(query.limit(), copy.limit());
     EXPECT_TRUE(copy.distinct());
     AttributeQuery::FetchMap fmap = copy.fetch();
     ASSERT_EQ(1u, fmap.size());
-    EXPECT_EQ(&gexpr3, fmap["name"].get());
+    EXPECT_EQ(gsexp, fmap["name"]);
     const AttributeQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ(1u, ovec.size());
-    EXPECT_EQ(&oexpr3, ovec.at(0).first.get());
+    EXPECT_EQ(osexp, ovec.at(0).first);
     EXPECT_EQ(AttributeQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_AttributeQuery_test, test_copy_assign) {
-    MockExpression fexpr1, fexpr2, fexpr3;
-    MockExpression gexpr1, gexpr2, gexpr3;
-    MockExpression oexpr1, oexpr2, oexpr3;
+    MockExpression fexpr, gexpr, oexpr;
+    expr::sexp fsexp(1), gsexp(2), osexp(3);
 
-    EXPECT_CALL(fexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr2, no_delete)));
-    EXPECT_CALL(fexpr2, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr3, no_delete)));
-    EXPECT_CALL(gexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&gexpr2, no_delete)));
-    EXPECT_CALL(gexpr2, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&gexpr3, no_delete)));
-    EXPECT_CALL(oexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr2, no_delete)));
-    EXPECT_CALL(oexpr2, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr3, no_delete)));
-
+    EXPECT_CALL(fexpr, to_sexp())
+        .WillOnce(Return(fsexp));
+    EXPECT_CALL(gexpr, to_sexp())
+        .WillOnce(Return(gsexp));
+    EXPECT_CALL(oexpr, to_sexp())
+        .WillOnce(Return(osexp));
+    
     query.distinct(true);
-    query.fetch("name", gexpr1);
-    query.filter(fexpr1);
-    query.order_by(oexpr1, AttributeQuery::ASC);
+    query.fetch("name", gexpr);
+    query.filter(fexpr);
+    query.order_by(oexpr, AttributeQuery::ASC);
     query.limit(10);
 
     AttributeQuery copy;
     copy = query;
     
-    EXPECT_EQ(&fexpr3, copy.filter().get());
+    EXPECT_EQ(fsexp, copy.filter());
     EXPECT_EQ(query.limit(), copy.limit());
     EXPECT_TRUE(copy.distinct());
     AttributeQuery::FetchMap fmap = copy.fetch();
     ASSERT_EQ(1u, fmap.size());
-    EXPECT_EQ(&gexpr3, fmap["name"].get());
+    EXPECT_EQ(gsexp, fmap["name"]);
     const AttributeQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ(1u, ovec.size());
-    EXPECT_EQ(&oexpr3, ovec.at(0).first.get());
+    EXPECT_EQ(osexp, ovec.at(0).first);
     EXPECT_EQ(AttributeQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_AttributeQuery_test, test_copy_assign_self) {
-    MockExpression fexpr1, fexpr2;
-    MockExpression gexpr1, gexpr2;
-    MockExpression oexpr1, oexpr2;
+    MockExpression fexpr, gexpr, oexpr;
+    expr::sexp fsexp(1), gsexp(2), osexp(3);
 
-    EXPECT_CALL(fexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr2, no_delete)));
-    EXPECT_CALL(gexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&gexpr2, no_delete)));
-    EXPECT_CALL(oexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr2, no_delete)));
+    EXPECT_CALL(fexpr, to_sexp())
+        .WillOnce(Return(fsexp));
+    EXPECT_CALL(gexpr, to_sexp())
+        .WillOnce(Return(gsexp));
+    EXPECT_CALL(oexpr, to_sexp())
+        .WillOnce(Return(osexp));
 
     query.distinct(true);
-    query.fetch("name", gexpr1);
-    query.filter(fexpr1);
-    query.order_by(oexpr1, AttributeQuery::ASC);
+    query.fetch("name", gexpr);
+    query.filter(fexpr);
+    query.order_by(oexpr, AttributeQuery::ASC);
     query.limit(10);
     query = query;
 
-    EXPECT_EQ(&fexpr2, query.filter().get());
+    EXPECT_EQ(fsexp, query.filter());
     EXPECT_EQ(10, query.limit());
     EXPECT_TRUE(query.distinct());
     AttributeQuery::FetchMap fmap = query.fetch();
     ASSERT_EQ(1u, fmap.size());
-    EXPECT_EQ(&gexpr2, fmap["name"].get());
+    EXPECT_EQ(gsexp, fmap["name"]);
     const AttributeQuery::OrderVector& ovec = query.order();
     ASSERT_EQ(1u, ovec.size());
-    EXPECT_EQ(&oexpr2, ovec.at(0).first.get());
+    EXPECT_EQ(osexp, ovec.at(0).first);
     EXPECT_EQ(AttributeQuery::ASC, ovec.at(0).second);
 }
 
@@ -157,64 +142,64 @@ TEST_F(db_AttributeQuery_test, test_distinct) {
 }
 
 TEST_F(db_AttributeQuery_test, test_fetch) {
-    shared_ptr<MockExpression> expr = make_shared<MockExpression>();
-    shared_ptr<MockExpression> cexpr = make_shared<MockExpression>();
+    MockExpression expr;
+    expr::sexp se(1);
 
-    EXPECT_CALL(*expr, clone())
-        .WillOnce(Return(cexpr));
+    EXPECT_CALL(expr, to_sexp())
+        .WillOnce(Return(se));
     
-    query.fetch("name", *expr);
+    query.fetch("name", expr);
     AttributeQuery::FetchMap fmap = query.fetch();
     ASSERT_EQ(1u, fmap.size());
-    EXPECT_EQ(cexpr, fmap["name"]);
+    EXPECT_EQ(se, fmap["name"]);
 }
 
 TEST_F(db_AttributeQuery_test, test_fetch_duplicate_name) {
-    shared_ptr<MockExpression> expr = make_shared<MockExpression>();
-    shared_ptr<MockExpression> cexpr = make_shared<MockExpression>();
+    MockExpression expr;
+    expr::sexp se(1);
 
-    EXPECT_CALL(*expr, clone())
-        .WillOnce(Return(cexpr));
-    
-    query.fetch("name", *expr);
+    EXPECT_CALL(expr, to_sexp())
+        .WillOnce(Return(se));
+
+    query.fetch("name", expr);
     AttributeQuery::FetchMap fmap = query.fetch();
     ASSERT_EQ(1u, fmap.size());
-    EXPECT_EQ(cexpr, fmap["name"]);
+    EXPECT_EQ(se, fmap["name"]);
 
-    EXPECT_THROW(query.fetch("name", *expr), duplicate_entry);
+    EXPECT_THROW(query.fetch("name", expr), duplicate_entry);
     fmap = query.fetch();
     ASSERT_EQ(1u, fmap.size());
-    EXPECT_EQ(cexpr, fmap["name"]);
+    EXPECT_EQ(se, fmap["name"]);
 }
 
 TEST_F(db_AttributeQuery_test, test_fetch_empty_name) {
-    shared_ptr<MockExpression> expr = make_shared<MockExpression>();
+    MockExpression expr;
 
-    EXPECT_THROW(query.fetch("", *expr), value_error);
+    EXPECT_THROW(query.fetch("", expr), value_error);
 }
 
 TEST_F(db_AttributeQuery_test, test_filter) {
-    shared_ptr<MockExpression> expr = make_shared<MockExpression>();
-    shared_ptr<MockExpression> cexpr = make_shared<MockExpression>();
+    MockExpression expr;
+    expr::sexp se;
 
-    EXPECT_CALL(*expr, clone())
-        .WillOnce(Return(cexpr));
-    
-    query.filter(*expr);
-    EXPECT_EQ(cexpr, query.filter());
+    EXPECT_CALL(expr, to_sexp())
+        .WillOnce(Return(se));
+
+    query.filter(expr);
+    EXPECT_EQ(se, query.filter());
 }
 
 TEST_F(db_AttributeQuery_test, test_order_by) {
-    shared_ptr<MockExpression> expr = make_shared<MockExpression>();
-    shared_ptr<MockExpression> cexpr = make_shared<MockExpression>();
+    MockExpression expr;
+    expr::sexp se;
 
-    EXPECT_CALL(*expr, clone())
-        .WillOnce(Return(cexpr));
-    
-    query.order_by(*expr, AttributeQuery::ASC);
+    EXPECT_CALL(expr, to_sexp())
+        .WillOnce(Return(se));
+
+    query.order_by(expr, AttributeQuery::ASC);
     const AttributeQuery::OrderVector& ovec = query.order();
     ASSERT_EQ(1u, ovec.size());
-    EXPECT_EQ(cexpr, ovec.at(0).first);
+    EXPECT_EQ(se, ovec.at(0).first);
     EXPECT_EQ(AttributeQuery::ASC, ovec.at(0).second);
 }
 
@@ -224,16 +209,16 @@ TEST_F(db_AttributeQuery_test, test_limit) {
 }
 
 TEST_F(db_AttributeQuery_test, test_group) {
-    shared_ptr<MockExpression> expr = make_shared<MockExpression>();
-    shared_ptr<MockExpression> cexpr = make_shared<MockExpression>();
+    MockExpression expr;
+    expr::sexp se;
 
-    EXPECT_CALL(*expr, clone())
-        .WillOnce(Return(cexpr));
-    
-    query.group(*expr);
+    EXPECT_CALL(expr, to_sexp())
+        .WillOnce(Return(se));
+
+    query.group(expr);
     const AttributeQuery::ExpressionVector& vec = query.group();
     ASSERT_EQ(1u, vec.size());
-    EXPECT_EQ(cexpr, vec.at(0));
+    EXPECT_EQ(se, vec.at(0));
 }
 
 } // namespace db

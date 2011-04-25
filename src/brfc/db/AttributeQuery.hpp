@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <brfc/expr/fwd.hpp>
+#include <brfc/expr/sexp.hpp>
 
 namespace brfc {
 namespace db {
@@ -39,9 +40,9 @@ class AttributeQuery {
         DESC = 2
     };
 
-    typedef std::map<std::string, expr::ExpressionPtr> FetchMap;
-    typedef std::vector<expr::ExpressionPtr> ExpressionVector;
-    typedef std::pair<expr::ExpressionPtr, SortDir> OrderPair;
+    typedef std::map<std::string, expr::sexp> FetchMap;
+    typedef std::vector<expr::sexp> ExpressionVector;
+    typedef std::pair<expr::sexp, SortDir> OrderPair;
     typedef std::vector<OrderPair> OrderVector;
 
     /**
@@ -62,7 +63,9 @@ class AttributeQuery {
     /**
      * @brief copy assign
      */
-    AttributeQuery& operator=(const AttributeQuery& rhs);
+    AttributeQuery& operator=(AttributeQuery rhs);
+
+    void swap(AttributeQuery& other);
 
     /**
      * @brief fetch unique results
@@ -96,7 +99,7 @@ class AttributeQuery {
      */
     AttributeQuery& filter(const expr::Expression& expr);
     
-    const expr::ExpressionPtr filter() const {
+    const expr::sexp& filter() const {
         return filter_;
     }
     
@@ -126,7 +129,7 @@ class AttributeQuery {
   private:
     bool distinct_;
     FetchMap fetch_;
-    expr::ExpressionPtr filter_;
+    expr::sexp filter_;
     ExpressionVector group_;
     OrderVector order_;
     int limit_;
