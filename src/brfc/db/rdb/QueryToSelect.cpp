@@ -463,13 +463,13 @@ QueryToSelect::Impl::transform(const FileQuery& query) {
     select_->offset(query.skip());
 
     // replace attributes in where clause with columns
-    if (query.filter()) {
-        select_->where(eval(query.filter()->to_sexp()));
+    if (not query.filter().empty()) {
+        select_->where(eval(query.filter()));
     }
 
     if (query.order().size() > 0 ) {
         BOOST_FOREACH(FileQuery::OrderPair op, query.order()) {
-            sql::ExpressionPtr order = eval(op.first->to_sexp());
+            sql::ExpressionPtr order = eval(op.first);
             if (op.second == FileQuery::ASC) {
                 order = sql::Function::min(order);
             } else {

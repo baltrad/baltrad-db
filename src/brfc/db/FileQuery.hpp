@@ -20,9 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_FILE_QUERY_HPP
 #define BRFC_DB_FILE_QUERY_HPP
 
-#include <brfc/expr/fwd.hpp>
-
 #include <vector>
+
+#include <brfc/expr/fwd.hpp>
+#include <brfc/expr/sexp.hpp>
 
 namespace brfc {
 namespace db {
@@ -37,7 +38,7 @@ class FileQuery {
         DESC = 2
     };
 
-    typedef std::pair<expr::ExpressionPtr, SortDir> OrderPair;
+    typedef std::pair<expr::sexp, SortDir> OrderPair;
     typedef std::vector<OrderPair> OrderVector;
 
     /**
@@ -58,7 +59,9 @@ class FileQuery {
     /**
      * @brief copy assignment
      */
-    FileQuery& operator=(const FileQuery& rhs);
+    FileQuery& operator=(FileQuery rhs);
+
+    void swap(FileQuery& other);
     
     /**
      * @brief add a filtering expression
@@ -69,7 +72,7 @@ class FileQuery {
      */
     FileQuery& filter(const expr::Expression& expr);
     
-    expr::ExpressionPtr filter() const {
+    expr::sexp filter() const {
         return filter_;
     }
     
@@ -96,7 +99,7 @@ class FileQuery {
     int skip() const { return skip_; }
 
   private:
-    expr::ExpressionPtr filter_;
+    expr::sexp filter_;
     OrderVector order_;
     int limit_;
     int skip_;

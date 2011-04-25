@@ -45,108 +45,103 @@ class db_FileQuery_test : public ::testing::Test {
 };
 
 TEST_F(db_FileQuery_test, test_copy_ctor) {
-    MockExpression fexpr1, fexpr2, fexpr3, oexpr1, oexpr2, oexpr3;
+    MockExpression fexpr, oexpr;
+    expr::sexp fsexp(1), osexp(2);
 
-    EXPECT_CALL(fexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr2, no_delete)));
-    EXPECT_CALL(fexpr2, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr3, no_delete)));
-    EXPECT_CALL(oexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr2, no_delete)));
-    EXPECT_CALL(oexpr2, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr3, no_delete)));
+    EXPECT_CALL(fexpr, to_sexp())
+        .WillOnce(Return(fsexp));
+    EXPECT_CALL(oexpr, to_sexp())
+        .WillOnce(Return(osexp));
 
-    query.filter(fexpr1);
-    query.order_by(oexpr1, FileQuery::ASC);
+    query.filter(fexpr);
+    query.order_by(oexpr, FileQuery::ASC);
     query.limit(10);
     query.skip(5);
 
     FileQuery copy(query);
     
-    EXPECT_EQ(&fexpr3, copy.filter().get());
+    EXPECT_EQ(fsexp, copy.filter());
     EXPECT_EQ(query.limit(), copy.limit());
     EXPECT_EQ(query.skip(), copy.skip());
     const FileQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ((size_t)1, ovec.size());
-    EXPECT_EQ(&oexpr3, ovec.at(0).first.get());
+    EXPECT_EQ(osexp, ovec.at(0).first);
     EXPECT_EQ(FileQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_FileQuery_test, test_copy_assign) {
-    MockExpression fexpr1, fexpr2, fexpr3, oexpr1, oexpr2, oexpr3;
+    MockExpression fexpr, oexpr;
+    expr::sexp fsexp(1), osexp(2);
 
-    EXPECT_CALL(fexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr2, no_delete)));
-    EXPECT_CALL(fexpr2, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr3, no_delete)));
-    EXPECT_CALL(oexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr2, no_delete)));
-    EXPECT_CALL(oexpr2, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr3, no_delete)));
+    EXPECT_CALL(fexpr, to_sexp())
+        .WillOnce(Return(fsexp));
+    EXPECT_CALL(oexpr, to_sexp())
+        .WillOnce(Return(osexp));
 
-    query.filter(fexpr1);
-    query.order_by(oexpr1, FileQuery::ASC);
+    query.filter(fexpr);
+    query.order_by(oexpr, FileQuery::ASC);
     query.limit(10);
     query.skip(5);
 
     FileQuery copy;
     copy = query;
     
-    EXPECT_EQ(&fexpr3, copy.filter().get());
+    EXPECT_EQ(fsexp, copy.filter());
     EXPECT_EQ(query.limit(), copy.limit());
     EXPECT_EQ(query.skip(), copy.skip());
     const FileQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ((size_t)1, ovec.size());
-    EXPECT_EQ(&oexpr3, ovec.at(0).first.get());
+    EXPECT_EQ(osexp, ovec.at(0).first);
     EXPECT_EQ(FileQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_FileQuery_test, test_copy_assign_self) {
-    MockExpression fexpr1, fexpr2, oexpr1, oexpr2;
+    MockExpression fexpr, oexpr;
+    expr::sexp fsexp(1), osexp(2);
 
-    EXPECT_CALL(fexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&fexpr2, no_delete)));
-    EXPECT_CALL(oexpr1, clone())
-        .WillOnce(Return(shared_ptr<MockExpression>(&oexpr2, no_delete)));
+    EXPECT_CALL(fexpr, to_sexp())
+        .WillOnce(Return(fsexp));
+    EXPECT_CALL(oexpr, to_sexp())
+        .WillOnce(Return(osexp));
 
-    query.filter(fexpr1);
-    query.order_by(oexpr1, FileQuery::ASC);
+    query.filter(fexpr);
+    query.order_by(oexpr, FileQuery::ASC);
     query.limit(10);
     query.skip(5);
 
     query = query;
     
-    EXPECT_EQ(&fexpr2, query.filter().get());
+    EXPECT_EQ(fsexp, query.filter());
     EXPECT_EQ(10, query.limit());
     EXPECT_EQ(5, query.skip());
     const FileQuery::OrderVector& ovec = query.order();
     ASSERT_EQ((size_t)1, ovec.size());
-    EXPECT_EQ(&oexpr2, ovec.at(0).first.get());
+    EXPECT_EQ(osexp, ovec.at(0).first);
     EXPECT_EQ(FileQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_FileQuery_test, test_filter) {
-    shared_ptr<MockExpression> expr = make_shared<MockExpression>();
-    shared_ptr<MockExpression> cexpr = make_shared<MockExpression>();
+    MockExpression expr;
+    expr::sexp se(1);
 
-    EXPECT_CALL(*expr, clone())
-        .WillOnce(Return(cexpr));
+    EXPECT_CALL(expr, to_sexp())
+        .WillOnce(Return(se));
     
-    query.filter(*expr);
-    EXPECT_EQ(cexpr, query.filter());
+    query.filter(expr);
+    EXPECT_EQ(se, query.filter());
 }
 
 TEST_F(db_FileQuery_test, test_order_by) {
-    shared_ptr<MockExpression> expr = make_shared<MockExpression>();
-    shared_ptr<MockExpression> cexpr = make_shared<MockExpression>();
+    MockExpression expr;
+    expr::sexp se(1);
 
-    EXPECT_CALL(*expr, clone())
-        .WillOnce(Return(cexpr));
+    EXPECT_CALL(expr, to_sexp())
+        .WillOnce(Return(se));
     
-    query.order_by(*expr, FileQuery::ASC);
+    query.order_by(expr, FileQuery::ASC);
     const FileQuery::OrderVector& ovec = query.order();
     ASSERT_EQ((size_t)1, ovec.size());
-    EXPECT_EQ(cexpr, ovec.at(0).first);
+    EXPECT_EQ(se, ovec.at(0).first);
     EXPECT_EQ(FileQuery::ASC, ovec.at(0).second);
 }
 

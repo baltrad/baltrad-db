@@ -23,6 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
+#include <brfc/expr/listcons.hpp>
 #include <brfc/expr/Attribute.hpp>
 #include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/Expression.hpp>
@@ -38,15 +39,11 @@ FileQuery::FileQuery()
 }
 
 FileQuery::FileQuery(const FileQuery& other)
-        : filter_()
-        , order_()
+        : filter_(other.filter_)
+        , order_(other.order_)
         , limit_(other.limit_)
         , skip_(other.skip_) {
-    if (other.filter_)
-        filter_ = other.filter_->clone();
-    BOOST_FOREACH(const OrderPair& opair, other.order_) {
-        order_.push_back(std::make_pair(opair.first->clone(), opair.second));
-    }
+
 }
 
 FileQuery::~FileQuery() {
@@ -54,33 +51,35 @@ FileQuery::~FileQuery() {
 }
 
 FileQuery&
-FileQuery::operator=(const FileQuery& rhs) {
-    if (this == &rhs)
-        return *this;
-
-    if (rhs.filter_) {
-        filter_ = rhs.filter_->clone();
-    } else {
-        filter_.reset();
-    }
-    order_.clear();
-    BOOST_FOREACH(const OrderPair& opair, rhs.order_) {
-        order_.push_back(std::make_pair(opair.first->clone(), opair.second));
-    }
-    limit_ = rhs.limit_;
-    skip_ = rhs.skip_;
+FileQuery::operator=(FileQuery rhs) {
+    rhs.swap(*this);
     return *this;
+}
+
+void
+FileQuery::swap(FileQuery& other) {
+    std::swap(filter_, other.filter_);
+    std::swap(order_, other.order_);
+    std::swap(limit_, other.limit_);
+    std::swap(skip_, other.skip_);
 }
 
 FileQuery&
 FileQuery::filter(const expr::Expression& expr) {
-    filter_ = filter_ ? filter_->and_(expr) : expr.clone();
+    if (not filter_.empty()) {
+        filter_ = expr::listcons().symbol("and")
+                                  .append(filter_)
+                                  .append(expr.to_sexp())
+                                  .get();
+    } else {
+        filter_ = expr.to_sexp();
+    }
     return *this;
 }
 
 FileQuery&
 FileQuery::order_by(const expr::Expression& expr, SortDir dir) {
-    order_.push_back(std::make_pair(expr.clone(), dir));
+    order_.push_back(std::make_pair(expr.to_sexp(), dir));
     return *this;
 }
 
