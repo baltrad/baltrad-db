@@ -26,19 +26,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/AttributeResult.hpp>
 #include <brfc/db/Database.hpp>
 
-#include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
-#include <brfc/expr/Literal.hpp>
 
 namespace brfc {
 namespace fuse {
 
 DirFactory::DirFactory(db::Database* db,
-                       const expr::Attribute& attr,
+                       const expr::sexp& attr,
                        const EntryFactory* cfactory)
         : db_(db)
-        , attr_(static_pointer_cast<expr::Attribute>(attr.clone()))
+        , attr_(attr)
         , cfactory_(cfactory)
         , filter_() 
         , entries_() {
@@ -65,9 +62,8 @@ DirFactory::do_clone() const {
 }
 
 void
-DirFactory::do_filter(const expr::Expression& expr) {
-    expr::ExpressionPtr c = expr.clone();
-    filter_.swap(c);
+DirFactory::do_filter(const expr::sexp& expr) {
+    filter_ = expr;
 }
 
 void
@@ -75,9 +71,9 @@ DirFactory::do_update() {
     invalidate_all();
 
     db::AttributeQuery qry;
-    qry.fetch("val", *attr_);
-    if (filter_)
-        qry.filter(*filter_);
+    qry.fetch("val", attr_);
+    if (not filter_.empty())
+        qry.filter(filter_);
     
     scoped_ptr<db::AttributeResult> result(database().execute(qry));
 
@@ -137,11 +133,10 @@ DirFactory::create_entry(const Variant& value) {
     static expr::ExpressionFactory xpr;
     shared_ptr<DirEntry> entry = make_shared<DirEntry>(value.to_string(),
                                                        *cfactory_);
-    expr::Literal lit(value);
-    expr::ExpressionPtr cfilter = attr_->eq(lit);
-    if (filter_)
-        cfilter = xpr.and_(*filter_, *cfilter);
-    entry->child_factory().filter(*cfilter);
+    expr::sexp cfilter = xpr.eq(attr_, xpr.literal(value));
+    if (not filter_.empty())
+        cfilter = xpr.and_(filter_, cfilter);
+    entry->child_factory().filter(cfilter);
     return entry;
 }
 

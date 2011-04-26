@@ -83,8 +83,9 @@ SWIG_JAVABODY_METHODS(public, public, brfc::db::FileResult);
 /***
  * brfc::db::AttributeQuery
  */
-%ignore brfc::db::AttributeQuery::order() const;
 %ignore brfc::db::AttributeQuery::fetch() const;
+%ignore brfc::db::AttributeQuery::group() const;
+%ignore brfc::db::AttributeQuery::order() const;
 %typemap(javaimports) brfc::db::AttributeQuery, brfc::db::AttributeQuery* %{
     import eu.baltrad.fc.expr.Expression;
 %}
@@ -155,9 +156,7 @@ SWIG_JAVABODY_METHODS(public, public, brfc::db::Database);
 
 
 %pragma(java) jniclassimports=%{
-    import eu.baltrad.fc.expr.Attribute;
     import eu.baltrad.fc.expr.Expression;
-    import eu.baltrad.fc.expr.Function;
     import eu.baltrad.fc.oh5.File;
     import eu.baltrad.fc.oh5.PhysicalFile;
     import eu.baltrad.fc.oh5.Source;

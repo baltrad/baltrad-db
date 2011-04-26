@@ -31,9 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/Database.hpp>
 
-#include <brfc/expr/BinaryOperator.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
-#include <brfc/expr/Literal.hpp>
 
 #include <brfc/fuse/Daemon.hpp>
 #include <brfc/fuse/FileFactory.hpp>
@@ -121,15 +119,15 @@ Mount::do_execute(db::Database& db) {
     fuse::FileFactory l4fac(&db, &namer);
 
     fuse::DirFactory l3fac(&db,
-                           *xpr.attribute("what/date"),
+                           xpr.attribute("what/date"),
                            &l4fac);
 
     fuse::DirFactory l2fac(&db,
-                           *xpr.attribute("what/object"),
+                           xpr.attribute("what/object"),
                            &l3fac);
     
     fuse::DirFactory l1fac(&db,
-                           *xpr.attribute("what/source:_name"),
+                           xpr.attribute("what/source:_name"),
                            &l2fac); 
 
     fuse::DirEntry root("", l1fac);

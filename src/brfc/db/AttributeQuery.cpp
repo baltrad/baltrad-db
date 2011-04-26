@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/expr/listcons.hpp>
-#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace db {
@@ -72,37 +71,37 @@ AttributeQuery::distinct(bool distinct) {
 }
 
 AttributeQuery&
-AttributeQuery::fetch(const std::string& name, const expr::Expression& expr) {
+AttributeQuery::fetch(const std::string& name, const expr::sexp& expr) {
     if (name.empty())
         throw value_error("empty name for AttributeQuery::fetch");
     if (fetch_.find(name) != fetch_.end())
         throw duplicate_entry("duplicate AttributeQuery::fetch: " + name);
-    fetch_[name] = expr.to_sexp();
+    fetch_[name] = expr;
     return *this;
 }
 
 AttributeQuery&
-AttributeQuery::filter(const expr::Expression& expr) {
+AttributeQuery::filter(const expr::sexp& expr) {
     if (not filter_.empty()) {
         filter_ = expr::listcons().symbol("and")
                                   .append(filter_)
-                                  .append(expr.to_sexp())
+                                  .append(expr)
                                   .get();
     } else {
-        filter_ = expr.to_sexp();
+        filter_ = expr;
     }
     return *this;
 }
 
 AttributeQuery&
-AttributeQuery::group(const expr::Expression& expr) {
-    group_.push_back(expr.to_sexp());
+AttributeQuery::group(const expr::sexp& expr) {
+    group_.push_back(expr);
     return *this;
 }
 
 AttributeQuery&
-AttributeQuery::order_by(const expr::Expression& expr, SortDir dir) {
-    order_.push_back(std::make_pair(expr.to_sexp(), dir));
+AttributeQuery::order_by(const expr::sexp& expr, SortDir dir) {
+    order_.push_back(std::make_pair(expr, dir));
     return *this;
 }
 

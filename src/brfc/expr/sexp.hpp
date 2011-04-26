@@ -22,10 +22,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <iosfwd>
 #include <list>
 
-#include <brfc/DateTime.hpp>
-
 #include <boost/variant.hpp>
-#include <boost/ptr_container/ptr_list.hpp>
+
+#include <brfc/DateTime.hpp>
+#include <brfc/TimeDelta.hpp>
 
 namespace brfc {
 namespace expr {
@@ -44,6 +44,7 @@ class sexp {
             DATE,
             TIME,
             DATETIME,
+            INTERVAL,
             SYMBOL
         };
     };
@@ -58,7 +59,8 @@ class sexp {
                 bool,
                 Date,
                 Time,
-                DateTime
+                DateTime,
+                TimeDelta
             > value_t;
     
     typedef list_t::const_iterator const_iterator;
@@ -124,6 +126,11 @@ class sexp {
     sexp(const DateTime& value);
     
     /**
+     * @brief construct interval
+     */
+    sexp(const TimeDelta& value);
+    
+    /**
      * @brief construct list from iterators
      */
     template<typename Iter>
@@ -153,6 +160,7 @@ class sexp {
     bool is_date() const { return type() == type::DATE; }
     bool is_time() const { return type() == type::TIME; }
     bool is_datetime() const { return type() == type::DATETIME; }
+    bool is_interval() const { return type() == type::INTERVAL; }
     
     list_t list() const;
     bool bool_() const;
@@ -163,6 +171,7 @@ class sexp {
     Date date() const;
     Time time() const;
     DateTime datetime() const;
+    TimeDelta interval() const;
 
     size_t size() const;
     bool empty() const;
@@ -250,6 +259,9 @@ inline bool operator<=(const sexp& lhs, const sexp& rhs) {
 }
 
 std::ostream& operator<<(std::ostream& out, const sexp& x);
+
+// define so that gtest doesn't try to print sexp as a container
+void PrintTo(const sexp& x, ::std::ostream* os);
 
 } // namespace expr
 } // namespace brfc

@@ -19,15 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/ExpressionFactory.hpp>
 
+#include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/DateTime.hpp>
-
-#include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
-#include <brfc/expr/Expression.hpp>
-#include <brfc/expr/ExpressionList.hpp>
-#include <brfc/expr/Function.hpp>
-#include <brfc/expr/Literal.hpp>
+#include <brfc/Variant.hpp>
+#include <brfc/expr/listcons.hpp>
 
 namespace brfc {
 namespace expr {
@@ -42,201 +38,238 @@ ExpressionFactory::ExpressionFactory(const AttributePrototypes& prototypes)
 
 }
 
-AttributePtr
+sexp
 ExpressionFactory::attribute(const std::string& name) const {
-    return static_pointer_cast<Attribute>(prototypes_.get(name).clone());
+    const std::string& type = prototypes_.typename_(name);
+    return listcons().symbol("attr").string(name).string(type).get();
 }
 
-LiteralPtr
+sexp
+ExpressionFactory::literal(const Variant& value) const {
+    return sexp();
+}
+
+sexp
 ExpressionFactory::string(const std::string& value) const {
-    return make_shared<Literal>(Variant(value));
+    return sexp(value);
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::string(const char* value) const {
-    return make_shared<Literal>(Variant(value));
+    return sexp(value);
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::int64_(long long value) const {
-    return make_shared<Literal>(Variant(value));
+    return sexp(value);
 }
 
-LiteralPtr
+sexp
+ExpressionFactory::long_(long long value) const {
+    return sexp(value);
+}
+
+sexp
 ExpressionFactory::double_(double value) const {
-    return make_shared<Literal>(Variant(value));
+    return sexp(value);
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::date(int year, int month, int day) const {
     return date(Date(year, month, day));
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::date(const Date& date) const {
-    return make_shared<Literal>(Variant(date));
+    return sexp(date);
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::date(const DateTime& datetime) const {
     return date(datetime.date());
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::time(int hour, int minute, int second) const {
     return time(Time(hour, minute, second));
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::time(const Time& time) const {
-    return make_shared<Literal>(Variant(time));
+    return sexp(time);
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::time(const DateTime& datetime) const {
     return time(datetime.time());
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::datetime(const DateTime& datetime) const {
-    return make_shared<Literal>(Variant(datetime));
+    return sexp(datetime);
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::timedelta(const TimeDelta& delta) const {
-    return make_shared<Literal>(Variant(delta));
+    return sexp(delta);
 }
 
-LiteralPtr
+sexp
 ExpressionFactory::bool_(bool value) const {
-    return make_shared<Literal>(Variant(value));
+    return sexp(value);
 }
 
-BinaryOperatorPtr
-ExpressionFactory::ne(const Expression& lhs, const Expression& rhs) const {
-    return lhs.ne(rhs);
+sexp
+ExpressionFactory::unary(const std::string& op, const sexp& arg) const {
+    return listcons().symbol(op).append(arg).get();
 }
 
-BinaryOperatorPtr
-ExpressionFactory::eq(const Expression& lhs, const Expression& rhs) const {
-    return lhs.eq(rhs);
+sexp
+ExpressionFactory::binary(const std::string& op,
+                         const sexp& lhs,
+                         const sexp& rhs) const {
+    return listcons().symbol(op).append(lhs).append(rhs).get();
 }
 
-BinaryOperatorPtr
-ExpressionFactory::gt(const Expression& lhs, const Expression& rhs) const {
-    return lhs.gt(rhs);
+sexp
+ExpressionFactory::ne(const sexp& lhs, const sexp& rhs) const {
+    return binary("!=", lhs, rhs);
 }
 
-BinaryOperatorPtr
-ExpressionFactory::lt(const Expression& lhs, const Expression& rhs) const {
-    return lhs.lt(rhs);
+sexp
+ExpressionFactory::eq(const sexp& lhs, const sexp& rhs) const {
+    return binary("=", lhs, rhs);
 }
 
-BinaryOperatorPtr
-ExpressionFactory::le(const Expression& lhs, const Expression& rhs) const {
-    return lhs.le(rhs);
+sexp
+ExpressionFactory::gt(const sexp& lhs, const sexp& rhs) const {
+    return binary(">", lhs, rhs);
 }
 
-BinaryOperatorPtr
-ExpressionFactory::ge(const Expression& lhs, const Expression& rhs) const {
-    return lhs.ge(rhs);
+sexp
+ExpressionFactory::lt(const sexp& lhs, const sexp& rhs) const {
+    return binary("<", lhs, rhs);
 }
 
-BinaryOperatorPtr
-ExpressionFactory::between(const Expression& expr,
-                           const Expression& low,
-                           const Expression& high) const {
-    return expr.between(low, high);
+sexp
+ExpressionFactory::le(const sexp& lhs, const sexp& rhs) const {
+    return binary("<=", lhs, rhs);
 }
 
-BinaryOperatorPtr
-ExpressionFactory::and_(const Expression& lhs, const Expression& rhs) const {
-    return lhs.and_(rhs);
+sexp
+ExpressionFactory::ge(const sexp& lhs, const sexp& rhs) const {
+    return binary(">=", lhs, rhs);
 }
 
-ExpressionPtr
-ExpressionFactory::and_(const ExpressionList& exprs) const {
-  if (exprs.size() < 1)
-    throw value_error("ExpressionList must have at least 1 element");
-  ExpressionPtr expr = exprs.at(0).clone();
-  for (size_t i = 1; i < exprs.size(); ++i) {
-    expr = expr->and_(exprs.at(i));
-  }
-  return expr;
+sexp
+ExpressionFactory::between(const sexp& expr,
+                           const sexp& low,
+                           const sexp& high) const {
+    return and_(binary("<=", low, expr), binary("<=", expr, high));
 }
 
-BinaryOperatorPtr
-ExpressionFactory::or_(const Expression& lhs, const Expression& rhs) const {
-    return lhs.or_(rhs);
+sexp
+ExpressionFactory::and_(const sexp& lhs, const sexp& rhs) const {
+    return binary("and", lhs, rhs);
 }
 
-ExpressionPtr
-ExpressionFactory::or_(const ExpressionList& exprs) const {
-  if (exprs.size() < 1)
-    throw value_error("ExpressionList must have at least 1 element");
-  ExpressionPtr expr = exprs.at(0).clone();
-  for (size_t i = 1; i < exprs.size(); ++i) {
-    expr = expr->or_(exprs.at(i));
-  }
-  return expr;
+sexp
+ExpressionFactory::and_(const sexp& x) const {
+    BRFC_ASSERT(x.is_list());
+    if (x.size() < 1)
+        throw value_error("sexp must have at least 1 element");
+    sexp::const_iterator it = x.begin();
+    sexp result = *it;
+    ++it;
+    for ( ; it != x.end(); ++it) {
+        result = and_(result, *it);
+    }
+    return result;
 }
 
-BinaryOperatorPtr
-ExpressionFactory::add(const Expression& lhs, const Expression& rhs) const {
-    return lhs.add(rhs);
+sexp
+ExpressionFactory::or_(const sexp& lhs, const sexp& rhs) const {
+    return binary("or", lhs, rhs);
 }
 
-BinaryOperatorPtr
-ExpressionFactory::sub(const Expression& lhs, const Expression& rhs) const {
-    return lhs.sub(rhs);
+sexp
+ExpressionFactory::or_(const sexp& x) const {
+    BRFC_ASSERT(x.is_list());
+    if (x.size() < 1)
+        throw value_error("sexp must have at least 1 element");
+    sexp::const_iterator it = x.begin();
+    sexp result = *it;
+    ++it;
+    for ( ; it != x.end(); ++it) {
+        result = or_(result, *it);
+    }
+    return result;
 }
 
-BinaryOperatorPtr
-ExpressionFactory::mul(const Expression& lhs, const Expression& rhs) const {
-    return lhs.mul(rhs);
+sexp
+ExpressionFactory::add(const sexp& lhs, const sexp& rhs) const {
+    return binary("+", lhs, rhs);
 }
 
-BinaryOperatorPtr
-ExpressionFactory::div(const Expression& lhs, const Expression& rhs) const {
-    return lhs.div(rhs);
+sexp
+ExpressionFactory::sub(const sexp& lhs, const sexp& rhs) const {
+    return binary("-", lhs, rhs);
 }
 
-ParenthesesPtr
-ExpressionFactory::parentheses(const Expression& expr) const {
-    return expr.parentheses();
+sexp
+ExpressionFactory::mul(const sexp& lhs, const sexp& rhs) const {
+    return binary("*", lhs, rhs);
 }
 
-FunctionPtr
-ExpressionFactory::min(const Expression& expr) const {
-    return Function::min(expr);
+sexp
+ExpressionFactory::div(const sexp& lhs, const sexp& rhs) const {
+    return binary("/", lhs, rhs);
 }
 
-
-FunctionPtr
-ExpressionFactory::max(const Expression& expr) const {
-    return Function::max(expr);
+sexp
+ExpressionFactory::parentheses(const sexp& x) const {
+    return x;
 }
 
-FunctionPtr
-ExpressionFactory::sum(const Expression& expr) const {
-    return Function::sum(expr);
+sexp
+ExpressionFactory::like(const sexp& x, const std::string& pattern) const {
+    return binary("like", x, sexp(pattern));
 }
 
-FunctionPtr
-ExpressionFactory::count(const Expression& expr) const {
-    return Function::count(expr);
+sexp
+ExpressionFactory::in(const sexp& x, const sexp& l) const {
+    return binary("in", x, l);
 }
 
-ExpressionPtr
+sexp
+ExpressionFactory::not_in(const sexp& x, const sexp& l) const {
+    return binary("not_in", x, l);
+}
+
+sexp
+ExpressionFactory::min(const sexp& x) const {
+    return unary("min", x);
+}
+
+sexp
+ExpressionFactory::max(const sexp& x) const {
+    return unary("max", x);
+}
+
+sexp
+ExpressionFactory::sum(const sexp& x) const {
+    return unary("sum", x);
+}
+
+sexp
+ExpressionFactory::count(const sexp& x) const {
+    return unary("count", x);
+}
+
+sexp
 ExpressionFactory::combined_datetime(const std::string& date,
                                      const std::string& time) const {
-    AttributePtr date_attr = attribute(date);
-    if (date_attr->type() != Attribute::DATE)
-        throw value_error("invalid attribute for date");
-    AttributePtr time_attr = attribute(time);
-    if (time_attr->type() != Attribute::TIME)
-        throw value_error("invalid attribute for time");
-    return add(*date_attr, *time_attr);
+    return add(attribute(date), attribute(time));
 }
 
 } // namespace expr

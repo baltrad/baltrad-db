@@ -27,8 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileQuery.hpp>
 #include <brfc/db/FileResult.hpp>
 
-#include <brfc/expr/Expression.hpp>
-
 namespace brfc {
 namespace fuse {
 
@@ -60,9 +58,8 @@ FileFactory::do_clone() const {
 }
 
 void
-FileFactory::do_filter(const expr::Expression& expr) {
-    expr::ExpressionPtr c = expr.clone();
-    filter_.swap(c);
+FileFactory::do_filter(const expr::sexp& expr) {
+    filter_ = expr;
 }
 
 void
@@ -70,8 +67,8 @@ FileFactory::do_update() {
     invalidate_all();
 
     db::FileQuery qry;
-    if (filter_)
-        qry.filter(*filter_);
+    if (not filter_.empty())
+        qry.filter(filter_);
     scoped_ptr<db::FileResult> result(database().execute(qry));
 
     EntryByUuid_t& es = entries_.get<by_uuid>();

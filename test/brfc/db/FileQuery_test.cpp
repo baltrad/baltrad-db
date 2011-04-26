@@ -24,14 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileQuery.hpp>
 
-#include <brfc/expr/MockExpression.hpp>
-
-using ::testing::Matcher;
-using ::testing::Ref;
-using ::testing::Return;
-
-using brfc::expr::MockExpression;
-
 namespace brfc {
 namespace db {
 
@@ -45,16 +37,10 @@ class db_FileQuery_test : public ::testing::Test {
 };
 
 TEST_F(db_FileQuery_test, test_copy_ctor) {
-    MockExpression fexpr, oexpr;
     expr::sexp fsexp(1), osexp(2);
 
-    EXPECT_CALL(fexpr, to_sexp())
-        .WillOnce(Return(fsexp));
-    EXPECT_CALL(oexpr, to_sexp())
-        .WillOnce(Return(osexp));
-
-    query.filter(fexpr);
-    query.order_by(oexpr, FileQuery::ASC);
+    query.filter(fsexp);
+    query.order_by(osexp, FileQuery::ASC);
     query.limit(10);
     query.skip(5);
 
@@ -70,16 +56,10 @@ TEST_F(db_FileQuery_test, test_copy_ctor) {
 }
 
 TEST_F(db_FileQuery_test, test_copy_assign) {
-    MockExpression fexpr, oexpr;
     expr::sexp fsexp(1), osexp(2);
 
-    EXPECT_CALL(fexpr, to_sexp())
-        .WillOnce(Return(fsexp));
-    EXPECT_CALL(oexpr, to_sexp())
-        .WillOnce(Return(osexp));
-
-    query.filter(fexpr);
-    query.order_by(oexpr, FileQuery::ASC);
+    query.filter(fsexp);
+    query.order_by(osexp, FileQuery::ASC);
     query.limit(10);
     query.skip(5);
 
@@ -96,16 +76,10 @@ TEST_F(db_FileQuery_test, test_copy_assign) {
 }
 
 TEST_F(db_FileQuery_test, test_copy_assign_self) {
-    MockExpression fexpr, oexpr;
     expr::sexp fsexp(1), osexp(2);
 
-    EXPECT_CALL(fexpr, to_sexp())
-        .WillOnce(Return(fsexp));
-    EXPECT_CALL(oexpr, to_sexp())
-        .WillOnce(Return(osexp));
-
-    query.filter(fexpr);
-    query.order_by(oexpr, FileQuery::ASC);
+    query.filter(fsexp);
+    query.order_by(osexp, FileQuery::ASC);
     query.limit(10);
     query.skip(5);
 
@@ -121,24 +95,16 @@ TEST_F(db_FileQuery_test, test_copy_assign_self) {
 }
 
 TEST_F(db_FileQuery_test, test_filter) {
-    MockExpression expr;
     expr::sexp se(1);
 
-    EXPECT_CALL(expr, to_sexp())
-        .WillOnce(Return(se));
-    
-    query.filter(expr);
+    query.filter(se);
     EXPECT_EQ(se, query.filter());
 }
 
 TEST_F(db_FileQuery_test, test_order_by) {
-    MockExpression expr;
     expr::sexp se(1);
 
-    EXPECT_CALL(expr, to_sexp())
-        .WillOnce(Return(se));
-    
-    query.order_by(expr, FileQuery::ASC);
+    query.order_by(se, FileQuery::ASC);
     const FileQuery::OrderVector& ovec = query.order();
     ASSERT_EQ((size_t)1, ovec.size());
     EXPECT_EQ(se, ovec.at(0).first);

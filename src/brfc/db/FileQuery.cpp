@@ -24,9 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/expr/listcons.hpp>
-#include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
-#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace db {
@@ -65,21 +62,21 @@ FileQuery::swap(FileQuery& other) {
 }
 
 FileQuery&
-FileQuery::filter(const expr::Expression& expr) {
+FileQuery::filter(const expr::sexp& expr) {
     if (not filter_.empty()) {
         filter_ = expr::listcons().symbol("and")
                                   .append(filter_)
-                                  .append(expr.to_sexp())
+                                  .append(expr)
                                   .get();
     } else {
-        filter_ = expr.to_sexp();
+        filter_ = expr;
     }
     return *this;
 }
 
 FileQuery&
-FileQuery::order_by(const expr::Expression& expr, SortDir dir) {
-    order_.push_back(std::make_pair(expr.to_sexp(), dir));
+FileQuery::order_by(const expr::sexp& expr, SortDir dir) {
+    order_.push_back(std::make_pair(expr, dir));
     return *this;
 }
 

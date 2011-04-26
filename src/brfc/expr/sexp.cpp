@@ -71,6 +71,10 @@ sexp::sexp(const DateTime& value)
         : value_(value) {
 }
 
+sexp::sexp(const TimeDelta& value)
+        : value_(value) {
+}
+
 /*
 sexp::sexp(const value_t& value)
         : value_(value) {
@@ -143,6 +147,10 @@ struct type_visitor : public boost::static_visitor<sexp::type::_> {
 
     sexp::type::_ operator()(const DateTime&) const {
         return sexp::type::DATETIME;
+    }
+
+    sexp::type::_ operator()(const TimeDelta&) const {
+        return sexp::type::INTERVAL;
     }
 };
 
@@ -373,6 +381,10 @@ std::ostream&
 operator<<(std::ostream& out, const sexp& x) {
     apply_visitor(to_ostream(out), x);
     return out;
+}
+
+void PrintTo(const sexp& x, ::std::ostream* os) {
+  *os << x;
 }
 
 } // namespace expr

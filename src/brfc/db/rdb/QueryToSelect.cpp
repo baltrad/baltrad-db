@@ -37,7 +37,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/Model.hpp>
 
 #include <brfc/expr/sexp.hpp>
-#include <brfc/expr/Expression.hpp>
 
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>

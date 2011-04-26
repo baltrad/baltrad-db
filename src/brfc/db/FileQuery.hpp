@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
-#include <brfc/expr/fwd.hpp>
 #include <brfc/expr/sexp.hpp>
 
 namespace brfc {
@@ -70,7 +69,7 @@ class FileQuery {
      *
      * successive filtering expressions are added together using AND
      */
-    FileQuery& filter(const expr::Expression& expr);
+    FileQuery& filter(const expr::sexp& expr);
     
     expr::sexp filter() const {
         return filter_;
@@ -79,7 +78,7 @@ class FileQuery {
     /**
      * @brief append sort order
      */
-    FileQuery& order_by(const expr::Expression& expr, SortDir dir);
+    FileQuery& order_by(const expr::sexp& expr, SortDir dir);
 
     OrderVector order() const { return order_; }
 

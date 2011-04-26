@@ -17,16 +17,15 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <brfc/test_common.hpp>
+
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/expr/fwd.hpp>
-#include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
+
+#include <brfc/expr/sexp.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
-#include <brfc/expr/ExpressionList.hpp>
-#include <brfc/expr/Literal.hpp>
 
 namespace brfc {
 namespace expr {
@@ -41,90 +40,56 @@ class expr_ExpressionFactory_test : public ::testing::Test {
 };
 
 TEST_F(expr_ExpressionFactory_test, test_combined_datetime) {
-    ExpressionPtr x;
+    sexp x;
     EXPECT_NO_THROW(x = xpr.combined_datetime("what/date", "what/time"));
-
-    BinaryOperatorPtr op = dynamic_pointer_cast<BinaryOperator>(x);
-    ASSERT_TRUE(op);
-
-    EXPECT_EQ(BinaryOperator::ADD, op->type());
-
-    AttributePtr p = dynamic_pointer_cast<Attribute>(op->lhs());
-    ASSERT_TRUE(p);
-    EXPECT_EQ("what/date", p->name());
-
-    p = dynamic_pointer_cast<Attribute>(op->rhs());
-    ASSERT_TRUE(p);
-    EXPECT_EQ("what/time", p->name());
-}
-
-TEST_F(expr_ExpressionFactory_test, test_combined_datetime_invalid) {
-    ExpressionPtr x;
-    EXPECT_THROW(x = xpr.combined_datetime("what/time", "what/date"),
-                 value_error);
     
-    EXPECT_THROW(x = xpr.combined_datetime("what/date", "what/object"),
-                 value_error);
-
-    EXPECT_THROW(x = xpr.combined_datetime("what/object", "what/time"),
-                 value_error);
-
-    EXPECT_THROW(x = xpr.combined_datetime("what/object", "what/object"),
-                 value_error);
+    sexp e = xpr.add(xpr.attribute("what/date"), xpr.attribute("what/time"));
+    EXPECT_EQ(e, x);
 }
 
-TEST_F(expr_ExpressionFactory_test, test_and_ExpressionList) {
-    ExpressionList exprs;
-    exprs.append(*xpr.long_(1));
-    exprs.append(*xpr.long_(2));
-    exprs.append(*xpr.long_(3));
-
-    ExpressionPtr expected = xpr.long_(1);
-    expected = expected->and_(*xpr.long_(2));
-    expected = expected->and_(*xpr.long_(3));
+TEST_F(expr_ExpressionFactory_test, test_and_list) {
+    sexp exprs;
+    exprs.push_back(xpr.long_(1));
+    exprs.push_back(xpr.long_(2));
+    exprs.push_back(xpr.long_(3));
     
-    EXPECT_TRUE(xpr.and_(exprs)->equals(*expected));
+    sexp expected = xpr.and_(xpr.and_(xpr.long_(1), xpr.long_(2)), xpr.long_(3));
+
+    EXPECT_EQ(expected, xpr.and_(exprs));
 }
 
-TEST_F(expr_ExpressionFactory_test, test_and_ExpressionList_empty) {
-    ExpressionList exprs;
-
-    EXPECT_THROW(xpr.and_(exprs), value_error);
+TEST_F(expr_ExpressionFactory_test, test_and_list_empty) {
+    EXPECT_THROW(xpr.and_(sexp()), value_error);
 }
 
-TEST_F(expr_ExpressionFactory_test, test_and_ExpressionList_single) {
-    ExpressionList exprs;
-    exprs.append(*xpr.long_(1));
+TEST_F(expr_ExpressionFactory_test, test_and_list_single) {
+    sexp exprs;
+    exprs.push_back(xpr.long_(1));
 
-    EXPECT_TRUE(xpr.and_(exprs)->equals(*xpr.long_(1)));
+    EXPECT_EQ(xpr.long_(1), xpr.and_(exprs));
 }
 
-TEST_F(expr_ExpressionFactory_test, test_or_ExpressionList) {
-    ExpressionList exprs;
-    exprs.append(*xpr.long_(1));
-    exprs.append(*xpr.long_(2));
-    exprs.append(*xpr.long_(3));
+TEST_F(expr_ExpressionFactory_test, test_or_list) {
+    sexp exprs;
+    exprs.push_back(xpr.long_(1));
+    exprs.push_back(xpr.long_(2));
+    exprs.push_back(xpr.long_(3));
 
-    ExpressionPtr expected = xpr.long_(1);
-    expected = expected->or_(*xpr.long_(2));
-    expected = expected->or_(*xpr.long_(3));
-    
-    EXPECT_TRUE(xpr.or_(exprs)->equals(*expected));
+    sexp expected = xpr.or_(xpr.or_(xpr.long_(1), xpr.long_(2)), xpr.long_(3));
+    ASSERT_TRUE(exprs.is_list());
+    EXPECT_EQ(expected, xpr.or_(exprs));
 }
 
-TEST_F(expr_ExpressionFactory_test, test_or_ExpressionList_empty) {
-    ExpressionList exprs;
-
-    EXPECT_THROW(xpr.or_(exprs), value_error);
+TEST_F(expr_ExpressionFactory_test, test_or_list_empty) {
+    EXPECT_THROW(xpr.or_(sexp()), value_error);
 }
 
-TEST_F(expr_ExpressionFactory_test, test_or_ExpressionList_single) {
-    ExpressionList exprs;
-    exprs.append(*xpr.long_(1));
+TEST_F(expr_ExpressionFactory_test, test_or_list_single) {
+    sexp exprs;
+    exprs.push_back(xpr.long_(1));
 
-    EXPECT_TRUE(xpr.or_(exprs)->equals(*xpr.long_(1)));
+    EXPECT_EQ(xpr.long_(1), xpr.or_(exprs));
 }
-
 
 } // namespace expr
 } // namespace brfc

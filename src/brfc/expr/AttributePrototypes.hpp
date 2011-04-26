@@ -23,13 +23,24 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <string>
 
-#include <brfc/expr/Attribute.hpp>
-
 namespace brfc {
 namespace expr {
 
 class AttributePrototypes {
   public:
+    enum Type {
+        UNKNOWN,
+        STRING,
+        INT64,
+        LONG = INT64,
+        DOUBLE,
+        BOOL,
+        DATE,
+        TIME,
+        DATETIME,
+        SEQUENCE = STRING
+    };
+
     AttributePrototypes()
             : prototypes_() {
     }
@@ -43,14 +54,15 @@ class AttributePrototypes {
 
     bool has(const std::string& name) const;
 
-    void add(const Attribute& prototype);
+    void add(const std::string& name, Type type);
 
-    const Attribute& get(const std::string& name) const;
+    std::string typename_(const std::string& name) const;
+    std::string typename_(Type type) const;
 
     void clear();
 
   private:
-    typedef std::map<std::string, AttributePtr> PrototypeMap;
+    typedef std::map<std::string, Type> PrototypeMap;
     PrototypeMap prototypes_;
 };
 

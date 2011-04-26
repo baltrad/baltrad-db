@@ -29,198 +29,195 @@ namespace expr {
 
 AttributePrototypes
 AttributePrototypes::default_odim_h5() {
-    typedef std::map<std::string, Attribute::Type> NameTypeMap;
-    NameTypeMap defns;
+    PrototypeMap defns;
 
     boost::assign::insert(defns)
-        ("Conventions",       Attribute::STRING)
+        ("Conventions",       STRING)
         /***
          * Table 1
          * Mandatory top-level what header Attributes for all weather
          * radar files
          */
-        ("what/object",       Attribute::STRING)
-        ("what/version",      Attribute::STRING)
-        ("what/date",         Attribute::DATE)
-        ("what/time",         Attribute::TIME)
-        ("what/source",       Attribute::STRING)
+        ("what/object",       STRING)
+        ("what/version",      STRING)
+        ("what/date",         DATE)
+        ("what/time",         TIME)
+        ("what/source",       STRING)
         /***
          * Table 4
          * where Attributes for polar data objects
          */
-        ("where/lon",         Attribute::DOUBLE)
-        ("where/lat",         Attribute::DOUBLE)
-        ("where/height",      Attribute::DOUBLE)
+        ("where/lon",         DOUBLE)
+        ("where/lat",         DOUBLE)
+        ("where/height",      DOUBLE)
         // Dataset specific
-        ("where/elangle",     Attribute::DOUBLE)
-        ("where/nbins",       Attribute::INT64)
-        ("where/rstart",      Attribute::DOUBLE)
-        ("where/rscale",      Attribute::DOUBLE)
-        ("where/nrays",       Attribute::INT64)
-        ("where/a1gate",      Attribute::INT64)
+        ("where/elangle",     DOUBLE)
+        ("where/nbins",       INT64)
+        ("where/rstart",      DOUBLE)
+        ("where/rscale",      DOUBLE)
+        ("where/nrays",       INT64)
+        ("where/a1gate",      INT64)
         // Sector specific
-        ("where/startaz",     Attribute::DOUBLE)
-        ("where/stopaz",      Attribute::DOUBLE)
+        ("where/startaz",     DOUBLE)
+        ("where/stopaz",      DOUBLE)
         /***
          * Table 5
          * where Attributes for geographical image data Groups
          */
-        ("where/projdef",     Attribute::STRING)
-        ("where/xsize",       Attribute::INT64)
-        ("where/ysize",       Attribute::INT64)
-        ("where/xscale",      Attribute::DOUBLE)
-        ("where/yscale",      Attribute::DOUBLE)
-        ("where/LL_lon",      Attribute::DOUBLE)
-        ("where/LL_lat",      Attribute::DOUBLE)
-        ("where/UL_lon",      Attribute::DOUBLE)
-        ("where/UL_lat",      Attribute::DOUBLE)
-        ("where/UR_lon",      Attribute::DOUBLE)
-        ("where/UR_lat",      Attribute::DOUBLE)
-        ("where/LR_lon",      Attribute::DOUBLE)
-        ("where/LR_lat",      Attribute::DOUBLE)
+        ("where/projdef",     STRING)
+        ("where/xsize",       INT64)
+        ("where/ysize",       INT64)
+        ("where/xscale",      DOUBLE)
+        ("where/yscale",      DOUBLE)
+        ("where/LL_lon",      DOUBLE)
+        ("where/LL_lat",      DOUBLE)
+        ("where/UL_lon",      DOUBLE)
+        ("where/UL_lat",      DOUBLE)
+        ("where/UR_lon",      DOUBLE)
+        ("where/UR_lat",      DOUBLE)
+        ("where/LR_lon",      DOUBLE)
+        ("where/LR_lat",      DOUBLE)
         /***
          * Table 6
          * where for cross-section data Group
          */
         // Common Attributes
-        //("where/xsize",       Attribute::INT64) // dup
-        //("where/ysize",       Attribute::INT64) // dup
-        //("where/xscale",      Attribute::DOUBLE) // dup
-        //("where/yscale",      Attribute::DOUBLE) // dup
-        ("where/minheight",   Attribute::DOUBLE)
-        ("where/maxheight",   Attribute::DOUBLE)
+        //("where/xsize",       INT64) // dup
+        //("where/ysize",       INT64) // dup
+        //("where/xscale",      DOUBLE) // dup
+        //("where/yscale",      DOUBLE) // dup
+        ("where/minheight",   DOUBLE)
+        ("where/maxheight",   DOUBLE)
         // RHI specific
-        //("where/lon",         Attribute::DOUBLE) // dup
-        //("where/lat",         Attribute::DOUBLE) // dup
-        ("where/az_angle",    Attribute::DOUBLE)
-        ("where/angles",      Attribute::SEQUENCE)
-        ("where/range",       Attribute::DOUBLE)
+        //("where/lon",         DOUBLE) // dup
+        //("where/lat",         DOUBLE) // dup
+        ("where/az_angle",    DOUBLE)
+        ("where/angles",      SEQUENCE)
+        ("where/range",       DOUBLE)
         // Cross section and side panel specific
-        ("where/start_lon",   Attribute::DOUBLE)
-        ("where/start_lat",   Attribute::DOUBLE)
-        ("where/stop_lon",    Attribute::DOUBLE)
-        ("where/stop_lat",    Attribute::DOUBLE)
+        ("where/start_lon",   DOUBLE)
+        ("where/start_lat",   DOUBLE)
+        ("where/stop_lon",    DOUBLE)
+        ("where/stop_lat",    DOUBLE)
         /***
          * Table 7
          * where for vertical profiles
          */
-        //("where/lon",         Attribute::DOUBLE) // dup
-        //("where/lat",         Attribute::DOUBLE) // dup
-        //("where/height",      Attribute::DOUBLE) // dup
-        ("where/levels",      Attribute::INT64)
-        ("where/interval",    Attribute::DOUBLE)
-        //("where/minheight",   Attribute::DOUBLE) // dup
-        //("where/maxheight",   Attribute::DOUBLE) // dup
+        //("where/lon",         DOUBLE) // dup
+        //("where/lat",         DOUBLE) // dup
+        //("where/height",      DOUBLE) // dup
+        ("where/levels",      INT64)
+        ("where/interval",    DOUBLE)
+        //("where/minheight",   DOUBLE) // dup
+        //("where/maxheight",   DOUBLE) // dup
         /***
          * Table 8
          * how attributes for all objects
          */
-        ("how/task",          Attribute::STRING)
-        ("how/startepochs",   Attribute::INT64)
-        ("how/endepochs",     Attribute::INT64)
-        ("how/system",        Attribute::STRING)
-        ("how/software",      Attribute::STRING)
-        ("how/sw_version",    Attribute::STRING)
-        ("how/zr_a",          Attribute::DOUBLE)
-        ("how/zr_b",          Attribute::DOUBLE)
-        ("how/kr_a",          Attribute::DOUBLE)
-        ("how/kr_b",          Attribute::DOUBLE)
-        ("how/simulated",     Attribute::BOOL)
+        ("how/task",          STRING)
+        ("how/startepochs",   INT64)
+        ("how/endepochs",     INT64)
+        ("how/system",        STRING)
+        ("how/software",      STRING)
+        ("how/sw_version",    STRING)
+        ("how/zr_a",          DOUBLE)
+        ("how/zr_b",          DOUBLE)
+        ("how/kr_a",          DOUBLE)
+        ("how/kr_b",          DOUBLE)
+        ("how/simulated",     BOOL)
         // Data from individual radars
-        ("how/beamwidth",     Attribute::DOUBLE)
-        ("how/wavelength",    Attribute::DOUBLE)
-        ("how/rpm",           Attribute::DOUBLE)
-        ("how/pulsewidth",    Attribute::DOUBLE)
-        ("how/lowprf",        Attribute::INT64)
-        ("how/highprf",       Attribute::INT64)
+        ("how/beamwidth",     DOUBLE)
+        ("how/wavelength",    DOUBLE)
+        ("how/rpm",           DOUBLE)
+        ("how/pulsewidth",    DOUBLE)
+        ("how/lowprf",        INT64)
+        ("how/highprf",       INT64)
         // Polar data
-        ("how/azmethod",      Attribute::STRING)
-        ("how/binmethod",     Attribute::STRING)
-        ("how/azangles",      Attribute::SEQUENCE)
-        ("how/elangles",      Attribute::SEQUENCE)
-        ("how/aztimes",       Attribute::SEQUENCE)
+        ("how/azmethod",      STRING)
+        ("how/binmethod",     STRING)
+        ("how/azangles",      SEQUENCE)
+        ("how/elangles",      SEQUENCE)
+        ("how/aztimes",       SEQUENCE)
         // Cartesian images including composites
-        ("how/angles",        Attribute::SEQUENCE)
-        ("how/arotation",     Attribute::SEQUENCE)
-        ("how/camethod",      Attribute::STRING)
-        ("how/nodes",         Attribute::SEQUENCE)
-        ("how/ACCnum",        Attribute::INT64)
+        ("how/angles",        SEQUENCE)
+        ("how/arotation",     SEQUENCE)
+        ("how/camethod",      STRING)
+        ("how/nodes",         SEQUENCE)
+        ("how/ACCnum",        INT64)
         // Vertical profile specific
-        ("how/minrange",      Attribute::DOUBLE)
-        ("how/maxrange",      Attribute::DOUBLE)
-        ("how/NI",            Attribute::DOUBLE)
-        ("how/dealiased",     Attribute::INT64)
+        ("how/minrange",      DOUBLE)
+        ("how/maxrange",      DOUBLE)
+        ("how/NI",            DOUBLE)
+        ("how/dealiased",     INT64)
         // Quality
-        ("how/pointaccEL",    Attribute::DOUBLE)
-        ("how/pointaccAZ",    Attribute::DOUBLE)
-        ("how/malfunc",       Attribute::BOOL)
-        ("how/radar_msg",     Attribute::STRING)
-        ("how/radhoriz",      Attribute::DOUBLE)
-        ("how/MDS",           Attribute::DOUBLE)
-        ("how/OUR",           Attribute::DOUBLE)
-        ("how/Dclutter",      Attribute::SEQUENCE)
-        ("how/comment",       Attribute::STRING)
-        ("how/SQI",           Attribute::DOUBLE)
-        ("how/CSR",           Attribute::DOUBLE)
-        ("how/LOG",           Attribute::DOUBLE)
-        ("how/VPRCorr",       Attribute::BOOL)
-        ("how/freeze",        Attribute::DOUBLE)
-        ("how/min",           Attribute::DOUBLE)
-        ("how/max",           Attribute::DOUBLE)
-        ("how/step",          Attribute::DOUBLE)
-        ("how/levels",        Attribute::INT64)
-        ("how/peakpwr",       Attribute::DOUBLE)
-        ("how/avgpwr",        Attribute::DOUBLE)
-        ("how/dynrange",      Attribute::DOUBLE)
-        ("how/RAC",           Attribute::DOUBLE)
-        ("how/BBC",           Attribute::BOOL)
-        ("how/PAC",           Attribute::DOUBLE)
-        ("how/S2N",           Attribute::DOUBLE)
-        ("how/polarization",  Attribute::STRING)
+        ("how/pointaccEL",    DOUBLE)
+        ("how/pointaccAZ",    DOUBLE)
+        ("how/malfunc",       BOOL)
+        ("how/radar_msg",     STRING)
+        ("how/radhoriz",      DOUBLE)
+        ("how/MDS",           DOUBLE)
+        ("how/OUR",           DOUBLE)
+        ("how/Dclutter",      SEQUENCE)
+        ("how/comment",       STRING)
+        ("how/SQI",           DOUBLE)
+        ("how/CSR",           DOUBLE)
+        ("how/LOG",           DOUBLE)
+        ("how/VPRCorr",       BOOL)
+        ("how/freeze",        DOUBLE)
+        ("how/min",           DOUBLE)
+        ("how/max",           DOUBLE)
+        ("how/step",          DOUBLE)
+        ("how/levels",        INT64)
+        ("how/peakpwr",       DOUBLE)
+        ("how/avgpwr",        DOUBLE)
+        ("how/dynrange",      DOUBLE)
+        ("how/RAC",           DOUBLE)
+        ("how/BBC",           BOOL)
+        ("how/PAC",           DOUBLE)
+        ("how/S2N",           DOUBLE)
+        ("how/polarization",  STRING)
         /***
          * Table 13
          * what Group for Dataset Objects
          */
-        ("what/product",      Attribute::STRING)
+        ("what/product",      STRING)
         // XXX: wtf, this has varying type (double or sequence)
-        //("what/prodpar",      Attribute::SEQUENCE)
-        ("what/quantity",     Attribute::STRING)
-        ("what/startdate",    Attribute::DATE)
-        ("what/starttime",    Attribute::TIME)
-        ("what/enddate",      Attribute::DATE)
-        ("what/endtime",      Attribute::TIME)
-        ("what/gain",         Attribute::DOUBLE)
-        ("what/offset",       Attribute::DOUBLE)
-        ("what/nodata",       Attribute::DOUBLE)
-        ("what/undetect",     Attribute::DOUBLE)
+        //("what/prodpar",      SEQUENCE)
+        ("what/quantity",     STRING)
+        ("what/startdate",    DATE)
+        ("what/starttime",    TIME)
+        ("what/enddate",      DATE)
+        ("what/endtime",      TIME)
+        ("what/gain",         DOUBLE)
+        ("what/offset",       DOUBLE)
+        ("what/nodata",       DOUBLE)
+        ("what/undetect",     DOUBLE)
         /***
          * Table 17
          * Eight-bit Image attributes.
          */
-        ("CLASS",             Attribute::STRING)
-        ("IMAGE_VERSION",     Attribute::STRING)
+        ("CLASS",             STRING)
+        ("IMAGE_VERSION",     STRING)
         
         /***
          * "virtual" attributes
          */
-        ("file:uuid",         Attribute::STRING)
-        ("file:hash",         Attribute::STRING)
-        ("file:stored_at",    Attribute::DATETIME)
-        ("what/source:_name",  Attribute::STRING)
-        ("what/source:WMO",   Attribute::STRING)
-        ("what/source:RAD",   Attribute::STRING)
-        ("what/source:ORG",   Attribute::STRING)
-        ("what/source:PLC",   Attribute::STRING)
-        ("what/source:CTY",   Attribute::STRING)
-        ("what/source:CMT",   Attribute::STRING)
+        ("file:uuid",         STRING)
+        ("file:hash",         STRING)
+        ("file:stored_at",    DATETIME)
+        ("what/source:_name",  STRING)
+        ("what/source:WMO",   STRING)
+        ("what/source:RAD",   STRING)
+        ("what/source:ORG",   STRING)
+        ("what/source:PLC",   STRING)
+        ("what/source:CTY",   STRING)
+        ("what/source:CMT",   STRING)
     ;
-
     
     AttributePrototypes prototypes;
     
-    BOOST_FOREACH(const NameTypeMap::value_type& defn, defns) {
-	Attribute attr(defn.first, defn.second);
-        prototypes.add(attr);
+    BOOST_FOREACH(const PrototypeMap::value_type& defn, defns) {
+        prototypes.add(defn.first, defn.second);
     }
 
     return prototypes;
@@ -232,20 +229,41 @@ AttributePrototypes::has(const std::string& name) const {
 }
 
 void
-AttributePrototypes::add(const Attribute& prototype) {
-    if (has(prototype.name()))
-        throw duplicate_entry("duplicate prototype: " + prototype.name());
-    AttributePtr ptr = static_pointer_cast<Attribute>(prototype.clone());
-    prototypes_.insert(std::make_pair(prototype.name(), ptr));
+AttributePrototypes::add(const std::string& name, Type type) {
+    if (has(name))
+        throw duplicate_entry("duplicate prototype: " + name);
+    prototypes_.insert(std::make_pair(name, type));
 
 }
 
-const Attribute&
-AttributePrototypes::get(const std::string& name) const {
+std::string
+AttributePrototypes::typename_(const std::string& name) const {
     PrototypeMap::const_iterator i = prototypes_.find(name);
     if (i == prototypes_.end())
         throw lookup_error("no prototype for attribute: " + name);
-    return *i->second;
+    return typename_(i->second);
+}
+
+std::string
+AttributePrototypes::typename_(Type type) const {
+    switch (type) {
+        case STRING:
+            return "string";
+        case INT64:
+            return "int64";
+        case DOUBLE:
+            return "double";
+        case BOOL:
+            return "bool";
+        case DATE:
+            return "date";
+        case TIME:
+            return "time";
+        case DATETIME:
+            return "datetime";
+        default:
+            throw std::runtime_error("invalid attribute type");
+    }
 }
 
 void

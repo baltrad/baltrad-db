@@ -25,18 +25,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/DateTime.hpp>
 #include <brfc/FileHasher.hpp>
+#include <brfc/Variant.hpp>
 
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/AttributeResult.hpp>
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/expr/Attribute.hpp>
-#include <brfc/expr/BinaryOperator.hpp>
+#include <brfc/expr/sexp.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
-#include <brfc/expr/ExpressionList.hpp>
-#include <brfc/expr/Function.hpp>
-#include <brfc/expr/Literal.hpp>
-#include <brfc/expr/Parentheses.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/Group.hpp>
@@ -143,8 +139,8 @@ struct db_AttributeQuery_itest : public testing::TestWithParam<const char*> {
 
 
 TEST_P(db_AttributeQuery_itest, test_simple) {
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(1)));
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .filter(xpr.eq(xpr.attribute("where/xsize"), xpr.int64_(1)));
     r.reset(db->execute(query));
 
     ASSERT_TRUE(r->next());
@@ -153,8 +149,8 @@ TEST_P(db_AttributeQuery_itest, test_simple) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_list_all_files) {
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(5, r->size());
@@ -171,9 +167,9 @@ TEST_P(db_AttributeQuery_itest, test_list_all_files) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_filter_by_object) {
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .filter(*xpr.attribute("what/object")->eq(*xpr.string("PVOL")))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .filter(xpr.eq(xpr.attribute("what/object"), xpr.string("PVOL")))
+         .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(3, r->size());
@@ -186,9 +182,9 @@ TEST_P(db_AttributeQuery_itest, test_filter_by_object) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_fetch_xsize_filtering_by_xsize) {
-    query.fetch("xsize", *xpr.attribute("where/xsize"))
-         .filter(*xpr.attribute("where/xsize")->eq(*xpr.int64_(2)))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    query.fetch("xsize", xpr.attribute("where/xsize"))
+         .filter(xpr.eq(xpr.attribute("where/xsize"), xpr.int64_(2)))
+         .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
@@ -199,11 +195,13 @@ TEST_P(db_AttributeQuery_itest, test_fetch_xsize_filtering_by_xsize) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_filter_by_xsize_or_ysize) {
-    expr::AttributePtr xsize = xpr.attribute("where/xsize");
-    expr::AttributePtr ysize = xpr.attribute("where/ysize");
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .filter(*xsize->eq(*xpr.int64_(1))->or_(*ysize->eq(*xpr.int64_(2))))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .filter(
+            xpr.or_(
+                xpr.eq(xpr.attribute("where/xsize"), xpr.int64_(1)),
+                xpr.eq(xpr.attribute("where/ysize"), xpr.int64_(2))
+            )
+         ).order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(4, r->size());
@@ -218,10 +216,9 @@ TEST_P(db_AttributeQuery_itest, test_filter_by_xsize_or_ysize) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_filter_by_xsize_distinct) {
-    expr::AttributePtr xsize = xpr.attribute("where/xsize");
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
+    query.fetch("uuid", xpr.attribute("file:uuid"))
          .distinct(true)
-         .filter(*xsize->eq(*xpr.int64_(3)));
+         .filter(xpr.eq(xpr.attribute("where/xsize"), xpr.int64_(3)));
     r.reset(db->execute(query));
 
     EXPECT_EQ(1, r->size());
@@ -232,15 +229,14 @@ TEST_P(db_AttributeQuery_itest, test_filter_by_xsize_distinct) {
 TEST_P(db_AttributeQuery_itest, test_filter_by_combined_datetime) {
     DateTime min(2000, 1, 1, 12, 1);
     DateTime max(2001, 1, 1, 12, 0);
-    expr::ExpressionPtr what_dt =
-        xpr.add(
-            *xpr.attribute("what/date"),
-            *xpr.attribute("what/time")
-        )->parentheses();
+    expr::sexp what_dt = xpr.add(
+        xpr.attribute("what/date"),
+        xpr.attribute("what/time")
+    );
 
-    query.fetch("uuid", *xpr.attribute("file:uuid"));
-    query.filter(*what_dt->between(*xpr.datetime(min), *xpr.datetime(max)));
-    query.order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    query.fetch("uuid", xpr.attribute("file:uuid"));
+    query.filter(xpr.between(what_dt, xpr.datetime(min), xpr.datetime(max)));
+    query.order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(r->size(), 3);
@@ -253,10 +249,9 @@ TEST_P(db_AttributeQuery_itest, test_filter_by_combined_datetime) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_select_by_wmo_code) {
-    expr::AttributePtr wmo_code = xpr.attribute("what/source:WMO");
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .filter(*wmo_code->eq(*xpr.string("02666")))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .filter(xpr.eq(xpr.attribute("what/source:WMO"), xpr.string("02666")))
+         .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(r->size(), 2);
@@ -267,10 +262,14 @@ TEST_P(db_AttributeQuery_itest, test_select_by_wmo_code) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_select_by_or_node) {
-    expr::AttributePtr node = xpr.attribute("what/source:_name");
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .filter(*node->eq(*xpr.string("seang"))->or_(*node->eq(*xpr.string("sekkr"))))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    expr::sexp node = xpr.attribute("what/source:_name");
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .filter(
+            xpr.or_(
+                xpr.eq(node, xpr.string("seang")),
+                xpr.eq(node, xpr.string("sekkr"))
+            )
+         ).order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
     EXPECT_EQ(r->size(), 5);
     ASSERT_TRUE(r->next());
@@ -286,17 +285,22 @@ TEST_P(db_AttributeQuery_itest, test_select_by_or_node) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_select_by_node_and_node) {
-    expr::AttributePtr node = xpr.attribute("what/source:_name");
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .filter(*node->eq(*xpr.string("seang"))->and_(*node->eq(*xpr.string("sekkr"))));
+    expr::sexp node = xpr.attribute("what/source:_name");
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .filter(
+            xpr.and_(
+                xpr.eq(node, xpr.string("seang")),
+                xpr.eq(node, xpr.string("sekkr"))
+            )
+         );
     r.reset(db->execute(query));
     EXPECT_EQ(0, r->size());
 }
 
 TEST_P(db_AttributeQuery_itest, test_select_by_place) {
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .filter(*xpr.attribute("what/source:PLC")->eq(*xpr.string("Ängelholm")))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .filter(xpr.eq(xpr.attribute("what/source:PLC"), xpr.string("Ängelholm")))
+         .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(3, r->size());
@@ -309,10 +313,9 @@ TEST_P(db_AttributeQuery_itest, test_select_by_place) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_query_like) {
-    expr::AttributePtr node = xpr.attribute("what/source:_name");
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .filter(*node->like("sea*"))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .filter(xpr.like(xpr.attribute("what/source:_name"), "sea*"))
+         .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(3, r->size());
@@ -325,10 +328,10 @@ TEST_P(db_AttributeQuery_itest, test_query_like) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_order_by) {
-    expr::ExpressionPtr dt =
-        xpr.attribute("what/date")->add(*xpr.attribute("what/time"));
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .order_by(*dt, AttributeQuery::DESC);
+    expr::sexp dt =
+        xpr.add(xpr.attribute("what/date"), xpr.attribute("what/time"));
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .order_by(dt, AttributeQuery::DESC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(5, r->size());
@@ -345,8 +348,8 @@ TEST_P(db_AttributeQuery_itest, test_order_by) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_limit) {
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC)
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC)
          .limit(2);
     r.reset(db->execute(query));
 
@@ -358,7 +361,7 @@ TEST_P(db_AttributeQuery_itest, test_limit) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_fetch_max_xsize) {
-    query.fetch("max_xsize", *xpr.max(*xpr.attribute("where/xsize")));
+    query.fetch("max_xsize", xpr.max(xpr.attribute("where/xsize")));
     r.reset(db->execute(query));
     
     EXPECT_EQ(1, r->size());
@@ -367,7 +370,7 @@ TEST_P(db_AttributeQuery_itest, test_fetch_max_xsize) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_count_ysize) {
-    query.fetch("count_ysize", *xpr.count(*xpr.attribute("where/ysize")));
+    query.fetch("count_ysize", xpr.count(xpr.attribute("where/ysize")));
     r.reset(db->execute(query));
 
     EXPECT_EQ(1, r->size());
@@ -376,8 +379,8 @@ TEST_P(db_AttributeQuery_itest, test_count_ysize) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_fetch_min_ysize_with_filter) {
-    query.fetch("min_ysize", *xpr.min(*xpr.attribute("where/ysize")))
-         .filter(*xpr.attribute("what/object")->eq(*xpr.string("CVOL")));
+    query.fetch("min_ysize", xpr.min(xpr.attribute("where/ysize")))
+         .filter(xpr.eq(xpr.attribute("what/object"), xpr.string("CVOL")));
     r.reset(db->execute(query));
     
     EXPECT_EQ(1, r->size());
@@ -386,10 +389,10 @@ TEST_P(db_AttributeQuery_itest, test_fetch_min_ysize_with_filter) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_group_by_source_sum_xsize) {
-    query.fetch("source", *xpr.attribute("what/source:_name"))
-         .fetch("sum_xsize", *xpr.sum(*xpr.attribute("where/xsize")))
-         .group(*xpr.attribute("what/source:_name"))
-         .order_by(*xpr.attribute("what/source:_name"), AttributeQuery::ASC);
+    query.fetch("source", xpr.attribute("what/source:_name"))
+         .fetch("sum_xsize", xpr.sum(xpr.attribute("where/xsize")))
+         .group(xpr.attribute("what/source:_name"))
+         .order_by(xpr.attribute("what/source:_name"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
@@ -402,11 +405,11 @@ TEST_P(db_AttributeQuery_itest, test_group_by_source_sum_xsize) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_group_by_source_sum_xsize_with_filter) {
-    query.fetch("source", *xpr.attribute("what/source:_name"))
-         .fetch("sum_xsize", *xpr.sum(*xpr.attribute("where/xsize")))
-         .filter(*xpr.attribute("what/date")->eq(*xpr.date(2000, 1, 1)))
-         .group(*xpr.attribute("what/source:_name"))
-         .order_by(*xpr.attribute("what/source:_name"), AttributeQuery::ASC);
+    query.fetch("source", xpr.attribute("what/source:_name"))
+         .fetch("sum_xsize", xpr.sum(xpr.attribute("where/xsize")))
+         .filter(xpr.eq(xpr.attribute("what/date"), xpr.date(2000, 1, 1)))
+         .group(xpr.attribute("what/source:_name"))
+         .order_by(xpr.attribute("what/source:_name"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
@@ -420,10 +423,10 @@ TEST_P(db_AttributeQuery_itest, test_group_by_source_sum_xsize_with_filter) {
 
 
 TEST_P(db_AttributeQuery_itest, test_group_by_source_max_xsize) {
-    query.fetch("source", *xpr.attribute("what/source:_name"))
-         .fetch("max_xsize", *xpr.max(*xpr.attribute("where/xsize")))
-         .group(*xpr.attribute("what/source:_name"))
-         .order_by(*xpr.attribute("what/source:_name"), AttributeQuery::ASC);
+    query.fetch("source", xpr.attribute("what/source:_name"))
+         .fetch("max_xsize", xpr.max(xpr.attribute("where/xsize")))
+         .group(xpr.attribute("what/source:_name"))
+         .order_by(xpr.attribute("what/source:_name"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
@@ -436,11 +439,11 @@ TEST_P(db_AttributeQuery_itest, test_group_by_source_max_xsize) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_group_by_source_max_xsize_min_ysize) {
-    query.fetch("source", *xpr.attribute("what/source:_name"))
-         .fetch("max_xsize", *xpr.max(*xpr.attribute("where/xsize")))
-         .fetch("min_ysize", *xpr.min(*xpr.attribute("where/ysize")))
-         .group(*xpr.attribute("what/source:_name"))
-         .order_by(*xpr.attribute("what/source:_name"), AttributeQuery::ASC);
+    query.fetch("source", xpr.attribute("what/source:_name"))
+         .fetch("max_xsize", xpr.max(xpr.attribute("where/xsize")))
+         .fetch("min_ysize", xpr.min(xpr.attribute("where/ysize")))
+         .group(xpr.attribute("what/source:_name"))
+         .order_by(xpr.attribute("what/source:_name"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
@@ -455,10 +458,10 @@ TEST_P(db_AttributeQuery_itest, test_group_by_source_max_xsize_min_ysize) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_group_by_source_missing_value) {
-    query.fetch("source", *xpr.attribute("what/source:_name"))
-         .fetch("min_elangle", *xpr.min(*xpr.attribute("where/elangle")))
-         .group(*xpr.attribute("what/source:_name"))
-         .order_by(*xpr.attribute("what/source:_name"), AttributeQuery::ASC);
+    query.fetch("source", xpr.attribute("what/source:_name"))
+         .fetch("min_elangle", xpr.min(xpr.attribute("where/elangle")))
+         .group(xpr.attribute("what/source:_name"))
+         .order_by(xpr.attribute("what/source:_name"), AttributeQuery::ASC);
     r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
@@ -471,13 +474,13 @@ TEST_P(db_AttributeQuery_itest, test_group_by_source_missing_value) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_in) {
-    expr::ExpressionList l;
-    l.append(*xpr.string("CVOL"));
-    l.append(*xpr.string("SCAN"));
+    expr::sexp l;
+    l.push_back(xpr.string("CVOL"));
+    l.push_back(xpr.string("SCAN"));
 
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .filter(*xpr.attribute("what/object")->in(l))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .filter(xpr.in(xpr.attribute("what/object"), l))
+         .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
     
     EXPECT_EQ(2, r->size());
@@ -488,13 +491,13 @@ TEST_P(db_AttributeQuery_itest, test_in) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_not_in) {
-    expr::ExpressionList l;
-    l.append(*xpr.int64_(2));
-    l.append(*xpr.int64_(3));
+    expr::sexp l;
+    l.push_back(xpr.int64_(2));
+    l.push_back(xpr.int64_(3));
 
-    query.fetch("uuid", *xpr.attribute("file:uuid"))
-         .filter(*xpr.attribute("where/xsize")->not_in(l))
-         .order_by(*xpr.attribute("file:stored_at"), AttributeQuery::ASC);
+    query.fetch("uuid", xpr.attribute("file:uuid"))
+         .filter(xpr.not_in(xpr.attribute("where/xsize"), l))
+         .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
     
     EXPECT_EQ(3, r->size());

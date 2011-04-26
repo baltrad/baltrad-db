@@ -24,52 +24,36 @@ import java.util.List;
 import junit.framework.TestCase;
 
 public class ExpressionTest extends TestCase {
-  private ExpressionFactory xpr = new ExpressionFactory();
-
-  private Attribute attr;
-  private Literal[] valueArray;
-  private List<Literal> valueList;
-  private ExpressionList valueElist;
+  private ExpressionFactory xpr;
 
   public void setUp() {
-    attr = xpr.attribute("what/object");
-    valueArray = new Literal[]{xpr.int64_(1), xpr.int64_(2)};
-
-    valueList = new ArrayList<Literal>();
-    valueList.add(xpr.int64_(1));
-    valueList.add(xpr.int64_(2));
-    
-    valueElist = new ExpressionList();
-    valueElist.append(xpr.int64_(1));
-    valueElist.append(xpr.int64_(2));
+    xpr = new ExpressionFactory();
   }
 
-  public void testIn_Collection() {
-    BinaryOperator op = attr.in(valueList);
-    assertEquals(BinaryOperator.Type.IN, op.type());
-    assertTrue(op.lhs().equals(attr));
-    assertTrue(op.rhs().equals(valueElist));
+  public void testEquals() {
+    assertTrue((new Expression()).equals(new Expression()));
   }
 
-  public void testIn_Array() {
-    BinaryOperator op = attr.in(valueArray);
-    assertEquals(BinaryOperator.Type.IN, op.type());
-    assertTrue(op.lhs().equals(attr));
-    assertTrue(op.rhs().equals(valueElist));
+  public void testConstructFromArray() {
+    Expression[] a = new Expression[]{xpr.int64_(1), xpr.int64_(2)};
+    Expression e = new Expression();
+    e.push_back(xpr.int64_(1));
+    e.push_back(xpr.int64_(2));
+
+    Expression r = new Expression(a);
+    assertTrue(r.equals(e));
   }
 
-  public void testNotIn_Collection() {
-    BinaryOperator op = attr.not_in(valueList);
-    assertEquals(BinaryOperator.Type.NOT_IN, op.type());
-    assertTrue(op.lhs().equals(attr));
-    assertTrue(op.rhs().equals(valueElist));
-  }
+  public void testConstructFromCollection() {
+    List<Expression> l = new ArrayList<Expression>();
+    l.add(xpr.int64_(1));
+    l.add(xpr.int64_(2));
+    Expression e = new Expression();
+    e.push_back(xpr.int64_(1));
+    e.push_back(xpr.int64_(2));
 
-  public void testNotIn_Array() {
-    BinaryOperator op = attr.not_in(valueArray);
-    assertEquals(BinaryOperator.Type.NOT_IN, op.type());
-    assertTrue(op.lhs().equals(attr));
-    assertTrue(op.rhs().equals(valueElist));
+    Expression r = new Expression(l);
+    assertEquals(2, r.size());
+    assertTrue(r.equals(e));
   }
-
 }

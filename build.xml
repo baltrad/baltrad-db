@@ -84,8 +84,6 @@
       <test name="eu.baltrad.fc.TestTime" todir="${waf.builddir}/test/reports" />
       <test name="eu.baltrad.fc.TestDateTime" todir="${waf.builddir}/test/reports" />
       <test name="eu.baltrad.fc.expr.ExpressionTest" todir="${waf.builddir}/test/reports" />
-      <test name="eu.baltrad.fc.expr.ExpressionFactoryTest" todir="${waf.builddir}/test/reports" />
-      <test name="eu.baltrad.fc.expr.ExpressionListTest" todir="${waf.builddir}/test/reports" />
       <test name="eu.baltrad.fc.oh5.TestSource" todir="${waf.builddir}/test/reports" />
     </junit>
   </target>

@@ -32,15 +32,6 @@ class Time;
 class TimeDelta;
 class Variant;
 
-namespace expr {
-
-class sexp;
-
-// define so that gtest doesn't try to print sexp as a container
-void PrintTo(const sexp& x, ::std::ostream* os);
-
-} // namespace expr
-
 namespace oh5 {
     class Scalar;
 } // namespace oh5
