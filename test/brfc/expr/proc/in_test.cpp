@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <stdexcept>
 
 #include <brfc/test_common.hpp>
-#include <brfc/expr/listcons.hpp>
+#include <brfc/expr/Listcons.hpp>
 #include <brfc/expr/proc/in.hpp>
 
 namespace brfc {
@@ -30,28 +30,28 @@ namespace expr {
 namespace proc {
 
 TEST(expr_proc_in_test, test_float_in_ints) {
-    Expression coll = listcons().int64(1).int64(2).int64(3).get();
-    Expression args = listcons().double_(1).append(coll).get();
+    Expression coll = Listcons().int64(1).int64(2).int64(3).get();
+    Expression args = Listcons().double_(1).append(coll).get();
     EXPECT_EQ(Expression(true), in()(args));
-    args = listcons().double_(4).append(coll).get();
+    args = Listcons().double_(4).append(coll).get();
     EXPECT_EQ(Expression(false), in()(args));
 }
 
 TEST(expr_proc_in_test, test_str_in_strs) {
-    Expression coll = listcons().string("foo").string("bar").get();
-    Expression args = listcons().string("foo").append(coll).get();
+    Expression coll = Listcons().string("foo").string("bar").get();
+    Expression args = Listcons().string("foo").append(coll).get();
     EXPECT_EQ(Expression(true), in()(args));
-    args = listcons().string("baz").append(coll).get();
+    args = Listcons().string("baz").append(coll).get();
     EXPECT_EQ(Expression(false), in()(args));
 }
 
 TEST(expr_proc_in_test, test_invalid_arg_types) {
-    Expression args = listcons().append(Expression()).append(Expression()).get();
+    Expression args = Listcons().append(Expression()).append(Expression()).get();
     EXPECT_THROW(in()(args), std::logic_error);
 }
 
 TEST(expr_proc_in_test, test_invalid_arg_count) {
-    Expression args = listcons().int64(1).append(Expression()).append(Expression()).get();
+    Expression args = Listcons().int64(1).append(Expression()).append(Expression()).get();
     EXPECT_THROW(in()(args), std::logic_error);
 }
 

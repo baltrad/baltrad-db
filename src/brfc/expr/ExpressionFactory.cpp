@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/DateTime.hpp>
 #include <brfc/Variant.hpp>
-#include <brfc/expr/listcons.hpp>
+#include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
 namespace expr {
@@ -41,7 +41,7 @@ ExpressionFactory::ExpressionFactory(const AttributePrototypes& prototypes)
 Expression
 ExpressionFactory::attribute(const std::string& name) const {
     const std::string& type = prototypes_.typename_(name);
-    return listcons().symbol("attr").string(name).string(type).get();
+    return Listcons().symbol("attr").string(name).string(type).get();
 }
 
 Expression
@@ -121,14 +121,14 @@ ExpressionFactory::bool_(bool value) const {
 
 Expression
 ExpressionFactory::unary(const std::string& op, const Expression& arg) const {
-    return listcons().symbol(op).append(arg).get();
+    return Listcons().symbol(op).append(arg).get();
 }
 
 Expression
 ExpressionFactory::binary(const std::string& op,
                          const Expression& lhs,
                          const Expression& rhs) const {
-    return listcons().symbol(op).append(lhs).append(rhs).get();
+    return Listcons().symbol(op).append(lhs).append(rhs).get();
 }
 
 Expression

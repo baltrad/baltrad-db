@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/expr/listcons.hpp>
+#include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
 namespace db {
@@ -64,7 +64,7 @@ FileQuery::swap(FileQuery& other) {
 FileQuery&
 FileQuery::filter(const expr::Expression& expr) {
     if (not filter_.empty()) {
-        filter_ = expr::listcons().symbol("and")
+        filter_ = expr::Listcons().symbol("and")
                                   .append(filter_)
                                   .append(expr)
                                   .get();

@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <stdexcept>
 
 #include <brfc/test_common.hpp>
-#include <brfc/expr/listcons.hpp>
+#include <brfc/expr/Listcons.hpp>
 #include <brfc/expr/proc/arithmetic.hpp>
 
 namespace brfc {
@@ -32,7 +32,7 @@ namespace proc {
 /* add */
 
 TEST(expr_proc_arithmetic_add_test, test_Expression_dispatch) {
-    EXPECT_EQ(Expression(3), add()(listcons().int64(1).int64(2).get()));
+    EXPECT_EQ(Expression(3), add()(Listcons().int64(1).int64(2).get()));
 }
 
 TEST(expr_proc_arithmetic_add_test, test_int_int) {
@@ -50,7 +50,7 @@ TEST(expr_proc_arithmetic_add_test, test_int_list) {
 /* sub */
 
 TEST(expr_proc_arithmetic_sub_test, test_Expression_dispatch) {
-    EXPECT_EQ(Expression(-1), sub()(listcons().int64(1).int64(2).get()));
+    EXPECT_EQ(Expression(-1), sub()(Listcons().int64(1).int64(2).get()));
 }
 
 TEST(expr_proc_arithmetic_sub_test, test_int_int) {
@@ -68,7 +68,7 @@ TEST(expr_proc_arithmetic_sub_test, test_int_list) {
 /* mul */
 
 TEST(expr_proc_arithmetic_mul_test, test_Expression_dispatch) {
-    EXPECT_EQ(Expression(6), mul()(listcons().int64(2).int64(3).get()));
+    EXPECT_EQ(Expression(6), mul()(Listcons().int64(2).int64(3).get()));
 }
 
 TEST(expr_proc_arithmetic_mul_test, test_int_int) {
@@ -86,7 +86,7 @@ TEST(expr_proc_arithmetic_mul_test, test_int_list) {
 /* div */
 
 TEST(expr_proc_arithmetic_div_test, test_Expression_dispatch) {
-    EXPECT_EQ(Expression(1), div()(listcons().int64(3).int64(2).get()));
+    EXPECT_EQ(Expression(1), div()(Listcons().int64(3).int64(2).get()));
 }
 
 TEST(expr_proc_arithmetic_div_test, test_int_int) {

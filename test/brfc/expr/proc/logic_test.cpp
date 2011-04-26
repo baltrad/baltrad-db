@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <stdexcept>
 
 #include <brfc/test_common.hpp>
-#include <brfc/expr/listcons.hpp>
+#include <brfc/expr/Listcons.hpp>
 #include <brfc/expr/proc/logic.hpp>
 
 namespace brfc {
@@ -32,7 +32,7 @@ namespace proc {
 /* and_ */
 
 TEST(expr_proc_logic_and_test, test_Expression_dispatch) {
-    EXPECT_EQ(Expression(true), and_()(listcons().bool_(true).bool_(true).get()));
+    EXPECT_EQ(Expression(true), and_()(Listcons().bool_(true).bool_(true).get()));
 }
 
 TEST(expr_proc_logic_and_test, test_bool_bool) {
@@ -47,7 +47,7 @@ TEST(expr_proc_logic_and_test, test_bool_int) {
 /* or_ */
 
 TEST(expr_proc_logic_or_test, test_Expression_dispatch) {
-    EXPECT_EQ(Expression(true), or_()(listcons().bool_(true).bool_(true).get()));
+    EXPECT_EQ(Expression(true), or_()(Listcons().bool_(true).bool_(true).get()));
 }
 
 TEST(expr_proc_logic_or_test, test_bool_bool) {
@@ -62,7 +62,7 @@ TEST(expr_proc_logic_or_test, test_bool_int) {
 /* not_ */
 
 TEST(expr_proc_logic_not_test, test_Expression_dispatch) {
-    EXPECT_EQ(Expression(false), not_()(listcons().bool_(true).get()));
+    EXPECT_EQ(Expression(false), not_()(Listcons().bool_(true).get()));
 }
 
 TEST(expr_proc_logic_not_test, test_bool) {

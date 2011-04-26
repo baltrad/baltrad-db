@@ -19,25 +19,25 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/expr/listcons.hpp>
+#include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
 namespace expr {
 
-TEST(expr_listcons_test, test_empty) {
-    Expression e = listcons().get();
+TEST(expr_Listcons_test, test_empty) {
+    Expression e = Listcons().get();
     ASSERT_TRUE(e.is_list());
     ASSERT_EQ(0u, e.size());
 }
 
-TEST(expr_listcons_test, test_construct_one) {
-    Expression e= listcons().symbol("+").get();
+TEST(expr_Listcons_test, test_construct_one) {
+    Expression e= Listcons().symbol("+").get();
     ASSERT_EQ(1u, e.size());
     ASSERT_EQ(Expression::type::SYMBOL, e.front().type());
 }
 
-TEST(expr_listcons_test, test_construct_many) {
-    Expression e = listcons().symbol("+")
+TEST(expr_Listcons_test, test_construct_many) {
+    Expression e = Listcons().symbol("+")
                        .int64(1)
                        .double_(2.1)
                        .bool_(true)

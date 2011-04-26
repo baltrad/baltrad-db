@@ -24,70 +24,70 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace expr {
 
-class listcons {
+class Listcons {
   public:
-    listcons()
+    Listcons()
             : exp_() {
     }
 
-    listcons& symbol(const std::string& value) {
+    Listcons& symbol(const std::string& value) {
         exp_.push_back(Expression::symbol(value));
         return *this;
     }
 
-    listcons& string(const std::string& value) {
+    Listcons& string(const std::string& value) {
         exp_.push_back(Expression(value));
         return *this;
     }
 
-    listcons& int64(long long value) {
+    Listcons& int64(long long value) {
         exp_.push_back(Expression(value));
         return *this;
     }
 
-    listcons& double_(double value) {
+    Listcons& double_(double value) {
         exp_.push_back(Expression(value));
         return *this;
     }
 
-    listcons& bool_(bool value) {
+    Listcons& bool_(bool value) {
         exp_.push_back(Expression(value));
         return *this;
     }
 
-    listcons& date(int year, int month, int day) {
+    Listcons& date(int year, int month, int day) {
         exp_.push_back(Expression(Date(year, month, day)));
         return *this;
     }
 
-    listcons& date(const Date& date) {
+    Listcons& date(const Date& date) {
         exp_.push_back(Expression(date));
         return *this;
     }
 
-    listcons& time(int hour, int minute, int second=0, int msec=0) {
+    Listcons& time(int hour, int minute, int second=0, int msec=0) {
         exp_.push_back(Expression(Time(hour, minute, second, msec)));
         return *this;
     }
 
-    listcons& time(const Time& time) {
+    Listcons& time(const Time& time) {
         exp_.push_back(Expression(time));
         return *this;
     }
 
-    listcons& datetime(int year, int month, int day,
+    Listcons& datetime(int year, int month, int day,
                        int hour, int minute, int second=0, int msec=0) {
         exp_.push_back(Expression(DateTime(year, month, day,
                                       hour, minute, second, msec)));
         return *this;
     }
 
-    listcons& datetime(const DateTime& dt) {
+    Listcons& datetime(const DateTime& dt) {
         exp_.push_back(Expression(dt));
         return *this;
     }
 
-    listcons& append(const Expression& value) {
+    Listcons& append(const Expression& value) {
         exp_.push_back(value);
         return *this;
     }

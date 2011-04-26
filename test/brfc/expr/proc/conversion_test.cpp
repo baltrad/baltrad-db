@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/test_common.hpp>
-#include <brfc/expr/listcons.hpp>
+#include <brfc/expr/Listcons.hpp>
 #include <brfc/expr/proc/conversion.hpp>
 
 namespace brfc {
@@ -33,7 +33,7 @@ namespace proc {
 
 TEST(expr_proc_conversion_date_test, test_Expression_dispatch) {
     Expression e(Date(2011, 12, 13));
-    EXPECT_EQ(e, date()(listcons().append(e).get()));
+    EXPECT_EQ(e, date()(Listcons().append(e).get()));
 }
 
 TEST(expr_proc_conversion_date_test, test_string) {
@@ -59,7 +59,7 @@ TEST(expr_proc_conversion_date_test, test_datetime) {
 
 TEST(expr_proc_conversion_time_test, test_Expression_dispatch) {
     Expression e(Time(14, 15, 16));
-    EXPECT_EQ(e, time()(listcons().append(e).get()));
+    EXPECT_EQ(e, time()(Listcons().append(e).get()));
 }
 
 TEST(expr_proc_conversion_time_test, test_string) {
@@ -85,7 +85,7 @@ TEST(expr_proc_conversion_time_test, test_datetime) {
 
 TEST(expr_proc_conversion_datetime_test, test_Expression_dispatch) {
     Expression e(DateTime(2011, 12, 13, 14, 15, 16));
-    EXPECT_EQ(e, datetime()(listcons().append(e).get()));
+    EXPECT_EQ(e, datetime()(Listcons().append(e).get()));
 }
 
 TEST(expr_proc_conversion_datetime_test, test_string) {

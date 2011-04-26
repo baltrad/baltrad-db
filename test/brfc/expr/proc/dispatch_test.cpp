@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/test_common.hpp>
-#include <brfc/expr/listcons.hpp>
+#include <brfc/expr/Listcons.hpp>
 #include <brfc/expr/proc/dispatch.hpp>
 
 namespace brfc {
@@ -60,7 +60,7 @@ struct unary_op {
 
 TEST(expr_proc_dispatch_test, test_binary) {
     binary_op op;
-    Expression in = listcons().int64(1).int64(2).get();
+    Expression in = Listcons().int64(1).int64(2).get();
 
     EXPECT_NO_THROW(binary_dispatch(op, in));
     
@@ -82,7 +82,7 @@ TEST(expr_proc_dispatch_test, test_binary_invalid_type) {
 
 TEST(expr_proc_dispatch_test, test_unary) {
     unary_op op;
-    Expression in = listcons().int64(1).get();
+    Expression in = Listcons().int64(1).get();
     
     EXPECT_NO_THROW(unary_dispatch(op, in));
 

@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <stdexcept>
 
 #include <brfc/test_common.hpp>
-#include <brfc/expr/listcons.hpp>
+#include <brfc/expr/Listcons.hpp>
 #include <brfc/expr/proc/like.hpp>
 
 namespace brfc {
@@ -30,7 +30,7 @@ namespace expr {
 namespace proc {
 
 TEST(expr_proc_like_test, test_Expression_dispatch) {
-    EXPECT_EQ(Expression(false), like()(listcons().string("foo").string("bar").get()));
+    EXPECT_EQ(Expression(false), like()(Listcons().string("foo").string("bar").get()));
 }
 
 TEST(expr_proc_like_test, test_invalid_types) {
