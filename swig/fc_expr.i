@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %{
     #include <brfc/expr/AttributePrototypes.hpp>
-    #include <brfc/expr/sexp.hpp>
+    #include <brfc/expr/Expression.hpp>
     #include <brfc/expr/ExpressionFactory.hpp>
 %}
 
@@ -41,13 +41,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   }
 %}
 
-%ignore brfc::expr::sexp::sexp(const std::string& value, construct_symbol);
-%ignore brfc::expr::sexp::type;
-%rename(Expression) brfc::expr::sexp;
+%ignore brfc::expr::Expression::Expression(const std::string& value, construct_symbol);
+%ignore brfc::expr::Expression::type() const;
 
-%rename(equals) brfc::expr::operator==(const sexp&, const sexp&);
+%rename(equals) brfc::expr::operator==(const Expression&, const Expression&);
 
-%typemap(javaimports) brfc::expr::sexp %{
+%typemap(javaimports) brfc::expr::Expression %{
   import java.util.Collection;
 
   import eu.baltrad.fc.Date;
@@ -56,9 +55,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   import eu.baltrad.fc.TimeDelta;
 %}
 
-SWIG_JAVABODY_METHODS(public, public, brfc::expr::sexp)
+SWIG_JAVABODY_METHODS(public, public, brfc::expr::Expression)
 
-%typemap(javacode) brfc::expr::sexp %{
+%typemap(javacode) brfc::expr::Expression %{
   public Expression(Collection<Expression> values) {
     this();
     for (Expression e : values) {
@@ -106,8 +105,8 @@ SWIG_JAVABODY_METHODS(public, public, brfc::expr::sexp)
     import eu.baltrad.fc.Variant;
 %}
 
-%include <brfc/expr/sexp.hpp>
 %include <brfc/expr/AttributePrototypes.hpp>
+%include <brfc/expr/Expression.hpp>
 %include <brfc/expr/ExpressionFactory.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:

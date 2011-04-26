@@ -30,28 +30,28 @@ namespace expr {
 namespace proc {
 
 TEST(expr_proc_in_test, test_float_in_ints) {
-    sexp coll = listcons().int64(1).int64(2).int64(3).get();
-    sexp args = listcons().double_(1).append(coll).get();
-    EXPECT_EQ(sexp(true), in()(args));
+    Expression coll = listcons().int64(1).int64(2).int64(3).get();
+    Expression args = listcons().double_(1).append(coll).get();
+    EXPECT_EQ(Expression(true), in()(args));
     args = listcons().double_(4).append(coll).get();
-    EXPECT_EQ(sexp(false), in()(args));
+    EXPECT_EQ(Expression(false), in()(args));
 }
 
 TEST(expr_proc_in_test, test_str_in_strs) {
-    sexp coll = listcons().string("foo").string("bar").get();
-    sexp args = listcons().string("foo").append(coll).get();
-    EXPECT_EQ(sexp(true), in()(args));
+    Expression coll = listcons().string("foo").string("bar").get();
+    Expression args = listcons().string("foo").append(coll).get();
+    EXPECT_EQ(Expression(true), in()(args));
     args = listcons().string("baz").append(coll).get();
-    EXPECT_EQ(sexp(false), in()(args));
+    EXPECT_EQ(Expression(false), in()(args));
 }
 
 TEST(expr_proc_in_test, test_invalid_arg_types) {
-    sexp args = listcons().append(sexp()).append(sexp()).get();
+    Expression args = listcons().append(Expression()).append(Expression()).get();
     EXPECT_THROW(in()(args), std::logic_error);
 }
 
 TEST(expr_proc_in_test, test_invalid_arg_count) {
-    sexp args = listcons().int64(1).append(sexp()).append(sexp()).get();
+    Expression args = listcons().int64(1).append(Expression()).append(Expression()).get();
     EXPECT_THROW(in()(args), std::logic_error);
 }
 

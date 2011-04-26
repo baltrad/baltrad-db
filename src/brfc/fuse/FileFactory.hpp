@@ -29,7 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/smart_ptr.hpp>
 
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/Expression.hpp>
 
 #include <brfc/fuse/EntryFactory.hpp>
 #include <brfc/fuse/FileEntry.hpp>
@@ -64,7 +64,7 @@ class FileFactory : public EntryFactory {
   private:
     virtual FileFactory* do_clone() const;
 
-    void do_filter(const expr::sexp& expr);
+    void do_filter(const expr::Expression& expr);
 
     virtual void do_update();
 
@@ -121,7 +121,7 @@ class FileFactory : public EntryFactory {
     
     db::Database* db_; 
     FileNamer* namer_;
-    expr::sexp filter_;
+    expr::Expression filter_;
     EntrySet_t entries_;
 };
 

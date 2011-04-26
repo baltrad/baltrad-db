@@ -29,8 +29,8 @@ namespace brfc {
 namespace expr {
 namespace proc {
 
-TEST(expr_proc_like_test, test_sexp_dispatch) {
-    EXPECT_EQ(sexp(false), like()(listcons().string("foo").string("bar").get()));
+TEST(expr_proc_like_test, test_Expression_dispatch) {
+    EXPECT_EQ(Expression(false), like()(listcons().string("foo").string("bar").get()));
 }
 
 TEST(expr_proc_like_test, test_invalid_types) {
@@ -40,27 +40,27 @@ TEST(expr_proc_like_test, test_invalid_types) {
 }
 
 TEST(expr_proc_like_test, test_plain) {
-    EXPECT_EQ(sexp(true), like()(std::string("foo"), std::string("foo")));
-    EXPECT_EQ(sexp(false), like()(std::string("foo"), std::string("bar")));
+    EXPECT_EQ(Expression(true), like()(std::string("foo"), std::string("foo")));
+    EXPECT_EQ(Expression(false), like()(std::string("foo"), std::string("bar")));
 }
 
 TEST(expr_proc_like_test, test_star) {
     std::string s = "foobarbaz";
-    EXPECT_EQ(sexp(true), like()(s, std::string("foo*")));
-    EXPECT_EQ(sexp(true), like()(s, std::string("*bar*")));
-    EXPECT_EQ(sexp(true), like()(s, std::string("*baz")));
-    EXPECT_EQ(sexp(false), like()(s, std::string("bar*")));
-    EXPECT_EQ(sexp(false), like()(s, std::string("*bab*")));
-    EXPECT_EQ(sexp(false), like()(s, std::string("*bab")));
+    EXPECT_EQ(Expression(true), like()(s, std::string("foo*")));
+    EXPECT_EQ(Expression(true), like()(s, std::string("*bar*")));
+    EXPECT_EQ(Expression(true), like()(s, std::string("*baz")));
+    EXPECT_EQ(Expression(false), like()(s, std::string("bar*")));
+    EXPECT_EQ(Expression(false), like()(s, std::string("*bab*")));
+    EXPECT_EQ(Expression(false), like()(s, std::string("*bab")));
 }
 
 TEST(expr_proc_like_test, test_qmark) {
     std::string s = "foobar";
     
-    EXPECT_EQ(sexp(true), like()(s, std::string("f?o??r")));
-    EXPECT_EQ(sexp(false), like()(s, std::string("foob?")));
-    EXPECT_EQ(sexp(false), like()(s, std::string("foobar?")));
-    EXPECT_EQ(sexp(false), like()(s, std::string("?foob??")));
+    EXPECT_EQ(Expression(true), like()(s, std::string("f?o??r")));
+    EXPECT_EQ(Expression(false), like()(s, std::string("foob?")));
+    EXPECT_EQ(Expression(false), like()(s, std::string("foobar?")));
+    EXPECT_EQ(Expression(false), like()(s, std::string("?foob??")));
 }
 
 }

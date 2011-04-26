@@ -16,8 +16,8 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef BRFC_EXPR_SEXP_HPP
-#define BRFC_EXPR_SEXP_HPP
+#ifndef BRFC_EXPR_EXPRESSION_HPP
+#define BRFC_EXPR_EXPRESSION_HPP
 
 #include <iosfwd>
 #include <list>
@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace expr {
 
-class sexp {
+class Expression {
   public:
     struct construct_symbol {}; ///< construct symbol tag
 
@@ -49,7 +49,7 @@ class sexp {
         };
     };
     
-    typedef std::list<sexp> list_t;
+    typedef std::list<Expression> list_t;
 
     typedef ::boost::variant<
                 list_t,
@@ -68,73 +68,73 @@ class sexp {
     /**
      * @brief construct empty list
      */
-    sexp();
+    Expression();
 
     /**
      * @brief construct bool
      */
-    sexp(bool value);
+    Expression(bool value);
     
     /**
      * @brief construct in64
      */
-    sexp(int value);
+    Expression(int value);
 
     /**
      * @brief construct int64
      */
-    sexp(long long value);
+    Expression(long long value);
 
     /**
      * @brief construct double
      */
-    sexp(double value);
+    Expression(double value);
     
     /**
      * @brief construct string
      */
-    sexp(const char* value);
+    Expression(const char* value);
 
     /**
      * @brief construct string
      */
-    sexp(const std::string& value);
+    Expression(const std::string& value);
 
     /**
      * @brief construct symbol
      */
-    sexp(const std::string& value, construct_symbol);
+    Expression(const std::string& value, construct_symbol);
 
     /**
      * @brief construct list
      */
-    sexp(const list_t& value);
+    Expression(const list_t& value);
     
     /**
      * @brief construct date
      */
-    sexp(const Date& value);
+    Expression(const Date& value);
     
     /**
      * @brief construct time
      */
-    sexp(const Time& value);
+    Expression(const Time& value);
     
     /**
      * @brief construct datetime
      */
-    sexp(const DateTime& value);
+    Expression(const DateTime& value);
     
     /**
      * @brief construct interval
      */
-    sexp(const TimeDelta& value);
+    Expression(const TimeDelta& value);
     
     /**
      * @brief construct list from iterators
      */
     template<typename Iter>
-    sexp(Iter first, Iter last)
+    Expression(Iter first, Iter last)
             : value_() {
         ::boost::get<list_t>(value_).assign(first, last);
     }
@@ -142,12 +142,12 @@ class sexp {
     /**
      * @brief construct symbol
      */
-    static sexp symbol(const std::string& value);
+    static Expression symbol(const std::string& value);
 
-    sexp(const sexp& other);
-    sexp& operator=(sexp rhs);
+    Expression(const Expression& other);
+    Expression& operator=(Expression rhs);
 
-    void swap(sexp& other);
+    void swap(Expression& other);
 
     type::_ type() const;
 
@@ -176,22 +176,22 @@ class sexp {
     size_t size() const;
     bool empty() const;
 
-    const sexp& front() const;
+    const Expression& front() const;
     void pop_front();
-    void push_back(const sexp& value);
+    void push_back(const Expression& value);
 
     const_iterator begin() const;
     const_iterator end() const;
 
     template<typename Visitor>
     typename Visitor::result_type
-    apply_visitor(Visitor& v, const sexp& rhs) const {
+    apply_visitor(Visitor& v, const Expression& rhs) const {
         return ::boost::apply_visitor(v, value_, rhs.value_);
     }
 
     template<typename Visitor>
     typename Visitor::result_type
-    apply_visitor(const Visitor& v, const sexp& rhs) const {
+    apply_visitor(const Visitor& v, const Expression& rhs) const {
         return ::boost::apply_visitor(v, value_, rhs.value_);
     }
 
@@ -216,54 +216,54 @@ struct static_visitor : public ::boost::static_visitor<Result> { };
 
 template<typename Visitor>
 typename Visitor::result_type
-apply_visitor(Visitor& v, const sexp& lhs, const sexp& rhs) {
+apply_visitor(Visitor& v, const Expression& lhs, const Expression& rhs) {
     return lhs.apply_visitor(v, rhs);
 }
 
 template<typename Visitor>
 typename Visitor::result_type
-apply_visitor(const Visitor& v, const sexp& lhs, const sexp& rhs) {
+apply_visitor(const Visitor& v, const Expression& lhs, const Expression& rhs) {
     return lhs.apply_visitor(v, rhs);
 }
 
 template<typename Visitor>
 typename Visitor::result_type
-apply_visitor(Visitor& v, const sexp& x) {
+apply_visitor(Visitor& v, const Expression& x) {
     return x.apply_visitor(v);
 }
 
 template<typename Visitor>
 typename Visitor::result_type
-apply_visitor(const Visitor& v, const sexp& x) {
+apply_visitor(const Visitor& v, const Expression& x) {
     return x.apply_visitor(v);
 }
 
-bool operator==(const sexp& lhs, const sexp& rhs);
+bool operator==(const Expression& lhs, const Expression& rhs);
 
-bool operator<(const sexp& lhs, const sexp& rhs);
+bool operator<(const Expression& lhs, const Expression& rhs);
 
-inline bool operator!=(const sexp& lhs, const sexp& rhs) {
+inline bool operator!=(const Expression& lhs, const Expression& rhs) {
     return not (lhs == rhs);
 }
 
-inline bool operator>(const sexp& lhs, const sexp& rhs) {
+inline bool operator>(const Expression& lhs, const Expression& rhs) {
     return rhs < lhs;
 }
 
-inline bool operator>=(const sexp& lhs, const sexp& rhs) {
+inline bool operator>=(const Expression& lhs, const Expression& rhs) {
     return not (lhs < rhs);
 }
 
-inline bool operator<=(const sexp& lhs, const sexp& rhs) {
+inline bool operator<=(const Expression& lhs, const Expression& rhs) {
     return not (rhs < lhs);
 }
 
-std::ostream& operator<<(std::ostream& out, const sexp& x);
+std::ostream& operator<<(std::ostream& out, const Expression& x);
 
-// define so that gtest doesn't try to print sexp as a container
-void PrintTo(const sexp& x, ::std::ostream* os);
+// define so that gtest doesn't try to print Expression as a container
+void PrintTo(const Expression& x, ::std::ostream* os);
 
 } // namespace expr
 } // namespace brfc
 
-#endif // BRFC_EXPR_SEXP_HPP
+#endif // BRFC_EXPR_EXPRESSION_HPP

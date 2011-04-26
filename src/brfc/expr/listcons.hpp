@@ -19,7 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_LISTCONS_HPP
 #define BRFC_EXPR_LISTCONS_HPP
 
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace expr {
@@ -27,75 +27,75 @@ namespace expr {
 class listcons {
   public:
     listcons()
-            : sexp_() {
+            : exp_() {
     }
 
     listcons& symbol(const std::string& value) {
-        sexp_.push_back(sexp::symbol(value));
+        exp_.push_back(Expression::symbol(value));
         return *this;
     }
 
     listcons& string(const std::string& value) {
-        sexp_.push_back(sexp(value));
+        exp_.push_back(Expression(value));
         return *this;
     }
 
     listcons& int64(long long value) {
-        sexp_.push_back(sexp(value));
+        exp_.push_back(Expression(value));
         return *this;
     }
 
     listcons& double_(double value) {
-        sexp_.push_back(sexp(value));
+        exp_.push_back(Expression(value));
         return *this;
     }
 
     listcons& bool_(bool value) {
-        sexp_.push_back(sexp(value));
+        exp_.push_back(Expression(value));
         return *this;
     }
 
     listcons& date(int year, int month, int day) {
-        sexp_.push_back(sexp(Date(year, month, day)));
+        exp_.push_back(Expression(Date(year, month, day)));
         return *this;
     }
 
     listcons& date(const Date& date) {
-        sexp_.push_back(sexp(date));
+        exp_.push_back(Expression(date));
         return *this;
     }
 
     listcons& time(int hour, int minute, int second=0, int msec=0) {
-        sexp_.push_back(sexp(Time(hour, minute, second, msec)));
+        exp_.push_back(Expression(Time(hour, minute, second, msec)));
         return *this;
     }
 
     listcons& time(const Time& time) {
-        sexp_.push_back(sexp(time));
+        exp_.push_back(Expression(time));
         return *this;
     }
 
     listcons& datetime(int year, int month, int day,
                        int hour, int minute, int second=0, int msec=0) {
-        sexp_.push_back(sexp(DateTime(year, month, day,
+        exp_.push_back(Expression(DateTime(year, month, day,
                                       hour, minute, second, msec)));
         return *this;
     }
 
     listcons& datetime(const DateTime& dt) {
-        sexp_.push_back(sexp(dt));
+        exp_.push_back(Expression(dt));
         return *this;
     }
 
-    listcons& append(const sexp& value) {
-        sexp_.push_back(value);
+    listcons& append(const Expression& value) {
+        exp_.push_back(value);
         return *this;
     }
 
-    sexp get() const { return sexp_; }
+    Expression get() const { return exp_; }
 
   private:
-    sexp sexp_;
+    Expression exp_;
 };
 
 } // namespace expr

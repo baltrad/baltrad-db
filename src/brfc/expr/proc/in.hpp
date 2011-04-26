@@ -22,10 +22,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace expr {
 
-class sexp;
+class Expression;
 
 struct in {
-    sexp operator()(const sexp& args) const;
+    Expression operator()(const Expression& args) const;
 };
 
 } // namespace expr

@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/Expression.hpp>
 
 #include <ostream>
 
@@ -26,57 +26,57 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace expr {
 
-sexp::sexp()
+Expression::Expression()
         : value_() {
 }
 
-sexp::sexp(bool value)
+Expression::Expression(bool value)
         : value_(value) {
 }
 
-sexp::sexp(int value)
+Expression::Expression(int value)
         : value_((long long)value) {
 
 }
 
-sexp::sexp(long long value)
+Expression::Expression(long long value)
         : value_(value) {
 }
 
-sexp::sexp(double value)
+Expression::Expression(double value)
         : value_(value) {
 }
 
-sexp::sexp(const char* value)
+Expression::Expression(const char* value)
         : value_(std::string(value)) {
 }
 
-sexp::sexp(const std::string& value)
+Expression::Expression(const std::string& value)
         : value_(value) {
 }
 
-sexp::sexp(const list_t& value)
+Expression::Expression(const list_t& value)
         : value_(value) {
 }
 
-sexp::sexp(const Date& value)
+Expression::Expression(const Date& value)
         : value_(value) {
 }
 
-sexp::sexp(const Time& value)
+Expression::Expression(const Time& value)
         : value_(value) {
 }
 
-sexp::sexp(const DateTime& value)
+Expression::Expression(const DateTime& value)
         : value_(value) {
 }
 
-sexp::sexp(const TimeDelta& value)
+Expression::Expression(const TimeDelta& value)
         : value_(value) {
 }
 
 /*
-sexp::sexp(const value_t& value)
+Expression::Expression(const value_t& value)
         : value_(value) {
 
 }
@@ -86,151 +86,151 @@ namespace {
     static std::string null_prefix("\0", 1);
 } // namespace anonymous
 
-sexp::sexp(const std::string& value, construct_symbol)
+Expression::Expression(const std::string& value, construct_symbol)
         : value_(null_prefix + value) {
     // prefixing with \0 to mark symbols snatched from Joel de Guzman's utree
 }
 
-sexp
-sexp::symbol(const std::string& value) {
-    return sexp(value, construct_symbol());
+Expression
+Expression::symbol(const std::string& value) {
+    return Expression(value, construct_symbol());
 }
 
-sexp::sexp(const sexp& other)
+Expression::Expression(const Expression& other)
         : value_(other.value_) {
 }
 
 void
-sexp::swap(sexp& other) {
+Expression::swap(Expression& other) {
     std::swap(value_, other.value_);
 }
 
-sexp&
-sexp::operator=(sexp rhs) {
+Expression&
+Expression::operator=(Expression rhs) {
     rhs.swap(*this);
     return *this;
 }
 
 namespace {
 
-struct type_visitor : public boost::static_visitor<sexp::type::_> {
-    sexp::type::_ operator()(const sexp::list_t&) const {
-        return sexp::type::LIST;
+struct type_visitor : public boost::static_visitor<Expression::type::_> {
+    Expression::type::_ operator()(const Expression::list_t&) const {
+        return Expression::type::LIST;
     }
 
-    sexp::type::_ operator()(bool) const {
-        return sexp::type::BOOL;
+    Expression::type::_ operator()(bool) const {
+        return Expression::type::BOOL;
     }
 
-    sexp::type::_ operator()(long long) const {
-        return sexp::type::INT64;
+    Expression::type::_ operator()(long long) const {
+        return Expression::type::INT64;
     }
     
-    sexp::type::_ operator()(double) const {
-        return sexp::type::DOUBLE;
+    Expression::type::_ operator()(double) const {
+        return Expression::type::DOUBLE;
     }
 
-    sexp::type::_ operator()(const std::string& val) const {
+    Expression::type::_ operator()(const std::string& val) const {
         if (not val.empty() and val.at(0) == '\0')
-            return sexp::type::SYMBOL;
+            return Expression::type::SYMBOL;
         else
-            return sexp::type::STRING;
+            return Expression::type::STRING;
     }
 
-    sexp::type::_ operator()(const Date&) const {
-        return sexp::type::DATE;
+    Expression::type::_ operator()(const Date&) const {
+        return Expression::type::DATE;
     }
 
-    sexp::type::_ operator()(const Time&) const {
-        return sexp::type::TIME;
+    Expression::type::_ operator()(const Time&) const {
+        return Expression::type::TIME;
     }
 
-    sexp::type::_ operator()(const DateTime&) const {
-        return sexp::type::DATETIME;
+    Expression::type::_ operator()(const DateTime&) const {
+        return Expression::type::DATETIME;
     }
 
-    sexp::type::_ operator()(const TimeDelta&) const {
-        return sexp::type::INTERVAL;
+    Expression::type::_ operator()(const TimeDelta&) const {
+        return Expression::type::INTERVAL;
     }
 };
 
 } // namespace anonymous
 
-sexp::type::_
-sexp::type() const {
+Expression::type::_
+Expression::type() const {
     return boost::apply_visitor(type_visitor(), value_);
 }
 
-sexp::list_t
-sexp::list() const {
+Expression::list_t
+Expression::list() const {
     return boost::get<list_t>(value_);
 }
 
 bool
-sexp::bool_() const {
+Expression::bool_() const {
     return boost::get<bool>(value_);
 }
 
 long long
-sexp::int64() const {
+Expression::int64() const {
     return boost::get<long long>(value_);
 }
 
 double
-sexp::double_() const {
+Expression::double_() const {
     return boost::get<double>(value_);
 }
 
 std::string
-sexp::string() const {
+Expression::string() const {
     return boost::get<std::string>(value_);
 }
 
 Date
-sexp::date() const {
+Expression::date() const {
     return boost::get<Date>(value_);
 }
 
 Time
-sexp::time() const {
+Expression::time() const {
     return boost::get<Time>(value_);
 }
 
 DateTime
-sexp::datetime() const {
+Expression::datetime() const {
     return boost::get<DateTime>(value_);
 }
 
 std::string
-sexp::symbol() const {
+Expression::symbol() const {
     BRFC_ASSERT(is_symbol());
     const std::string& s = boost::get<std::string>(value_);
     return s.substr(1);
 }
 
 size_t
-sexp::size() const {
+Expression::size() const {
     BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.size();
 }
 
 bool
-sexp::empty() const {
+Expression::empty() const {
     BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.empty();
 }
 
-const sexp&
-sexp::front() const {
+const Expression&
+Expression::front() const {
     BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.front();
 }
 
 void
-sexp::pop_front() {
+Expression::pop_front() {
     BRFC_ASSERT(is_list());
     list_t& l = boost::get<list_t>(value_);
     BRFC_ASSERT(not l.empty());
@@ -238,21 +238,21 @@ sexp::pop_front() {
 }
 
 void
-sexp::push_back(const sexp& value) {
+Expression::push_back(const Expression& value) {
     BRFC_ASSERT(is_list());
     list_t& l = boost::get<list_t>(value_);
     l.push_back(value);
 }
 
-sexp::const_iterator
-sexp::begin() const {
+Expression::const_iterator
+Expression::begin() const {
     BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.begin();
 }
 
-sexp::const_iterator
-sexp::end() const {
+Expression::const_iterator
+Expression::end() const {
     BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.end();
@@ -288,7 +288,7 @@ struct is_equal : public static_visitor<bool> {
 } // namespace anonymous
 
 bool
-operator==(const sexp& lhs, const sexp& rhs) {
+operator==(const Expression& lhs, const Expression& rhs) {
     return apply_visitor(is_equal(), lhs, rhs);
 }
 
@@ -322,7 +322,7 @@ struct is_less_than : public static_visitor<bool> {
 } // namespace anonymous
 
 bool
-operator<(const sexp& lhs, const sexp& rhs) {
+operator<(const Expression& lhs, const Expression& rhs) {
     return apply_visitor(is_less_than(), lhs, rhs);
 }
 
@@ -350,9 +350,9 @@ struct to_ostream : public static_visitor<void> {
         }
     }
 
-    void operator()(const sexp::list_t& x) const {
+    void operator()(const Expression::list_t& x) const {
         out << "(";
-        sexp::list_t::const_iterator it = x.begin();
+        Expression::list_t::const_iterator it = x.begin();
         while (it != x.end()) {
             apply_visitor(*this, *it);
             ++it;
@@ -378,12 +378,12 @@ struct to_ostream : public static_visitor<void> {
 } // namespace anonymous
 
 std::ostream&
-operator<<(std::ostream& out, const sexp& x) {
+operator<<(std::ostream& out, const Expression& x) {
     apply_visitor(to_ostream(out), x);
     return out;
 }
 
-void PrintTo(const sexp& x, ::std::ostream* os) {
+void PrintTo(const Expression& x, ::std::ostream* os) {
   *os << x;
 }
 

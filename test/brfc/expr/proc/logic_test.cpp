@@ -31,13 +31,13 @@ namespace proc {
 
 /* and_ */
 
-TEST(expr_proc_logic_and_test, test_sexp_dispatch) {
-    EXPECT_EQ(sexp(true), and_()(listcons().bool_(true).bool_(true).get()));
+TEST(expr_proc_logic_and_test, test_Expression_dispatch) {
+    EXPECT_EQ(Expression(true), and_()(listcons().bool_(true).bool_(true).get()));
 }
 
 TEST(expr_proc_logic_and_test, test_bool_bool) {
-    EXPECT_EQ(sexp(true), and_()(true, true));
-    EXPECT_EQ(sexp(false), and_()(true, false));
+    EXPECT_EQ(Expression(true), and_()(true, true));
+    EXPECT_EQ(Expression(false), and_()(true, false));
 }
 
 TEST(expr_proc_logic_and_test, test_bool_int) {
@@ -46,13 +46,13 @@ TEST(expr_proc_logic_and_test, test_bool_int) {
 
 /* or_ */
 
-TEST(expr_proc_logic_or_test, test_sexp_dispatch) {
-    EXPECT_EQ(sexp(true), or_()(listcons().bool_(true).bool_(true).get()));
+TEST(expr_proc_logic_or_test, test_Expression_dispatch) {
+    EXPECT_EQ(Expression(true), or_()(listcons().bool_(true).bool_(true).get()));
 }
 
 TEST(expr_proc_logic_or_test, test_bool_bool) {
-    EXPECT_EQ(sexp(true), or_()(true, false));
-    EXPECT_EQ(sexp(false), or_()(false, false));
+    EXPECT_EQ(Expression(true), or_()(true, false));
+    EXPECT_EQ(Expression(false), or_()(false, false));
 }
 
 TEST(expr_proc_logic_or_test, test_bool_int) {
@@ -61,13 +61,13 @@ TEST(expr_proc_logic_or_test, test_bool_int) {
 
 /* not_ */
 
-TEST(expr_proc_logic_not_test, test_sexp_dispatch) {
-    EXPECT_EQ(sexp(false), not_()(listcons().bool_(true).get()));
+TEST(expr_proc_logic_not_test, test_Expression_dispatch) {
+    EXPECT_EQ(Expression(false), not_()(listcons().bool_(true).get()));
 }
 
 TEST(expr_proc_logic_not_test, test_bool) {
-    EXPECT_EQ(sexp(true), not_()(false));
-    EXPECT_EQ(sexp(false), not_()(true));
+    EXPECT_EQ(Expression(true), not_()(false));
+    EXPECT_EQ(Expression(false), not_()(true));
 }
 
 TEST(expr_proc_logic_not_test, test_int) {

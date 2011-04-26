@@ -26,16 +26,16 @@ namespace brfc {
 namespace expr {
 namespace proc {
 
-struct like : public static_visitor<sexp> {
+struct like : public static_visitor<Expression> {
     template<typename T, typename U>
-    sexp operator()(const T&, const U&) const {
+    Expression operator()(const T&, const U&) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
 
-    sexp operator()(const std::string& str, std::string pattern) const;
+    Expression operator()(const std::string& str, std::string pattern) const;
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return binary_dispatch(*this, args);
     }
 };

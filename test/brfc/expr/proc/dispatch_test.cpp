@@ -36,23 +36,23 @@ namespace {
 struct binary_op {
     typedef void result_type;
 
-    mutable sexp arg1, arg2;
+    mutable Expression arg1, arg2;
     
     template<typename T, typename U>
     result_type operator()(const T& a1, const U& a2) const {
-        arg1 = sexp(a1);
-        arg2 = sexp(a2);
+        arg1 = Expression(a1);
+        arg2 = Expression(a2);
     }
 };
 
 struct unary_op {
     typedef void result_type;
 
-    mutable sexp arg;
+    mutable Expression arg;
 
     template<typename T>
     void operator()(const T& a) const {
-        arg = sexp(a);
+        arg = Expression(a);
     }
 };
 
@@ -60,45 +60,45 @@ struct unary_op {
 
 TEST(expr_proc_dispatch_test, test_binary) {
     binary_op op;
-    sexp in = listcons().int64(1).int64(2).get();
+    Expression in = listcons().int64(1).int64(2).get();
 
     EXPECT_NO_THROW(binary_dispatch(op, in));
     
-    EXPECT_EQ(sexp(1), op.arg1);
-    EXPECT_EQ(sexp(2), op.arg2);
+    EXPECT_EQ(Expression(1), op.arg1);
+    EXPECT_EQ(Expression(2), op.arg2);
 }
 
 TEST(expr_proc_dispatch_test, test_binary_invalid_arg_count) {
     binary_op op;
     
-    EXPECT_THROW(binary_dispatch(op, sexp()), std::logic_error);
+    EXPECT_THROW(binary_dispatch(op, Expression()), std::logic_error);
 }
 
 TEST(expr_proc_dispatch_test, test_binary_invalid_type) {
     binary_op op;
     
-    EXPECT_THROW(binary_dispatch(op, sexp(1)), std::logic_error);
+    EXPECT_THROW(binary_dispatch(op, Expression(1)), std::logic_error);
 }
 
 TEST(expr_proc_dispatch_test, test_unary) {
     unary_op op;
-    sexp in = listcons().int64(1).get();
+    Expression in = listcons().int64(1).get();
     
     EXPECT_NO_THROW(unary_dispatch(op, in));
 
-    EXPECT_EQ(sexp(1), op.arg);
+    EXPECT_EQ(Expression(1), op.arg);
 }
 
 TEST(expr_proc_dispatch_test, test_unary_invalid_arg_count) {
     unary_op op;
     
-    EXPECT_THROW(unary_dispatch(op, sexp()), std::logic_error);
+    EXPECT_THROW(unary_dispatch(op, Expression()), std::logic_error);
 }
 
 TEST(expr_proc_dispatch_test, test_unary_invalid_type) {
     unary_op op;
     
-    EXPECT_THROW(unary_dispatch(op, sexp(1)), std::logic_error);
+    EXPECT_THROW(unary_dispatch(op, Expression(1)), std::logic_error);
 }
 
 

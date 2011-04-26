@@ -27,7 +27,7 @@ namespace brfc {
 namespace expr {
 namespace proc {
 
-sexp
+Expression
 like::operator()(const std::string& str, std::string pattern) const {
     using namespace boost::xpressive;
     using boost::algorithm::replace_all;

@@ -30,103 +30,103 @@ namespace expr {
 namespace proc {
 
 // + could additionally be defined for string + string, list + list
-struct add : public static_visitor<sexp> {
+struct add : public static_visitor<Expression> {
     template<typename T, typename U>
-    sexp dispatch(const T&, const U&, boost::mpl::false_) const {
+    Expression dispatch(const T&, const U&, boost::mpl::false_) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
     
     template<typename T, typename U>
-    sexp dispatch(const T& lhs, const U& rhs, boost::mpl::true_) const {
-        return sexp(lhs + rhs);
+    Expression dispatch(const T& lhs, const U& rhs, boost::mpl::true_) const {
+        return Expression(lhs + rhs);
     }
 
     template<typename T, typename U>
-    sexp operator()(const T& lhs, const U& rhs) const {
+    Expression operator()(const T& lhs, const U& rhs) const {
         return dispatch(lhs, rhs,
                         boost::mpl::and_<
                             boost::is_arithmetic<T>,
                             boost::is_arithmetic<U> >());
     }
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return binary_dispatch(*this, args);
     }
 };
 
-struct sub : public static_visitor<sexp> {
+struct sub : public static_visitor<Expression> {
     template<typename T, typename U>
-    sexp dispatch(const T&, const U&, boost::mpl::false_) const {
+    Expression dispatch(const T&, const U&, boost::mpl::false_) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
     
     template<typename T, typename U>
-    sexp dispatch(const T& lhs, const U& rhs, boost::mpl::true_) const {
-        return sexp(lhs - rhs);
+    Expression dispatch(const T& lhs, const U& rhs, boost::mpl::true_) const {
+        return Expression(lhs - rhs);
     }
 
     template<typename T, typename U>
-    sexp operator()(const T& lhs, const U& rhs) const {
+    Expression operator()(const T& lhs, const U& rhs) const {
         return dispatch(lhs, rhs,
                         boost::mpl::and_<
                             boost::is_arithmetic<T>,
                             boost::is_arithmetic<U> >());
     }
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return binary_dispatch(*this, args);
     }
 };
 
-struct mul : public static_visitor<sexp> {
+struct mul : public static_visitor<Expression> {
     template<typename T, typename U>
-    sexp dispatch(const T&, const U&, boost::mpl::false_) const {
+    Expression dispatch(const T&, const U&, boost::mpl::false_) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
     
     template<typename T, typename U>
-    sexp dispatch(const T& lhs, const U& rhs, boost::mpl::true_) const {
-        return sexp(lhs * rhs);
+    Expression dispatch(const T& lhs, const U& rhs, boost::mpl::true_) const {
+        return Expression(lhs * rhs);
     }
 
     template<typename T, typename U>
-    sexp operator()(const T& lhs, const U& rhs) const {
+    Expression operator()(const T& lhs, const U& rhs) const {
         return dispatch(lhs, rhs,
                         boost::mpl::and_<
                             boost::is_arithmetic<T>,
                             boost::is_arithmetic<U> >());
     }
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return binary_dispatch(*this, args);
     }
 };
 
 
-struct div : public static_visitor<sexp> {
+struct div : public static_visitor<Expression> {
     template<typename T, typename U>
-    sexp dispatch(const T&, const U&, boost::mpl::false_) const {
+    Expression dispatch(const T&, const U&, boost::mpl::false_) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
     
     template<typename T, typename U>
-    sexp dispatch(const T& lhs, const U& rhs, boost::mpl::true_) const {
-        return sexp(lhs / rhs);
+    Expression dispatch(const T& lhs, const U& rhs, boost::mpl::true_) const {
+        return Expression(lhs / rhs);
     }
 
     template<typename T, typename U>
-    sexp operator()(const T& lhs, const U& rhs) const {
+    Expression operator()(const T& lhs, const U& rhs) const {
         return dispatch(lhs, rhs,
                         boost::mpl::and_<
                             boost::is_arithmetic<T>,
                             boost::is_arithmetic<U> >());
     }
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return binary_dispatch(*this, args);
     }
 };

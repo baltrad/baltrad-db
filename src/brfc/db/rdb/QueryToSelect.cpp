@@ -36,7 +36,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/AttributeMapper.hpp>
 #include <brfc/db/rdb/Model.hpp>
 
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/Expression.hpp>
 
 #include <brfc/sql/Alias.hpp>
 #include <brfc/sql/BinaryOperator.hpp>
@@ -56,7 +56,7 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
-using expr::sexp;
+using expr::Expression;
 
 namespace {
 
@@ -93,11 +93,11 @@ struct attr {
     }
 
     sql::ExpressionPtr
-    operator()(const sexp& x) {
+    operator()(const Expression& x) {
         BRFC_ASSERT(x.is_list());
         BRFC_ASSERT(x.size() == 3);
 
-        sexp::const_iterator it = x.begin();
+        Expression::const_iterator it = x.begin();
         ++it; // skip symbol
         const std::string& name = (*it).string();
         ++it;
@@ -239,7 +239,7 @@ struct attr {
 };
 
 struct binop {
-    typedef boost::function<sql::ExpressionPtr(const sexp&)> eval_t;
+    typedef boost::function<sql::ExpressionPtr(const Expression&)> eval_t;
 
     eval_t eval;
     std::map<std::string, std::string> opmap;
@@ -266,11 +266,11 @@ struct binop {
         ;
     }
 
-    sql::ExpressionPtr operator()(const sexp& x) {
+    sql::ExpressionPtr operator()(const Expression& x) {
         BRFC_ASSERT(x.is_list());
         BRFC_ASSERT(x.size() == 3);
 
-        sexp::const_iterator it = x.begin();
+        Expression::const_iterator it = x.begin();
         std::string op = opmap[it->symbol()];
         ++it;
         sql::ExpressionPtr lhs = eval(*it);
@@ -296,18 +296,18 @@ struct binop {
 };
 
 struct func {
-    typedef boost::function<sql::ExpressionPtr(const sexp&)> eval_t;
+    typedef boost::function<sql::ExpressionPtr(const Expression&)> eval_t;
 
     eval_t eval;
 
     explicit func(eval_t eval_) : eval(eval_) { }
     
-    sql::ExpressionPtr operator()(const sexp& x) {
+    sql::ExpressionPtr operator()(const Expression& x) {
         BRFC_ASSERT(x.is_list());
         BRFC_ASSERT(x.size() >= 1);
 
         sql::FunctionPtr f = sql::Function::create(x.front().symbol());
-        sexp::const_iterator it = x.begin();
+        Expression::const_iterator it = x.begin();
         ++it; // skip symbol
         for ( ; it != x.end(); ++it) {
             f->add_arg(eval(*it));
@@ -319,34 +319,34 @@ struct func {
 struct literal {
     sql::Factory xpr_;
 
-    sql::ExpressionPtr operator()(const sexp& x) {
+    sql::ExpressionPtr operator()(const Expression& x) {
         switch (x.type()) {
-            case sexp::type::LIST:
+            case Expression::type::LIST:
                 return list(x);
-            case sexp::type::BOOL:
+            case Expression::type::BOOL:
                 return xpr_.literal(Variant(x.bool_()));
-            case sexp::type::INT64:
+            case Expression::type::INT64:
                 return xpr_.literal(Variant(x.int64()));
-            case sexp::type::DOUBLE:
+            case Expression::type::DOUBLE:
                 return xpr_.literal(Variant(x.double_()));
-            case sexp::type::STRING:
+            case Expression::type::STRING:
                 return xpr_.literal(Variant(x.string()));
-            case sexp::type::DATE:
+            case Expression::type::DATE:
                 return xpr_.literal(Variant(x.date()));
-            case sexp::type::TIME:
+            case Expression::type::TIME:
                 return xpr_.literal(Variant(x.time()));
-            case sexp::type::DATETIME:
+            case Expression::type::DATETIME:
                 return xpr_.literal(Variant(x.datetime()));
-            case sexp::type::SYMBOL:
+            case Expression::type::SYMBOL:
                 throw std::logic_error("literal symbol");
             default:
-                throw std::logic_error("unhandled sexp type");
+                throw std::logic_error("unhandled Expression type");
         }
     }
 
-    sql::ExpressionPtr list(const sexp& x) {
+    sql::ExpressionPtr list(const Expression& x) {
         sql::ExpressionListPtr exprs = sql::ExpressionList::create();
-        sexp::const_iterator iter = x.begin();
+        Expression::const_iterator iter = x.begin();
         for ( ; iter != x.end(); ++iter) {
             exprs->add(operator()(*iter));
         }
@@ -357,7 +357,7 @@ struct literal {
 } // namespace anonymous
 
 struct QueryToSelect::Impl {
-    typedef boost::function<sql::ExpressionPtr(const sexp&)> proc_t;
+    typedef boost::function<sql::ExpressionPtr(const Expression&)> proc_t;
     typedef std::map<std::string, proc_t> procmap_t;
 
     const AttributeMapper* mapper_;
@@ -417,7 +417,7 @@ struct QueryToSelect::Impl {
      */
     void reset();
 
-    sql::ExpressionPtr eval(const sexp& x) {
+    sql::ExpressionPtr eval(const Expression& x) {
         if (x.is_list() and not x.empty() and x.front().is_symbol()) {
             const std::string& symbol = x.front().symbol();
             if (symbol == "attr")
@@ -516,7 +516,7 @@ QueryToSelect::Impl::transform(const AttributeQuery& query) {
     } 
 
     // replace attributes in group by
-    BOOST_FOREACH(const expr::sexp& x, query.group()) {
+    BOOST_FOREACH(const expr::Expression& x, query.group()) {
         select_->append_group_by(eval(x));
     }
 

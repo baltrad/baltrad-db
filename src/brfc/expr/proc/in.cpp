@@ -20,27 +20,27 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/in.hpp>
 
 #include <brfc/assert.hpp>
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace expr {
 
-sexp
-in::operator()(const sexp& args) const{
+Expression
+in::operator()(const Expression& args) const{
     BRFC_ASSERT(args.size() == 2);
-    sexp::const_iterator it = args.begin();
-    const sexp& lhs = *it;
+    Expression::const_iterator it = args.begin();
+    const Expression& lhs = *it;
     ++it;
-    const sexp& rhs = *it;
+    const Expression& rhs = *it;
     BRFC_ASSERT(not lhs.is_list());
     BRFC_ASSERT(rhs.is_list());
 
     it = rhs.begin();
     for ( ; it != rhs.end(); ++it) {
         if (lhs == *it)
-            return sexp(true);
+            return Expression(true);
     }
-    return sexp(false);
+    return Expression(false);
 }
 
 } // namespace expr

@@ -28,50 +28,50 @@ namespace proc {
 
 // should we also support nil (i.e empty list)?
 
-struct and_ : public static_visitor<sexp> {
+struct and_ : public static_visitor<Expression> {
     template<typename T, typename U>
-    sexp operator()(const T&, const U&) const {
+    Expression operator()(const T&, const U&) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
 
-    sexp operator()(bool lhs, bool rhs) const {
-        return sexp(lhs and rhs);
+    Expression operator()(bool lhs, bool rhs) const {
+        return Expression(lhs and rhs);
     }
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return binary_dispatch(*this, args);
     }
 };
 
-struct or_ : public static_visitor<sexp> {
+struct or_ : public static_visitor<Expression> {
     template<typename T, typename U>
-    sexp operator()(const T&, const U&) const {
+    Expression operator()(const T&, const U&) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
 
-    sexp operator()(bool lhs, bool rhs) const {
-        return sexp(lhs or rhs);
+    Expression operator()(bool lhs, bool rhs) const {
+        return Expression(lhs or rhs);
     }
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return binary_dispatch(*this, args);
     }
 };
 
-struct not_ : public static_visitor<sexp> {
+struct not_ : public static_visitor<Expression> {
     template<typename T>
-    sexp operator()(const T&) const {
+    Expression operator()(const T&) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
 
-    sexp operator()(bool val) const {
-        return sexp(not val);
+    Expression operator()(bool val) const {
+        return Expression(not val);
     }
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return unary_dispatch(*this, args);
     }
 };

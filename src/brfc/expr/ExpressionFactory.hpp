@@ -34,7 +34,7 @@ class Variant;
 
 namespace expr {
 
-class sexp;
+class Expression;
 
 /**
  * @brief factory for constructing expression elements
@@ -56,79 +56,79 @@ class ExpressionFactory {
     /**
      * @brief construct expr::Attribute
      */
-    sexp attribute(const std::string& name) const;
+    Expression attribute(const std::string& name) const;
 
-    sexp literal(const Variant& value) const;
-
-    /**
-     * @brief construct sexp containing a string
-     */
-    sexp string(const std::string& value) const;
+    Expression literal(const Variant& value) const;
 
     /**
-     * @brief construct sexp containing a string
+     * @brief construct Expression containing a string
      */
-    sexp string(const char* value) const;
+    Expression string(const std::string& value) const;
 
     /**
-     * @brief construct sexp containing a 64-bit integer
+     * @brief construct Expression containing a string
      */
-    sexp int64_(long long value) const;
+    Expression string(const char* value) const;
+
+    /**
+     * @brief construct Expression containing a 64-bit integer
+     */
+    Expression int64_(long long value) const;
     
     /**
-     * @brief construct sexp containing a 64-bit integer
+     * @brief construct Expression containing a 64-bit integer
      */
-    sexp long_(long long value) const;
+    Expression long_(long long value) const;
 
     /**
-     * @brief construct sexp containing a double precision float
+     * @brief construct Expression containing a double precision float
      */
-    sexp double_(double value) const;
+    Expression double_(double value) const;
 
     /**
-     * @brief construct sexp containing a date
+     * @brief construct Expression containing a date
      */
-    sexp date(int year, int month, int day) const;
+    Expression date(int year, int month, int day) const;
 
     /**
-     * @brief construct sexp containing a date
+     * @brief construct Expression containing a date
      */
-    sexp date(const Date& date) const;
+    Expression date(const Date& date) const;
 
     /**
-     * @brief construct sexp containing a date
+     * @brief construct Expression containing a date
      */
-    sexp date(const DateTime& datetime) const;
+    Expression date(const DateTime& datetime) const;
 
     /**
-     * @brief construct sexp containing a time
+     * @brief construct Expression containing a time
      */
-    sexp time(int hour, int minute, int second=0) const;
+    Expression time(int hour, int minute, int second=0) const;
 
     /**
-     * @brief construct sexp containing a time
+     * @brief construct Expression containing a time
      */
-    sexp time(const Time& time) const;
+    Expression time(const Time& time) const;
 
     /**
-     * @brief construct sexp containing a time
+     * @brief construct Expression containing a time
      */
-    sexp time(const DateTime& datetime) const;
+    Expression time(const DateTime& datetime) const;
 
     /**
-     * @brief construct sexp containing a datetime
+     * @brief construct Expression containing a datetime
      */
-    sexp datetime(const DateTime& datetime) const;
+    Expression datetime(const DateTime& datetime) const;
 
     /**
-     * @brief construct sexp containing a timedelta
+     * @brief construct Expression containing a timedelta
      */
-    sexp timedelta(const TimeDelta& delta) const;
+    Expression timedelta(const TimeDelta& delta) const;
 
     /**
-     * @brief construct sexp containing a bool
+     * @brief construct Expression containing a bool
      */
-    sexp bool_(bool value) const;
+    Expression bool_(bool value) const;
 
     /**
      * @name comparison operators
@@ -137,37 +137,37 @@ class ExpressionFactory {
     /**
      * @brief lhs != rhs
      */
-    sexp ne(const sexp& lhs, const sexp& rhs) const;
+    Expression ne(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs == rhs
      */
-    sexp eq(const sexp& lhs, const sexp& rhs) const;
+    Expression eq(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs > rhs
      */
-    sexp gt(const sexp& lhs, const sexp& rhs) const;
+    Expression gt(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs < rhs
      */
-    sexp lt(const sexp& lhs, const sexp& rhs) const;
+    Expression lt(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs <= rhs
      */
-    sexp le(const sexp& lhs, const sexp& rhs) const;
+    Expression le(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs >= rhs
      */
-    sexp ge(const sexp& lhs, const sexp& rhs) const;
+    Expression ge(const Expression& lhs, const Expression& rhs) const;
     
     /**
      * @brief low <= expr <= high
      */
-    sexp between(const sexp& x, const sexp& low, const sexp& high) const;
+    Expression between(const Expression& x, const Expression& low, const Expression& high) const;
     //@}
 
     /**
@@ -177,22 +177,22 @@ class ExpressionFactory {
     /**
      * @brief lhs AND rhs
      */
-    sexp and_(const sexp& lhs, const sexp& rhs) const;
+    Expression and_(const Expression& lhs, const Expression& rhs) const;
     
     /**
      * @brief expr1 AND expr2 AND ...
      */
-    sexp and_(const sexp& x) const;
+    Expression and_(const Expression& x) const;
 
     /**
      * @brief lhs OR rhs
      */
-    sexp or_(const sexp& lhs, const sexp& rhs) const;
+    Expression or_(const Expression& lhs, const Expression& rhs) const;
     
     /**
      * @brief expr1 OR expr2 OR ...
      */
-    sexp or_(const sexp& x) const;
+    Expression or_(const Expression& x) const;
     //@}
     
     /**
@@ -202,43 +202,43 @@ class ExpressionFactory {
     /**
      * @brief lhs + rhs
      */
-    sexp add(const sexp& lhs, const sexp& rhs) const;
+    Expression add(const Expression& lhs, const Expression& rhs) const;
     
     /**
      * @brief lhs - rhs
      */
-    sexp sub(const sexp& lhs, const sexp& rhs) const;
+    Expression sub(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs * rhs
      */
-    sexp mul(const sexp& lhs, const sexp& rhs) const;
+    Expression mul(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs / rhs
      */
-    sexp div(const sexp& lhs, const sexp& rhs) const;
+    Expression div(const Expression& lhs, const Expression& rhs) const;
     ///@}
 
     /**
      * @brief surround x with parentheses
      */
-    sexp parentheses(const sexp& x) const;
+    Expression parentheses(const Expression& x) const;
     
     /**
      * @brief x LIKE pattern
      */
-    sexp like(const sexp& x, const std::string& pattern) const;
+    Expression like(const Expression& x, const std::string& pattern) const;
     
     /**
      * @brief x IN l
      */
-    sexp in(const sexp& x, const sexp& l) const;
+    Expression in(const Expression& x, const Expression& l) const;
     
     /**
      * @brief x NOT IN l
      */
-    sexp not_in(const sexp& x, const sexp& l) const;
+    Expression not_in(const Expression& x, const Expression& l) const;
     
     /**
      * @name aggregate functions
@@ -247,22 +247,22 @@ class ExpressionFactory {
     /**
      * @brief MIN function
      */
-    sexp min(const sexp& expr) const;
+    Expression min(const Expression& expr) const;
     
     /**
      * @brief MAX function
      */
-    sexp max(const sexp& expr) const;
+    Expression max(const Expression& expr) const;
 
     /**
      * @brief SUM function
      */
-    sexp sum(const sexp& x) const;
+    Expression sum(const Expression& x) const;
     
     /**
      * @brief COUNT function
      */
-    sexp count(const sexp& x) const;
+    Expression count(const Expression& x) const;
     //@}
 
     /**
@@ -271,12 +271,12 @@ class ExpressionFactory {
      * @param time name of the time attribute
      * @throw value_error if attributes are of incorrect type
      */
-    sexp combined_datetime(const std::string& date,
+    Expression combined_datetime(const std::string& date,
                            const std::string& time) const;
   
   private:
-    sexp binary(const std::string& op, const sexp& lhs, const sexp& rhs) const;
-    sexp unary(const std::string& op, const sexp& arg) const;
+    Expression binary(const std::string& op, const Expression& lhs, const Expression& rhs) const;
+    Expression unary(const std::string& op, const Expression& arg) const;
 
     AttributePrototypes prototypes_;
 };

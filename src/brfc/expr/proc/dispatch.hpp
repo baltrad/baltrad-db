@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_EXPR_PROC_DISPATCH_HPP
 
 #include <brfc/assert.hpp>
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace expr {
@@ -29,7 +29,7 @@ namespace proc {
 
 template<typename Function>
 typename Function::result_type
-unary_dispatch(const Function& func, const sexp& args) {
+unary_dispatch(const Function& func, const Expression& args) {
     BRFC_ASSERT(args.is_list());
     BRFC_ASSERT(args.size() == 1);
     return expr::apply_visitor(func, args.front());
@@ -37,13 +37,13 @@ unary_dispatch(const Function& func, const sexp& args) {
 
 template<typename Function>
 typename Function::result_type
-binary_dispatch(const Function& func, const sexp& args) {
+binary_dispatch(const Function& func, const Expression& args) {
     BRFC_ASSERT(args.is_list());
     BRFC_ASSERT(args.size() == 2);
-    expr::sexp::const_iterator it = args.begin();
-    const sexp& arg1 = *it;
+    expr::Expression::const_iterator it = args.begin();
+    const Expression& arg1 = *it;
     ++it;
-    const sexp& arg2 = *it;
+    const Expression& arg2 = *it;
     return expr::apply_visitor(func, arg1, arg2);
 }
 

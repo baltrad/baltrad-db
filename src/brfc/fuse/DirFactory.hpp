@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/tag.hpp>
 
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/Expression.hpp>
 #include <brfc/fuse/EntryFactory.hpp>
 #include <brfc/fuse/DirEntry.hpp>
 
@@ -55,7 +55,7 @@ class DirFactory : public EntryFactory {
      * @param cfactory child factory to bind with created entries
      */
     DirFactory(db::Database* db,
-               const expr::sexp& attr,
+               const expr::Expression& attr,
                const EntryFactory* cfactory);
     
     virtual ~DirFactory();
@@ -66,7 +66,7 @@ class DirFactory : public EntryFactory {
   private:
     virtual DirFactory* do_clone() const;
 
-    virtual void do_filter(const expr::sexp& expr);
+    virtual void do_filter(const expr::Expression& expr);
 
     virtual void do_update();
 
@@ -114,9 +114,9 @@ class DirFactory : public EntryFactory {
     db::Database& database() { return *db_; }
 
     db::Database* db_;
-    expr::sexp attr_;
+    expr::Expression attr_;
     const EntryFactory* cfactory_;
-    expr::sexp filter_;
+    expr::Expression filter_;
     EntrySet_t entries_;
 };
 

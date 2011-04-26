@@ -22,95 +22,95 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <stdexcept>
 
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace expr {
 
-TEST(expr_sexp_test, test_ctor_default) {
-    sexp e;
-    ASSERT_EQ(sexp::type::LIST, e.type());
+TEST(expr_Expression_test, test_ctor_default) {
+    Expression e;
+    ASSERT_EQ(Expression::type::LIST, e.type());
 }
 
-TEST(expr_sexp_test, test_ctor_symbol) {
-    sexp e("symbol", sexp::construct_symbol());
-    ASSERT_EQ(sexp::type::SYMBOL, e.type());
+TEST(expr_Expression_test, test_ctor_symbol) {
+    Expression e("symbol", Expression::construct_symbol());
+    ASSERT_EQ(Expression::type::SYMBOL, e.type());
     ASSERT_EQ("symbol", e.symbol());
 }
 
-TEST(expr_sexp_test, test_ctor_string) {
-    sexp e("string");
-    ASSERT_EQ(sexp::type::STRING, e.type());
+TEST(expr_Expression_test, test_ctor_string) {
+    Expression e("string");
+    ASSERT_EQ(Expression::type::STRING, e.type());
     ASSERT_EQ("string", e.string());
 }
 
-TEST(expr_sexp_test, test_ctor_bool) {
-    sexp e(true);
-    ASSERT_EQ(sexp::type::BOOL, e.type());
+TEST(expr_Expression_test, test_ctor_bool) {
+    Expression e(true);
+    ASSERT_EQ(Expression::type::BOOL, e.type());
     ASSERT_TRUE(e.bool_());
 }
 
-TEST(expr_sexp_test, test_swap) {
-    sexp e1(true);
-    sexp e2("foo");
+TEST(expr_Expression_test, test_swap) {
+    Expression e1(true);
+    Expression e2("foo");
     e1.swap(e2);
-    ASSERT_EQ(sexp::type::STRING, e1.type());
+    ASSERT_EQ(Expression::type::STRING, e1.type());
     EXPECT_EQ("foo", e1.string());
-    ASSERT_EQ(sexp::type::BOOL, e2.type());
+    ASSERT_EQ(Expression::type::BOOL, e2.type());
     EXPECT_TRUE(e2.bool_());
 }
 
-TEST(expr_sexp_test, test_assign) {
-    sexp e1;
-    sexp e2("foo");
+TEST(expr_Expression_test, test_assign) {
+    Expression e1;
+    Expression e2("foo");
     e1 = e2;
-    ASSERT_EQ(sexp::type::STRING, e1.type());
+    ASSERT_EQ(Expression::type::STRING, e1.type());
     EXPECT_EQ("foo", e1.string());
-    ASSERT_EQ(sexp::type::STRING, e2.type());
+    ASSERT_EQ(Expression::type::STRING, e2.type());
     EXPECT_EQ("foo", e2.string());
 }
 
-TEST(expr_sexp_test, test_copy_ctor) {
-    sexp e1("foo");
-    sexp e2(e1);
-    ASSERT_EQ(sexp::type::STRING, e1.type());
+TEST(expr_Expression_test, test_copy_ctor) {
+    Expression e1("foo");
+    Expression e2(e1);
+    ASSERT_EQ(Expression::type::STRING, e1.type());
     EXPECT_EQ("foo", e1.string());
-    ASSERT_EQ(sexp::type::STRING, e2.type());
+    ASSERT_EQ(Expression::type::STRING, e2.type());
     EXPECT_EQ("foo", e2.string());
 }
 
-TEST(expr_sexp_test, test_push_back) {
-    sexp e;
-    e.push_back(sexp("foo"));
+TEST(expr_Expression_test, test_push_back) {
+    Expression e;
+    e.push_back(Expression("foo"));
     ASSERT_EQ(1u, e.size());
-    ASSERT_EQ(sexp::type::STRING, e.front().type());
+    ASSERT_EQ(Expression::type::STRING, e.front().type());
     ASSERT_EQ("foo", e.front().string());
 }
 
-TEST(expr_sexp_test, test_pop_front) {
-    sexp e;
-    e.push_back(sexp("foo"));
+TEST(expr_Expression_test, test_pop_front) {
+    Expression e;
+    e.push_back(Expression("foo"));
     e.pop_front();
     EXPECT_TRUE(e.empty());
 }
 
-TEST(expr_sexp_test, test_pop_front_empty) {
-    sexp e;
+TEST(expr_Expression_test, test_pop_front_empty) {
+    Expression e;
     EXPECT_ANY_THROW(e.pop_front());
 }
 
-TEST(expr_sexp_test, test_equality) {
-    sexp e1;
-    sexp e2(1);
-    sexp e3(1.0f);
-    sexp e4(true);
-    sexp e5("foo");
-    sexp e6("foo", sexp::construct_symbol());
-    sexp e7;
-    e7.push_back(sexp("foo"));
-    sexp e8(Date(2010, 11, 12));
-    sexp e9(Time(13, 14, 15));
-    sexp e10(DateTime(2010, 11, 12, 13, 14, 15));
+TEST(expr_Expression_test, test_equality) {
+    Expression e1;
+    Expression e2(1);
+    Expression e3(1.0f);
+    Expression e4(true);
+    Expression e5("foo");
+    Expression e6("foo", Expression::construct_symbol());
+    Expression e7;
+    e7.push_back(Expression("foo"));
+    Expression e8(Date(2010, 11, 12));
+    Expression e9(Time(13, 14, 15));
+    Expression e10(DateTime(2010, 11, 12, 13, 14, 15));
 
     EXPECT_EQ(e1, e1);
     EXPECT_NE(e1, e2);
@@ -178,15 +178,15 @@ TEST(expr_sexp_test, test_equality) {
     EXPECT_EQ(e10, e10);
 }
 
-TEST(expr_sexp_test, test_less_than_list) {
-    sexp e1;
-    sexp e2;
-    e2.push_back(sexp(1));
-    sexp e3;
-    e3.push_back(sexp(1));
-    e3.push_back(sexp(2));
-    sexp e4;
-    e4.push_back(sexp(2));
+TEST(expr_Expression_test, test_less_than_list) {
+    Expression e1;
+    Expression e2;
+    e2.push_back(Expression(1));
+    Expression e3;
+    e3.push_back(Expression(1));
+    e3.push_back(Expression(2));
+    Expression e4;
+    e4.push_back(Expression(2));
 
     EXPECT_LT(e1, e2);
     EXPECT_LT(e1, e3);
@@ -198,17 +198,17 @@ TEST(expr_sexp_test, test_less_than_list) {
     EXPECT_LT(e3, e4);
 }
 
-TEST(expr_sexp_test, test_to_ostream) {
-    sexp e;
-    e.push_back(sexp("foo", sexp::construct_symbol()));
-    e.push_back(sexp("bar"));
-    e.push_back(sexp(false));
-    e.push_back(sexp(1));
-    e.push_back(sexp(1.2));
-    e.push_back(sexp());
-    e.push_back(sexp(Date(2011, 12, 13)));
-    e.push_back(sexp(Time(14, 15, 16, 17)));
-    e.push_back(sexp(DateTime(2011, 12, 13, 14, 15, 16, 17)));
+TEST(expr_Expression_test, test_to_ostream) {
+    Expression e;
+    e.push_back(Expression("foo", Expression::construct_symbol()));
+    e.push_back(Expression("bar"));
+    e.push_back(Expression(false));
+    e.push_back(Expression(1));
+    e.push_back(Expression(1.2));
+    e.push_back(Expression());
+    e.push_back(Expression(Date(2011, 12, 13)));
+    e.push_back(Expression(Time(14, 15, 16, 17)));
+    e.push_back(Expression(DateTime(2011, 12, 13, 14, 15, 16, 17)));
     std::stringstream ss;
     ss << e;
     std::string expected =
@@ -243,14 +243,14 @@ struct noncopyable_const_visitor : static_visitor<void> {
 
 }
 
-TEST(expr_sexp_test, test_apply_visitor_noncopyable_visitor) {
-    sexp e;
+TEST(expr_Expression_test, test_apply_visitor_noncopyable_visitor) {
+    Expression e;
     noncopyable_visitor v;
     apply_visitor(v, e);
 }
 
-TEST(expr_sexp_test, test_apply_visitor_noncopyable_const_visitor) {
-    sexp e;
+TEST(expr_Expression_test, test_apply_visitor_noncopyable_const_visitor) {
+    Expression e;
     apply_visitor(noncopyable_const_visitor(), e);
 }
 

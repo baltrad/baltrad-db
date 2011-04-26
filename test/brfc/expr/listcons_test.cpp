@@ -25,19 +25,19 @@ namespace brfc {
 namespace expr {
 
 TEST(expr_listcons_test, test_empty) {
-    sexp e = listcons().get();
+    Expression e = listcons().get();
     ASSERT_TRUE(e.is_list());
     ASSERT_EQ(0u, e.size());
 }
 
 TEST(expr_listcons_test, test_construct_one) {
-    sexp e= listcons().symbol("+").get();
+    Expression e= listcons().symbol("+").get();
     ASSERT_EQ(1u, e.size());
-    ASSERT_EQ(sexp::type::SYMBOL, e.front().type());
+    ASSERT_EQ(Expression::type::SYMBOL, e.front().type());
 }
 
 TEST(expr_listcons_test, test_construct_many) {
-    sexp e = listcons().symbol("+")
+    Expression e = listcons().symbol("+")
                        .int64(1)
                        .double_(2.1)
                        .bool_(true)
@@ -47,7 +47,7 @@ TEST(expr_listcons_test, test_construct_many) {
                        .datetime(2011, 12, 13, 14, 15, 16, 17)
                        .get();
     ASSERT_EQ(8u, e.size());
-    sexp::const_iterator it = e.begin();
+    Expression::const_iterator it = e.begin();
     ASSERT_TRUE(it->is_symbol());
     ASSERT_EQ("+", it->symbol());
     ++it;

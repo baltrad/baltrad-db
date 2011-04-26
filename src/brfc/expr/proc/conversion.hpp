@@ -19,7 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_PROC_AGGREGATE_HPP
 #define BRFC_EXPR_PROC_AGGREGATE_HPP
 
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/Expression.hpp>
 
 #include <brfc/expr/proc/dispatch.hpp>
 
@@ -27,71 +27,71 @@ namespace brfc {
 namespace expr {
 namespace proc {
 
-struct date : public static_visitor<sexp> {
+struct date : public static_visitor<Expression> {
     template<typename T>
-    sexp operator()(const T& value) const {
+    Expression operator()(const T& value) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
 
-    sexp operator()(const std::string& value) const {
-        return sexp(Date::from_iso_string(value));
+    Expression operator()(const std::string& value) const {
+        return Expression(Date::from_iso_string(value));
     }
 
-    sexp operator()(const DateTime& value) const {
-        return sexp(value.date());
+    Expression operator()(const DateTime& value) const {
+        return Expression(value.date());
     }
 
-    sexp operator()(const Date& value) const {
-        return sexp(value);
+    Expression operator()(const Date& value) const {
+        return Expression(value);
     }
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return unary_dispatch(*this, args);
     }
 };
 
-struct time : public static_visitor<sexp> {
+struct time : public static_visitor<Expression> {
     template<typename T>
-    sexp operator()(const T& value) const {
+    Expression operator()(const T& value) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
     
-    sexp operator()(const std::string& value) const {
-        return sexp(Time::from_iso_string(value));
+    Expression operator()(const std::string& value) const {
+        return Expression(Time::from_iso_string(value));
     }
 
-    sexp operator()(const DateTime& value) const {
-        return sexp(value.time());
+    Expression operator()(const DateTime& value) const {
+        return Expression(value.time());
     }
 
-    sexp operator()(const Time& value) const {
-        return sexp(value);
+    Expression operator()(const Time& value) const {
+        return Expression(value);
     }
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return unary_dispatch(*this, args);
     }
 
 };
 
-struct datetime : public static_visitor<sexp> {
+struct datetime : public static_visitor<Expression> {
     template<typename T>
-    sexp operator()(const T& value) const {
+    Expression operator()(const T& value) const {
         BRFC_ASSERT(false);
-        return sexp();
+        return Expression();
     }
 
-    sexp operator()(const std::string& value) const {
-        return sexp(DateTime::from_iso_string(value));
+    Expression operator()(const std::string& value) const {
+        return Expression(DateTime::from_iso_string(value));
     }
 
-    sexp operator()(const DateTime& value) const {
-        return sexp(value);
+    Expression operator()(const DateTime& value) const {
+        return Expression(value);
     }
 
-    sexp operator()(const sexp& args) const {
+    Expression operator()(const Expression& args) const {
         return unary_dispatch(*this, args);
     }
 };

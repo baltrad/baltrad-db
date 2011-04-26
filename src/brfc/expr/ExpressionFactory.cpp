@@ -38,148 +38,148 @@ ExpressionFactory::ExpressionFactory(const AttributePrototypes& prototypes)
 
 }
 
-sexp
+Expression
 ExpressionFactory::attribute(const std::string& name) const {
     const std::string& type = prototypes_.typename_(name);
     return listcons().symbol("attr").string(name).string(type).get();
 }
 
-sexp
+Expression
 ExpressionFactory::literal(const Variant& value) const {
-    return sexp();
+    return Expression();
 }
 
-sexp
+Expression
 ExpressionFactory::string(const std::string& value) const {
-    return sexp(value);
+    return Expression(value);
 }
 
-sexp
+Expression
 ExpressionFactory::string(const char* value) const {
-    return sexp(value);
+    return Expression(value);
 }
 
-sexp
+Expression
 ExpressionFactory::int64_(long long value) const {
-    return sexp(value);
+    return Expression(value);
 }
 
-sexp
+Expression
 ExpressionFactory::long_(long long value) const {
-    return sexp(value);
+    return Expression(value);
 }
 
-sexp
+Expression
 ExpressionFactory::double_(double value) const {
-    return sexp(value);
+    return Expression(value);
 }
 
-sexp
+Expression
 ExpressionFactory::date(int year, int month, int day) const {
     return date(Date(year, month, day));
 }
 
-sexp
+Expression
 ExpressionFactory::date(const Date& date) const {
-    return sexp(date);
+    return Expression(date);
 }
 
-sexp
+Expression
 ExpressionFactory::date(const DateTime& datetime) const {
     return date(datetime.date());
 }
 
-sexp
+Expression
 ExpressionFactory::time(int hour, int minute, int second) const {
     return time(Time(hour, minute, second));
 }
 
-sexp
+Expression
 ExpressionFactory::time(const Time& time) const {
-    return sexp(time);
+    return Expression(time);
 }
 
-sexp
+Expression
 ExpressionFactory::time(const DateTime& datetime) const {
     return time(datetime.time());
 }
 
-sexp
+Expression
 ExpressionFactory::datetime(const DateTime& datetime) const {
-    return sexp(datetime);
+    return Expression(datetime);
 }
 
-sexp
+Expression
 ExpressionFactory::timedelta(const TimeDelta& delta) const {
-    return sexp(delta);
+    return Expression(delta);
 }
 
-sexp
+Expression
 ExpressionFactory::bool_(bool value) const {
-    return sexp(value);
+    return Expression(value);
 }
 
-sexp
-ExpressionFactory::unary(const std::string& op, const sexp& arg) const {
+Expression
+ExpressionFactory::unary(const std::string& op, const Expression& arg) const {
     return listcons().symbol(op).append(arg).get();
 }
 
-sexp
+Expression
 ExpressionFactory::binary(const std::string& op,
-                         const sexp& lhs,
-                         const sexp& rhs) const {
+                         const Expression& lhs,
+                         const Expression& rhs) const {
     return listcons().symbol(op).append(lhs).append(rhs).get();
 }
 
-sexp
-ExpressionFactory::ne(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::ne(const Expression& lhs, const Expression& rhs) const {
     return binary("!=", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::eq(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::eq(const Expression& lhs, const Expression& rhs) const {
     return binary("=", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::gt(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::gt(const Expression& lhs, const Expression& rhs) const {
     return binary(">", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::lt(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::lt(const Expression& lhs, const Expression& rhs) const {
     return binary("<", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::le(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::le(const Expression& lhs, const Expression& rhs) const {
     return binary("<=", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::ge(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::ge(const Expression& lhs, const Expression& rhs) const {
     return binary(">=", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::between(const sexp& expr,
-                           const sexp& low,
-                           const sexp& high) const {
+Expression
+ExpressionFactory::between(const Expression& expr,
+                           const Expression& low,
+                           const Expression& high) const {
     return and_(binary("<=", low, expr), binary("<=", expr, high));
 }
 
-sexp
-ExpressionFactory::and_(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::and_(const Expression& lhs, const Expression& rhs) const {
     return binary("and", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::and_(const sexp& x) const {
+Expression
+ExpressionFactory::and_(const Expression& x) const {
     BRFC_ASSERT(x.is_list());
     if (x.size() < 1)
-        throw value_error("sexp must have at least 1 element");
-    sexp::const_iterator it = x.begin();
-    sexp result = *it;
+        throw value_error("Expression must have at least 1 element");
+    Expression::const_iterator it = x.begin();
+    Expression result = *it;
     ++it;
     for ( ; it != x.end(); ++it) {
         result = and_(result, *it);
@@ -187,18 +187,18 @@ ExpressionFactory::and_(const sexp& x) const {
     return result;
 }
 
-sexp
-ExpressionFactory::or_(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::or_(const Expression& lhs, const Expression& rhs) const {
     return binary("or", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::or_(const sexp& x) const {
+Expression
+ExpressionFactory::or_(const Expression& x) const {
     BRFC_ASSERT(x.is_list());
     if (x.size() < 1)
-        throw value_error("sexp must have at least 1 element");
-    sexp::const_iterator it = x.begin();
-    sexp result = *it;
+        throw value_error("Expression must have at least 1 element");
+    Expression::const_iterator it = x.begin();
+    Expression result = *it;
     ++it;
     for ( ; it != x.end(); ++it) {
         result = or_(result, *it);
@@ -206,67 +206,67 @@ ExpressionFactory::or_(const sexp& x) const {
     return result;
 }
 
-sexp
-ExpressionFactory::add(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::add(const Expression& lhs, const Expression& rhs) const {
     return binary("+", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::sub(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::sub(const Expression& lhs, const Expression& rhs) const {
     return binary("-", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::mul(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::mul(const Expression& lhs, const Expression& rhs) const {
     return binary("*", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::div(const sexp& lhs, const sexp& rhs) const {
+Expression
+ExpressionFactory::div(const Expression& lhs, const Expression& rhs) const {
     return binary("/", lhs, rhs);
 }
 
-sexp
-ExpressionFactory::parentheses(const sexp& x) const {
+Expression
+ExpressionFactory::parentheses(const Expression& x) const {
     return x;
 }
 
-sexp
-ExpressionFactory::like(const sexp& x, const std::string& pattern) const {
-    return binary("like", x, sexp(pattern));
+Expression
+ExpressionFactory::like(const Expression& x, const std::string& pattern) const {
+    return binary("like", x, Expression(pattern));
 }
 
-sexp
-ExpressionFactory::in(const sexp& x, const sexp& l) const {
+Expression
+ExpressionFactory::in(const Expression& x, const Expression& l) const {
     return binary("in", x, l);
 }
 
-sexp
-ExpressionFactory::not_in(const sexp& x, const sexp& l) const {
+Expression
+ExpressionFactory::not_in(const Expression& x, const Expression& l) const {
     return binary("not_in", x, l);
 }
 
-sexp
-ExpressionFactory::min(const sexp& x) const {
+Expression
+ExpressionFactory::min(const Expression& x) const {
     return unary("min", x);
 }
 
-sexp
-ExpressionFactory::max(const sexp& x) const {
+Expression
+ExpressionFactory::max(const Expression& x) const {
     return unary("max", x);
 }
 
-sexp
-ExpressionFactory::sum(const sexp& x) const {
+Expression
+ExpressionFactory::sum(const Expression& x) const {
     return unary("sum", x);
 }
 
-sexp
-ExpressionFactory::count(const sexp& x) const {
+Expression
+ExpressionFactory::count(const Expression& x) const {
     return unary("count", x);
 }
 
-sexp
+Expression
 ExpressionFactory::combined_datetime(const std::string& date,
                                      const std::string& time) const {
     return add(attribute(date), attribute(time));

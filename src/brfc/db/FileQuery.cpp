@@ -62,7 +62,7 @@ FileQuery::swap(FileQuery& other) {
 }
 
 FileQuery&
-FileQuery::filter(const expr::sexp& expr) {
+FileQuery::filter(const expr::Expression& expr) {
     if (not filter_.empty()) {
         filter_ = expr::listcons().symbol("and")
                                   .append(filter_)
@@ -75,7 +75,7 @@ FileQuery::filter(const expr::sexp& expr) {
 }
 
 FileQuery&
-FileQuery::order_by(const expr::sexp& expr, SortDir dir) {
+FileQuery::order_by(const expr::Expression& expr, SortDir dir) {
     order_.push_back(std::make_pair(expr, dir));
     return *this;
 }

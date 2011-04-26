@@ -35,71 +35,71 @@ class db_AttributeQuery_test : public ::testing::Test {
 };
 
 TEST_F(db_AttributeQuery_test, test_copy_ctor) {
-    expr::sexp fsexp(1), gsexp(2), osexp(3);
+    expr::Expression fExpression(1), gExpression(2), oExpression(3);
 
     query.distinct(true);
-    query.fetch("name", gsexp);
-    query.filter(fsexp);
-    query.order_by(osexp, AttributeQuery::ASC);
+    query.fetch("name", gExpression);
+    query.filter(fExpression);
+    query.order_by(oExpression, AttributeQuery::ASC);
     query.limit(10);
 
     AttributeQuery copy(query);
     
-    EXPECT_EQ(fsexp, copy.filter());
+    EXPECT_EQ(fExpression, copy.filter());
     EXPECT_EQ(query.limit(), copy.limit());
     EXPECT_TRUE(copy.distinct());
     AttributeQuery::FetchMap fmap = copy.fetch();
     ASSERT_EQ(1u, fmap.size());
-    EXPECT_EQ(gsexp, fmap["name"]);
+    EXPECT_EQ(gExpression, fmap["name"]);
     const AttributeQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ(1u, ovec.size());
-    EXPECT_EQ(osexp, ovec.at(0).first);
+    EXPECT_EQ(oExpression, ovec.at(0).first);
     EXPECT_EQ(AttributeQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_AttributeQuery_test, test_copy_assign) {
-    expr::sexp fsexp(1), gsexp(2), osexp(3);
+    expr::Expression fExpression(1), gExpression(2), oExpression(3);
     
     query.distinct(true);
-    query.fetch("name", gsexp);
-    query.filter(fsexp);
-    query.order_by(osexp, AttributeQuery::ASC);
+    query.fetch("name", gExpression);
+    query.filter(fExpression);
+    query.order_by(oExpression, AttributeQuery::ASC);
     query.limit(10);
 
     AttributeQuery copy;
     copy = query;
     
-    EXPECT_EQ(fsexp, copy.filter());
+    EXPECT_EQ(fExpression, copy.filter());
     EXPECT_EQ(query.limit(), copy.limit());
     EXPECT_TRUE(copy.distinct());
     AttributeQuery::FetchMap fmap = copy.fetch();
     ASSERT_EQ(1u, fmap.size());
-    EXPECT_EQ(gsexp, fmap["name"]);
+    EXPECT_EQ(gExpression, fmap["name"]);
     const AttributeQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ(1u, ovec.size());
-    EXPECT_EQ(osexp, ovec.at(0).first);
+    EXPECT_EQ(oExpression, ovec.at(0).first);
     EXPECT_EQ(AttributeQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_AttributeQuery_test, test_copy_assign_self) {
-    expr::sexp fsexp(1), gsexp(2), osexp(3);
+    expr::Expression fExpression(1), gExpression(2), oExpression(3);
 
     query.distinct(true);
-    query.fetch("name", gsexp);
-    query.filter(fsexp);
-    query.order_by(osexp, AttributeQuery::ASC);
+    query.fetch("name", gExpression);
+    query.filter(fExpression);
+    query.order_by(oExpression, AttributeQuery::ASC);
     query.limit(10);
     query = query;
 
-    EXPECT_EQ(fsexp, query.filter());
+    EXPECT_EQ(fExpression, query.filter());
     EXPECT_EQ(10, query.limit());
     EXPECT_TRUE(query.distinct());
     AttributeQuery::FetchMap fmap = query.fetch();
     ASSERT_EQ(1u, fmap.size());
-    EXPECT_EQ(gsexp, fmap["name"]);
+    EXPECT_EQ(gExpression, fmap["name"]);
     const AttributeQuery::OrderVector& ovec = query.order();
     ASSERT_EQ(1u, ovec.size());
-    EXPECT_EQ(osexp, ovec.at(0).first);
+    EXPECT_EQ(oExpression, ovec.at(0).first);
     EXPECT_EQ(AttributeQuery::ASC, ovec.at(0).second);
 }
 
@@ -111,7 +111,7 @@ TEST_F(db_AttributeQuery_test, test_distinct) {
 }
 
 TEST_F(db_AttributeQuery_test, test_fetch) {
-    expr::sexp se(1);
+    expr::Expression se(1);
 
     query.fetch("name", se);
     AttributeQuery::FetchMap fmap = query.fetch();
@@ -120,7 +120,7 @@ TEST_F(db_AttributeQuery_test, test_fetch) {
 }
 
 TEST_F(db_AttributeQuery_test, test_fetch_duplicate_name) {
-    expr::sexp se(1);
+    expr::Expression se(1);
 
     query.fetch("name", se);
     AttributeQuery::FetchMap fmap = query.fetch();
@@ -134,18 +134,18 @@ TEST_F(db_AttributeQuery_test, test_fetch_duplicate_name) {
 }
 
 TEST_F(db_AttributeQuery_test, test_fetch_empty_name) {
-    EXPECT_THROW(query.fetch("", expr::sexp(1)), value_error);
+    EXPECT_THROW(query.fetch("", expr::Expression(1)), value_error);
 }
 
 TEST_F(db_AttributeQuery_test, test_filter) {
-    expr::sexp se;
+    expr::Expression se;
 
     query.filter(se);
     EXPECT_EQ(se, query.filter());
 }
 
 TEST_F(db_AttributeQuery_test, test_order_by) {
-    expr::sexp se;
+    expr::Expression se;
 
     query.order_by(se, AttributeQuery::ASC);
     const AttributeQuery::OrderVector& ovec = query.order();
@@ -160,7 +160,7 @@ TEST_F(db_AttributeQuery_test, test_limit) {
 }
 
 TEST_F(db_AttributeQuery_test, test_group) {
-    expr::sexp se;
+    expr::Expression se;
 
     query.group(se);
     const AttributeQuery::ExpressionVector& vec = query.group();

@@ -31,13 +31,13 @@ namespace proc {
 
 /* date */
 
-TEST(expr_proc_conversion_date_test, test_sexp_dispatch) {
-    sexp e(Date(2011, 12, 13));
+TEST(expr_proc_conversion_date_test, test_Expression_dispatch) {
+    Expression e(Date(2011, 12, 13));
     EXPECT_EQ(e, date()(listcons().append(e).get()));
 }
 
 TEST(expr_proc_conversion_date_test, test_string) {
-    sexp e(Date(2011, 12, 13));
+    Expression e(Date(2011, 12, 13));
     EXPECT_EQ(e, date()(std::string("2011-12-13")));
 }
 
@@ -46,24 +46,24 @@ TEST(expr_proc_conversion_date_test, test_string_invalid) {
 }
 
 TEST(expr_proc_conversion_date_test, test_date) {
-    sexp e(Date(2011, 12, 13));
+    Expression e(Date(2011, 12, 13));
     EXPECT_EQ(e, date()(Date(2011, 12, 13)));
 }
 
 TEST(expr_proc_conversion_date_test, test_datetime) {
-    sexp e(Date(2011, 12, 13));
+    Expression e(Date(2011, 12, 13));
     EXPECT_EQ(e, date()(DateTime(2011, 12, 13, 14, 15, 16)));
 }
 
 /* time */
 
-TEST(expr_proc_conversion_time_test, test_sexp_dispatch) {
-    sexp e(Time(14, 15, 16));
+TEST(expr_proc_conversion_time_test, test_Expression_dispatch) {
+    Expression e(Time(14, 15, 16));
     EXPECT_EQ(e, time()(listcons().append(e).get()));
 }
 
 TEST(expr_proc_conversion_time_test, test_string) {
-    sexp e(Time(14, 15, 16));
+    Expression e(Time(14, 15, 16));
     EXPECT_EQ(e, time()(std::string("14:15:16")));
 }
 
@@ -72,24 +72,24 @@ TEST(expr_proc_conversion_time_test, test_string_invalid) {
 }
 
 TEST(expr_proc_conversion_time_test, test_time) {
-    sexp e(Time(14, 15, 16));
+    Expression e(Time(14, 15, 16));
     EXPECT_EQ(e, time()(Time(14, 15, 16)));
 }
 
 TEST(expr_proc_conversion_time_test, test_datetime) {
-    sexp e(Time(14, 15, 16));
+    Expression e(Time(14, 15, 16));
     EXPECT_EQ(e, time()(DateTime(2011, 12, 13, 14, 15, 16)));
 }
 
 /* datetime */
 
-TEST(expr_proc_conversion_datetime_test, test_sexp_dispatch) {
-    sexp e(DateTime(2011, 12, 13, 14, 15, 16));
+TEST(expr_proc_conversion_datetime_test, test_Expression_dispatch) {
+    Expression e(DateTime(2011, 12, 13, 14, 15, 16));
     EXPECT_EQ(e, datetime()(listcons().append(e).get()));
 }
 
 TEST(expr_proc_conversion_datetime_test, test_string) {
-    sexp e(DateTime(2011, 12, 13, 14, 15, 16));
+    Expression e(DateTime(2011, 12, 13, 14, 15, 16));
     EXPECT_EQ(e, datetime()(std::string("2011-12-13T14:15:16")));
 }
 
@@ -99,7 +99,7 @@ TEST(expr_proc_conversion_datetime_test, test_string_invalid) {
 
 
 TEST(expr_proc_conversion_datetime_test, test_datetime) {
-    sexp e(DateTime(2011, 12, 13, 14, 15, 16));
+    Expression e(DateTime(2011, 12, 13, 14, 15, 16));
     EXPECT_EQ(e, datetime()(DateTime(2011, 12, 13, 14, 15, 16)));
 }
 

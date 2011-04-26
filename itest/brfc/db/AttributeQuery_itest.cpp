@@ -31,7 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/AttributeResult.hpp>
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/expr/sexp.hpp>
+#include <brfc/expr/Expression.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
 
 #include <brfc/oh5/Attribute.hpp>
@@ -229,7 +229,7 @@ TEST_P(db_AttributeQuery_itest, test_filter_by_xsize_distinct) {
 TEST_P(db_AttributeQuery_itest, test_filter_by_combined_datetime) {
     DateTime min(2000, 1, 1, 12, 1);
     DateTime max(2001, 1, 1, 12, 0);
-    expr::sexp what_dt = xpr.add(
+    expr::Expression what_dt = xpr.add(
         xpr.attribute("what/date"),
         xpr.attribute("what/time")
     );
@@ -262,7 +262,7 @@ TEST_P(db_AttributeQuery_itest, test_select_by_wmo_code) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_select_by_or_node) {
-    expr::sexp node = xpr.attribute("what/source:_name");
+    expr::Expression node = xpr.attribute("what/source:_name");
     query.fetch("uuid", xpr.attribute("file:uuid"))
          .filter(
             xpr.or_(
@@ -285,7 +285,7 @@ TEST_P(db_AttributeQuery_itest, test_select_by_or_node) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_select_by_node_and_node) {
-    expr::sexp node = xpr.attribute("what/source:_name");
+    expr::Expression node = xpr.attribute("what/source:_name");
     query.fetch("uuid", xpr.attribute("file:uuid"))
          .filter(
             xpr.and_(
@@ -328,7 +328,7 @@ TEST_P(db_AttributeQuery_itest, test_query_like) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_order_by) {
-    expr::sexp dt =
+    expr::Expression dt =
         xpr.add(xpr.attribute("what/date"), xpr.attribute("what/time"));
     query.fetch("uuid", xpr.attribute("file:uuid"))
          .order_by(dt, AttributeQuery::DESC);
@@ -474,7 +474,7 @@ TEST_P(db_AttributeQuery_itest, test_group_by_source_missing_value) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_in) {
-    expr::sexp l;
+    expr::Expression l;
     l.push_back(xpr.string("CVOL"));
     l.push_back(xpr.string("SCAN"));
 
@@ -491,7 +491,7 @@ TEST_P(db_AttributeQuery_itest, test_in) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_not_in) {
-    expr::sexp l;
+    expr::Expression l;
     l.push_back(xpr.int64_(2));
     l.push_back(xpr.int64_(3));
 

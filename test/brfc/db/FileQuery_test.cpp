@@ -37,72 +37,72 @@ class db_FileQuery_test : public ::testing::Test {
 };
 
 TEST_F(db_FileQuery_test, test_copy_ctor) {
-    expr::sexp fsexp(1), osexp(2);
+    expr::Expression fExpression(1), oExpression(2);
 
-    query.filter(fsexp);
-    query.order_by(osexp, FileQuery::ASC);
+    query.filter(fExpression);
+    query.order_by(oExpression, FileQuery::ASC);
     query.limit(10);
     query.skip(5);
 
     FileQuery copy(query);
     
-    EXPECT_EQ(fsexp, copy.filter());
+    EXPECT_EQ(fExpression, copy.filter());
     EXPECT_EQ(query.limit(), copy.limit());
     EXPECT_EQ(query.skip(), copy.skip());
     const FileQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ((size_t)1, ovec.size());
-    EXPECT_EQ(osexp, ovec.at(0).first);
+    EXPECT_EQ(oExpression, ovec.at(0).first);
     EXPECT_EQ(FileQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_FileQuery_test, test_copy_assign) {
-    expr::sexp fsexp(1), osexp(2);
+    expr::Expression fExpression(1), oExpression(2);
 
-    query.filter(fsexp);
-    query.order_by(osexp, FileQuery::ASC);
+    query.filter(fExpression);
+    query.order_by(oExpression, FileQuery::ASC);
     query.limit(10);
     query.skip(5);
 
     FileQuery copy;
     copy = query;
     
-    EXPECT_EQ(fsexp, copy.filter());
+    EXPECT_EQ(fExpression, copy.filter());
     EXPECT_EQ(query.limit(), copy.limit());
     EXPECT_EQ(query.skip(), copy.skip());
     const FileQuery::OrderVector& ovec = copy.order();
     ASSERT_EQ((size_t)1, ovec.size());
-    EXPECT_EQ(osexp, ovec.at(0).first);
+    EXPECT_EQ(oExpression, ovec.at(0).first);
     EXPECT_EQ(FileQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_FileQuery_test, test_copy_assign_self) {
-    expr::sexp fsexp(1), osexp(2);
+    expr::Expression fExpression(1), oExpression(2);
 
-    query.filter(fsexp);
-    query.order_by(osexp, FileQuery::ASC);
+    query.filter(fExpression);
+    query.order_by(oExpression, FileQuery::ASC);
     query.limit(10);
     query.skip(5);
 
     query = query;
     
-    EXPECT_EQ(fsexp, query.filter());
+    EXPECT_EQ(fExpression, query.filter());
     EXPECT_EQ(10, query.limit());
     EXPECT_EQ(5, query.skip());
     const FileQuery::OrderVector& ovec = query.order();
     ASSERT_EQ((size_t)1, ovec.size());
-    EXPECT_EQ(osexp, ovec.at(0).first);
+    EXPECT_EQ(oExpression, ovec.at(0).first);
     EXPECT_EQ(FileQuery::ASC, ovec.at(0).second);
 }
 
 TEST_F(db_FileQuery_test, test_filter) {
-    expr::sexp se(1);
+    expr::Expression se(1);
 
     query.filter(se);
     EXPECT_EQ(se, query.filter());
 }
 
 TEST_F(db_FileQuery_test, test_order_by) {
-    expr::sexp se(1);
+    expr::Expression se(1);
 
     query.order_by(se, FileQuery::ASC);
     const FileQuery::OrderVector& ovec = query.order();
