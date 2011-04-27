@@ -114,7 +114,7 @@ RelationalDatabase::mapper() const {
 bool
 RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
     try {
-        entry_by_file(file);
+        auto_ptr<FileEntry> e(entry_by_file(file));
     } catch (lookup_error) {
         return false;
     }
