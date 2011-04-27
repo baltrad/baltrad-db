@@ -59,7 +59,12 @@ namespace boost {
         jclass cls = jenv->FindClass("eu/baltrad/fc/FileCatalogError");
         jenv->ThrowNew(cls, e.what());
         return $null;
+    } catch (const std::exception& e) {
+        jclass cls = jenv->FindClass("java/lang/RuntimeException");
+        jenv->ThrowNew(cls, e.what());
+        return $null;
     }
+
 }
 
 /* vim:filetype=cpp:et:ts=4:sw=4:

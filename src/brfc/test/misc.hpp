@@ -17,26 +17,15 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_OH5_MOCK_NODE_BACKEND_HPP
-#define BRFC_OH5_MOCK_NODE_BACKEND_HPP
-
-#include <gmock/gmock.h>
-
-#include <brfc/oh5/Node.hpp>
-#include <brfc/oh5/NodeBackend.hpp>
+#ifndef BRFC_TEST_MISC_HPP
+#define BRFC_TEST_MISC_HPP
 
 namespace brfc {
-namespace oh5 {
+namespace test {
 
-class MockNodeBackend : public NodeBackend {
-  public:
-    MOCK_METHOD1(do_add, Node&(Node*));
-    MOCK_CONST_METHOD1(do_has, bool(const Node&));
-    MOCK_CONST_METHOD0(do_root, const Node&());
-    MOCK_CONST_METHOD1(do_children, std::vector<const Node*>(const Node&));
-};
+void throw_std_exception();
 
-} // namespace oh5
+} // namespace test
 } // namespace brfc
 
-#endif // BRFC_OH5_MOCK_NODE_BACKEND_HPP
+#endif // BRFC_TEST_MISC_HPP

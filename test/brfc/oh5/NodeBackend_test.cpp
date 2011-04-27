@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
 #include <brfc/oh5/MockNodeBackend.hpp>
 #include <brfc/oh5/MockNode.hpp>
 
@@ -34,20 +36,31 @@ namespace oh5 {
 struct oh5_NodeBackend_test : public ::testing::Test {
     oh5_NodeBackend_test()
              : root("")
-             , backend(root) {
+             , backend() {
+    }
+
+    virtual void SetUp() {
+        root.backend(&backend);
     }
 
     MockNode root;
     MockNodeBackend backend;
+    boost::ptr_vector<Node> be_nodes;
+
+    Node& be_add(Node* n) { be_nodes.push_back(n); return *n; }
 };
 
 TEST_F(oh5_NodeBackend_test, test_add) {
-    MockNode n("n");
-    EXPECT_CALL(backend, do_add(&n))
-        .WillOnce(ReturnRef(n));
+    MockNode* n = new MockNode("n");
 
-    Node& rn = backend.add(root, &n);
-    EXPECT_EQ(&n, &rn);
+    ON_CALL(*n, do_accepts_child(_))
+        .WillByDefault(Return(true)); // for leak detection
+
+    EXPECT_CALL(backend, do_add(n))
+        .WillOnce(Invoke(this, &oh5_NodeBackend_test::be_add));
+
+    Node& rn = backend.add(root, n);
+    EXPECT_EQ(n, &rn);
     EXPECT_EQ(&backend, &rn.backend());
     EXPECT_EQ(&root, rn.parent());
 }
@@ -62,13 +75,15 @@ TEST_F(oh5_NodeBackend_test, test_add_duplicate) {
 }
 
 TEST_F(oh5_NodeBackend_test, test_add_invalid_parent) {
-    MockNode r2("n");
-    MockNodeBackend be2(r2);
+    MockNodeBackend be2;
+    MockNode r2("r2");
+    r2.backend(&be2);
 
     MockNode* n = new MockNode("n2");
 
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
+
     EXPECT_THROW(backend.add(r2, n), value_error); 
 }
 

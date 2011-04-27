@@ -16,27 +16,19 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+package eu.baltrad.fc;
 
-#ifndef BRFC_OH5_MOCK_NODE_BACKEND_HPP
-#define BRFC_OH5_MOCK_NODE_BACKEND_HPP
+import eu.baltrad.fc.test.fc_test;
 
-#include <gmock/gmock.h>
+import junit.framework.TestCase;
 
-#include <brfc/oh5/Node.hpp>
-#include <brfc/oh5/NodeBackend.hpp>
-
-namespace brfc {
-namespace oh5 {
-
-class MockNodeBackend : public NodeBackend {
-  public:
-    MOCK_METHOD1(do_add, Node&(Node*));
-    MOCK_CONST_METHOD1(do_has, bool(const Node&));
-    MOCK_CONST_METHOD0(do_root, const Node&());
-    MOCK_CONST_METHOD1(do_children, std::vector<const Node*>(const Node&));
+public class StdExceptionTest extends TestCase {
+  public void test_std_exception_thrown_as_RuntimeException() {
+    try {
+      fc_test.throw_std_exception();
+      fail("expected RuntimeException");
+    } catch (RuntimeException e) {
+      // pass
+    } 
+  }
 };
-
-} // namespace oh5
-} // namespace brfc
-
-#endif // BRFC_OH5_MOCK_NODE_BACKEND_HPP

@@ -124,7 +124,7 @@ struct MemoryNodeBackend::Impl {
 
 MemoryNodeBackend::MemoryNodeBackend()
         : impl_(new Impl()) {
-    root(impl_->root());
+    impl_->root().backend(this);
 }
 
 MemoryNodeBackend::~MemoryNodeBackend() {

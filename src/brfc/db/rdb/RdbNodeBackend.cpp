@@ -219,7 +219,7 @@ struct RdbNodeBackend::Impl {
 
 RdbNodeBackend::RdbNodeBackend(RelationalDatabase* rdb)
         : impl_(new Impl(rdb)) {
-    root(impl_->root());
+    impl_->root().backend(this);
 }
 
 RdbNodeBackend::~RdbNodeBackend() {

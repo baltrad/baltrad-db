@@ -38,11 +38,6 @@ NodeBackend::~NodeBackend() {
 
 }
 
-void
-NodeBackend::root(Node& node) {
-    node.backend(this);
-}
-
 Node&
 NodeBackend::add(const Node& parent, Node* node) {
     if (not node)

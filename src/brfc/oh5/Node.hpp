@@ -223,20 +223,23 @@ class Node : public boost::noncopyable {
     
     iterator end();
     const_iterator end() const;
+
+    /**
+     * @brief associate with backend
+     * @throw runtime_error when already associated with a backend
+     */
+    void backend(NodeBackend* backend);
+    
+    /**
+     * @brief set parent
+     * @throw runtime_error when already associated with a parent
+     */
+    void parent(Node* parent);
   
   protected:
     Node(const Node& other);
 
   private:
-    friend class NodeBackend; // access to backend(NodeBackend*), parent(Node*)
-
-    /**
-     * @brief associate with backend
-     */
-    void backend(NodeBackend* backend);
-
-    void parent(Node* parent) { parent_ = parent; }
-
     virtual bool do_accepts_child(const Node& node) const = 0;
 
     virtual Node* do_clone() const = 0;

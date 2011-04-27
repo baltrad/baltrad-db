@@ -144,9 +144,6 @@ class NodeBackend : public boost::noncopyable {
      */
     std::string path(const Node& node) const;
 
-  protected:
-    void root(Node& node);
-
   private:
     const NodeBackend& const_this() {
         return const_cast<const NodeBackend&>(*this);

@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/test/TestRDB.hpp>
     #include <brfc/test/TempH5File.hpp>
     #include <brfc/test/TempDir.hpp>
+    #include <brfc/test/misc.hpp>
 %}
 
 %import "fc_oh5.i"
@@ -52,6 +53,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %include <brfc/test/TestRDB.hpp>
 %include <brfc/test/TempH5File.hpp>
 %include <brfc/test/TempDir.hpp>
+%include <brfc/test/misc.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:
 */

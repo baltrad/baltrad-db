@@ -79,6 +79,13 @@ Node::backend(NodeBackend* backend) {
     backend_ = backend;
 }
 
+void
+Node::parent(Node* parent) {
+    if (parent_ != 0)
+        throw std::runtime_error("can't change parent of already bound node");
+    parent_ = parent;
+}
+
 std::string
 Node::path() const {
     std::list<std::string> names;
