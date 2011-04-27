@@ -41,42 +41,42 @@ namespace brfc {
 namespace oh5 {
 
 
-ACTION(ReturnDerefArg) { return *arg0; }
-
 struct oh5_Node_test : public ::testing::Test {
     oh5_Node_test()
             : r("")
             , a("a")
             , f("f") 
-            , backend(r) {
+            , be() {
 
     }
 
     virtual void SetUp() {
-        ON_CALL(backend, do_add(_))
-            .WillByDefault(ReturnDerefArg());
-        
-        backend.add(r, &a);
+        r.backend(&be);
     }
-    
+
     MockNode r, a, f;
-    MockNodeBackend backend;
+    MockNodeBackend be;
 };
 
 TEST_F(oh5_Node_test, test_has_backend) {
+    EXPECT_FALSE(a.has_backend());
+    a.backend(&be);
     EXPECT_TRUE(a.has_backend());
-    EXPECT_FALSE(f.has_backend());
 }
 
-TEST_F(oh5_Node_test, test_backend) {
-    EXPECT_EQ(&backend, &a.backend());
+TEST_F(oh5_Node_test, test_set_backend_twice) {
+    a.backend(&be);
+    EXPECT_THROW(a.backend(&be), std::runtime_error);
+}
+
+TEST_F(oh5_Node_test, test_backend_missing) {
     EXPECT_THROW(f.backend(), std::runtime_error);
 }
 
 TEST_F(oh5_Node_test, test_add) {
-    EXPECT_CALL(backend, do_add(&f))
+    EXPECT_CALL(be, do_add(&f))
         .WillOnce(ReturnRef(f));
-    
+     
     EXPECT_EQ(&f, &r.add(&f));
 }
 
@@ -84,7 +84,7 @@ TEST_F(oh5_Node_test, test_has_child) {
     std::vector<const oh5::Node*> c;
     c.push_back(&a);
 
-    EXPECT_CALL(backend, do_children(Ref(r)))
+    EXPECT_CALL(be, do_children(Ref(r)))
         .WillOnce(Return(c))
         .WillOnce(Return(c));
     
@@ -96,7 +96,7 @@ TEST_F(oh5_Node_test, test_children) {
     std::vector<const oh5::Node*> c;
     c.push_back(&a);
 
-    EXPECT_CALL(backend, do_children(Ref(r)))
+    EXPECT_CALL(be, do_children(Ref(r)))
         .WillOnce(Return(c));
 
     std::vector<oh5::Node*> rc = r.children();
@@ -110,7 +110,8 @@ TEST_F(oh5_Node_test, test_path_root) {
 }
 
 TEST_F(oh5_Node_test, test_path) {
-    backend.add(a, &f);
+    a.parent(&r);
+    f.parent(&a);
 
     EXPECT_EQ("/a/f", f.path());
 }
@@ -121,20 +122,22 @@ TEST_F(oh5_Node_test, test_iterator_dereference) {
 }
 
 TEST_F(oh5_Node_test, test_iterator_increment) {
-    std::vector<const oh5::Node*> c;
-    std::vector<const oh5::Node*> ce;
-    c.push_back(&a);
-    backend.add(r, &f);
-    c.push_back(&f);
+    std::vector<const oh5::Node*> cr;
+    std::vector<const oh5::Node*> ca;
+    std::vector<const oh5::Node*> cf;
+    a.backend(&be);
+    f.backend(&be);
+    cr.push_back(&a);
+    cr.push_back(&f);
 
     {
         InSequence s;
-        EXPECT_CALL(backend, do_children(Ref(r)))
-            .WillOnce(Return(c));
-        EXPECT_CALL(backend, do_children(Ref(a)))
-            .WillOnce(Return(ce));
-        EXPECT_CALL(backend, do_children(Ref(f)))
-            .WillOnce(Return(ce));
+        EXPECT_CALL(be, do_children(Ref(r)))
+            .WillOnce(Return(cr));
+        EXPECT_CALL(be, do_children(Ref(a)))
+            .WillOnce(Return(ca));
+        EXPECT_CALL(be, do_children(Ref(f)))
+            .WillOnce(Return(cf));
     }
     
     Node::iterator i = r.begin();
@@ -147,7 +150,7 @@ TEST_F(oh5_Node_test, test_iterator_increment) {
 
 TEST_F(oh5_Node_test, test_iterator_end) {
     std::vector<const oh5::Node*> c;
-    EXPECT_CALL(backend, do_children(Ref(r)))
+    EXPECT_CALL(be, do_children(Ref(r)))
         .WillOnce(Return(c));
 
     Node::iterator i = r.begin();

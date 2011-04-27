@@ -30,10 +30,6 @@ namespace oh5 {
 
 class MockNodeBackend : public NodeBackend {
   public:
-    MockNodeBackend(Node& r) {
-        root(r);
-    }
-
     MOCK_METHOD1(do_add, Node&(Node*));
     MOCK_CONST_METHOD1(do_has, bool(const Node&));
     MOCK_CONST_METHOD0(do_root, const Node&());
