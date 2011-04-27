@@ -165,7 +165,7 @@ TEST_P(db_Database_itest, store_with_invalid_attributes) {
     // add an invalid attribute
     file.root().add(new oh5::Attribute("invalid", oh5::Scalar(1)));
 
-    EXPECT_NO_THROW(db->store(file));
+    auto_ptr<FileEntry> e(db->store(file));
 }
 
 TEST_P(db_Database_itest, test_sources) {
