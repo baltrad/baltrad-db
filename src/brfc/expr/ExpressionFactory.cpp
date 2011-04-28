@@ -120,57 +120,57 @@ ExpressionFactory::bool_(bool value) const {
 }
 
 Expression
-ExpressionFactory::unary(const std::string& op, const Expression& arg) const {
+ExpressionFactory::unary_op(const std::string& op, const Expression& arg) const {
     return Listcons().symbol(op).append(arg).get();
 }
 
 Expression
-ExpressionFactory::binary(const std::string& op,
-                         const Expression& lhs,
-                         const Expression& rhs) const {
+ExpressionFactory::binary_op(const std::string& op,
+                             const Expression& lhs,
+                             const Expression& rhs) const {
     return Listcons().symbol(op).append(lhs).append(rhs).get();
 }
 
 Expression
 ExpressionFactory::ne(const Expression& lhs, const Expression& rhs) const {
-    return binary("!=", lhs, rhs);
+    return binary_op("!=", lhs, rhs);
 }
 
 Expression
 ExpressionFactory::eq(const Expression& lhs, const Expression& rhs) const {
-    return binary("=", lhs, rhs);
+    return binary_op("=", lhs, rhs);
 }
 
 Expression
 ExpressionFactory::gt(const Expression& lhs, const Expression& rhs) const {
-    return binary(">", lhs, rhs);
+    return binary_op(">", lhs, rhs);
 }
 
 Expression
 ExpressionFactory::lt(const Expression& lhs, const Expression& rhs) const {
-    return binary("<", lhs, rhs);
+    return binary_op("<", lhs, rhs);
 }
 
 Expression
 ExpressionFactory::le(const Expression& lhs, const Expression& rhs) const {
-    return binary("<=", lhs, rhs);
+    return binary_op("<=", lhs, rhs);
 }
 
 Expression
 ExpressionFactory::ge(const Expression& lhs, const Expression& rhs) const {
-    return binary(">=", lhs, rhs);
+    return binary_op(">=", lhs, rhs);
 }
 
 Expression
 ExpressionFactory::between(const Expression& expr,
                            const Expression& low,
                            const Expression& high) const {
-    return and_(binary("<=", low, expr), binary("<=", expr, high));
+    return and_(le(low, expr), le(expr, high));
 }
 
 Expression
 ExpressionFactory::and_(const Expression& lhs, const Expression& rhs) const {
-    return binary("and", lhs, rhs);
+    return binary_op("and", lhs, rhs);
 }
 
 Expression
@@ -189,7 +189,7 @@ ExpressionFactory::and_(const Expression& x) const {
 
 Expression
 ExpressionFactory::or_(const Expression& lhs, const Expression& rhs) const {
-    return binary("or", lhs, rhs);
+    return binary_op("or", lhs, rhs);
 }
 
 Expression
@@ -208,22 +208,22 @@ ExpressionFactory::or_(const Expression& x) const {
 
 Expression
 ExpressionFactory::add(const Expression& lhs, const Expression& rhs) const {
-    return binary("+", lhs, rhs);
+    return binary_op("+", lhs, rhs);
 }
 
 Expression
 ExpressionFactory::sub(const Expression& lhs, const Expression& rhs) const {
-    return binary("-", lhs, rhs);
+    return binary_op("-", lhs, rhs);
 }
 
 Expression
 ExpressionFactory::mul(const Expression& lhs, const Expression& rhs) const {
-    return binary("*", lhs, rhs);
+    return binary_op("*", lhs, rhs);
 }
 
 Expression
 ExpressionFactory::div(const Expression& lhs, const Expression& rhs) const {
-    return binary("/", lhs, rhs);
+    return binary_op("/", lhs, rhs);
 }
 
 Expression
@@ -233,37 +233,37 @@ ExpressionFactory::parentheses(const Expression& x) const {
 
 Expression
 ExpressionFactory::like(const Expression& x, const std::string& pattern) const {
-    return binary("like", x, Expression(pattern));
+    return binary_op("like", x, Expression(pattern));
 }
 
 Expression
 ExpressionFactory::in(const Expression& x, const Expression& l) const {
-    return binary("in", x, l);
+    return binary_op("in", x, l);
 }
 
 Expression
 ExpressionFactory::not_in(const Expression& x, const Expression& l) const {
-    return binary("not_in", x, l);
+    return binary_op("not_in", x, l);
 }
 
 Expression
 ExpressionFactory::min(const Expression& x) const {
-    return unary("min", x);
+    return unary_op("min", x);
 }
 
 Expression
 ExpressionFactory::max(const Expression& x) const {
-    return unary("max", x);
+    return unary_op("max", x);
 }
 
 Expression
 ExpressionFactory::sum(const Expression& x) const {
-    return unary("sum", x);
+    return unary_op("sum", x);
 }
 
 Expression
 ExpressionFactory::count(const Expression& x) const {
-    return unary("count", x);
+    return unary_op("count", x);
 }
 
 Expression

@@ -130,6 +130,10 @@ class ExpressionFactory {
      */
     Expression bool_(bool value) const;
 
+
+    Expression binary_op(const std::string& op, const Expression& lhs, const Expression& rhs) const;
+    Expression unary_op(const std::string& op, const Expression& arg) const;
+
     /**
      * @name comparison operators
      * @{
@@ -275,8 +279,6 @@ class ExpressionFactory {
                            const std::string& time) const;
   
   private:
-    Expression binary(const std::string& op, const Expression& lhs, const Expression& rhs) const;
-    Expression unary(const std::string& op, const Expression& arg) const;
 
     AttributePrototypes prototypes_;
 };
