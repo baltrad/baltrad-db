@@ -41,6 +41,12 @@ ExpressionFactory::ExpressionFactory(const AttributePrototypes& prototypes)
 Expression
 ExpressionFactory::attribute(const std::string& name) const {
     const std::string& type = prototypes_.typename_(name);
+    return attribute(name, type);
+}
+
+Expression
+ExpressionFactory::attribute(const std::string& name,
+                             const std::string& type) const {
     return Listcons().symbol("attr").string(name).string(type).get();
 }
 

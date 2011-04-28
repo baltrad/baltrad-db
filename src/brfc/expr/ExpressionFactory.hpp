@@ -58,6 +58,8 @@ class ExpressionFactory {
      */
     Expression attribute(const std::string& name) const;
 
+    Expression attribute(const std::string& name, const std::string& type) const;
+
     Expression literal(const Variant& value) const;
 
     /**
