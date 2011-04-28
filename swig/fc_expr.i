@@ -42,6 +42,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   }
 %}
 
+/***
+ * brfc::expr::Expression
+ */
 %extend brfc::expr::Expression {
     std::string toString() {
         std::stringstream ss;
@@ -51,7 +54,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 };
 
 %ignore brfc::expr::Expression::Expression(const std::string& value, construct_symbol);
+%ignore brfc::expr::Expression::Expression(const list_t& );
 %ignore brfc::expr::Expression::type() const;
+%ignore brfc::expr::Expression::list() const;
+%ignore brfc::expr::Expression::begin;
+%ignore brfc::expr::Expression::end;
+%ignore brfc::expr::PrintTo;
 
 %rename(equals) brfc::expr::operator==(const Expression&, const Expression&);
 
@@ -90,7 +98,6 @@ SWIG_JAVABODY_METHODS(public, public, brfc::expr::Expression)
     }
   }
 %}
-
 
 /***
  * brfc::expr::ExpressionFactory
