@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %include "common.i"
 
 %{
+    #include <sstream>
     #include <brfc/expr/AttributePrototypes.hpp>
     #include <brfc/expr/Expression.hpp>
     #include <brfc/expr/ExpressionFactory.hpp>
@@ -40,6 +41,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     }
   }
 %}
+
+%extend brfc::expr::Expression {
+    std::string toString() {
+        std::stringstream ss;
+        ss << *$self;
+        return ss.str();
+    }
+};
 
 %ignore brfc::expr::Expression::Expression(const std::string& value, construct_symbol);
 %ignore brfc::expr::Expression::type() const;

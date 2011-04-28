@@ -31,7 +31,13 @@ public class ExpressionTest extends TestCase {
   }
 
   public void testEquals() {
-    assertTrue((new Expression()).equals(new Expression()));
+    assertEquals(new Expression(), new Expression());
+    assertEquals(new Expression(1.0), new Expression(1));
+  }
+
+  public void testToString() {
+    Expression e = new Expression();
+    assertEquals("()", e.toString());
   }
 
   public void testConstructFromArray() {
