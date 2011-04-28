@@ -251,7 +251,8 @@ TEST(expr_Expression_test, test_apply_visitor_noncopyable_visitor) {
 
 TEST(expr_Expression_test, test_apply_visitor_noncopyable_const_visitor) {
     Expression e;
-    apply_visitor(noncopyable_const_visitor(), e);
+    noncopyable_const_visitor v;
+    apply_visitor(v, e);
 }
 
 } // namespace expr
