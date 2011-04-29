@@ -402,7 +402,7 @@ TEST_P(db_FileQuery_itest, test_not_in) {
     l.push_back(xpr.int64_(2));
     l.push_back(xpr.int64_(4));
 
-    query.filter(xpr.not_in(xpr.attribute("where/ysize"), l));
+    query.filter(xpr.not_(xpr.in(xpr.attribute("where/ysize"), l)));
     r.reset(db->execute(query));
     
     EXPECT_EQ(2, r->size());

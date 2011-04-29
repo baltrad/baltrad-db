@@ -26,6 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Expression.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
+#include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
 namespace expr {
@@ -89,6 +90,11 @@ TEST_F(expr_ExpressionFactory_test, test_or_list_single) {
     exprs.push_back(xpr.long_(1));
 
     EXPECT_EQ(xpr.long_(1), xpr.or_(exprs));
+}
+
+TEST_F(expr_ExpressionFactory_test, test_not) {
+    Expression x = Listcons().symbol("not").bool_(true).get();
+    EXPECT_EQ(x, xpr.not_(xpr.bool_(true)));
 }
 
 } // namespace expr

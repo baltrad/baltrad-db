@@ -199,6 +199,11 @@ class ExpressionFactory {
      * @brief expr1 OR expr2 OR ...
      */
     Expression or_(const Expression& x) const;
+
+    /**
+     * @brief NOT x
+     */
+    Expression not_(const Expression& x) const;
     //@}
     
     /**

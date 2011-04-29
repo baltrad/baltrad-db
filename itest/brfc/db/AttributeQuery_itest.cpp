@@ -496,7 +496,7 @@ TEST_P(db_AttributeQuery_itest, test_not_in) {
     l.push_back(xpr.int64_(3));
 
     query.fetch("uuid", xpr.attribute("file:uuid"))
-         .filter(xpr.not_in(xpr.attribute("where/xsize"), l))
+         .filter(xpr.not_(xpr.in(xpr.attribute("where/xsize"), l)))
          .order_by(xpr.attribute("file:stored_at"), AttributeQuery::ASC);
     r.reset(db->execute(query));
     

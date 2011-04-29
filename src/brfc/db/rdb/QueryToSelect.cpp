@@ -295,6 +295,31 @@ struct binop {
     }
 };
 
+struct unaryop {
+    typedef boost::function<sql::ExpressionPtr(const Expression&)> eval_t;
+
+    eval_t eval;
+    std::map<std::string, std::string> opmap;
+
+    explicit unaryop(eval_t eval_)
+            : eval(eval_) {
+        boost::assign::insert(opmap)
+            ("not", "NOT")
+        ;
+    } 
+
+    sql::ExpressionPtr operator()(const Expression& x) {
+        BRFC_ASSERT(x.is_list());
+        BRFC_ASSERT(x.size() == 2);
+
+        Expression::const_iterator it = x.begin();
+        std::string op = opmap[it->symbol()];
+        ++it;
+        sql::ExpressionPtr exp = eval(*it);
+        return sql::BinaryOperator::create(op, sql::ExpressionPtr(), exp);
+    }
+};
+
 struct func {
     typedef boost::function<sql::ExpressionPtr(const Expression&)> eval_t;
 
@@ -394,6 +419,7 @@ struct QueryToSelect::Impl {
 
             ("and",    binop(eval_cb))
             ("or",     binop(eval_cb))
+            ("not",    unaryop(eval_cb))
 
             ("like",   binop(eval_cb))
 

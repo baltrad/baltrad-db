@@ -213,6 +213,11 @@ ExpressionFactory::or_(const Expression& x) const {
 }
 
 Expression
+ExpressionFactory::not_(const Expression& x) const {
+    return unary_op("not", x);
+}
+
+Expression
 ExpressionFactory::add(const Expression& lhs, const Expression& rhs) const {
     return binary_op("+", lhs, rhs);
 }
