@@ -247,11 +247,6 @@ class ExpressionFactory {
     Expression in(const Expression& x, const Expression& l) const;
     
     /**
-     * @brief x NOT IN l
-     */
-    Expression not_in(const Expression& x, const Expression& l) const;
-    
-    /**
      * @name aggregate functions
      * @{
      */

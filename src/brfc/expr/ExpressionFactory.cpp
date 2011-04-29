@@ -253,11 +253,6 @@ ExpressionFactory::in(const Expression& x, const Expression& l) const {
 }
 
 Expression
-ExpressionFactory::not_in(const Expression& x, const Expression& l) const {
-    return binary_op("not_in", x, l);
-}
-
-Expression
 ExpressionFactory::min(const Expression& x) const {
     return unary_op("min", x);
 }

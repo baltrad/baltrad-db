@@ -88,11 +88,6 @@ class Expression : public Element {
      * @brief this IN (values)
      */
     BinaryOperatorPtr in(ExpressionListPtr values) const;
-    
-    /**
-     * @brief this NOT IN (values)
-     */
-    BinaryOperatorPtr not_in(ExpressionListPtr value) const;
     //@}
 
     /**

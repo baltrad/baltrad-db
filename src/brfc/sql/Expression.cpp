@@ -98,11 +98,6 @@ Expression::in(ExpressionListPtr values) const {
     return BinaryOperator::create("IN", this->shared_from_this(), values->parentheses());
 }
 
-BinaryOperatorPtr
-Expression::not_in(ExpressionListPtr values) const {
-    return BinaryOperator::create("NOT IN", this->shared_from_this(), values->parentheses());
-}
-
 ParenthesesPtr
 Expression::parentheses() const {
     return Parentheses::create(this->shared_from_this());

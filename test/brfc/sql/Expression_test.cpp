@@ -61,17 +61,6 @@ TEST_F(sql_Expression_test, test_in) {
     EXPECT_EQ(vals, rhs->expression());
 }
 
-TEST_F(sql_Expression_test, test_not_in) {
-    LiteralPtr lit = xpr.int64_(1);
-    ExpressionListPtr vals = ExpressionList::create();
-    BinaryOperatorPtr op = lit->not_in(vals);
-    EXPECT_EQ("NOT IN", op->op());
-    EXPECT_EQ(lit, op->lhs());
-    ParenthesesPtr rhs = dynamic_pointer_cast<Parentheses>(op->rhs());
-    ASSERT_TRUE(rhs);
-    EXPECT_EQ(vals, rhs->expression());
-}
-
 TEST_F(sql_Expression_test, test_join_contains) {
 
     TablePtr t1 = Table::create("t1");

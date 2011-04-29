@@ -256,7 +256,6 @@ struct binop {
             (">=", ">=")
             ("like", "LIKE")
             ("in", "IN")
-            ("not_in", "NOT IN")
             ("and", "AND")
             ("or", "OR")
             ("+", "+")
@@ -422,9 +421,7 @@ struct QueryToSelect::Impl {
             ("not",    unaryop(eval_cb))
 
             ("like",   binop(eval_cb))
-
             ("in",     binop(eval_cb))
-            ("not_in", binop(eval_cb))
 
             ("attr",   attr_cb)
 
