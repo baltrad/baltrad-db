@@ -162,6 +162,11 @@ class Factory {
      * @brief lhs OR rhs
      */
     BinaryOperatorPtr or_(ExpressionPtr lhs, ExpressionPtr rhs) const;
+
+    /**
+     * @brief NOT exp
+     */
+    BinaryOperatorPtr not_(ExpressionPtr exp) const;
     //@}
     
     /**

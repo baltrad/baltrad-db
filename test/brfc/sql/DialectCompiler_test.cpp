@@ -116,6 +116,13 @@ TEST_F(sql_DialectCompiler_test, test_simple) {
     EXPECT_EQ(Variant(2), replacer.value(":lit_1"));
 }
 
+TEST_F(sql_DialectCompiler_test, test_not) {
+    ExpressionPtr expr = xpr.bool_(true)->not_();
+    const Query& q = compiler.compile(*expr);
+    EXPECT_EQ("NOT :lit_0", q.statement());
+    EXPECT_EQ(Variant(true), replacer.value(":lit_0"));
+}
+
 TEST_F(sql_DialectCompiler_test, test_between) {
     ExpressionPtr expr = xpr.int64_(1)->between(xpr.int64_(0), xpr.int64_(2));
     const Query& q = compiler.compile(*expr);

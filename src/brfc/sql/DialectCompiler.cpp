@@ -73,11 +73,16 @@ DialectCompiler::push(const std::string& top) {
 
 void
 DialectCompiler::operator()(const BinaryOperator& expr) {
-    visit(*expr.lhs(), *this);
-    visit(*expr.rhs(), *this);
-    const std::string& rhs = pop();
-    const std::string& lhs = pop();
-    push(lhs + " " + expr.op() + " " + rhs);
+    std::string lhs, rhs;
+    if (expr.lhs()) {
+        visit(*expr.lhs(), *this);
+        lhs = pop() + " ";
+    }
+    if (expr.rhs()) {
+        visit(*expr.rhs(), *this);
+        rhs = " " + pop();
+    }
+    push (lhs + expr.op() + rhs);
 }
 
 void

@@ -76,6 +76,11 @@ Expression::or_(ExpressionPtr rhs) const {
 }
 
 BinaryOperatorPtr
+Expression::not_() const {
+    return BinaryOperator::create("NOT", ExpressionPtr(), this->shared_from_this());
+}
+
+BinaryOperatorPtr
 Expression::add(ExpressionPtr rhs) const {
     return BinaryOperator::create("+", this->shared_from_this(), rhs);
 }

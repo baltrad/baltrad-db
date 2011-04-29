@@ -108,6 +108,11 @@ class Expression : public Element {
      * @brief this OR rhs
      */
     BinaryOperatorPtr or_(ExpressionPtr rhs) const;
+    
+    /**
+     * @brief NOT this
+     */
+    BinaryOperatorPtr not_() const;
     //@}
     
     /**

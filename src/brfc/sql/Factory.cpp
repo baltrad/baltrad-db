@@ -146,6 +146,11 @@ Factory::or_(ExpressionPtr lhs, ExpressionPtr rhs) const {
 }
 
 BinaryOperatorPtr
+Factory::not_(ExpressionPtr exp) const {
+    return exp->not_();
+}
+
+BinaryOperatorPtr
 Factory::add(ExpressionPtr lhs, ExpressionPtr rhs) const {
     return lhs->add(rhs);
 }
