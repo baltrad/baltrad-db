@@ -31,6 +31,9 @@ namespace brfc {
 namespace expr {
 
 class Expression {
+    typedef void (Expression::*bool_type)() const;
+    void this_type_does_not_support_comparisons() const {}
+
   public:
     struct construct_symbol {}; ///< construct symbol tag
 
@@ -206,6 +209,8 @@ class Expression {
     apply_visitor(const Visitor& v) const {
         return ::boost::apply_visitor(v, value_);
     }
+
+    operator bool_type() const;
 
   private:
     value_t value_;

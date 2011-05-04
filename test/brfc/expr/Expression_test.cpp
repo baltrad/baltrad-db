@@ -255,5 +255,10 @@ TEST(expr_Expression_test, test_apply_visitor_noncopyable_const_visitor) {
     apply_visitor(v, e);
 }
 
+TEST(expr_Expression_test, test_bool_conversion) {
+    EXPECT_FALSE(Expression());
+    EXPECT_TRUE(Expression(1));
+}
+
 } // namespace expr
 } // namespace brfc

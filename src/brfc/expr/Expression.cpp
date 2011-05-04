@@ -111,6 +111,11 @@ Expression::operator=(Expression rhs) {
     return *this;
 }
 
+Expression::operator Expression::bool_type() const {
+    return (is_list() and empty()) ?
+        0 : &Expression::this_type_does_not_support_comparisons;
+}
+
 namespace {
 
 struct type_visitor : public boost::static_visitor<Expression::type::_> {
