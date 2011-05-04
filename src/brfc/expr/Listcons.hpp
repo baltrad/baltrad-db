@@ -92,6 +92,14 @@ class Listcons {
         return *this;
     }
 
+    Listcons& extend(const Expression& value) {
+        Expression::const_iterator it = value.begin();
+        for ( ; it != value.end(); ++it) {
+            exp_.push_back(*it);
+        }
+        return *this;
+    }
+
     Expression get() const { return exp_; }
 
   private:
