@@ -23,62 +23,91 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/sql/BinaryOperator.hpp>
-#include <brfc/sql/Column.hpp>
-#include <brfc/sql/Expression.hpp>
-#include <brfc/sql/Label.hpp>
+#include <brfc/expr/Listcons.hpp>
+
+
+using ::brfc::expr::Expression;
+using ::brfc::expr::Listcons;
 
 namespace brfc {
 namespace sql {
 
-Select::Select(SelectablePtr from)
+Select::Select()
         : what_()
-        , from_(from)
+        , from_()
         , where_()
         , group_by_()
-        , order_()
+        , order_by_()
         , limit_(0)
         , offset_(0)
         , distinct_(false) {
-    if (from) {
-        const std::vector<ColumnPtr>& cols = from->columns();
-        what_.insert(what_.end(), cols.begin(), cols.end());
-    }
 }
 
 void
-Select::what(ExpressionPtr expr) {
+Select::from(const expr::Expression& table) {
+    from_.from(table);
+}
+
+void
+Select::join(const expr::Expression& table,
+             const expr::Expression& condition) {
+    from_.join(table, condition);
+}
+
+void
+Select::outerjoin(const expr::Expression& table,
+                  const expr::Expression& condition) {
+    from_.outerjoin(table, condition);
+}
+
+void
+Select::what(const Expression& expr) {
     what_.push_back(expr);
 }
 
-std::vector<ColumnPtr>
-Select::columns() const {
-    std::vector<ColumnPtr> cols;
-    LabelPtr lbl;
-    ColumnPtr col;
-    BOOST_FOREACH(ExpressionPtr xpr, what_) {
-        if (col = dynamic_pointer_cast<Column>(xpr))
-            col = col->proxy(this->shared_from_this());
-        else if (lbl = dynamic_pointer_cast<Label>(xpr)) {
-            if (col = dynamic_pointer_cast<Column>(lbl->expression())) {
-                col = col->proxy(lbl->name(), this->shared_from_this());
-            } else {
-                col = Column::create(lbl->name(), this->shared_from_this());
-            }
-        }
-        cols.push_back(col->proxy(this->shared_from_this()));
+void
+Select::append_where(const Expression& expr) {
+    if (not where_.empty()) {
+        where_ = Listcons().symbol("and")
+                           .append(where_)
+                           .append(expr)
+                           .get();
+    } else {
+        where_ = expr;
     }
-    return cols;
 }
 
 void
-Select::append_where(ExpressionPtr expr) {
-    where_ = where_ ? where_->and_(expr) : expr;
+Select::append_order_by(const Expression& x, SortDirection dir) {
+    Expression o;
+    if (dir == ASC) {
+        o.push_back(Expression::symbol("asc"));
+    } else {
+        o.push_back(Expression::symbol("desc"));
+    }
+    o.push_back(x);
+    order_by_.push_back(o);
 }
 
-void
-Select::append_order_by(ExpressionPtr expr, SortDirection dir) {
-    order_.push_back(std::make_pair(expr, dir));
+Expression
+Select::expression() const {
+    Expression stmt;
+    stmt.push_back(Expression::symbol("select"));
+    if (distinct_)
+        stmt.push_back(Listcons().symbol("distinct").get());
+    stmt.push_back(Listcons().symbol("select-columns").extend(what_).get());
+    stmt.push_back(from_.expression());
+    if (where_)
+        stmt.push_back(Listcons().symbol("where").append(where_).get());
+    if (group_by_)
+        stmt.push_back(Listcons().symbol("group-by").extend(group_by_).get());
+    if (order_by_)
+        stmt.push_back(Listcons().symbol("order-by").extend(order_by_).get());
+    if (limit_)
+        stmt.push_back(Listcons().symbol("limit").int64(limit_).get());
+    if (offset_)
+        stmt.push_back(Listcons().symbol("offset").int64(offset_).get());
+    return stmt;
 }
 
 } // namespace sql

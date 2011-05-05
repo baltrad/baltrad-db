@@ -23,9 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/rdb/AttributeMapper.hpp>
 
-#include <brfc/sql/Table.hpp>
-#include <brfc/sql/Column.hpp>
-
 namespace brfc {
 namespace db {
 namespace rdb {
@@ -64,11 +61,11 @@ AttributeMapper::has(const std::string& attribute) const {
 }
 
 MappingVector
-AttributeMapper::specializations_on(sql::TablePtr table) const {
+AttributeMapper::specializations_on(const std::string& table) const {
     MappingVector vec;
     BOOST_FOREACH(const MappingMap::value_type& entry, mappings_) {
         const Mapping& mapping = entry.second;
-        if (mapping.column->selectable()->name() == table->name()) {
+        if (mapping.table == table) {
             vec.push_back(mapping);
         }
     }

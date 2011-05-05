@@ -22,28 +22,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/Variant.hpp>
 
-#include <brfc/sql/Column.hpp>
 #include <brfc/sql/Insert.hpp>
-#include <brfc/sql/Literal.hpp>
-#include <brfc/sql/Table.hpp>
 
 namespace brfc {
 namespace sql {
-
-TEST(sql_Insert_test, test_value) {
-    TablePtr t = Table::create("t");
-    t->add_column("c");
-
-    InsertPtr stmt = Insert::create(t);
-    LiteralPtr val = Literal::create(Variant(1));
-
-    EXPECT_THROW(stmt->value("nxcol", val), lookup_error);
-
-    stmt->value("c", val);
-    EXPECT_EQ(1u, stmt->values().size());
-
-    EXPECT_THROW(stmt->value("c", val), duplicate_entry);
-}
 
 } // namespace sql
 } // namespace brfc

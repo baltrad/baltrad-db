@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/DefaultConnectionCreator.hpp>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/Url.hpp>
 
 #include <brfc/sql/pg/Connection.hpp>

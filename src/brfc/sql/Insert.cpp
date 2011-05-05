@@ -22,32 +22,51 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/expr/Listcons.hpp>
 
-#include <brfc/sql/Column.hpp>
-#include <brfc/sql/Table.hpp>
+using ::brfc::expr::Expression;
+using ::brfc::expr::Listcons;
 
 namespace brfc {
 namespace sql {
 
-void
-Insert::value(const std::string& column, ExpressionPtr expr) {
-    value(table_->column(column), expr);
+Insert::Insert(const std::string& table)
+        : table_(table)
+        , values_()
+        , returning_() {
 }
 
 void
-Insert::value(ColumnPtr column, ExpressionPtr expr) {
-    if (column->selectable() != table_)
-        throw lookup_error("table mismatch");
-    BOOST_FOREACH(const ValueMap::value_type& val, values_) {
-        if (val.first == column)
-            throw duplicate_entry("duplicate column: " + column->name());
+Insert::value(const std::string& column, const Expression& expr) {
+    values_[column] = expr;
+}
+
+void
+Insert::returning(const Expression& expr) {
+    returning_ = expr;
+}
+
+Expression
+Insert::expression() const {
+    Expression stmt;
+    stmt.push_back(Expression::symbol("insert"));
+    stmt.push_back(Expression(table_));
+
+    Expression cols, vals;
+    cols.push_back(Expression::symbol("insert-columns"));
+    vals.push_back(Expression::symbol("insert-values"));
+    BOOST_FOREACH(const ValueMap::value_type& e, values_) {
+        cols.push_back(Expression(e.first));
+        vals.push_back(e.second);
     }
-    values_.push_back(std::make_pair(column, expr));
-}
 
-void
-Insert::add_return(ExpressionPtr expr) {
-    returns_.push_back(expr);
+    stmt.push_back(cols);
+    stmt.push_back(vals);
+    
+    if (returning_) {
+        stmt.push_back(Listcons().symbol("returning").append(returning_).get());
+    }
+    return stmt;
 }
 
 } // namespace sql

@@ -22,6 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <string>
 
+#include <brfc/smart_ptr.hpp>
+
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Query.hpp>
 #include <brfc/sql/Result.hpp>
@@ -70,12 +72,12 @@ Connection::commit() {
 
 Result*
 Connection::execute(const Insert& stmt) {
-    return execute(compiler().compile(stmt));
+    return execute(compiler().compile(stmt.expression()));
 }
 
 Result*
 Connection::execute(const Select& stmt) {
-    return execute(compiler().compile(stmt));
+    return execute(compiler().compile(stmt.expression()));
 }
 
 Result*

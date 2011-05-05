@@ -21,144 +21,172 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/DateTime.hpp>
 
-#include <brfc/sql/Bind.hpp>
-#include <brfc/sql/Expression.hpp>
-#include <brfc/sql/Literal.hpp>
+#include <brfc/expr/Listcons.hpp>
+
+using ::brfc::expr::Expression;
+using ::brfc::expr::Listcons;
 
 namespace brfc {
 namespace sql {
 
-LiteralPtr
-Factory::literal(const Variant& value) const {
-    return Literal::create(value);
+Expression
+Factory::literal(const Expression& value) const {
+    return Listcons().symbol("lit").append(value).get();
 }
 
-LiteralPtr
+Expression
 Factory::string(const std::string& value) const {
-    return Literal::create(Variant(value));
+    return Listcons().symbol("lit").string(value).get();
 }
 
-LiteralPtr
+Expression
 Factory::string(const char* value) const {
-    return Literal::create(Variant(value));
+    return Listcons().symbol("lit").string(value).get();
 }
 
-LiteralPtr
+Expression
 Factory::int64_(long long value) const {
-    return Literal::create(Variant(value));
+    return Listcons().symbol("lit").int64(value).get();
 }
 
-LiteralPtr
+Expression
 Factory::double_(double value) const {
-    return Literal::create(Variant(value));
+    return Listcons().symbol("lit").double_(value).get();
 }
 
-LiteralPtr
-Factory::date(int year, int month, int day) const {
-    return date(Date(year, month, day));
+Expression
+Factory::date(const Date& value) const {
+    return Listcons().symbol("lit").date(value).get();
 }
 
-LiteralPtr
-Factory::date(const Date& date) const {
-    return Literal::create(Variant(Date(date)));
+Expression
+Factory::time(const Time& value) const {
+    return Listcons().symbol("lit").time(value).get();
 }
 
-LiteralPtr
-Factory::date(const DateTime& datetime) const {
-    return date(datetime.date());
+Expression
+Factory::datetime(const DateTime& value) const {
+    return Listcons().symbol("lit").datetime(value).get();
 }
 
-LiteralPtr
-Factory::time(int hour, int minute, int second) const {
-    return time(Time(hour, minute, second));
-}
-
-LiteralPtr
-Factory::time(const Time& time) const {
-    return Literal::create(Variant(time));
-}
-
-LiteralPtr
-Factory::time(const DateTime& datetime) const {
-    return time(datetime.time());
-}
-
-LiteralPtr
-Factory::datetime(const DateTime& datetime) const {
-    return Literal::create(Variant(datetime));
-}
-
-LiteralPtr
+Expression
 Factory::bool_(bool value) const {
-    return Literal::create(Variant(value));
+    return Listcons().symbol("lit").bool_(value).get();
 }
 
-BindPtr
+Expression
 Factory::bind(const std::string& name) const {
-    return Bind::create(name);
+    return Listcons().symbol("bind").string(name).get();
 }
 
-BinaryOperatorPtr
-Factory::ne(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->ne(rhs);
+Expression
+Factory::ne(const Expression& lhs, const Expression& rhs) const {
+    return binary_op("!=", lhs, rhs);
 }
 
-BinaryOperatorPtr
-Factory::eq(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->eq(rhs);
+Expression
+Factory::eq(const Expression& lhs, const Expression& rhs) const {
+    return binary_op("=", lhs, rhs);
 }
 
-BinaryOperatorPtr
-Factory::gt(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->gt(rhs);
+Expression
+Factory::gt(const Expression& lhs, const Expression& rhs) const {
+    return binary_op(">", lhs, rhs);
 }
 
-BinaryOperatorPtr
-Factory::lt(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->lt(rhs);
+Expression
+Factory::lt(const Expression& lhs, const Expression& rhs) const {
+    return binary_op("<", lhs, rhs);
 }
 
-BinaryOperatorPtr
-Factory::le(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->le(rhs);
+Expression
+Factory::le(const Expression& lhs, const Expression& rhs) const {
+    return binary_op("<=", lhs, rhs);
 }
 
-BinaryOperatorPtr
-Factory::ge(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->ge(rhs);
+Expression
+Factory::ge(const Expression& lhs, const Expression& rhs) const {
+    return binary_op(">=", lhs, rhs);
 }
 
-BinaryOperatorPtr
-Factory::between(ExpressionPtr sql,
-                 ExpressionPtr low,
-                 ExpressionPtr high) const {
-    return sql->between(low, high);
+Expression
+Factory::between(const Expression& x,
+                 const Expression& low,
+                 const Expression& high) const {
+    return and_(le(low, x), le(x, high));
 }
 
-BinaryOperatorPtr
-Factory::and_(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->and_(rhs);
+Expression
+Factory::and_(const Expression& lhs, const Expression& rhs) const {
+    return binary_op("and", lhs, rhs);
 }
 
-BinaryOperatorPtr
-Factory::or_(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->or_(rhs);
+Expression
+Factory::or_(const Expression& lhs, const Expression& rhs) const {
+    return binary_op("or", lhs, rhs);
 }
 
-BinaryOperatorPtr
-Factory::not_(ExpressionPtr exp) const {
-    return exp->not_();
+Expression
+Factory::not_(const Expression& exp) const {
+    return unary_op("not", exp);
 }
 
-BinaryOperatorPtr
-Factory::add(ExpressionPtr lhs, ExpressionPtr rhs) const {
-    return lhs->add(rhs);
+Expression
+Factory::add(const Expression& lhs, const Expression& rhs) const {
+    return binary_op("+", lhs, rhs);
 }
 
-ParenthesesPtr
-Factory::parentheses(ExpressionPtr xpr) const {
-    return xpr->parentheses();
+Expression
+Factory::binary_op(const std::string& op,
+                   const Expression& lhs,
+                   const Expression& rhs) const {
+    return Listcons().symbol(op).append(lhs).append(rhs).get();
 }
 
+Expression
+Factory::unary_op(const std::string& op,
+                   const Expression& arg) const {
+    return Listcons().symbol(op).append(arg).get();
+}
+
+Expression
+Factory::alias(const expr::Expression& x, const std::string& alias) const {
+    return Listcons().symbol("alias").append(x).string(alias).get();
+}
+
+Expression
+Factory::label(const expr::Expression& x, const std::string& alias) const {
+    return Listcons().symbol("label").append(x).string(alias).get();
+}
+
+Expression
+Factory::min(const expr::Expression& x) const {
+    return unary_op("min", x);
+}
+
+Expression
+Factory::max(const expr::Expression& x) const {
+    return unary_op("max", x);
+}
+
+Expression
+Factory::sum(const expr::Expression& x) const {
+    return unary_op("sum", x);
+}
+
+Expression
+Factory::count(const expr::Expression& x) const {
+    return unary_op("count", x);
+}
+
+Expression
+Factory::column(const std::string& table, const std::string& column) const {
+    return Listcons().symbol("column").string(table).string(column).get();
+}
+
+Expression
+Factory::table(const std::string& table) const {
+    return Listcons().symbol("table").string(table).get();
+}
 } // namespace sql
 } // namespace brfc

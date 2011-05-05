@@ -22,10 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
-#include <brfc/visit.hpp>
-#include <brfc/Variant.hpp>
-
-#include <brfc/sql/fwd.hpp>
+#include <brfc/expr/Eval.hpp>
 #include <brfc/sql/Compiler.hpp>
 
 namespace brfc {
@@ -38,29 +35,14 @@ class Dialect;
  */
 class DialectCompiler : public Compiler {
   public:
-    typedef mpl::vector<const Alias,
-                        const BinaryOperator,
-                        const Bind,
-                        const Column,
-                        const ExpressionList,
-                        const Function,
-                        const Insert,
-                        const Join,
-                        const Parentheses,
-                        const Label,
-                        const Literal,
-                        const Select,
-                        const Table> accepted_types;
+    struct proc {
+        typedef expr::Expression result_type;
+    };
 
     /**
      * @brief constructor
      */
-    explicit DialectCompiler(const Dialect* dialect)
-            : dialect_(dialect)
-            , in_from_clause_(false)
-            , binds_()
-            , stack_() {
-    }
+    explicit DialectCompiler(const Dialect* dialect);
 
     /**
      * @brief compile Alias to string form
@@ -68,14 +50,34 @@ class DialectCompiler : public Compiler {
      * @post top of the stack contains alias or 'aliased AS alias' if compiling
      *       a FROM-clause
      */
-    void operator()(const Alias& expr);
-    
+    struct alias : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
     /**
      * @brief compile binary operator to string form
      *
      * @post stack contains 'lhs op rhs'
      */
-    void operator()(const BinaryOperator& expr);
+    struct binop : public proc {
+        binop(const std::string& op) : op_(op) { }
+
+        expr::Expression operator()(const expr::Expression& x);
+
+        std::string op_;
+    };
+
+    struct like : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+    
+    struct unaryop : public proc {
+        unaryop(const std::string& op) : op_(op) { }
+
+        expr::Expression operator()(const expr::Expression& x);
+
+        std::string op_;
+    };
 
     /**
      * @brief compile a Bind to string form
@@ -83,69 +85,143 @@ class DialectCompiler : public Compiler {
      * @post top of the stack constains bind name, BindMap has an entry
      *       with the name and null value
      */
-    void operator()(const Bind& bind);
+    struct bind : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+        
+        BindMap binds_;
+    };
 
     /**
      * @brief compile column to string form
      * @post top of the stack contains compiled column
      */
-    void operator()(const Column& expr);
-
-    /**
-     * @brief compile an expression list to string form
-     * @post top of the stack contains 'expr1, expr2, ...'
-     */
-    void operator()(const ExpressionList& list);
+    struct column : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
 
     /**
      * @brief compile function call to string form
      * @post top of the stack contains 'name(arg1, arg2, ...)'
      */
-    void operator()(const Function& func);
+    struct function : public proc {
+        explicit function(const std::string& name) : name_(name) { }
+
+        expr::Expression operator()(const expr::Expression& x);
+
+        std::string name_;
+    };
     
     /**
      * @brief compile Join to string form
      * @post top of the stack contains 
      *       '\<from\> JOIN \<to\> ON \<expression\>'
      */
-    void operator()(const Join& join);
+    struct join : public proc {
+        explicit join(const std::string& type)
+                : type_(type) {
+        }
+
+        expr::Expression operator()(const expr::Expression& x);
+
+        std::string type_;
+    };
 
     /**
      * @brief compile Literal to string form
      * @post top of the stack contains result of Dialect::variant_to_string
      */
-    void operator()(const Literal& expr);
-    
+    struct literal : public proc {
+        literal(const sql::Dialect& dialect) : dialect_(dialect) { }
+
+        expr::Expression operator()(const expr::Expression& x);
+
+        const sql::Dialect& dialect_;
+    };
+
     /**
      * @brief compile Label to string form
      * @post top of the stack contains 'expression AS name'
      */
-    void operator()(const Label& label);
-
-    /**
-     * @brief surround the top of the stack with parentheses
-     * @post stack contains '(content)'
-     */
-    void operator()(const Parentheses& expr);
+    struct label : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
 
     /**
      * @brief compile Select statement to string form
      * @post top of the stack contains 'SELECT what FROM from WHERE where'
      */
-    void operator()(const Select& select);
+    struct select : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
+    struct distinct : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
+    struct select_columns : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
+    struct from_clause : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
+    struct where_clause : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
+    struct group_by : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
+    struct order_by : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
+    struct order_dir : public proc {
+        explicit order_dir(const std::string& dir) : dir_(dir) { }
+
+        expr::Expression operator()(const expr::Expression& x);
+
+        std::string dir_;
+    };
+
+    struct limit : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
+    struct offset : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
 
     /**
      * @brief compile Insert statement to string form
      * @post top of the stack contains 'INSERT INTO table(bind.keys)
      *       VALUES(bind.values) RETURNING returns'
      */
-    void operator()(const Insert& insert);
+    struct insert : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
+    struct insert_columns : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+
+    struct insert_values : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
+    
+    struct returning : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
 
     /**
      * @brief compile Table to string form
      * @post top of the stack contains table name
      */
-    void operator()(const Table& expr);
+    struct table : public proc {
+        expr::Expression operator()(const expr::Expression& x);
+    };
   
   protected:
     /**
@@ -153,16 +229,12 @@ class DialectCompiler : public Compiler {
      * @pre stack is empty
      * @post stack contains compiled string, accessible through compiled()
      */
-    virtual Query do_compile(const Element& expr);
+    virtual Query do_compile(const expr::Expression& x);
 
   private:
-    std::string pop();
-    void push(const std::string& str);
-    
+    expr::Eval eval_;
     const Dialect* dialect_;
-    bool in_from_clause_;
-    BindMap binds_;
-    std::vector<std::string> stack_;
+    bind bind_;
 };
 
 }

@@ -22,9 +22,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/scoped_ptr.hpp>
 
-#include <brfc/sql/fwd.hpp>
-
 namespace brfc {
+
+namespace sql {
+    class Select;
+}
+
 namespace db {
 
 class AttributeQuery;
@@ -57,7 +60,7 @@ class QueryToSelect {
      * formed during the visitation becomes the from-clause for the
      * statement.
      */
-    sql::SelectPtr transform(const FileQuery& query);
+    sql::Select transform(const FileQuery& query);
     
     /**
      * @brief transfrom an AttributeQuery to sql::Select statement
@@ -69,7 +72,7 @@ class QueryToSelect {
      * transferred from the query to the statement. The from-clause formed
      * during the visitation becomes the from-clause for the statement.
      */
-    sql::SelectPtr transform(const AttributeQuery& query);
+    sql::Select transform(const AttributeQuery& query);
 
   private:
     struct Impl;

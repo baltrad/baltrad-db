@@ -22,15 +22,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gmock/gmock.h>
 
+#include <brfc/expr/Expression.hpp>
 #include <brfc/sql/Compiler.hpp>
-#include <brfc/sql/Element.hpp>
 
 namespace brfc {
 namespace sql  {
 
 class MockCompiler : public Compiler {
   public:
-    MOCK_METHOD1(do_compile, Query(const Element&));
+    MOCK_METHOD1(do_compile, Query(const expr::Expression&));
 };
 
 } // namespace sql

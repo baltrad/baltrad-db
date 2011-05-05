@@ -22,9 +22,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <string>
 
-#include <brfc/sql/fwd.hpp>
-
 namespace brfc {
+
+namespace expr {
+    class Expression;
+}
 
 class Date;
 class DateTime;
@@ -41,71 +43,49 @@ class Factory {
     /**
      * @brief construct Literal from Variant
      */
-    LiteralPtr literal(const Variant& value) const;
+    expr::Expression literal(const expr::Expression& value) const;
 
     /**
      * @brief construct Literal containing a string
-     * @{
      */
-    LiteralPtr string(const std::string& value) const;
-    LiteralPtr string(const char* value) const;
+    expr::Expression string(const std::string& value) const;
 
     /**
-     * @}
+     * @brief construct Literal containing a string
      */
-
+    expr::Expression string(const char* value) const;
 
     /**
      * @brief construct Literal containing a 64-bit integer
      */
-    LiteralPtr int64_(long long value) const;
+    expr::Expression int64_(long long value) const;
 
     /**
      * @brief construct Literal containing a double precision float
      */
-    LiteralPtr double_(double value) const;
+    expr::Expression double_(double value) const;
 
     /**
      * @brief construct Literal containing a date
      */
-    LiteralPtr date(int year, int month, int day) const;
-
-    /**
-     * @brief construct Literal containing a date
-     */
-    LiteralPtr date(const Date& date) const;
-
-    /**
-     * @brief construct Literal containing a date
-     */
-    LiteralPtr date(const DateTime& datetime) const;
+    expr::Expression date(const Date& date) const;
 
     /**
      * @brief construct Literal containing a time
      */
-    LiteralPtr time(int hour, int minute, int second=0) const;
-
-    /**
-     * @brief construct Literal containing a time
-     */
-    LiteralPtr time(const Time& time) const;
-
-    /**
-     * @brief construct Literal containing a time
-     */
-    LiteralPtr time(const DateTime& datetime) const;
+    expr::Expression time(const Time& time) const;
 
     /**
      * @brief construct Literal containing a datetime
      */
-    LiteralPtr datetime(const DateTime& datetime) const;
+    expr::Expression datetime(const DateTime& datetime) const;
 
     /**
      * @brief construct Literal containing a bool
      */
-    LiteralPtr bool_(bool value) const;
+    expr::Expression bool_(bool value) const;
 
-    BindPtr bind(const std::string& name) const;
+    expr::Expression bind(const std::string& name) const;
 
     /**
      * @name comparison operators
@@ -114,39 +94,39 @@ class Factory {
     /**
      * @brief lhs != rhs
      */
-    BinaryOperatorPtr ne(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    expr::Expression ne(const expr::Expression& lhs, const expr::Expression& rhs) const;
 
     /**
      * @brief lhs == rhs
      */
-    BinaryOperatorPtr eq(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    expr::Expression eq(const expr::Expression& lhs, const expr::Expression& rhs) const;
 
     /**
      * @brief lhs > rhs
      */
-    BinaryOperatorPtr gt(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    expr::Expression gt(const expr::Expression& lhs, const expr::Expression& rhs) const;
 
     /**
      * @brief lhs < rhs
      */
-    BinaryOperatorPtr lt(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    expr::Expression lt(const expr::Expression& lhs, const expr::Expression& rhs) const;
 
     /**
      * @brief lhs <= rhs
      */
-    BinaryOperatorPtr le(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    expr::Expression le(const expr::Expression& lhs, const expr::Expression& rhs) const;
 
     /**
      * @brief lhs >= rhs
      */
-    BinaryOperatorPtr ge(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    expr::Expression ge(const expr::Expression& lhs, const expr::Expression& rhs) const;
     
     /**
      * @brief low <= sql => high
      */
-    BinaryOperatorPtr between(ExpressionPtr sql,
-                              ExpressionPtr low,
-                              ExpressionPtr high) const;
+    expr::Expression between(const expr::Expression& sql,
+                              const expr::Expression& low,
+                              const expr::Expression& high) const;
     //@}
 
     /**
@@ -156,17 +136,17 @@ class Factory {
     /**
      * @brief lhs AND rhs
      */
-    BinaryOperatorPtr and_(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    expr::Expression and_(const expr::Expression& lhs, const expr::Expression& rhs) const;
     
     /**
      * @brief lhs OR rhs
      */
-    BinaryOperatorPtr or_(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    expr::Expression or_(const expr::Expression& lhs, const expr::Expression& rhs) const;
 
     /**
      * @brief NOT exp
      */
-    BinaryOperatorPtr not_(ExpressionPtr exp) const;
+    expr::Expression not_(const expr::Expression& exp) const;
     //@}
     
     /**
@@ -176,13 +156,31 @@ class Factory {
     /**
      * @brief lhs + rhs
      */
-    BinaryOperatorPtr add(ExpressionPtr lhs, ExpressionPtr rhs) const;
+    expr::Expression add(const expr::Expression& lhs, const expr::Expression& rhs) const;
 
-    /**
-     * @brief surround expression with parentheses
-     */
-    ParenthesesPtr parentheses(ExpressionPtr xpr) const;
+    expr::Expression column(const std::string& table,
+                            const std::string& column) const;
+
+    expr::Expression label(const expr::Expression& x, const std::string& label) const;
+
+    expr::Expression alias(const expr::Expression& x, const std::string& alias) const;
+
+    expr::Expression table(const std::string& table) const;
+
+    expr::Expression min(const expr::Expression& x) const;
+    expr::Expression max(const expr::Expression& x) const;
+    expr::Expression sum(const expr::Expression& x) const;
+    expr::Expression count(const expr::Expression& x) const;
+
+
+    expr::Expression binary_op(const std::string& op,
+                               const expr::Expression& lhs,
+                               const expr::Expression& rhs) const;
+
+    expr::Expression unary_op(const std::string& op,
+                              const expr::Expression& arg) const;
 };
+
 
 }
 }

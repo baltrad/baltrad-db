@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 
 #include <brfc/assert.hpp>
@@ -36,21 +35,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/AttributeMapper.hpp>
 #include <brfc/db/rdb/Model.hpp>
 
-#include <brfc/expr/Expression.hpp>
+#include <brfc/expr/Listcons.hpp>
 
-#include <brfc/sql/Alias.hpp>
-#include <brfc/sql/BinaryOperator.hpp>
-#include <brfc/sql/Column.hpp>
-#include <brfc/sql/Expression.hpp>
-#include <brfc/sql/ExpressionList.hpp>
 #include <brfc/sql/Factory.hpp>
-#include <brfc/sql/Function.hpp>
-#include <brfc/sql/Join.hpp>
-#include <brfc/sql/Label.hpp>
-#include <brfc/sql/Literal.hpp>
-#include <brfc/sql/Parentheses.hpp>
 #include <brfc/sql/Select.hpp>
-#include <brfc/sql/Table.hpp>
 
 namespace brfc {
 namespace db {
@@ -64,14 +52,12 @@ struct attr {
 
     const AttributeMapper* mapper_;
     sql::Factory xpr_;
-    const Model& m_;
-    sql::JoinPtr from_; ///< from clause for the statement
+    sql::FromClause from_; ///< from clause for the statement
     std::map<std::string, std::string> plain_column_map;
     
-    attr(const AttributeMapper* mapper, const Model& model)
+    attr(const AttributeMapper* mapper)
             : mapper_(mapper)
             , xpr_()
-            , m_(model)
             , from_()
             , plain_column_map() {
         boost::assign::insert(plain_column_map)
@@ -87,12 +73,17 @@ struct attr {
 
     void reset() {
         // always select from files and join sources
-        from_ = m_.files->join(m_.sources,
-                               xpr_.eq(m_.files->column("source_id"),
-                                       m_.sources->column("id")));
+        from_ = sql::FromClause(xpr_.table(m::files::name()));
+        from_.join(
+            xpr_.table(m::sources::name()),
+            xpr_.eq(
+                m::files::column("source_id"),
+                m::sources::column("id")
+            )
+        );
     }
 
-    sql::ExpressionPtr
+    Expression
     operator()(const Expression& x) {
         BRFC_ASSERT(x.is_list());
         BRFC_ASSERT(x.size() == 3);
@@ -115,7 +106,7 @@ struct attr {
      *   mapper
      * - plain_attr_column() for every other attribute
      */
-    sql::ColumnPtr
+    Expression
     column_by_attr(const std::string& name, const std::string& type) {
         if (boost::starts_with(name, "what/source:")) {
             return source_attr_column(name);
@@ -133,12 +124,12 @@ struct attr {
      * look up mapping from the mapper and use Mapping::column as the column
      * for the attribute.
      */
-    sql::ColumnPtr
+    Expression
     specialized_attr_column(const std::string& name) {
         // currently, specialized attributes are only in bdb_files and
         // bdb_sources. These are already contained in the from clause.
         Mapping mapping = mapper_->mapping(name);
-        return mapping.column;
+        return xpr_.column(mapping.table, mapping.column);
     }
 
     /**
@@ -146,40 +137,42 @@ struct attr {
      * @return the sql::Column where the attribute is stored
      *
      * The column is looked up using the $KEY in 'what/source:$KEY':
-     * - if $KEY is 'name' or 'node', the column for the attribute is
-     *   'bdb_sources.name'
+     * - if $KEY is '_name', the column for the attribute is 'bdb_sources.name'
      * - for every other $KEY, 'bdb_source_kvs' is joined in the from-clause
      *   (if not already joined) using an alias 'src_$KEY' with an additional
      *   join-condition 'bdb_source_kvs.key=$KEY'. The column for the
      *   attribute is 'src_$KEY.value'.
      */
-    sql::ColumnPtr
+    Expression
     source_attr_column(const std::string& name) {
         const std::string& key = name.substr(name.find_first_of(':') + 1);
         if (key == "_name") {
             // sources is joined by default
             // this attribute can be accessed at sources.name
-            return m_.sources->column("name");
+            return m::sources::column("name");
         } else {
             std::string alias = "src_" + key;
-            sql::AliasPtr value_t = m_.source_kvs->alias(alias);
+            Expression alias_t = xpr_.alias("bdb_source_kvs", alias);
 
             // join if missing
-            if (not from_->contains(value_t)) {
-                from_ = from_->outerjoin(value_t,
-                            xpr_.and_(
-                                xpr_.eq(
-                                    value_t->column("source_id"),
-                                    m_.sources->column("id")),
-                                xpr_.eq(
-                                    value_t->column("key"),
-                                    xpr_.string(key))
-                            )
+            if (not from_.contains(alias_t)) {
+                from_.outerjoin(
+                    alias_t,
+                    xpr_.and_(
+                        xpr_.eq(
+                            xpr_.column(alias, "source_id"),
+                            m::sources::column("id")
+                        ),
+                        xpr_.eq(
+                            xpr_.column(alias, "key"),
+                            xpr_.string(key)
+                        )
+                    )
                 );
             }
 
             // this attribute can be accessed at src_$KEY.value
-            return value_t->column("value");
+            return xpr_.column(alias, "value");
         }
     }
 
@@ -193,7 +186,7 @@ struct attr {
      *
      * The column for the attribute is '$NAME_values.value_$TYPE'.
      */
-    sql::ColumnPtr
+    Expression
     plain_attr_column(std::string name, const std::string& type) {
         std::list<std::string> path;
         boost::split(path, name, boost::is_any_of("/"),
@@ -208,38 +201,56 @@ struct attr {
         
         // alias the table (this attribute is always searched on this alias)
         boost::erase_all(name, "/");
-        sql::AliasPtr value_t = m_.attrvals->alias(name + "_values");
+        std::string alias = name + "_values";
+        Expression alias_t = xpr_.alias(m::attrvals::name(), alias);
         
         // join this table-alias if not already joined
-        if (not from_->contains(value_t)) {
+        if (not from_.contains(alias_t)) {
             // join attribute layer to files
-            sql::SelectablePtr l0 = m_.nodes->alias(name + "_l0");
-            from_ = from_->outerjoin(l0,
+            std::string l0_alias = name + "_l0";
+            from_.outerjoin(
+                xpr_.alias(m::nodes::name(), l0_alias),
                 xpr_.and_(
-                    l0->column("file_id")->eq(m_.files->column("id")),
-                    l0->column("name")->eq(xpr_.string(attrname))
+                    xpr_.eq(
+                        xpr_.column(l0_alias, "file_id"),
+                        m::files::column("id")
+                    ),
+                    xpr_.eq(
+                        xpr_.column(l0_alias, "name"),
+                        xpr_.string(attrname)
+                    )
                 )
             );
             // join group layer to attribute layer
-            sql::SelectablePtr l1 = m_.nodes->alias(name + "_l1");
-            from_ = from_->outerjoin(l1,
+            std::string l1_alias = name + "_l1";
+            from_.outerjoin(
+                xpr_.alias(m::nodes::name(), l1_alias),
                 xpr_.and_(
-                    l1->column("id")->eq(l0->column("parent_id")),
-                    l1->column("name")->eq(xpr_.string(groupname))
+                    xpr_.eq(
+                        xpr_.column(l1_alias, "id"),
+                        xpr_.column(l0_alias, "parent_id")
+                    ),
+                    xpr_.eq(
+                        xpr_.column(l1_alias, "name"),
+                        xpr_.string(groupname)
+                    )
                 )
             );
             // join attribute values to attribute layer
-            from_ = from_->outerjoin(value_t,
-                value_t->column("node_id")->eq(l0->column("id"))
+            from_.outerjoin(
+                alias_t,
+                xpr_.eq(
+                    xpr_.column(alias, "node_id"),
+                    xpr_.column(l0_alias, "id")
+                )
             );
         }
-        
-        return value_t->column(plain_column_map[type]);
+        return xpr_.column(alias, plain_column_map[type]);
     }
 };
 
 struct binop {
-    typedef boost::function<sql::ExpressionPtr(const Expression&)> eval_t;
+    typedef boost::function<Expression(const Expression&)> eval_t;
 
     eval_t eval;
     std::map<std::string, std::string> opmap;
@@ -254,10 +265,10 @@ struct binop {
             ("<", "<")
             ("<=", "<=")
             (">=", ">=")
-            ("like", "LIKE")
-            ("in", "IN")
-            ("and", "AND")
-            ("or", "OR")
+            ("like", "like")
+            ("in", "in")
+            ("and", "and")
+            ("or", "or")
             ("+", "+")
             ("-", "-")
             ("*", "*")
@@ -265,76 +276,64 @@ struct binop {
         ;
     }
 
-    sql::ExpressionPtr operator()(const Expression& x) {
+    Expression operator()(const Expression& x) {
         BRFC_ASSERT(x.is_list());
         BRFC_ASSERT(x.size() == 3);
 
         Expression::const_iterator it = x.begin();
         std::string op = opmap[it->symbol()];
         ++it;
-        sql::ExpressionPtr lhs = eval(*it);
+        Expression lhs = eval(*it);
         ++it;
-        sql::ExpressionPtr rhs = eval(*it);
-        if (op == "LIKE")
-            rhs = replace_like_pattern(rhs);
-        return sql::BinaryOperator::create(op, lhs, rhs);
-    }
-
-    sql::ExpressionPtr
-    replace_like_pattern(sql::ExpressionPtr expr) {
-        sql::LiteralPtr l = dynamic_pointer_cast<sql::Literal>(expr);
-        if (l and l->value().is_string()) {
-            std::string value(l->value().string());
-            boost::replace_all(value, "*", "%");
-            boost::replace_all(value, "?", "_");
-            l = sql::Literal::create(Variant(value));
-            return l;
-        }
-        return expr;
+        Expression rhs = eval(*it);
+        return expr::Listcons().symbol(op).append(lhs).append(rhs).get();
     }
 };
 
 struct unaryop {
-    typedef boost::function<sql::ExpressionPtr(const Expression&)> eval_t;
+    typedef boost::function<Expression(const Expression&)> eval_t;
 
     eval_t eval;
     std::map<std::string, std::string> opmap;
 
     explicit unaryop(eval_t eval_)
-            : eval(eval_) {
+            : eval(eval_)
+            , opmap() {
         boost::assign::insert(opmap)
-            ("not", "NOT")
+            ("not", "not")
         ;
-    } 
+    }
 
-    sql::ExpressionPtr operator()(const Expression& x) {
+    Expression operator()(const Expression& x) {
         BRFC_ASSERT(x.is_list());
         BRFC_ASSERT(x.size() == 2);
 
         Expression::const_iterator it = x.begin();
         std::string op = opmap[it->symbol()];
         ++it;
-        sql::ExpressionPtr exp = eval(*it);
-        return sql::BinaryOperator::create(op, sql::ExpressionPtr(), exp);
+        Expression arg = eval(*it);
+        return expr::Listcons().symbol(op).append(arg).get();
     }
 };
 
+
 struct func {
-    typedef boost::function<sql::ExpressionPtr(const Expression&)> eval_t;
+    typedef boost::function<Expression(const Expression&)> eval_t;
 
     eval_t eval;
 
     explicit func(eval_t eval_) : eval(eval_) { }
     
-    sql::ExpressionPtr operator()(const Expression& x) {
+    Expression operator()(const Expression& x) {
         BRFC_ASSERT(x.is_list());
         BRFC_ASSERT(x.size() >= 1);
 
-        sql::FunctionPtr f = sql::Function::create(x.front().symbol());
+        Expression f;
+        f.push_back(Expression::symbol(x.front().symbol()));
         Expression::const_iterator it = x.begin();
         ++it; // skip symbol
         for ( ; it != x.end(); ++it) {
-            f->add_arg(eval(*it));
+            f.push_back(eval(*it));
         }
         return f;
     }
@@ -343,52 +342,21 @@ struct func {
 struct literal {
     sql::Factory xpr_;
 
-    sql::ExpressionPtr operator()(const Expression& x) {
-        switch (x.type()) {
-            case Expression::type::LIST:
-                return list(x);
-            case Expression::type::BOOL:
-                return xpr_.literal(Variant(x.bool_()));
-            case Expression::type::INT64:
-                return xpr_.literal(Variant(x.int64()));
-            case Expression::type::DOUBLE:
-                return xpr_.literal(Variant(x.double_()));
-            case Expression::type::STRING:
-                return xpr_.literal(Variant(x.string()));
-            case Expression::type::DATE:
-                return xpr_.literal(Variant(x.date()));
-            case Expression::type::TIME:
-                return xpr_.literal(Variant(x.time()));
-            case Expression::type::DATETIME:
-                return xpr_.literal(Variant(x.datetime()));
-            case Expression::type::SYMBOL:
-                throw std::logic_error("literal symbol");
-            default:
-                throw std::logic_error("unhandled Expression type");
-        }
-    }
-
-    sql::ExpressionPtr list(const Expression& x) {
-        sql::ExpressionListPtr exprs = sql::ExpressionList::create();
-        Expression::const_iterator iter = x.begin();
-        for ( ; iter != x.end(); ++iter) {
-            exprs->add(operator()(*iter));
-        }
-        return exprs;
+    Expression operator()(const Expression& x) {
+        return xpr_.literal(x);
     }
 };
 
 } // namespace anonymous
 
 struct QueryToSelect::Impl {
-    typedef boost::function<sql::ExpressionPtr(const Expression&)> proc_t;
+    typedef boost::function<Expression(const Expression&)> proc_t;
     typedef std::map<std::string, proc_t> procmap_t;
 
     const AttributeMapper* mapper_;
     procmap_t procs_;
     sql::Factory xpr_;
-    const Model& m_;
-    sql::SelectPtr select_; ///< the select statement
+    sql::Select select_; ///< the select statement
 
     attr attr_cb;
     literal literal_cb;
@@ -396,9 +364,8 @@ struct QueryToSelect::Impl {
     Impl(const AttributeMapper* mapper)
             : mapper_(mapper)
             , procs_()
-            , m_(Model::instance())
             , select_()
-            , attr_cb(mapper_, m_)
+            , attr_cb(mapper_)
             , literal_cb() { 
         
         proc_t eval_cb = boost::bind(&QueryToSelect::Impl::eval, this, _1);
@@ -440,7 +407,7 @@ struct QueryToSelect::Impl {
      */
     void reset();
 
-    sql::ExpressionPtr eval(const Expression& x) {
+    Expression eval(const Expression& x) {
         if (x.is_list() and not x.empty() and x.front().is_symbol()) {
             const std::string& symbol = x.front().symbol();
             if (symbol == "attr")
@@ -452,8 +419,8 @@ struct QueryToSelect::Impl {
         }
     }
 
-    sql::SelectPtr transform(const FileQuery& query);
-    sql::SelectPtr transform(const AttributeQuery& query);
+    sql::Select transform(const FileQuery& query);
+    sql::Select transform(const AttributeQuery& query);
 };
 
 QueryToSelect::QueryToSelect(const AttributeMapper* mapper)
@@ -467,90 +434,90 @@ QueryToSelect::~QueryToSelect() {
 
 void
 QueryToSelect::Impl::reset() {
-    select_ = sql::Select::create();
+    select_ = sql::Select();
     attr_cb.reset();
 }
 
-sql::SelectPtr
+sql::Select
 QueryToSelect::transform(const FileQuery& query) {
     return impl_->transform(query);
 }
 
-sql::SelectPtr
+sql::Select
 QueryToSelect::Impl::transform(const FileQuery& query) {
     reset();
 
-    select_->what(m_.files->column("id"));
-    select_->limit(query.limit());
-    select_->offset(query.skip());
+    select_.what(m::files::column("id"));
+    select_.limit(query.limit());
+    select_.offset(query.skip());
 
     // replace attributes in where clause with columns
-    if (not query.filter().empty()) {
-        select_->where(eval(query.filter()));
+    if (not query.filter().empty()) { // XXX: unnecessary check
+        select_.where(eval(query.filter()));
     }
 
     if (query.order().size() > 0 ) {
         BOOST_FOREACH(FileQuery::OrderPair op, query.order()) {
-            sql::ExpressionPtr order = eval(op.first);
+            Expression order = eval(op.first);
             if (op.second == FileQuery::ASC) {
-                order = sql::Function::min(order);
+                order = xpr_.min(order);
             } else {
-                order = sql::Function::max(order);
+                order = xpr_.max(order);
             }
-            select_->append_order_by(
+            select_.append_order_by(
                 order,
                 sql::Select::SortDirection(op.second)
             );
         }
-        select_->append_group_by(m_.files->column("id"));
+        select_.append_group_by(m::files::column("id"));
     } else {
-        select_->append_order_by(m_.files->column("id"), sql::Select::ASC);
-        select_->distinct(true);
+        select_.append_order_by(m::files::column("id"), sql::Select::ASC);
+        select_.distinct(true);
     }
     
     // add the built join as from clause
-    select_->from(attr_cb.from_);
+    select_.from(attr_cb.from_);
 
     return select_;
 }
 
 
-sql::SelectPtr
+sql::Select
 QueryToSelect::transform(const AttributeQuery& query) {
     return impl_->transform(query);
 }
 
-sql::SelectPtr
+sql::Select
 QueryToSelect::Impl::transform(const AttributeQuery& query) {
     reset();
     
-    select_->distinct(query.distinct());
-    select_->limit(query.limit());
+    select_.distinct(query.distinct());
+    select_.limit(query.limit());
 
     // replace attributes with columns
     BOOST_FOREACH(const AttributeQuery::FetchMap::value_type& val, query.fetch()) {
-        sql::ExpressionPtr col = eval(val.second);
-        select_->what(col->label("l_" + val.first));
+        const Expression& col = eval(val.second);
+        select_.what(xpr_.label(col, "l_" + val.first));
     }
 
     // replace attributes in where clause with columns
     if (not query.filter().empty()) {
-        select_->where(eval(query.filter()));
+        select_.where(eval(query.filter()));
     } 
 
     // replace attributes in group by
     BOOST_FOREACH(const expr::Expression& x, query.group()) {
-        select_->append_group_by(eval(x));
+        select_.append_group_by(eval(x));
     }
 
     // replace attributes in order by
     BOOST_FOREACH(AttributeQuery::OrderPair op, query.order()) {
-        select_->append_order_by(eval(op.first),
+        select_.append_order_by(eval(op.first),
                                  sql::Select::SortDirection(op.second));
     }
     
     // add the built join as from clause
-    select_->from(attr_cb.from_);
+    select_.from(attr_cb.from_);
 
     return select_;
 }

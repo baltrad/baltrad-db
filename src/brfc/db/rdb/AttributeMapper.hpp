@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <string>
-#include <brfc/sql/fwd.hpp>
 
 namespace brfc {
 
@@ -35,13 +34,17 @@ namespace rdb {
  * @brief Attribute mapping to database table/column
  */
 struct Mapping {
-    Mapping(const std::string& attribute_, sql::ColumnPtr column_)
+    Mapping(const std::string& attribute_,
+            const std::string& table_,
+            const std::string& column_)
             : attribute(attribute_)
+            , table(table_)
             , column(column_) {
     }
     
     std::string attribute; ///< Attribute name
-    sql::ColumnPtr column; ///< column in the table where value is stored
+    std::string table; ///< table this value is stored in
+    std::string column;
 };
 
 /**
@@ -89,7 +92,7 @@ class AttributeMapper {
                in the table
      */
     MappingVector
-    specializations_on(sql::TablePtr table) const;
+    specializations_on(const std::string& table) const;
 
     /**
      * @brief is mapper aware of Attribute

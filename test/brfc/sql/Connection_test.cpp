@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Select.hpp>
-#include <brfc/sql/Table.hpp>
 
 #include <brfc/test_common.hpp>
 #include <brfc/sql/MockCompiler.hpp>
@@ -215,34 +214,33 @@ TEST_F(sql_Connection_test, test_execute_sqlquery) {
 }
 
 TEST_F(sql_Connection_test, test_execute_insert) {
-    TablePtr t = Table::create("t");
-    InsertPtr query = Insert::create(t);
+    Insert query("t1");
     Query compiled("query");
     MockResult result;
 
-    EXPECT_CALL(compiler, do_compile(Ref(*query)))
+    EXPECT_CALL(compiler, do_compile(_))
         .WillOnce(Return(compiled));
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(compiled.statement()))
         .WillOnce(Return(&result));
     
-    EXPECT_EQ(&result, conn.execute(*query));
+    EXPECT_EQ(&result, conn.execute(query));
 }
 
 TEST_F(sql_Connection_test, test_execute_select) {
-    SelectPtr query = Select::create();
+    Select query;
     Query compiled("query");
     MockResult result;
 
-    EXPECT_CALL(compiler, do_compile(Ref(*query)))
+    EXPECT_CALL(compiler, do_compile(_))
         .WillOnce(Return(compiled));
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(conn, do_execute(compiled.statement()))
         .WillOnce(Return(&result));
     
-    EXPECT_EQ(&result, conn.execute(*query));
+    EXPECT_EQ(&result, conn.execute(query));
 }
 
 TEST_F(sql_Connection_test, test_execute_replaces_binds) {

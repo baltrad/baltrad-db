@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/noncopyable.hpp>
 
+#include <brfc/smart_ptr.hpp>
 #include <brfc/sql/Factory.hpp>
 
 namespace brfc {
@@ -48,7 +49,6 @@ namespace sql {
 namespace db {
 namespace rdb {
 
-class Model;
 class RdbFileEntry;
 class RdbNodeBackend;
 
@@ -123,7 +123,7 @@ class RdbHelper : boost::noncopyable {
      * @brief lookup id for @c source
      * @return database id of the source or 0 if source is not found
      *
-     * Model::source_kvs is queryied for key/value pairs defined in source.
+     * m::source_kvs is queryied for key/value pairs defined in source.
      * A source is considered found when exactly one database id is found.
      */
     long long select_source_id(const oh5::Source& source);
@@ -169,7 +169,6 @@ class RdbHelper : boost::noncopyable {
     void compile_insert_attr_query();
 
     shared_ptr<sql::Connection> conn_;
-    const Model& m_;
     sql::Factory sql_;
     scoped_ptr<sql::Query> insert_node_qry_;
     scoped_ptr<sql::Query> insert_attr_qry_;

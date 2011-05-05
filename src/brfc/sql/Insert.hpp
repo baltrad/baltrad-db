@@ -20,13 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_INSERT_HPP
 #define BRFC_SQL_INSERT_HPP
 
-#include <vector>
-#include <utility>
-
+#include <map>
 #include <string>
 
-#include <brfc/sql/fwd.hpp>
-#include <brfc/sql/Element.hpp>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace sql {
@@ -34,72 +31,44 @@ namespace sql {
 /**
  * @brief SQL INSERT statement
  */
-class Insert : public Element {
+class Insert {
   public:
-    typedef std::vector<std::pair<ColumnPtr, ExpressionPtr> > ValueMap;
-    typedef std::vector<ExpressionPtr> ReturnVector;
-    
-    /**
-     * @brief construct as shared_ptr
-     * @sa Insert()
-     */
-    static InsertPtr create(TablePtr table) {
-        return InsertPtr(new Insert(table));
-    }
-    
-    /**
-     * @brief table this statement inserts to
-     */
-    TablePtr table() const { return table_; }
+    typedef std::map<std::string, expr::Expression> ValueMap;
 
-    /**
-     * @brief bind value to a column
-     * @param column name of the column
-     * @param expr SQL expression to insert to the column
-     * @throw lookup_error if table doesn't have the column
-     * @throw duplicate_entry if a value is already bound for the column
-     */
-    void value(const std::string& column, ExpressionPtr expr);
-    
-    /**
-     * @brief bind value to a column
-     * @param column the column
-     * @param expr SQL expression to insert to the column
-     * @throw lookup_error if table doesn't have the column
-     * @throw duplicate_entry if a value is already bound for the column
-     */
-    void value(ColumnPtr column, ExpressionPtr expr);
-
-    /**
-     * @brief access values bound to columns
-     */
-    const ValueMap& values() const { return values_; }
-    
-    /**
-     * @brief add an expression to return
-     */
-    void add_return(ExpressionPtr expr);
-    
-    /**
-     * @brief access expressions this statement returns
-     */
-    const ReturnVector& returns() const { return returns_; }
-  
-  private:
     /**
      * @brief constructor
      * @param table the table to insert values to
      */
-    explicit Insert(TablePtr table)
-            : Element()
-            , table_(table)
-            , values_()
-            , returns_() {
-    }
+    explicit Insert(const std::string& table);
+
+    /**
+     * @brief table this statement inserts to
+     */
+    std::string table() const { return table_; }
+
+    /**
+     * @brief bind value to a column
+     * @param column name of the column
+     * @param x SQL expression to insert to the column
+     */
+    void value(const std::string& column, const expr::Expression& x);
+    
+    /**
+     * @brief add an expression to return
+     */
+    void returning(const expr::Expression& x);
+    
+    /**
+     * @brief access expressions this statement returns
+     */
+    expr::Expression returning() const { return returning_; }
+
+    expr::Expression expression() const;
   
-    TablePtr table_;
+  private:  
+    std::string table_;
     ValueMap values_;
-    ReturnVector returns_;
+    expr::Expression returning_;
 };
 
 } // namespace sql

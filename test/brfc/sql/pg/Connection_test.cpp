@@ -21,6 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <pqxx/connection>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/Url.hpp>
 #include <brfc/sql/pg/Connection.hpp>
 

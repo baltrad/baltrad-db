@@ -44,12 +44,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/PhysicalFile.hpp>
 #include <brfc/oh5/Source.hpp>
 
-#include <brfc/sql/expr.hpp>
 #include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/DefaultConnectionCreator.hpp>
 #include <brfc/sql/Result.hpp>
+#include <brfc/sql/Select.hpp>
 
 namespace brfc {
 namespace db {
@@ -128,24 +128,22 @@ RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
 
 FileEntry*
 RelationalDatabase::do_entry_by_file(const oh5::PhysicalFile& file) {
-    const Model& m = Model::instance();
-
     const std::string& hash = file_hasher().hash(file);
     shared_ptr<sql::Connection> c = conn();
     long long src_id = RdbHelper(c).select_source_id(file.source());
 
     sql::Factory xpr;
-    sql::SelectPtr qry = sql::Select::create();
-    qry->what(m.files->column("uuid"));
-    qry->from(m.files);
-    qry->where(
+    sql::Select qry;
+    qry.what(m::files::column("uuid"));
+    qry.from(m::files::name());
+    qry.where(
         xpr.and_(
-            m.files->column("hash")->eq(xpr.string(hash)),
-            m.files->column("source_id")->eq(xpr.int64_(src_id))
+            xpr.eq(m::files::column("hash"), xpr.string(hash)),
+            xpr.eq(m::files::column("source_id"), xpr.int64_(src_id))
         )
     );
 
-    auto_ptr<sql::Result> result(c->execute(*qry));
+    auto_ptr<sql::Result> result(c->execute(qry));
     if (result->size() > 1 or not result->next())
         throw lookup_error(file.path() + " is not stored");
     
@@ -162,33 +160,31 @@ RelationalDatabase::do_entry_by_uuid(const std::string& uuid) {
 
 FileResult*
 RelationalDatabase::do_execute(const FileQuery& query) {
-    sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
+    const sql::Select& select = QueryToSelect(&mapper()).transform(query);
     shared_ptr<sql::Connection> c = conn();
-    auto_ptr<sql::Result> res(c->execute(*select));
+    auto_ptr<sql::Result> res(c->execute(select));
     return new RdbFileResult(this, c, res.release());
 }
 
 AttributeResult*
 RelationalDatabase::do_execute(const AttributeQuery& query) {
-    sql::SelectPtr select = QueryToSelect(&mapper()).transform(query);
+    const sql::Select& select = QueryToSelect(&mapper()).transform(query);
     shared_ptr<sql::Connection> c = conn();
-    auto_ptr<sql::Result> res(c->execute(*select));
+    auto_ptr<sql::Result> res(c->execute(select));
     return new RdbAttributeResult(c, res.release());
 }
 
 void
 RelationalDatabase::populate_mapper() {
-    const Model& m = Model::instance();
-
     mapper_->clear();
-    mapper_->add(Mapping("file:uuid", m.files->column("uuid")));
-    mapper_->add(Mapping("file:hash", m.files->column("hash")));
-    mapper_->add(Mapping("file:stored_at", m.files->column("stored_at")));
-    mapper_->add(Mapping("file:size", m.file_content->column("size")));
-    mapper_->add(Mapping("source:_name", m.sources->column("name")));
-    mapper_->add(Mapping("what/object", m.files->column("what_object")));
-    mapper_->add(Mapping("what/date", m.files->column("what_date")));
-    mapper_->add(Mapping("what/time", m.files->column("what_time")));
+    mapper_->add(Mapping("file:uuid", m::files::name(), "uuid"));
+    mapper_->add(Mapping("file:hash", m::files::name(), "hash"));
+    mapper_->add(Mapping("file:stored_at", m::files::name(), "stored_at"));
+    mapper_->add(Mapping("file:size", m::file_content::name(),"size"));
+    mapper_->add(Mapping("source:_name", m::sources::name(), "name"));
+    mapper_->add(Mapping("what/object", m::files::name(), "what_object"));
+    mapper_->add(Mapping("what/date", m::files::name(), "what_date"));
+    mapper_->add(Mapping("what/time", m::files::name(), "what_time"));
 }
 
 void

@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <brfc/exceptions.hpp>
 #include <brfc/Url.hpp>
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/AttributeResult.hpp>

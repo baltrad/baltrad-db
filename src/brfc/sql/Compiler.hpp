@@ -23,17 +23,20 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Query.hpp>
 
 namespace brfc {
-namespace sql {
 
-class Element;
+namespace expr {
+    class Expression;
+}
+
+namespace sql {
 
 /**
  * @brief ABC for SQL expression compiler
  */
 class Compiler {
   public:
-    Query compile(const Element& expr) {
-        return do_compile(expr);
+    Query compile(const expr::Expression& x) {
+        return do_compile(x);
     }
 
     virtual ~Compiler() { }
@@ -42,7 +45,7 @@ class Compiler {
     /**
      * @brief compile expression/statement to string form
      */
-    virtual Query do_compile(const Element& expr) = 0;
+    virtual Query do_compile(const expr::Expression& x) = 0;
 };
 
 } // namespace sql

@@ -20,34 +20,81 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_RDB_MODEL_HPP
 #define BRFC_DB_RDB_MODEL_HPP
 
-#include <map>
 #include <string>
-
-#include <brfc/sql/fwd.hpp>
+#include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
 namespace db {
 namespace rdb {
 
-class Model {
-  public:
-    static Model& instance();
 
-    sql::TablePtr sources;
-    sql::TablePtr source_kvs;
-    sql::TablePtr files;
-    sql::TablePtr file_content;
-    sql::TablePtr nodes;
-    sql::TablePtr attrvals;
+struct m {
 
-    sql::TablePtr table_by_name(const std::string& name) const;
+    struct sources {
+        static std::string name() { return "bdb_sources"; }
 
-  private:
-    Model();
+        static expr::Expression column(const std::string& colname) {
+            return expr::Listcons().symbol("column")
+                                   .string(name())
+                                   .string(colname)
+                                   .get();
+        }
+    };
 
-    typedef std::map<std::string, sql::TablePtr> TableMap;
-    
-    TableMap tables_;
+    struct source_kvs {
+        static std::string name() { return "bdb_source_kvs"; }
+
+        static expr::Expression column(const std::string& colname) {
+            return expr::Listcons().symbol("column")
+                                   .string(name())
+                                   .string(colname)
+                                   .get();
+        }
+    };
+
+    struct files {
+        static std::string name() { return "bdb_files"; }
+
+        static expr::Expression column(const std::string& colname) {
+            return expr::Listcons().symbol("column")
+                                   .string(name())
+                                   .string(colname)
+                                   .get();
+        }
+    };
+
+    struct file_content {
+        static std::string name() { return "bdb_file_content"; }
+
+        static expr::Expression column(const std::string& colname) {
+            return expr::Listcons().symbol("column")
+                                   .string(name())
+                                   .string(colname)
+                                   .get();
+        }
+    };
+
+    struct nodes {
+        static std::string name() { return "bdb_nodes"; }
+
+        static expr::Expression column(const std::string& colname) {
+            return expr::Listcons().symbol("column")
+                                   .string(name())
+                                   .string(colname)
+                                   .get();
+        }
+    };
+
+    struct attrvals {
+        static std::string name() { return "bdb_attribute_values"; }
+
+        static expr::Expression column(const std::string& colname) {
+            return expr::Listcons().symbol("column")
+                                   .string(name())
+                                   .string(colname)
+                                   .get();
+        }
+    };
 };
 
 } // namespace rdb

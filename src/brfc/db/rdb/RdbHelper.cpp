@@ -33,14 +33,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/RdbFileEntry.hpp>
 #include <brfc/db/rdb/RdbNodeBackend.hpp>
 
+#include <brfc/expr/Expression.hpp>
+
 #include <brfc/oh5/Attribute.hpp>
 #include <brfc/oh5/DataSet.hpp>
 #include <brfc/oh5/Group.hpp>
 #include <brfc/oh5/Scalar.hpp>
 #include <brfc/oh5/PhysicalFile.hpp>
 
-#include <brfc/sql/expr.hpp>
-#include <brfc/sql/Bind.hpp>
+#include <brfc/sql/Factory.hpp>
+#include <brfc/sql/Insert.hpp>
+#include <brfc/sql/Select.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Query.hpp>
@@ -51,6 +54,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace db {
 namespace rdb {
+
+using expr::Expression;
 
 namespace {
 
@@ -102,16 +107,15 @@ node_sql_type(const oh5::Node& node) {
         BRFC_ASSERT(false);
 }
 
-sql::ColumnPtr
+std::string
 attr_sql_column(const oh5::Attribute& attr) {
-    const Model& m = Model::instance();
     switch (attr.value().type()) {
         case oh5::Scalar::STRING:
-            return m.attrvals->column("value_str");
+            return "value_str";
         case oh5::Scalar::INT64:
-            return m.attrvals->column("value_int");
+            return "value_int";
         case oh5::Scalar::DOUBLE:
-            return m.attrvals->column("value_double");
+            return "value_double";
         default:
             break;
     }
@@ -124,7 +128,6 @@ attr_sql_column(const oh5::Attribute& attr) {
 
 RdbHelper::RdbHelper(shared_ptr<sql::Connection> conn)
         : conn_(conn)
-        , m_(Model::instance())
         , sql_()
         , insert_node_qry_()
         , insert_attr_qry_() {
@@ -167,16 +170,16 @@ RdbHelper::last_id(sql::Result& result) {
 
 void
 RdbHelper::compile_insert_node_query() {
-    sql::InsertPtr qry = sql::Insert::create(m_.nodes);
+    sql::Insert qry(m::nodes::name());
     if (dialect().has_feature(sql::Dialect::RETURNING))
-        qry->add_return(m_.nodes->column("id"));
+        qry.returning(m::nodes::column("id"));
 
-    qry->value("parent_id", sql_.bind(":parent_id"));
-    qry->value("type", sql_.bind(":type"));
-    qry->value("file_id", sql_.bind(":file_id"));
-    qry->value("name", sql_.bind(":name"));
+    qry.value("parent_id", sql_.bind(":parent_id"));
+    qry.value("type", sql_.bind(":type"));
+    qry.value("file_id", sql_.bind(":file_id"));
+    qry.value("name", sql_.bind(":name"));
 
-    const sql::Query& q = conn().compiler().compile(*qry);
+    const sql::Query& q = conn().compiler().compile(qry.expression());
     insert_node_qry_.reset(new sql::Query(q));
 }
 
@@ -210,17 +213,17 @@ RdbHelper::insert_node(long long file_id, oh5::Node& node) {
 
 void
 RdbHelper::compile_insert_attr_query() {
-    sql::InsertPtr qry = sql::Insert::create(m_.attrvals);
+    sql::Insert qry(m::attrvals::name());
 
-    qry->value("node_id", sql_.bind(":node_id"));
-    qry->value("value_str", sql_.bind(":value_str"));
-    qry->value("value_int", sql_.bind(":value_int"));
-    qry->value("value_double", sql_.bind(":value_double"));
-    qry->value("value_bool", sql_.bind(":value_bool"));
-    qry->value("value_date", sql_.bind(":value_date"));
-    qry->value("value_time", sql_.bind(":value_time"));
+    qry.value("node_id", sql_.bind(":node_id"));
+    qry.value("value_str", sql_.bind(":value_str"));
+    qry.value("value_int", sql_.bind(":value_int"));
+    qry.value("value_double", sql_.bind(":value_double"));
+    qry.value("value_bool", sql_.bind(":value_bool"));
+    qry.value("value_date", sql_.bind(":value_date"));
+    qry.value("value_time", sql_.bind(":value_time"));
 
-    const sql::Query& q = conn().compiler().compile(*qry);
+    const sql::Query& q = conn().compiler().compile(qry.expression());
     insert_attr_qry_.reset(new sql::Query(q));
 }
 
@@ -232,7 +235,7 @@ RdbHelper::insert_attribute(oh5::Attribute& attr) {
     
     qry.bind(":node_id", Variant(backend(attr).id(attr)));
 
-    qry.bind(attr_sql_column(attr)->name(), attr_sql_value(attr));
+    qry.bind(attr_sql_column(attr), attr_sql_value(attr));
 
     if (attr.value().type() == oh5::Scalar::STRING) {
         try {
@@ -268,19 +271,19 @@ RdbHelper::insert_file(RdbFileEntry& entry,
 
     DateTime stored_at = DateTime::utc_now();
     
-    sql::InsertPtr qry = sql::Insert::create(m_.files);
-    qry->value("uuid", sql_.string(uuid));
-    qry->value("hash", sql_.string(entry.hash())); 
-    qry->value("source_id", sql_.int64_(source_id));
-    qry->value("stored_at", sql_.datetime(stored_at));
-    qry->value("what_object", sql_.string(file.what_object()));
-    qry->value("what_date", sql_.date(file.what_date()));
-    qry->value("what_time", sql_.time(file.what_time()));
+    sql::Insert qry(m::files::name());
+    qry.value("uuid", sql_.string(uuid));
+    qry.value("hash", sql_.string(entry.hash())); 
+    qry.value("source_id", sql_.int64_(source_id));
+    qry.value("stored_at", sql_.datetime(stored_at));
+    qry.value("what_object", sql_.string(file.what_object()));
+    qry.value("what_date", sql_.date(file.what_date()));
+    qry.value("what_time", sql_.time(file.what_time()));
 
     if (dialect().has_feature(sql::Dialect::RETURNING))
-        qry->add_return(m_.files->column("id"));
+        qry.returning(m::files::column("id"));
 
-    scoped_ptr<sql::Result> result(conn().execute(*qry));
+    scoped_ptr<sql::Result> result(conn().execute(qry));
 
     long long file_id = last_id(*result);
     entry.uuid(uuid);
@@ -296,13 +299,12 @@ RdbHelper::insert_file_content(RdbFileEntry& entry, const std::string& path) {
     long long size = BoostFileSystem().file_size(path);
     long long lo_id = conn().store_large_object(path);
 
-    sql::InsertPtr qry = sql::Insert::create(m_.file_content);
-    qry->value("file_id", sql_.int64_(entry.id()));
-    qry->value("lo_id", sql_.int64_(lo_id));
-    qry->value("size", sql_.int64_(size));
+    sql::Insert qry(m::file_content::name());
+    qry.value("file_id", sql_.int64_(entry.id()));
+    qry.value("lo_id", sql_.int64_(lo_id));
+    qry.value("size", sql_.int64_(size));
 
-
-    scoped_ptr<sql::Result>(conn().execute(*qry));
+    scoped_ptr<sql::Result>(conn().execute(qry));
 
     entry.lo_id(lo_id);
     entry.size(size);
@@ -310,22 +312,27 @@ RdbHelper::insert_file_content(RdbFileEntry& entry, const std::string& path) {
 
 void
 RdbHelper::load_file(RdbFileEntry& entry) {
-    sql::SelectPtr qry = sql::Select::create();
-    qry->from(m_.files->outerjoin(m_.file_content));
-    qry->what(m_.files->column("uuid"));
-    qry->what(m_.files->column("source_id"));
-    qry->what(m_.files->column("hash"));
-    qry->what(m_.files->column("stored_at"));
-    qry->what(m_.file_content->column("lo_id"));
-    qry->what(m_.file_content->column("size"));
+    sql::Select qry;
+    qry.from(m::files::name());
+    qry.outerjoin(
+        sql_.table(m::file_content::name()),
+        sql_.eq(m::files::column("id"), m::file_content::column("file_id"))
+    );
+
+    qry.what(m::files::column("uuid"));
+    qry.what(m::files::column("source_id"));
+    qry.what(m::files::column("hash"));
+    qry.what(m::files::column("stored_at"));
+    qry.what(m::file_content::column("lo_id"));
+    qry.what(m::file_content::column("size"));
     if (entry.id() != 0)
-        qry->where(m_.files->column("id")->eq(sql_.int64_(entry.id())));
+        qry.where(sql_.eq(m::files::column("id"), sql_.int64_(entry.id())));
     else if (entry.uuid() != "")
-        qry->where(m_.files->column("uuid")->eq(sql_.string(entry.uuid())));
+        qry.where(sql_.eq(m::files::column("uuid"), sql_.string(entry.uuid())));
     else
         throw std::runtime_error("no uuid or id to load file from db");
     
-    scoped_ptr<sql::Result> result(conn().execute(*qry));
+    scoped_ptr<sql::Result> result(conn().execute(qry));
 
     if (not result->next())
         throw brfc::lookup_error("no RdbFileEntry found by id=" +
@@ -342,18 +349,22 @@ RdbHelper::load_file(RdbFileEntry& entry) {
 
 long long
 RdbHelper::select_root_id(const RdbFileEntry& entry) {
-    sql::SelectPtr qry = sql::Select::create();
-    qry->from(m_.files->join(m_.nodes));
-    qry->what(m_.nodes->column("id"));
-    qry->where(m_.nodes->column("name")->eq(sql_.string("")));
+    sql::Select qry;
+    qry.from(m::files::name());
+    qry.join(
+        sql_.table(m::nodes::name()),
+        sql_.eq(m::files::column("id"), m::nodes::column("file_id"))
+    );
+    qry.what(m::nodes::column("id"));
+    qry.where(sql_.eq(m::nodes::column("name"), sql_.string("")));
     if (entry.id() != 0)
-        qry->append_where(m_.files->column("id")->eq(sql_.int64_(entry.id())));
+        qry.append_where(sql_.eq(m::files::column("id"), sql_.int64_(entry.id())));
     else if (entry.uuid() != "")
-        qry->append_where(m_.files->column("uuid")->eq(sql_.string(entry.uuid())));
+        qry.append_where(sql_.eq(m::files::column("uuid"), sql_.string(entry.uuid())));
     else
         throw std::runtime_error("no uuid or id to load file from db");
 
-    scoped_ptr<sql::Result> r(conn().execute(*qry));
+    scoped_ptr<sql::Result> r(conn().execute(qry));
     
     if (not r->next())
         return 0;
@@ -363,20 +374,30 @@ RdbHelper::select_root_id(const RdbFileEntry& entry) {
 
 long long
 RdbHelper::select_source_id(const oh5::Source& src) {
-    sql::SelectPtr qry = sql::Select::create();
-    qry->distinct(true);
-    qry->what(m_.sources->column("id"));
-    qry->from(m_.sources->join(m_.source_kvs));
-    qry->where(sql_.bool_(false));
-    
-    sql::ExpressionPtr x;
+    sql::Select qry;
+    qry.distinct(true);
+    qry.what(m::sources::column("id"));
+    qry.from(m::sources::name());
+    qry.join(
+        sql_.table(m::source_kvs::name()),
+        sql_.eq(
+            m::sources::column("id"),
+            m::source_kvs::column("source_id")
+        )
+    );
+    qry.what(m::sources::column("id"));
+
+    qry.where(sql_.bool_(false));
+    Expression x;
     BOOST_FOREACH(const std::string& key, src.keys()) {
-        x = m_.source_kvs->column("key")->eq(sql_.string(key));
-        x = x->and_(m_.source_kvs->column("value")->eq(sql_.string(src.get(key))));
-        qry->where(qry->where()->or_(x->parentheses()));
+        x = sql_.and_(
+            sql_.eq(m::source_kvs::column("key"), sql_.string(key)),
+            sql_.eq(m::source_kvs::column("value"), sql_.string(src.get(key)))
+        );
+        qry.where(sql_.or_(qry.where(), x));
     }
 
-    scoped_ptr<sql::Result> r(conn().execute(*qry));
+    scoped_ptr<sql::Result> r(conn().execute(qry));
     if (r->size() == 1 and r->next())
         return r->value_at(0).int64_();
     else
@@ -385,10 +406,13 @@ RdbHelper::select_source_id(const oh5::Source& src) {
 
 oh5::Source
 RdbHelper::select_source(long long id) {
-    sql::SelectPtr qry = sql::Select::create(m_.source_kvs);
-    qry->where(m_.source_kvs->column("source_id")->eq(sql_.int64_(id)));
+    sql::Select qry;
+    qry.what(m::source_kvs::column("key"));
+    qry.what(m::source_kvs::column("value"));
+    qry.from(m::source_kvs::name());
+    qry.where(sql_.eq(m::source_kvs::column("source_id"), sql_.int64_(id)));
 
-    scoped_ptr<sql::Result> r(conn().execute(*qry));
+    scoped_ptr<sql::Result> r(conn().execute(qry));
 
     oh5::Source src;
     
@@ -396,10 +420,13 @@ RdbHelper::select_source(long long id) {
         src.add(r->value_at("key").string(), r->value_at("value").string());
     }
 
-    qry = sql::Select::create(m_.sources);
-    qry->where(m_.sources->column("id")->eq(sql_.int64_(id)));
+    qry = sql::Select();
+    qry.what(m::sources::column("id"));
+    qry.what(m::sources::column("name"));
+    qry.from(m::sources::name());
+    qry.where(sql_.eq(m::sources::column("id"), sql_.int64_(id)));
 
-    r.reset(conn().execute(*qry));
+    r.reset(conn().execute(qry));
 
     if (r->next()) {
         src.add("_name", r->value_at("name").string());
@@ -411,14 +438,22 @@ RdbHelper::select_source(long long id) {
 
 std::vector<oh5::Source>
 RdbHelper::select_all_sources() {
-    sql::SelectPtr qry = sql::Select::create();
-    qry->from(m_.sources->outerjoin(m_.source_kvs));
-    qry->what(m_.sources->column("id"));
-    qry->what(m_.sources->column("name"));
-    qry->what(m_.source_kvs->column("key"));
-    qry->what(m_.source_kvs->column("value"));
+    sql::Select qry;
+    qry.from(m::sources::name());
+    qry.outerjoin(
+        sql_.table(m::source_kvs::name()),
+        sql_.eq(
+            m::sources::column("id"),
+            m::source_kvs::column("source_id")
+        )
+    );
 
-    scoped_ptr<sql::Result> r(conn().execute(*qry));
+    qry.what(m::sources::column("id"));
+    qry.what(m::sources::column("name"));
+    qry.what(m::source_kvs::column("key"));
+    qry.what(m::source_kvs::column("value"));
+
+    scoped_ptr<sql::Result> r(conn().execute(qry));
 
     oh5::Source src;
     long long prev_id = 0, id = 0;
@@ -447,23 +482,19 @@ RdbHelper::add_source(const oh5::Source& source) {
     scoped_ptr<sql::Result> r;
     try {
         conn().begin();
-        sql::InsertPtr qry = sql::Insert::create(m_.sources);
-        qry->value(m_.sources->column("name"),
-                   sql_.string(source.get("_name")));
+        sql::Insert qry(m::sources::name());
+        qry.value("name", sql_.string(source.get("_name")));
         if (dialect().has_feature(sql::Dialect::RETURNING))
-            qry->add_return(m_.sources->column("id"));
-        r.reset(conn().execute(*qry));
+            qry.returning(m::sources::column("id"));
+        r.reset(conn().execute(qry));
         long long id = last_id(*r);
 
         BOOST_FOREACH(const std::string& key, source.keys()) {
-            qry = sql::Insert::create(m_.source_kvs);
-            qry->value(m_.source_kvs->column("source_id"),
-                       sql_.int64_(id));
-            qry->value(m_.source_kvs->column("key"),
-                       sql_.string(key));
-            qry->value(m_.source_kvs->column("value"),
-                       sql_.string(source.get(key)));
-            r.reset(conn().execute(*qry));
+            qry = sql::Insert(m::source_kvs::name());
+            qry.value("source_id", sql_.int64_(id));
+            qry.value("key", sql_.string(key));
+            qry.value("value", sql_.string(source.get(key)));
+            r.reset(conn().execute(qry));
         }
 
         conn().commit();
@@ -492,14 +523,11 @@ RdbHelper::update_source(const oh5::Source& source) {
         r.reset(conn().execute(sql::Query(stmt, binds)));
     
         BOOST_FOREACH(const std::string& key, source.keys()) {
-            sql::InsertPtr qry = sql::Insert::create(m_.source_kvs);
-            qry->value(m_.source_kvs->column("source_id"),
-                       sql_.int64_(id));
-            qry->value(m_.source_kvs->column("key"),
-                       sql_.string(key));
-            qry->value(m_.source_kvs->column("value"),
-                       sql_.string(source.get(key)));
-            r.reset(conn().execute(*qry));
+            sql::Insert qry(m::source_kvs::name());
+            qry.value("source_id", sql_.int64_(id));
+            qry.value("key", sql_.string(key));
+            qry.value("value", sql_.string(source.get(key)));
+            r.reset(conn().execute(qry));
         }
 
         conn().commit();
@@ -521,26 +549,33 @@ RdbHelper::remove_source(const oh5::Source& source) {
 
 void
 RdbHelper::load_children(oh5::Node& node) {
-    sql::SelectPtr qry = sql::Select::create();
-    
-    qry->from(m_.nodes->outerjoin(m_.attrvals));
-    qry->what(m_.nodes->column("id"));
-    qry->what(m_.nodes->column("name"));
-    qry->what(m_.nodes->column("type"));
-    qry->what(m_.attrvals->column("value_int"));
-    qry->what(m_.attrvals->column("value_str"));
-    qry->what(m_.attrvals->column("value_double"));
-    qry->what(m_.attrvals->column("value_bool"));
-    qry->what(m_.attrvals->column("value_date"));
-    qry->what(m_.attrvals->column("value_time"));
+    sql::Select qry;
+    qry.from(m::nodes::name());
+    qry.outerjoin(
+        sql_.table(m::attrvals::name()),
+        sql_.eq(
+            m::nodes::column("id"),
+            m::attrvals::column("node_id")
+        )
+    );
+
+    qry.what(m::nodes::column("id"));
+    qry.what(m::nodes::column("name"));
+    qry.what(m::nodes::column("type"));
+    qry.what(m::attrvals::column("value_int"));
+    qry.what(m::attrvals::column("value_str"));
+    qry.what(m::attrvals::column("value_double"));
+    qry.what(m::attrvals::column("value_bool"));
+    qry.what(m::attrvals::column("value_date"));
+    qry.what(m::attrvals::column("value_time"));
 
     RdbNodeBackend& be = backend(node);
 
     long long id = be.id(node);
 
-    qry->where(m_.nodes->column("parent_id")->eq(sql_.int64_(id)));
+    qry.where(sql_.eq(m::nodes::column("parent_id"), sql_.int64_(id)));
 
-    scoped_ptr<sql::Result> r(conn().execute(*qry));
+    scoped_ptr<sql::Result> r(conn().execute(qry));
 
     while (r->next()) {
         std::string name = r->value_at("name").string();
