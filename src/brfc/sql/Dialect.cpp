@@ -20,11 +20,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Dialect.hpp>
 
 #include <sstream>
+#include <vector>
 
-#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/join.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Variant.hpp>
+#include <brfc/expr/Expression.hpp>
+
+using ::brfc::expr::Expression;
 
 namespace brfc {
 namespace sql {
@@ -52,27 +57,34 @@ ansi_sql_interval_str(const TimeDelta& delta) {
 }
 
 std::string
-Dialect::do_variant_to_string(const Variant& value) const {
-    switch (value.type()) {
-        case Variant::NONE:
-            return "NULL";
-        case Variant::STRING:
-            return "'" + escape(value.string()) + "'";
-        case Variant::INT64:
-        case Variant::DOUBLE:
-            return value.to_string();
-        case Variant::BOOL:
-            return boost::to_lower_copy(value.to_string());
-        case Variant::DATE:
-            return "'" + value.date().to_iso_string(true) + "'";
-        case Variant::TIME:
-            return "'" + value.time().to_iso_string(true) + "'";
-        case Variant::DATETIME:
-            return "'" + value.datetime().to_iso_string(true) + "'";
-        case Variant::TIMEDELTA:
-            return "INTERVAL '" + ansi_sql_interval_str(value.timedelta()) +  "'";
+Dialect::do_literal_to_string(const Expression& x) const {
+    std::vector<std::string> strs;
+    switch (x.type()) {
+        case Expression::type::LIST:
+            if (x.empty())
+                return "NULL";
+            BOOST_FOREACH(const Expression& e, x) {
+                strs.push_back(literal_to_string(e));
+            }
+            return "(" + boost::join(strs, ", ") + ")";
+        case Expression::type::BOOL:
+            return x.bool_() ? "true" : "false";
+        case Expression::type::INT64:
+            return boost::lexical_cast<std::string>(x.int64());
+        case Expression::type::DOUBLE:
+            return boost::lexical_cast<std::string>(x.double_());
+        case Expression::type::STRING:
+            return "'" + escape(x.string()) + "'";
+        case Expression::type::DATE:
+            return "'" + x.date().to_iso_string(true) + "'";
+        case Expression::type::TIME:
+            return "'" + x.time().to_iso_string(true) + "'";
+        case Expression::type::DATETIME:
+            return "'" + x.datetime().to_iso_string(true) + "'";
+        case Expression::type::INTERVAL:
+            return "INTERVAL '" + ansi_sql_interval_str(x.interval()) + "'";
         default:
-            throw value_error("could not conv to sql: " + value.to_string());
+            throw std::logic_error("invalid literal:");
     }
 }
 

@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gmock/gmock.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Variant.hpp>
+#include <brfc/expr/Expression.hpp>
 
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Query.hpp>
@@ -53,6 +53,7 @@ class sql_Connection_test : public testing::Test {
     }
 
     void SetUp() {
+        dialect.delegate_to_fake();
         ON_CALL(conn, do_is_open())
             .WillByDefault(Return(true));
         ON_CALL(conn, do_dialect())
@@ -246,7 +247,7 @@ TEST_F(sql_Connection_test, test_execute_select) {
 TEST_F(sql_Connection_test, test_execute_replaces_binds) {
     std::string stmt(":bind");
     BindMap binds;
-    binds.add(":bind", Variant(1));
+    binds.add(":bind", expr::Expression(1));
     MockResult result;
 
     ON_CALL(conn, do_execute(_))

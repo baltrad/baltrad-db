@@ -59,7 +59,7 @@ struct formatter {
     formatter(const BindMap& binds, const Dialect& dialect)
             : map() {
         BOOST_FOREACH(const BindMap::value_type& kv, binds) {
-            map[kv.first] = dialect.variant_to_string(kv.second);
+            map[kv.first] = dialect.literal_to_string(kv.second);
         }
     }
     

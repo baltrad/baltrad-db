@@ -24,6 +24,8 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test_common.hpp>
 
+using ::brfc::expr::Expression;
+
 namespace brfc {
 namespace sql {
 
@@ -37,83 +39,83 @@ class sql_BindMap_test : public testing::Test {
 };
 
 TEST_F(sql_BindMap_test, test_add_variant) {
-    Variant val(1);
+    Expression val(1);
     binds.add(":bind", val);
     EXPECT_EQ(val, binds.get(":bind"));
 }
 
 TEST_F(sql_BindMap_test, test_add_without_colon) {
-    Variant val(1);
+    Expression val(1);
     binds.add("bind", val);
     EXPECT_EQ(val, binds.get(":bind"));
 }
 
 TEST_F(sql_BindMap_test, test_add_duplicate) {
-    binds.add(":bind", Variant());
-    EXPECT_THROW(binds.add(":bind", Variant()), duplicate_entry);
+    binds.add(":bind", Expression());
+    EXPECT_THROW(binds.add(":bind", Expression()), duplicate_entry);
 }
 
 TEST_F(sql_BindMap_test, test_get_without_colon) {
-    Variant val(1);
-    Variant result;
+    Expression val(1);
+    Expression result;
     binds.add(":bind", val);
     EXPECT_NO_THROW(result = binds.get("bind"));
     EXPECT_EQ(val, result); 
 }
 
 TEST_F(sql_BindMap_test, test_get_with_default) {
-    Variant default_(1);
-    Variant result;
+    Expression default_(1);
+    Expression result;
     EXPECT_NO_THROW(result = binds.get(":bind", default_));
     EXPECT_EQ(default_, result);
 }
 
 
 TEST_F(sql_BindMap_test, test_set) {
-    EXPECT_THROW(binds.set(":bind", Variant()), lookup_error);
+    EXPECT_THROW(binds.set(":bind", Expression()), lookup_error);
     
-    binds.add(":bind", Variant());
-    EXPECT_NO_THROW(binds.set(":bind", Variant(1)));
+    binds.add(":bind", Expression());
+    EXPECT_NO_THROW(binds.set(":bind", Expression(1)));
     ASSERT_TRUE(binds.has(":bind"));
-    EXPECT_EQ(Variant(1), binds.get(":bind"));
+    EXPECT_EQ(Expression(1), binds.get(":bind"));
 }
 
 TEST_F(sql_BindMap_test, test_set_without_colon) {
-    EXPECT_THROW(binds.set("bind", Variant()), lookup_error);
+    EXPECT_THROW(binds.set("bind", Expression()), lookup_error);
     
-    binds.add(":bind", Variant());
-    EXPECT_NO_THROW(binds.set("bind", Variant(1)));
+    binds.add(":bind", Expression());
+    EXPECT_NO_THROW(binds.set("bind", Expression(1)));
     ASSERT_TRUE(binds.has(":bind"));
-    EXPECT_EQ(Variant(1), binds.get(":bind"));
+    EXPECT_EQ(Expression(1), binds.get(":bind"));
 }
 
 
 TEST_F(sql_BindMap_test, test_size) {
     EXPECT_EQ((size_t)0, binds.size());
-    binds.add(":bind", Variant());
+    binds.add(":bind", Expression());
     EXPECT_EQ((size_t)1, binds.size());
 }
 
 TEST_F(sql_BindMap_test, test_copy) {
-    Variant val(1);
+    Expression val(1);
     binds.add(":bind", val);
 
     BindMap copy1(binds);
     EXPECT_EQ(binds.size(), copy1.size());
-    EXPECT_EQ(val, copy1.get(":bind", Variant()));
+    EXPECT_EQ(val, copy1.get(":bind", Expression()));
 
     BindMap copy2;
     copy2 = binds;
     EXPECT_EQ(binds.size(), copy2.size());
-    EXPECT_EQ(val, copy2.get(":bind", Variant()));
+    EXPECT_EQ(val, copy2.get(":bind", Expression()));
 
     binds = binds;
     EXPECT_EQ((size_t)1, binds.size());
-    EXPECT_EQ(val, binds.get(":bind", Variant()));
+    EXPECT_EQ(val, binds.get(":bind", Expression()));
 }
 
 TEST_F(sql_BindMap_test, test_remove) {
-    Variant val(1);
+    Expression val(1);
     binds.add(":bind1", val);
     binds.add(":bind2", val);
     
@@ -127,7 +129,7 @@ TEST_F(sql_BindMap_test, test_remove) {
 }
 
 TEST_F(sql_BindMap_test, test_clear) {
-    Variant val(1);
+    Expression val(1);
     binds.add(":bind1", val);
     binds.add(":bind2", val);
 

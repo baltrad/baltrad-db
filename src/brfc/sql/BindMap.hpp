@@ -21,14 +21,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_BIND_MAP_HPP
 
 #include <map>
-#include <brfc/Variant.hpp>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
 namespace sql {
 
 class BindMap {
   public:
-    typedef std::map<std::string, Variant> map;
+    typedef std::map<std::string, expr::Expression> map;
     typedef map::iterator iterator;
     typedef map::const_iterator const_iterator;
     typedef map::value_type value_type;
@@ -42,13 +42,13 @@ class BindMap {
     /**
      * @throw duplicate_entry if bind already exists
      */
-    void add(const std::string& name, const Variant& value);
+    void add(const std::string& name, const expr::Expression& value);
 
     /**
      * @throw lookup_error if bind doesn't exist
      *
      */
-    void set(const std::string& name, const Variant& value);
+    void set(const std::string& name, const expr::Expression& value);
     
     /**
      * @return true if bind exists
@@ -58,13 +58,14 @@ class BindMap {
     /**
      * @throw lookup_error if bind not found
      */
-    const Variant& get(const std::string& name) const;
+    expr::Expression get(const std::string& name) const;
     
     /**
      * @brief get bind value
      * @return the value or default_ if bind not found
      */
-    const Variant& get(const std::string& name, const Variant& default_) const;
+    expr::Expression get(const std::string& name,
+                         const expr::Expression& default_) const;
 
     size_t size() const {
         return binds_.size();

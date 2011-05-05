@@ -51,11 +51,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/util/BoostFileSystem.hpp>
 
+using ::brfc::expr::Expression;
+
 namespace brfc {
 namespace db {
 namespace rdb {
-
-using expr::Expression;
 
 namespace {
 
@@ -80,15 +80,15 @@ variant_to_oh5_scalar(const Variant& value) {
     throw std::runtime_error("invalid Variant to oh5::Scalar");
 }
 
-Variant
+Expression
 attr_sql_value(const oh5::Attribute& attr) {
     switch (attr.value().type()) {
         case oh5::Scalar::STRING:
-            return Variant(attr.value().string());
+            return Expression(attr.value().string());
         case oh5::Scalar::INT64:
-            return Variant(attr.value().int64_());
+            return Expression(attr.value().int64_());
         case oh5::Scalar::DOUBLE:
-            return Variant(attr.value().double_());
+            return Expression(attr.value().double_());
         default:
             break;
     }
@@ -189,15 +189,15 @@ RdbHelper::insert_node(long long file_id, oh5::Node& node) {
         compile_insert_node_query();
     sql::Query qry(*insert_node_qry_); // make a copy not to mess up defaults
 
-    Variant parent_id;
+    Expression parent_id;
     const oh5::Node* parent = node.parent();
     if (parent) {
-        parent_id = Variant(backend(*parent).id(*parent));
+        parent_id = Expression(backend(*parent).id(*parent));
     }
     qry.bind(":parent_id", parent_id);
-    qry.bind(":type", Variant(node_sql_type(node)));
-    qry.bind(":file_id", Variant(file_id));
-    qry.bind(":name", Variant(node.name()));
+    qry.bind(":type", Expression(node_sql_type(node)));
+    qry.bind(":file_id", Expression(file_id));
+    qry.bind(":name", Expression(node.name()));
 
     scoped_ptr<sql::Result> result(conn().execute(qry));
 
@@ -233,24 +233,24 @@ RdbHelper::insert_attribute(oh5::Attribute& attr) {
         compile_insert_attr_query();
     sql::Query qry(*insert_attr_qry_); // make a copy not to mess up defaults
     
-    qry.bind(":node_id", Variant(backend(attr).id(attr)));
+    qry.bind(":node_id", Expression(backend(attr).id(attr)));
 
     qry.bind(attr_sql_column(attr), attr_sql_value(attr));
 
     if (attr.value().type() == oh5::Scalar::STRING) {
         try {
             bool val = attr.value().to_bool();
-            qry.bind(":value_bool", Variant(val));
+            qry.bind(":value_bool", Expression(val));
         } catch (const value_error&) { /* pass */ }
 
         try {
             Date date = attr.value().to_date();
-            qry.bind(":value_date", Variant(date));
+            qry.bind(":value_date", Expression(date));
         } catch (const value_error&) { /* pass */ }
 
         try {
             Time time = attr.value().to_time();
-            qry.bind(":value_time", Variant(time));
+            qry.bind(":value_time", Expression(time));
         } catch (const value_error&) { /* pass */ }
     }
 
@@ -513,13 +513,13 @@ RdbHelper::update_source(const oh5::Source& source) {
 
         std::string stmt("UPDATE bdb_sources SET name = :name WHERE id = :id");
         sql::BindMap binds;
-        binds.add(":name", Variant(source.get("_name")));
-        binds.add(":id", Variant(id));
+        binds.add(":name", Expression(source.get("_name")));
+        binds.add(":id", Expression(id));
         r.reset(conn().execute(sql::Query(stmt, binds)));
 
         stmt = "DELETE FROM bdb_source_kvs WHERE source_id = :id";
         binds.clear();
-        binds.add(":id", Variant(id));
+        binds.add(":id", Expression(id));
         r.reset(conn().execute(sql::Query(stmt, binds)));
     
         BOOST_FOREACH(const std::string& key, source.keys()) {
@@ -541,7 +541,7 @@ void
 RdbHelper::remove_source(const oh5::Source& source) {
     std::string stmt("DELETE FROM bdb_sources WHERE id = :id");
     sql::BindMap binds;
-    binds.add(":id", Variant(boost::lexical_cast<int>(source.get("_id"))));
+    binds.add(":id", Expression(boost::lexical_cast<int>(source.get("_id"))));
     scoped_ptr<sql::Result> r(conn().execute(sql::Query(stmt, binds)));
     if (not r->affected_rows())
         throw lookup_error("source not stored in database");

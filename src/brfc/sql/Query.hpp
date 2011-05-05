@@ -52,7 +52,7 @@ class Query {
      * @brief bind a value
      * @throw lookup_error if no such bind is defined in binds
      */
-    void bind(const std::string& name, const Variant& value) {
+    void bind(const std::string& name, const expr::Expression& value) {
         binds_.set(name, value);
     }
 

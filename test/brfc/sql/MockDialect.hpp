@@ -29,18 +29,20 @@ namespace sql {
 
 class MockDialect : public Dialect {
   public:
-    MockDialect() {
-        ON_CALL(*this, do_variant_to_string(::testing::_))
-            .WillByDefault(::testing::Invoke(this, &MockDialect::do_variant_to_string_impl));
-    }
-
     MOCK_CONST_METHOD1(do_has_feature, bool(Dialect::Feature));
     MOCK_CONST_METHOD0(do_name, std::string&());
-    MOCK_CONST_METHOD1(do_variant_to_string, std::string(const Variant&));
+    MOCK_CONST_METHOD1(do_literal_to_string, std::string(const expr::Expression&));
     MOCK_CONST_METHOD1(do_escape, std::string(const std::string&));
 
-    std::string do_variant_to_string_impl(const Variant& value) {
-        return Dialect::do_variant_to_string(value);
+    std::string do_literal_to_string_impl(const expr::Expression& value) {
+        return Dialect::do_literal_to_string(value);
+    }
+
+    void delegate_to_fake() {
+        ON_CALL(*this, do_literal_to_string(::testing::_))
+            .WillByDefault(::testing::Invoke(this, &MockDialect::do_literal_to_string_impl));
+        ON_CALL(*this, do_escape(::testing::_))
+            .WillByDefault(::testing::ReturnArg<0>());
     }
 };
 

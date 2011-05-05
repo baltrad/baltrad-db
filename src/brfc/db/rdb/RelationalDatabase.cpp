@@ -41,6 +41,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/RdbHelper.hpp>
 #include <brfc/db/rdb/SaveFile.hpp>
 
+#include <brfc/expr/Expression.hpp>
+
 #include <brfc/oh5/PhysicalFile.hpp>
 #include <brfc/oh5/Source.hpp>
 
@@ -197,7 +199,7 @@ bool
 RelationalDatabase::do_remove(const FileEntry& entry) {
     std::string qry("DELETE FROM bdb_files WHERE uuid = :uuid");
     sql::BindMap binds;
-    binds.add(":uuid", Variant(entry.uuid()));
+    binds.add(":uuid", expr::Expression(entry.uuid()));
     shared_ptr<sql::Connection> c = conn();
     auto_ptr<sql::Result> r (c->execute(sql::Query(qry, binds)));
     return r->affected_rows();

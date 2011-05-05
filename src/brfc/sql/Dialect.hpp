@@ -25,7 +25,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class TimeDelta;
-class Variant;
+
+namespace expr {
+    class Expression;
+}
 
 namespace sql {
 
@@ -47,10 +50,10 @@ class Dialect {
     }
 
     /**
-     * @sa do_variant_to_string
+     * @sa do_literal_to_string
      */
-    std::string variant_to_string(const Variant& value) const {
-        return do_variant_to_string(value);
+    std::string literal_to_string(const expr::Expression& value) const {
+        return do_literal_to_string(value);
     }
     
     /**
@@ -77,7 +80,7 @@ class Dialect {
      * - none as NULL
      * - string surrounded by apostrophes (') and passed through escape()
      */
-    virtual std::string do_variant_to_string(const Variant& value) const;
+    virtual std::string do_literal_to_string(const expr::Expression& value) const;
 
     virtual std::string do_escape(const std::string& str) const = 0;
 };

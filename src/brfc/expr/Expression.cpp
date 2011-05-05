@@ -206,6 +206,11 @@ Expression::datetime() const {
     return boost::get<DateTime>(value_);
 }
 
+TimeDelta
+Expression::interval() const {
+    return boost::get<TimeDelta>(value_);
+}
+
 std::string
 Expression::symbol() const {
     BRFC_ASSERT(is_symbol());

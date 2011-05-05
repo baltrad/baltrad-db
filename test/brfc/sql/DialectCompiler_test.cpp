@@ -22,8 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/lexical_cast.hpp>
 
-#include <brfc/Variant.hpp>
-
 #include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/DialectCompiler.hpp>
 #include <brfc/sql/Factory.hpp>
@@ -34,8 +32,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test_common.hpp>
 #include <brfc/sql/MockDialect.hpp>
 
-using ::testing::_;
-using ::testing::Invoke;
 using ::brfc::expr::Expression;
 
 namespace brfc {
@@ -50,14 +46,14 @@ class Replacer {
             , count_(0) {
     }
 
-    std::string replace(const Variant& value) {
+    std::string replace(const Expression& value) {
         std::string key = ":lit_" + boost::lexical_cast<std::string>(count_++);
         binds_.add(key, value);
         return key;
     }
 
-    Variant value(const std::string& key) const {
-        return binds_.get(key, Variant());
+    Expression value(const std::string& key) const {
+        return binds_.get(key, Expression());
     }
 
   private:
@@ -75,11 +71,9 @@ struct sql_DialectCompiler_test: public testing::Test {
     }
 
     virtual void SetUp() {
-        ON_CALL(dialect, do_variant_to_string(_))
-            .WillByDefault(Invoke(&replacer, &Replacer::replace));
+        dialect.delegate_to_fake();
     }
     
-    Replacer replacer;
     ::testing::NiceMock<MockDialect> dialect;
     DialectCompiler compiler;
     Factory xpr;
@@ -120,7 +114,7 @@ TEST_F(sql_DialectCompiler_test, test_bind) {
     const Query& q = compiler.compile(b);
     EXPECT_EQ(":bind", q.statement());
     ASSERT_TRUE(q.binds().has("bind"));
-    EXPECT_EQ(Variant(), q.binds().get("bind"));
+    EXPECT_EQ(Expression(), q.binds().get("bind"));
 }
 
 TEST_F(sql_DialectCompiler_test, test_bind_without_colon) {
@@ -128,7 +122,7 @@ TEST_F(sql_DialectCompiler_test, test_bind_without_colon) {
     const Query& q = compiler.compile(b);
     EXPECT_EQ(":bind", q.statement());
     ASSERT_TRUE(q.binds().has("bind"));
-    EXPECT_EQ(Variant(), q.binds().get("bind"));
+    EXPECT_EQ(Expression(), q.binds().get("bind"));
 }
 
 TEST_F(sql_DialectCompiler_test, test_aliased_select) {
@@ -265,8 +259,8 @@ TEST_F(sql_DialectCompiler_test, test_function) {
     f->add_arg(xpr.int64_(2));
     const Query& q = compiler.compile(*f);
     EXPECT_EQ("func1(:lit_0, :lit_1)", q.statement());
-    EXPECT_EQ(Variant(1), replacer.value(":lit_0"));
-    EXPECT_EQ(Variant(2), replacer.value(":lit_1"));
+    EXPECT_EQ(Expression(1), replacer.value(":lit_0"));
+    EXPECT_EQ(Expression(2), replacer.value(":lit_1"));
 }
 */
 

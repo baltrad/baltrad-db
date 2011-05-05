@@ -25,9 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 
 #include <boost/bind.hpp>
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
@@ -145,7 +143,7 @@ DialectCompiler::bind::operator()(const Expression& x) {
     std::string name = x.front().string();
     if (not boost::starts_with(name, ":"))
         name = ":" + name;
-    binds_.add(name, Variant());
+    binds_.add(name, Expression());
     return Expression(name);
 }
 
@@ -224,41 +222,10 @@ DialectCompiler::join::operator()(const Expression& x) {
     return Expression(ss.str());
 }
 
-std::string
-literal_to_string(const Expression& x) {
-    switch (x.type()) {
-        case Expression::type::BOOL:
-            return x.bool_() ? "true" : "false";
-        case Expression::type::INT64:
-            return boost::lexical_cast<std::string>(x.int64());
-        case Expression::type::DOUBLE:
-            return boost::lexical_cast<std::string>(x.double_());
-        case Expression::type::STRING:
-            return "'" + x.string() + "'";
-        case Expression::type::DATE:
-            return "'" + x.date().to_iso_string(true) + "'";
-        case Expression::type::TIME:
-            return "'" + x.time().to_iso_string(true) + "'";
-        case Expression::type::DATETIME:
-            return "'" + x.datetime().to_iso_string(true) + "'";
-        default:
-            throw std::logic_error("invalid literal");
-    }
-}
-
 Expression
 DialectCompiler::literal::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() == 1);
-    if (x.front().is_list()) {
-        if (x.front().empty())
-            return Expression("NULL");
-        std::vector<std::string> strs;
-        BOOST_FOREACH(const Expression& e, x.front()) {
-            strs.push_back(literal_to_string(e));
-        }
-        return Expression("(" + boost::join(strs, ", ") + ")");
-    }
-    return Expression(literal_to_string(x.front()));
+    return Expression(dialect_.literal_to_string(x.front()));
 }
 
 Expression

@@ -47,7 +47,7 @@ BindMap::operator=(const BindMap& rhs) {
 }
 
 void
-BindMap::add(const std::string& name, const Variant& value) {
+BindMap::add(const std::string& name, const expr::Expression& value) {
     const map::value_type& pair = std::make_pair(name_to_placeholder(name),
                                                  value);
     if (not binds_.insert(pair).second)
@@ -55,7 +55,7 @@ BindMap::add(const std::string& name, const Variant& value) {
 }
 
 void
-BindMap::set(const std::string& name, const Variant& value) {
+BindMap::set(const std::string& name, const expr::Expression& value) {
     const std::string& key = name_to_placeholder(name);
     map::iterator iter = binds_.find(key);
     if (iter == binds_.end())
@@ -69,7 +69,7 @@ BindMap::has(const std::string& name) const {
     return binds_.find(name_to_placeholder(name)) != binds_.end();
 }
 
-const Variant&
+expr::Expression
 BindMap::get(const std::string& name) const {
     map::const_iterator iter = binds_.find(name_to_placeholder(name));
     if (iter == binds_.end())
@@ -77,8 +77,8 @@ BindMap::get(const std::string& name) const {
     return iter->second;
 }
 
-const Variant&
-BindMap::get(const std::string& name, const Variant& default_) const {
+expr::Expression
+BindMap::get(const std::string& name, const expr::Expression& default_) const {
     try {
         return get(name);
     } catch (const lookup_error&) {
