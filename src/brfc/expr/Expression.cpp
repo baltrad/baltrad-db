@@ -254,6 +254,14 @@ Expression::push_back(const Expression& value) {
     l.push_back(value);
 }
 
+void
+Expression::extend(const Expression& other) {
+    Expression::const_iterator it = other.begin();
+    for ( ; it != other.end(); ++it) {
+        push_back(*it);
+    }
+}
+
 Expression::const_iterator
 Expression::begin() const {
     BRFC_ASSERT(is_list());

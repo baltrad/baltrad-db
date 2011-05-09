@@ -260,5 +260,15 @@ TEST(expr_Expression_test, test_bool_conversion) {
     EXPECT_TRUE(Expression(1));
 }
 
+TEST(expr_Expression_test, test_extend) {
+    Expression e;
+    Expression l;
+    l.push_back(Expression(1));
+    l.push_back(Expression(2));
+    e.extend(l);
+
+    EXPECT_EQ(l, e);
+}
+
 } // namespace expr
 } // namespace brfc

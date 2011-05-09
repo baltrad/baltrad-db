@@ -93,10 +93,7 @@ class Listcons {
     }
 
     Listcons& extend(const Expression& value) {
-        Expression::const_iterator it = value.begin();
-        for ( ; it != value.end(); ++it) {
-            exp_.push_back(*it);
-        }
+        exp_.extend(value);
         return *this;
     }
 

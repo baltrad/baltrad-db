@@ -182,6 +182,7 @@ class Expression {
     const Expression& front() const;
     void pop_front();
     void push_back(const Expression& value);
+    void extend(const Expression& other);
 
     const_iterator begin() const;
     const_iterator end() const;
