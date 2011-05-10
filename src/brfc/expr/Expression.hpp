@@ -76,62 +76,62 @@ class Expression {
     /**
      * @brief construct bool
      */
-    Expression(bool value);
+    explicit Expression(bool value);
     
     /**
      * @brief construct in64
      */
-    Expression(int value);
+    explicit Expression(int value);
 
     /**
      * @brief construct int64
      */
-    Expression(long long value);
+    explicit Expression(long long value);
 
     /**
      * @brief construct double
      */
-    Expression(double value);
+    explicit Expression(double value);
     
     /**
      * @brief construct string
      */
-    Expression(const char* value);
+    explicit Expression(const char* value);
 
     /**
      * @brief construct string
      */
-    Expression(const std::string& value);
+    explicit Expression(const std::string& value);
 
     /**
      * @brief construct symbol
      */
-    Expression(const std::string& value, construct_symbol);
+    explicit Expression(const std::string& value, construct_symbol);
 
     /**
      * @brief construct list
      */
-    Expression(const list_t& value);
+    explicit Expression(const list_t& value);
     
     /**
      * @brief construct date
      */
-    Expression(const Date& value);
+    explicit Expression(const Date& value);
     
     /**
      * @brief construct time
      */
-    Expression(const Time& value);
+    explicit Expression(const Time& value);
     
     /**
      * @brief construct datetime
      */
-    Expression(const DateTime& value);
+    explicit Expression(const DateTime& value);
     
     /**
      * @brief construct interval
      */
-    Expression(const TimeDelta& value);
+    explicit Expression(const TimeDelta& value);
     
     /**
      * @brief construct list from iterators

@@ -391,6 +391,10 @@ struct to_ostream : public static_visitor<void> {
     void operator()(const DateTime& dt) const {
         out << "(datetime \"" << dt.to_iso_string() << "\")";
     }
+
+    void operator()(const TimeDelta& td) const {
+        out << "(timedelta << " << td.days() << td.msecs() << std::endl;
+    }
 };
 
 } // namespace anonymous

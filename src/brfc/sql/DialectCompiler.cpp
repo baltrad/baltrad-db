@@ -284,7 +284,7 @@ DialectCompiler::select_columns::operator()(const Expression& x) {
 Expression
 DialectCompiler::from_clause::operator()(const Expression& x) {
     Expression e;
-    e.push_back("FROM ");
+    e.push_back(Expression("FROM "));
     e.extend(join_with_str(x.begin(), x.end(), " "));
     return e;
 }
@@ -294,7 +294,7 @@ DialectCompiler::where_clause::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() == 1);
 
     Expression e;
-    e.push_back("WHERE ");
+    e.push_back(Expression("WHERE "));
     e.push_back(x.front());
     return e;
 }
@@ -304,7 +304,7 @@ DialectCompiler::group_by::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() >= 1);
 
     Expression e;
-    e.push_back("GROUP BY ");
+    e.push_back(Expression("GROUP BY "));
     e.extend(join_with_str(x.begin(), x.end(), ", "));
     return e;
 }
@@ -314,7 +314,7 @@ DialectCompiler::order_by::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() >= 1);
 
     Expression e;
-    e.push_back("ORDER BY ");
+    e.push_back(Expression("ORDER BY "));
     e.extend(join_with_str(x.begin(), x.end(), ", "));
     return e;
 }

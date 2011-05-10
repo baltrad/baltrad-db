@@ -313,7 +313,7 @@ RdbHelper::insert_file_content(RdbFileEntry& entry, const std::string& path) {
 void
 RdbHelper::load_file(RdbFileEntry& entry) {
     sql::Select qry;
-    qry.from(m::files::name());
+    qry.from(sql_.table(m::files::name()));
     qry.outerjoin(
         sql_.table(m::file_content::name()),
         sql_.eq(m::files::column("id"), m::file_content::column("file_id"))
@@ -350,7 +350,7 @@ RdbHelper::load_file(RdbFileEntry& entry) {
 long long
 RdbHelper::select_root_id(const RdbFileEntry& entry) {
     sql::Select qry;
-    qry.from(m::files::name());
+    qry.from(sql_.table(m::files::name()));
     qry.join(
         sql_.table(m::nodes::name()),
         sql_.eq(m::files::column("id"), m::nodes::column("file_id"))
@@ -377,7 +377,7 @@ RdbHelper::select_source_id(const oh5::Source& src) {
     sql::Select qry;
     qry.distinct(true);
     qry.what(m::sources::column("id"));
-    qry.from(m::sources::name());
+    qry.from(sql_.table(m::sources::name()));
     qry.join(
         sql_.table(m::source_kvs::name()),
         sql_.eq(
@@ -409,7 +409,7 @@ RdbHelper::select_source(long long id) {
     sql::Select qry;
     qry.what(m::source_kvs::column("key"));
     qry.what(m::source_kvs::column("value"));
-    qry.from(m::source_kvs::name());
+    qry.from(sql_.table(m::source_kvs::name()));
     qry.where(sql_.eq(m::source_kvs::column("source_id"), sql_.int64_(id)));
 
     scoped_ptr<sql::Result> r(conn().execute(qry));
@@ -423,7 +423,7 @@ RdbHelper::select_source(long long id) {
     qry = sql::Select();
     qry.what(m::sources::column("id"));
     qry.what(m::sources::column("name"));
-    qry.from(m::sources::name());
+    qry.from(sql_.table(m::sources::name()));
     qry.where(sql_.eq(m::sources::column("id"), sql_.int64_(id)));
 
     r.reset(conn().execute(qry));
@@ -439,7 +439,7 @@ RdbHelper::select_source(long long id) {
 std::vector<oh5::Source>
 RdbHelper::select_all_sources() {
     sql::Select qry;
-    qry.from(m::sources::name());
+    qry.from(sql_.table(m::sources::name()));
     qry.outerjoin(
         sql_.table(m::source_kvs::name()),
         sql_.eq(
@@ -550,7 +550,7 @@ RdbHelper::remove_source(const oh5::Source& source) {
 void
 RdbHelper::load_children(oh5::Node& node) {
     sql::Select qry;
-    qry.from(m::nodes::name());
+    qry.from(sql_.table(m::nodes::name()));
     qry.outerjoin(
         sql_.table(m::attrvals::name()),
         sql_.eq(

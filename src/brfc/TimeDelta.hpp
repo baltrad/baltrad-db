@@ -75,6 +75,10 @@ class TimeDelta {
     bool operator!=(const TimeDelta& rhs) const {
         return not (*this == rhs);
     }
+
+    bool operator<(const TimeDelta& rhs) const {
+        return days_ < rhs.days_ and msecs_ < rhs.msecs_;
+    }
     ///@}
 
   private:

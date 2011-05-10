@@ -137,7 +137,7 @@ RelationalDatabase::do_entry_by_file(const oh5::PhysicalFile& file) {
     sql::Factory xpr;
     sql::Select qry;
     qry.what(m::files::column("uuid"));
-    qry.from(m::files::name());
+    qry.from(xpr.table(m::files::name()));
     qry.where(
         xpr.and_(
             xpr.eq(m::files::column("hash"), xpr.string(hash)),

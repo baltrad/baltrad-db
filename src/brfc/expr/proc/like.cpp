@@ -36,7 +36,7 @@ like::operator()(const std::string& str, std::string pattern) const {
     replace_all(pattern, "?", ".{1,1}");
     sregex_compiler compiler;
     sregex re =  compiler.compile(pattern);
-    return regex_match(str.begin(), str.end(), re);
+    return Expression(regex_match(str.begin(), str.end(), re));
 }
 
 } // namespace proc

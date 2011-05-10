@@ -152,7 +152,7 @@ struct attr {
             return m::sources::column("name");
         } else {
             std::string alias = "src_" + key;
-            Expression alias_t = xpr_.alias("bdb_source_kvs", alias);
+            Expression alias_t = xpr_.alias(xpr_.table("bdb_source_kvs"), alias);
 
             // join if missing
             if (not from_.contains(alias_t)) {
@@ -202,14 +202,14 @@ struct attr {
         // alias the table (this attribute is always searched on this alias)
         boost::erase_all(name, "/");
         std::string alias = name + "_values";
-        Expression alias_t = xpr_.alias(m::attrvals::name(), alias);
+        Expression alias_t = xpr_.alias(xpr_.table(m::attrvals::name()), alias);
         
         // join this table-alias if not already joined
         if (not from_.contains(alias_t)) {
             // join attribute layer to files
             std::string l0_alias = name + "_l0";
             from_.outerjoin(
-                xpr_.alias(m::nodes::name(), l0_alias),
+                xpr_.alias(xpr_.table(m::nodes::name()), l0_alias),
                 xpr_.and_(
                     xpr_.eq(
                         xpr_.column(l0_alias, "file_id"),
@@ -224,7 +224,7 @@ struct attr {
             // join group layer to attribute layer
             std::string l1_alias = name + "_l1";
             from_.outerjoin(
-                xpr_.alias(m::nodes::name(), l1_alias),
+                xpr_.alias(xpr_.table(m::nodes::name()), l1_alias),
                 xpr_.and_(
                     xpr_.eq(
                         xpr_.column(l1_alias, "id"),
