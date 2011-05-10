@@ -27,12 +27,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+namespace expr {
+    class Expression;
+}
+
 namespace sql {
 
 class Compiler;
 class Dialect;
 class Insert;
-class Query;
 class Result;
 class Select;
 
@@ -113,7 +116,7 @@ class Connection : boost::noncopyable {
     /**
      * @brief execute an SQL query
      *
-     * The actual statement (returned by SqlQuery::replace_binds(*this)) is
+     * The actual statement (returned by replace_binds(stmt, binds)) is
      * executed using do_execute().
      *
      * If no transaction is in progress, executes the statement in a "private"
@@ -123,9 +126,9 @@ class Connection : boost::noncopyable {
      * @note caller takes ownership of the result
      * @sa do_execute
      */
-    Result* execute(const Query& query);
+    Result* execute(const expr::Expression& stmt, const BindMap& binds=BindMap());
 
-    Result* execute(const std::string& query);
+    Result* execute(const std::string& stmt);
 
     const Dialect& dialect() const {
         return do_dialect();
@@ -154,6 +157,9 @@ class Connection : boost::noncopyable {
     long long last_insert_id() const {
         return do_last_insert_id();
     }
+
+    std::string replace_binds(const expr::Expression& stmt,
+                              const BindMap& binds) const;
 
   protected:
     // allow access to protected virtuals

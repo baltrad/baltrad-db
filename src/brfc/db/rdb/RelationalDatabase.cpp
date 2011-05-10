@@ -53,6 +53,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Select.hpp>
 
+using ::brfc::expr::Expression;
+using ::brfc::expr::Listcons;
+
 namespace brfc {
 namespace db {
 namespace rdb {
@@ -197,11 +200,14 @@ RelationalDatabase::populate_hasher() {
 
 bool
 RelationalDatabase::do_remove(const FileEntry& entry) {
-    std::string qry("DELETE FROM bdb_files WHERE uuid = :uuid");
+    sql::Factory xpr;
+    Expression stmt = Listcons().string("DELETE FROM bdb_files WHERE uuid = ")
+                                .append(xpr.bind("uuid"))
+                                .get();
     sql::BindMap binds;
     binds.add(":uuid", expr::Expression(entry.uuid()));
     shared_ptr<sql::Connection> c = conn();
-    auto_ptr<sql::Result> r (c->execute(sql::Query(qry, binds)));
+    auto_ptr<sql::Result> r (c->execute(stmt, binds));
     return r->affected_rows();
 }
 

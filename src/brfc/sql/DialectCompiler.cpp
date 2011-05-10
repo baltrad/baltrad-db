@@ -19,9 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/DialectCompiler.hpp>
 
-#include <algorithm>
-#include <iostream>
-#include <list>
 #include <sstream>
 
 #include <boost/bind.hpp>
@@ -34,7 +31,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Insert.hpp>
-#include <brfc/sql/Query.hpp>
 #include <brfc/sql/Select.hpp>
 
 using ::brfc::expr::Expression;
@@ -92,20 +88,14 @@ DialectCompiler::DialectCompiler(const Dialect* dialect)
     eval_.bind("table", boost::bind(table(), _1));
 }
 
-Query
+Expression
 DialectCompiler::do_compile(const Expression& expr) {
-    bind_.binds_.clear();
     Expression e = eval_(expr);
-    Expression q;
-    if (e.is_string()) {
-        q = e;
+    if (e.is_list()) {
+        return compact_str(e);
     } else {
-        q = compact_str(e);
-        BRFC_ASSERT(q.size() == 1);
-        BRFC_ASSERT(q.front().is_string());
-        q = q.front();
+        return Listcons().append(e).get();
     }
-    return Query(q.string(), bind_.binds_);
 }
 
 Expression
@@ -143,12 +133,8 @@ Expression
 DialectCompiler::bind::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() == 1);
     
-    std::string name = x.front().string();
-    if (not boost::starts_with(name, ":"))
-        name = ":" + name;
-    binds_.add(name, Expression());
-    return Expression(name);
-//    return Listcons().symbol("bind").string(name).get();
+    const std::string& name = x.front().string();
+    return Listcons().symbol("bind").string(name).get();
 }
 
 Expression
@@ -398,17 +384,25 @@ DialectCompiler::compact_str(const Expression& x) {
         if (it->is_string()) {
             s += it->string();
         } else if (it->is_list()) {
-            const Expression& l = compact_str(*it);
-            Expression::const_iterator li = l.begin();
-            for ( ; li != l.end(); ++li) {
-                if (li->is_string()) {
-                    s+= li->string();
-                } else {
-                    if (not s.empty()) {
-                        e.push_back(Expression(s));
-                        s.clear();
+            if (*it and it->front().is_symbol() and it->front().symbol() == "bind") {
+                if (not s.empty()) {
+                    e.push_back(Expression(s));
+                    s.clear();
+                }
+                e.push_back(*it);
+            } else {
+                const Expression& l = compact_str(*it);
+                Expression::const_iterator li = l.begin();
+                for ( ; li != l.end(); ++li) {
+                    if (li->is_string()) {
+                        s+= li->string();
+                    } else {
+                        if (not s.empty()) {
+                            e.push_back(Expression(s));
+                            s.clear();
+                        }
+                        e.push_back(*li);
                     }
-                    e.push_back(*li);
                 }
             }
         } else {

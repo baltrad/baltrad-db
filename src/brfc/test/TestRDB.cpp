@@ -61,7 +61,7 @@ TestRDB::drop() {
 
 void
 TestRDB::clean() {
-    scoped_ptr<sql::Result> r(conn()->execute("DELETE FROM bdb_files"));
+    scoped_ptr<sql::Result> r(conn()->execute(std::string("DELETE FROM bdb_files")));
 }
 
 namespace {

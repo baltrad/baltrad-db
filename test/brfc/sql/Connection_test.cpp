@@ -18,15 +18,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/expr/Expression.hpp>
+#include <brfc/expr/Listcons.hpp>
 
 #include <brfc/sql/Connection.hpp>
-#include <brfc/sql/Query.hpp>
-#include <brfc/sql/Result.hpp>
+#include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>
+#include <brfc/sql/Result.hpp>
 #include <brfc/sql/Select.hpp>
 
 #include <brfc/test_common.hpp>
@@ -40,6 +39,8 @@ using testing::Return;
 using testing::ReturnRef;
 using testing::Throw;
 using testing::_;
+using ::brfc::expr::Expression;
+using ::brfc::expr::Listcons;
 
 namespace brfc {
 namespace sql {
@@ -49,7 +50,8 @@ class sql_Connection_test : public testing::Test {
     sql_Connection_test()
         : compiler()
         , dialect()
-        , conn() {
+        , conn()
+        , xpr() {
     }
 
     void SetUp() {
@@ -65,6 +67,7 @@ class sql_Connection_test : public testing::Test {
     ::testing::NiceMock<MockCompiler> compiler;
     ::testing::NiceMock<MockDialect> dialect;
     ::testing::NiceMock<MockConnection> conn;
+    Factory xpr;
 };
 
 TEST_F(sql_Connection_test, test_close) {
@@ -202,8 +205,6 @@ TEST_F(sql_Connection_test, test_commit_on_closed_connection) {
 
 TEST_F(sql_Connection_test, test_execute_sqlquery) {
     std::string stmt("query");
-    BindMap binds;
-    Query query(stmt, binds);
     MockResult result;
 
     EXPECT_CALL(conn, do_in_transaction())
@@ -211,19 +212,19 @@ TEST_F(sql_Connection_test, test_execute_sqlquery) {
     EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Return(&result));
     
-    EXPECT_EQ(&result, conn.execute(query));
+    EXPECT_EQ(&result, conn.execute(stmt));
 }
 
 TEST_F(sql_Connection_test, test_execute_insert) {
     Insert query("t1");
-    Query compiled("query");
+    Expression compiled = Listcons().string("query").get();
     MockResult result;
 
-    EXPECT_CALL(compiler, do_compile(_))
+    EXPECT_CALL(compiler, do_compile(query.expression()))
         .WillOnce(Return(compiled));
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(conn, do_execute(compiled.statement()))
+    EXPECT_CALL(conn, do_execute("query"))
         .WillOnce(Return(&result));
     
     EXPECT_EQ(&result, conn.execute(query));
@@ -231,23 +232,23 @@ TEST_F(sql_Connection_test, test_execute_insert) {
 
 TEST_F(sql_Connection_test, test_execute_select) {
     Select query;
-    Query compiled("query");
+    Expression compiled = Listcons().string("query").get();
     MockResult result;
 
-    EXPECT_CALL(compiler, do_compile(_))
+    EXPECT_CALL(compiler, do_compile(query.expression()))
         .WillOnce(Return(compiled));
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(conn, do_execute(compiled.statement()))
+    EXPECT_CALL(conn, do_execute("query"))
         .WillOnce(Return(&result));
     
     EXPECT_EQ(&result, conn.execute(query));
 }
 
 TEST_F(sql_Connection_test, test_execute_replaces_binds) {
-    std::string stmt(":bind");
+    Expression stmt = Listcons().string("query ").append(xpr.bind("b")).get();
     BindMap binds;
-    binds.add(":bind", expr::Expression(1));
+    binds.add("b", expr::Expression(1));
     MockResult result;
 
     ON_CALL(conn, do_execute(_))
@@ -255,10 +256,10 @@ TEST_F(sql_Connection_test, test_execute_replaces_binds) {
 
     EXPECT_CALL(conn, do_in_transaction())
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(conn, do_execute("1"))
+    EXPECT_CALL(conn, do_execute("query 1"))
         .WillOnce(Return(&result));
     
-    conn.execute(Query(stmt, binds));
+    conn.execute(stmt, binds);
 }
 
 } // namespace sql

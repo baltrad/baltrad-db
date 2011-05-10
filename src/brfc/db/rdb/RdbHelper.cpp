@@ -46,12 +46,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Select.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
-#include <brfc/sql/Query.hpp>
 #include <brfc/sql/Result.hpp>
 
 #include <brfc/util/BoostFileSystem.hpp>
 
 using ::brfc::expr::Expression;
+using ::brfc::expr::Listcons;
 
 namespace brfc {
 namespace db {
@@ -179,27 +179,26 @@ RdbHelper::compile_insert_node_query() {
     qry.value("file_id", sql_.bind(":file_id"));
     qry.value("name", sql_.bind(":name"));
 
-    const sql::Query& q = conn().compiler().compile(qry.expression());
-    insert_node_qry_.reset(new sql::Query(q));
+    insert_node_qry_ = conn().compiler().compile(qry.expression());
 }
 
 void
 RdbHelper::insert_node(long long file_id, oh5::Node& node) {
-    if (insert_node_qry_.get() == 0)
+    if (not insert_node_qry_)
         compile_insert_node_query();
-    sql::Query qry(*insert_node_qry_); // make a copy not to mess up defaults
-
+    
+    sql::BindMap binds;
     Expression parent_id;
     const oh5::Node* parent = node.parent();
     if (parent) {
         parent_id = Expression(backend(*parent).id(*parent));
     }
-    qry.bind(":parent_id", parent_id);
-    qry.bind(":type", Expression(node_sql_type(node)));
-    qry.bind(":file_id", Expression(file_id));
-    qry.bind(":name", Expression(node.name()));
+    binds.add(":parent_id", parent_id);
+    binds.add(":type", Expression(node_sql_type(node)));
+    binds.add(":file_id", Expression(file_id));
+    binds.add(":name", Expression(node.name()));
 
-    scoped_ptr<sql::Result> result(conn().execute(qry));
+    scoped_ptr<sql::Result> result(conn().execute(insert_node_qry_, binds));
 
     long long db_id = last_id(*result);
     backend(node).id(node, db_id);
@@ -222,39 +221,36 @@ RdbHelper::compile_insert_attr_query() {
     qry.value("value_bool", sql_.bind(":value_bool"));
     qry.value("value_date", sql_.bind(":value_date"));
     qry.value("value_time", sql_.bind(":value_time"));
-
-    const sql::Query& q = conn().compiler().compile(qry.expression());
-    insert_attr_qry_.reset(new sql::Query(q));
+    
+    insert_attr_qry_ = conn().compiler().compile(qry.expression());
 }
 
 void
 RdbHelper::insert_attribute(oh5::Attribute& attr) {
-    if (insert_attr_qry_.get() == 0)
+    if (not insert_attr_qry_)
         compile_insert_attr_query();
-    sql::Query qry(*insert_attr_qry_); // make a copy not to mess up defaults
     
-    qry.bind(":node_id", Expression(backend(attr).id(attr)));
-
-    qry.bind(attr_sql_column(attr), attr_sql_value(attr));
-
+    sql::BindMap binds;
+    binds.add(":node_id", Expression(backend(attr).id(attr)));
+    binds.add(attr_sql_column(attr), attr_sql_value(attr));
     if (attr.value().type() == oh5::Scalar::STRING) {
         try {
             bool val = attr.value().to_bool();
-            qry.bind(":value_bool", Expression(val));
+            binds.add(":value_bool", Expression(val));
         } catch (const value_error&) { /* pass */ }
 
         try {
             Date date = attr.value().to_date();
-            qry.bind(":value_date", Expression(date));
+            binds.add(":value_date", Expression(date));
         } catch (const value_error&) { /* pass */ }
 
         try {
             Time time = attr.value().to_time();
-            qry.bind(":value_time", Expression(time));
+            binds.add(":value_time", Expression(time));
         } catch (const value_error&) { /* pass */ }
     }
 
-    scoped_ptr<sql::Result>(conn().execute(qry));
+    scoped_ptr<sql::Result>(conn().execute(insert_attr_qry_, binds));
 }
 
 void
@@ -511,16 +507,22 @@ RdbHelper::update_source(const oh5::Source& source) {
     try {
         conn().begin();
 
-        std::string stmt("UPDATE bdb_sources SET name = :name WHERE id = :id");
+        Expression stmt = Listcons().string("UPDATE bdb_sources SET name = ")
+                                    .append(sql_.bind("name"))
+                                    .string(" WHERE id = ")
+                                    .append(sql_.bind("id"))
+                                    .get();
         sql::BindMap binds;
         binds.add(":name", Expression(source.get("_name")));
         binds.add(":id", Expression(id));
-        r.reset(conn().execute(sql::Query(stmt, binds)));
+        r.reset(conn().execute(stmt, binds));
 
-        stmt = "DELETE FROM bdb_source_kvs WHERE source_id = :id";
+        stmt = Listcons().string("DELETE FROM bdb_source_kvs WHERE source_id =")
+                         .append(sql_.bind("id"))
+                         .get();
         binds.clear();
         binds.add(":id", Expression(id));
-        r.reset(conn().execute(sql::Query(stmt, binds)));
+        r.reset(conn().execute(stmt, binds));
     
         BOOST_FOREACH(const std::string& key, source.keys()) {
             sql::Insert qry(m::source_kvs::name());
@@ -539,10 +541,12 @@ RdbHelper::update_source(const oh5::Source& source) {
 
 void
 RdbHelper::remove_source(const oh5::Source& source) {
-    std::string stmt("DELETE FROM bdb_sources WHERE id = :id");
+    Expression stmt = Listcons().string("DELETE FROM bdb_sources WHERE id=")
+                                .append(sql_.bind("id"))
+                                .get();
     sql::BindMap binds;
     binds.add(":id", Expression(boost::lexical_cast<int>(source.get("_id"))));
-    scoped_ptr<sql::Result> r(conn().execute(sql::Query(stmt, binds)));
+    scoped_ptr<sql::Result> r(conn().execute(stmt, binds));
     if (not r->affected_rows())
         throw lookup_error("source not stored in database");
 }

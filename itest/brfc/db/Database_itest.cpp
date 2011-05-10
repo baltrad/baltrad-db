@@ -232,7 +232,7 @@ TEST_P(db_Database_itest, test_remove_source) {
     ASSERT_TRUE(source_by_name(sources, "srcname4") != sources.end());
     src = *source_by_name(sources, "srcname4");
 
-    EXPECT_NO_THROW(db->remove_source(src));
+    db->remove_source(src);
 
     sources = db->sources();
     EXPECT_TRUE(source_by_name(sources, "srcname4") == sources.end());

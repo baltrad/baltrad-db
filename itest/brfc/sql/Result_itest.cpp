@@ -45,8 +45,8 @@ struct sql_Result_itest : public testing::TestWithParam<const char*> {
             , conn(db->conn()) {
     }
 
-    shared_ptr<Result> query(const std::string& stmt, const BindMap& binds) {
-        return shared_ptr<Result>(conn->execute(Query(stmt, binds)));
+    shared_ptr<Result> query(const std::string& stmt) {
+        return shared_ptr<Result>(conn->execute(stmt));
     }
     
     test::TestRDB* db;
@@ -54,66 +54,66 @@ struct sql_Result_itest : public testing::TestWithParam<const char*> {
 };
 
 TEST_P(sql_Result_itest, size) {
-    shared_ptr<Result> r = query("SELECT 1", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT 1");
     EXPECT_EQ(r->size(), 1);
 }
 
 TEST_P(sql_Result_itest, next) {
-    shared_ptr<Result> r = query("SELECT 1", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT 1");
     EXPECT_TRUE(r->next());
     EXPECT_TRUE(not r->next());
 }
 
 TEST_P(sql_Result_itest, int64) {
-    shared_ptr<Result> r = query("SELECT 1", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT 1");
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->value_at(0).int64_(), 1);
 }
 
 TEST_P(sql_Result_itest, double_) {
-    shared_ptr<Result> r = query("SELECT 1.1::real", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT 1.1::real");
     ASSERT_TRUE(r->next());
     EXPECT_NEAR(r->value_at(0).double_(), 1.1, 0.00001);
 }
 
 TEST_P(sql_Result_itest, string) {
-    shared_ptr<Result> r = query("SELECT 'bla'", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT 'bla'");
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->value_at(0).string(), "bla");
 }
 
 TEST_P(sql_Result_itest, bool_) {
-    shared_ptr<Result> r = query("SELECT true", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT true");
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->value_at(0).bool_(), true);
 }
 
 TEST_P(sql_Result_itest, bool_false) {
-    shared_ptr<Result> r = query("SELECT false", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT false");
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->value_at(0).bool_(), false);
 }
 
 TEST_P(sql_Result_itest, date) {
-    shared_ptr<Result> r = query("SELECT DATE '2001-01-02'", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT DATE '2001-01-02'");
     ASSERT_TRUE(r->next());
     EXPECT_EQ(r->value_at(0).date(), Date(2001, 1, 2));
 }
 
 TEST_P(sql_Result_itest, time) {
-    shared_ptr<Result> r = query("SELECT TIME '12:00:05'", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT TIME '12:00:05'");
     ASSERT_TRUE(r->next());
     EXPECT_EQ(Time(12, 0, 5), r->value_at(0).time());
 }
 
 TEST_P(sql_Result_itest, invalid_column) {
-    shared_ptr<Result> r = query("SELECT 1", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT 1");
     ASSERT_TRUE(r->next());
     EXPECT_THROW(r->value_at(1), lookup_error);
 }
 
 TEST_P(sql_Result_itest, value_at_by_column) {
-    shared_ptr<Result> r = query("SELECT 1 as i", sql::BindMap());
+    shared_ptr<Result> r = query("SELECT 1 as i");
     ASSERT_TRUE(r->next());
     EXPECT_THROW(r->value_at("j"), lookup_error);
     EXPECT_NO_THROW(r->value_at("i"));

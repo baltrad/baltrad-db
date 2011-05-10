@@ -20,8 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_DIALECT_COMPILER_HPP
 #define BRFC_SQL_DIALECT_COMPILER_HPP
 
-#include <vector>
-
 #include <brfc/expr/Eval.hpp>
 #include <brfc/sql/Compiler.hpp>
 
@@ -85,8 +83,6 @@ class DialectCompiler : public Compiler {
      */
     struct bind : public proc {
         expr::Expression operator()(const expr::Expression& x);
-        
-        BindMap binds_;
     };
 
     /**
@@ -229,7 +225,7 @@ class DialectCompiler : public Compiler {
      * @pre stack is empty
      * @post stack contains compiled string, accessible through compiled()
      */
-    virtual Query do_compile(const expr::Expression& x);
+    virtual expr::Expression do_compile(const expr::Expression& x);
 
   private:
     expr::Eval eval_;
