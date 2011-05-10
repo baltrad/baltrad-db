@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string/replace.hpp>
 
 #include <brfc/assert.hpp>
-#include <brfc/expr/Expression.hpp>
+#include <brfc/expr/Listcons.hpp>
 
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Insert.hpp>
@@ -38,6 +38,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Select.hpp>
 
 using ::brfc::expr::Expression;
+using ::brfc::expr::Listcons;
 
 namespace brfc {
 namespace sql {
@@ -94,15 +95,17 @@ DialectCompiler::DialectCompiler(const Dialect* dialect)
 Query
 DialectCompiler::do_compile(const Expression& expr) {
     bind_.binds_.clear();
-    Expression e;
-    try {
-        e = eval_(expr);
-    } catch (...) {
-        std::cout << expr << std::endl;
-        throw;
+    Expression e = eval_(expr);
+    Expression q;
+    if (e.is_string()) {
+        q = e;
+    } else {
+        q = compact_str(e);
+        BRFC_ASSERT(q.size() == 1);
+        BRFC_ASSERT(q.front().is_string());
+        q = q.front();
     }
-    BRFC_ASSERT(e.is_string());
-    return Query(e.string(), bind_.binds_);
+    return Query(q.string(), bind_.binds_);
 }
 
 Expression
@@ -110,10 +113,10 @@ DialectCompiler::binop::operator()(const Expression& expr) {
     BRFC_ASSERT(expr.size() == 2);
 
     Expression::const_iterator it = expr.begin();
-    std::string lhs(it->string());
+    const Expression& lhs = *it;
     ++it;
-    std::string rhs(it->string());
-    return Expression(lhs + " " + op_ + " " + rhs);
+    const Expression& rhs = *it;
+    return Listcons().append(lhs).string(" " + op_ + " ").append(rhs).get();
 }
 
 Expression
@@ -121,19 +124,19 @@ DialectCompiler::like::operator()(const Expression& expr) {
     BRFC_ASSERT(expr.size() == 2);
 
     Expression::const_iterator it = expr.begin();
-    std::string lhs(it->string());
+    const Expression& lhs = *it;
     ++it;
     std::string rhs(it->string());
     boost::replace_all(rhs, "*", "%");
     boost::replace_all(rhs, "?", "_");
-    return Expression(lhs + " LIKE " + rhs);
+    return Listcons().append(lhs).string(" LIKE " + rhs).get();
 }
 
 Expression
 DialectCompiler::unaryop::operator()(const Expression& expr) {
     BRFC_ASSERT(expr.size() == 1);
-
-    return Expression(op_ + " " + expr.front().string());
+    
+    return Listcons().string(op_ + " ").append(expr.front()).get();
 }
 
 Expression
@@ -145,6 +148,7 @@ DialectCompiler::bind::operator()(const Expression& x) {
         name = ":" + name;
     binds_.add(name, Expression());
     return Expression(name);
+//    return Listcons().symbol("bind").string(name).get();
 }
 
 Expression
@@ -157,6 +161,7 @@ DialectCompiler::column::operator()(const Expression& x) {
     return Expression(table + "." + column);
 }
 
+namespace {
 /**
  * @brief join [@c first, @c last) to a string separated by @c sep
  */
@@ -179,10 +184,28 @@ join_to_str(Expression::const_iterator first,
 }
 
 Expression
+join_with_str(Expression::const_iterator first,
+              Expression::const_iterator last,
+              const std::string& sep) {
+    Expression e;
+    while (first != last) {
+        e.push_back(*first);
+        ++first;
+        if (first != last)
+            e.push_back(Expression(sep));
+    }
+    return e;
+}
+
+} // namespace anonymous
+
+Expression
 DialectCompiler::function::operator()(const Expression& x) {
-    std::stringstream ss;
-    ss << name_ << "(" << join_to_str(x.begin(), x.end(), ", ") << ")";
-    return Expression(ss.str());
+    Expression e;
+    e.push_back(Expression(name_ + "("));
+    e.extend(join_with_str(x.begin(), x.end(), ", "));
+    e.push_back(Expression(")"));
+    return e;
 }
 
 Expression
@@ -190,36 +213,43 @@ DialectCompiler::alias::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() == 2);
 
     Expression::const_iterator it = x.begin();
-    const std::string& aliased = it->string();
+    const Expression& aliased = *it;
     ++it;
     const std::string& alias = it->string();
 
-    std::stringstream ss;
+    bool is_select = false;
+    if (aliased.is_list() and aliased.front().is_string()
+        and ::boost::starts_with(aliased.front().string(), "SELECT ")) {
+        is_select = true;
+    }
 
-    bool is_select = ::boost::starts_with(aliased, "SELECT ");
-    if (is_select) ss << "(";
-    ss << aliased;
-    if (is_select) ss << ")";
-    ss << " AS " << alias;
-    return Expression(ss.str());
+    Expression e;
+    if (is_select)
+        e.push_back(Expression("("));
+    e.push_back(aliased);
+    if (is_select)
+        e.push_back(Expression(")"));
+    e.push_back(Expression(" AS " + alias));
+    return e;
 }
 
 Expression
 DialectCompiler::join::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() == 2);
-
-    std::stringstream ss;
-    ss << type_ << " ";
-
-    Expression::const_iterator it = x.begin();
-    const std::string& table = it->string();
-    ss << table;
     
+    Expression::const_iterator it = x.begin();
+    const Expression& selectable = *it;
     ++it;
-    const std::string& condition = it->string();
-    if (not condition.empty())
-        ss << " ON " << condition;
-    return Expression(ss.str());
+    const Expression& condition = *it;
+
+    Expression e;
+    e.push_back(Expression(type_ + " "));
+    e.push_back(selectable);
+    if (condition) {
+        e.push_back(Expression(" ON "));
+        e.push_back(condition);
+    }
+    return e;
 }
 
 Expression
@@ -232,12 +262,11 @@ Expression
 DialectCompiler::label::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() == 2);
 
-    std::stringstream ss;
     Expression::const_iterator it = x.begin();
-    ss << it->string() << " AS ";
+    const Expression& lhs = *it;
     ++it;
-    ss << it->string();
-    return Expression(ss.str());
+    const std::string& rhs = it->string();
+    return Listcons().append(lhs).string(" AS " + rhs).get();
 }
 
 Expression
@@ -247,57 +276,57 @@ DialectCompiler::distinct::operator()(const Expression&) {
 
 Expression
 DialectCompiler::select_columns::operator()(const Expression& x) {
-    return Expression(join_to_str(x.begin(), x.end(), ", "));
+    Expression e;
+    e.extend(join_with_str(x.begin(), x.end(), ", "));
+    return e;
 }
 
 Expression
 DialectCompiler::from_clause::operator()(const Expression& x) {
-    std::stringstream ss;
-    Expression::const_iterator it = x.begin();
-    ss << "FROM " << join_to_str(it, x.end(), " ");
-    return Expression(ss.str());
+    Expression e;
+    e.push_back("FROM ");
+    e.extend(join_with_str(x.begin(), x.end(), " "));
+    return e;
 }
 
 Expression
 DialectCompiler::where_clause::operator()(const Expression& x) {
-    if (not x.empty()) {
-        std::stringstream ss;
-        ss << "WHERE " << x.front().string();
-        return Expression(ss.str());
-    } else {
-        return x;
-    }
+    BRFC_ASSERT(x.size() == 1);
+
+    Expression e;
+    e.push_back("WHERE ");
+    e.push_back(x.front());
+    return e;
 }
 
 Expression
 DialectCompiler::group_by::operator()(const Expression& x) {
-    if (not x.empty()) {
-        std::stringstream ss;
-        ss << "GROUP BY " << join_to_str(x.begin(), x.end(), ", ");
-        return Expression(ss.str());
-    } else {
-        return x;
-    }
+    BRFC_ASSERT(x.size() >= 1);
+
+    Expression e;
+    e.push_back("GROUP BY ");
+    e.extend(join_with_str(x.begin(), x.end(), ", "));
+    return e;
 }
 
 Expression
 DialectCompiler::order_by::operator()(const Expression& x) {
-    if (not x.empty()) {
-        std::stringstream ss;
-        ss << "ORDER BY " << join_to_str(x.begin(), x.end(), ", ");
-        return Expression(ss.str());
-    } else {
-        return x;
-    }
+    BRFC_ASSERT(x.size() >= 1);
+
+    Expression e;
+    e.push_back("ORDER BY ");
+    e.extend(join_with_str(x.begin(), x.end(), ", "));
+    return e;
 }
 
 Expression
 DialectCompiler::order_dir::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() == 1);
     
-    std::stringstream ss;
-    ss << x.front().string() << " " << dir_;
-    return Expression(ss.str());
+    Expression e;
+    e.push_back(x.front());
+    e.push_back(Expression(" " + dir_));
+    return e;
 }
 
 Expression
@@ -316,7 +345,10 @@ DialectCompiler::offset::operator()(const Expression& x) {
 
 Expression
 DialectCompiler::select::operator()(const Expression& x) {
-    return Expression("SELECT " + join_to_str(x.begin(), x.end(), " "));
+    Expression e;
+    e.push_back(Expression("SELECT "));
+    e.extend(join_with_str(x.begin(), x.end(), " "));
+    return e;
 }
 
 Expression
@@ -328,23 +360,26 @@ DialectCompiler::insert_columns::operator()(const Expression& x) {
 
 Expression
 DialectCompiler::insert_values::operator()(const Expression& x) {
-    std::stringstream ss;
-    ss << "VALUES (" << join_to_str(x.begin(), x.end(), ", ") << ")";
-    return Expression(ss.str());
+    return Listcons().string("VALUES (")
+                     .extend(join_with_str(x.begin(), x.end(), ", "))
+                     .string(")")
+                     .get();
 }
 
 Expression
 DialectCompiler::returning::operator()(const Expression& x) {
-    std::stringstream ss;
-    ss << "RETURNING " << join_to_str(x.begin(), x.end(), ", ");
-    return Expression(ss.str());
+    Expression e;
+    e.push_back(Expression("RETURNING "));
+    e.extend(join_with_str(x.begin(), x.end(), ", "));
+    return e;
 }
 
 Expression
 DialectCompiler::insert::operator()(const Expression& x) {
-    std::stringstream ss;
-    ss << "INSERT INTO " << join_to_str(x.begin(), x.end(), " ");
-    return Expression(ss.str());
+    Expression e;
+    e.push_back(Expression("INSERT INTO "));
+    e.extend(join_with_str(x.begin(), x.end(), " "));
+    return e;
 }
 
 Expression
@@ -352,6 +387,41 @@ DialectCompiler::table::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() == 1);
 
     return Expression(x.front().string());
+}
+
+Expression
+DialectCompiler::compact_str(const Expression& x) {
+    Expression e;
+    std::string s;
+    Expression::const_iterator it = x.begin();
+    for ( ; it != x.end(); ++it) {
+        if (it->is_string()) {
+            s += it->string();
+        } else if (it->is_list()) {
+            const Expression& l = compact_str(*it);
+            Expression::const_iterator li = l.begin();
+            for ( ; li != l.end(); ++li) {
+                if (li->is_string()) {
+                    s+= li->string();
+                } else {
+                    if (not s.empty()) {
+                        e.push_back(Expression(s));
+                        s.clear();
+                    }
+                    e.push_back(*li);
+                }
+            }
+        } else {
+            if (not s.empty()) {
+                e.push_back(Expression(s));
+                s.clear();
+            }
+            e.push_back(*it);
+        }
+    }
+    if (not s.empty())
+        e.push_back(Expression(s));
+    return e;
 }
 
 } // namespace sql

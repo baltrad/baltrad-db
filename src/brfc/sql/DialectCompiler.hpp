@@ -55,14 +55,12 @@ class DialectCompiler : public Compiler {
     };
 
     /**
-     * @brief compile binary operator to string form
-     *
-     * @post stack contains 'lhs op rhs'
+     * @brief binary operator
      */
     struct binop : public proc {
         binop(const std::string& op) : op_(op) { }
-
-        expr::Expression operator()(const expr::Expression& x);
+        
+        expr::Expression operator()(const expr::Expression& args);
 
         std::string op_;
     };
@@ -222,6 +220,8 @@ class DialectCompiler : public Compiler {
     struct table : public proc {
         expr::Expression operator()(const expr::Expression& x);
     };
+
+    expr::Expression compact_str(const expr::Expression& x);
   
   protected:
     /**
