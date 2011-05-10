@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
 
-
-#include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Result.hpp>
 

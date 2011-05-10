@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/smart_ptr.hpp>
 
+#include <brfc/sql/Compiler.hpp>
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Result.hpp>
@@ -84,7 +85,7 @@ Connection::execute(const Select& stmt) {
 }
 
 Result*
-Connection::execute(const Expression& stmt, const BindMap& binds) {
+Connection::execute(const Expression& stmt, const BindMap_t& binds) {
     return execute(replace_binds(stmt, binds));
 }
 
@@ -113,7 +114,7 @@ Connection::execute(const std::string& stmt) {
 namespace {
 
 std::string
-get_bind(const Dialect& d, const Expression& x, const BindMap& binds) {
+get_bind(const Dialect& d, const Expression& x, const Connection::BindMap_t& binds) {
     BRFC_ASSERT(x.is_list());
     Expression::const_iterator it = x.begin();
     BRFC_ASSERT(it->is_symbol());
@@ -121,8 +122,9 @@ get_bind(const Dialect& d, const Expression& x, const BindMap& binds) {
     ++it;
     BRFC_ASSERT(it != x.end());
     BRFC_ASSERT(it->is_string());
-
-    const Expression& e = binds.has(it->string()) ? binds.get(it->string()) : Expression();
+    
+    Connection::BindMap_t::const_iterator b_it = binds.find(it->string());
+    const Expression& e = b_it != binds.end() ? b_it->second  : Expression();
 
     return d.literal_to_string(e);
 }
@@ -131,7 +133,7 @@ get_bind(const Dialect& d, const Expression& x, const BindMap& binds) {
 
 std::string
 Connection::replace_binds(const Expression& stmt,
-                          const BindMap& binds) const {
+                          const BindMap_t& binds) const {
     BRFC_ASSERT(stmt.is_list());
     
     std::stringstream ss;

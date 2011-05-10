@@ -20,17 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_CONNECTION_HPP
 #define BRFC_SQL_CONNECTION_HPP
 
+#include <map>
+
 #include <boost/noncopyable.hpp>
 
-#include <brfc/sql/BindMap.hpp>
-#include <brfc/sql/Compiler.hpp>
+#include <brfc/expr/Expression.hpp>
 
 namespace brfc {
-
-namespace expr {
-    class Expression;
-}
-
 namespace sql {
 
 class Compiler;
@@ -44,6 +40,8 @@ class Select;
  */
 class Connection : boost::noncopyable {
   public:
+    typedef std::map<std::string, expr::Expression> BindMap_t;
+
     virtual ~Connection();
 
     /**
@@ -126,7 +124,7 @@ class Connection : boost::noncopyable {
      * @note caller takes ownership of the result
      * @sa do_execute
      */
-    Result* execute(const expr::Expression& stmt, const BindMap& binds=BindMap());
+    Result* execute(const expr::Expression& stmt, const BindMap_t& binds=BindMap_t());
 
     Result* execute(const std::string& stmt);
 
@@ -159,7 +157,7 @@ class Connection : boost::noncopyable {
     }
 
     std::string replace_binds(const expr::Expression& stmt,
-                              const BindMap& binds) const;
+                              const BindMap_t& binds) const;
 
   protected:
     // allow access to protected virtuals

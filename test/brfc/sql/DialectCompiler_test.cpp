@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Listcons.hpp>
 
-#include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/DialectCompiler.hpp>
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>

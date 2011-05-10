@@ -47,7 +47,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Source.hpp>
 
 #include <brfc/sql/BasicConnectionPool.hpp>
-#include <brfc/sql/BindMap.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/DefaultConnectionCreator.hpp>
 #include <brfc/sql/Result.hpp>
@@ -204,8 +203,9 @@ RelationalDatabase::do_remove(const FileEntry& entry) {
     Expression stmt = Listcons().string("DELETE FROM bdb_files WHERE uuid = ")
                                 .append(xpr.bind("uuid"))
                                 .get();
-    sql::BindMap binds;
-    binds.add(":uuid", expr::Expression(entry.uuid()));
+    sql::Connection::BindMap_t binds;
+    binds["uuid"] = expr::Expression(entry.uuid());
+
     shared_ptr<sql::Connection> c = conn();
     auto_ptr<sql::Result> r (c->execute(stmt, binds));
     return r->affected_rows();

@@ -41,6 +41,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Scalar.hpp>
 #include <brfc/oh5/PhysicalFile.hpp>
 
+#include <brfc/sql/Compiler.hpp>
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Select.hpp>
@@ -174,10 +175,10 @@ RdbHelper::compile_insert_node_query() {
     if (dialect().has_feature(sql::Dialect::RETURNING))
         qry.returning(m::nodes::column("id"));
 
-    qry.value("parent_id", sql_.bind(":parent_id"));
-    qry.value("type", sql_.bind(":type"));
-    qry.value("file_id", sql_.bind(":file_id"));
-    qry.value("name", sql_.bind(":name"));
+    qry.value("parent_id", sql_.bind("parent_id"));
+    qry.value("type", sql_.bind("type"));
+    qry.value("file_id", sql_.bind("file_id"));
+    qry.value("name", sql_.bind("name"));
 
     insert_node_qry_ = conn().compiler().compile(qry.expression());
 }
@@ -187,16 +188,16 @@ RdbHelper::insert_node(long long file_id, oh5::Node& node) {
     if (not insert_node_qry_)
         compile_insert_node_query();
     
-    sql::BindMap binds;
+    sql::Connection::BindMap_t binds;
     Expression parent_id;
     const oh5::Node* parent = node.parent();
     if (parent) {
         parent_id = Expression(backend(*parent).id(*parent));
     }
-    binds.add(":parent_id", parent_id);
-    binds.add(":type", Expression(node_sql_type(node)));
-    binds.add(":file_id", Expression(file_id));
-    binds.add(":name", Expression(node.name()));
+    binds["parent_id"] = parent_id;
+    binds["type"] = Expression(node_sql_type(node));
+    binds["file_id"] = Expression(file_id);
+    binds["name"] = Expression(node.name());
 
     scoped_ptr<sql::Result> result(conn().execute(insert_node_qry_, binds));
 
@@ -214,13 +215,13 @@ void
 RdbHelper::compile_insert_attr_query() {
     sql::Insert qry(m::attrvals::name());
 
-    qry.value("node_id", sql_.bind(":node_id"));
-    qry.value("value_str", sql_.bind(":value_str"));
-    qry.value("value_int", sql_.bind(":value_int"));
-    qry.value("value_double", sql_.bind(":value_double"));
-    qry.value("value_bool", sql_.bind(":value_bool"));
-    qry.value("value_date", sql_.bind(":value_date"));
-    qry.value("value_time", sql_.bind(":value_time"));
+    qry.value("node_id", sql_.bind("node_id"));
+    qry.value("value_str", sql_.bind("value_str"));
+    qry.value("value_int", sql_.bind("value_int"));
+    qry.value("value_double", sql_.bind("value_double"));
+    qry.value("value_bool", sql_.bind("value_bool"));
+    qry.value("value_date", sql_.bind("value_date"));
+    qry.value("value_time", sql_.bind("value_time"));
     
     insert_attr_qry_ = conn().compiler().compile(qry.expression());
 }
@@ -230,23 +231,23 @@ RdbHelper::insert_attribute(oh5::Attribute& attr) {
     if (not insert_attr_qry_)
         compile_insert_attr_query();
     
-    sql::BindMap binds;
-    binds.add(":node_id", Expression(backend(attr).id(attr)));
-    binds.add(attr_sql_column(attr), attr_sql_value(attr));
+    sql::Connection::BindMap_t binds;
+    binds["node_id"] = Expression(backend(attr).id(attr));
+    binds[attr_sql_column(attr)] = attr_sql_value(attr);
     if (attr.value().type() == oh5::Scalar::STRING) {
         try {
             bool val = attr.value().to_bool();
-            binds.add(":value_bool", Expression(val));
+            binds["value_bool"] = Expression(val);
         } catch (const value_error&) { /* pass */ }
 
         try {
             Date date = attr.value().to_date();
-            binds.add(":value_date", Expression(date));
+            binds["value_date"] = Expression(date);
         } catch (const value_error&) { /* pass */ }
 
         try {
             Time time = attr.value().to_time();
-            binds.add(":value_time", Expression(time));
+            binds["value_time"] = Expression(time);
         } catch (const value_error&) { /* pass */ }
     }
 
@@ -512,16 +513,16 @@ RdbHelper::update_source(const oh5::Source& source) {
                                     .string(" WHERE id = ")
                                     .append(sql_.bind("id"))
                                     .get();
-        sql::BindMap binds;
-        binds.add(":name", Expression(source.get("_name")));
-        binds.add(":id", Expression(id));
+        sql::Connection::BindMap_t binds;
+        binds["name"] = Expression(source.get("_name"));
+        binds["id"] = Expression(id);
         r.reset(conn().execute(stmt, binds));
 
         stmt = Listcons().string("DELETE FROM bdb_source_kvs WHERE source_id =")
                          .append(sql_.bind("id"))
                          .get();
         binds.clear();
-        binds.add(":id", Expression(id));
+        binds["id"] = Expression(id);
         r.reset(conn().execute(stmt, binds));
     
         BOOST_FOREACH(const std::string& key, source.keys()) {
@@ -544,8 +545,8 @@ RdbHelper::remove_source(const oh5::Source& source) {
     Expression stmt = Listcons().string("DELETE FROM bdb_sources WHERE id=")
                                 .append(sql_.bind("id"))
                                 .get();
-    sql::BindMap binds;
-    binds.add(":id", Expression(boost::lexical_cast<int>(source.get("_id"))));
+    sql::Connection::BindMap_t binds;
+    binds["id"] = Expression(boost::lexical_cast<int>(source.get("_id")));
     scoped_ptr<sql::Result> r(conn().execute(stmt, binds));
     if (not r->affected_rows())
         throw lookup_error("source not stored in database");
