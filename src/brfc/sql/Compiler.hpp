@@ -30,15 +30,23 @@ namespace sql {
  */
 class Compiler {
   public:
+    /**
+     * @brief compile @c x to sql form
+     * @return list expression
+     *
+     * the return value is a list that contains string expressions and
+     * expressions in form `(bind "bindname")` that are placeholders for
+     * literals to be bound later.
+     */
     expr::Expression compile(const expr::Expression& x) {
         return do_compile(x);
     }
-
+    
     virtual ~Compiler() { }
 
-  protected:
+  private:
     /**
-     * @brief compile expression/statement to string form
+     * @brief compile() implementaion
      */
     virtual expr::Expression do_compile(const expr::Expression& x) = 0;
 };
