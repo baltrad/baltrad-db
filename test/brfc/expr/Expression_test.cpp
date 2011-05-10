@@ -270,5 +270,21 @@ TEST(expr_Expression_test, test_extend) {
     EXPECT_EQ(l, e);
 }
 
+TEST(expr_Expression_test, test_join) {
+    Expression e;
+    e.push_back(Expression(1));
+    e.push_back(Expression(2));
+    e.push_back(Expression(3));
+
+    Expression sep(0);
+
+    Expression out;
+    e.push_back(Expression(1));
+    e.push_back(Expression(0));
+    e.push_back(Expression(2));
+    e.push_back(Expression(0));
+    e.push_back(Expression(3));
+}
+
 } // namespace expr
 } // namespace brfc

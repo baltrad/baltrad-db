@@ -269,6 +269,15 @@ std::ostream& operator<<(std::ostream& out, const Expression& x);
 // define so that gtest doesn't try to print Expression as a container
 void PrintTo(const Expression& x, ::std::ostream* os);
 
+/**
+ * @brief insert @c sep between elements of [@c first, @c last)
+ * @return the formed list
+ */
+Expression
+join(Expression::const_iterator first,
+     Expression::const_iterator last,
+     const Expression& sep);
+
 } // namespace expr
 } // namespace brfc
 

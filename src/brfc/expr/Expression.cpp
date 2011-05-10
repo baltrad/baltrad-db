@@ -409,5 +409,19 @@ void PrintTo(const Expression& x, ::std::ostream* os) {
   *os << x;
 }
 
+Expression
+join(Expression::const_iterator first,
+     Expression::const_iterator last,
+     const Expression& sep) {
+    Expression e;
+    while (first != last) {
+        e.push_back(*first);
+        ++first;
+        if (first != last)
+            e.push_back(sep);
+    }
+    return e;
+}
+
 } // namespace expr
 } // namespace brfc

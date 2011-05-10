@@ -169,27 +169,13 @@ join_to_str(Expression::const_iterator first,
     return ss.str();
 }
 
-Expression
-join_with_str(Expression::const_iterator first,
-              Expression::const_iterator last,
-              const std::string& sep) {
-    Expression e;
-    while (first != last) {
-        e.push_back(*first);
-        ++first;
-        if (first != last)
-            e.push_back(Expression(sep));
-    }
-    return e;
-}
-
 } // namespace anonymous
 
 Expression
 DialectCompiler::function::operator()(const Expression& x) {
     Expression e;
     e.push_back(Expression(name_ + "("));
-    e.extend(join_with_str(x.begin(), x.end(), ", "));
+    e.extend(expr::join(x.begin(), x.end(), Expression(", ")));
     e.push_back(Expression(")"));
     return e;
 }
@@ -263,7 +249,7 @@ DialectCompiler::distinct::operator()(const Expression&) {
 Expression
 DialectCompiler::select_columns::operator()(const Expression& x) {
     Expression e;
-    e.extend(join_with_str(x.begin(), x.end(), ", "));
+    e.extend(expr::join(x.begin(), x.end(), Expression(", ")));
     return e;
 }
 
@@ -271,7 +257,7 @@ Expression
 DialectCompiler::from_clause::operator()(const Expression& x) {
     Expression e;
     e.push_back(Expression("FROM "));
-    e.extend(join_with_str(x.begin(), x.end(), " "));
+    e.extend(expr::join(x.begin(), x.end(), Expression(" ")));
     return e;
 }
 
@@ -291,7 +277,7 @@ DialectCompiler::group_by::operator()(const Expression& x) {
 
     Expression e;
     e.push_back(Expression("GROUP BY "));
-    e.extend(join_with_str(x.begin(), x.end(), ", "));
+    e.extend(expr::join(x.begin(), x.end(), Expression(", ")));
     return e;
 }
 
@@ -301,7 +287,7 @@ DialectCompiler::order_by::operator()(const Expression& x) {
 
     Expression e;
     e.push_back(Expression("ORDER BY "));
-    e.extend(join_with_str(x.begin(), x.end(), ", "));
+    e.extend(expr::join(x.begin(), x.end(), Expression(", ")));
     return e;
 }
 
@@ -333,7 +319,7 @@ Expression
 DialectCompiler::select::operator()(const Expression& x) {
     Expression e;
     e.push_back(Expression("SELECT "));
-    e.extend(join_with_str(x.begin(), x.end(), " "));
+    e.extend(expr::join(x.begin(), x.end(), Expression(" ")));
     return e;
 }
 
@@ -347,7 +333,7 @@ DialectCompiler::insert_columns::operator()(const Expression& x) {
 Expression
 DialectCompiler::insert_values::operator()(const Expression& x) {
     return Listcons().string("VALUES (")
-                     .extend(join_with_str(x.begin(), x.end(), ", "))
+                     .extend(expr::join(x.begin(), x.end(), Expression(", ")))
                      .string(")")
                      .get();
 }
@@ -356,7 +342,7 @@ Expression
 DialectCompiler::returning::operator()(const Expression& x) {
     Expression e;
     e.push_back(Expression("RETURNING "));
-    e.extend(join_with_str(x.begin(), x.end(), ", "));
+    e.extend(expr::join(x.begin(), x.end(), Expression(", ")));
     return e;
 }
 
@@ -364,7 +350,7 @@ Expression
 DialectCompiler::insert::operator()(const Expression& x) {
     Expression e;
     e.push_back(Expression("INSERT INTO "));
-    e.extend(join_with_str(x.begin(), x.end(), " "));
+    e.extend(expr::join(x.begin(), x.end(), Expression(" ")));
     return e;
 }
 
