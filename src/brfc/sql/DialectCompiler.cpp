@@ -106,7 +106,10 @@ DialectCompiler::binop::operator()(const Expression& expr) {
     const Expression& lhs = *it;
     ++it;
     const Expression& rhs = *it;
-    return Listcons().append(lhs).string(" " + op_ + " ").append(rhs).get();
+    return Listcons().string("(").append(lhs)
+                     .string(" " + op_ + " ")
+                     .append(rhs).string(")")
+                     .get();
 }
 
 Expression

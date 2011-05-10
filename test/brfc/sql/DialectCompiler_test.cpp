@@ -57,7 +57,7 @@ struct sql_DialectCompiler_test: public testing::Test {
 
 TEST_F(sql_DialectCompiler_test, test_simple) {
     Expression expr = xpr.lt(xpr.int64_(1), xpr.int64_(2));
-    Expression out = Listcons().string("1 < 2").get();
+    Expression out = Listcons().string("(1 < 2)").get();
 
     EXPECT_EQ(out, compiler.compile(expr));
 }
@@ -71,7 +71,7 @@ TEST_F(sql_DialectCompiler_test, test_not) {
 
 TEST_F(sql_DialectCompiler_test, test_between) {
     Expression expr = xpr.between(xpr.int64_(1), xpr.int64_(0), xpr.int64_(2));
-    Expression out = Listcons().string("0 <= 1 AND 1 <= 2").get();
+    Expression out = Listcons().string("((0 <= 1) AND (1 <= 2))").get();
 
     EXPECT_EQ(out, compiler.compile(expr));
 }
@@ -114,7 +114,7 @@ TEST_F(sql_DialectCompiler_test, test_aliased_select) {
 TEST_F(sql_DialectCompiler_test, test_basic_join) {
     FromClause f(xpr.table("t1"));
     f.join(xpr.table("t2"), xpr.eq(xpr.column("t1", "c1"), xpr.column("t2", "c2")));
-    Expression out = Listcons().string("FROM t1 JOIN t2 ON t1.c1 = t2.c2").get();
+    Expression out = Listcons().string("FROM t1 JOIN t2 ON (t1.c1 = t2.c2)").get();
 
     EXPECT_EQ(out, compiler.compile(f.expression()));
 }
@@ -122,7 +122,7 @@ TEST_F(sql_DialectCompiler_test, test_basic_join) {
 TEST_F(sql_DialectCompiler_test, test_outerjoin) {
     FromClause f(xpr.table("t1"));
     f.outerjoin(xpr.table("t2"), xpr.eq(xpr.column("t1", "c1"), xpr.column("t2", "c2")));
-    Expression out = Listcons().string("FROM t1 LEFT JOIN t2 ON t1.c1 = t2.c2").get();
+    Expression out = Listcons().string("FROM t1 LEFT JOIN t2 ON (t1.c1 = t2.c2)").get();
 
     EXPECT_EQ(out, compiler.compile(f.expression()));
 }
@@ -133,7 +133,7 @@ TEST_F(sql_DialectCompiler_test, test_join_with_alias) {
         xpr.alias(xpr.table("t2"), "a"),
         xpr.eq(xpr.column("t1", "c1"), xpr.column("a", "c2"))
     );
-    Expression out = Listcons().string("FROM t1 JOIN t2 AS a ON t1.c1 = a.c2").get();
+    Expression out = Listcons().string("FROM t1 JOIN t2 AS a ON (t1.c1 = a.c2)").get();
 
     EXPECT_EQ(out, compiler.compile(f.expression()));
 }
@@ -150,7 +150,7 @@ TEST_F(sql_DialectCompiler_test, test_select) {
     select.what(xpr.column("t1", "c2"));
     select.what(xpr.column("t2", "c3"));
     select.where(xpr.lt(col, xpr.int64_(1)));
-    Expression out = Listcons().string("SELECT t1.c1, t1.c2, t2.c3 FROM t1 JOIN t2 ON t1.c1 = t2.c2 WHERE t1.c1 < 1").get();
+    Expression out = Listcons().string("SELECT t1.c1, t1.c2, t2.c3 FROM t1 JOIN t2 ON (t1.c1 = t2.c2) WHERE (t1.c1 < 1)").get();
 
     EXPECT_EQ(out, compiler.compile(select.expression()));
 }
@@ -223,7 +223,7 @@ TEST_F(sql_DialectCompiler_test, test_factory_or_) {
     Expression e1 = xpr.eq(xpr.column("t1", "c1"), xpr.int64_(1));
     Expression e2 = xpr.eq(xpr.column("t1", "c1"), xpr.int64_(2));
     Expression e3 = xpr.or_(e1, e2);
-    Expression out = Listcons().string("t1.c1 = 1 OR t1.c1 = 2").get();
+    Expression out = Listcons().string("((t1.c1 = 1) OR (t1.c1 = 2))").get();
 
     EXPECT_EQ(out, compiler.compile(e3));
 }
@@ -232,7 +232,9 @@ TEST_F(sql_DialectCompiler_test, test_proc_binop) {
     DialectCompiler::binop proc("op");
     
     Expression in = Listcons().int64(1).int64(2).get();
-    Expression out = Listcons().int64(1).string(" op ").int64(2).get();
+    Expression out = Listcons().string("(").int64(1)
+                               .string(" op ")
+                               .int64(2).string(")").get();
 
     EXPECT_EQ(out, proc(in));
 }
