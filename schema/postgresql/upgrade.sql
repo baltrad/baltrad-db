@@ -14,6 +14,21 @@ SELECT
     ELSE make_plpgsql()
   END;
 
+CREATE OR REPLACE FUNCTION restart_seq_with_max(table_name TEXT, column_name TEXT)
+ RETURNS BIGINT AS $$
+DECLARE
+ maxval BIGINT;
+BEGIN
+ EXECUTE 'SELECT COALESCE(MAX(' || column_name || '), 0) + 1 FROM '
+         || table_name INTO maxval;
+ EXECUTE 'ALTER SEQUENCE '
+         || table_name || '_' || column_name || '_seq'
+         || ' RESTART WITH '
+         || maxval;
+ RETURN maxval;
+END;
+$$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION bdbupgrade_add_size_to_bdb_file_content() RETURNS VOID AS $$
 BEGIN
@@ -105,6 +120,7 @@ SELECT bdbupgrade_add_size_to_bdb_file_content();
 SELECT bdbupgrade_del_bdb_nodes_indexes();
 SELECT bdbupgrade_add_bdb_nodes_indexes();
 SELECT bdbupgrade_add_bdb_files_indexes();
+SELECT restart_seq_with_max('bdb_sources', 'id');
 SELECT bdbupgrade_add_source_dkvir();
 
 DROP FUNCTION bdbupgrade_add_size_to_bdb_file_content();
@@ -112,4 +128,5 @@ DROP FUNCTION bdbupgrade_del_bdb_nodes_indexes();
 DROP FUNCTION bdbupgrade_add_bdb_nodes_indexes();
 DROP FUNCTION bdbupgrade_add_bdb_files_indexes();
 DROP FUNCTION bdbupgrade_add_source_dkvir();
+DROP FUNCTION restart_seq_with_max(TEXT, TEXT);
 DROP FUNCTION make_plpgsql();
