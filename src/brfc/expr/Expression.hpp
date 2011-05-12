@@ -178,6 +178,7 @@ class Expression {
 
     size_t size() const;
     bool empty() const;
+    bool contains(const Expression& other) const;
 
     const Expression& front() const;
     void pop_front();

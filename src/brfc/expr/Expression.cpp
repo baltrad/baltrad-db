@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Expression.hpp>
 
+#include <algorithm>
 #include <ostream>
 
 #include <brfc/assert.hpp>
@@ -230,6 +231,13 @@ Expression::empty() const {
     BRFC_ASSERT(is_list());
     const list_t& l = boost::get<list_t>(value_);
     return l.empty();
+}
+
+bool
+Expression::contains(const Expression& other) const {
+    BRFC_ASSERT(is_list());
+    const list_t& l = boost::get<list_t>(value_);
+    return std::find(l.begin(), l.end(), other) != l.end();
 }
 
 const Expression&

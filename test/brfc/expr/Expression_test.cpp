@@ -286,5 +286,15 @@ TEST(expr_Expression_test, test_join) {
     e.push_back(Expression(3));
 }
 
+TEST(expr_Expression_test, test_contains) {
+    Expression e;
+    e.push_back(Expression(1));
+    e.push_back(Expression("asd"));
+
+    EXPECT_TRUE(e.contains(Expression(1)));
+    EXPECT_TRUE(e.contains(Expression("asd")));
+    EXPECT_FALSE(e.contains(Expression()));
+}
+
 } // namespace expr
 } // namespace brfc
