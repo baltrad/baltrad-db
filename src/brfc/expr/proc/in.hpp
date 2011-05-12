@@ -24,10 +24,14 @@ namespace expr {
 
 class Expression;
 
+namespace proc {
+
+
 struct in {
     Expression operator()(const Expression& args) const;
 };
 
+} // namespace proc
 } // namespace expr
 } // namespace brfc
 

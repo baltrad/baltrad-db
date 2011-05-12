@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 namespace expr {
+namespace proc {
 
 Expression
 in::operator()(const Expression& args) const{
@@ -35,13 +36,9 @@ in::operator()(const Expression& args) const{
     BRFC_ASSERT(not lhs.is_list());
     BRFC_ASSERT(rhs.is_list());
 
-    it = rhs.begin();
-    for ( ; it != rhs.end(); ++it) {
-        if (lhs == *it)
-            return Expression(true);
-    }
-    return Expression(false);
+    return Expression(rhs.contains(lhs));
 }
 
+} // namespace proc
 } // namespace expr
 } // namespace brfc
