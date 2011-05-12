@@ -47,6 +47,18 @@ binary_dispatch(const Function& func, const Expression& args) {
     return expr::apply_visitor(func, arg1, arg2);
 }
 
+template<typename Function>
+typename Function::result_type
+binary_call(const Function& func, const Expression& args) {
+    BRFC_ASSERT(args.is_list());
+    BRFC_ASSERT(args.size() == 2);
+    expr::Expression::const_iterator it = args.begin();
+    const Expression& arg1 = *it;
+    ++it;
+    const Expression& arg2 = *it;
+    return func(arg1, arg2);
+}
+
 } // namespace proc
 } // namespace expr
 } // namespace brfc
