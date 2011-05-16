@@ -53,8 +53,8 @@ TEST(expr_proc_unary_list_test, test_call_list_list) {
     binary_list p(cb);
 
     Expression in_l = Listcons().int64(10).int64(40).get();
-    Expression in_r = Listcons().int64(5).int64(5).get();
-    Expression out = Listcons().int64(2).int64(8).get();
+    Expression in_r = Listcons().int64(5).int64(2).get();
+    Expression out = Listcons().int64(2).int64(5).int64(8).int64(20).get();
 
     EXPECT_EQ(out, p(Listcons().append(in_l).append(in_r).get()));
 }

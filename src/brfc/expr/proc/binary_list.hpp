@@ -72,10 +72,10 @@ struct binary_list {
     /**
      * @param lhs a list expression
      * @param rhs a list expression
-     * @return list of results applying proc to elements in lhs and
-     *         elements in rhs
+     * @return list of results applying proc to cartesian product of
+     *         lhs and rhs
      *
-     * for each element r in rhs, and l in lhs call proc(l, r)
+     * for each element l in lhs, for each element r in rhs, call proc(l, r)
      */
     Expression both_list(const Expression& lhs,
                          const Expression& rhs) const;

@@ -84,13 +84,14 @@ binary_list::both_list(const Expression& lhs,
                        const Expression& rhs) const {
     BRFC_ASSERT(lhs.is_list());
     BRFC_ASSERT(rhs.is_list());
-    BRFC_ASSERT(lhs.size() == rhs.size());
 
     Expression result;
     Expression::const_iterator lit = lhs.begin();
-    Expression::const_iterator rit = rhs.begin();
-    for ( ; lit != lhs.end(); ++lit, ++rit) {
-        result.push_back(proc_(Listcons().append(*lit).append(*rit).get()));
+    Expression::const_iterator rit;
+    for ( ; lit != lhs.end(); ++lit) {
+        for (rit = rhs.begin(); rit != rhs.end(); ++rit) {
+            result.push_back(proc_(Listcons().append(*lit).append(*rit).get()));
+        }
     }
     return result;
 }
