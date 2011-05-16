@@ -14,6 +14,21 @@ SELECT
     ELSE make_plpgsql()
   END;
 
+CREATE OR REPLACE FUNCTION restart_seq_with_max(table_name TEXT, column_name TEXT)
+ RETURNS BIGINT AS $$
+DECLARE
+ maxval BIGINT;
+BEGIN
+ EXECUTE 'SELECT COALESCE(MAX(' || column_name || '), 0) + 1 FROM '
+         || table_name INTO maxval;
+ EXECUTE 'ALTER SEQUENCE '
+         || table_name || '_' || column_name || '_seq'
+         || ' RESTART WITH '
+         || maxval;
+ RETURN maxval;
+END;
+$$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION bdbupgrade_add_size_to_bdb_file_content() RETURNS VOID AS $$
 BEGIN
@@ -87,13 +102,31 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION bdbupgrade_add_source_dkvir() RETURNS VOID AS $$
+DECLARE
+  src_id integer;
+BEGIN
+  SELECT id INTO src_id FROM bdb_sources WHERE name = 'dkvir';
+  IF NOT FOUND THEN
+    RAISE NOTICE 'adding source dkvir';
+    INSERT INTO bdb_sources(name) VALUES ('dkvir') RETURNING id INTO src_id;
+    INSERT INTO bdb_source_kvs(source_id, key, value) VALUES (src_id, 'PLC', 'Virring');
+    INSERT INTO bdb_source_kvs(source_id, key, value) VALUES (src_id, 'WMO', '06103');
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 SELECT bdbupgrade_add_size_to_bdb_file_content();
 SELECT bdbupgrade_del_bdb_nodes_indexes();
 SELECT bdbupgrade_add_bdb_nodes_indexes();
 SELECT bdbupgrade_add_bdb_files_indexes();
+SELECT restart_seq_with_max('bdb_sources', 'id');
+SELECT bdbupgrade_add_source_dkvir();
 
 DROP FUNCTION bdbupgrade_add_size_to_bdb_file_content();
 DROP FUNCTION bdbupgrade_del_bdb_nodes_indexes();
 DROP FUNCTION bdbupgrade_add_bdb_nodes_indexes();
 DROP FUNCTION bdbupgrade_add_bdb_files_indexes();
+DROP FUNCTION bdbupgrade_add_source_dkvir();
+DROP FUNCTION restart_seq_with_max(TEXT, TEXT);
 DROP FUNCTION make_plpgsql();
