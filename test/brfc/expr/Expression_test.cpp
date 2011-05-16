@@ -258,6 +258,7 @@ TEST(expr_Expression_test, test_apply_visitor_noncopyable_const_visitor) {
 TEST(expr_Expression_test, test_bool_conversion) {
     EXPECT_FALSE(Expression());
     EXPECT_TRUE(Expression(1));
+    EXPECT_FALSE(Expression(false));
 }
 
 TEST(expr_Expression_test, test_extend) {
