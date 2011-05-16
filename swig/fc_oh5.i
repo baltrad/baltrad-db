@@ -28,12 +28,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/oh5/Scalar.hpp>
     #include <brfc/oh5/Attribute.hpp>
     #include <brfc/oh5/File.hpp>
+    #include <brfc/oh5/FileMatcher.hpp>
     #include <brfc/oh5/PhysicalFile.hpp>
     #include <brfc/oh5/Group.hpp>
     #include <brfc/oh5/Source.hpp>
 %}
 
 %import "fc.i"
+%import "fc_expr.i"
 
 // Enable the JNI class to load the required native library.
 %pragma(java) jniclasscode=%{
@@ -154,9 +156,17 @@ SWIG_JAVABODY_METHODS(public, public, brfc::oh5::File);
  */
 SWIG_JAVABODY_METHODS(public, public, brfc::oh5::PhysicalFile);
 
+/***
+ * brfc::oh5::FileMatcher
+ */
+%typemap(javaimports) brfc::oh5::FileMatcher %{
+    import eu.baltrad.fc.expr.Expression;
+%}
+
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.Time;
+    import eu.baltrad.fc.expr.Expression;
 %}
 
 %include <brfc/oh5/Scalar.hpp>
@@ -165,6 +175,7 @@ SWIG_JAVABODY_METHODS(public, public, brfc::oh5::PhysicalFile);
 %include <brfc/oh5/Attribute.hpp>
 %include <brfc/oh5/Source.hpp>
 %include <brfc/oh5/File.hpp>
+%include <brfc/oh5/FileMatcher.hpp>
 %include <brfc/oh5/PhysicalFile.hpp>
 
 /* vim:filetype=cpp:et:ts=4:sw=4:
