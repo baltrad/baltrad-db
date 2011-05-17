@@ -28,17 +28,17 @@ import eu.baltrad.fc.NullStorage;
 import eu.baltrad.fc.Time;
 import eu.baltrad.fc.Variant;
 
-import eu.baltrad.fc.db.Database;
-import eu.baltrad.fc.db.FileEntry;
-import eu.baltrad.fc.db.FileQuery;
+import eu.baltrad.fc.Database;
+import eu.baltrad.fc.FileEntry;
+import eu.baltrad.fc.FileQuery;
 
-import eu.baltrad.fc.oh5.Oh5File;
-import eu.baltrad.fc.oh5.Oh5Source;
-import eu.baltrad.fc.oh5.hl.HlFile;
+import eu.baltrad.fc.Oh5File;
+import eu.baltrad.fc.Oh5Source;
+import eu.baltrad.fc.HlFile;
 
-import eu.baltrad.fc.test.TestRDB;
-import eu.baltrad.fc.test.TempH5File;
-import eu.baltrad.fc.test.TempDir;
+import eu.baltrad.fc.TestRDB;
+import eu.baltrad.fc.TempH5File;
+import eu.baltrad.fc.TempDir;
 
 import junit.framework.TestCase;
 

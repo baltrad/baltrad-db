@@ -16,13 +16,13 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-package eu.baltrad.fc.oh5;
+package eu.baltrad.fc;
 
 import java.util.List;
 
 import junit.framework.TestCase;
 
-public class TestSource extends TestCase {
+public class Oh5SourceTest extends TestCase {
 
   public void test_keys() {
     Oh5Source src = Oh5Source.from_string("key1:value1,key2:value2");

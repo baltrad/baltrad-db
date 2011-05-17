@@ -18,14 +18,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.baltrad.fc;
 
-import eu.baltrad.fc.test.fc_test;
+import eu.baltrad.fc.fc;
 
 import junit.framework.TestCase;
 
 public class StdExceptionTest extends TestCase {
   public void test_std_exception_thrown_as_RuntimeException() {
     try {
-      fc_test.throw_std_exception();
+      fc.throw_std_exception();
       fail("expected RuntimeException");
     } catch (RuntimeException e) {
       // pass
