@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace fuse {
 
-FileFactory::FileFactory(db::Database* db,
+FileFactory::FileFactory(Database* db,
                          FileNamer* namer)
         : db_(db)
         , namer_(namer)
@@ -66,15 +66,15 @@ void
 FileFactory::do_update() {
     invalidate_all();
 
-    db::FileQuery qry;
+    FileQuery qry;
     if (not filter_.empty())
         qry.filter(filter_);
-    scoped_ptr<db::FileResult> result(database().execute(qry));
+    scoped_ptr<FileResult> result(database().execute(qry));
 
     EntryByUuid_t& es = entries_.get<by_uuid>();
     EntryByUuid_t::iterator iter;
     
-    scoped_ptr<db::FileEntry> fe;
+    scoped_ptr< ::brfc::FileEntry> fe;
     while (result->next()) {
         fe.reset(result->entry());
         const std::string& uuid = fe->uuid();
@@ -126,7 +126,7 @@ FileFactory::remove_invalid() {
 }
 
 shared_ptr<FileEntry>
-FileFactory::create_entry(const db::FileEntry& fe) {
+FileFactory::create_entry(const ::brfc::FileEntry& fe) {
     const std::string& name = namer().name(fe);
     return make_shared<FileEntry>(db_, fe, name);
 }

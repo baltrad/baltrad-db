@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/AttributeResult.hpp>
 
 namespace brfc {
-namespace db {
 
 class MockAttributeResult : public AttributeResult {
   public:
@@ -36,7 +35,6 @@ class MockAttributeResult : public AttributeResult {
     MOCK_CONST_METHOD1(do_value_at, Variant(unsigned int));
 };
 
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_MOCK_FILE_RESULT_HPP

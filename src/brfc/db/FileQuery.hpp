@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Expression.hpp>
 
 namespace brfc {
-namespace db {
 
 /**
  * @brief query against the database
@@ -104,7 +103,6 @@ class FileQuery {
     int skip_;
 };
 
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_FILE_QUERY_HPP

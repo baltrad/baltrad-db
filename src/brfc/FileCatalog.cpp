@@ -35,7 +35,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-FileCatalog::FileCatalog(db::Database* db, LocalStorage* storage)
+FileCatalog::FileCatalog(Database* db, LocalStorage* storage)
         : db_(0)
         , storage_(0) {
     this->database(db);
@@ -47,9 +47,9 @@ FileCatalog::~FileCatalog() {
 }
 
 void
-FileCatalog::database(db::Database* db) {
+FileCatalog::database(Database* db) {
     if (not db)
-        throw value_error("null db::Database");
+        throw value_error("null Database");
     db_ = db;
 }
 
@@ -71,15 +71,15 @@ FileCatalog::is_stored(const oh5::PhysicalFile& f) const {
     return db_->is_stored(f);
 }
 
-db::FileEntry*
+FileEntry*
 FileCatalog::store(const std::string& path) {
     oh5::hl::HlFile f(path);
     return store(f); 
 }
 
-db::FileEntry*
+FileEntry*
 FileCatalog::store(const oh5::PhysicalFile& file) {
-    auto_ptr<db::FileEntry> e(db_->store(file));
+    auto_ptr<FileEntry> e(db_->store(file));
     try {
         storage_->prestore(*e, file.path());
     } catch (const std::runtime_error& e) {
@@ -89,15 +89,15 @@ FileCatalog::store(const oh5::PhysicalFile& file) {
     return e.release();
 }
 
-db::FileEntry*
+FileEntry*
 FileCatalog::get_or_store(const std::string& path) {
     oh5::hl::HlFile f(path);
     return get_or_store(f);
 }
 
-db::FileEntry*
+FileEntry*
 FileCatalog::get_or_store(const oh5::PhysicalFile& file) {
-    auto_ptr<db::FileEntry> e(db_->get_or_store(file));
+    auto_ptr<FileEntry> e(db_->get_or_store(file));
     try {
         storage_->prestore(*e, file.path());
     } catch (const std::runtime_error& e) {
@@ -108,7 +108,7 @@ FileCatalog::get_or_store(const oh5::PhysicalFile& file) {
 }
 
 bool
-FileCatalog::remove(const db::FileEntry& entry) {
+FileCatalog::remove(const FileEntry& entry) {
     bool removed = db_->remove(entry);
     try {
         storage_->remove(entry);
@@ -121,7 +121,7 @@ FileCatalog::remove(const db::FileEntry& entry) {
 
 std::string
 FileCatalog::local_path_for_uuid(const std::string& uuid) {
-    auto_ptr<db::FileEntry> e(database().entry_by_uuid(uuid));
+    auto_ptr<FileEntry> e(database().entry_by_uuid(uuid));
     return storage().store(*e);
 }
 

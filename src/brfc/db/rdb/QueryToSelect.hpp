@@ -24,18 +24,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace sql {
-    class Select;
+    class AttributeMapper;
+    class AttributeQuery;
+    class FileQuery;
+
+    namespace sql {
+        class Select;
+    }
 }
 
-namespace db {
-
-class AttributeQuery;
-class FileQuery;
-
-namespace rdb {
-
-class AttributeMapper;
+namespace brfc {
 
 /**
  * @brief transform a query to sql::Select statement
@@ -80,8 +78,6 @@ class QueryToSelect {
 
 };
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_RDB_FILE_QUERY_TO_SELECT_HPP

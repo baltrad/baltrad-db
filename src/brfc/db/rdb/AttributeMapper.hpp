@@ -27,9 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace db {
-namespace rdb {
-
 /**
  * @brief Attribute mapping to database table/column
  */
@@ -117,8 +114,6 @@ class AttributeMapper {
     MappingMap mappings_;
 };
 
-} // namespace db
-} // namespace rdb
 } // namespace brfc
 
 #endif //BRFC_DB_RDB_ATTRIBUTE_MAPPER_HPP

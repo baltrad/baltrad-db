@@ -50,7 +50,7 @@ class DefaultFileNamer : public FileNamer {
      * use the name given by name(const oh5::File&), but inject the first group
      * of the uuid before the file extension.
      */
-    virtual std::string do_name(const db::FileEntry& entry) const;
+    virtual std::string do_name(const FileEntry& entry) const;
 };
 
 } // namespace brfc

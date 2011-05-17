@@ -53,8 +53,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Select.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 RelationalDatabase::RelationalDatabase(const Url& dsn)
         : creator_(new sql::DefaultConnectionCreator(dsn))
@@ -228,6 +226,4 @@ RelationalDatabase::do_remove_source(const oh5::Source& source) {
     RdbHelper(conn()).remove_source(source);
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/PhysicalFile.hpp>
 
 namespace brfc {
-namespace db {
 
 class MockDatabase : public Database {
   public:
@@ -57,7 +56,6 @@ class MockDatabase : public Database {
         void(const oh5::Source&));
 };
 
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_MOCK_DATABASE_HPP

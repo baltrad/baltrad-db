@@ -27,7 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Source.hpp>
 
 namespace brfc {
-namespace db {
 
 class MockFileEntry : public FileEntry {
   public:
@@ -40,7 +39,6 @@ class MockFileEntry : public FileEntry {
     MOCK_CONST_METHOD0(do_root, const oh5::Node&());
 };
 
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_MOCK_FILE_ENTRY_HPP

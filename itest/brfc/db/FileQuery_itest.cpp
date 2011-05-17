@@ -46,7 +46,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/ITestEnv.hpp>
 
 namespace brfc {
-namespace db {
 
 /**
  * test data for this fixture:
@@ -125,8 +124,8 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
         db->clean();
     }
 
-    auto_ptr<db::FileEntry> entry(FileResult& r) {
-        return auto_ptr<db::FileEntry>(r.entry());
+    auto_ptr<FileEntry> entry(FileResult& r) {
+        return auto_ptr<FileEntry>(r.entry());
     }
     
     ExpressionFactory xpr;
@@ -418,6 +417,5 @@ INSTANTIATE_TEST_CASE_P(db_FileQuery_itest_p,
                         ::testing::ValuesIn(TEST_DSNS));
 #endif // BRFC_TEST_DSN_COUNT
 
-} // namespace db
 } // namespace brfc
 

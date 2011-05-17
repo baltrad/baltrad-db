@@ -57,7 +57,7 @@ DefaultFileNamer::do_name(const oh5::File& file) const {
 }
 
 std::string
-DefaultFileNamer::do_name(const db::FileEntry& entry) const {
+DefaultFileNamer::do_name(const FileEntry& entry) const {
     const oh5::File& file = static_cast<const oh5::File&>(entry);
     std::string name = this->name(file);
     const std::string& uuid = entry.uuid();

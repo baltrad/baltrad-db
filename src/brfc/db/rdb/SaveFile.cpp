@@ -36,8 +36,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Connection.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 SaveFile::SaveFile(RelationalDatabase* rdb)
         : rdb_(rdb) {
@@ -82,6 +80,4 @@ SaveFile::operator()(const oh5::PhysicalFile& file) {
     return entry_.release();
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

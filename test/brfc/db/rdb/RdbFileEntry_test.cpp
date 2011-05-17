@@ -35,8 +35,6 @@ using ::testing::Ref;
 using ::testing::Return;
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 class db_rdb_RdbFileEntry_test : public ::testing::Test {
   public:
@@ -68,6 +66,4 @@ TEST_F(db_rdb_RdbFileEntry_test, test_ctor) {
     EXPECT_FALSE(be->loaded(entry.root()));
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

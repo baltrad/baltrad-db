@@ -24,14 +24,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/AttributeResult.hpp>
 
 namespace brfc {
-
-namespace sql {
-    class Connection;
-    class Result;
+    namespace sql {
+        class Connection;
+        class Result;
+    }
 }
 
-namespace db {
-namespace rdb {
+namespace brfc {
 
 /**
  * @brief mediate sql::Result to AttributeResult
@@ -62,8 +61,6 @@ class RdbAttributeResult : public AttributeResult {
     scoped_ptr<sql::Result> result_;
 };
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_RDB_ATTRIBUTE_RESULT_HPP

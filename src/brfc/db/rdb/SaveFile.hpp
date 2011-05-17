@@ -21,18 +21,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_DB_RDB_SAVE_FILE_HPP
 
 namespace brfc {
-namespace oh5 {
 
-class Node;
-class PhysicalFile;
+    class RdbFileEntry;
+    class RelationalDatabase;
 
+    namespace oh5 {
+        class Node;
+        class PhysicalFile;
+    }
 }
 
-namespace db {
-namespace rdb {
-
-class RdbFileEntry;
-class RelationalDatabase;
+namespace brfc {
 
 /**
  * @brief save oh5::PhysicalFile instances to database
@@ -58,8 +57,6 @@ class SaveFile {
     RelationalDatabase* rdb_;
 };
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_RDB_SAVE_FILE_HPP

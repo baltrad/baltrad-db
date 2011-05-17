@@ -99,7 +99,7 @@ Mount::do_parse_args(const ArgVector& args) {
 }
 
 int
-Mount::do_execute(db::Database& db) {
+Mount::do_execute(Database& db) {
     std::vector<std::string> dargs;
     dargs.push_back("bdbtool");
     dargs.push_back(mount_point_);

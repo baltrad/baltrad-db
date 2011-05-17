@@ -27,14 +27,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Source.hpp>
 
 namespace brfc {
+    namespace oh5 {
+        class PhysicalFile;
+    }
+} 
 
-namespace oh5 {
-
-class PhysicalFile;
-
-} // namespace oh5
-
-namespace db {
+namespace brfc {
 
 class AttributeQuery;
 class AttributeResult;
@@ -181,7 +179,6 @@ class Database : public boost::noncopyable {
     virtual void do_remove_source(const oh5::Source& source) = 0;
 };
 
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_DATABASE_H

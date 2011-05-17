@@ -38,7 +38,7 @@ class Benchmark : public Command {
 
     virtual void do_parse_args(const ArgVector& args);
 
-    virtual int do_execute(db::Database& fc);
+    virtual int do_execute(Database& fc);
   
   private:
     int iterations_;

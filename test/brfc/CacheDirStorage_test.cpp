@@ -41,7 +41,7 @@ class CacheDirStorage_test : public ::testing::Test {
     
     std::string dir;
     MockFileSystem fs;
-    db::MockFileEntry entry;
+    MockFileEntry entry;
     CacheDirStorage storage;
 
     virtual void SetUp() {

@@ -54,12 +54,12 @@ class CacheDirStorage : public LocalStorage {
     /**
      * @brief absolute path this entry should be stored to
      */
-    std::string entry_path(const db::FileEntry& entry) const;
+    std::string entry_path(const FileEntry& entry) const;
  
   protected:
-    virtual std::string do_prestore(const db::FileEntry& entry, const std::string& path);
-    virtual std::string do_store(const db::FileEntry& entry);
-    virtual bool do_remove(const db::FileEntry& entry);
+    virtual std::string do_prestore(const FileEntry& entry, const std::string& path);
+    virtual std::string do_store(const FileEntry& entry);
+    virtual bool do_remove(const FileEntry& entry);
     virtual void do_clean();
     virtual bool do_is_valid() const;
   

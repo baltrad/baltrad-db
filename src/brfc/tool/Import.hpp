@@ -33,7 +33,7 @@ class Import : public Command {
 
     virtual void do_parse_args(const ArgVector& args);
 
-    virtual int do_execute(db::Database& db);
+    virtual int do_execute(Database& db);
   
   private:
     ArgVector args_;

@@ -30,8 +30,6 @@ class Date;
 class Time;
 class Variant;
 
-namespace db {
-
 /**
  * @brief ABC for Query results
  */
@@ -158,7 +156,6 @@ class AttributeResult : public boost::noncopyable {
     virtual Variant do_value_at(const std::string& name) const = 0;
 };
 
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_ATTRIBUTE_RESULT_HPP

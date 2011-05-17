@@ -43,8 +43,6 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 class db_rdb_RelationalDatabase_test : public ::testing::Test {
   public:
@@ -146,6 +144,4 @@ TEST_F(db_rdb_RelationalDatabase_test, test_remove) {
     EXPECT_TRUE(rdb.remove(e));
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

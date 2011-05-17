@@ -40,8 +40,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace mi = boost::multi_index;
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 struct RdbNodeBackend::Impl {
     struct node_entry {
@@ -267,6 +265,4 @@ RdbNodeBackend::do_children(const oh5::Node& node) const {
     return impl_->children(node);
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

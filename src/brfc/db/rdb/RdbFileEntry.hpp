@@ -27,8 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Source.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 class RelationalDatabase;
 
@@ -145,8 +143,6 @@ class RdbFileEntry : public FileEntry {
     RdbNodeBackend nodes_;
 };
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_RDB_RDB_FILE_ENTRY_HPP

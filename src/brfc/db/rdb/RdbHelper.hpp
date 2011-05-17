@@ -30,27 +30,26 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-     class FileHasher;
+    class FileHasher;
+    class RdbFileEntry;
+    class RdbNodeBackend;
 
-namespace oh5 {
-    class Attribute;
-    class Group;
-    class Node;
-    class PhysicalFile;
-    class Source;
+    namespace oh5 {
+        class Attribute;
+        class Group;
+        class Node;
+        class PhysicalFile;
+        class Source;
+    }
+
+    namespace sql {
+        class Connection;
+        class Dialect;
+        class Result;
+    }
 }
 
-namespace sql {
-    class Connection;
-    class Dialect;
-    class Result;
-}
-
-namespace db {
-namespace rdb {
-
-class RdbFileEntry;
-class RdbNodeBackend;
+namespace brfc {
 
 /**
  * @brief gather & simplify database queries
@@ -174,8 +173,6 @@ class RdbHelper : boost::noncopyable {
     Expression insert_attr_qry_;
 };
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_RDB_RDB_HELPER_HPP

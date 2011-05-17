@@ -49,8 +49,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test_common.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 class db_rdb_RdbHelper_itest : public ::testing::TestWithParam<const char*> {
   public:
@@ -332,6 +330,4 @@ INSTANTIATE_TEST_CASE_P(db_rdb_RdbHelper_itest_p,
                         ::testing::ValuesIn(TEST_DSNS));
 #endif // BRFC_TEST_DSN_COUNT
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

@@ -46,9 +46,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
                         brfc::oh5::File*,
                         brfc::oh5::File& "eu.baltrad.fc.oh5";
 
-%typemap("javapackage") brfc::db::FileEntry,
-                        brfc::db::FileEntry*,
-                        brfc::db::FileEntry& "eu.baltrad.fc.db";
+%typemap("javapackage") brfc::FileEntry,
+                        brfc::FileEntry*,
+                        brfc::FileEntry& "eu.baltrad.fc.db";
 
 %feature("director") brfc::FileNamer;
 

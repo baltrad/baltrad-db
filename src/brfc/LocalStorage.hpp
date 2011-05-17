@@ -24,11 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace db {
-
 class FileEntry;
-
-} // namespace db
 
 /**
  * @brief ABC for classes implementing node-local oh5::PhysicalFile storage
@@ -43,16 +39,16 @@ class LocalStorage {
      * @param path absolute path to the file in filesystem
      * @return absolute path to the stored file
      */
-    std::string prestore(const db::FileEntry& entry, const std::string& path) {
+    std::string prestore(const FileEntry& entry, const std::string& path) {
         return do_prestore(entry, path);
     }
 
     /**
-     * @brief write the file to storage from db::FileEntry content stream
+     * @brief write the file to storage from FileEntry content stream
      * @return absolute path to the stored file
      */
 
-    std::string store(const db::FileEntry& entry) {
+    std::string store(const FileEntry& entry) {
         return do_store(entry);
     }
     
@@ -60,7 +56,7 @@ class LocalStorage {
      * @brief remove the file if it exists
      * @return true if the file is removed (or is not stored here)
      */
-    bool remove(const db::FileEntry& entry) {
+    bool remove(const FileEntry& entry) {
         return do_remove(entry);
     }
     
@@ -82,17 +78,17 @@ class LocalStorage {
     /**
      * @return absolute path to the stored file
      */
-    virtual std::string do_prestore(const db::FileEntry& entry, const std::string& path) = 0;
+    virtual std::string do_prestore(const FileEntry& entry, const std::string& path) = 0;
 
     /**
      * @return absolute path to the stored file
      */
-    virtual std::string do_store(const db::FileEntry& entry) = 0;
+    virtual std::string do_store(const FileEntry& entry) = 0;
  
     /**
      * @return true if the file no longer exists
      */
-    virtual bool do_remove(const db::FileEntry& entry) = 0;
+    virtual bool do_remove(const FileEntry& entry) = 0;
 
     virtual void do_clean() = 0;
 

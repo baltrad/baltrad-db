@@ -89,7 +89,7 @@ Benchmark::do_parse_args(const ArgVector& args) {
 }
 
 int
-Benchmark::do_execute(db::Database& db) {
+Benchmark::do_execute(Database& db) {
     boost::timer timer;
 
     // read the "template" file
@@ -100,7 +100,7 @@ Benchmark::do_execute(db::Database& db) {
     TimeDelta delta;
     delta.add_days(1);
     double store_secs = 0;
-    boost::ptr_vector<db::FileEntry> stored_files;
+    boost::ptr_vector<FileEntry> stored_files;
     boost::progress_display progress(iterations_);
 
     for (int i=0; i < iterations_; ++i) {
@@ -124,7 +124,7 @@ Benchmark::do_execute(db::Database& db) {
 
     if (keep_) {
         std::cout << "cleaning up" << std::endl;
-        BOOST_FOREACH(const db::FileEntry& entry, stored_files) {
+        BOOST_FOREACH(const FileEntry& entry, stored_files) {
             db.remove(entry);
         }
     }

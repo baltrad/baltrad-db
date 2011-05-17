@@ -49,55 +49,55 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 /***
- * brfc::db::FileEntry
+ * brfc::FileEntry
  */
-%typemap(javaimports) brfc::db::FileEntry, brfc::db::FileEntry* %{
+%typemap(javaimports) brfc::FileEntry, brfc::FileEntry* %{
     import eu.baltrad.fc.DateTime;
     import eu.baltrad.fc.oh5.File;
     import eu.baltrad.fc.oh5.Source;
 %}
 
-SWIG_JAVABODY_METHODS(public, public, brfc::db::FileEntry);
+SWIG_JAVABODY_METHODS(public, public, brfc::FileEntry);
 
 /***
- * brfc::db::FileQuery
+ * brfc::FileQuery
  */
-%ignore brfc::db::FileQuery::order() const;
+%ignore brfc::FileQuery::order() const;
 
-%typemap(javaimports) brfc::db::FileQuery, brfc::db::FileQuery* %{
+%typemap(javaimports) brfc::FileQuery, brfc::FileQuery* %{
     import eu.baltrad.fc.expr.Expression;
 %}
 
-%newobject brfc::db::FileQuery::execute;
+%newobject brfc::FileQuery::execute;
 
 /***
- * brfc::db::FileResult
+ * brfc::FileResult
  */
-%ignore brfc::db::FileResult::FileResult;
-%ignore brfc::db::FileResult::operator=;
+%ignore brfc::FileResult::FileResult;
+%ignore brfc::FileResult::operator=;
 
-SWIG_JAVABODY_METHODS(public, public, brfc::db::FileResult);
+SWIG_JAVABODY_METHODS(public, public, brfc::FileResult);
 
-%newobject brfc::db::FileResult::entry;
+%newobject brfc::FileResult::entry;
 
 /***
- * brfc::db::AttributeQuery
+ * brfc::AttributeQuery
  */
-%ignore brfc::db::AttributeQuery::fetch() const;
-%ignore brfc::db::AttributeQuery::group() const;
-%ignore brfc::db::AttributeQuery::order() const;
-%typemap(javaimports) brfc::db::AttributeQuery, brfc::db::AttributeQuery* %{
+%ignore brfc::AttributeQuery::fetch() const;
+%ignore brfc::AttributeQuery::group() const;
+%ignore brfc::AttributeQuery::order() const;
+%typemap(javaimports) brfc::AttributeQuery, brfc::AttributeQuery* %{
     import eu.baltrad.fc.expr.Expression;
 %}
 
-%newobject brfc::db::AttributeQuery::execute;
+%newobject brfc::AttributeQuery::execute;
 
 /***
- * brfc::db::AttributeResult
+ * brfc::AttributeResult
  */
-SWIG_JAVABODY_METHODS(public, public, brfc::db::AttributeResult);
+SWIG_JAVABODY_METHODS(public, public, brfc::AttributeResult);
 
-%typemap(javaimports) brfc::db::AttributeResult, brfc::db::AttributeResult* %{
+%typemap(javaimports) brfc::AttributeResult, brfc::AttributeResult* %{
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.Time;
     import eu.baltrad.fc.Variant;
@@ -105,19 +105,19 @@ SWIG_JAVABODY_METHODS(public, public, brfc::db::AttributeResult);
 
 
 /***
- * brfc::db::Database
+ * brfc::Database
  */
 
-%newobject brfc::db::Database::create;
-%newobject brfc::db::Database::entry_by_file;
-%newobject brfc::db::Database::entry_by_uuid;
-%newobject brfc::db::Database::execute;
-%newobject brfc::db::Database::get_or_store;
-%newobject brfc::db::Database::store;
+%newobject brfc::Database::create;
+%newobject brfc::Database::entry_by_file;
+%newobject brfc::Database::entry_by_uuid;
+%newobject brfc::Database::execute;
+%newobject brfc::Database::get_or_store;
+%newobject brfc::Database::store;
 
-SWIG_JAVABODY_METHODS(public, public, brfc::db::Database);
+SWIG_JAVABODY_METHODS(public, public, brfc::Database);
 
-%typemap(javaimports) brfc::db::Database, brfc::db::Database* %{
+%typemap(javaimports) brfc::Database, brfc::Database* %{
     import java.util.ArrayList;
     import java.util.List;
 
@@ -126,9 +126,9 @@ SWIG_JAVABODY_METHODS(public, public, brfc::db::Database);
     import eu.baltrad.fc.oh5._StdVectorSource;
 %}
 
-// brfc::db::Database::sources -> eu.baltrad.fc.db.Database._sources
-%rename(_sources) brfc::db::Database::sources;
-%typemap(javacode) brfc::db::Database %{
+// brfc::Database::sources -> eu.baltrad.fc.db.Database._sources
+%rename(_sources) brfc::Database::sources;
+%typemap(javacode) brfc::Database %{
   public List<Source> sources() {
     _StdVectorSource srcvec = _sources();
     List<Source> srclist = new ArrayList<Source>((int)srcvec.size());
@@ -139,8 +139,8 @@ SWIG_JAVABODY_METHODS(public, public, brfc::db::Database);
   }
 %}
 
-%typemap(javabody) brfc::db::AttributeQuery,
-                   brfc::db::FileQuery %{ 
+%typemap(javabody) brfc::AttributeQuery,
+                   brfc::FileQuery %{ 
   private long swigCPtr;
   protected boolean swigCMemOwn;
 

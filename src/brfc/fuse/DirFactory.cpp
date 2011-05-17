@@ -31,7 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace fuse {
 
-DirFactory::DirFactory(db::Database* db,
+DirFactory::DirFactory(Database* db,
                        const Expression& attr,
                        const EntryFactory* cfactory)
         : db_(db)
@@ -70,12 +70,12 @@ void
 DirFactory::do_update() {
     invalidate_all();
 
-    db::AttributeQuery qry;
+    AttributeQuery qry;
     qry.fetch("val", attr_);
     if (not filter_.empty())
         qry.filter(filter_);
     
-    scoped_ptr<db::AttributeResult> result(database().execute(qry));
+    scoped_ptr<AttributeResult> result(database().execute(qry));
 
     EntryByName_t& es = entries_.get<by_name>();
     EntryByName_t::iterator iter;

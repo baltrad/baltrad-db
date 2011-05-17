@@ -66,7 +66,7 @@ class DefaultFileNamer_test : public ::testing::Test {
     oh5::MemoryNodeBackend node_backend;
     oh5::Node& root, &what;
     ::testing::NiceMock<oh5::MockFile> file;
-    ::testing::NiceMock<db::MockFileEntry> entry;
+    ::testing::NiceMock<MockFileEntry> entry;
 };
 
 TEST_F(DefaultFileNamer_test, name_file) {

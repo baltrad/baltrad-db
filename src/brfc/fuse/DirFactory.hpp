@@ -32,13 +32,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/fuse/DirEntry.hpp>
 
 namespace brfc {
-
-class Variant;
-
-namespace db {
     class Database;
-} // namespace db
+    class Variant;
+}
 
+namespace brfc {
 namespace fuse {
 
 class DirEntry;
@@ -54,7 +52,7 @@ class DirFactory : public EntryFactory {
      * @param attr the attribute to fetch as dirname
      * @param cfactory child factory to bind with created entries
      */
-    DirFactory(db::Database* db,
+    DirFactory(Database* db,
                const Expression& attr,
                const EntryFactory* cfactory);
     
@@ -111,9 +109,9 @@ class DirFactory : public EntryFactory {
 
     shared_ptr<DirEntry> create_entry(const Variant& value);
     
-    db::Database& database() { return *db_; }
+    Database& database() { return *db_; }
 
-    db::Database* db_;
+    Database* db_;
     Expression attr_;
     const EntryFactory* cfactory_;
     Expression filter_;

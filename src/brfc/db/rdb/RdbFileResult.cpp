@@ -25,8 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Result.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 bool
 RdbFileResult::do_next() {
@@ -52,6 +50,4 @@ RdbFileResult::do_entry() {
     return entry.release();
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

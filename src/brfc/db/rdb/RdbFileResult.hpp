@@ -25,15 +25,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace sql {
-    class Connection;
-    class Result;
-} // namespace sql
+    class RelationalDatabase;
 
-namespace db {
-namespace rdb {
+    namespace sql {
+        class Connection;
+        class Result;
+    }
+}
 
-class RelationalDatabase;
+namespace brfc {
 
 class RdbFileResult : public FileResult {
   public:
@@ -57,8 +57,6 @@ class RdbFileResult : public FileResult {
     scoped_ptr<sql::Result> result_;
 };
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_RDB_RDB_FILE_RESULT_HPP

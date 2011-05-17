@@ -25,13 +25,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/fuse/Entry.hpp>
 
 namespace brfc {
-
-namespace db {
     class Database;
     class FileEntry;
+}
 
-} // namespace db
-
+namespace brfc {
 namespace fuse {
 
 class FileEntry : public Entry {
@@ -42,8 +40,8 @@ class FileEntry : public Entry {
      * @param fe file entry in the database
      * @param name name of this file
      */
-    FileEntry(db::Database* db,
-              const db::FileEntry& fe,
+    FileEntry(Database* db,
+              const ::brfc::FileEntry& fe,
               const std::string& name);
 
     virtual ~FileEntry();
@@ -87,7 +85,7 @@ class FileEntry : public Entry {
 
     std::string tmpfspath() const;    
 
-    db::Database* db_;
+    Database* db_;
     std::string name_;
     std::string uuid_;
     bool valid_;

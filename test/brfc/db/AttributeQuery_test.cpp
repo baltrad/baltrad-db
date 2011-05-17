@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/AttributeQuery.hpp>
 
 namespace brfc {
-namespace db {
 
 class db_AttributeQuery_test : public ::testing::Test {
   public:
@@ -168,5 +167,4 @@ TEST_F(db_AttributeQuery_test, test_group) {
     EXPECT_EQ(se, vec.at(0));
 }
 
-} // namespace db
 } // namespace brfc

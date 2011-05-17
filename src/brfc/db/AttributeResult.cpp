@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Variant.hpp>
 
 namespace brfc {
-namespace db {
 
 Variant
 AttributeResult::value_at(const std::string& name) const {
@@ -67,5 +66,4 @@ AttributeResult::time(const std::string& name) const {
     return value_at(name).to_time();
 }
 
-} // namespace db
 } // namespace brfc

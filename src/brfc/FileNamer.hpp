@@ -24,13 +24,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace db {
     class FileEntry;
+
+    namespace oh5 {
+        class File;
+    }
 }
 
-namespace oh5 {
-    class File;
-}
+namespace brfc {
 
 /**
  * @brief ABC for generating filenames for File instances
@@ -53,9 +54,9 @@ class FileNamer {
      * @param entry FileEntry to be named
      * @return the generated filename
      *
-     * @sa do_name(const db::FileEntry&)
+     * @sa do_name(const FileEntry&)
      */
-    std::string name(const db::FileEntry& entry) const {
+    std::string name(const FileEntry& entry) const {
         return do_name(entry);
     }
 
@@ -73,7 +74,7 @@ class FileNamer {
     /**
      * @brief name(const oh5::File&) implementation
      */
-    virtual std::string do_name(const db::FileEntry& entry) const = 0;
+    virtual std::string do_name(const FileEntry& entry) const = 0;
 };
 
 } // namespace brfc

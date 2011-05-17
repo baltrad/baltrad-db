@@ -37,7 +37,7 @@ class MockCommand : public Command {
     MOCK_METHOD1(do_parse_args,
         void(const ArgVector&));
     MOCK_METHOD1(do_execute,
-        int(db::Database&));
+        int(Database&));
 };
 
 } // namespace tool

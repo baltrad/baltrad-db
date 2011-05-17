@@ -37,8 +37,6 @@ using ::testing::Ref;
 using ::testing::Return;
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 // XXX: test for loading unloaded nodes from DB!
 
@@ -144,6 +142,4 @@ TEST_F(db_rdb_RdbNodeBackend_test, test_children) {
     EXPECT_EQ(n, children.at(0));
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

@@ -31,7 +31,7 @@ namespace test {
  *
  * add methods for creating/dropping database schema in a relational database
  */
-class TestRDB : public db::rdb::RelationalDatabase {
+class TestRDB : public RelationalDatabase {
   public:
     /**
      * @brief constructor

@@ -47,12 +47,12 @@ CacheDirStorage::fs() const {
 }
 
 std::string
-CacheDirStorage::entry_path(const db::FileEntry& entry) const {
+CacheDirStorage::entry_path(const FileEntry& entry) const {
     return fs().join(dir_, entry.uuid() + ".h5");
 }
 
 std::string
-CacheDirStorage::do_store(const db::FileEntry& entry) {
+CacheDirStorage::do_store(const FileEntry& entry) {
     const std::string& path = entry_path(entry);
     if (not fs().exists(path)) {
         entry.write_to_file(path);
@@ -61,14 +61,14 @@ CacheDirStorage::do_store(const db::FileEntry& entry) {
 }
 
 std::string
-CacheDirStorage::do_prestore(const db::FileEntry& entry, const std::string& path) {
+CacheDirStorage::do_prestore(const FileEntry& entry, const std::string& path) {
     const std::string& new_path = entry_path(entry);
     fs().copy_file(path, new_path);
     return new_path;
 }
 
 bool
-CacheDirStorage::do_remove(const db::FileEntry& entry) {
+CacheDirStorage::do_remove(const FileEntry& entry) {
     const std::string& fs_path(entry_path(entry));
 
     if (fs().exists(fs_path)) {

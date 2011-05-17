@@ -54,7 +54,7 @@ Import::do_parse_args(const ArgVector& args) {
 }
 
 int
-Import::do_execute(db::Database& db) {
+Import::do_execute(Database& db) {
     BOOST_FOREACH(const std::string& path, args_) {
         std::cout << "importing " << path << std::endl;;
         std::cout.flush();

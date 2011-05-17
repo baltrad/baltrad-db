@@ -47,7 +47,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/ITestEnv.hpp>
 
 namespace brfc {
-namespace db {
 
 /**
  * test data for this fixture:
@@ -515,6 +514,5 @@ INSTANTIATE_TEST_CASE_P(db_AttributeQuery_itest_p,
                         ::testing::ValuesIn(TEST_DSNS));
 #endif // BRFC_TEST_DSN_COUNT
 
-} // namespace db
 } // namespace brfc
 

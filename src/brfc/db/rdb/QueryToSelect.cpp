@@ -41,8 +41,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Select.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 namespace {
 
@@ -520,6 +518,4 @@ QueryToSelect::Impl::transform(const AttributeQuery& query) {
     return select_;
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

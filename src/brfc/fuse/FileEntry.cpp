@@ -31,8 +31,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace fuse {
 
-FileEntry::FileEntry(db::Database* db,
-                     const db::FileEntry& fe,
+FileEntry::FileEntry(Database* db,
+                     const ::brfc::FileEntry& fe,
                      const std::string& name)
         : db_(db)
         , name_(name)

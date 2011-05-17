@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Result.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 bool
 RdbAttributeResult::do_next() {
@@ -47,6 +45,4 @@ RdbAttributeResult::do_value_at(const std::string& name) const {
     return result_->value_at("l_" + name);
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

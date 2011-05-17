@@ -25,11 +25,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 namespace brfc {
-
-namespace db {
     class Database;
 }
 
+namespace brfc {
 namespace tool {
 
 /**
@@ -79,7 +78,7 @@ class Command {
      * @param fc filecatalog to run on
      * @return execution status
      */
-    int execute(db::Database& db) {
+    int execute(Database& db) {
         return do_execute(db);
     }
 
@@ -90,7 +89,7 @@ class Command {
 
     virtual void do_parse_args(const ArgVector& args) = 0;
 
-    virtual int do_execute(db::Database& db) = 0;
+    virtual int do_execute(Database& db) = 0;
     
 };
 

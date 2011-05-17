@@ -99,5 +99,5 @@ BasicConnectionPool::dispose(Connection* conn) {
     --size_;
 }
 
-} // namespace db
+} // namespace sql
 } // namespace brfc

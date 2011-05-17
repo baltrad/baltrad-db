@@ -52,8 +52,8 @@ struct FileCatalog_test : public ::testing::Test {
         fc.storage(&storage);
     }
 
-    db::MockDatabase db;
-    db::MockFileEntry entry;
+    MockDatabase db;
+    MockFileEntry entry;
     MockLocalStorage storage;
     FileCatalog fc;
     std::string path;
@@ -88,7 +88,7 @@ TEST_F(FileCatalog_test, test_store) {
     EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
         .WillOnce(Return("/path/to/file"));
     
-    db::FileEntry* e = 0;
+    FileEntry* e = 0;
     EXPECT_NO_THROW(e = fc.store(file));
     EXPECT_TRUE(e);
 }
@@ -111,7 +111,7 @@ TEST_F(FileCatalog_test, test_store_on_prestore_failure) {
     EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
         .WillOnce(Throw(std::runtime_error("error")));
     
-    db::FileEntry* e = 0;
+    FileEntry* e = 0;
     EXPECT_NO_THROW(e = fc.store(file));
     EXPECT_TRUE(e);
 }
@@ -124,7 +124,7 @@ TEST_F(FileCatalog_test, test_get_or_store) {
     EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
         .WillOnce(Return("/path/to/file"));
     
-    db::FileEntry* e = 0;
+    FileEntry* e = 0;
     EXPECT_NO_THROW(e = fc.get_or_store(file));
     EXPECT_TRUE(e);
 }
@@ -144,7 +144,7 @@ TEST_F(FileCatalog_test, test_get_or_store_on_prestore_failure) {
     EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
         .WillOnce(Throw(std::runtime_error("error")));
     
-    db::FileEntry* e = 0;
+    FileEntry* e = 0;
     EXPECT_NO_THROW(e = fc.get_or_store(file));
     EXPECT_TRUE(e);
 }
@@ -178,7 +178,7 @@ TEST_F(FileCatalog_test, test_remove_nx_file) {
 }
 
 TEST_F(FileCatalog_test, test_local_path_for_uuid) {
-    db::MockFileEntry* e = new db::MockFileEntry();
+    MockFileEntry* e = new MockFileEntry();
     ON_CALL(*e, do_uuid()).WillByDefault(Return("")); // for leak detection
 
     std::string uuid = "uuid";

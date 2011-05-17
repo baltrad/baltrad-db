@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace db {
-
 /**
  * @brief oh5::File entry in Database
  */
@@ -63,7 +61,6 @@ class FileEntry : public oh5::File {
     virtual DateTime do_stored_at() const = 0;
 };
 
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_FILE_ENTRY_HPP

@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/noncopyable.hpp>
 
 namespace brfc {
-namespace db {
 
 class FileEntry;
 
@@ -87,7 +86,6 @@ class FileResult : public boost::noncopyable {
     virtual FileEntry* do_entry() = 0;
 };
 
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_FILE_RESULT_HPP

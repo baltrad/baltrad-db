@@ -30,7 +30,6 @@ using ::testing::Ref;
 using ::testing::Return;
 
 namespace brfc {
-namespace db {
 
 class db_Database_test : public ::testing::Test {
   public:
@@ -67,6 +66,4 @@ TEST_F(db_Database_test, test_get_or_store_not_stored) {
     EXPECT_EQ(&fe, db.get_or_store(f));
 }
 
-
-} // namepsace db
 } // namespace brfc

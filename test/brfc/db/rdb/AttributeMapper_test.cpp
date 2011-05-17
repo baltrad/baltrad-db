@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test_common.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 class db_rdb_AttributeMapper_test : public testing::Test {
   public:
@@ -50,7 +48,5 @@ TEST_F(db_rdb_AttributeMapper_test, specializations_on) {
     EXPECT_EQ(v.at(1).attribute, "attr2");
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc
 

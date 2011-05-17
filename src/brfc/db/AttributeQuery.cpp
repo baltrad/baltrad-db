@@ -27,7 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
-namespace db {
 
 AttributeQuery::AttributeQuery()
         : distinct_()
@@ -105,5 +104,4 @@ AttributeQuery::order_by(const Expression& expr, SortDir dir) {
     return *this;
 }
 
-} // namespace db
 } // namespace brfc

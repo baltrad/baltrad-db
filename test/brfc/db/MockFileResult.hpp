@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileResult.hpp>
 
 namespace brfc {
-namespace db {
 
 class MockFileResult : public FileResult {
   public:
@@ -36,7 +35,6 @@ class MockFileResult : public FileResult {
     MOCK_METHOD0(do_entry, FileEntry*());
 };
 
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_MOCK_FILE_RESULT_HPP

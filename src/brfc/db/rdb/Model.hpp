@@ -24,9 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
-
 
 struct m {
 
@@ -97,8 +94,6 @@ struct m {
     };
 };
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_RDB_MODEL_HPP

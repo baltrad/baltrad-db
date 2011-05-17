@@ -33,8 +33,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Connection.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         : rdb_(rdb)
@@ -142,6 +140,4 @@ RdbFileEntry::do_write_to_file(const std::string& path) const {
     }
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

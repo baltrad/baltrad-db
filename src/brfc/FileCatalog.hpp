@@ -27,18 +27,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
  */
 namespace brfc {
     
-class LocalStorage;
+    class Database;
+    class FileEntry;
+    class LocalStorage;
 
-namespace db {
-
-class Database;
-class FileEntry;
-
-} // namespace db
-
-namespace oh5 {
-    class PhysicalFile;
+    namespace oh5 {
+        class PhysicalFile;
+    }
 }
+
+namespace brfc {
 
 /**
  * @brief indexes and stores ODIM_H5 File instances
@@ -58,7 +56,7 @@ class FileCatalog {
      * @param storage local storage (caller retains ownership)
      */
     explicit
-    FileCatalog(db::Database* db, LocalStorage* storage);
+    FileCatalog(Database* db, LocalStorage* storage);
 
     /**
      * @brief destructor
@@ -66,18 +64,18 @@ class FileCatalog {
     ~FileCatalog();
     
     /**
-     * @brief access bound db::Database instance
+     * @brief access bound Database instance
      */
-    db::Database& database() const {
+    Database& database() const {
         return *db_;
     }
     
     /**
-     * @brief bind a db::Database instance
+     * @brief bind a Database instance
      * @param db the database to bind (caller retains ownership)
      * @throw value_error if db is null
      */
-    void database(db::Database* db);
+    void database(Database* db);
     
     /**
      * @brief access bound LocalStorage instance
@@ -136,7 +134,7 @@ class FileCatalog {
      *
      * @sa store(oh5::PhysicalFile& file)
      */
-    db::FileEntry* store(const std::string& path);
+    FileEntry* store(const std::string& path);
     
     /**
      * @brief import file to catalog
@@ -151,10 +149,10 @@ class FileCatalog {
      * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
      * is considered failed.
      */
-    db::FileEntry* store(const oh5::PhysicalFile& file);
+    FileEntry* store(const oh5::PhysicalFile& file);
     
     /**
-     * @brief get db::FileEntry for a file, storing it if necessary
+     * @brief get FileEntry for a file, storing it if necessary
      * @param path absolute path to file
      * @return FileEntry instance of the stored file
      * @throw db_error if storing file to database fails
@@ -166,10 +164,10 @@ class FileCatalog {
      * store(oh5::hl::HlFile(path))
      * @endcode
      */
-    db::FileEntry* get_or_store(const std::string& path);
+    FileEntry* get_or_store(const std::string& path);
 
     /**
-     * @brief get db::FileEntry for a file, storing it if necessary
+     * @brief get FileEntry for a file, storing it if necessary
      * @param file oh5::PhysicalFile instance to get the entry for
      * @return FileEntry instance for the file
      * @throw db_error if storing file to database fails
@@ -181,7 +179,7 @@ class FileCatalog {
      * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
      * is considered failed.
      */
-    db::FileEntry* get_or_store(const oh5::PhysicalFile& file);
+    FileEntry* get_or_store(const oh5::PhysicalFile& file);
     
     /**
      * @brief remove file from catalog
@@ -195,7 +193,7 @@ class FileCatalog {
      * Exceptions thrown by LocalStorage::remove are ignored and removing from
      * local storage is considered failed.
      */
-    bool remove(const db::FileEntry& entry);
+    bool remove(const FileEntry& entry);
 
     /**
      * @brief absolute local path for database entry idenified by @c uuid
@@ -208,7 +206,7 @@ class FileCatalog {
     std::string local_path_for_uuid(const std::string& uuid);
     
   private:
-    db::Database* db_;
+    Database* db_;
     LocalStorage* storage_;
 };
 

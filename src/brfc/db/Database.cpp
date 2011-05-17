@@ -25,13 +25,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/RelationalDatabase.hpp>
 
 namespace brfc {
-namespace db {
 
 Database*
 Database::create(const std::string& dsn) {
     Url url(dsn);
     if (url.scheme() == "postgresql") {
-        return new rdb::RelationalDatabase(dsn);
+        return new RelationalDatabase(dsn);
     } else {
         throw value_error("unknown database scheme: " + url.scheme());
     }
@@ -45,6 +44,5 @@ Database::get_or_store(const oh5::PhysicalFile& file) {
         return store(file);
 }
 
-} // namespace db
 } // namespace brfc
 

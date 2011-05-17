@@ -52,8 +52,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 namespace {
 
@@ -613,6 +611,4 @@ RdbHelper::load_children(oh5::Node& node) {
     be.loaded(node, true);
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

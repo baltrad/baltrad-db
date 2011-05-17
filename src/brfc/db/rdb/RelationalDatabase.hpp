@@ -28,31 +28,25 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-class FileHasher;
-class Url;
-class Variant;
+    class AttributeMapper;
+    class FileHasher;
+    class RdbHelper;
+    class Url;
+    class Variant;
 
-namespace oh5 {
+    namespace oh5 {
+        class File;
+        class Source;
+    }
 
-class File;
-class Source;
+    namespace sql {
+        class Connection;
+        class ConnectionCreator;
+        class ConnectionPool;
+    }
+}
 
-} // namespace oh5
-
-namespace sql {
-
-class Connection;
-class ConnectionCreator;
-class ConnectionPool;
-
-} // namespace sql
-
-namespace db {
-
-namespace rdb {
-
-class AttributeMapper;
-class RdbHelper;
+namespace brfc {
 
 /**
  * @brief Relational database backend
@@ -122,8 +116,6 @@ class RelationalDatabase : public Database {
     shared_ptr<RdbHelper> helper_;
 };
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_RDB_RELATIONAL_DATABASE_HPP

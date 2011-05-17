@@ -161,14 +161,14 @@ main(int argc, char** argv) {
     }
     
     // XXX: get from a factory
-    brfc::shared_ptr<brfc::db::Database> db;
+    brfc::shared_ptr<brfc::Database> db;
 
     if (dsn.size() < 1) {
         std::cerr << "missing DSN" << std::endl;
         return 1;
     } else {
         try {
-            db.reset(brfc::db::Database::create(dsn));
+            db.reset(brfc::Database::create(dsn));
         } catch (const brfc::brfc_error& e) {
             std::cerr << e.what() << std::endl;
             return 1;

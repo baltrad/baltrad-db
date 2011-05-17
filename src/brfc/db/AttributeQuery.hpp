@@ -27,7 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Expression.hpp>
 
 namespace brfc {
-namespace db {
 
 /**
  * @brief query against the database
@@ -134,7 +133,6 @@ class AttributeQuery {
     int limit_;
 };
 
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_ATTRIBUTE_QUERY_HPP

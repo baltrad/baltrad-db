@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/rdb/AttributeMapper.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 AttributeMapper::AttributeMapper()
         : mappings_() {
@@ -81,6 +79,4 @@ AttributeMapper::mapping(const std::string& attribute) const {
     return i->second;
 }
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc

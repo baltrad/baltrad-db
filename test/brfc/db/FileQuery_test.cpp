@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileQuery.hpp>
 
 namespace brfc {
-namespace db {
 
 class db_FileQuery_test : public ::testing::Test {
   public:
@@ -121,5 +120,4 @@ TEST_F(db_FileQuery_test, test_skip) {
     EXPECT_EQ(5, query.skip());
 }
 
-} // namespace db
 } // namespace brfc

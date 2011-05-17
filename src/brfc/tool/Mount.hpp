@@ -40,7 +40,7 @@ class Mount : public Command {
 
     virtual void do_parse_args(const ArgVector& vec);
 
-    virtual int do_execute(db::Database& db);
+    virtual int do_execute(Database& db);
   
   private:
     boost::program_options::options_description optdesc_;

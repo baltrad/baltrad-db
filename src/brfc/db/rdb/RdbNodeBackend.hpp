@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/scoped_ptr.hpp>
 
 namespace brfc {
-namespace db {
-namespace rdb {
 
 class RelationalDatabase;
 
@@ -57,8 +55,6 @@ class RdbNodeBackend : public oh5::NodeBackend {
     const boost::scoped_ptr<Impl> impl_;
 };
 
-} // namespace rdb
-} // namespace db
 } // namespace brfc
 
 #endif // BRFC_DB_RDB_RDB_NODE_BACKEND_HPP

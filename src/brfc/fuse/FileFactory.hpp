@@ -35,14 +35,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/fuse/FileEntry.hpp>
 
 namespace brfc {
-
-class FileNamer;
-
-namespace db {
     class Database;
+    class FileNamer;
     class FileEntry;
-} // namespace db
+}
 
+namespace brfc {
 namespace fuse {
 
 class FileEntry;
@@ -54,7 +52,7 @@ class FileFactory : public EntryFactory {
      * @param db the database to query from
      * @param namer namer to use for naming files
      */
-    FileFactory(db::Database* db, FileNamer* namer);
+    FileFactory(Database* db, FileNamer* namer);
     
     virtual ~FileFactory();
   
@@ -111,15 +109,15 @@ class FileFactory : public EntryFactory {
     typedef EntrySet_t::index<by_name>::type EntryByName_t;
     typedef EntrySet_t::index<by_valid>::type EntryByValid_t;
 
-    db::Database& database() { return *db_; }
+    Database& database() { return *db_; }
     FileNamer& namer() { return *namer_; }
 
     void invalidate_all();
     void remove_invalid();
 
-    shared_ptr<FileEntry> create_entry(const db::FileEntry& fe);
+    shared_ptr<FileEntry> create_entry(const ::brfc::FileEntry& fe);
     
-    db::Database* db_; 
+    Database* db_; 
     FileNamer* namer_;
     Expression filter_;
     EntrySet_t entries_;
