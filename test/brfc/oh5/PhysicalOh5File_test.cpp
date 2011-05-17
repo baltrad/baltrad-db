@@ -27,7 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 using ::testing::ReturnRef;
 
 namespace brfc {
-namespace oh5 {
 
 struct oh5_PhysicalOh5File_test : public testing::Test {
     oh5_PhysicalOh5File_test()
@@ -51,5 +50,4 @@ TEST_F(oh5_PhysicalOh5File_test, test_name) {
     EXPECT_EQ(file.name(), "filename2");
 }
 
-} // namespace oh5
 } // namespace brfc

@@ -36,7 +36,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5NodeBackend.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 Oh5Node::Oh5Node(const std::string& name)
         : boost::noncopyable()
@@ -245,6 +244,4 @@ bool Oh5NodeIterator<const Oh5Node>::equal(const Oh5NodeIterator<Oh5Node>&) cons
 template
 bool Oh5NodeIterator<const Oh5Node>::equal(const Oh5NodeIterator<const Oh5Node>&) const;
 
-
-} // namespace oh5
 } // namespace brfc

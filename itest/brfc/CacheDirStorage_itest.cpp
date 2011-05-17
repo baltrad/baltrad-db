@@ -60,7 +60,7 @@ class CacheDirStorage_itest : public ::testing::Test {
     test::TempDir dir;
     CacheDirStorage storage;
     test::TempH5File tmpfile;
-    oh5::hl::HlFile file;
+    HlFile file;
     ::testing::NiceMock<MockFileEntry> entry;
 };
 

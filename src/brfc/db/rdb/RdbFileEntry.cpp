@@ -89,14 +89,14 @@ RdbFileEntry::load() const {
     self->nodes_.loaded(nodes_.root(), false);
 }
 
-const oh5::Oh5Node&
+const Oh5Node&
 RdbFileEntry::do_root() const {
     if ((id_ or not uuid_.empty()) and not loaded())
         load();
     return nodes_.root();
 }
 
-oh5::Oh5Source
+Oh5Source
 RdbFileEntry::do_source() const {
     RdbHelper helper(rdb().conn());
     if (source_.empty()) {

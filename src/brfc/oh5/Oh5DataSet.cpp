@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Attribute.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 Oh5DataSet::Oh5DataSet(const std::string& name)
         : Oh5Node(name) { 
@@ -52,5 +51,4 @@ Oh5DataSet::do_clone() const {
     return new Oh5DataSet(*this);
 }
 
-} // namespace oh5
 } // namespace brfc

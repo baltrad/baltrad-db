@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Node.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 class MockNode : public Oh5Node {
   public:
@@ -37,7 +36,6 @@ class MockNode : public Oh5Node {
     MOCK_CONST_METHOD0(do_clone, Oh5Node*());
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_MOCK_NODE_HPP

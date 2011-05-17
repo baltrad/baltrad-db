@@ -42,17 +42,17 @@ SaveFile::SaveFile(RelationalDatabase* rdb)
 }
 
 RdbFileEntry*
-SaveFile::operator()(const oh5::PhysicalOh5File& file) {
+SaveFile::operator()(const PhysicalOh5File& file) {
     auto_ptr<RdbFileEntry> entry_(new RdbFileEntry(rdb_));
     entry_.reset(new RdbFileEntry(rdb_));
     entry_->hash(rdb_->file_hasher().hash(file));
     entry_->loaded(true);
 
-    oh5::Oh5NodeBackend& be = entry_->root().backend();
+    Oh5NodeBackend& be = entry_->root().backend();
 
     // copy nodes from file to entry
-    oh5::Oh5Node::const_iterator iter = file.root().begin();
-    oh5::Oh5Node::const_iterator end = file.root().end();
+    Oh5Node::const_iterator iter = file.root().begin();
+    Oh5Node::const_iterator end = file.root().end();
     ++iter; // skip root;
     for ( ; iter != end; ++iter) {
         be.add(iter->parent()->path(), iter->clone());
@@ -67,7 +67,7 @@ SaveFile::operator()(const oh5::PhysicalOh5File& file) {
         helper.insert_file_content(*entry_, file.path());
         long long file_id = entry_->id();
         
-        BOOST_FOREACH(oh5::Oh5Node& node, entry_->root()) {
+        BOOST_FOREACH(Oh5Node& node, entry_->root()) {
             helper.insert_node(file_id, node);
         }
 

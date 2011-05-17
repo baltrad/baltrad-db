@@ -34,7 +34,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 using ::testing::ReturnRef;
 
 namespace brfc {
-namespace oh5 {
 
 struct oh5_Oh5File_test : public testing::Test {
     oh5_Oh5File_test()
@@ -48,7 +47,7 @@ struct oh5_Oh5File_test : public testing::Test {
         ON_CALL(file, do_root())
             .WillByDefault(ReturnRef(root));
 
-        what = static_cast<Oh5Group*>(&root.add(new oh5::Oh5Group("what")));
+        what = static_cast<Oh5Group*>(&root.add(new Oh5Group("what")));
         what->add(new Oh5Attribute("object", Oh5Scalar("pvol")));
         what->add(new Oh5Attribute("date", Oh5Scalar(Date(2000, 1, 2))));
         what->add(new Oh5Attribute("time", Oh5Scalar(Time(12, 5))));
@@ -120,5 +119,4 @@ TEST_F(oh5_Oh5File_test, test_source_get) {
     EXPECT_EQ("", file.source().to_string());
 }
 
-} // namespace oh5
 } // namespace brfc

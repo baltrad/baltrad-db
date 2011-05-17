@@ -34,8 +34,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 namespace brfc {
-namespace oh5 {
-namespace hl {
 
 shared_ptr<const HlConverter>
 HlConverter::create_from_hlhdf_node(const HL_Node& node) {
@@ -169,6 +167,4 @@ HlStringConverter::do_convert(const Oh5Scalar& value) const {
                          const_cast<char*>(v.c_str())));
 }
 
-} // namespace hl
-} // namespace oh5
 } // namespace brfc

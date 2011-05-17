@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/extract_attr.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 class Oh5File;
 
@@ -45,7 +44,6 @@ class Oh5FileMatcher {
     Eval eval_;
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_FILE_MATCHER_HPP

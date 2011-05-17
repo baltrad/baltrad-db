@@ -74,42 +74,42 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
             , query() {
     }
 
-    void add_attribute(oh5::Oh5File& file,
+    void add_attribute(Oh5File& file,
                        std::string path,
-                       const oh5::Oh5Scalar& value) {
+                       const Oh5Scalar& value) {
         const std::string attr_name = path.substr(path.rfind('/') + 1);
         boost::erase_tail(path, attr_name.length() + 1);
 
-        oh5::Oh5Node& g = static_cast<oh5::Oh5Group&>(file.root()).get_or_create_group(path);
-        g.add(new oh5::Oh5Attribute(attr_name, value));
+        Oh5Node& g = static_cast<Oh5Group&>(file.root()).get_or_create_group(path);
+        g.add(new Oh5Attribute(attr_name, value));
     }
 
     virtual void SetUp() {
-        add_attribute(td1, "dataset1/where/xsize", oh5::Oh5Scalar(1));
-        add_attribute(td1, "dataset1/where/ysize", oh5::Oh5Scalar(2));
+        add_attribute(td1, "dataset1/where/xsize", Oh5Scalar(1));
+        add_attribute(td1, "dataset1/where/ysize", Oh5Scalar(2));
         tf1.write(td1);
         td1.path(tf1.path());
 
-        add_attribute(td2, "dataset1/where/xsize", oh5::Oh5Scalar(2));
-        add_attribute(td2, "dataset1/where/ysize", oh5::Oh5Scalar(2));
+        add_attribute(td2, "dataset1/where/xsize", Oh5Scalar(2));
+        add_attribute(td2, "dataset1/where/ysize", Oh5Scalar(2));
         tf2.write(td2);
         td2.path(tf2.path());
 
-        add_attribute(td3, "dataset1/where/xsize", oh5::Oh5Scalar(3));
-        add_attribute(td3, "dataset2/where/xsize", oh5::Oh5Scalar(3));
+        add_attribute(td3, "dataset1/where/xsize", Oh5Scalar(3));
+        add_attribute(td3, "dataset2/where/xsize", Oh5Scalar(3));
         tf3.write(td3);
         td3.path(tf3.path());
 
-        add_attribute(td4, "dataset1/where/xsize", oh5::Oh5Scalar(6));
-        add_attribute(td4, "dataset1/where/ysize", oh5::Oh5Scalar(4));
-        add_attribute(td4, "dataset2/where/ysize", oh5::Oh5Scalar(5));
+        add_attribute(td4, "dataset1/where/xsize", Oh5Scalar(6));
+        add_attribute(td4, "dataset1/where/ysize", Oh5Scalar(4));
+        add_attribute(td4, "dataset2/where/ysize", Oh5Scalar(5));
         tf4.write(td4);
         td4.path(tf4.path());
 
-        add_attribute(td5, "dataset1/where/xsize", oh5::Oh5Scalar(5));
-        add_attribute(td5, "dataset1/where/ysize", oh5::Oh5Scalar(2));
-        add_attribute(td5, "dataset2/where/xsize", oh5::Oh5Scalar(2));
-        add_attribute(td5, "dataset2/where/ysize", oh5::Oh5Scalar(5));
+        add_attribute(td5, "dataset1/where/xsize", Oh5Scalar(5));
+        add_attribute(td5, "dataset1/where/ysize", Oh5Scalar(2));
+        add_attribute(td5, "dataset2/where/xsize", Oh5Scalar(2));
+        add_attribute(td5, "dataset2/where/ysize", Oh5Scalar(5));
         tf5.write(td5);
         td5.path(tf5.path());
 
@@ -131,7 +131,7 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
     ExpressionFactory xpr;
     std::string src1, src2;
     test::TestRDB* db;
-    oh5::hl::HlFile td1, td2, td3, td4, td5;
+    HlFile td1, td2, td3, td4, td5;
     test::TempH5File tf1, tf2, tf3, tf4, tf5;
     scoped_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     FileQuery query;
@@ -310,7 +310,7 @@ TEST_P(db_FileQuery_itest, test_is_stored) {
 
 TEST_P(db_FileQuery_itest, test_has_nx_file) {
     bool result = false;
-    oh5::hl::HlFile td("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
+    HlFile td("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
     ASSERT_NO_THROW(result = db->is_stored(td));
     EXPECT_FALSE(result);
 }

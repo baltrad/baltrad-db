@@ -25,14 +25,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace oh5 {
-
 class Oh5File;
 
-} // namespace oh5
-
 /**
- * @brief ABC for hashing a oh5::File
+ * @brief ABC for hashing a File
  *
  * generated hash should uniquely identify the file
  */
@@ -58,7 +54,7 @@ class FileHasher {
     /**
      * @brief hash a file
      */
-    std::string hash(const oh5::Oh5File& file) const {
+    std::string hash(const Oh5File& file) const {
         return do_hash(file);
     }
 
@@ -76,7 +72,7 @@ class FileHasher {
 
 
   protected:
-    virtual std::string do_hash(const oh5::Oh5File& file) const = 0;
+    virtual std::string do_hash(const Oh5File& file) const = 0;
   
   private:
     std::string name_;

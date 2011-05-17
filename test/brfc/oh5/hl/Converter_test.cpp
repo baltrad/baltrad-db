@@ -30,8 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test_common.hpp>
 
 namespace brfc {
-namespace oh5 {
-namespace hl {
 
 namespace {
 
@@ -208,6 +206,4 @@ TEST(oh5_HlStringConverter_test, test_convert_variant) {
 }
 
 
-} // namespace hl
-} // namespace oh5
 } // namespace brfc

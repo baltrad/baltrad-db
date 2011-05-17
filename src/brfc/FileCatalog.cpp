@@ -62,23 +62,23 @@ FileCatalog::storage(LocalStorage* storage) {
 
 bool
 FileCatalog::is_stored(const std::string& path) const {
-    oh5::hl::HlFile f(path);
+    HlFile f(path);
     return is_stored(f);
 }
 
 bool
-FileCatalog::is_stored(const oh5::PhysicalOh5File& f) const {
+FileCatalog::is_stored(const PhysicalOh5File& f) const {
     return db_->is_stored(f);
 }
 
 FileEntry*
 FileCatalog::store(const std::string& path) {
-    oh5::hl::HlFile f(path);
+    HlFile f(path);
     return store(f); 
 }
 
 FileEntry*
-FileCatalog::store(const oh5::PhysicalOh5File& file) {
+FileCatalog::store(const PhysicalOh5File& file) {
     auto_ptr<FileEntry> e(db_->store(file));
     try {
         storage_->prestore(*e, file.path());
@@ -91,12 +91,12 @@ FileCatalog::store(const oh5::PhysicalOh5File& file) {
 
 FileEntry*
 FileCatalog::get_or_store(const std::string& path) {
-    oh5::hl::HlFile f(path);
+    HlFile f(path);
     return get_or_store(f);
 }
 
 FileEntry*
-FileCatalog::get_or_store(const oh5::PhysicalOh5File& file) {
+FileCatalog::get_or_store(const PhysicalOh5File& file) {
     auto_ptr<FileEntry> e(db_->get_or_store(file));
     try {
         storage_->prestore(*e, file.path());

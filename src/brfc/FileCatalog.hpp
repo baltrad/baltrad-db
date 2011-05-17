@@ -26,14 +26,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
  * @brief main namespace
  */
 namespace brfc {
-    
     class Database;
     class FileEntry;
     class LocalStorage;
-
-    namespace oh5 {
-        class PhysicalOh5File;
-    }
+    class PhysicalOh5File;
 }
 
 namespace brfc {
@@ -42,11 +38,11 @@ namespace brfc {
  * @brief indexes and stores ODIM_H5 File instances
  *
  * @note there are several similar methods accepting file as as a path string
- *       or oh5::PhysicalFile instance. Methods accepting file path are mostly
+ *       or PhysicalFile instance. Methods accepting file path are mostly
  *       just short-hands for loading the file from filesystem and then passing
- *       it to the method accepting oh5::PhysicalFile instance. If you want to
+ *       it to the method accepting PhysicalFile instance. If you want to
  *       call several methods on the same file, it's more efficient to create
- *       the oh5::PhysicalFile instance yourself.
+ *       the PhysicalFile instance yourself.
  */
 class FileCatalog {
   public:
@@ -98,17 +94,17 @@ class FileCatalog {
      * 
      * this is a short-hand for:
      * @code
-     * is_stored(oh5::hl::HlFile(path));
+     * is_stored(HlFile(path));
      * @endcode
      *
      * @sa File::unique_identifier
-     * @sa is_stored(const oh5::PhysicalFile&) const
+     * @sa is_stored(const PhysicalFile&) const
      */
     bool is_stored(const std::string& path) const;
     
     /**
      * @brief has file been imported to this catalog
-     * @param file oh5::PhysicalFile instance to test
+     * @param file PhysicalFile instance to test
      * @throw db_error if database query fails
      * @return true if file is stored
      *
@@ -116,7 +112,7 @@ class FileCatalog {
      * already present in database. For the exact rules on how the unique id
      * is determined, refer to File documentation.
      */
-    bool is_stored(const oh5::PhysicalOh5File& f) const;
+    bool is_stored(const PhysicalOh5File& f) const;
     
     /**
      * @brief import file to catalog
@@ -129,16 +125,16 @@ class FileCatalog {
      *
      * this is a short-hand for:
      * @code
-     * store(oh5::hl::HlFile(path));
+     * store(HlFile(path));
      * @endcode
      *
-     * @sa store(oh5::PhysicalFile& file)
+     * @sa store(PhysicalFile& file)
      */
     FileEntry* store(const std::string& path);
     
     /**
      * @brief import file to catalog
-     * @param file oh5::PhysicalFile instance to import
+     * @param file PhysicalFile instance to import
      * @return FileEntry instance of the stored file
      * @throw db_error if storing file to database fails
      * @throw duplicate_entry if file has already been stored
@@ -149,7 +145,7 @@ class FileCatalog {
      * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
      * is considered failed.
      */
-    FileEntry* store(const oh5::PhysicalOh5File& file);
+    FileEntry* store(const PhysicalOh5File& file);
     
     /**
      * @brief get FileEntry for a file, storing it if necessary
@@ -161,14 +157,14 @@ class FileCatalog {
      *
      * this is a short-hand for:
      * @code
-     * store(oh5::hl::HlFile(path))
+     * store(HlFile(path))
      * @endcode
      */
     FileEntry* get_or_store(const std::string& path);
 
     /**
      * @brief get FileEntry for a file, storing it if necessary
-     * @param file oh5::PhysicalFile instance to get the entry for
+     * @param file PhysicalFile instance to get the entry for
      * @return FileEntry instance for the file
      * @throw db_error if storing file to database fails
      * @note caller takes ownership of the entry
@@ -179,7 +175,7 @@ class FileCatalog {
      * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
      * is considered failed.
      */
-    FileEntry* get_or_store(const oh5::PhysicalOh5File& file);
+    FileEntry* get_or_store(const PhysicalOh5File& file);
     
     /**
      * @brief remove file from catalog

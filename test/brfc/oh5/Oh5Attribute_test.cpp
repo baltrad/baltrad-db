@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test_common.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 struct oh5_Oh5Attribute_test : public ::testing::Test {
   public:
@@ -59,5 +58,4 @@ TEST_F(oh5_Oh5Attribute_test, test_accepts_child_Attribute) {
     EXPECT_FALSE(attr.accepts_child(node));
 }
 
-} // namepsace oh5
 } // namespace brfc

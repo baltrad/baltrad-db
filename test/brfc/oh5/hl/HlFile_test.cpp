@@ -35,8 +35,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test_common.hpp>
 
 namespace brfc {
-namespace oh5 {
-namespace hl {
 
 struct oh5_hl_HlFile_test : public testing::Test {
     oh5_hl_HlFile_test() {
@@ -82,6 +80,4 @@ TEST_F(oh5_hl_HlFile_test, test_load_from_filesystem) {
     EXPECT_TRUE(dynamic_cast<Oh5DataSet*>(root.child("data1/data")) != 0);
 }
 
-} // namespace hl
-} // namespace oh5
 } // namespace brfc

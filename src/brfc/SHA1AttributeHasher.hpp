@@ -26,11 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace oh5 {
-
 class Oh5Attribute;
-
-} // namespace oh5
 
 /**
  * @brief generate SHA-1 hash of ODIM_H5 metadata attributes
@@ -41,7 +37,7 @@ class SHA1AttributeHasher : public FileHasher {
 
     virtual ~SHA1AttributeHasher();
 
-    static std::string attribute_string(const oh5::Oh5Attribute& attr);
+    static std::string attribute_string(const Oh5Attribute& attr);
 
     static std::string sha1hash(const std::string& str);
   
@@ -56,7 +52,7 @@ class SHA1AttributeHasher : public FileHasher {
      * @note changes to this algorithm most probably trigger the need to
      *       re-evaluate all files in the database hashed using this hasher.
      */
-    virtual std::string do_hash(const oh5::Oh5File& file) const;
+    virtual std::string do_hash(const Oh5File& file) const;
 };
 
 } // namespace brfc

@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/MemoryOh5NodeBackend.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 class FakeOh5File : public Oh5File {
   public:
@@ -37,8 +36,6 @@ class FakeOh5File : public Oh5File {
     MemoryOh5NodeBackend backend_;
 };
 
-} // namespace oh5
 } // namepsace brfc
-
 
 #endif // BRFC_OH5_FAKE_FILE_HPP

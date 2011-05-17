@@ -60,16 +60,16 @@ namespace {
 
 class GatherHLNodes {
   public:
-    typedef mpl::vector<const oh5::Oh5DataSet,
-                        const oh5::Oh5Group,
-                        const oh5::Oh5Attribute> accepted_types;
+    typedef mpl::vector<const Oh5DataSet,
+                        const Oh5Group,
+                        const Oh5Attribute> accepted_types;
     
     GatherHLNodes()
         : nodes_(HLNodeList_new(), &HLNodeList_free) {
 
     }
 
-    void operator()(const oh5::Oh5DataSet& dataset) {
+    void operator()(const Oh5DataSet& dataset) {
         const std::string& path = dataset.path();
 
         // create node
@@ -86,7 +86,7 @@ class GatherHLNodes {
         HLNode_setArrayValue(node, sizeof(int), 1, dims, (unsigned char*)array, "int", -1);
     }
 
-    void operator()(const oh5::Oh5Group& group) {
+    void operator()(const Oh5Group& group) {
         const std::string& path = group.path();
 
         // create node
@@ -100,7 +100,7 @@ class GatherHLNodes {
     }
 
 
-    void operator()(const oh5::Oh5Attribute& attr) {
+    void operator()(const Oh5Attribute& attr) {
         const std::string& path = attr.path();
 
         // create node
@@ -114,19 +114,19 @@ class GatherHLNodes {
         }
 
         // convert and set value
-        oh5::hl::HL_Data d = convert(attr.value());
+        HL_Data d = convert(attr.value());
         HLNode_setScalarValue(node, d.size(), d.data(), d.type(), -1);
     }
 
-    oh5::hl::HL_Data
-    convert(const oh5::Oh5Scalar& value) {
+    HL_Data
+    convert(const Oh5Scalar& value) {
         switch (value.type()) {
-            case oh5::Oh5Scalar::DOUBLE:
-                return oh5::hl::HlDoubleConverter().convert(value);
-            case oh5::Oh5Scalar::INT64:
-                return oh5::hl::HlInt64Converter().convert(value);
-            case oh5::Oh5Scalar::STRING:
-                return oh5::hl::HlStringConverter().convert(value);
+            case Oh5Scalar::DOUBLE:
+                return HlDoubleConverter().convert(value);
+            case Oh5Scalar::INT64:
+                return HlInt64Converter().convert(value);
+            case Oh5Scalar::STRING:
+                return HlStringConverter().convert(value);
             default:
                 throw std::runtime_error("could not convert");
         }
@@ -160,10 +160,10 @@ TempH5File::copy(const std::string& dest) const {
 }
 
 void
-TempH5File::write(const oh5::Oh5File& file) {
+TempH5File::write(const Oh5File& file) {
     GatherHLNodes node_gather;
     
-    oh5::Oh5Node::const_iterator iter = file.root().begin();
+    Oh5Node::const_iterator iter = file.root().begin();
     
     ++iter; // skip root
     for ( ; iter != file.root().end(); ++iter) {

@@ -31,16 +31,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
     class FileHasher;
+    class Oh5Attribute;
+    class Oh5Group;
+    class Oh5Node;
+    class PhysicalOh5File;
+    class Oh5Source;
     class RdbFileEntry;
     class RdbOh5NodeBackend;
-
-    namespace oh5 {
-        class Oh5Attribute;
-        class Oh5Group;
-        class Oh5Node;
-        class PhysicalOh5File;
-        class Oh5Source;
-    }
 
     namespace sql {
         class Connection;
@@ -69,14 +66,14 @@ class RdbHelper : boost::noncopyable {
      * @param node the node to get the backend from
      * @throw runtime_error if no backend or backend is not RdbOh5NodeBackend
      */
-    RdbOh5NodeBackend& backend(oh5::Oh5Node& node) const;
+    RdbOh5NodeBackend& backend(Oh5Node& node) const;
 
     /**
      * @brief access RdbNodeBacked on @c node
      * @param node the node to get the backend from
      * @throw runtime_error if no backend or backend is not RdbOh5NodeBackend
      */
-    const RdbOh5NodeBackend& backend(const oh5::Oh5Node& node) const;
+    const RdbOh5NodeBackend& backend(const Oh5Node& node) const;
 
     /**
      * @brief insert @c node to database
@@ -84,20 +81,20 @@ class RdbHelper : boost::noncopyable {
      * @pre node is associated with RdbFileEntry (and it has database id)
      * @post node backend has database id
      *
-     * if @c node is oh5::Attribute, call insert_attribute
+     * if @c node is Attribute, call insert_attribute
      */
-    void insert_node(long long file_id, oh5::Oh5Node& node);
+    void insert_node(long long file_id, Oh5Node& node);
     
     /**
      * @brief insert @c attr to database
      * @param attr the attribute to insert
      * @pre node backend has database id
      *
-     * if attribute value is of type oh5::Scalar::STRING, check if it
+     * if attribute value is of type Scalar::STRING, check if it
      * is convertible to bool, Date and Time and store the value for all
      * successful conversions.
      */
-    void insert_attribute(oh5::Oh5Attribute& attr);
+    void insert_attribute(Oh5Attribute& attr);
     
     /**
      * @brief insert @c entry to database
@@ -106,7 +103,7 @@ class RdbHelper : boost::noncopyable {
      * @post entry has database id
      */
     void insert_file(RdbFileEntry& entry,
-                             const oh5::PhysicalOh5File& file);
+                             const PhysicalOh5File& file);
     
     /**
      * @brief insert file content to database
@@ -125,7 +122,7 @@ class RdbHelper : boost::noncopyable {
      * m::source_kvs is queryied for key/value pairs defined in source.
      * A source is considered found when exactly one database id is found.
      */
-    long long select_source_id(const oh5::Oh5Source& source);
+    long long select_source_id(const Oh5Source& source);
     
     /**
      * @brief lookup id for the root node of @c entry
@@ -139,7 +136,7 @@ class RdbHelper : boost::noncopyable {
      * @return source with all key/value pairs defined in database or
      *         empty source if not found
      */
-    oh5::Oh5Source select_source(long long id);
+    Oh5Source select_source(long long id);
     
     /**
      * @brief load @c entry from database
@@ -151,15 +148,15 @@ class RdbHelper : boost::noncopyable {
      * @brief load all child nodes of @c node from database
      * @pre node has database id
      */
-    void load_children(oh5::Oh5Node& node);
+    void load_children(Oh5Node& node);
 
-    std::vector<oh5::Oh5Source> select_all_sources();
+    std::vector<Oh5Source> select_all_sources();
 
-    void add_source(const oh5::Oh5Source& source);
+    void add_source(const Oh5Source& source);
 
-    void update_source(const oh5::Oh5Source& source);
+    void update_source(const Oh5Source& source);
 
-    void remove_source(const oh5::Oh5Source& source);
+    void remove_source(const Oh5Source& source);
 
   private:
     long long last_id(sql::Result& result);

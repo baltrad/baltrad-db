@@ -25,8 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace oh5 {
-
 class Oh5Group;
 
 /**
@@ -82,8 +80,6 @@ class Oh5Attribute : public Oh5Node {
     Oh5Scalar value_;
 };
 
-
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_ATTRIBUTE_H

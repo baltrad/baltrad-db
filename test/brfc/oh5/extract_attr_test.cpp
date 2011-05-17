@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/FakeOh5File.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 struct oh5_extract_attr_test : public ::testing::Test {
     oh5_extract_attr_test()
@@ -92,5 +91,4 @@ TEST_F(oh5_extract_attr_test, test_source_part_missing) {
     EXPECT_EQ(0u, out.size());
 }
 
-} // namespace oh5
 } // namespace brfc

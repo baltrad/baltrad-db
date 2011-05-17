@@ -25,16 +25,12 @@ extern "C" {
 }
 
 namespace brfc {
-namespace oh5 {
-namespace hl {
 
 /**
  * @brief initialize HL-HDF library if not already initialized
  */
 void init_hlhdflib();
 
-} // namespace hl
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_HL_HLHDF_HPP

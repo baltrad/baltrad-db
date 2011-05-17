@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Node.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 /**
  * ODIM_H5 dataset
@@ -45,7 +44,6 @@ class Oh5DataSet : public Oh5Node {
     virtual Oh5Node* do_clone() const;
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_DATA_SET_HPP

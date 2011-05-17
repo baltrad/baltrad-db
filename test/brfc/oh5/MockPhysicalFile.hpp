@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/PhysicalOh5File.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 class MockPhysicalFile : public PhysicalOh5File {
   public:
@@ -33,7 +32,6 @@ class MockPhysicalFile : public PhysicalOh5File {
     MOCK_CONST_METHOD0(do_path, const std::string&());
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_MOCK_PHYSICAL_FILE_HPP

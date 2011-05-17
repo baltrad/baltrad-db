@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/noncopyable.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 class Oh5Node;
 
@@ -69,7 +68,7 @@ class Oh5NodeBackend : public boost::noncopyable {
     /**
      * @brief test if this backend owns @c node
      */
-    bool has(const oh5::Oh5Node& node) const {
+    bool has(const Oh5Node& node) const {
         return do_has(node);
     }
 
@@ -158,7 +157,6 @@ class Oh5NodeBackend : public boost::noncopyable {
     virtual std::vector<const Oh5Node*> do_children(const Oh5Node& node) const = 0;
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_NODE_BACKEND_HPP

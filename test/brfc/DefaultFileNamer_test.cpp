@@ -44,7 +44,7 @@ class DefaultFileNamer_test : public ::testing::Test {
             : namer()
             , node_backend()
             , root(node_backend.root())
-            , what(node_backend.add(node_backend.root(), new oh5::Oh5Group("what")))
+            , what(node_backend.add(node_backend.root(), new Oh5Group("what")))
             , file()
             , entry() {
     }
@@ -57,20 +57,20 @@ class DefaultFileNamer_test : public ::testing::Test {
         ON_CALL(file, do_root())
             .WillByDefault(ReturnRef(root));
         
-        what.add(new oh5::Oh5Attribute("object", oh5::Oh5Scalar("pvol")));
-        what.add(new oh5::Oh5Attribute("date", oh5::Oh5Scalar(Date(2010, 11, 12))));
-        what.add(new oh5::Oh5Attribute("time", oh5::Oh5Scalar(Time(14, 15))));
+        what.add(new Oh5Attribute("object", Oh5Scalar("pvol")));
+        what.add(new Oh5Attribute("date", Oh5Scalar(Date(2010, 11, 12))));
+        what.add(new Oh5Attribute("time", Oh5Scalar(Time(14, 15))));
     }
     
     DefaultFileNamer namer;
-    oh5::MemoryOh5NodeBackend node_backend;
-    oh5::Oh5Node& root, &what;
-    ::testing::NiceMock<oh5::MockOh5File> file;
+    MemoryOh5NodeBackend node_backend;
+    Oh5Node& root, &what;
+    ::testing::NiceMock<MockOh5File> file;
     ::testing::NiceMock<MockFileEntry> entry;
 };
 
 TEST_F(DefaultFileNamer_test, name_file) {
-    what.add(new oh5::Oh5Attribute("source", oh5::Oh5Scalar("_name:seang")));
+    what.add(new Oh5Attribute("source", Oh5Scalar("_name:seang")));
     
     EXPECT_EQ("pvol_seang_20101112T141500Z.h5", namer.name(file));
 }
@@ -80,10 +80,10 @@ TEST_F(DefaultFileNamer_test, name_file_unknown_source) {
 }
 
 TEST_F(DefaultFileNamer_test, name_entry) {
-    what.add(new oh5::Oh5Attribute("source", oh5::Oh5Scalar("_name:seang")));
+    what.add(new Oh5Attribute("source", Oh5Scalar("_name:seang")));
 
     ON_CALL(entry, do_source())
-        .WillByDefault(Return(oh5::Oh5Source::from_string("_name:seang")));
+        .WillByDefault(Return(Oh5Source::from_string("_name:seang")));
 
     EXPECT_EQ(namer.name(entry), "pvol_seang_20101112T141500Z_abcd0123.h5");
 }

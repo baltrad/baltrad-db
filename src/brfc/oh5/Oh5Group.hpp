@@ -24,8 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace oh5 {
-
 class Oh5Attribute;
 
 /**
@@ -102,7 +100,6 @@ class Oh5Group : public Oh5Node {
     virtual Oh5Node* do_clone() const;
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_GROUP_HPP

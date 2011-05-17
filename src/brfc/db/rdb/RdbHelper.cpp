@@ -55,35 +55,35 @@ namespace brfc {
 
 namespace {
 
-oh5::Oh5Scalar
+Oh5Scalar
 variant_to_oh5_scalar(const Variant& value) {
     switch (value.type()) {
         case Variant::STRING:
-            return oh5::Oh5Scalar(value.string());
+            return Oh5Scalar(value.string());
         case Variant::INT64:
-            return oh5::Oh5Scalar(value.int64_());
+            return Oh5Scalar(value.int64_());
         case Variant::DOUBLE:
-            return oh5::Oh5Scalar(value.double_());
+            return Oh5Scalar(value.double_());
         case Variant::BOOL:
-            return oh5::Oh5Scalar(value.bool_());
+            return Oh5Scalar(value.bool_());
         case Variant::DATE:
-            return oh5::Oh5Scalar(value.date());
+            return Oh5Scalar(value.date());
         case Variant::TIME:
-            return oh5::Oh5Scalar(value.time());
+            return Oh5Scalar(value.time());
         default:
             break;
     }
-    throw std::runtime_error("invalid Variant to oh5::Scalar");
+    throw std::runtime_error("invalid Variant to Scalar");
 }
 
 Expression
-attr_sql_value(const oh5::Oh5Attribute& attr) {
+attr_sql_value(const Oh5Attribute& attr) {
     switch (attr.value().type()) {
-        case oh5::Oh5Scalar::STRING:
+        case Oh5Scalar::STRING:
             return Expression(attr.value().string());
-        case oh5::Oh5Scalar::INT64:
+        case Oh5Scalar::INT64:
             return Expression(attr.value().int64_());
-        case oh5::Oh5Scalar::DOUBLE:
+        case Oh5Scalar::DOUBLE:
             return Expression(attr.value().double_());
         default:
             break;
@@ -92,25 +92,25 @@ attr_sql_value(const oh5::Oh5Attribute& attr) {
 }
 
 long long
-node_sql_type(const oh5::Oh5Node& node) {
-    if (dynamic_cast<const oh5::Oh5Group*>(&node) != 0)
+node_sql_type(const Oh5Node& node) {
+    if (dynamic_cast<const Oh5Group*>(&node) != 0)
         return 1;
-    else if (dynamic_cast<const oh5::Oh5Attribute*>(&node) != 0)
+    else if (dynamic_cast<const Oh5Attribute*>(&node) != 0)
         return 2;
-    else if (dynamic_cast<const oh5::Oh5DataSet*>(&node) != 0)
+    else if (dynamic_cast<const Oh5DataSet*>(&node) != 0)
         return 3;
     else
         BRFC_ASSERT(false);
 }
 
 std::string
-attr_sql_column(const oh5::Oh5Attribute& attr) {
+attr_sql_column(const Oh5Attribute& attr) {
     switch (attr.value().type()) {
-        case oh5::Oh5Scalar::STRING:
+        case Oh5Scalar::STRING:
             return "value_str";
-        case oh5::Oh5Scalar::INT64:
+        case Oh5Scalar::INT64:
             return "value_int";
-        case oh5::Oh5Scalar::DOUBLE:
+        case Oh5Scalar::DOUBLE:
             return "value_double";
         default:
             break;
@@ -144,12 +144,12 @@ RdbHelper::conn() {
 }
 
 RdbOh5NodeBackend&
-RdbHelper::backend(oh5::Oh5Node& node) const {
+RdbHelper::backend(Oh5Node& node) const {
     return dynamic_cast<RdbOh5NodeBackend&>(node.backend());
 }
 
 const RdbOh5NodeBackend&
-RdbHelper::backend(const oh5::Oh5Node& node) const {
+RdbHelper::backend(const Oh5Node& node) const {
     return dynamic_cast<const RdbOh5NodeBackend&>(node.backend());
 }
 
@@ -179,13 +179,13 @@ RdbHelper::compile_insert_node_query() {
 }
 
 void
-RdbHelper::insert_node(long long file_id, oh5::Oh5Node& node) {
+RdbHelper::insert_node(long long file_id, Oh5Node& node) {
     if (not insert_node_qry_)
         compile_insert_node_query();
     
     sql::Connection::BindMap_t binds;
     Expression parent_id;
-    const oh5::Oh5Node* parent = node.parent();
+    const Oh5Node* parent = node.parent();
     if (parent) {
         parent_id = Expression(backend(*parent).id(*parent));
     }
@@ -199,7 +199,7 @@ RdbHelper::insert_node(long long file_id, oh5::Oh5Node& node) {
     long long db_id = last_id(*result);
     backend(node).id(node, db_id);
 
-    if (oh5::Oh5Attribute* attr = dynamic_cast<oh5::Oh5Attribute*>(&node)) {
+    if (Oh5Attribute* attr = dynamic_cast<Oh5Attribute*>(&node)) {
         insert_attribute(*attr);
     }
 
@@ -222,14 +222,14 @@ RdbHelper::compile_insert_attr_query() {
 }
 
 void
-RdbHelper::insert_attribute(oh5::Oh5Attribute& attr) {
+RdbHelper::insert_attribute(Oh5Attribute& attr) {
     if (not insert_attr_qry_)
         compile_insert_attr_query();
     
     sql::Connection::BindMap_t binds;
     binds["node_id"] = Expression(backend(attr).id(attr));
     binds[attr_sql_column(attr)] = attr_sql_value(attr);
-    if (attr.value().type() == oh5::Oh5Scalar::STRING) {
+    if (attr.value().type() == Oh5Scalar::STRING) {
         try {
             bool val = attr.value().to_bool();
             binds["value_bool"] = Expression(val);
@@ -251,7 +251,7 @@ RdbHelper::insert_attribute(oh5::Oh5Attribute& attr) {
 
 void
 RdbHelper::insert_file(RdbFileEntry& entry,
-                       const oh5::PhysicalOh5File& file) {
+                       const PhysicalOh5File& file) {
     long long source_id = select_source_id(file.source());
 
     boost::uuids::basic_random_generator<boost::mt19937> gen;
@@ -365,7 +365,7 @@ RdbHelper::select_root_id(const RdbFileEntry& entry) {
 }
 
 long long
-RdbHelper::select_source_id(const oh5::Oh5Source& src) {
+RdbHelper::select_source_id(const Oh5Source& src) {
     sql::Select qry;
     qry.distinct(true);
     qry.what(m::sources::column("id"));
@@ -396,7 +396,7 @@ RdbHelper::select_source_id(const oh5::Oh5Source& src) {
         return 0;
 }
 
-oh5::Oh5Source
+Oh5Source
 RdbHelper::select_source(long long id) {
     sql::Select qry;
     qry.what(m::source_kvs::column("key"));
@@ -406,7 +406,7 @@ RdbHelper::select_source(long long id) {
 
     scoped_ptr<sql::Result> r(conn().execute(qry));
 
-    oh5::Oh5Source src;
+    Oh5Source src;
     
     while (r->next()) {
         src.add(r->value_at("key").string(), r->value_at("value").string());
@@ -428,7 +428,7 @@ RdbHelper::select_source(long long id) {
     return src;
 }
 
-std::vector<oh5::Oh5Source>
+std::vector<Oh5Source>
 RdbHelper::select_all_sources() {
     sql::Select qry;
     qry.from(sql_.table(m::sources::name()));
@@ -447,9 +447,9 @@ RdbHelper::select_all_sources() {
 
     scoped_ptr<sql::Result> r(conn().execute(qry));
 
-    oh5::Oh5Source src;
+    Oh5Source src;
     long long prev_id = 0, id = 0;
-    std::vector<oh5::Oh5Source> sources;
+    std::vector<Oh5Source> sources;
     while (r->next()) {
         id = r->value_at("id").int64_();
         if (id != prev_id) {
@@ -470,7 +470,7 @@ RdbHelper::select_all_sources() {
 }
 
 void
-RdbHelper::add_source(const oh5::Oh5Source& source) {
+RdbHelper::add_source(const Oh5Source& source) {
     scoped_ptr<sql::Result> r;
     try {
         conn().begin();
@@ -497,7 +497,7 @@ RdbHelper::add_source(const oh5::Oh5Source& source) {
 }
 
 void
-RdbHelper::update_source(const oh5::Oh5Source& source) {
+RdbHelper::update_source(const Oh5Source& source) {
     long long id = boost::lexical_cast<long long>(source.get("_id"));
     scoped_ptr<sql::Result> r;
     try {
@@ -536,7 +536,7 @@ RdbHelper::update_source(const oh5::Oh5Source& source) {
 }
 
 void
-RdbHelper::remove_source(const oh5::Oh5Source& source) {
+RdbHelper::remove_source(const Oh5Source& source) {
     Expression stmt = Listcons().string("DELETE FROM bdb_sources WHERE id=")
                                 .append(sql_.bind("id"))
                                 .get();
@@ -548,7 +548,7 @@ RdbHelper::remove_source(const oh5::Oh5Source& source) {
 }
 
 void
-RdbHelper::load_children(oh5::Oh5Node& node) {
+RdbHelper::load_children(Oh5Node& node) {
     sql::Select qry;
     qry.from(sql_.table(m::nodes::name()));
     qry.outerjoin(
@@ -582,28 +582,28 @@ RdbHelper::load_children(oh5::Oh5Node& node) {
         long long id = r->value_at("id").int64_();
         long long type = r->value_at("type").int64_();
 
-        auto_ptr<oh5::Oh5Node> child;
+        auto_ptr<Oh5Node> child;
         if (type == 1) { // GROUP
-            child.reset(new oh5::Oh5Group(name));
+            child.reset(new Oh5Group(name));
         } else if (type == 2) { // ATTRIBUTE
-            oh5::Oh5Scalar value(0);
+            Oh5Scalar value(0);
             if (not r->value_at("value_str").is_null()) {
-                value = oh5::Oh5Scalar(r->value_at("value_str").string());
+                value = Oh5Scalar(r->value_at("value_str").string());
             } else if (not r->value_at("value_int").is_null()) {
-                value = oh5::Oh5Scalar(r->value_at("value_int").int64_());
+                value = Oh5Scalar(r->value_at("value_int").int64_());
             } else if (not r->value_at("value_double").is_null()) {
-                value = oh5::Oh5Scalar(r->value_at("value_double").double_());
+                value = Oh5Scalar(r->value_at("value_double").double_());
             } else {
                 BRFC_ASSERT(false);
             }
-            child.reset(new oh5::Oh5Attribute(name, value));
+            child.reset(new Oh5Attribute(name, value));
         } else if (type == 3) { // DATASET
-            child.reset(new oh5::Oh5DataSet(name));
+            child.reset(new Oh5DataSet(name));
         } else {
             BRFC_ASSERT(false);
         }
         
-        oh5::Oh5Node& c = be.add(node, child.release());
+        Oh5Node& c = be.add(node, child.release());
         be.id(c, id);
         be.loaded(c, false);
     }

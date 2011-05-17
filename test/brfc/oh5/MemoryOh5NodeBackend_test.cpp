@@ -28,7 +28,6 @@ using ::testing::_;
 using ::testing::Return;
 
 namespace brfc {
-namespace oh5 {
 
 class oh5_MemoryOh5NodeBackend_test : public ::testing::Test {
   public:
@@ -99,5 +98,4 @@ TEST_F(oh5_MemoryOh5NodeBackend_test, test_children) {
     EXPECT_EQ(n, children.at(0));
 }
 
-} // namespace oh5
 } // namespace brfc

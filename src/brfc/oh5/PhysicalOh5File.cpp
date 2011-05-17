@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/PhysicalOh5File.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 std::string
 PhysicalOh5File::name() const {
@@ -29,5 +28,4 @@ PhysicalOh5File::name() const {
     return idx == std::string::npos ? p : p.substr(idx + 1);
 }
 
-} // namespace oh5
 } // namespace brfc

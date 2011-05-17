@@ -42,12 +42,12 @@ class DefaultFileNamer : public FileNamer {
      *   - @c timestamp is the value of "/what/date" and "/what/time" formatted
      *     as @c yyyyMMddThhmmssZ
      */
-    virtual std::string do_name(const oh5::Oh5File& file) const;
+    virtual std::string do_name(const Oh5File& file) const;
 
     /**
      * @brief name a FileEntry
      *
-     * use the name given by name(const oh5::File&), but inject the first group
+     * use the name given by name(const File&), but inject the first group
      * of the uuid before the file extension.
      */
     virtual std::string do_name(const FileEntry& entry) const;

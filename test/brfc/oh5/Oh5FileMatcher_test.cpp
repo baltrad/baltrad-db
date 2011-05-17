@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5FileMatcher.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 struct oh5_Oh5FileMatcher_test : public ::testing::Test {
     oh5_Oh5FileMatcher_test()
@@ -116,7 +115,4 @@ TEST_F(oh5_Oh5FileMatcher_test, test_or) {
     EXPECT_FALSE(matcher.match(f1, e2));
 }
 
-
-
-} // namespace oh5
 } // namespace brfc

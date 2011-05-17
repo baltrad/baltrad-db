@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5File.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 class PhysicalOh5File : public Oh5File {
   public:
@@ -42,7 +41,6 @@ class PhysicalOh5File : public Oh5File {
     virtual const std::string& do_path() const = 0;
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_PHSYICAL_FILE_HPP

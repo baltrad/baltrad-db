@@ -30,14 +30,11 @@ namespace brfc {
 
     class AttributeMapper;
     class FileHasher;
+    class Oh5File;
+    class Oh5Source;
     class RdbHelper;
     class Url;
     class Variant;
-
-    namespace oh5 {
-        class Oh5File;
-        class Oh5Source;
-    }
 
     namespace sql {
         class Connection;
@@ -89,21 +86,21 @@ class RelationalDatabase : public Database {
     /**
      * @brief check if file hash is unique in database
      */
-    virtual bool do_is_stored(const oh5::PhysicalOh5File& file);
+    virtual bool do_is_stored(const PhysicalOh5File& file);
     virtual bool do_remove(const FileEntry& entry);
 
-    virtual FileEntry* do_store(const oh5::PhysicalOh5File& file);
-    virtual FileEntry* do_entry_by_file(const oh5::PhysicalOh5File& file);
+    virtual FileEntry* do_store(const PhysicalOh5File& file);
+    virtual FileEntry* do_entry_by_file(const PhysicalOh5File& file);
     virtual FileEntry* do_entry_by_uuid(const std::string& uuid);
     
     virtual FileResult* do_execute(const FileQuery& query);
 
     virtual AttributeResult* do_execute(const AttributeQuery& query);
 
-    virtual std::vector<oh5::Oh5Source> do_sources() const;
-    virtual void do_add_source(const oh5::Oh5Source& source);
-    virtual void do_update_source(const oh5::Oh5Source& source);
-    virtual void do_remove_source(const oh5::Oh5Source& source);
+    virtual std::vector<Oh5Source> do_sources() const;
+    virtual void do_add_source(const Oh5Source& source);
+    virtual void do_update_source(const Oh5Source& source);
+    virtual void do_remove_source(const Oh5Source& source);
 
   private:
     void populate_mapper();

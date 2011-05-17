@@ -30,11 +30,8 @@ extern "C" {
 #include <brfc/smart_ptr.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 class Oh5Scalar;
-
-namespace hl {
 
 /**
  * @brief HLHDF scalar data as raw byte array
@@ -183,8 +180,6 @@ class HlDoubleConverter : public HlConverter {
     virtual HL_Data do_convert(const Oh5Scalar& value) const;
 };
 
-} // namespace hl
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_HL_CONVERTER_HPP

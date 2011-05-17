@@ -93,7 +93,7 @@ Benchmark::do_execute(Database& db) {
     boost::timer timer;
 
     // read the "template" file
-    oh5::hl::HlFile f(infile_);
+    HlFile f(infile_);
     double load_secs = timer.elapsed();
 
     DateTime dt(Date(3000, 1, 1));
@@ -104,8 +104,8 @@ Benchmark::do_execute(Database& db) {
     boost::progress_display progress(iterations_);
 
     for (int i=0; i < iterations_; ++i) {
-        f.root().attribute("what/date")->value(oh5::Oh5Scalar(dt.date()));
-        f.root().attribute("what/time")->value(oh5::Oh5Scalar(dt.time()));
+        f.root().attribute("what/date")->value(Oh5Scalar(dt.date()));
+        f.root().attribute("what/time")->value(Oh5Scalar(dt.time()));
 
         timer.restart();
         stored_files.push_back(db.store(f));

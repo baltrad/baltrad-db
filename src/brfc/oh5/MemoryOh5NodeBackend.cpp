@@ -38,7 +38,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace mi = boost::multi_index;
 
 namespace brfc {
-namespace oh5 {
 
 struct MemoryOh5NodeBackend::Impl {
 
@@ -88,7 +87,7 @@ struct MemoryOh5NodeBackend::Impl {
 
     }
 
-    void add(oh5::Oh5Node* _node) {
+    void add(Oh5Node* _node) {
         std::auto_ptr<Oh5Node> node(_node);
         if (not entries.insert(_node).second)
             throw duplicate_entry(node->path());
@@ -104,7 +103,7 @@ struct MemoryOh5NodeBackend::Impl {
 
     const Oh5Node& root() const { return nodes.front(); }
 
-    std::vector<const Oh5Node*> children(const oh5::Oh5Node& node) const {
+    std::vector<const Oh5Node*> children(const Oh5Node& node) const {
         const EntryByParent_t& nentries = entries.get<by_parent>();
 
         std::pair<EntryByParent_t::iterator,
@@ -132,7 +131,7 @@ MemoryOh5NodeBackend::~MemoryOh5NodeBackend() {
 }
 
 Oh5Node&
-MemoryOh5NodeBackend::do_add(oh5::Oh5Node* node) {
+MemoryOh5NodeBackend::do_add(Oh5Node* node) {
     impl_->add(node);
     return *node;
 }
@@ -152,6 +151,5 @@ MemoryOh5NodeBackend::do_children(const Oh5Node& node) const {
     return impl_->children(node);
 }
 
-} // namespace oh5
 } // namespace brfc
 

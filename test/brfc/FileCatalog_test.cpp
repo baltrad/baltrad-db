@@ -57,7 +57,7 @@ struct FileCatalog_test : public ::testing::Test {
     MockLocalStorage storage;
     FileCatalog fc;
     std::string path;
-    ::testing::NiceMock<oh5::MockPhysicalFile> file;
+    ::testing::NiceMock<MockPhysicalFile> file;
 };
 
 TEST_F(FileCatalog_test, test_ctor_null_db) {

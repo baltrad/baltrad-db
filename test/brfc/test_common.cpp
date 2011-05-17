@@ -67,8 +67,8 @@ std::ostream& operator<<(std::ostream& out, const brfc::Variant& value) {
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const brfc::oh5::Oh5Scalar& value) {
-    out << "oh5::Scalar("
+std::ostream& operator<<(std::ostream& out, const brfc::Oh5Scalar& value) {
+    out << "Scalar("
         << value.to_string()
         << ")";
     return out;

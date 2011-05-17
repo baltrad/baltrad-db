@@ -58,7 +58,7 @@ Import::do_execute(Database& db) {
     BOOST_FOREACH(const std::string& path, args_) {
         std::cout << "importing " << path << std::endl;;
         std::cout.flush();
-        oh5::hl::HlFile file(path);
+        HlFile file(path);
         db.store(file);
     }
     return 0;

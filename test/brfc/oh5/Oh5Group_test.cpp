@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test_common.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 struct oh5_Oh5Group_test : public ::testing::Test {
     oh5_Oh5Group_test()
@@ -129,5 +128,4 @@ TEST_F(oh5_Oh5Group_test, test_get_or_create_group) {
     EXPECT_EQ(&child1, &child2);
 }
 
-} // namespace oh5
 } // namespace brfc

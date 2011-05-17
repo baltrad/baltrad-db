@@ -23,13 +23,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
     class Expression;
+    class Oh5File;
+    class Oh5Scalar;
 }
 
 namespace brfc {
-namespace oh5 {
-
-class Oh5File;
-class Oh5Scalar;
 
 /**
  * @brief extract attribute values from file
@@ -58,7 +56,6 @@ struct extract_attr {
     const Oh5File* file_;
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_EXTRACT_ATTR_HPP

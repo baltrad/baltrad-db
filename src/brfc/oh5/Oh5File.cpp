@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 Oh5Source
 Oh5File::source() const {
@@ -100,5 +99,4 @@ Oh5File::group(const std::string& path) const {
     return dynamic_cast<const Oh5Group*>(node(path));
 }
 
-} // namespace oh5
 } // namepsace brfc

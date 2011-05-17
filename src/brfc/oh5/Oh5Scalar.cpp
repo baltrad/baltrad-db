@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 Oh5Scalar::Oh5Scalar(bool value)
         : value_(value ? "True" : "False") {
@@ -152,7 +151,7 @@ class scalar_to_date : public boost::static_visitor<Date> {
   public:
     Date operator()(const std::string& value) const {
         if (value.length() != 8)
-            throw value_error("oh5::Scalar not convertible to Date");
+            throw value_error("Scalar not convertible to Date");
         return Date::from_iso_string(value);
     }
 
@@ -168,7 +167,7 @@ class scalar_to_time : public boost::static_visitor<Time> {
   public:
     Time operator()(const std::string& value) const {
         if (value.length() != 6)
-            throw value_error("oh5::Scalar not convertible to Time");
+            throw value_error("Scalar not convertible to Time");
         return Time::from_iso_string(value);
     }
 
@@ -217,5 +216,4 @@ operator==(const Oh5Scalar& lhs, const Oh5Scalar& rhs) {
     return lhs.value_ == rhs.value_;
 }
 
-} // namespace oh5
 } // namespace brfc

@@ -46,7 +46,7 @@ SHA1AttributeHasher::~SHA1AttributeHasher() {
 }
 
 std::string
-SHA1AttributeHasher::attribute_string(const oh5::Oh5Attribute& attr) {
+SHA1AttributeHasher::attribute_string(const Oh5Attribute& attr) {
     return attr.path() + "=" + attr.value().to_string();
 }
 
@@ -68,14 +68,14 @@ SHA1AttributeHasher::sha1hash(const std::string& str) {
 }
 
 std::string
-SHA1AttributeHasher::do_hash(const oh5::Oh5File& file) const {
+SHA1AttributeHasher::do_hash(const Oh5File& file) const {
     std::list<std::string> strs;
-    const oh5::Oh5Attribute* attr = 0;
+    const Oh5Attribute* attr = 0;
 
     const std::list<std::string>& ign = ignored();
 
-    BOOST_FOREACH(const oh5::Oh5Node& node, file.root()) {
-        attr = dynamic_cast<const oh5::Oh5Attribute*>(&node);
+    BOOST_FOREACH(const Oh5Node& node, file.root()) {
+        attr = dynamic_cast<const Oh5Attribute*>(&node);
         if (attr and not contains(ign.begin(), ign.end(), attr->full_name())) {
             strs.push_back(attribute_string(*attr));
         }

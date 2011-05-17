@@ -29,8 +29,6 @@ namespace brfc {
 class Date;
 class Time;
 
-namespace oh5 {
-
 /**
  * ODIM_H5 scalar value
  */
@@ -209,7 +207,6 @@ bool operator!=(const Oh5Scalar& lhs, const Oh5Scalar& rhs) {
     return not (lhs == rhs);
 }
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_VALUE_HPP

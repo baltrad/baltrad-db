@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test_common.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 TEST(oh5_Oh5Scalar_test, int64_) {
     Oh5Scalar v(10); // accepts integers
@@ -148,5 +147,4 @@ TEST(oh5_Oh5Scalar_test, to_date) {
     EXPECT_THROW(Oh5Scalar(1.2).to_date(), value_error);
 }
 
-} // namespace oh5
 } // namespace brfc

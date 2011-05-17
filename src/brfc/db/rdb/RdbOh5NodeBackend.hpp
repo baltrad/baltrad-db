@@ -27,29 +27,29 @@ namespace brfc {
 
 class RelationalDatabase;
 
-class RdbOh5NodeBackend : public oh5::Oh5NodeBackend {
+class RdbOh5NodeBackend : public Oh5NodeBackend {
   public:
     explicit RdbOh5NodeBackend(RelationalDatabase* rdb);
 
     virtual ~RdbOh5NodeBackend();
 
-    void id(const oh5::Oh5Node& node, long long id);
+    void id(const Oh5Node& node, long long id);
     
-    long long id(const oh5::Oh5Node& node) const;
+    long long id(const Oh5Node& node) const;
 
-    bool loaded(const oh5::Oh5Node& node) const;
+    bool loaded(const Oh5Node& node) const;
 
-    void loaded(const oh5::Oh5Node& node, bool loaded);
+    void loaded(const Oh5Node& node, bool loaded);
 
   private:
-    virtual oh5::Oh5Node& do_add(oh5::Oh5Node* node);
+    virtual Oh5Node& do_add(Oh5Node* node);
 
-    virtual bool do_has(const oh5::Oh5Node& node) const;
+    virtual bool do_has(const Oh5Node& node) const;
 
-    virtual const oh5::Oh5Node& do_root() const;
+    virtual const Oh5Node& do_root() const;
 
-    virtual std::vector<const oh5::Oh5Node*>
-        do_children(const oh5::Oh5Node& node) const;
+    virtual std::vector<const Oh5Node*>
+        do_children(const Oh5Node& node) const;
 
     struct Impl;
     const boost::scoped_ptr<Impl> impl_;

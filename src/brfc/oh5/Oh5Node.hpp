@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/iterator/iterator_facade.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 class Oh5Attribute;
 class Oh5DataSet;
@@ -275,7 +274,6 @@ class Oh5NodeIterator :
     std::deque<T*> stack_;
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_NODE_HPP

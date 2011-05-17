@@ -29,8 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/MemoryOh5NodeBackend.hpp>
 
 namespace brfc {
-namespace oh5 {
-namespace hl {
 
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
@@ -73,7 +71,7 @@ class HlFile : public PhysicalOh5File {
      */
     virtual ~HlFile();
 
-    using oh5::PhysicalOh5File::path;
+    using PhysicalOh5File::path;
 
     void path(const std::string& path) {
         path_ = path;
@@ -94,7 +92,5 @@ class HlFile : public PhysicalOh5File {
     std::string path_;
 };
 
-} // namesapce hl
-} // namespace oh5
 } // namespace brfc
 #endif // BRFC_OH5_HL_HL_FILE_H

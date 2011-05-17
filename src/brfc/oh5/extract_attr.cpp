@@ -32,7 +32,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 Expression
 extract_attr::operator()(const Expression& args) const {
@@ -101,5 +100,4 @@ extract_attr::value_expression(const Oh5Scalar& value,
     }
 }
 
-} // namespace oh5
 } // namespace brfc

@@ -38,8 +38,6 @@ using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 
 namespace brfc {
-namespace oh5 {
-
 
 struct oh5_Oh5Node_test : public ::testing::Test {
     oh5_Oh5Node_test()
@@ -81,7 +79,7 @@ TEST_F(oh5_Oh5Node_test, test_add) {
 }
 
 TEST_F(oh5_Oh5Node_test, test_has_child) {
-    std::vector<const oh5::Oh5Node*> c;
+    std::vector<const Oh5Node*> c;
     c.push_back(&a);
 
     EXPECT_CALL(be, do_children(Ref(r)))
@@ -93,13 +91,13 @@ TEST_F(oh5_Oh5Node_test, test_has_child) {
 }
 
 TEST_F(oh5_Oh5Node_test, test_children) {
-    std::vector<const oh5::Oh5Node*> c;
+    std::vector<const Oh5Node*> c;
     c.push_back(&a);
 
     EXPECT_CALL(be, do_children(Ref(r)))
         .WillOnce(Return(c));
 
-    std::vector<oh5::Oh5Node*> rc = r.children();
+    std::vector<Oh5Node*> rc = r.children();
     ASSERT_EQ(1u, rc.size());
     EXPECT_EQ(&a, rc.at(0));
 }
@@ -122,9 +120,9 @@ TEST_F(oh5_Oh5Node_test, test_iterator_dereference) {
 }
 
 TEST_F(oh5_Oh5Node_test, test_iterator_increment) {
-    std::vector<const oh5::Oh5Node*> cr;
-    std::vector<const oh5::Oh5Node*> ca;
-    std::vector<const oh5::Oh5Node*> cf;
+    std::vector<const Oh5Node*> cr;
+    std::vector<const Oh5Node*> ca;
+    std::vector<const Oh5Node*> cf;
     a.backend(&be);
     f.backend(&be);
     cr.push_back(&a);
@@ -149,7 +147,7 @@ TEST_F(oh5_Oh5Node_test, test_iterator_increment) {
 }
 
 TEST_F(oh5_Oh5Node_test, test_iterator_end) {
-    std::vector<const oh5::Oh5Node*> c;
+    std::vector<const Oh5Node*> c;
     EXPECT_CALL(be, do_children(Ref(r)))
         .WillOnce(Return(c));
 
@@ -159,5 +157,4 @@ TEST_F(oh5_Oh5Node_test, test_iterator_end) {
     EXPECT_TRUE(i == r.end());
 }
 
-} // namespace oh5
 } // namespace brfc

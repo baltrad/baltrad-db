@@ -30,7 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/logic.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 struct list_in {
     typedef Expression result_type;
@@ -89,5 +88,4 @@ Oh5FileMatcher::match(const Oh5File& file, const Expression& x) {
     return result;
 }
 
-} // namespace oh5
 } // namespace brfc

@@ -27,7 +27,7 @@ namespace brfc {
 class FileEntry;
 
 /**
- * @brief ABC for classes implementing node-local oh5::PhysicalFile storage
+ * @brief ABC for classes implementing node-local PhysicalFile storage
  */
 class LocalStorage {
   public:

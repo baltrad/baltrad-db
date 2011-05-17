@@ -42,9 +42,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %import "fc_oh5.i"
 %import "fc_db.i"
 
-%typemap("javapackage") brfc::oh5::Oh5File,
-                        brfc::oh5::Oh5File*,
-                        brfc::oh5::Oh5File& "eu.baltrad.fc.oh5";
+%typemap("javapackage") brfc::Oh5File,
+                        brfc::Oh5File*,
+                        brfc::Oh5File& "eu.baltrad.fc.oh5";
 
 %typemap("javapackage") brfc::FileEntry,
                         brfc::FileEntry*,

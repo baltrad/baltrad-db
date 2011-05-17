@@ -38,7 +38,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   }
 %}
 
-%typemap(javaimports) brfc::oh5::hl::HlFile %{
+%typemap(javaimports) brfc::HlFile %{
     import eu.baltrad.fc.oh5.PhysicalOh5File;
     import eu.baltrad.fc.Date;
     import eu.baltrad.fc.Time;

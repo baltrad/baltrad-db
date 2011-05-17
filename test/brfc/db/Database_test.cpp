@@ -45,7 +45,7 @@ TEST_F(db_Database_test, test_create_invalid_dsn) {
 }
 
 TEST_F(db_Database_test, test_get_or_store_stored) {
-    oh5::MockPhysicalFile f; 
+    MockPhysicalFile f; 
     MockFileEntry fe;
     EXPECT_CALL(db, do_is_stored(Ref(f)))
         .WillOnce(Return(true));
@@ -56,7 +56,7 @@ TEST_F(db_Database_test, test_get_or_store_stored) {
 }
 
 TEST_F(db_Database_test, test_get_or_store_not_stored) {
-    oh5::MockPhysicalFile f; 
+    MockPhysicalFile f; 
     MockFileEntry fe;
     EXPECT_CALL(db, do_is_stored(Ref(f)))
         .WillOnce(Return(false));

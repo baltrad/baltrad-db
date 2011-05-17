@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/scoped_ptr.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 /**
  * @brief NodeBackend storing nodes only in memory
@@ -53,7 +52,6 @@ class MemoryOh5NodeBackend : public Oh5NodeBackend {
     boost::scoped_ptr<Impl> impl_;
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_MEMORY_NODE_BACKEND_HPP

@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5NodeBackend.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 class MockNodeBackend : public Oh5NodeBackend {
   public:
@@ -36,7 +35,6 @@ class MockNodeBackend : public Oh5NodeBackend {
     MOCK_CONST_METHOD1(do_children, std::vector<const Oh5Node*>(const Oh5Node&));
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_MOCK_NODE_BACKEND_HPP

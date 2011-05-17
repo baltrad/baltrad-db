@@ -31,7 +31,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5NodeBackend.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 Oh5Group::Oh5Group(const std::string& name)
         : Oh5Node(name) {
@@ -106,5 +105,4 @@ Oh5Group::do_clone() const {
     return new Oh5Group(*this);
 }
 
-} // namespace oh5
 } // namespace brfc

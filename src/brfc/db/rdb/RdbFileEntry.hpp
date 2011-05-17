@@ -115,12 +115,12 @@ class RdbFileEntry : public FileEntry {
 
     virtual void do_write_to_file(const std::string& path) const;
 
-    virtual const oh5::Oh5Node& do_root() const;
+    virtual const Oh5Node& do_root() const;
     
     /**
      * @brief source as stored in the database
      */
-    virtual oh5::Oh5Source do_source() const;
+    virtual Oh5Source do_source() const;
 
     virtual std::string do_hash() const;
 
@@ -135,7 +135,7 @@ class RdbFileEntry : public FileEntry {
     long long id_;
     long long lo_id_;
     long long source_id_;
-    oh5::Oh5Source source_;
+    Oh5Source source_;
     std::string uuid_;
     std::string hash_;
     long long size_;

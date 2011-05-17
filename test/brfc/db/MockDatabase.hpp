@@ -33,13 +33,13 @@ namespace brfc {
 class MockDatabase : public Database {
   public:
     MOCK_METHOD1(do_is_stored,
-        bool(const oh5::PhysicalOh5File&));
+        bool(const PhysicalOh5File&));
     MOCK_METHOD1(do_remove,
         bool(const FileEntry&));
     MOCK_METHOD1(do_store,
-        FileEntry*(const oh5::PhysicalOh5File&));
+        FileEntry*(const PhysicalOh5File&));
     MOCK_METHOD1(do_entry_by_file,
-        FileEntry*(const oh5::PhysicalOh5File&));
+        FileEntry*(const PhysicalOh5File&));
     MOCK_METHOD1(do_entry_by_uuid,
         FileEntry*(const std::string&));
     MOCK_METHOD1(do_execute,
@@ -47,13 +47,13 @@ class MockDatabase : public Database {
     MOCK_METHOD1(do_execute,
         AttributeResult*(const AttributeQuery&));
     MOCK_CONST_METHOD0(do_sources,
-        std::vector<oh5::Oh5Source>());
+        std::vector<Oh5Source>());
     MOCK_METHOD1(do_add_source,
-        void(const oh5::Oh5Source&));
+        void(const Oh5Source&));
     MOCK_METHOD1(do_update_source,
-        void(const oh5::Oh5Source&));
+        void(const Oh5Source&));
     MOCK_METHOD1(do_remove_source,
-        void(const oh5::Oh5Source&));
+        void(const Oh5Source&));
 };
 
 } // namespace brfc

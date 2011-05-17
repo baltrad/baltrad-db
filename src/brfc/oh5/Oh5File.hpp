@@ -20,23 +20,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_OH5_FILE_HPP
 #define BRFC_OH5_FILE_HPP
 
+#include <string>
 #include <vector>
 
 #include <boost/noncopyable.hpp>
 
-#include <string>
-
 namespace brfc {
 
 class Date;
-class Time;
-
-namespace oh5 {
-
 class Oh5Attribute;
 class Oh5Group;
 class Oh5Node;
 class Oh5Source;
+class Time;
 
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
@@ -142,6 +138,5 @@ class Oh5File : public boost::noncopyable {
     virtual Oh5Source do_source() const;
 };
 
-} // namespace oh5
 } // namespace brfc
 #endif // BRFC_OH5_FILE_HPP

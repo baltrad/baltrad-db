@@ -25,9 +25,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 /**
- * @brief oh5::File entry in Database
+ * @brief File entry in Database
  */
-class FileEntry : public oh5::Oh5File {
+class FileEntry : public Oh5File {
   public:
     virtual ~FileEntry() { }
 

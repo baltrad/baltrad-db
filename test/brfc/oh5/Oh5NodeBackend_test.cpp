@@ -31,7 +31,6 @@ using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 
 namespace brfc {
-namespace oh5 {
 
 struct oh5_Oh5NodeBackend_test : public ::testing::Test {
     oh5_Oh5NodeBackend_test()
@@ -125,5 +124,4 @@ TEST_F(oh5_Oh5NodeBackend_test, test_node_missing) {
     EXPECT_FALSE(backend.node("foo"));
 }
 
-} // namespace oh5
 } // namespace brfc

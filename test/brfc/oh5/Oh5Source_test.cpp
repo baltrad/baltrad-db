@@ -25,9 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test_common.hpp>
 
-
 namespace brfc {
-namespace oh5 {
 
 TEST(oh5_Oh5Source_test, test_from_string_valid) {
     Oh5Source s = Oh5Source::from_string("WMO:02606,RAD:SE50");
@@ -124,5 +122,4 @@ TEST(oh5_Oh5Source_test, test_to_string) {
     EXPECT_EQ("PLC:Ängelholm,RAD:SE50,WMO:02606", s.to_string());
 }
 
-} // namespace oh5
 } // namespace brfc

@@ -36,8 +36,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/hl/HlConverter.hpp>
 
 namespace brfc {
-namespace oh5 {
-namespace hl {
 
 HlFile::HlFile()
         : nodes_()
@@ -127,6 +125,4 @@ HlFile::load() {
     }
 }
 
-} // namespace hl
-} // namespace oh5
 } // namepsace brfc

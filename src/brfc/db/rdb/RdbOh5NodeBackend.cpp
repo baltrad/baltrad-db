@@ -43,7 +43,7 @@ namespace brfc {
 
 struct RdbOh5NodeBackend::Impl {
     struct node_entry {
-        explicit node_entry(const oh5::Oh5Node* node_,
+        explicit node_entry(const Oh5Node* node_,
                             long long id_=0,
                             bool loaded_=true)
                 : node(node_)
@@ -54,9 +54,9 @@ struct RdbOh5NodeBackend::Impl {
 
         std::string name() const { return node->name(); }
 
-        const oh5::Oh5Node* parent() const { return node->parent(); }
+        const Oh5Node* parent() const { return node->parent(); }
 
-        const oh5::Oh5Node* node;
+        const Oh5Node* node;
         long long id;
         bool loaded;
     };
@@ -70,17 +70,17 @@ struct RdbOh5NodeBackend::Impl {
             mi::hashed_unique<
                 mi::tag<by_node>,
                 mi::member<
-                    node_entry, const oh5::Oh5Node*, &node_entry::node>
+                    node_entry, const Oh5Node*, &node_entry::node>
             >,
             mi::hashed_non_unique<
                 mi::tag<by_parent>,
                 mi::const_mem_fun<
-                    node_entry, const oh5::Oh5Node*, &node_entry::parent>
+                    node_entry, const Oh5Node*, &node_entry::parent>
             >,
             mi::hashed_unique<
                 mi::composite_key<
                     node_entry,
-                    mi::const_mem_fun<node_entry, const oh5::Oh5Node*, &node_entry::parent>,
+                    mi::const_mem_fun<node_entry, const Oh5Node*, &node_entry::parent>,
                     mi::const_mem_fun<node_entry, std::string, &node_entry::name>
                 >
             >
@@ -107,18 +107,18 @@ struct RdbOh5NodeBackend::Impl {
     };
     
     struct cmp_ptr {
-        cmp_ptr(const oh5::Oh5Node* n) : n_(n) { }
+        cmp_ptr(const Oh5Node* n) : n_(n) { }
 
-        bool operator()(const oh5::Oh5Node& n) { return n_ == &n; }
+        bool operator()(const Oh5Node& n) { return n_ == &n; }
 
-        const oh5::Oh5Node* n_;
+        const Oh5Node* n_;
     };
 
     Impl(RelationalDatabase* rdb_)
             : rdb(rdb_)
             , nodes()
             , entries() {
-        nodes.push_back(new oh5::Oh5Group(""));
+        nodes.push_back(new Oh5Group(""));
         entries.insert(node_entry(&root(), 0));
     }
 
@@ -126,23 +126,23 @@ struct RdbOh5NodeBackend::Impl {
 
     }
 
-    bool loaded(const oh5::Oh5Node& node) const {
+    bool loaded(const Oh5Node& node) const {
         return entry(node).loaded;
     }
 
-    void loaded(const oh5::Oh5Node& node, bool loaded) {
+    void loaded(const Oh5Node& node, bool loaded) {
         entries.get<by_node>().modify(find_entry(node), set_loaded(loaded));
     }
 
-    long long id(const oh5::Oh5Node& node) const {
+    long long id(const Oh5Node& node) const {
         return entry(node).id;
     }
 
-    void id(const oh5::Oh5Node& node, long long id) {
+    void id(const Oh5Node& node, long long id) {
         entries.get<by_node>().modify(find_entry(node), set_id(id));
     }
 
-    node_entry entry(const oh5::Oh5Node& node) const {
+    node_entry entry(const Oh5Node& node) const {
         const EntryByNode_t& nentries = entries.get<by_node>();
         EntryByNode_t::const_iterator iter = nentries.find(&node);
         if (iter == nentries.end())
@@ -151,28 +151,28 @@ struct RdbOh5NodeBackend::Impl {
     }
 
     EntryByNode_t::iterator
-    find_entry(const oh5::Oh5Node& node) {
+    find_entry(const Oh5Node& node) {
         return entries.get<by_node>().find(&node);
     }
 
     EntryByNode_t::const_iterator
-    find_entry(const oh5::Oh5Node& node) const {
+    find_entry(const Oh5Node& node) const {
         return entries.get<by_node>().find(&node);
     }
 
-    void add(oh5::Oh5Node* _node) {
-        auto_ptr<oh5::Oh5Node> node(_node);
+    void add(Oh5Node* _node) {
+        auto_ptr<Oh5Node> node(_node);
         if (not entries.insert(node_entry(_node)).second)
             throw duplicate_entry(node->path());
         nodes.push_back(node);
     }
 
-    bool has(const oh5::Oh5Node& node) const {
+    bool has(const Oh5Node& node) const {
         return std::find_if(nodes.begin(), nodes.end(),
                             cmp_ptr(&node)) != nodes.end();
     }
 
-    void load(const oh5::Oh5Node& node) const {
+    void load(const Oh5Node& node) const {
         // XXX: !
         Impl* self = const_cast<Impl*>(this);
         EntryByNode_t& es = self->entries.get<by_node>();
@@ -184,17 +184,17 @@ struct RdbOh5NodeBackend::Impl {
         
         RdbHelper helper(rdb->conn());
         // XXX: !
-        oh5::Oh5Node& n = const_cast<oh5::Oh5Node&>(node);
+        Oh5Node& n = const_cast<Oh5Node&>(node);
         helper.load_children(n);
         
         es.modify(iter, set_loaded(true));
     }
 
-    oh5::Oh5Node& root() { return nodes.front(); }
+    Oh5Node& root() { return nodes.front(); }
 
-    const oh5::Oh5Node& root() const { return nodes.front(); }
+    const Oh5Node& root() const { return nodes.front(); }
 
-    std::vector<const oh5::Oh5Node*> children(const oh5::Oh5Node& node) const {
+    std::vector<const Oh5Node*> children(const Oh5Node& node) const {
         load(node);
 
         const EntryByParent_t& nentries = entries.get<by_parent>();
@@ -203,7 +203,7 @@ struct RdbOh5NodeBackend::Impl {
                   EntryByParent_t::iterator> range;
         range = nentries.equal_range(&node);
         
-        std::vector<const oh5::Oh5Node*> vec;
+        std::vector<const Oh5Node*> vec;
         for ( ; range.first != range.second; ++range.first) {
             vec.push_back(range.first->node);
         }
@@ -211,7 +211,7 @@ struct RdbOh5NodeBackend::Impl {
     }
      
     RelationalDatabase* rdb;
-    boost::ptr_vector<oh5::Oh5Node> nodes;
+    boost::ptr_vector<Oh5Node> nodes;
     NodeSet_t entries;
 };
 
@@ -225,43 +225,43 @@ RdbOh5NodeBackend::~RdbOh5NodeBackend() {
 }
 
 void
-RdbOh5NodeBackend::id(const oh5::Oh5Node& node, long long id) {
+RdbOh5NodeBackend::id(const Oh5Node& node, long long id) {
     impl_->id(node, id);
 }
 
 long long
-RdbOh5NodeBackend::id(const oh5::Oh5Node& node) const {
+RdbOh5NodeBackend::id(const Oh5Node& node) const {
     return impl_->id(node);
 }
 
 void
-RdbOh5NodeBackend::loaded(const oh5::Oh5Node& node, bool loaded) {
+RdbOh5NodeBackend::loaded(const Oh5Node& node, bool loaded) {
     return impl_->loaded(node, loaded);
 }
 
 bool
-RdbOh5NodeBackend::loaded(const oh5::Oh5Node& node) const {
+RdbOh5NodeBackend::loaded(const Oh5Node& node) const {
     return impl_->loaded(node);
 }
 
-oh5::Oh5Node&
-RdbOh5NodeBackend::do_add(oh5::Oh5Node* node) {
+Oh5Node&
+RdbOh5NodeBackend::do_add(Oh5Node* node) {
     impl_->add(node);
     return *node;
 }
 
 bool
-RdbOh5NodeBackend::do_has(const oh5::Oh5Node& node) const {
+RdbOh5NodeBackend::do_has(const Oh5Node& node) const {
     return impl_->has(node);
 }
 
-const oh5::Oh5Node&
+const Oh5Node&
 RdbOh5NodeBackend::do_root() const {
     return impl_->root();
 }
 
-std::vector<const oh5::Oh5Node*>
-RdbOh5NodeBackend::do_children(const oh5::Oh5Node& node) const {
+std::vector<const Oh5Node*>
+RdbOh5NodeBackend::do_children(const Oh5Node& node) const {
     return impl_->children(node);
 }
 

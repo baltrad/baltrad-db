@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 namespace brfc {
-namespace oh5 {
 
 /**
  * @brief ODIM_H5 source
@@ -126,7 +125,6 @@ class Oh5Source {
     Map map_;
 };
 
-} // namespace oh5
 } // namespace brfc
 
 #endif // BRFC_OH5_SOURCE_H

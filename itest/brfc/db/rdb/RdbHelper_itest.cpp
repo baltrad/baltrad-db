@@ -77,11 +77,11 @@ class db_rdb_RdbHelper_itest : public ::testing::TestWithParam<const char*> {
     RdbHelper helper;
     RdbFileEntry entry;
     RdbOh5NodeBackend& backend;
-    oh5::hl::HlFile file;
+    HlFile file;
 };
 
 TEST_P(db_rdb_RdbHelper_itest, test_backend) {
-    oh5::Oh5Group* grp = new oh5::Oh5Group("grp");
+    Oh5Group* grp = new Oh5Group("grp");
     EXPECT_THROW(helper.backend(*grp), std::runtime_error);
     
     entry.root().add(grp);
@@ -115,7 +115,7 @@ TEST_P(db_rdb_RdbHelper_itest, test_insert_file_content) {
 TEST_P(db_rdb_RdbHelper_itest, test_insert_node_group) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
 
-    oh5::Oh5Node& grp = entry.root();
+    Oh5Node& grp = entry.root();
     EXPECT_NO_THROW(helper.insert_node(entry.id(), grp));
     EXPECT_GT(backend.id(grp), 0);
     EXPECT_TRUE(backend.loaded(grp));
@@ -127,7 +127,7 @@ TEST_P(db_rdb_RdbHelper_itest, test_insert_node_attribute) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
     EXPECT_NO_THROW(helper.insert_node(entry.id(), entry.root()));
     
-    oh5::Oh5Node& attr = entry.root().add(new oh5::Oh5Attribute("attr", oh5::Oh5Scalar(1)));
+    Oh5Node& attr = entry.root().add(new Oh5Attribute("attr", Oh5Scalar(1)));
 
     EXPECT_NO_THROW(helper.insert_node(entry.id(), attr));
 }
@@ -135,10 +135,10 @@ TEST_P(db_rdb_RdbHelper_itest, test_insert_node_attribute) {
 TEST_P(db_rdb_RdbHelper_itest, test_insert_node_dataset) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
     EXPECT_NO_THROW(helper.insert_node(entry.id(), entry.root()));
-    oh5::Oh5Node& parent = entry.root().add(new oh5::Oh5Group("data1"));
+    Oh5Node& parent = entry.root().add(new Oh5Group("data1"));
     EXPECT_NO_THROW(helper.insert_node(entry.id(), parent));
     
-    oh5::Oh5Node& ds = parent.add(new oh5::Oh5DataSet("data"));
+    Oh5Node& ds = parent.add(new Oh5DataSet("data"));
 
     EXPECT_NO_THROW(helper.insert_node(entry.id(), ds));
     EXPECT_GT(backend.id(ds), 0);
@@ -223,7 +223,7 @@ TEST_P(db_rdb_RdbHelper_itest, test_select_root_id_by_uuid) {
 
 TEST_P(db_rdb_RdbHelper_itest, test_load_source) {
     long long src_id = 0;
-    oh5::Oh5Source src = oh5::Oh5Source::from_string("PLC:Legionowo");
+    Oh5Source src = Oh5Source::from_string("PLC:Legionowo");
     EXPECT_NO_THROW(src_id = helper.select_source_id(src));
     EXPECT_GT(src_id, 0);
     
@@ -239,14 +239,14 @@ TEST_P(db_rdb_RdbHelper_itest, test_load_source) {
 }
 
 TEST_P(db_rdb_RdbHelper_itest, test_select_source_nx) {
-    oh5::Oh5Source src;
+    Oh5Source src;
     EXPECT_NO_THROW(helper.select_source(-1));
     EXPECT_TRUE(src.empty());
 }
 
 TEST_P(db_rdb_RdbHelper_itest, test_load_source_unicode) {
     long long src_id = 0;
-    oh5::Oh5Source src = oh5::Oh5Source::from_string("PLC:Legionowo");
+    Oh5Source src = Oh5Source::from_string("PLC:Legionowo");
     EXPECT_NO_THROW(src_id = helper.select_source_id(src));
     EXPECT_GT(src_id, 0);
     
@@ -263,7 +263,7 @@ TEST_P(db_rdb_RdbHelper_itest, test_load_source_unicode) {
 
 TEST_P(db_rdb_RdbHelper_itest, test_load_source_by_plc_unicode) {
     long long src_id = 0;
-    oh5::Oh5Source src = oh5::Oh5Source::from_string("PLC:Świdwin");
+    Oh5Source src = Oh5Source::from_string("PLC:Świdwin");
     EXPECT_NO_THROW(src_id = helper.select_source_id(src));
     EXPECT_GT(src_id, 0);
 
@@ -279,21 +279,21 @@ TEST_P(db_rdb_RdbHelper_itest, test_load_source_by_plc_unicode) {
 }
 
 TEST_P(db_rdb_RdbHelper_itest, test_load_children) {
-    oh5::Oh5Node& g1 = entry.root().add(new oh5::Oh5Group("g1"));
-    oh5::Oh5Node& g2 = entry.root().add(new oh5::Oh5Group("g2"));
-    oh5::Oh5Node& a1 = entry.root().add(new oh5::Oh5Attribute("a1", oh5::Oh5Scalar(1)));
-    oh5::Oh5Node& a2 = g2.add(new oh5::Oh5Attribute("a2", oh5::Oh5Scalar(2)));
-    oh5::Oh5Node& ds1 = g2.add(new oh5::Oh5DataSet("ds1"));
-    oh5::Oh5Node& a3 = ds1.add(new oh5::Oh5Attribute("a3", oh5::Oh5Scalar(3)));
+    Oh5Node& g1 = entry.root().add(new Oh5Group("g1"));
+    Oh5Node& g2 = entry.root().add(new Oh5Group("g2"));
+    Oh5Node& a1 = entry.root().add(new Oh5Attribute("a1", Oh5Scalar(1)));
+    Oh5Node& a2 = g2.add(new Oh5Attribute("a2", Oh5Scalar(2)));
+    Oh5Node& ds1 = g2.add(new Oh5DataSet("ds1"));
+    Oh5Node& a3 = ds1.add(new Oh5Attribute("a3", Oh5Scalar(3)));
 
     EXPECT_NO_THROW(helper.insert_file(entry, file));
-    BOOST_FOREACH(oh5::Oh5Node& node, entry.root()) {
+    BOOST_FOREACH(Oh5Node& node, entry.root()) {
         EXPECT_NO_THROW(helper.insert_node(entry.id(), node));
     }
     conn->commit();
 
     RdbOh5NodeBackend be(db);
-    oh5::Oh5Node& r = be.root();
+    Oh5Node& r = be.root();
     be.id(r, backend.id(entry.root()));
     be.loaded(r, false);
 
@@ -302,7 +302,7 @@ TEST_P(db_rdb_RdbHelper_itest, test_load_children) {
 
     EXPECT_EQ(3u, r.children().size());
 
-    oh5::Oh5Node* g = r.group("g1");
+    Oh5Node* g = r.group("g1");
     ASSERT_TRUE(g);
     EXPECT_EQ(backend.id(g1), be.id(*g));
     EXPECT_FALSE(be.loaded(*g));
@@ -312,13 +312,13 @@ TEST_P(db_rdb_RdbHelper_itest, test_load_children) {
     EXPECT_EQ(backend.id(g2), be.id(*g));
     EXPECT_FALSE(be.loaded(*g));
 
-    oh5::Oh5Attribute* a = r.attribute("a1");
+    Oh5Attribute* a = r.attribute("a1");
     ASSERT_TRUE(a);
     EXPECT_EQ(backend.id(a1), be.id(*a));
     EXPECT_FALSE(be.loaded(*a));
-    EXPECT_EQ(oh5::Oh5Scalar(1), a->value());
+    EXPECT_EQ(Oh5Scalar(1), a->value());
 
-    oh5::Oh5DataSet* d = dynamic_cast<oh5::Oh5DataSet*>(r.child("g2/ds1"));
+    Oh5DataSet* d = dynamic_cast<Oh5DataSet*>(r.child("g2/ds1"));
     ASSERT_TRUE(d);
     EXPECT_EQ(backend.id(ds1), be.id(*d));
     EXPECT_FALSE(be.loaded(*d));

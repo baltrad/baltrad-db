@@ -61,7 +61,7 @@ class db_rdb_RdbOh5NodeBackend_test : public ::testing::Test {
     sql::MockConnectionPool pool;
     shared_ptr<sql::ConnectionPool> pool_ptr;
     RelationalDatabase db;
-    ::testing::NiceMock<oh5::MockNode> node;
+    ::testing::NiceMock<MockNode> node;
     RdbOh5NodeBackend backend;
 };
 
@@ -81,11 +81,11 @@ TEST_F(db_rdb_RdbOh5NodeBackend_test, test_set_loaded) {
 }
 
 TEST_F(db_rdb_RdbOh5NodeBackend_test, test_add) {
-    oh5::MockNode* n = new oh5::MockNode("n");
+    MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
 
-    oh5::Oh5Node& rn = backend.root().add(n);
+    Oh5Node& rn = backend.root().add(n);
 
     EXPECT_EQ(n, &rn); // reuses node
     EXPECT_TRUE(backend.loaded(*n));
@@ -93,8 +93,8 @@ TEST_F(db_rdb_RdbOh5NodeBackend_test, test_add) {
 }
 
 TEST_F(db_rdb_RdbOh5NodeBackend_test, test_add_duplicate_entry) {
-    oh5::MockNode* n1 = new oh5::MockNode("n");
-    oh5::MockNode* n2 = new oh5::MockNode("n");
+    MockNode* n1 = new MockNode("n");
+    MockNode* n2 = new MockNode("n");
     ON_CALL(*n1, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
     ON_CALL(*n2, do_accepts_child(_))
@@ -105,7 +105,7 @@ TEST_F(db_rdb_RdbOh5NodeBackend_test, test_add_duplicate_entry) {
 }
 
 TEST_F(db_rdb_RdbOh5NodeBackend_test, test_has) {
-    oh5::MockNode* n = new oh5::MockNode("n");
+    MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
     
@@ -116,7 +116,7 @@ TEST_F(db_rdb_RdbOh5NodeBackend_test, test_has) {
 }
 
 TEST_F(db_rdb_RdbOh5NodeBackend_test, test_parent) {
-    oh5::MockNode* n = new oh5::MockNode("n");
+    MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
     
@@ -126,11 +126,11 @@ TEST_F(db_rdb_RdbOh5NodeBackend_test, test_parent) {
 }
 
 TEST_F(db_rdb_RdbOh5NodeBackend_test, test_children) {
-    oh5::MockNode* n = new oh5::MockNode("n");
+    MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
     
-    std::vector<oh5::Oh5Node*> children = backend.children(backend.root());
+    std::vector<Oh5Node*> children = backend.children(backend.root());
     EXPECT_TRUE(children.empty());
 
     backend.root().add(n);

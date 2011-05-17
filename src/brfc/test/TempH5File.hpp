@@ -24,11 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-namespace oh5 {
-
 class Oh5File;
-
-}
 
 namespace test {
 
@@ -50,7 +46,7 @@ class TempH5File {
 
     void unlink();
     
-    void write(const oh5::Oh5File& f);
+    void write(const Oh5File& f);
     
     std::string path() const;
 

@@ -31,7 +31,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 namespace brfc {
-namespace oh5 {
 
 Oh5Source
 Oh5Source::from_string(const std::string& source) {
@@ -121,5 +120,4 @@ Oh5Source::to_string() const {
     return boost::join(elms, ",");
 }
 
-} // namespace oh5
 } // namespace brfc
