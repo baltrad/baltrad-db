@@ -17,36 +17,32 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <gtest/gtest.h>
+#include <brfc/rdb/RdbAttributeResult.hpp>
 
-#include <brfc/db/rdb/AttributeMapper.hpp>
+#include <brfc/Variant.hpp>
 
-#include <brfc/test_common.hpp>
+#include <brfc/sql/Result.hpp>
 
 namespace brfc {
 
-class db_rdb_AttributeMapper_test : public testing::Test {
-  public:
-    db_rdb_AttributeMapper_test()
-            : mapper() {
-    }
+bool
+RdbAttributeResult::do_next() {
+    return result_->next();
+}
 
-    void SetUp() {
-        mapper.add(Mapping("attr1", "t1", "c1"));
-        mapper.add(Mapping("attr2", "t1", "c2"));
-        mapper.add(Mapping("attr3", "t2", "c1"));
-        mapper.add(Mapping("attr4", "t3", "value"));
-    }
+bool
+RdbAttributeResult::do_seek(int idx) {
+    return result_->seek(idx);
+}
 
-    AttributeMapper mapper;
-};
+int
+RdbAttributeResult::do_size() const {
+    return result_->size();
+}
 
-TEST_F(db_rdb_AttributeMapper_test, specializations_on) {
-    MappingVector v = mapper.specializations_on("t1");
-    ASSERT_EQ(v.size(), (size_t)2);
-    EXPECT_EQ(v.at(0).attribute, "attr1");
-    EXPECT_EQ(v.at(1).attribute, "attr2");
+Variant
+RdbAttributeResult::do_value_at(const std::string& name) const {
+    return result_->value_at("l_" + name);
 }
 
 } // namespace brfc
-

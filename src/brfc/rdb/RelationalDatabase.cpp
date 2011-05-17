@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <deque>
 
@@ -32,14 +32,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileQuery.hpp>
 #include <brfc/db/FileResult.hpp>
 
-#include <brfc/db/rdb/AttributeMapper.hpp>
-#include <brfc/db/rdb/Model.hpp>
-#include <brfc/db/rdb/QueryToSelect.hpp>
-#include <brfc/db/rdb/RdbAttributeResult.hpp>
-#include <brfc/db/rdb/RdbFileEntry.hpp>
-#include <brfc/db/rdb/RdbFileResult.hpp>
-#include <brfc/db/rdb/RdbHelper.hpp>
-#include <brfc/db/rdb/SaveFile.hpp>
+#include <brfc/rdb/AttributeMapper.hpp>
+#include <brfc/rdb/Model.hpp>
+#include <brfc/rdb/QueryToSelect.hpp>
+#include <brfc/rdb/RdbAttributeResult.hpp>
+#include <brfc/rdb/RdbFileEntry.hpp>
+#include <brfc/rdb/RdbFileResult.hpp>
+#include <brfc/rdb/RdbHelper.hpp>
+#include <brfc/rdb/SaveFile.hpp>
 
 #include <brfc/expr/Expression.hpp>
 

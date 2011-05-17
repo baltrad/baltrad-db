@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/db/rdb/RdbOh5NodeBackend.hpp>
+#include <brfc/rdb/RdbOh5NodeBackend.hpp>
 
 #include <brfc/oh5/Oh5Source.hpp>
 

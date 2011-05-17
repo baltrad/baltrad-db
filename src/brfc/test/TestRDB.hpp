@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_TEST_TEST_RDB_HPP
 
 #include <string>
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 namespace brfc {
 namespace test {

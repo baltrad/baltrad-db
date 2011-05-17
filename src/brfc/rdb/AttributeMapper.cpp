@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/db/rdb/AttributeMapper.hpp>
+#include <brfc/rdb/AttributeMapper.hpp>
 
 namespace brfc {
 

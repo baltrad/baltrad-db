@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/db/rdb/SaveFile.hpp>
+#include <brfc/rdb/SaveFile.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -25,9 +25,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/smart_ptr.hpp>
 #include <brfc/FileHasher.hpp>
 
-#include <brfc/db/rdb/RdbHelper.hpp>
-#include <brfc/db/rdb/RdbFileEntry.hpp>
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/RdbHelper.hpp>
+#include <brfc/rdb/RdbFileEntry.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/oh5/Oh5Node.hpp>
 #include <brfc/oh5/PhysicalOh5File.hpp>

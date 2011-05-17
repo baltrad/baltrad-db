@@ -19,9 +19,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/db/rdb/RdbFileEntry.hpp>
-#include <brfc/db/rdb/RdbOh5NodeBackend.hpp>
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/RdbFileEntry.hpp>
+#include <brfc/rdb/RdbOh5NodeBackend.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
@@ -36,9 +36,9 @@ using ::testing::Return;
 
 namespace brfc {
 
-class db_rdb_RdbFileEntry_test : public ::testing::Test {
+class rdb_RdbFileEntry_test : public ::testing::Test {
   public:
-    db_rdb_RdbFileEntry_test()
+    rdb_RdbFileEntry_test()
             : conn()
             , pool()
             , pool_ptr(&pool, no_delete)
@@ -59,7 +59,7 @@ class db_rdb_RdbFileEntry_test : public ::testing::Test {
     RdbFileEntry entry;
 };
 
-TEST_F(db_rdb_RdbFileEntry_test, test_ctor) {
+TEST_F(rdb_RdbFileEntry_test, test_ctor) {
     EXPECT_EQ(0, entry.root().parent());
     RdbOh5NodeBackend* be = dynamic_cast<RdbOh5NodeBackend*>(&entry.root().backend());
     ASSERT_TRUE(be);

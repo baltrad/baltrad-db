@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/Url.hpp>
 
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 namespace brfc {
 

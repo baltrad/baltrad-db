@@ -19,8 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <memory>
 
-#include <brfc/db/rdb/RdbFileEntry.hpp>
-#include <brfc/db/rdb/RdbFileResult.hpp>
+#include <brfc/rdb/RdbFileEntry.hpp>
+#include <brfc/rdb/RdbFileResult.hpp>
 
 #include <brfc/sql/Result.hpp>
 

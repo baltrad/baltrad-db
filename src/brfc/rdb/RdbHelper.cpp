@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/db/rdb/RdbHelper.hpp>
+#include <brfc/rdb/RdbHelper.hpp>
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
@@ -28,10 +28,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/FileHasher.hpp>
 
-#include <brfc/db/rdb/AttributeMapper.hpp>
-#include <brfc/db/rdb/Model.hpp>
-#include <brfc/db/rdb/RdbFileEntry.hpp>
-#include <brfc/db/rdb/RdbOh5NodeBackend.hpp>
+#include <brfc/rdb/AttributeMapper.hpp>
+#include <brfc/rdb/Model.hpp>
+#include <brfc/rdb/RdbFileEntry.hpp>
+#include <brfc/rdb/RdbOh5NodeBackend.hpp>
 
 #include <brfc/expr/Expression.hpp>
 

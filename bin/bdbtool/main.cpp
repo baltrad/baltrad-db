@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 #include <brfc/smart_ptr.hpp>
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/tool/Benchmark.hpp>
 #include <brfc/tool/Import.hpp>

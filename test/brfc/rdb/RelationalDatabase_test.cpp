@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/AttributeResult.hpp>
 #include <brfc/db/FileQuery.hpp>
 #include <brfc/db/FileResult.hpp>
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/sql/DialectCompiler.hpp>
 
@@ -44,9 +44,9 @@ using ::testing::ReturnRef;
 
 namespace brfc {
 
-class db_rdb_RelationalDatabase_test : public ::testing::Test {
+class rdb_RelationalDatabase_test : public ::testing::Test {
   public:
-    db_rdb_RelationalDatabase_test()
+    rdb_RelationalDatabase_test()
             : conn(new ::testing::NiceMock<sql::MockConnection>())
             , dialect()
             , compiler(&dialect)
@@ -75,7 +75,7 @@ class db_rdb_RelationalDatabase_test : public ::testing::Test {
     RelationalDatabase rdb;
 };
 
-TEST_F(db_rdb_RelationalDatabase_test, test_create_pool) {
+TEST_F(rdb_RelationalDatabase_test, test_create_pool) {
     delete conn; // XXX: shows up leaked, fix the fixture/tests
     sql::MockConnectionCreator c;
 
@@ -88,7 +88,7 @@ TEST_F(db_rdb_RelationalDatabase_test, test_create_pool) {
     EXPECT_EQ(3u, bcp->max_size());
 }
 
-TEST_F(db_rdb_RelationalDatabase_test, test_create_pool_invalid) {
+TEST_F(rdb_RelationalDatabase_test, test_create_pool_invalid) {
     delete conn; // XXX: shows up leaked, fix the fixture/tests
     sql::MockConnectionCreator c;
 
@@ -96,7 +96,7 @@ TEST_F(db_rdb_RelationalDatabase_test, test_create_pool_invalid) {
     EXPECT_THROW(RelationalDatabase::create_pool(&c, url), value_error);
 }
 
-TEST_F(db_rdb_RelationalDatabase_test, test_create_pool_default) {
+TEST_F(rdb_RelationalDatabase_test, test_create_pool_default) {
     delete conn; // XXX: shows up leaked, fix the fixture/tests
     sql::MockConnectionCreator c;
 
@@ -110,7 +110,7 @@ TEST_F(db_rdb_RelationalDatabase_test, test_create_pool_default) {
 }
 
 
-TEST_F(db_rdb_RelationalDatabase_test, test_execute_attribute_query) {
+TEST_F(rdb_RelationalDatabase_test, test_execute_attribute_query) {
     EXPECT_CALL(pool, do_get())
         .WillOnce(Return(conn));
     EXPECT_CALL(*conn, do_execute(_))
@@ -120,7 +120,7 @@ TEST_F(db_rdb_RelationalDatabase_test, test_execute_attribute_query) {
     scoped_ptr<AttributeResult> r(rdb.execute(q));
 }
 
-TEST_F(db_rdb_RelationalDatabase_test, test_execute_file_query) {
+TEST_F(rdb_RelationalDatabase_test, test_execute_file_query) {
     EXPECT_CALL(pool, do_get())
         .WillOnce(Return(conn));
     EXPECT_CALL(*conn, do_execute(_))
@@ -130,7 +130,7 @@ TEST_F(db_rdb_RelationalDatabase_test, test_execute_file_query) {
     scoped_ptr<FileResult> r(rdb.execute(q));
 }
 
-TEST_F(db_rdb_RelationalDatabase_test, test_remove) {
+TEST_F(rdb_RelationalDatabase_test, test_remove) {
     MockFileEntry e;
     EXPECT_CALL(pool, do_get())
         .WillOnce(Return(conn));

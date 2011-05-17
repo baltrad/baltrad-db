@@ -21,8 +21,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/db/rdb/RdbOh5NodeBackend.hpp>
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/RdbOh5NodeBackend.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
@@ -40,9 +40,9 @@ namespace brfc {
 
 // XXX: test for loading unloaded nodes from DB!
 
-class db_rdb_RdbOh5NodeBackend_test : public ::testing::Test {
+class rdb_RdbOh5NodeBackend_test : public ::testing::Test {
   public:
-    db_rdb_RdbOh5NodeBackend_test()
+    rdb_RdbOh5NodeBackend_test()
             : conn()
             , pool()
             , pool_ptr(&pool, no_delete)
@@ -65,22 +65,22 @@ class db_rdb_RdbOh5NodeBackend_test : public ::testing::Test {
     RdbOh5NodeBackend backend;
 };
 
-TEST_F(db_rdb_RdbOh5NodeBackend_test, test_ctor) {
+TEST_F(rdb_RdbOh5NodeBackend_test, test_ctor) {
     EXPECT_EQ(0, backend.id(backend.root()));
     EXPECT_TRUE(backend.loaded(backend.root()));
 }
 
-TEST_F(db_rdb_RdbOh5NodeBackend_test, test_set_id) {
+TEST_F(rdb_RdbOh5NodeBackend_test, test_set_id) {
     backend.id(backend.root(), 1);
     EXPECT_EQ(1, backend.id(backend.root()));
 }
 
-TEST_F(db_rdb_RdbOh5NodeBackend_test, test_set_loaded) {
+TEST_F(rdb_RdbOh5NodeBackend_test, test_set_loaded) {
     backend.loaded(backend.root(), false);
     EXPECT_FALSE(backend.loaded(backend.root()));
 }
 
-TEST_F(db_rdb_RdbOh5NodeBackend_test, test_add) {
+TEST_F(rdb_RdbOh5NodeBackend_test, test_add) {
     MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
@@ -92,7 +92,7 @@ TEST_F(db_rdb_RdbOh5NodeBackend_test, test_add) {
     EXPECT_EQ(0, backend.id(*n));
 }
 
-TEST_F(db_rdb_RdbOh5NodeBackend_test, test_add_duplicate_entry) {
+TEST_F(rdb_RdbOh5NodeBackend_test, test_add_duplicate_entry) {
     MockNode* n1 = new MockNode("n");
     MockNode* n2 = new MockNode("n");
     ON_CALL(*n1, do_accepts_child(_))
@@ -104,7 +104,7 @@ TEST_F(db_rdb_RdbOh5NodeBackend_test, test_add_duplicate_entry) {
     EXPECT_THROW(backend.root().add(n2), duplicate_entry);
 }
 
-TEST_F(db_rdb_RdbOh5NodeBackend_test, test_has) {
+TEST_F(rdb_RdbOh5NodeBackend_test, test_has) {
     MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
@@ -115,7 +115,7 @@ TEST_F(db_rdb_RdbOh5NodeBackend_test, test_has) {
     EXPECT_TRUE(backend.has(*n));
 }
 
-TEST_F(db_rdb_RdbOh5NodeBackend_test, test_parent) {
+TEST_F(rdb_RdbOh5NodeBackend_test, test_parent) {
     MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
@@ -125,7 +125,7 @@ TEST_F(db_rdb_RdbOh5NodeBackend_test, test_parent) {
     EXPECT_EQ(&backend.root(), n->parent());
 }
 
-TEST_F(db_rdb_RdbOh5NodeBackend_test, test_children) {
+TEST_F(rdb_RdbOh5NodeBackend_test, test_children) {
     MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection

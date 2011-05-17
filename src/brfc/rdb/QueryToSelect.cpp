@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/db/rdb/QueryToSelect.hpp>
+#include <brfc/rdb/QueryToSelect.hpp>
 
 #include <boost/assign.hpp>
 #include <boost/bind.hpp>
@@ -32,8 +32,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/FileQuery.hpp>
-#include <brfc/db/rdb/AttributeMapper.hpp>
-#include <brfc/db/rdb/Model.hpp>
+#include <brfc/rdb/AttributeMapper.hpp>
+#include <brfc/rdb/Model.hpp>
 
 #include <brfc/expr/Listcons.hpp>
 

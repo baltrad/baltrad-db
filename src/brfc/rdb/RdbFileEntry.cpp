@@ -20,15 +20,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 #include <string>
 
-#include <brfc/db/rdb/RdbFileEntry.hpp>
+#include <brfc/rdb/RdbFileEntry.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/FileHasher.hpp>
 
-#include <brfc/db/rdb/AttributeMapper.hpp>
-#include <brfc/db/rdb/RdbOh5NodeBackend.hpp>
-#include <brfc/db/rdb/RdbHelper.hpp>
-#include <brfc/db/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/AttributeMapper.hpp>
+#include <brfc/rdb/RdbOh5NodeBackend.hpp>
+#include <brfc/rdb/RdbHelper.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/sql/Connection.hpp>
 
