@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 Expression
@@ -99,5 +98,4 @@ list_filter::both_list(const Expression& lhs,
 }
 
 } // namepsace proc
-} // namespace expr
 } // namespace brfc

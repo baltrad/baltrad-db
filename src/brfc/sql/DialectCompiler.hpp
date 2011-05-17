@@ -42,7 +42,7 @@ class DialectCompiler : public Compiler {
      * @brief base for DialectCompiler procedures
      */
     struct proc {
-        typedef expr::Expression result_type;
+        typedef Expression result_type;
     };
 
     /**
@@ -55,7 +55,7 @@ class DialectCompiler : public Compiler {
          *         `("(", aliased, ") AS " + alias)`
          *         if aliased is a SELECT-statement
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
 
     /**
@@ -71,7 +71,7 @@ class DialectCompiler : public Compiler {
          * @param x `(lhs, rhs)`
          * @return `(lhs, " " + op + " ", rhs)`
          */
-        expr::Expression operator()(const expr::Expression& args);
+        Expression operator()(const Expression& args);
 
         std::string op_;
     };
@@ -86,7 +86,7 @@ class DialectCompiler : public Compiler {
          *
          * replaces '*' with '%' and '?' with '_' in the pattern
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -102,7 +102,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1)`
          * @return `(op, arg1)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
 
         std::string op_;
     };
@@ -115,7 +115,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1)`
          * @return `(bind, arg1)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
 
     /**
@@ -126,7 +126,7 @@ class DialectCompiler : public Compiler {
          * @param x `(table, column)`
          * @return `table + "." + column`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
 
     /**
@@ -142,7 +142,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1, arg2, ..., argN)`
          * @return `(name + "(", arg1, ", ", arg2, ", ", ... , argN, ")")`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
 
         std::string name_;
     };
@@ -162,7 +162,7 @@ class DialectCompiler : public Compiler {
          * @param x `(selectable [, condition])
          * @return `(type + " ", selectable [, " ON ", condition])`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
 
         std::string type_;
     };
@@ -182,7 +182,7 @@ class DialectCompiler : public Compiler {
          *
          * calls @ref Dialect::literal_to_string() on @c arg
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
 
         const sql::Dialect& dialect_;
     };
@@ -195,7 +195,7 @@ class DialectCompiler : public Compiler {
          * @param x `(labeled, label)`
          * @return `(labeled, " AS " + label)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
 
     /**
@@ -206,7 +206,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1, arg2, ..., argN)`
          * @return `("SELECT ", arg1, " ", arg2, " ", ..., argN)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -217,7 +217,7 @@ class DialectCompiler : public Compiler {
          * @param x `()`
          * @return `"DISTINCT"`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -228,7 +228,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1, arg2, ..., argN)`
          * @return `(arg1, " ", arg2, " ", ..., argN)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -239,7 +239,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1, arg2, ..., argN)`
          * @return `("FROM ", arg1, " ", arg2, " ", ..., argN)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -250,7 +250,7 @@ class DialectCompiler : public Compiler {
          * @param x `(condition)`
          * @return `("WHERE ", condition)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -261,7 +261,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1, arg2, ..., argN)`
          * @return `("GROUP BY ", arg1, " ", arg2, " ", ..., argN)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -272,7 +272,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1, arg2, ..., argN)`
          * @return `("ORDER BY ", arg1, " ", arg2, " ", ..., argN)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -288,7 +288,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg)`
          * @return `(arg, " " + dir)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
 
         std::string dir_;
     };
@@ -303,7 +303,7 @@ class DialectCompiler : public Compiler {
          *
          * the (int64) argument is cast to string using boost::lexical_cast
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -316,7 +316,7 @@ class DialectCompiler : public Compiler {
          *
          * the (int64) argument is cast to string using boost::lexical_cast
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
 
     /**
@@ -327,7 +327,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1, arg2, ..., argN)`
          * @return `("INSERT INTO ", arg1, " ", arg2, " ", ..., argN)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -338,7 +338,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1, arg2, ..., argN)`
          * @return `arg1 + ", " + arg2 + ", " + ... + argN`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -349,7 +349,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1, arg2, ..., argN)`
          * @return `("VALUES (", arg1, ", ", arg2, ", ", ..., argN, ")")`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
     
     /**
@@ -360,7 +360,7 @@ class DialectCompiler : public Compiler {
          * @param x `(arg1, arg2, ..., argN)`
          * @return `("RETURNING ", arg1, ", ", arg2, ", ", ..., argN)`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
 
     /**
@@ -371,10 +371,10 @@ class DialectCompiler : public Compiler {
          * @param x `(table)`
          * @return `table`
          */
-        expr::Expression operator()(const expr::Expression& x);
+        Expression operator()(const Expression& x);
     };
 
-    expr::Expression compact_str(const expr::Expression& x);
+    Expression compact_str(const Expression& x);
   
   private:
     /**
@@ -382,9 +382,9 @@ class DialectCompiler : public Compiler {
      * @pre stack is empty
      * @post stack contains compiled string, accessible through compiled()
      */
-    virtual expr::Expression do_compile(const expr::Expression& x);
+    virtual Expression do_compile(const Expression& x);
 
-    expr::Eval eval_;
+    Eval eval_;
     const Dialect* dialect_;
     bind bind_;
 };

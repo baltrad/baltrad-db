@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Expression.hpp>
 
 namespace brfc {
-namespace expr {
 
 TEST(expr_Expression_test, test_ctor_default) {
     Expression e;
@@ -297,5 +296,4 @@ TEST(expr_Expression_test, test_contains) {
     EXPECT_FALSE(e.contains(Expression()));
 }
 
-} // namespace expr
 } // namespace brfc

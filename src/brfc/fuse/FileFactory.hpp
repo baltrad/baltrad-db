@@ -64,7 +64,7 @@ class FileFactory : public EntryFactory {
   private:
     virtual FileFactory* do_clone() const;
 
-    void do_filter(const expr::Expression& expr);
+    void do_filter(const Expression& expr);
 
     virtual void do_update();
 
@@ -121,7 +121,7 @@ class FileFactory : public EntryFactory {
     
     db::Database* db_; 
     FileNamer* namer_;
-    expr::Expression filter_;
+    Expression filter_;
     EntrySet_t entries_;
 };
 

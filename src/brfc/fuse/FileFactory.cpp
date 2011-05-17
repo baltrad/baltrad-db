@@ -58,7 +58,7 @@ FileFactory::do_clone() const {
 }
 
 void
-FileFactory::do_filter(const expr::Expression& expr) {
+FileFactory::do_filter(const Expression& expr) {
     filter_ = expr;
 }
 

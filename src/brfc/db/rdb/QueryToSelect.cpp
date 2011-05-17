@@ -44,8 +44,6 @@ namespace brfc {
 namespace db {
 namespace rdb {
 
-using expr::Expression;
-
 namespace {
 
 struct attr {
@@ -97,7 +95,7 @@ struct attr {
     }
 
    /**
-     * @brief turn expr::Attribute into sql::Column
+     * @brief turn Attribute into sql::Column
      * @post the expression stack contains equivalent sql::Column
      * 
      * depending on the attribute, column lookup is forwarded to:
@@ -286,7 +284,7 @@ struct binop {
         Expression lhs = eval(*it);
         ++it;
         Expression rhs = eval(*it);
-        return expr::Listcons().symbol(op).append(lhs).append(rhs).get();
+        return Listcons().symbol(op).append(lhs).append(rhs).get();
     }
 };
 
@@ -312,7 +310,7 @@ struct unaryop {
         std::string op = opmap[it->symbol()];
         ++it;
         Expression arg = eval(*it);
-        return expr::Listcons().symbol(op).append(arg).get();
+        return Listcons().symbol(op).append(arg).get();
     }
 };
 
@@ -506,7 +504,7 @@ QueryToSelect::Impl::transform(const AttributeQuery& query) {
     } 
 
     // replace attributes in group by
-    BOOST_FOREACH(const expr::Expression& x, query.group()) {
+    BOOST_FOREACH(const Expression& x, query.group()) {
         select_.append_group_by(eval(x));
     }
 

@@ -37,7 +37,7 @@ class db_FileQuery_test : public ::testing::Test {
 };
 
 TEST_F(db_FileQuery_test, test_copy_ctor) {
-    expr::Expression fExpression(1), oExpression(2);
+    Expression fExpression(1), oExpression(2);
 
     query.filter(fExpression);
     query.order_by(oExpression, FileQuery::ASC);
@@ -56,7 +56,7 @@ TEST_F(db_FileQuery_test, test_copy_ctor) {
 }
 
 TEST_F(db_FileQuery_test, test_copy_assign) {
-    expr::Expression fExpression(1), oExpression(2);
+    Expression fExpression(1), oExpression(2);
 
     query.filter(fExpression);
     query.order_by(oExpression, FileQuery::ASC);
@@ -76,7 +76,7 @@ TEST_F(db_FileQuery_test, test_copy_assign) {
 }
 
 TEST_F(db_FileQuery_test, test_copy_assign_self) {
-    expr::Expression fExpression(1), oExpression(2);
+    Expression fExpression(1), oExpression(2);
 
     query.filter(fExpression);
     query.order_by(oExpression, FileQuery::ASC);
@@ -95,14 +95,14 @@ TEST_F(db_FileQuery_test, test_copy_assign_self) {
 }
 
 TEST_F(db_FileQuery_test, test_filter) {
-    expr::Expression se(1);
+    Expression se(1);
 
     query.filter(se);
     EXPECT_EQ(se, query.filter());
 }
 
 TEST_F(db_FileQuery_test, test_order_by) {
-    expr::Expression se(1);
+    Expression se(1);
 
     query.order_by(se, FileQuery::ASC);
     const FileQuery::OrderVector& ovec = query.order();

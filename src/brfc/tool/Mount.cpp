@@ -113,7 +113,7 @@ Mount::do_execute(db::Database& db) {
     dargs.push_back("gid=" + boost::lexical_cast<std::string>(gid_));
 
     fuse::Daemon& daemon = fuse::Daemon::instance();
-    expr::ExpressionFactory xpr;
+    ExpressionFactory xpr;
     
     DefaultFileNamer namer;
     fuse::FileFactory l4fac(&db, &namer);

@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Expression.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 Expression
@@ -40,5 +39,4 @@ in::operator()(const Expression& args) const{
 }
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc

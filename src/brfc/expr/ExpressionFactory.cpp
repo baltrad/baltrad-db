@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
-namespace expr {
 
 ExpressionFactory::ExpressionFactory()
         : prototypes_(AttributePrototypes::default_odim_h5()) {
@@ -278,5 +277,4 @@ ExpressionFactory::combined_datetime(const std::string& date,
     return add(attribute(date), attribute(time));
 }
 
-} // namespace expr
 } // namespace brfc

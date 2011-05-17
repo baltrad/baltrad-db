@@ -27,7 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 using ::testing::Return;
 
 namespace brfc {
-namespace expr {
 
 namespace {
 
@@ -88,5 +87,4 @@ TEST_F(expr_Eval_test, test_proc_call_order) {
     EXPECT_EQ(Expression(30), eval(e));
 };
 
-} // namespace expr
 } // namespace brfc

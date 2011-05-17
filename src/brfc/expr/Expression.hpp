@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/TimeDelta.hpp>
 
 namespace brfc {
-namespace expr {
 
 class Expression {
     typedef void (Expression::*bool_type)() const;
@@ -279,7 +278,6 @@ join(Expression::const_iterator first,
      Expression::const_iterator last,
      const Expression& sep);
 
-} // namespace expr
 } // namespace brfc
 
 #endif // BRFC_EXPR_EXPRESSION_HPP

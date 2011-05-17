@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/function.hpp>
 
 namespace brfc {
-namespace expr {
 
 class Expression;
 
@@ -34,7 +33,7 @@ class Eval {
             : procs_() {
     }
 
-    typedef boost::function<expr::Expression(const expr::Expression&)> proc_t;
+    typedef boost::function<Expression(const Expression&)> proc_t;
 
     void bind(const std::string& symbol, proc_t proc);
 
@@ -47,7 +46,6 @@ class Eval {
     procmap_t procs_;
 };
 
-} // namespace expr
 } // namespace brfc
 
 #endif // BRFC_EXPR_EVAL_HPP

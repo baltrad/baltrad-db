@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/dispatch.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 namespace {
@@ -103,5 +102,4 @@ TEST(expr_proc_dispatch_test, test_unary_invalid_type) {
 
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc

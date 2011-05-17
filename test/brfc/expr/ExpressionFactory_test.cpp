@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
-namespace expr {
 
 class expr_ExpressionFactory_test : public ::testing::Test {
   public:
@@ -97,5 +96,4 @@ TEST_F(expr_ExpressionFactory_test, test_not) {
     EXPECT_EQ(x, xpr.not_(xpr.bool_(true)));
 }
 
-} // namespace expr
 } // namespace brfc

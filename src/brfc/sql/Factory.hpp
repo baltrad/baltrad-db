@@ -23,16 +23,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 namespace brfc {
-
-namespace expr {
+    class Date;
+    class DateTime;
     class Expression;
+    class Time;
+    class Variant;
 }
 
-class Date;
-class DateTime;
-class Time;
-class Variant;
-
+namespace brfc {
 namespace sql {
 
 /**
@@ -43,49 +41,49 @@ class Factory {
     /**
      * @brief construct Literal from Variant
      */
-    expr::Expression literal(const expr::Expression& value) const;
+    Expression literal(const Expression& value) const;
 
     /**
      * @brief construct Literal containing a string
      */
-    expr::Expression string(const std::string& value) const;
+    Expression string(const std::string& value) const;
 
     /**
      * @brief construct Literal containing a string
      */
-    expr::Expression string(const char* value) const;
+    Expression string(const char* value) const;
 
     /**
      * @brief construct Literal containing a 64-bit integer
      */
-    expr::Expression int64_(long long value) const;
+    Expression int64_(long long value) const;
 
     /**
      * @brief construct Literal containing a double precision float
      */
-    expr::Expression double_(double value) const;
+    Expression double_(double value) const;
 
     /**
      * @brief construct Literal containing a date
      */
-    expr::Expression date(const Date& date) const;
+    Expression date(const Date& date) const;
 
     /**
      * @brief construct Literal containing a time
      */
-    expr::Expression time(const Time& time) const;
+    Expression time(const Time& time) const;
 
     /**
      * @brief construct Literal containing a datetime
      */
-    expr::Expression datetime(const DateTime& datetime) const;
+    Expression datetime(const DateTime& datetime) const;
 
     /**
      * @brief construct Literal containing a bool
      */
-    expr::Expression bool_(bool value) const;
+    Expression bool_(bool value) const;
 
-    expr::Expression bind(const std::string& name) const;
+    Expression bind(const std::string& name) const;
 
     /**
      * @name comparison operators
@@ -94,39 +92,39 @@ class Factory {
     /**
      * @brief lhs != rhs
      */
-    expr::Expression ne(const expr::Expression& lhs, const expr::Expression& rhs) const;
+    Expression ne(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs == rhs
      */
-    expr::Expression eq(const expr::Expression& lhs, const expr::Expression& rhs) const;
+    Expression eq(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs > rhs
      */
-    expr::Expression gt(const expr::Expression& lhs, const expr::Expression& rhs) const;
+    Expression gt(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs < rhs
      */
-    expr::Expression lt(const expr::Expression& lhs, const expr::Expression& rhs) const;
+    Expression lt(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs <= rhs
      */
-    expr::Expression le(const expr::Expression& lhs, const expr::Expression& rhs) const;
+    Expression le(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief lhs >= rhs
      */
-    expr::Expression ge(const expr::Expression& lhs, const expr::Expression& rhs) const;
+    Expression ge(const Expression& lhs, const Expression& rhs) const;
     
     /**
      * @brief low <= sql => high
      */
-    expr::Expression between(const expr::Expression& sql,
-                              const expr::Expression& low,
-                              const expr::Expression& high) const;
+    Expression between(const Expression& sql,
+                              const Expression& low,
+                              const Expression& high) const;
     //@}
 
     /**
@@ -136,17 +134,17 @@ class Factory {
     /**
      * @brief lhs AND rhs
      */
-    expr::Expression and_(const expr::Expression& lhs, const expr::Expression& rhs) const;
+    Expression and_(const Expression& lhs, const Expression& rhs) const;
     
     /**
      * @brief lhs OR rhs
      */
-    expr::Expression or_(const expr::Expression& lhs, const expr::Expression& rhs) const;
+    Expression or_(const Expression& lhs, const Expression& rhs) const;
 
     /**
      * @brief NOT exp
      */
-    expr::Expression not_(const expr::Expression& exp) const;
+    Expression not_(const Expression& exp) const;
     //@}
     
     /**
@@ -156,29 +154,29 @@ class Factory {
     /**
      * @brief lhs + rhs
      */
-    expr::Expression add(const expr::Expression& lhs, const expr::Expression& rhs) const;
+    Expression add(const Expression& lhs, const Expression& rhs) const;
 
-    expr::Expression column(const std::string& table,
+    Expression column(const std::string& table,
                             const std::string& column) const;
 
-    expr::Expression label(const expr::Expression& x, const std::string& label) const;
+    Expression label(const Expression& x, const std::string& label) const;
 
-    expr::Expression alias(const expr::Expression& x, const std::string& alias) const;
+    Expression alias(const Expression& x, const std::string& alias) const;
 
-    expr::Expression table(const std::string& table) const;
+    Expression table(const std::string& table) const;
 
-    expr::Expression min(const expr::Expression& x) const;
-    expr::Expression max(const expr::Expression& x) const;
-    expr::Expression sum(const expr::Expression& x) const;
-    expr::Expression count(const expr::Expression& x) const;
+    Expression min(const Expression& x) const;
+    Expression max(const Expression& x) const;
+    Expression sum(const Expression& x) const;
+    Expression count(const Expression& x) const;
 
 
-    expr::Expression binary_op(const std::string& op,
-                               const expr::Expression& lhs,
-                               const expr::Expression& rhs) const;
+    Expression binary_op(const std::string& op,
+                               const Expression& lhs,
+                               const Expression& rhs) const;
 
-    expr::Expression unary_op(const std::string& op,
-                              const expr::Expression& arg) const;
+    Expression unary_op(const std::string& op,
+                              const Expression& arg) const;
 };
 
 

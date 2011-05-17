@@ -33,7 +33,7 @@ namespace sql {
  */
 class Insert {
   public:
-    typedef std::map<std::string, expr::Expression> ValueMap;
+    typedef std::map<std::string, Expression> ValueMap;
 
     /**
      * @brief constructor
@@ -51,24 +51,24 @@ class Insert {
      * @param column name of the column
      * @param x SQL expression to insert to the column
      */
-    void value(const std::string& column, const expr::Expression& x);
+    void value(const std::string& column, const Expression& x);
     
     /**
      * @brief add an expression to return
      */
-    void returning(const expr::Expression& x);
+    void returning(const Expression& x);
     
     /**
      * @brief access expressions this statement returns
      */
-    expr::Expression returning() const { return returning_; }
+    Expression returning() const { return returning_; }
 
-    expr::Expression expression() const;
+    Expression expression() const;
   
   private:  
     std::string table_;
     ValueMap values_;
-    expr::Expression returning_;
+    Expression returning_;
 };
 
 } // namespace sql

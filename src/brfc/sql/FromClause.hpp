@@ -35,36 +35,36 @@ namespace sql {
  */
 class FromClause {
   public:
-    explicit FromClause(const expr::Expression& e=expr::Expression());
+    explicit FromClause(const Expression& e=Expression());
     
-    void from(const expr::Expression& table);
+    void from(const Expression& table);
     
-    void join(const expr::Expression& table,
-              const expr::Expression& condition);
+    void join(const Expression& table,
+              const Expression& condition);
     
-    void outerjoin(const expr::Expression& table,
-                   const expr::Expression& condition);
+    void outerjoin(const Expression& table,
+                   const Expression& condition);
 
-    bool contains(const expr::Expression& table) const;
+    bool contains(const Expression& table) const;
  
-    expr::Expression expression() const;
+    Expression expression() const;
 
   private:
     struct join_part {
         join_part(const std::string& type_,
-                  const expr::Expression& table_,
-                  const expr::Expression& condition_)
+                  const Expression& table_,
+                  const Expression& condition_)
                 : type(type_)
                 , table(table_)
                 , condition(condition_) {
         }
 
         std::string type;
-        expr::Expression table;
-        expr::Expression condition;
+        Expression table;
+        Expression condition;
     };
     
-    expr::Expression from_;
+    Expression from_;
     std::vector<join_part> parts_;
 };
 

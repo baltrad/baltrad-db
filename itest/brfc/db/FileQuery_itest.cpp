@@ -129,7 +129,7 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
         return auto_ptr<db::FileEntry>(r.entry());
     }
     
-    expr::ExpressionFactory xpr;
+    ExpressionFactory xpr;
     std::string src1, src2;
     test::TestRDB* db;
     oh5::hl::HlFile td1, td2, td3, td4, td5;
@@ -205,8 +205,8 @@ TEST_P(db_FileQuery_itest, test_filter_by_xsize) {
 }
 
 TEST_P(db_FileQuery_itest, test_filter_by_xsize_or_ysize) {
-    expr::Expression xsize = xpr.attribute("where/xsize");
-    expr::Expression ysize = xpr.attribute("where/ysize");
+    Expression xsize = xpr.attribute("where/xsize");
+    Expression ysize = xpr.attribute("where/ysize");
     query.filter(
         xpr.or_(
             xpr.eq(xpr.attribute("where/xsize"), xpr.int64_(1)),
@@ -227,7 +227,7 @@ TEST_P(db_FileQuery_itest, test_filter_by_xsize_or_ysize) {
 TEST_P(db_FileQuery_itest, test_filter_by_combined_datetime) {
     DateTime min(2000, 1, 1, 12, 1);
     DateTime max(2001, 1, 1, 12, 0);
-    expr::Expression what_dt =
+    Expression what_dt =
         xpr.add(xpr.attribute("what/date"), xpr.attribute("what/time"));
 
     query.filter(xpr.between(what_dt, xpr.datetime(min), xpr.datetime(max)));
@@ -243,7 +243,7 @@ TEST_P(db_FileQuery_itest, test_filter_by_combined_datetime) {
 }
 
 TEST_P(db_FileQuery_itest, test_filter_by_wmo_code) {
-    expr::Expression wmo_code = xpr.attribute("what/source:WMO");
+    Expression wmo_code = xpr.attribute("what/source:WMO");
     query.filter(xpr.eq(wmo_code, xpr.string("02666")));
     r.reset(db->execute(query));
 
@@ -255,7 +255,7 @@ TEST_P(db_FileQuery_itest, test_filter_by_wmo_code) {
 }
 
 TEST_P(db_FileQuery_itest, test_filter_by_node_or_node) {
-    expr::Expression node = xpr.attribute("what/source:_name");
+    Expression node = xpr.attribute("what/source:_name");
     query.filter(
         xpr.or_(
             xpr.eq(node, xpr.string("seang")),
@@ -278,7 +278,7 @@ TEST_P(db_FileQuery_itest, test_filter_by_node_or_node) {
 }
 
 TEST_P(db_FileQuery_itest, test_filter_by_node_and_node) {
-    expr::Expression node = xpr.attribute("what/source:_name");
+    Expression node = xpr.attribute("what/source:_name");
     query.filter(
         xpr.and_(
             xpr.eq(node, xpr.string("seang")),
@@ -383,7 +383,7 @@ TEST_P(db_FileQuery_itest, test_skip_with_limit) {
 }
 
 TEST_P(db_FileQuery_itest, test_in) {
-    expr::Expression l;
+    Expression l;
     l.push_back(xpr.string("CVOL"));
     l.push_back(xpr.string("SCAN"));
 
@@ -398,7 +398,7 @@ TEST_P(db_FileQuery_itest, test_in) {
 }
 
 TEST_P(db_FileQuery_itest, test_not_in) {
-    expr::Expression l;
+    Expression l;
     l.push_back(xpr.int64_(2));
     l.push_back(xpr.int64_(4));
 

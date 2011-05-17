@@ -32,8 +32,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/test_common.hpp>
 #include <brfc/sql/MockDialect.hpp>
 
-using ::brfc::expr::Expression;
-using ::brfc::expr::Listcons;
 using ::testing::Return;
 
 namespace brfc {

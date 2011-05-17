@@ -28,13 +28,10 @@ namespace brfc {
 
 class Date;
 class DateTime;
+class Expression;
 class Time;
 class TimeDelta;
 class Variant;
-
-namespace expr {
-
-class Expression;
 
 /**
  * @brief factory for constructing expression elements
@@ -54,7 +51,7 @@ class ExpressionFactory {
     explicit ExpressionFactory(const AttributePrototypes& prototypes);
 
     /**
-     * @brief construct expr::Attribute
+     * @brief construct Attribute
      */
     Expression attribute(const std::string& name) const;
 
@@ -285,7 +282,6 @@ class ExpressionFactory {
     AttributePrototypes prototypes_;
 };
 
-}
-}
+} // namespace brfc
 
 #endif // BRFC_EXPR_EXPRESSION_FACTORY_HPP

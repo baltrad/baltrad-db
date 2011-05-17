@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Listcons.hpp>
 
 namespace brfc {
-namespace expr {
 
 TEST(expr_Listcons_test, test_empty) {
     Expression e = Listcons().get();
@@ -73,5 +72,4 @@ TEST(expr_Listcons_test, test_construct_many) {
     ASSERT_EQ(DateTime(2011, 12, 13, 14, 15, 16, 17), it->datetime());
 }
 
-}
-}
+} // namespace brfc

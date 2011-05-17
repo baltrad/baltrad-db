@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/conversion.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 /* date */
@@ -104,5 +103,4 @@ TEST(expr_proc_conversion_datetime_test, test_datetime) {
 }
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc

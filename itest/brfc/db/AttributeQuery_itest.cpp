@@ -127,7 +127,7 @@ struct db_AttributeQuery_itest : public testing::TestWithParam<const char*> {
         db->clean();
     }
     
-    expr::ExpressionFactory xpr;
+    ExpressionFactory xpr;
     std::string src1, src2;
     test::TestRDB* db;
     oh5::hl::HlFile td1, td2, td3, td4, td5;
@@ -229,7 +229,7 @@ TEST_P(db_AttributeQuery_itest, test_filter_by_xsize_distinct) {
 TEST_P(db_AttributeQuery_itest, test_filter_by_combined_datetime) {
     DateTime min(2000, 1, 1, 12, 1);
     DateTime max(2001, 1, 1, 12, 0);
-    expr::Expression what_dt = xpr.add(
+    Expression what_dt = xpr.add(
         xpr.attribute("what/date"),
         xpr.attribute("what/time")
     );
@@ -262,7 +262,7 @@ TEST_P(db_AttributeQuery_itest, test_select_by_wmo_code) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_select_by_or_node) {
-    expr::Expression node = xpr.attribute("what/source:_name");
+    Expression node = xpr.attribute("what/source:_name");
     query.fetch("uuid", xpr.attribute("file:uuid"))
          .filter(
             xpr.or_(
@@ -285,7 +285,7 @@ TEST_P(db_AttributeQuery_itest, test_select_by_or_node) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_select_by_node_and_node) {
-    expr::Expression node = xpr.attribute("what/source:_name");
+    Expression node = xpr.attribute("what/source:_name");
     query.fetch("uuid", xpr.attribute("file:uuid"))
          .filter(
             xpr.and_(
@@ -328,7 +328,7 @@ TEST_P(db_AttributeQuery_itest, test_query_like) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_order_by) {
-    expr::Expression dt =
+    Expression dt =
         xpr.add(xpr.attribute("what/date"), xpr.attribute("what/time"));
     query.fetch("uuid", xpr.attribute("file:uuid"))
          .order_by(dt, AttributeQuery::DESC);
@@ -474,7 +474,7 @@ TEST_P(db_AttributeQuery_itest, test_group_by_source_missing_value) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_in) {
-    expr::Expression l;
+    Expression l;
     l.push_back(xpr.string("CVOL"));
     l.push_back(xpr.string("SCAN"));
 
@@ -491,7 +491,7 @@ TEST_P(db_AttributeQuery_itest, test_in) {
 }
 
 TEST_P(db_AttributeQuery_itest, test_not_in) {
-    expr::Expression l;
+    Expression l;
     l.push_back(xpr.int64_(2));
     l.push_back(xpr.int64_(3));
 

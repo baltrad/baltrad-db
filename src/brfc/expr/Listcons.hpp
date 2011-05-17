@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Expression.hpp>
 
 namespace brfc {
-namespace expr {
 
 class Listcons {
   public:
@@ -103,7 +102,6 @@ class Listcons {
     Expression exp_;
 };
 
-} // namespace expr
 } // namespace brfc
 
 #endif // BRFC_EXPR_LISTCONS_HPP

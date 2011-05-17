@@ -39,8 +39,6 @@ using testing::Return;
 using testing::ReturnRef;
 using testing::Throw;
 using testing::_;
-using ::brfc::expr::Expression;
-using ::brfc::expr::Listcons;
 
 namespace brfc {
 namespace sql {
@@ -248,7 +246,7 @@ TEST_F(sql_Connection_test, test_execute_select) {
 TEST_F(sql_Connection_test, test_execute_replaces_binds) {
     Expression stmt = Listcons().string("query ").append(xpr.bind("b")).get();
     Connection::BindMap_t binds;
-    binds["b"] = expr::Expression(1);
+    binds["b"] = Expression(1);
     MockResult result;
 
     ON_CALL(conn, do_execute(_))

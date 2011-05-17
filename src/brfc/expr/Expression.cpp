@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/assert.hpp>
 
 namespace brfc {
-namespace expr {
 
 Expression::Expression()
         : value_() {
@@ -437,5 +436,4 @@ join(Expression::const_iterator first,
     return e;
 }
 
-} // namespace expr
 } // namespace brfc

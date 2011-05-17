@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 namespace brfc {
-namespace expr {
 
 AttributePrototypes
 AttributePrototypes::default_odim_h5() {
@@ -271,5 +270,4 @@ AttributePrototypes::clear() {
     prototypes_.clear();
 }
 
-} // namespace expr
 } // namespace brfc

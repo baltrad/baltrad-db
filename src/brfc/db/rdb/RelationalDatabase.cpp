@@ -52,9 +52,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Select.hpp>
 
-using ::brfc::expr::Expression;
-using ::brfc::expr::Listcons;
-
 namespace brfc {
 namespace db {
 namespace rdb {
@@ -204,7 +201,7 @@ RelationalDatabase::do_remove(const FileEntry& entry) {
                                 .append(xpr.bind("uuid"))
                                 .get();
     sql::Connection::BindMap_t binds;
-    binds["uuid"] = expr::Expression(entry.uuid());
+    binds["uuid"] = Expression(entry.uuid());
 
     shared_ptr<sql::Connection> c = conn();
     auto_ptr<sql::Result> r (c->execute(stmt, binds));

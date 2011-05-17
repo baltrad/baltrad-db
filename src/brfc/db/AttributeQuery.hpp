@@ -39,9 +39,9 @@ class AttributeQuery {
         DESC = 2
     };
 
-    typedef std::map<std::string, expr::Expression> FetchMap;
-    typedef std::vector<expr::Expression> ExpressionVector;
-    typedef std::pair<expr::Expression, SortDir> OrderPair;
+    typedef std::map<std::string, Expression> FetchMap;
+    typedef std::vector<Expression> ExpressionVector;
+    typedef std::pair<Expression, SortDir> OrderPair;
     typedef std::vector<OrderPair> OrderVector;
 
     /**
@@ -76,14 +76,14 @@ class AttributeQuery {
     /**
      * @brief mark an expression for fetching
      * @param name the name this expression will be accessible with in results
-     * @param expr expr::Expression to fetch
+     * @param expr Expression to fetch
      * @return this AttributeQuery (for chaining)
      *
      * expression are returned in AttributeResult in the same order as they
      * are marked.
      */
     AttributeQuery& fetch(const std::string& name,
-                          const expr::Expression& expr);
+                          const Expression& expr);
     
     const FetchMap& fetch() const {
         return fetch_;
@@ -96,9 +96,9 @@ class AttributeQuery {
      *
      * successive filtering expressions are added together using AND
      */
-    AttributeQuery& filter(const expr::Expression& expr);
+    AttributeQuery& filter(const Expression& expr);
     
-    const expr::Expression& filter() const {
+    const Expression& filter() const {
         return filter_;
     }
     
@@ -107,14 +107,14 @@ class AttributeQuery {
      * @param expr group expression
      * @return this AttributeQuery (for chaining)
      */
-    AttributeQuery& group(const expr::Expression& expr);
+    AttributeQuery& group(const Expression& expr);
 
     ExpressionVector group() const { return group_; }
 
     /**
      * @brief append sort order
      */
-    AttributeQuery& order_by(const expr::Expression& expr, SortDir dir);
+    AttributeQuery& order_by(const Expression& expr, SortDir dir);
 
     OrderVector order() const { return order_; }
     
@@ -128,7 +128,7 @@ class AttributeQuery {
   private:
     bool distinct_;
     FetchMap fetch_;
-    expr::Expression filter_;
+    Expression filter_;
     ExpressionVector group_;
     OrderVector order_;
     int limit_;

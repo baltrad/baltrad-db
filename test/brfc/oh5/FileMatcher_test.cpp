@@ -27,9 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/FakeFile.hpp>
 #include <brfc/oh5/FileMatcher.hpp>
 
-using ::brfc::expr::Expression;
-using ::brfc::expr::Listcons;
-
 namespace brfc {
 namespace oh5 {
 
@@ -64,7 +61,7 @@ struct oh5_FileMatcher_test : public ::testing::Test {
 
     FakeFile f1;
     FileMatcher matcher;
-    expr::ExpressionFactory xpr;
+    ExpressionFactory xpr;
 };
 
 TEST_F(oh5_FileMatcher_test, test_what_object_eq) {

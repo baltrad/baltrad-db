@@ -33,9 +33,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Insert.hpp>
 #include <brfc/sql/Select.hpp>
 
-using ::brfc::expr::Expression;
-using ::brfc::expr::Listcons;
-
 namespace brfc {
 namespace sql {
 
@@ -178,7 +175,7 @@ Expression
 DialectCompiler::function::operator()(const Expression& x) {
     Expression e;
     e.push_back(Expression(name_ + "("));
-    e.extend(expr::join(x.begin(), x.end(), Expression(", ")));
+    e.extend(::brfc::join(x.begin(), x.end(), Expression(", ")));
     e.push_back(Expression(")"));
     return e;
 }
@@ -252,7 +249,7 @@ DialectCompiler::distinct::operator()(const Expression&) {
 Expression
 DialectCompiler::select_columns::operator()(const Expression& x) {
     Expression e;
-    e.extend(expr::join(x.begin(), x.end(), Expression(", ")));
+    e.extend(::brfc::join(x.begin(), x.end(), Expression(", ")));
     return e;
 }
 
@@ -260,7 +257,7 @@ Expression
 DialectCompiler::from_clause::operator()(const Expression& x) {
     Expression e;
     e.push_back(Expression("FROM "));
-    e.extend(expr::join(x.begin(), x.end(), Expression(" ")));
+    e.extend(::brfc::join(x.begin(), x.end(), Expression(" ")));
     return e;
 }
 
@@ -280,7 +277,7 @@ DialectCompiler::group_by::operator()(const Expression& x) {
 
     Expression e;
     e.push_back(Expression("GROUP BY "));
-    e.extend(expr::join(x.begin(), x.end(), Expression(", ")));
+    e.extend(::brfc::join(x.begin(), x.end(), Expression(", ")));
     return e;
 }
 
@@ -290,7 +287,7 @@ DialectCompiler::order_by::operator()(const Expression& x) {
 
     Expression e;
     e.push_back(Expression("ORDER BY "));
-    e.extend(expr::join(x.begin(), x.end(), Expression(", ")));
+    e.extend(::brfc::join(x.begin(), x.end(), Expression(", ")));
     return e;
 }
 
@@ -322,7 +319,7 @@ Expression
 DialectCompiler::select::operator()(const Expression& x) {
     Expression e;
     e.push_back(Expression("SELECT "));
-    e.extend(expr::join(x.begin(), x.end(), Expression(" ")));
+    e.extend(::brfc::join(x.begin(), x.end(), Expression(" ")));
     return e;
 }
 
@@ -336,7 +333,7 @@ DialectCompiler::insert_columns::operator()(const Expression& x) {
 Expression
 DialectCompiler::insert_values::operator()(const Expression& x) {
     return Listcons().string("VALUES (")
-                     .extend(expr::join(x.begin(), x.end(), Expression(", ")))
+                     .extend(::brfc::join(x.begin(), x.end(), Expression(", ")))
                      .string(")")
                      .get();
 }
@@ -345,7 +342,7 @@ Expression
 DialectCompiler::returning::operator()(const Expression& x) {
     Expression e;
     e.push_back(Expression("RETURNING "));
-    e.extend(expr::join(x.begin(), x.end(), Expression(", ")));
+    e.extend(::brfc::join(x.begin(), x.end(), Expression(", ")));
     return e;
 }
 
@@ -353,7 +350,7 @@ Expression
 DialectCompiler::insert::operator()(const Expression& x) {
     Expression e;
     e.push_back(Expression("INSERT INTO "));
-    e.extend(expr::join(x.begin(), x.end(), Expression(" ")));
+    e.extend(::brfc::join(x.begin(), x.end(), Expression(" ")));
     return e;
 }
 

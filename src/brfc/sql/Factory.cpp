@@ -23,9 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Listcons.hpp>
 
-using ::brfc::expr::Expression;
-using ::brfc::expr::Listcons;
-
 namespace brfc {
 namespace sql {
 
@@ -150,32 +147,32 @@ Factory::unary_op(const std::string& op,
 }
 
 Expression
-Factory::alias(const expr::Expression& x, const std::string& alias) const {
+Factory::alias(const Expression& x, const std::string& alias) const {
     return Listcons().symbol("alias").append(x).string(alias).get();
 }
 
 Expression
-Factory::label(const expr::Expression& x, const std::string& alias) const {
+Factory::label(const Expression& x, const std::string& alias) const {
     return Listcons().symbol("label").append(x).string(alias).get();
 }
 
 Expression
-Factory::min(const expr::Expression& x) const {
+Factory::min(const Expression& x) const {
     return unary_op("min", x);
 }
 
 Expression
-Factory::max(const expr::Expression& x) const {
+Factory::max(const Expression& x) const {
     return unary_op("max", x);
 }
 
 Expression
-Factory::sum(const expr::Expression& x) const {
+Factory::sum(const Expression& x) const {
     return unary_op("sum", x);
 }
 
 Expression
-Factory::count(const expr::Expression& x) const {
+Factory::count(const Expression& x) const {
     return unary_op("count", x);
 }
 

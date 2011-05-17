@@ -40,7 +40,7 @@ class Select;
  */
 class Connection : boost::noncopyable {
   public:
-    typedef std::map<std::string, expr::Expression> BindMap_t;
+    typedef std::map<std::string, Expression> BindMap_t;
 
     virtual ~Connection();
 
@@ -124,7 +124,7 @@ class Connection : boost::noncopyable {
      * @note caller takes ownership of the result
      * @sa do_execute
      */
-    Result* execute(const expr::Expression& stmt, const BindMap_t& binds=BindMap_t());
+    Result* execute(const Expression& stmt, const BindMap_t& binds=BindMap_t());
 
     Result* execute(const std::string& stmt);
 
@@ -156,7 +156,7 @@ class Connection : boost::noncopyable {
         return do_last_insert_id();
     }
 
-    std::string replace_binds(const expr::Expression& stmt,
+    std::string replace_binds(const Expression& stmt,
                               const BindMap_t& binds) const;
 
   protected:

@@ -29,8 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/list_filter.hpp>
 #include <brfc/expr/proc/logic.hpp>
 
-using ::brfc::expr::Expression;
-
 namespace brfc {
 namespace oh5 {
 
@@ -60,24 +58,24 @@ struct list_in {
 FileMatcher::FileMatcher()
         : attr_() 
         , eval_() {
-    using ::brfc::expr::proc::binary_list;
-    using ::brfc::expr::proc::list_filter;
+    using ::brfc::proc::binary_list;
+    using ::brfc::proc::list_filter;
 
-    eval_.bind("+", boost::bind(binary_list(expr::proc::add()), _1));
-    eval_.bind("-", boost::bind(binary_list(expr::proc::sub()), _1));
-    eval_.bind("*", boost::bind(binary_list(expr::proc::mul()), _1));
-    eval_.bind("/", boost::bind(binary_list(expr::proc::div()), _1));
-    eval_.bind("=", boost::bind(list_filter(expr::proc::eq()), _1));
-    eval_.bind("!=", boost::bind(list_filter(expr::proc::ne()), _1));
-    eval_.bind(">", boost::bind(list_filter(expr::proc::gt()), _1));
-    eval_.bind("<", boost::bind(list_filter(expr::proc::lt()), _1));
-    eval_.bind(">=", boost::bind(list_filter(expr::proc::ge()), _1));
-    eval_.bind("<=", boost::bind(list_filter(expr::proc::le()), _1));
-    eval_.bind("and", boost::bind(expr::proc::and_(), _1));
-    eval_.bind("or", boost::bind(expr::proc::or_(), _1));
-    eval_.bind("not", boost::bind(expr::proc::not_(), _1));
+    eval_.bind("+", boost::bind(binary_list(proc::add()), _1));
+    eval_.bind("-", boost::bind(binary_list(proc::sub()), _1));
+    eval_.bind("*", boost::bind(binary_list(proc::mul()), _1));
+    eval_.bind("/", boost::bind(binary_list(proc::div()), _1));
+    eval_.bind("=", boost::bind(list_filter(proc::eq()), _1));
+    eval_.bind("!=", boost::bind(list_filter(proc::ne()), _1));
+    eval_.bind(">", boost::bind(list_filter(proc::gt()), _1));
+    eval_.bind("<", boost::bind(list_filter(proc::lt()), _1));
+    eval_.bind(">=", boost::bind(list_filter(proc::ge()), _1));
+    eval_.bind("<=", boost::bind(list_filter(proc::le()), _1));
+    eval_.bind("and", boost::bind(proc::and_(), _1));
+    eval_.bind("or", boost::bind(proc::or_(), _1));
+    eval_.bind("not", boost::bind(proc::not_(), _1));
 
-    eval_.bind("like", boost::bind(list_filter(expr::proc::like()), _1));
+    eval_.bind("like", boost::bind(list_filter(proc::like()), _1));
     eval_.bind("in", boost::bind(list_in(), _1));
 
     eval_.bind("attr", boost::bind(boost::ref(attr_), _1));

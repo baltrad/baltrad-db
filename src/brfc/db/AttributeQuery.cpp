@@ -71,7 +71,7 @@ AttributeQuery::distinct(bool distinct) {
 }
 
 AttributeQuery&
-AttributeQuery::fetch(const std::string& name, const expr::Expression& expr) {
+AttributeQuery::fetch(const std::string& name, const Expression& expr) {
     if (name.empty())
         throw value_error("empty name for AttributeQuery::fetch");
     if (fetch_.find(name) != fetch_.end())
@@ -81,9 +81,9 @@ AttributeQuery::fetch(const std::string& name, const expr::Expression& expr) {
 }
 
 AttributeQuery&
-AttributeQuery::filter(const expr::Expression& expr) {
+AttributeQuery::filter(const Expression& expr) {
     if (not filter_.empty()) {
-        filter_ = expr::Listcons().symbol("and")
+        filter_ = Listcons().symbol("and")
                                   .append(filter_)
                                   .append(expr)
                                   .get();
@@ -94,13 +94,13 @@ AttributeQuery::filter(const expr::Expression& expr) {
 }
 
 AttributeQuery&
-AttributeQuery::group(const expr::Expression& expr) {
+AttributeQuery::group(const Expression& expr) {
     group_.push_back(expr);
     return *this;
 }
 
 AttributeQuery&
-AttributeQuery::order_by(const expr::Expression& expr, SortDir dir) {
+AttributeQuery::order_by(const Expression& expr, SortDir dir) {
     order_.push_back(std::make_pair(expr, dir));
     return *this;
 }

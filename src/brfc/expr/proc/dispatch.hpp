@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Expression.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 template<typename Function>
@@ -32,7 +31,7 @@ typename Function::result_type
 unary_dispatch(const Function& func, const Expression& args) {
     BRFC_ASSERT(args.is_list());
     BRFC_ASSERT(args.size() == 1);
-    return expr::apply_visitor(func, args.front());
+    return apply_visitor(func, args.front());
 }
 
 template<typename Function>
@@ -40,11 +39,11 @@ typename Function::result_type
 binary_dispatch(const Function& func, const Expression& args) {
     BRFC_ASSERT(args.is_list());
     BRFC_ASSERT(args.size() == 2);
-    expr::Expression::const_iterator it = args.begin();
+    Expression::const_iterator it = args.begin();
     const Expression& arg1 = *it;
     ++it;
     const Expression& arg2 = *it;
-    return expr::apply_visitor(func, arg1, arg2);
+    return apply_visitor(func, arg1, arg2);
 }
 
 template<typename Function>
@@ -52,7 +51,7 @@ typename Function::result_type
 binary_call(const Function& func, const Expression& args) {
     BRFC_ASSERT(args.is_list());
     BRFC_ASSERT(args.size() == 2);
-    expr::Expression::const_iterator it = args.begin();
+    Expression::const_iterator it = args.begin();
     const Expression& arg1 = *it;
     ++it;
     const Expression& arg2 = *it;
@@ -60,7 +59,6 @@ binary_call(const Function& func, const Expression& args) {
 }
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc
 
 #endif // BRFC_EXPR_PROC_DISPATCH_HPP

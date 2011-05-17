@@ -22,12 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
-
 #include <brfc/expr/Listcons.hpp>
-
-
-using ::brfc::expr::Expression;
-using ::brfc::expr::Listcons;
 
 namespace brfc {
 namespace sql {
@@ -44,19 +39,19 @@ Select::Select()
 }
 
 void
-Select::from(const expr::Expression& table) {
+Select::from(const Expression& table) {
     from_.from(table);
 }
 
 void
-Select::join(const expr::Expression& table,
-             const expr::Expression& condition) {
+Select::join(const Expression& table,
+             const Expression& condition) {
     from_.join(table, condition);
 }
 
 void
-Select::outerjoin(const expr::Expression& table,
-                  const expr::Expression& condition) {
+Select::outerjoin(const Expression& table,
+                  const Expression& condition) {
     from_.outerjoin(table, condition);
 }
 

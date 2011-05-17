@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/MockDialect.hpp>
 
-using ::brfc::expr::Expression;
 using ::testing::Return;
 
 namespace brfc {

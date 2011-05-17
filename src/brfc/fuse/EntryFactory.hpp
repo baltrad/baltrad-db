@@ -24,11 +24,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 namespace brfc {
-
-namespace expr {
     class Expression;
 }
 
+namespace brfc {
 namespace fuse {
 
 class Entry;
@@ -49,7 +48,7 @@ class EntryFactory {
     /**
      * @brief set the filter to use on database queries
      */
-    void filter(const expr::Expression& expr) {
+    void filter(const Expression& expr) {
         do_filter(expr);
     }
     
@@ -83,7 +82,7 @@ class EntryFactory {
 
     virtual EntryFactory* do_clone() const = 0;
 
-    virtual void do_filter(const expr::Expression& expr) = 0;
+    virtual void do_filter(const Expression& expr) = 0;
 
     virtual void do_update() = 0;
 

@@ -20,19 +20,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_EXPR_PROC_IN_HPP
 
 namespace brfc {
-namespace expr {
+    class Expression;
+}
 
-class Expression;
-
+namespace brfc {
 namespace proc {
-
 
 struct in {
     Expression operator()(const Expression& args) const;
 };
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc
 
 #endif // BRFC_EXPR_PROC_IN_HPP

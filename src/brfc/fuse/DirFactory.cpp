@@ -32,7 +32,7 @@ namespace brfc {
 namespace fuse {
 
 DirFactory::DirFactory(db::Database* db,
-                       const expr::Expression& attr,
+                       const Expression& attr,
                        const EntryFactory* cfactory)
         : db_(db)
         , attr_(attr)
@@ -62,7 +62,7 @@ DirFactory::do_clone() const {
 }
 
 void
-DirFactory::do_filter(const expr::Expression& expr) {
+DirFactory::do_filter(const Expression& expr) {
     filter_ = expr;
 }
 
@@ -130,10 +130,10 @@ DirFactory::remove_invalid() {
 
 shared_ptr<DirEntry>
 DirFactory::create_entry(const Variant& value) {
-    static expr::ExpressionFactory xpr;
+    static ExpressionFactory xpr;
     shared_ptr<DirEntry> entry = make_shared<DirEntry>(value.to_string(),
                                                        *cfactory_);
-    expr::Expression cfilter = xpr.eq(attr_, xpr.literal(value));
+    Expression cfilter = xpr.eq(attr_, xpr.literal(value));
     if (not filter_.empty())
         cfilter = xpr.and_(filter_, cfilter);
     entry->child_factory().filter(cfilter);

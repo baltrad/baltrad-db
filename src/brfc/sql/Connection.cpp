@@ -31,8 +31,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Select.hpp>
 
-using ::brfc::expr::Expression;
-
 namespace brfc {
 namespace sql {
 

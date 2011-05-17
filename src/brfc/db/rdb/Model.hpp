@@ -33,8 +33,8 @@ struct m {
     struct sources {
         static std::string name() { return "bdb_sources"; }
 
-        static expr::Expression column(const std::string& colname) {
-            return expr::Listcons().symbol("column")
+        static Expression column(const std::string& colname) {
+            return Listcons().symbol("column")
                                    .string(name())
                                    .string(colname)
                                    .get();
@@ -44,8 +44,8 @@ struct m {
     struct source_kvs {
         static std::string name() { return "bdb_source_kvs"; }
 
-        static expr::Expression column(const std::string& colname) {
-            return expr::Listcons().symbol("column")
+        static Expression column(const std::string& colname) {
+            return Listcons().symbol("column")
                                    .string(name())
                                    .string(colname)
                                    .get();
@@ -55,8 +55,8 @@ struct m {
     struct files {
         static std::string name() { return "bdb_files"; }
 
-        static expr::Expression column(const std::string& colname) {
-            return expr::Listcons().symbol("column")
+        static Expression column(const std::string& colname) {
+            return Listcons().symbol("column")
                                    .string(name())
                                    .string(colname)
                                    .get();
@@ -66,8 +66,8 @@ struct m {
     struct file_content {
         static std::string name() { return "bdb_file_content"; }
 
-        static expr::Expression column(const std::string& colname) {
-            return expr::Listcons().symbol("column")
+        static Expression column(const std::string& colname) {
+            return Listcons().symbol("column")
                                    .string(name())
                                    .string(colname)
                                    .get();
@@ -77,8 +77,8 @@ struct m {
     struct nodes {
         static std::string name() { return "bdb_nodes"; }
 
-        static expr::Expression column(const std::string& colname) {
-            return expr::Listcons().symbol("column")
+        static Expression column(const std::string& colname) {
+            return Listcons().symbol("column")
                                    .string(name())
                                    .string(colname)
                                    .get();
@@ -88,8 +88,8 @@ struct m {
     struct attrvals {
         static std::string name() { return "bdb_attribute_values"; }
 
-        static expr::Expression column(const std::string& colname) {
-            return expr::Listcons().symbol("column")
+        static Expression column(const std::string& colname) {
+            return Listcons().symbol("column")
                                    .string(name())
                                    .string(colname)
                                    .get();

@@ -38,7 +38,7 @@ class Compiler {
      * expressions in form `(bind "bindname")` that are placeholders for
      * literals to be bound later.
      */
-    expr::Expression compile(const expr::Expression& x) {
+    Expression compile(const Expression& x) {
         return do_compile(x);
     }
     
@@ -48,7 +48,7 @@ class Compiler {
     /**
      * @brief compile() implementaion
      */
-    virtual expr::Expression do_compile(const expr::Expression& x) = 0;
+    virtual Expression do_compile(const Expression& x) = 0;
 };
 
 } // namespace sql

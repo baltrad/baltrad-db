@@ -38,11 +38,11 @@ class FileMatcher {
      * @brief test if @c file matches @c x
      * @return true if @c x evaluates to true on @c file
      */
-    bool match(const File& file, const expr::Expression& x);
+    bool match(const File& file, const Expression& x);
     
   private:
     extract_attr attr_;
-    expr::Eval eval_;
+    Eval eval_;
 };
 
 } // namespace oh5

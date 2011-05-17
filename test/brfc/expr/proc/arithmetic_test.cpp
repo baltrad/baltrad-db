@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/arithmetic.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 /* add */
@@ -104,5 +103,4 @@ TEST(expr_proc_arithmetic_div_test, test_int_list) {
 }
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc

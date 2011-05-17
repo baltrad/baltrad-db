@@ -170,8 +170,8 @@ class RdbHelper : boost::noncopyable {
 
     shared_ptr<sql::Connection> conn_;
     sql::Factory sql_;
-    expr::Expression insert_node_qry_;
-    expr::Expression insert_attr_qry_;
+    Expression insert_node_qry_;
+    Expression insert_attr_qry_;
 };
 
 } // namespace rdb

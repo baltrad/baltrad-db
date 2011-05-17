@@ -29,7 +29,7 @@ namespace sql  {
 
 class MockCompiler : public Compiler {
   public:
-    MOCK_METHOD1(do_compile, expr::Expression(const expr::Expression&));
+    MOCK_METHOD1(do_compile, Expression(const Expression&));
 };
 
 } // namespace sql

@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/arithmetic.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 TEST(expr_proc_binary_list_test, test_call_list_plain) {
@@ -71,5 +70,4 @@ TEST(expr_proc_unary_list_test, test_call_plain_plain) {
 }
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc

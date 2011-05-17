@@ -22,11 +22,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 namespace brfc {
-
-namespace expr {
     class Expression;
 }
 
+namespace brfc {
 namespace oh5 {
 
 class File;
@@ -36,7 +35,7 @@ class Scalar;
  * @brief extract attribute values from file
  */
 struct extract_attr {
-    typedef expr::Expression result_type;
+    typedef Expression result_type;
 
     extract_attr() : file_(0) { }
     
@@ -44,14 +43,14 @@ struct extract_attr {
      * @param args `(attrpath, attrtype)`
      * @return (attrval1, attrval2, ..., attrvalN)
      */
-    expr::Expression operator()(const expr::Expression& args) const;
+    Expression operator()(const Expression& args) const;
 
-    expr::Expression find_source(const std::string& path) const;
+    Expression find_source(const std::string& path) const;
 
-    expr::Expression find_all(const std::string& path,
+    Expression find_all(const std::string& path,
                               const std::string& type) const;
 
-    expr::Expression value_expression(const Scalar& value,
+    Expression value_expression(const Scalar& value,
                                       const std::string& type) const;
 
     void file(const File* f) { file_ = f; }

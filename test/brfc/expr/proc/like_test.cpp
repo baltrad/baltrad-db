@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/like.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 TEST(expr_proc_like_test, test_Expression_dispatch) {
@@ -63,6 +62,5 @@ TEST(expr_proc_like_test, test_qmark) {
     EXPECT_EQ(Expression(false), like()(s, std::string("?foob??")));
 }
 
-}
-}
-}
+} // namespace proc
+} // namespace brfc

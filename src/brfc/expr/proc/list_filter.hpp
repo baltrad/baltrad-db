@@ -23,10 +23,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/function.hpp>
 
 namespace brfc {
-namespace expr {
+    class Expression;
+}
 
-class Expression;
-
+namespace brfc {
 namespace proc {
 
 struct list_filter {
@@ -79,7 +79,6 @@ struct list_filter {
 };
 
 } // namepsace proc
-} // namespace expr
 } // namespace brfc
 
 #endif // BRFC_EXPR_PROC_LIST_FILTER_HPP

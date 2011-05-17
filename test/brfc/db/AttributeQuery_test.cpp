@@ -35,7 +35,7 @@ class db_AttributeQuery_test : public ::testing::Test {
 };
 
 TEST_F(db_AttributeQuery_test, test_copy_ctor) {
-    expr::Expression fExpression(1), gExpression(2), oExpression(3);
+    Expression fExpression(1), gExpression(2), oExpression(3);
 
     query.distinct(true);
     query.fetch("name", gExpression);
@@ -58,7 +58,7 @@ TEST_F(db_AttributeQuery_test, test_copy_ctor) {
 }
 
 TEST_F(db_AttributeQuery_test, test_copy_assign) {
-    expr::Expression fExpression(1), gExpression(2), oExpression(3);
+    Expression fExpression(1), gExpression(2), oExpression(3);
     
     query.distinct(true);
     query.fetch("name", gExpression);
@@ -82,7 +82,7 @@ TEST_F(db_AttributeQuery_test, test_copy_assign) {
 }
 
 TEST_F(db_AttributeQuery_test, test_copy_assign_self) {
-    expr::Expression fExpression(1), gExpression(2), oExpression(3);
+    Expression fExpression(1), gExpression(2), oExpression(3);
 
     query.distinct(true);
     query.fetch("name", gExpression);
@@ -111,7 +111,7 @@ TEST_F(db_AttributeQuery_test, test_distinct) {
 }
 
 TEST_F(db_AttributeQuery_test, test_fetch) {
-    expr::Expression se(1);
+    Expression se(1);
 
     query.fetch("name", se);
     AttributeQuery::FetchMap fmap = query.fetch();
@@ -120,7 +120,7 @@ TEST_F(db_AttributeQuery_test, test_fetch) {
 }
 
 TEST_F(db_AttributeQuery_test, test_fetch_duplicate_name) {
-    expr::Expression se(1);
+    Expression se(1);
 
     query.fetch("name", se);
     AttributeQuery::FetchMap fmap = query.fetch();
@@ -134,18 +134,18 @@ TEST_F(db_AttributeQuery_test, test_fetch_duplicate_name) {
 }
 
 TEST_F(db_AttributeQuery_test, test_fetch_empty_name) {
-    EXPECT_THROW(query.fetch("", expr::Expression(1)), value_error);
+    EXPECT_THROW(query.fetch("", Expression(1)), value_error);
 }
 
 TEST_F(db_AttributeQuery_test, test_filter) {
-    expr::Expression se;
+    Expression se;
 
     query.filter(se);
     EXPECT_EQ(se, query.filter());
 }
 
 TEST_F(db_AttributeQuery_test, test_order_by) {
-    expr::Expression se;
+    Expression se;
 
     query.order_by(se, AttributeQuery::ASC);
     const AttributeQuery::OrderVector& ovec = query.order();
@@ -160,7 +160,7 @@ TEST_F(db_AttributeQuery_test, test_limit) {
 }
 
 TEST_F(db_AttributeQuery_test, test_group) {
-    expr::Expression se;
+    Expression se;
 
     query.group(se);
     const AttributeQuery::ExpressionVector& vec = query.group();

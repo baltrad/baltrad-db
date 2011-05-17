@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 namespace brfc {
-namespace expr {
 
 class AttributePrototypes {
   public:
@@ -66,7 +65,6 @@ class AttributePrototypes {
     PrototypeMap prototypes_;
 };
 
-} // namespace expr
 } // namespace brfc
 
 #endif // BRFC_EXPR_ATTRIBUTE_PROTOTYPES_HPP

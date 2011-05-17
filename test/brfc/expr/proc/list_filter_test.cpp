@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/comparison.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 TEST(expr_proc_list_filter_test, test_call_list_plain) {
@@ -64,5 +63,4 @@ TEST(expr_proc_list_filter_test, test_call_plain_plain) {
 }
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc

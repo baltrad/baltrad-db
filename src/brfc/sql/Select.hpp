@@ -66,25 +66,25 @@ class Select {
      * @throw duplicate_entry if the @c expr is labeled and the name
      *        conflicts with a previous label or column
      */
-    void what(const expr::Expression& expr);
+    void what(const Expression& expr);
 
     /**
      * @brief append Expression to where clause
      */
-    void append_where(const expr::Expression& x);
+    void append_where(const Expression& x);
 
     /**
      * @brief set Expression as where clause
      */
-    void where(const expr::Expression& expr) {
+    void where(const Expression& expr) {
         where_ = expr;
     }
 
-    expr::Expression where() const {
+    Expression where() const {
         return where_;
     }
 
-    expr::Expression what() const {
+    Expression what() const {
         return what_;
     }
 
@@ -94,25 +94,25 @@ class Select {
         return from_;
     }
 
-    void from(const expr::Expression& table);
+    void from(const Expression& table);
 
-    void join(const expr::Expression& table,
-              const expr::Expression& condition);
+    void join(const Expression& table,
+              const Expression& condition);
 
-    void outerjoin(const expr::Expression& table,
-                   const expr::Expression& condition);
+    void outerjoin(const Expression& table,
+                   const Expression& condition);
 
-    void append_group_by(const expr::Expression& expr) {
+    void append_group_by(const Expression& expr) {
         group_by_.push_back(expr);
     }
 
-    expr::Expression group_by() const {
+    Expression group_by() const {
         return group_by_;
     }
 
-    void append_order_by(const expr::Expression& x, SortDirection dir);
+    void append_order_by(const Expression& x, SortDirection dir);
 
-    expr::Expression order() const { return order_by_; }
+    Expression order() const { return order_by_; }
     
     void limit(int limit) { limit_ = limit; }
 
@@ -122,14 +122,14 @@ class Select {
 
     int offset() const { return offset_; }
 
-    expr::Expression expression() const;
+    Expression expression() const;
 
   private:
-    expr::Expression what_;
+    Expression what_;
     FromClause from_;
-    expr::Expression where_;
-    expr::Expression group_by_;
-    expr::Expression order_by_;
+    Expression where_;
+    Expression group_by_;
+    Expression order_by_;
     int limit_;
     int offset_;
     bool distinct_;

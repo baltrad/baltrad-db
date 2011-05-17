@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <functional>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 struct eq : public static_visitor<Expression> {
@@ -64,7 +63,6 @@ struct ge : public static_visitor<Expression> {
 };
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc
 
 #endif // BRFC_EXPR_PROC_COMPARISON_HPP

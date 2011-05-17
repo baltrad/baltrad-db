@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Expression.hpp>
 
 namespace brfc {
-namespace expr {
 
 void
 Eval::bind(const std::string& symbol, proc_t proc) {
@@ -57,5 +56,4 @@ Eval::proc(const std::string& symbol) const {
     return it->second;
 }
 
-} // namespace expr
 } // namespace brfc

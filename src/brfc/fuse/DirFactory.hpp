@@ -55,7 +55,7 @@ class DirFactory : public EntryFactory {
      * @param cfactory child factory to bind with created entries
      */
     DirFactory(db::Database* db,
-               const expr::Expression& attr,
+               const Expression& attr,
                const EntryFactory* cfactory);
     
     virtual ~DirFactory();
@@ -66,7 +66,7 @@ class DirFactory : public EntryFactory {
   private:
     virtual DirFactory* do_clone() const;
 
-    virtual void do_filter(const expr::Expression& expr);
+    virtual void do_filter(const Expression& expr);
 
     virtual void do_update();
 
@@ -114,9 +114,9 @@ class DirFactory : public EntryFactory {
     db::Database& database() { return *db_; }
 
     db::Database* db_;
-    expr::Expression attr_;
+    Expression attr_;
     const EntryFactory* cfactory_;
-    expr::Expression filter_;
+    Expression filter_;
     EntrySet_t entries_;
 };
 

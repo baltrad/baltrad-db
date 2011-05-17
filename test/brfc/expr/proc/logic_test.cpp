@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/logic.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 /* and_ */
@@ -75,5 +74,4 @@ TEST(expr_proc_logic_not_test, test_int) {
 }
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc

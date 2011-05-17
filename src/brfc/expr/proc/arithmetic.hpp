@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/dispatch.hpp>
 
 namespace brfc {
-namespace expr {
 namespace proc {
 
 // + could additionally be defined for string + string, list + list
@@ -132,7 +131,6 @@ struct div : public static_visitor<Expression> {
 };
 
 } // namespace proc
-} // namespace expr
 } // namespace brfc
 
 #endif // BRFC_EXPR_PROC_ARITHMETIC_HPP

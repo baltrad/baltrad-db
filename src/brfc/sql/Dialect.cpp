@@ -29,8 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/expr/Expression.hpp>
 
-using ::brfc::expr::Expression;
-
 namespace brfc {
 namespace sql {
 

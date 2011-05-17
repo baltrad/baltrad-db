@@ -43,9 +43,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 /***
- * brfc::expr::Expression
+ * brfc::Expression
  */
-%extend brfc::expr::Expression {
+%extend brfc::Expression {
     std::string toString() {
         std::stringstream ss;
         ss << *$self;
@@ -53,17 +53,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     }
 };
 
-%ignore brfc::expr::Expression::Expression(const std::string& value, construct_symbol);
-%ignore brfc::expr::Expression::Expression(const list_t& );
-%ignore brfc::expr::Expression::type() const;
-%ignore brfc::expr::Expression::list() const;
-%ignore brfc::expr::Expression::begin;
-%ignore brfc::expr::Expression::end;
-%ignore brfc::expr::PrintTo;
+%ignore brfc::Expression::Expression(const std::string& value, construct_symbol);
+%ignore brfc::Expression::Expression(const list_t& );
+%ignore brfc::Expression::type() const;
+%ignore brfc::Expression::list() const;
+%ignore brfc::Expression::begin;
+%ignore brfc::Expression::end;
+%ignore brfc::PrintTo;
 
-%rename(equals) brfc::expr::operator==(const Expression&, const Expression&);
+%rename(equals) brfc::operator==(const Expression&, const Expression&);
 
-%typemap(javaimports) brfc::expr::Expression %{
+%typemap(javaimports) brfc::Expression %{
   import java.util.Collection;
 
   import eu.baltrad.fc.Date;
@@ -72,9 +72,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   import eu.baltrad.fc.TimeDelta;
 %}
 
-SWIG_JAVABODY_METHODS(public, public, brfc::expr::Expression)
+SWIG_JAVABODY_METHODS(public, public, brfc::Expression)
 
-%typemap(javacode) brfc::expr::Expression %{
+%typemap(javacode) brfc::Expression %{
   public Expression(Collection<Expression> values) {
     this();
     for (Expression e : values) {
@@ -100,10 +100,10 @@ SWIG_JAVABODY_METHODS(public, public, brfc::expr::Expression)
 %}
 
 /***
- * brfc::expr::ExpressionFactory
+ * brfc::ExpressionFactory
  */
-%ignore brfc::expr::ExpressionFactory::string(const char* value) const;
-%typemap(javaimports) brfc::expr::ExpressionFactory %{
+%ignore brfc::ExpressionFactory::string(const char* value) const;
+%typemap(javaimports) brfc::ExpressionFactory %{
   import java.util.Collection;
 
   import eu.baltrad.fc.Date;
