@@ -32,7 +32,7 @@ extern "C" {
 namespace brfc {
 namespace oh5 {
 
-class Scalar;
+class Oh5Scalar;
 
 namespace hl {
 
@@ -84,7 +84,7 @@ class Converter {
 
     static
     shared_ptr<const Converter>
-    create_from_variant(const Scalar& variant);
+    create_from_variant(const Oh5Scalar& variant);
 
     /**
      * @brief convert data from HLHDF format to Scalar
@@ -95,7 +95,7 @@ class Converter {
      *
      * @see do_convert(HL_FormatSpecifier, unsigned char*) const
      */
-    Scalar convert(const HL_Node& node) const;
+    Oh5Scalar convert(const HL_Node& node) const;
     
     /**
      * @brief convert a Scalar to HLHDF format
@@ -104,7 +104,7 @@ class Converter {
      *
      * @see do_convert(const Scalar&) const
      */
-    HL_Data convert(const Scalar& value) const;
+    HL_Data convert(const Oh5Scalar& value) const;
 
     /**
      * @brief destructor
@@ -115,13 +115,13 @@ class Converter {
     /**
      * @brief do the actual conversion to Scalar
      */
-    virtual Scalar do_convert(HL_FormatSpecifier format,
+    virtual Oh5Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const = 0;
 
     /**
      * @brief do the actial conversion to HL_Data
      */
-    virtual HL_Data do_convert(const Scalar& value) const = 0;
+    virtual HL_Data do_convert(const Oh5Scalar& value) const = 0;
 };
 
 /**
@@ -135,10 +135,10 @@ class Converter {
  */
 class StringConverter : public Converter {
   protected:
-    virtual Scalar do_convert(HL_FormatSpecifier format,
+    virtual Oh5Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
     
-    virtual HL_Data do_convert(const Scalar& value) const;
+    virtual HL_Data do_convert(const Oh5Scalar& value) const;
 };
 
 /**
@@ -158,10 +158,10 @@ class StringConverter : public Converter {
  */
 class Int64Converter : public Converter {
   protected:
-    virtual Scalar do_convert(HL_FormatSpecifier format,
+    virtual Oh5Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
 
-    virtual HL_Data do_convert(const Scalar& value) const;
+    virtual HL_Data do_convert(const Oh5Scalar& value) const;
 };
 
 /**
@@ -177,10 +177,10 @@ class Int64Converter : public Converter {
  */
 class DoubleConverter : public Converter {
   protected:
-    virtual Scalar do_convert(HL_FormatSpecifier format,
+    virtual Oh5Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
 
-    virtual HL_Data do_convert(const Scalar& value) const;
+    virtual HL_Data do_convert(const Oh5Scalar& value) const;
 };
 
 } // namespace hl

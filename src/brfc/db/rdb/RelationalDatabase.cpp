@@ -43,8 +43,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Expression.hpp>
 
-#include <brfc/oh5/PhysicalFile.hpp>
-#include <brfc/oh5/Source.hpp>
+#include <brfc/oh5/PhysicalOh5File.hpp>
+#include <brfc/oh5/Oh5Source.hpp>
 
 #include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/Connection.hpp>
@@ -111,7 +111,7 @@ RelationalDatabase::mapper() const {
 }
 
 bool
-RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
+RelationalDatabase::do_is_stored(const oh5::PhysicalOh5File& file) {
     try {
         auto_ptr<FileEntry> e(entry_by_file(file));
     } catch (lookup_error) {
@@ -121,12 +121,12 @@ RelationalDatabase::do_is_stored(const oh5::PhysicalFile& file) {
 }
 
 FileEntry*
-RelationalDatabase::do_store(const oh5::PhysicalFile& file) {
+RelationalDatabase::do_store(const oh5::PhysicalOh5File& file) {
     return SaveFile(this)(file);
 }
 
 FileEntry*
-RelationalDatabase::do_entry_by_file(const oh5::PhysicalFile& file) {
+RelationalDatabase::do_entry_by_file(const oh5::PhysicalOh5File& file) {
     const std::string& hash = file_hasher().hash(file);
     shared_ptr<sql::Connection> c = conn();
     long long src_id = RdbHelper(c).select_source_id(file.source());
@@ -206,23 +206,23 @@ RelationalDatabase::do_remove(const FileEntry& entry) {
     return r->affected_rows();
 }
 
-std::vector<oh5::Source>
+std::vector<oh5::Oh5Source>
 RelationalDatabase::do_sources() const {
     return RdbHelper(conn()).select_all_sources();
 }
 
 void
-RelationalDatabase::do_add_source(const oh5::Source& source) {
+RelationalDatabase::do_add_source(const oh5::Oh5Source& source) {
     RdbHelper(conn()).add_source(source);
 }
 
 void
-RelationalDatabase::do_update_source(const oh5::Source& source) {
+RelationalDatabase::do_update_source(const oh5::Oh5Source& source) {
     RdbHelper(conn()).update_source(source);
 }
 
 void
-RelationalDatabase::do_remove_source(const oh5::Source& source) {
+RelationalDatabase::do_remove_source(const oh5::Oh5Source& source) {
     RdbHelper(conn()).remove_source(source);
 }
 

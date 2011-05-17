@@ -23,8 +23,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/oh5/Node.hpp>
-#include <brfc/oh5/Source.hpp>
+#include <brfc/oh5/Oh5Node.hpp>
+#include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {
 
@@ -32,11 +32,11 @@ class MockFileEntry : public FileEntry {
   public:
     MOCK_CONST_METHOD0(do_uuid, std::string());
     MOCK_CONST_METHOD1(do_write_to_file, void(const std::string&));
-    MOCK_CONST_METHOD0(do_source, oh5::Source());
+    MOCK_CONST_METHOD0(do_source, oh5::Oh5Source());
     MOCK_CONST_METHOD0(do_hash, std::string());
     MOCK_CONST_METHOD0(do_size, long long());
     MOCK_CONST_METHOD0(do_stored_at, DateTime());
-    MOCK_CONST_METHOD0(do_root, const oh5::Node&());
+    MOCK_CONST_METHOD0(do_root, const oh5::Oh5Node&());
 };
 
 } // namespace brfc

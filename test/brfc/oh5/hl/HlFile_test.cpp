@@ -23,10 +23,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/DataSet.hpp>
-#include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/Scalar.hpp>
+#include <brfc/oh5/Oh5Attribute.hpp>
+#include <brfc/oh5/Oh5DataSet.hpp>
+#include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
@@ -51,22 +51,22 @@ TEST_F(oh5_hl_HlFile_test, test_open_nx_file) {
 }
 
 TEST_F(oh5_hl_HlFile_test, test_load_from_filesystem) {
-    Scalar t_12_05_01(Time(12, 5, 1));
-    Scalar d_2000_01_02(Date(2000, 1, 2));
+    Oh5Scalar t_12_05_01(Time(12, 5, 1));
+    Oh5Scalar d_2000_01_02(Date(2000, 1, 2));
 
-    file.root().add(new Attribute("date", d_2000_01_02));
-    file.root().add(new Attribute("time", t_12_05_01));
-    Node& what = file.root().add(new Group("what"));
-    what.add(new Attribute("date", d_2000_01_02));
-    Node& data1 = file.root().add(new Group("data1"));
-    data1.add(new DataSet("data"));
+    file.root().add(new Oh5Attribute("date", d_2000_01_02));
+    file.root().add(new Oh5Attribute("time", t_12_05_01));
+    Oh5Node& what = file.root().add(new Oh5Group("what"));
+    what.add(new Oh5Attribute("date", d_2000_01_02));
+    Oh5Node& data1 = file.root().add(new Oh5Group("data1"));
+    data1.add(new Oh5DataSet("data"));
 
     test::TempH5File tempfile;
     tempfile.write(file);
 
     HlFile g(tempfile.path());
     EXPECT_EQ(g.path(), tempfile.path());
-    Node& root = g.root();
+    Oh5Node& root = g.root();
     EXPECT_EQ((size_t)4, root.children().size());
     EXPECT_TRUE(root.has_child("date"));
     EXPECT_TRUE(root.has_child("time"));
@@ -79,7 +79,7 @@ TEST_F(oh5_hl_HlFile_test, test_load_from_filesystem) {
     EXPECT_EQ("120501", root.attribute("time")->value().string());
     EXPECT_EQ("20000102", root.attribute("what/date")->value().string());
     EXPECT_TRUE(root.has_child("data1/data"));
-    EXPECT_TRUE(dynamic_cast<DataSet*>(root.child("data1/data")) != 0);
+    EXPECT_TRUE(dynamic_cast<Oh5DataSet*>(root.child("data1/data")) != 0);
 }
 
 } // namespace hl

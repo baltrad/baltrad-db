@@ -26,7 +26,7 @@ namespace brfc {
 
 namespace oh5 {
 
-class File;
+class Oh5File;
 
 }
 
@@ -50,7 +50,7 @@ class TempH5File {
 
     void unlink();
     
-    void write(const oh5::File& f);
+    void write(const oh5::Oh5File& f);
     
     std::string path() const;
 

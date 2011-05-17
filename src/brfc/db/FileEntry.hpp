@@ -20,14 +20,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_DB_FILE_ENTRY_HPP
 
 #include <brfc/DateTime.hpp>
-#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 namespace brfc {
 
 /**
  * @brief oh5::File entry in Database
  */
-class FileEntry : public oh5::File {
+class FileEntry : public oh5::Oh5File {
   public:
     virtual ~FileEntry() { }
 

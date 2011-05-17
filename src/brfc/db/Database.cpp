@@ -37,7 +37,7 @@ Database::create(const std::string& dsn) {
 }
 
 FileEntry*
-Database::get_or_store(const oh5::PhysicalFile& file) {
+Database::get_or_store(const oh5::PhysicalOh5File& file) {
     if (is_stored(file))
         return entry_by_file(file);
     else

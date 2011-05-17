@@ -32,8 +32,8 @@ import eu.baltrad.fc.db.Database;
 import eu.baltrad.fc.db.FileEntry;
 import eu.baltrad.fc.db.FileQuery;
 
-import eu.baltrad.fc.oh5.File;
-import eu.baltrad.fc.oh5.Source;
+import eu.baltrad.fc.oh5.Oh5File;
+import eu.baltrad.fc.oh5.Oh5Source;
 import eu.baltrad.fc.oh5.hl.HlFile;
 
 import eu.baltrad.fc.test.TestRDB;
@@ -88,7 +88,7 @@ public class TestFileCatalog extends TestCase {
 
   public void testCustomFileNamer() {
     FileNamer namer = new FileNamer() {
-      protected String do_name(File file) {
+      protected String do_name(Oh5File file) {
         return "file";
       }
     };
@@ -97,7 +97,7 @@ public class TestFileCatalog extends TestCase {
   }
 
   public void testSourceList() {
-    List<Source> sources = fc.database().sources();
+    List<Oh5Source> sources = fc.database().sources();
     assertTrue(sources.size() > 0);
   }
 

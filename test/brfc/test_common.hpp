@@ -33,7 +33,7 @@ class TimeDelta;
 class Variant;
 
 namespace oh5 {
-    class Scalar;
+    class Oh5Scalar;
 } // namespace oh5
 
 } // namespace brfc
@@ -54,6 +54,6 @@ std::ostream&
 operator<<(std::ostream& out, const brfc::Variant& value);
 
 std::ostream&
-operator<<(std::ostream& out, const brfc::oh5::Scalar& value);
+operator<<(std::ostream& out, const brfc::oh5::Oh5Scalar& value);
 
 #endif // BRFC_TEST_COMMON_HPP

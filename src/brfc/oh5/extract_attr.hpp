@@ -28,8 +28,8 @@ namespace brfc {
 namespace brfc {
 namespace oh5 {
 
-class File;
-class Scalar;
+class Oh5File;
+class Oh5Scalar;
 
 /**
  * @brief extract attribute values from file
@@ -50,12 +50,12 @@ struct extract_attr {
     Expression find_all(const std::string& path,
                               const std::string& type) const;
 
-    Expression value_expression(const Scalar& value,
+    Expression value_expression(const Oh5Scalar& value,
                                       const std::string& type) const;
 
-    void file(const File* f) { file_ = f; }
+    void file(const Oh5File* f) { file_ = f; }
 
-    const File* file_;
+    const Oh5File* file_;
 };
 
 } // namespace oh5

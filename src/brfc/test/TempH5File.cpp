@@ -25,11 +25,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 
 #include <brfc/visit.hpp>
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/DataSet.hpp>
-#include <brfc/oh5/File.hpp>
-#include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/Scalar.hpp>
+#include <brfc/oh5/Oh5Attribute.hpp>
+#include <brfc/oh5/Oh5DataSet.hpp>
+#include <brfc/oh5/Oh5File.hpp>
+#include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/oh5/hl/hlhdf.hpp>
 #include <brfc/oh5/hl/Converter.hpp>
@@ -60,16 +60,16 @@ namespace {
 
 class GatherHLNodes {
   public:
-    typedef mpl::vector<const oh5::DataSet,
-                        const oh5::Group,
-                        const oh5::Attribute> accepted_types;
+    typedef mpl::vector<const oh5::Oh5DataSet,
+                        const oh5::Oh5Group,
+                        const oh5::Oh5Attribute> accepted_types;
     
     GatherHLNodes()
         : nodes_(HLNodeList_new(), &HLNodeList_free) {
 
     }
 
-    void operator()(const oh5::DataSet& dataset) {
+    void operator()(const oh5::Oh5DataSet& dataset) {
         const std::string& path = dataset.path();
 
         // create node
@@ -86,7 +86,7 @@ class GatherHLNodes {
         HLNode_setArrayValue(node, sizeof(int), 1, dims, (unsigned char*)array, "int", -1);
     }
 
-    void operator()(const oh5::Group& group) {
+    void operator()(const oh5::Oh5Group& group) {
         const std::string& path = group.path();
 
         // create node
@@ -100,7 +100,7 @@ class GatherHLNodes {
     }
 
 
-    void operator()(const oh5::Attribute& attr) {
+    void operator()(const oh5::Oh5Attribute& attr) {
         const std::string& path = attr.path();
 
         // create node
@@ -119,13 +119,13 @@ class GatherHLNodes {
     }
 
     oh5::hl::HL_Data
-    convert(const oh5::Scalar& value) {
+    convert(const oh5::Oh5Scalar& value) {
         switch (value.type()) {
-            case oh5::Scalar::DOUBLE:
+            case oh5::Oh5Scalar::DOUBLE:
                 return oh5::hl::DoubleConverter().convert(value);
-            case oh5::Scalar::INT64:
+            case oh5::Oh5Scalar::INT64:
                 return oh5::hl::Int64Converter().convert(value);
-            case oh5::Scalar::STRING:
+            case oh5::Oh5Scalar::STRING:
                 return oh5::hl::StringConverter().convert(value);
             default:
                 throw std::runtime_error("could not convert");
@@ -160,10 +160,10 @@ TempH5File::copy(const std::string& dest) const {
 }
 
 void
-TempH5File::write(const oh5::File& file) {
+TempH5File::write(const oh5::Oh5File& file) {
     GatherHLNodes node_gather;
     
-    oh5::Node::const_iterator iter = file.root().begin();
+    oh5::Oh5Node::const_iterator iter = file.root().begin();
     
     ++iter; // skip root
     for ( ; iter != file.root().end(); ++iter) {

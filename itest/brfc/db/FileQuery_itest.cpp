@@ -31,9 +31,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/ExpressionFactory.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/Scalar.hpp>
+#include <brfc/oh5/Oh5Attribute.hpp>
+#include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
@@ -74,42 +74,42 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
             , query() {
     }
 
-    void add_attribute(oh5::File& file,
+    void add_attribute(oh5::Oh5File& file,
                        std::string path,
-                       const oh5::Scalar& value) {
+                       const oh5::Oh5Scalar& value) {
         const std::string attr_name = path.substr(path.rfind('/') + 1);
         boost::erase_tail(path, attr_name.length() + 1);
 
-        oh5::Node& g = static_cast<oh5::Group&>(file.root()).get_or_create_group(path);
-        g.add(new oh5::Attribute(attr_name, value));
+        oh5::Oh5Node& g = static_cast<oh5::Oh5Group&>(file.root()).get_or_create_group(path);
+        g.add(new oh5::Oh5Attribute(attr_name, value));
     }
 
     virtual void SetUp() {
-        add_attribute(td1, "dataset1/where/xsize", oh5::Scalar(1));
-        add_attribute(td1, "dataset1/where/ysize", oh5::Scalar(2));
+        add_attribute(td1, "dataset1/where/xsize", oh5::Oh5Scalar(1));
+        add_attribute(td1, "dataset1/where/ysize", oh5::Oh5Scalar(2));
         tf1.write(td1);
         td1.path(tf1.path());
 
-        add_attribute(td2, "dataset1/where/xsize", oh5::Scalar(2));
-        add_attribute(td2, "dataset1/where/ysize", oh5::Scalar(2));
+        add_attribute(td2, "dataset1/where/xsize", oh5::Oh5Scalar(2));
+        add_attribute(td2, "dataset1/where/ysize", oh5::Oh5Scalar(2));
         tf2.write(td2);
         td2.path(tf2.path());
 
-        add_attribute(td3, "dataset1/where/xsize", oh5::Scalar(3));
-        add_attribute(td3, "dataset2/where/xsize", oh5::Scalar(3));
+        add_attribute(td3, "dataset1/where/xsize", oh5::Oh5Scalar(3));
+        add_attribute(td3, "dataset2/where/xsize", oh5::Oh5Scalar(3));
         tf3.write(td3);
         td3.path(tf3.path());
 
-        add_attribute(td4, "dataset1/where/xsize", oh5::Scalar(6));
-        add_attribute(td4, "dataset1/where/ysize", oh5::Scalar(4));
-        add_attribute(td4, "dataset2/where/ysize", oh5::Scalar(5));
+        add_attribute(td4, "dataset1/where/xsize", oh5::Oh5Scalar(6));
+        add_attribute(td4, "dataset1/where/ysize", oh5::Oh5Scalar(4));
+        add_attribute(td4, "dataset2/where/ysize", oh5::Oh5Scalar(5));
         tf4.write(td4);
         td4.path(tf4.path());
 
-        add_attribute(td5, "dataset1/where/xsize", oh5::Scalar(5));
-        add_attribute(td5, "dataset1/where/ysize", oh5::Scalar(2));
-        add_attribute(td5, "dataset2/where/xsize", oh5::Scalar(2));
-        add_attribute(td5, "dataset2/where/ysize", oh5::Scalar(5));
+        add_attribute(td5, "dataset1/where/xsize", oh5::Oh5Scalar(5));
+        add_attribute(td5, "dataset1/where/ysize", oh5::Oh5Scalar(2));
+        add_attribute(td5, "dataset2/where/xsize", oh5::Oh5Scalar(2));
+        add_attribute(td5, "dataset2/where/ysize", oh5::Oh5Scalar(5));
         tf5.write(td5);
         td5.path(tf5.path());
 

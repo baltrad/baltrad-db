@@ -27,9 +27,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/expr/Expression.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/File.hpp>
-#include <brfc/oh5/Source.hpp>
+#include <brfc/oh5/Oh5Attribute.hpp>
+#include <brfc/oh5/Oh5File.hpp>
+#include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -54,7 +54,7 @@ extract_attr::operator()(const Expression& args) const {
 Expression
 extract_attr::find_source(const std::string& path) const {
     Expression result;
-    const Source& s = file_->source();
+    const Oh5Source& s = file_->source();
     const std::string& key = path.substr(path.find_first_of(':') + 1);
     if (s.has(key)) {
         result.push_back(Expression(s.get(key)));
@@ -65,12 +65,12 @@ extract_attr::find_source(const std::string& path) const {
 Expression
 extract_attr::find_all(const std::string& path,
                        const std::string& type) const {
-    Node::const_iterator it = file_->root().begin();
-    Node::const_iterator end = file_->root().end();
+    Oh5Node::const_iterator it = file_->root().begin();
+    Oh5Node::const_iterator end = file_->root().end();
     
     Expression result;
     for ( ; it != end; ++it) {
-        const Attribute* a = it->child<Attribute>(path);
+        const Oh5Attribute* a = it->child<Oh5Attribute>(path);
         if (a) {
             const Expression& e = value_expression(a->value(), type);
             if (e)
@@ -82,7 +82,7 @@ extract_attr::find_all(const std::string& path,
 }
 
 Expression
-extract_attr::value_expression(const Scalar& value,
+extract_attr::value_expression(const Oh5Scalar& value,
                                const std::string& type) const {
     if (type == "string") {
         return Expression(value.string());

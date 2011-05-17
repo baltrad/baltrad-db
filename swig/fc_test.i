@@ -43,11 +43,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 %pragma(java) jniclassimports=%{
-    import eu.baltrad.fc.oh5.File;
+    import eu.baltrad.fc.oh5.Oh5File;
 %}
 
 %typemap(javaimports) brfc::test::TempH5File %{
-    import eu.baltrad.fc.oh5.File;
+    import eu.baltrad.fc.oh5.Oh5File;
 %}
 
 %include <brfc/test/TestRDB.hpp>

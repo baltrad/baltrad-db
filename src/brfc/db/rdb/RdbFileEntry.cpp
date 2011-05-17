@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileHasher.hpp>
 
 #include <brfc/db/rdb/AttributeMapper.hpp>
-#include <brfc/db/rdb/RdbNodeBackend.hpp>
+#include <brfc/db/rdb/RdbOh5NodeBackend.hpp>
 #include <brfc/db/rdb/RdbHelper.hpp>
 #include <brfc/db/rdb/RelationalDatabase.hpp>
 
@@ -89,14 +89,14 @@ RdbFileEntry::load() const {
     self->nodes_.loaded(nodes_.root(), false);
 }
 
-const oh5::Node&
+const oh5::Oh5Node&
 RdbFileEntry::do_root() const {
     if ((id_ or not uuid_.empty()) and not loaded())
         load();
     return nodes_.root();
 }
 
-oh5::Source
+oh5::Oh5Source
 RdbFileEntry::do_source() const {
     RdbHelper helper(rdb().conn());
     if (source_.empty()) {

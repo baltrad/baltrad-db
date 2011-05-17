@@ -29,8 +29,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/File.hpp>
+#include <brfc/oh5/Oh5Attribute.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 #include <brfc/util/algorithm.hpp>
 
@@ -46,7 +46,7 @@ SHA1AttributeHasher::~SHA1AttributeHasher() {
 }
 
 std::string
-SHA1AttributeHasher::attribute_string(const oh5::Attribute& attr) {
+SHA1AttributeHasher::attribute_string(const oh5::Oh5Attribute& attr) {
     return attr.path() + "=" + attr.value().to_string();
 }
 
@@ -68,14 +68,14 @@ SHA1AttributeHasher::sha1hash(const std::string& str) {
 }
 
 std::string
-SHA1AttributeHasher::do_hash(const oh5::File& file) const {
+SHA1AttributeHasher::do_hash(const oh5::Oh5File& file) const {
     std::list<std::string> strs;
-    const oh5::Attribute* attr = 0;
+    const oh5::Oh5Attribute* attr = 0;
 
     const std::list<std::string>& ign = ignored();
 
-    BOOST_FOREACH(const oh5::Node& node, file.root()) {
-        attr = dynamic_cast<const oh5::Attribute*>(&node);
+    BOOST_FOREACH(const oh5::Oh5Node& node, file.root()) {
+        attr = dynamic_cast<const oh5::Oh5Attribute*>(&node);
         if (attr and not contains(ign.begin(), ign.end(), attr->full_name())) {
             strs.push_back(attribute_string(*attr));
         }

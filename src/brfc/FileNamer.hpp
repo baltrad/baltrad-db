@@ -27,7 +27,7 @@ namespace brfc {
     class FileEntry;
 
     namespace oh5 {
-        class File;
+        class Oh5File;
     }
 }
 
@@ -45,7 +45,7 @@ class FileNamer {
      *
      * @sa do_name(const oh5::File&)
      */
-    std::string name(const oh5::File& file) const {
+    std::string name(const oh5::Oh5File& file) const {
         return do_name(file);
     }
     
@@ -69,7 +69,7 @@ class FileNamer {
     /**
      * @brief name(const oh5::File&) implementation
      */
-    virtual std::string do_name(const oh5::File& file) const = 0;
+    virtual std::string do_name(const oh5::Oh5File& file) const = 0;
 
     /**
      * @brief name(const oh5::File&) implementation

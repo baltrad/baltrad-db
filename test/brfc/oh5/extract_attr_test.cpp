@@ -21,9 +21,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Listcons.hpp>
 
 #include <brfc/oh5/extract_attr.hpp>
-#include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/FakeFile.hpp>
+#include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5Attribute.hpp>
+#include <brfc/oh5/FakeOh5File.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -35,28 +35,28 @@ struct oh5_extract_attr_test : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        Node& what = f1.root().add(new Group("what"));
-        what.add(new Attribute("source", Scalar("WMO:012345,CMT:foo")));
+        Oh5Node& what = f1.root().add(new Oh5Group("what"));
+        what.add(new Oh5Attribute("source", Oh5Scalar("WMO:012345,CMT:foo")));
 
-        Node& ds1 = f1.root().add(new Group("dataset1"));
-        Node& ds1_where = ds1.add(new Group("where"));
-        ds1_where.add(new Attribute("xsize", Scalar(1)));
-        ds1_where.add(new Attribute("ysize", Scalar(2)));
+        Oh5Node& ds1 = f1.root().add(new Oh5Group("dataset1"));
+        Oh5Node& ds1_where = ds1.add(new Oh5Group("where"));
+        ds1_where.add(new Oh5Attribute("xsize", Oh5Scalar(1)));
+        ds1_where.add(new Oh5Attribute("ysize", Oh5Scalar(2)));
 
-        Node& ds2 = f1.root().add(new Group("dataset2"));
-        Node& ds2_where = ds2.add(new Group("where"));
-        ds2_where.add(new Attribute("xsize", Scalar(3)));
-        ds2_where.add(new Attribute("ysize", Scalar(4)));
+        Oh5Node& ds2 = f1.root().add(new Oh5Group("dataset2"));
+        Oh5Node& ds2_where = ds2.add(new Oh5Group("where"));
+        ds2_where.add(new Oh5Attribute("xsize", Oh5Scalar(3)));
+        ds2_where.add(new Oh5Attribute("ysize", Oh5Scalar(4)));
 
-        Node& ds2_d1 = ds2.add(new Group("data1"));
-        Node& ds2_d1_where = ds2_d1.add(new Group("where"));
-        ds2_d1_where.add(new Attribute("xsize", Scalar(5)));
-        ds2_d1_where.add(new Attribute("ysize", Scalar(6)));
+        Oh5Node& ds2_d1 = ds2.add(new Oh5Group("data1"));
+        Oh5Node& ds2_d1_where = ds2_d1.add(new Oh5Group("where"));
+        ds2_d1_where.add(new Oh5Attribute("xsize", Oh5Scalar(5)));
+        ds2_d1_where.add(new Oh5Attribute("ysize", Oh5Scalar(6)));
 
         proc.file(&f1);
     }
 
-    FakeFile f1;
+    FakeOh5File f1;
     extract_attr proc;
 };
 

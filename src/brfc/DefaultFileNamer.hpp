@@ -42,7 +42,7 @@ class DefaultFileNamer : public FileNamer {
      *   - @c timestamp is the value of "/what/date" and "/what/time" formatted
      *     as @c yyyyMMddThhmmssZ
      */
-    virtual std::string do_name(const oh5::File& file) const;
+    virtual std::string do_name(const oh5::Oh5File& file) const;
 
     /**
      * @brief name a FileEntry

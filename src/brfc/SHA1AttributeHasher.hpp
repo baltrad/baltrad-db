@@ -28,7 +28,7 @@ namespace brfc {
 
 namespace oh5 {
 
-class Attribute;
+class Oh5Attribute;
 
 } // namespace oh5
 
@@ -41,7 +41,7 @@ class SHA1AttributeHasher : public FileHasher {
 
     virtual ~SHA1AttributeHasher();
 
-    static std::string attribute_string(const oh5::Attribute& attr);
+    static std::string attribute_string(const oh5::Oh5Attribute& attr);
 
     static std::string sha1hash(const std::string& str);
   
@@ -56,7 +56,7 @@ class SHA1AttributeHasher : public FileHasher {
      * @note changes to this algorithm most probably trigger the need to
      *       re-evaluate all files in the database hashed using this hasher.
      */
-    virtual std::string do_hash(const oh5::File& file) const;
+    virtual std::string do_hash(const oh5::Oh5File& file) const;
 };
 
 } // namespace brfc

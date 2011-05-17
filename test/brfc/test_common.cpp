@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/Variant.hpp>
-#include <brfc/oh5/Scalar.hpp>
+#include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/test_common.hpp>
 
@@ -67,7 +67,7 @@ std::ostream& operator<<(std::ostream& out, const brfc::Variant& value) {
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const brfc::oh5::Scalar& value) {
+std::ostream& operator<<(std::ostream& out, const brfc::oh5::Oh5Scalar& value) {
     out << "oh5::Scalar("
         << value.to_string()
         << ")";

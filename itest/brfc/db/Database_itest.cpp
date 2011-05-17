@@ -27,8 +27,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/Scalar.hpp>
+#include <brfc/oh5/Oh5Attribute.hpp>
+#include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
 
@@ -161,27 +161,27 @@ TEST_P(db_Database_itest, store_with_invalid_attributes) {
     tf.write(file);
     file.path(tf.path());
     // add an invalid attribute
-    file.root().add(new oh5::Attribute("invalid", oh5::Scalar(1)));
+    file.root().add(new oh5::Oh5Attribute("invalid", oh5::Oh5Scalar(1)));
 
     auto_ptr<FileEntry> e(db->store(file));
 }
 
 TEST_P(db_Database_itest, test_sources) {
-    std::vector<oh5::Source> sources;
+    std::vector<oh5::Oh5Source> sources;
     EXPECT_NO_THROW(sources = db->sources());
 
     EXPECT_TRUE(sources.size() > 0);
 }
 
 TEST_P(db_Database_itest, test_add_source) {
-    oh5::Source src;
+    oh5::Oh5Source src;
     EXPECT_THROW(db->add_source(src), lookup_error);
 
     src.add("_name", "srcname1");
 
     EXPECT_NO_THROW(db->add_source(src));
 
-    std::vector<oh5::Source> sources = db->sources();
+    std::vector<oh5::Oh5Source> sources = db->sources();
 
     EXPECT_TRUE(source_by_name(sources, "srcname1") != sources.end());
 
@@ -192,14 +192,14 @@ TEST_P(db_Database_itest, test_add_source) {
 }
 
 TEST_P(db_Database_itest, test_update_source) {
-    oh5::Source src;
+    oh5::Oh5Source src;
     src.add("_name", "srcname2");
     src.add("key1", "value1");
     src.add("key2", "value2");
     
     EXPECT_NO_THROW(db->add_source(src));
 
-    std::vector<oh5::Source> sources = db->sources();
+    std::vector<oh5::Oh5Source> sources = db->sources();
     ASSERT_TRUE(source_by_name(sources, "srcname2") != sources.end());
     src = *source_by_name(sources, "srcname2");
     src.remove("_name");
@@ -220,13 +220,13 @@ TEST_P(db_Database_itest, test_update_source) {
 }
 
 TEST_P(db_Database_itest, test_remove_source) {
-    oh5::Source src;
+    oh5::Oh5Source src;
     src.add("_name", "srcname4");
 
     EXPECT_THROW(db->remove_source(src), lookup_error);
 
     db->add_source(src);
-    std::vector<oh5::Source> sources = db->sources(); 
+    std::vector<oh5::Oh5Source> sources = db->sources(); 
     ASSERT_TRUE(source_by_name(sources, "srcname4") != sources.end());
     src = *source_by_name(sources, "srcname4");
 

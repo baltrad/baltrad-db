@@ -22,9 +22,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/db/rdb/RdbNodeBackend.hpp>
+#include <brfc/db/rdb/RdbOh5NodeBackend.hpp>
 
-#include <brfc/oh5/Source.hpp>
+#include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {
 
@@ -107,20 +107,20 @@ class RdbFileEntry : public FileEntry {
      */
     void load() const;
     
-    RdbNodeBackend& node_backend() { return nodes_; }
-    const RdbNodeBackend& node_backend() const { return nodes_; }
+    RdbOh5NodeBackend& node_backend() { return nodes_; }
+    const RdbOh5NodeBackend& node_backend() const { return nodes_; }
 
   protected:
     virtual std::string do_uuid() const;
 
     virtual void do_write_to_file(const std::string& path) const;
 
-    virtual const oh5::Node& do_root() const;
+    virtual const oh5::Oh5Node& do_root() const;
     
     /**
      * @brief source as stored in the database
      */
-    virtual oh5::Source do_source() const;
+    virtual oh5::Oh5Source do_source() const;
 
     virtual std::string do_hash() const;
 
@@ -135,12 +135,12 @@ class RdbFileEntry : public FileEntry {
     long long id_;
     long long lo_id_;
     long long source_id_;
-    oh5::Source source_;
+    oh5::Oh5Source source_;
     std::string uuid_;
     std::string hash_;
     long long size_;
     DateTime stored_at_;
-    RdbNodeBackend nodes_;
+    RdbOh5NodeBackend nodes_;
 };
 
 } // namespace brfc

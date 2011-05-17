@@ -27,9 +27,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/oh5/File.hpp>
-#include <brfc/oh5/Scalar.hpp>
-#include <brfc/oh5/Source.hpp>
+#include <brfc/oh5/Oh5File.hpp>
+#include <brfc/oh5/Oh5Scalar.hpp>
+#include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {
 
@@ -38,7 +38,7 @@ DefaultFileNamer::DefaultFileNamer() {
 }
 
 std::string
-DefaultFileNamer::do_name(const oh5::File& file) const {
+DefaultFileNamer::do_name(const oh5::Oh5File& file) const {
     std::string name;
     name.append(boost::to_lower_copy(file.what_object()));
     name.append("_");
@@ -58,7 +58,7 @@ DefaultFileNamer::do_name(const oh5::File& file) const {
 
 std::string
 DefaultFileNamer::do_name(const FileEntry& entry) const {
-    const oh5::File& file = static_cast<const oh5::File&>(entry);
+    const oh5::Oh5File& file = static_cast<const oh5::Oh5File&>(entry);
     std::string name = this->name(file);
     const std::string& uuid = entry.uuid();
     const std::string& version = "_" + uuid.substr(0, uuid.find("-"));

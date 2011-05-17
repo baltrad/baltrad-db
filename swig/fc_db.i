@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 %include "common.i"
 
 %{
-    #include <brfc/oh5/File.hpp>
+    #include <brfc/oh5/Oh5File.hpp>
     #include <brfc/Variant.hpp>
     #include <brfc/db/AttributeQuery.hpp>
     #include <brfc/db/AttributeResult.hpp>
@@ -53,8 +53,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
  */
 %typemap(javaimports) brfc::FileEntry, brfc::FileEntry* %{
     import eu.baltrad.fc.DateTime;
-    import eu.baltrad.fc.oh5.File;
-    import eu.baltrad.fc.oh5.Source;
+    import eu.baltrad.fc.oh5.Oh5File;
+    import eu.baltrad.fc.oh5.Oh5Source;
 %}
 
 SWIG_JAVABODY_METHODS(public, public, brfc::FileEntry);
@@ -121,17 +121,17 @@ SWIG_JAVABODY_METHODS(public, public, brfc::Database);
     import java.util.ArrayList;
     import java.util.List;
 
-    import eu.baltrad.fc.oh5.PhysicalFile;
-    import eu.baltrad.fc.oh5.Source;
-    import eu.baltrad.fc.oh5._StdVectorSource;
+    import eu.baltrad.fc.oh5.PhysicalOh5File;
+    import eu.baltrad.fc.oh5.Oh5Source;
+    import eu.baltrad.fc.oh5._StdVectorOh5Source;
 %}
 
 // brfc::Database::sources -> eu.baltrad.fc.db.Database._sources
 %rename(_sources) brfc::Database::sources;
 %typemap(javacode) brfc::Database %{
-  public List<Source> sources() {
-    _StdVectorSource srcvec = _sources();
-    List<Source> srclist = new ArrayList<Source>((int)srcvec.size());
+  public List<Oh5Source> sources() {
+    _StdVectorOh5Source srcvec = _sources();
+    List<Oh5Source> srclist = new ArrayList<Oh5Source>((int)srcvec.size());
     for (int i=0; i < srcvec.size(); i++) {
         srclist.add(srcvec.get(i));
     }
@@ -157,9 +157,9 @@ SWIG_JAVABODY_METHODS(public, public, brfc::Database);
 
 %pragma(java) jniclassimports=%{
     import eu.baltrad.fc.expr.Expression;
-    import eu.baltrad.fc.oh5.File;
-    import eu.baltrad.fc.oh5.PhysicalFile;
-    import eu.baltrad.fc.oh5.Source;
+    import eu.baltrad.fc.oh5.Oh5File;
+    import eu.baltrad.fc.oh5.PhysicalOh5File;
+    import eu.baltrad.fc.oh5.Oh5Source;
 %}
 
 %include <brfc/db/AttributeResult.hpp>

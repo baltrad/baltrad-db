@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 public class TestSource extends TestCase {
 
   public void test_keys() {
-    Source src = Source.from_string("key1:value1,key2:value2");
+    Oh5Source src = Oh5Source.from_string("key1:value1,key2:value2");
     List<String> keys = src.keys();
     assertEquals(2, keys.size());
     assertTrue(keys.contains("key1"));
@@ -33,7 +33,7 @@ public class TestSource extends TestCase {
   }
 
   public void test_all_keys() {
-    Source src = Source.from_string("key1:value1,key2:value2,_key3:value3");
+    Oh5Source src = Oh5Source.from_string("key1:value1,key2:value2,_key3:value3");
     List<String> keys = src.keys();
     assertEquals(2, keys.size());
     assertTrue(keys.contains("key1"));

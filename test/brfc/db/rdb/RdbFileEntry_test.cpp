@@ -20,12 +20,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/db/rdb/RdbFileEntry.hpp>
-#include <brfc/db/rdb/RdbNodeBackend.hpp>
+#include <brfc/db/rdb/RdbOh5NodeBackend.hpp>
 #include <brfc/db/rdb/RelationalDatabase.hpp>
 
-#include <brfc/oh5/Attribute.hpp>
-#include <brfc/oh5/Group.hpp>
-#include <brfc/oh5/PhysicalFile.hpp>
+#include <brfc/oh5/Oh5Attribute.hpp>
+#include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/PhysicalOh5File.hpp>
 
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionPool.hpp>
@@ -61,7 +61,7 @@ class db_rdb_RdbFileEntry_test : public ::testing::Test {
 
 TEST_F(db_rdb_RdbFileEntry_test, test_ctor) {
     EXPECT_EQ(0, entry.root().parent());
-    RdbNodeBackend* be = dynamic_cast<RdbNodeBackend*>(&entry.root().backend());
+    RdbOh5NodeBackend* be = dynamic_cast<RdbOh5NodeBackend*>(&entry.root().backend());
     ASSERT_TRUE(be);
     EXPECT_FALSE(be->loaded(entry.root()));
 }

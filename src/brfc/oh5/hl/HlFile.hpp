@@ -25,8 +25,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/noncopyable.hpp>
 
-#include <brfc/oh5/PhysicalFile.hpp>
-#include <brfc/oh5/MemoryNodeBackend.hpp>
+#include <brfc/oh5/PhysicalOh5File.hpp>
+#include <brfc/oh5/MemoryOh5NodeBackend.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -35,7 +35,7 @@ namespace hl {
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
  */
-class HlFile : public PhysicalFile {
+class HlFile : public PhysicalOh5File {
   public:
     /**
      * @brief construct an empty File
@@ -73,7 +73,7 @@ class HlFile : public PhysicalFile {
      */
     virtual ~HlFile();
 
-    using oh5::PhysicalFile::path;
+    using oh5::PhysicalOh5File::path;
 
     void path(const std::string& path) {
         path_ = path;
@@ -85,12 +85,12 @@ class HlFile : public PhysicalFile {
      */
     virtual const std::string& do_path() const { return path_; }
 
-    virtual const Node& do_root() const { return nodes_.root(); }
+    virtual const Oh5Node& do_root() const { return nodes_.root(); }
 
   private:
     void load();
     
-    MemoryNodeBackend nodes_;
+    MemoryOh5NodeBackend nodes_;
     std::string path_;
 };
 

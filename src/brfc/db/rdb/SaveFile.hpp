@@ -26,8 +26,8 @@ namespace brfc {
     class RelationalDatabase;
 
     namespace oh5 {
-        class Node;
-        class PhysicalFile;
+        class Oh5Node;
+        class PhysicalOh5File;
     }
 }
 
@@ -49,10 +49,10 @@ class SaveFile {
      * @param file the file to be saved
      * @return file entry in the database
      */
-    RdbFileEntry* operator()(const oh5::PhysicalFile& file);
+    RdbFileEntry* operator()(const oh5::PhysicalOh5File& file);
 
   private:
-    oh5::Node& parent_on_entry(const oh5::Node& node);
+    oh5::Oh5Node& parent_on_entry(const oh5::Oh5Node& node);
 
     RelationalDatabase* rdb_;
 };
