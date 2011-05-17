@@ -33,7 +33,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/oh5/hl/hlhdf.hpp>
-#include <brfc/oh5/hl/Converter.hpp>
+#include <brfc/oh5/hl/HlConverter.hpp>
 
 namespace brfc {
 namespace oh5 {
@@ -73,8 +73,8 @@ HlFile::~HlFile() {
 namespace {
 
 void add_attribute(Oh5Node& parent, const std::string& name, HL_Node* node) {
-    shared_ptr<const Converter> converter =
-        Converter::create_from_hlhdf_node(*node);
+    shared_ptr<const HlConverter> converter =
+        HlConverter::create_from_hlhdf_node(*node);
     if (not converter)
         throw std::runtime_error(std::string("could not convert ") +
                                  HLNode_getName(node) + 

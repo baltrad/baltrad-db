@@ -32,7 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/oh5/hl/hlhdf.hpp>
-#include <brfc/oh5/hl/Converter.hpp>
+#include <brfc/oh5/hl/HlConverter.hpp>
 
 #include <brfc/util/BoostFileSystem.hpp>
 
@@ -122,11 +122,11 @@ class GatherHLNodes {
     convert(const oh5::Oh5Scalar& value) {
         switch (value.type()) {
             case oh5::Oh5Scalar::DOUBLE:
-                return oh5::hl::DoubleConverter().convert(value);
+                return oh5::hl::HlDoubleConverter().convert(value);
             case oh5::Oh5Scalar::INT64:
-                return oh5::hl::Int64Converter().convert(value);
+                return oh5::hl::HlInt64Converter().convert(value);
             case oh5::Oh5Scalar::STRING:
-                return oh5::hl::StringConverter().convert(value);
+                return oh5::hl::HlStringConverter().convert(value);
             default:
                 throw std::runtime_error("could not convert");
         }

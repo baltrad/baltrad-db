@@ -76,14 +76,14 @@ class HL_Data {
 /**
  * @brief ABC for HL_Data <-> Scalar conversion
  */
-class Converter {
+class HlConverter {
   public:
     static
-    shared_ptr<const Converter>
+    shared_ptr<const HlConverter>
     create_from_hlhdf_node(const HL_Node& node);
 
     static
-    shared_ptr<const Converter>
+    shared_ptr<const HlConverter>
     create_from_variant(const Oh5Scalar& variant);
 
     /**
@@ -109,7 +109,7 @@ class Converter {
     /**
      * @brief destructor
      */
-    virtual ~Converter() {}
+    virtual ~HlConverter() {}
 
   protected:
     /**
@@ -133,7 +133,7 @@ class Converter {
  *       default encoding being ASCII. It states using UNICODE might be
  *       preferrable, but again doesn't give any specific encoding.
  */
-class StringConverter : public Converter {
+class HlStringConverter : public HlConverter {
   protected:
     virtual Oh5Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
@@ -156,7 +156,7 @@ class StringConverter : public Converter {
  *       ullong precision (in fact, no unsigned values), although it
  *       leaves a possibility for an attribute value to be encoded as one.
  */
-class Int64Converter : public Converter {
+class HlInt64Converter : public HlConverter {
   protected:
     virtual Oh5Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;
@@ -175,7 +175,7 @@ class Int64Converter : public Converter {
  * @note conversion from Scalar to HLHDF format always results in a
  *       HLHDF_DOUBLE
  */
-class DoubleConverter : public Converter {
+class HlDoubleConverter : public HlConverter {
   protected:
     virtual Oh5Scalar do_convert(HL_FormatSpecifier format,
                                unsigned char* data) const;

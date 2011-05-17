@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/hl/Converter.hpp>
+#include <brfc/oh5/hl/HlConverter.hpp>
 
 #include <string>
 #include <vector>
@@ -37,42 +37,42 @@ namespace brfc {
 namespace oh5 {
 namespace hl {
 
-shared_ptr<const Converter>
-Converter::create_from_hlhdf_node(const HL_Node& node) {
+shared_ptr<const HlConverter>
+HlConverter::create_from_hlhdf_node(const HL_Node& node) {
     HL_Node* node_ptr = const_cast<HL_Node*>(&node);
     HL_FormatSpecifier fmt = HLNode_getFormat(node_ptr);
     switch (fmt) {
         case HLHDF_INT:
         case HLHDF_LONG:
         case HLHDF_LLONG:
-            return make_shared<Int64Converter>();
+            return make_shared<HlInt64Converter>();
         case HLHDF_FLOAT:
         case HLHDF_DOUBLE:
         case HLHDF_LDOUBLE:
-            return make_shared<DoubleConverter>();
+            return make_shared<HlDoubleConverter>();
         case HLHDF_STRING:
-            return make_shared<StringConverter>();
+            return make_shared<HlStringConverter>();
         default:
-            return shared_ptr<Converter>();
+            return shared_ptr<HlConverter>();
     }
 }
 
-shared_ptr<const Converter>
-Converter::create_from_variant(const Oh5Scalar& variant) {
+shared_ptr<const HlConverter>
+HlConverter::create_from_variant(const Oh5Scalar& variant) {
     switch (variant.type()) {
         case Oh5Scalar::INT64:
-            return make_shared<Int64Converter>();
+            return make_shared<HlInt64Converter>();
         case Oh5Scalar::DOUBLE:
-            return make_shared<DoubleConverter>();
+            return make_shared<HlDoubleConverter>();
         case Oh5Scalar::STRING:
-            return make_shared<StringConverter>();
+            return make_shared<HlStringConverter>();
         default:
-            return shared_ptr<Converter>();
+            return shared_ptr<HlConverter>();
     }
 }
 
 Oh5Scalar
-Converter::convert(const HL_Node& node) const {
+HlConverter::convert(const HL_Node& node) const {
     HL_Node* node_ptr = const_cast<HL_Node*>(&node);
     HL_FormatSpecifier fmt = HLNode_getFormat(node_ptr);
     unsigned char* data = HLNode_getData(node_ptr);
@@ -80,12 +80,12 @@ Converter::convert(const HL_Node& node) const {
 }
 
 HL_Data
-Converter::convert(const Oh5Scalar& value) const {
+HlConverter::convert(const Oh5Scalar& value) const {
     return do_convert(value);
 }
 
 Oh5Scalar
-DoubleConverter::do_convert(HL_FormatSpecifier format,
+HlDoubleConverter::do_convert(HL_FormatSpecifier format,
                           unsigned char* data) const {
     using boost::numeric_cast;
     double val;
@@ -107,7 +107,7 @@ DoubleConverter::do_convert(HL_FormatSpecifier format,
 }
 
 HL_Data
-DoubleConverter::do_convert(const Oh5Scalar& value) const {
+HlDoubleConverter::do_convert(const Oh5Scalar& value) const {
     if (value.type() != Oh5Scalar::DOUBLE)
         throw value_error("invalid Scalar conversion to HLHDF double");
 
@@ -117,7 +117,7 @@ DoubleConverter::do_convert(const Oh5Scalar& value) const {
 }
 
 Oh5Scalar
-Int64Converter::do_convert(HL_FormatSpecifier format,
+HlInt64Converter::do_convert(HL_FormatSpecifier format,
                          unsigned char* data) const {
     using boost::numeric_cast;
     long long val;
@@ -138,7 +138,7 @@ Int64Converter::do_convert(HL_FormatSpecifier format,
 }
 
 HL_Data
-Int64Converter::do_convert(const Oh5Scalar& value) const {
+HlInt64Converter::do_convert(const Oh5Scalar& value) const {
     if (value.type() != Oh5Scalar::INT64)
         throw value_error("invalid Scalar conversion to HLHDF llong");
     
@@ -148,7 +148,7 @@ Int64Converter::do_convert(const Oh5Scalar& value) const {
 }
 
 Oh5Scalar
-StringConverter::do_convert(HL_FormatSpecifier format,
+HlStringConverter::do_convert(HL_FormatSpecifier format,
                            unsigned char* data) const {
     if (format != HLHDF_STRING)
         throw value_error("invalid format for conversion to std::string");
@@ -160,7 +160,7 @@ StringConverter::do_convert(HL_FormatSpecifier format,
 }
 
 HL_Data
-StringConverter::do_convert(const Oh5Scalar& value) const {
+HlStringConverter::do_convert(const Oh5Scalar& value) const {
     if (value.type() != Oh5Scalar::STRING)
         throw value_error("invalid Scalar conversion to HLHDF string");
     std::string v = value.string();

@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/oh5/hl/hlhdf.hpp>
-#include <brfc/oh5/hl/Converter.hpp>
+#include <brfc/oh5/hl/HlConverter.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/test_common.hpp>
@@ -61,57 +61,57 @@ create_hlhdf_attribute(const char* name, const char* tname, const char* value) {
 
 } // namespace anonymous
 
-TEST(oh5_hl_Converter_test, test_create_converter_from_hlhdf_node) {
+TEST(oh5_hl_HlConverter_test, test_create_converter_from_hlhdf_node) {
     shared_ptr<HL_Node> node;
-    shared_ptr<const Converter> conv;
+    shared_ptr<const HlConverter> conv;
 
     node = create_hlhdf_attribute("node", "int", (int)1);
-    conv = Converter::create_from_hlhdf_node(*node);
-    EXPECT_TRUE(dynamic_pointer_cast<const Int64Converter>(conv));
+    conv = HlConverter::create_from_hlhdf_node(*node);
+    EXPECT_TRUE(dynamic_pointer_cast<const HlInt64Converter>(conv));
 
     node = create_hlhdf_attribute("node", "long", (long)1);
-    conv = Converter::create_from_hlhdf_node(*node);
-    EXPECT_TRUE(dynamic_pointer_cast<const Int64Converter>(conv));
+    conv = HlConverter::create_from_hlhdf_node(*node);
+    EXPECT_TRUE(dynamic_pointer_cast<const HlInt64Converter>(conv));
 
     node = create_hlhdf_attribute("node", "llong", (long long)1);
-    conv = Converter::create_from_hlhdf_node(*node);
-    EXPECT_TRUE(dynamic_pointer_cast<const Int64Converter>(conv));
+    conv = HlConverter::create_from_hlhdf_node(*node);
+    EXPECT_TRUE(dynamic_pointer_cast<const HlInt64Converter>(conv));
 
     node = create_hlhdf_attribute("node", "float", (float)1.1);
-    conv = Converter::create_from_hlhdf_node(*node);
-    EXPECT_TRUE(dynamic_pointer_cast<const DoubleConverter>(conv));
+    conv = HlConverter::create_from_hlhdf_node(*node);
+    EXPECT_TRUE(dynamic_pointer_cast<const HlDoubleConverter>(conv));
 
     node = create_hlhdf_attribute("node", "double", (double)1.1);
-    conv = Converter::create_from_hlhdf_node(*node);
-    EXPECT_TRUE(dynamic_pointer_cast<const DoubleConverter>(conv));
+    conv = HlConverter::create_from_hlhdf_node(*node);
+    EXPECT_TRUE(dynamic_pointer_cast<const HlDoubleConverter>(conv));
 
     node = create_hlhdf_attribute("node", "ldouble", (long double)1.1);
-    conv = Converter::create_from_hlhdf_node(*node);
-    EXPECT_TRUE(dynamic_pointer_cast<const DoubleConverter>(conv));
+    conv = HlConverter::create_from_hlhdf_node(*node);
+    EXPECT_TRUE(dynamic_pointer_cast<const HlDoubleConverter>(conv));
 
     node = create_hlhdf_attribute("node", "string", "foo");
-    conv = Converter::create_from_hlhdf_node(*node);
-    EXPECT_TRUE(dynamic_pointer_cast<const StringConverter>(conv));
+    conv = HlConverter::create_from_hlhdf_node(*node);
+    EXPECT_TRUE(dynamic_pointer_cast<const HlStringConverter>(conv));
 }
 
-TEST(oh5_hl_Converter_test, test_create_converter_from_variant) {
-    shared_ptr<const Converter> conv;
+TEST(oh5_hl_HlConverter_test, test_create_converter_from_variant) {
+    shared_ptr<const HlConverter> conv;
     Oh5Scalar v(1);
-    conv = Converter::create_from_variant(v);
-    EXPECT_TRUE(dynamic_pointer_cast<const Int64Converter>(conv));
+    conv = HlConverter::create_from_variant(v);
+    EXPECT_TRUE(dynamic_pointer_cast<const HlInt64Converter>(conv));
 
     v = Oh5Scalar(1.1);
-    conv = Converter::create_from_variant(v);
-    EXPECT_TRUE(dynamic_pointer_cast<const DoubleConverter>(conv));
+    conv = HlConverter::create_from_variant(v);
+    EXPECT_TRUE(dynamic_pointer_cast<const HlDoubleConverter>(conv));
 
     v = Oh5Scalar("foo");
-    conv = Converter::create_from_variant(v);
-    EXPECT_TRUE(dynamic_pointer_cast<const StringConverter>(conv));
+    conv = HlConverter::create_from_variant(v);
+    EXPECT_TRUE(dynamic_pointer_cast<const HlStringConverter>(conv));
 
 }
 
-TEST(oh5_Int64Converter_test, test_convert_hlnode) {
-    Int64Converter conv;
+TEST(oh5_HlInt64Converter_test, test_convert_hlnode) {
+    HlInt64Converter conv;
     shared_ptr<HL_Node> node;
     Oh5Scalar v(0);
     
@@ -134,8 +134,8 @@ TEST(oh5_Int64Converter_test, test_convert_hlnode) {
     EXPECT_THROW(conv.convert(*node), value_error);
 }
 
-TEST(oh5_Int64Converter_test, test_convert_variant) {
-    Int64Converter conv;
+TEST(oh5_HlInt64Converter_test, test_convert_variant) {
+    HlInt64Converter conv;
 
     HL_Data d = conv.convert(Oh5Scalar(1));
     EXPECT_STREQ("llong", d.type());
@@ -145,8 +145,8 @@ TEST(oh5_Int64Converter_test, test_convert_variant) {
     EXPECT_THROW(conv.convert(Oh5Scalar("asd")), value_error);
 }
 
-TEST(oh5_DoubleConverter_test, test_convert_hlnode) {
-    DoubleConverter conv;
+TEST(oh5_HlDoubleConverter_test, test_convert_hlnode) {
+    HlDoubleConverter conv;
     shared_ptr<HL_Node> node;
     Oh5Scalar v(0);
     
@@ -169,8 +169,8 @@ TEST(oh5_DoubleConverter_test, test_convert_hlnode) {
     EXPECT_THROW(conv.convert(*node), value_error);
 }
 
-TEST(oh5_DoubleConverter_test, test_convert_variant) {
-    DoubleConverter conv;
+TEST(oh5_HlDoubleConverter_test, test_convert_variant) {
+    HlDoubleConverter conv;
 
     HL_Data d = conv.convert(Oh5Scalar(1.1));
     EXPECT_STREQ("double", d.type());
@@ -180,8 +180,8 @@ TEST(oh5_DoubleConverter_test, test_convert_variant) {
     EXPECT_THROW(conv.convert(Oh5Scalar("asd")), value_error);
 }
 
-TEST(oh5_StringConverter_test, test_convert_hlnode) {
-    StringConverter conv;
+TEST(oh5_HlStringConverter_test, test_convert_hlnode) {
+    HlStringConverter conv;
     shared_ptr<HL_Node> node;
     Oh5Scalar v(0);
     
@@ -196,8 +196,8 @@ TEST(oh5_StringConverter_test, test_convert_hlnode) {
     EXPECT_THROW(conv.convert(*node), value_error);
 }
 
-TEST(oh5_StringConverter_test, test_convert_variant) {
-    StringConverter conv;
+TEST(oh5_HlStringConverter_test, test_convert_variant) {
+    HlStringConverter conv;
 
     HL_Data d = conv.convert(Oh5Scalar("foo"));
     EXPECT_STREQ("string", d.type());
