@@ -29,14 +29,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string/split.hpp>
 
 #include <brfc/assert.hpp>
-
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/FileQuery.hpp>
+#include <brfc/expr/Listcons.hpp>
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/Model.hpp>
-
-#include <brfc/expr/Listcons.hpp>
-
 #include <brfc/sql/Factory.hpp>
 #include <brfc/sql/Select.hpp>
 
@@ -70,13 +67,42 @@ struct attr {
     void reset() {
         // always select from files and join sources
         from_ = sql::FromClause(xpr_.table(m::files::name()));
-        from_.join(
-            xpr_.table(m::sources::name()),
-            xpr_.eq(
-                m::files::column("source_id"),
-                m::sources::column("id")
-            )
-        );
+    }
+
+    void join_sources() {
+        Expression sources_t = xpr_.table(m::sources::name());
+        if (not from_.contains(sources_t)) {
+            from_.join(
+                sources_t,
+                xpr_.eq(
+                    m::files::column("source_id"),
+                    m::sources::column("id")
+                )
+            );
+        }
+    }
+
+    std::string join_source_kvs(const std::string& key) {
+        std::string alias = "src_" + key;
+        Expression alias_t = xpr_.alias(xpr_.table("bdb_source_kvs"), alias);
+
+        // join if missing
+        if (not from_.contains(alias_t)) {
+            from_.outerjoin(
+                alias_t,
+                xpr_.and_(
+                    xpr_.eq(
+                        xpr_.column(alias, "source_id"),
+                        m::sources::column("id")
+                    ),
+                    xpr_.eq(
+                        xpr_.column(alias, "key"),
+                        xpr_.string(key)
+                    )
+                )
+            );
+        }
+        return alias;
     }
 
     Expression
@@ -143,30 +169,12 @@ struct attr {
     source_attr_column(const std::string& name) {
         const std::string& key = name.substr(name.find_first_of(':') + 1);
         if (key == "_name") {
-            // sources is joined by default
+            join_sources();
             // this attribute can be accessed at sources.name
             return m::sources::column("name");
         } else {
-            std::string alias = "src_" + key;
-            Expression alias_t = xpr_.alias(xpr_.table("bdb_source_kvs"), alias);
-
-            // join if missing
-            if (not from_.contains(alias_t)) {
-                from_.outerjoin(
-                    alias_t,
-                    xpr_.and_(
-                        xpr_.eq(
-                            xpr_.column(alias, "source_id"),
-                            m::sources::column("id")
-                        ),
-                        xpr_.eq(
-                            xpr_.column(alias, "key"),
-                            xpr_.string(key)
-                        )
-                    )
-                );
-            }
-
+            join_sources();
+            const std::string& alias = join_source_kvs(key);
             // this attribute can be accessed at src_$KEY.value
             return xpr_.column(alias, "value");
         }
