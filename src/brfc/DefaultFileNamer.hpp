@@ -26,7 +26,7 @@ namespace brfc {
 
 /**
  * @brief default FileNamer implementation
- *
+ * @ingroup exposed
  */
 class DefaultFileNamer : public FileNamer {
   public:

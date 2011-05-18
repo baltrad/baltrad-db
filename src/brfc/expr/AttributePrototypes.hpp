@@ -25,6 +25,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+/**
+ * @brief collection of known attribute names and types
+ * @ingroup exposed
+ */
 class AttributePrototypes {
   public:
     enum Type {

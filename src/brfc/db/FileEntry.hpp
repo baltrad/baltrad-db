@@ -26,6 +26,7 @@ namespace brfc {
 
 /**
  * @brief File entry in Database
+ * @ingroup exposed
  */
 class FileEntry : public Oh5File {
   public:

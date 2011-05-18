@@ -32,6 +32,8 @@ namespace brfc {
 
 /**
  * @brief Variant value
+ *
+ * @ingroup exposed
  */
 class Variant {
   public:

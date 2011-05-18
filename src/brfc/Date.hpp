@@ -28,6 +28,7 @@ class TimeDelta;
 
 /**
  * @brief date in a proleptic Gregorian calendar
+ * @ingroup exposed
  */
 class Date {
   public:

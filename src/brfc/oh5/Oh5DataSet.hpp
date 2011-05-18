@@ -28,6 +28,8 @@ namespace brfc {
  * ODIM_H5 dataset
  *
  * - can have Attribute as a child
+ *
+ * @ingroup exposed
  */
 class Oh5DataSet : public Oh5Node {
   public:

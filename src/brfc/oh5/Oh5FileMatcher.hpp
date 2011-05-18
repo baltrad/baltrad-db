@@ -28,6 +28,8 @@ class Oh5File;
 
 /**
  * @brief match files against filters
+ *
+ * @ingroup exposed
  */
 class Oh5FileMatcher {
   public:

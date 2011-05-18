@@ -37,6 +37,7 @@ class PhysicalOh5File;
 
 /**
  * @brief ABC for Database access
+ * @ingroup exposed
  */
 class Database : public boost::noncopyable {
   public:

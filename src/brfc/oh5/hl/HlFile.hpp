@@ -31,7 +31,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 /**
- * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
+ * @brief ODIM_H5 file implementation using hlhdf
+ * @ingroup exposed
  */
 class HlFile : public PhysicalOh5File {
   public:

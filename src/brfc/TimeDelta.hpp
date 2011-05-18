@@ -32,6 +32,9 @@ enum dt_const {
     MSECS_IN_DAY = 86400000
 };
 
+/**
+ * @ingroup exposed
+ */
 class TimeDelta {
   public:
     explicit TimeDelta(int days=0, int msecs=0)

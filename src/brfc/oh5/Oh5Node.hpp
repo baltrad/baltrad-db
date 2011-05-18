@@ -44,6 +44,8 @@ class Oh5NodeIterator;
  *
  * A node is a single element in the ODIM_H5 hirerchy. It has a name which
  * is unique among the children of one parent.
+ *
+ * @ingroup exposed
  */
 class Oh5Node : public boost::noncopyable {
   public:

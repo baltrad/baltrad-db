@@ -35,6 +35,10 @@ namespace brfc {
 namespace brfc {
 
 /**
+ * @defgroup exposed Exposed in bindings
+ */
+
+/**
  * @brief indexes and stores ODIM_H5 File instances
  *
  * @note there are several similar methods accepting file as as a path string
@@ -43,6 +47,8 @@ namespace brfc {
  *       it to the method accepting PhysicalFile instance. If you want to
  *       call several methods on the same file, it's more efficient to create
  *       the PhysicalFile instance yourself.
+ *
+ * @ingroup exposed
  */
 class FileCatalog {
   public:

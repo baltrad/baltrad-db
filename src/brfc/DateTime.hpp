@@ -29,6 +29,7 @@ namespace brfc {
 
 /**
  * @brief combined Date and Time
+ * @ingroup exposed
  */
 class DateTime {
   public:

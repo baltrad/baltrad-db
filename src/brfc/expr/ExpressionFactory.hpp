@@ -35,6 +35,7 @@ class Variant;
 
 /**
  * @brief factory for constructing expression elements
+ * @ingroup exposed
  */
 class ExpressionFactory {
   public:

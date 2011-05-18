@@ -29,6 +29,7 @@ class Oh5Group;
 
 /**
  * @brief ODIM_H5 attribute element
+ * @ingroup exposed
  */
 class Oh5Attribute : public Oh5Node {
   public:

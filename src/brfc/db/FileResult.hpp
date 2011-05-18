@@ -28,6 +28,7 @@ class FileEntry;
 
 /**
  * @brief ABC for FileQuery results
+ * @ingroup exposed
  */
 class FileResult : public boost::noncopyable {
   public:

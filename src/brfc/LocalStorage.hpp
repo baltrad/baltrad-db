@@ -28,6 +28,7 @@ class FileEntry;
 
 /**
  * @brief ABC for classes implementing node-local PhysicalFile storage
+ * @ingroup exposed
  */
 class LocalStorage {
   public:

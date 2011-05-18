@@ -31,6 +31,8 @@ namespace brfc {
  *
  * this is a simple key <-> value mapping. Although ODIM_H5 specifies
  * [WMO,RAD,ORG,PLC,CTY,CMT] as valid keys, this class accepts anything.
+ *
+ * @ingroup exposed
  */
 class Oh5Source {
   public:

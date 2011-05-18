@@ -36,6 +36,8 @@ class Time;
 
 /**
  * @brief a HDF5 file conforming to ODIM_H5/V2_0 specification
+ *
+ * @ingroup exposed
  */
 class Oh5File : public boost::noncopyable {
   public:

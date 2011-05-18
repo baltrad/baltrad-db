@@ -29,6 +29,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+/**
+ * @ingroup exposed
+ */
 class Expression {
     typedef void (Expression::*bool_type)() const;
     void this_type_does_not_support_comparisons() const {}

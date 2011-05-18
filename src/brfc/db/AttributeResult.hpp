@@ -32,6 +32,7 @@ class Variant;
 
 /**
  * @brief ABC for Query results
+ * @ingroup exposed
  */
 class AttributeResult : public boost::noncopyable {
   public:

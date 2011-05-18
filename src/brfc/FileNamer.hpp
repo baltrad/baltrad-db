@@ -32,6 +32,7 @@ namespace brfc {
 
 /**
  * @brief ABC for generating filenames for File instances
+ * @ingroup exposed
  */
 class FileNamer {
   public:

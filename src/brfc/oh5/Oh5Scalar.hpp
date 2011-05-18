@@ -31,6 +31,9 @@ class Time;
 
 /**
  * ODIM_H5 scalar value
+ *
+ * 
+ * @ingroup exposed
  */
 class Oh5Scalar {
   public:

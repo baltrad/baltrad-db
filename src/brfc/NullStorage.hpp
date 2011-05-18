@@ -26,6 +26,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
+/**
+ * @ingroup exposed
+ */
 class NullStorage : public LocalStorage {
   protected:
     /**

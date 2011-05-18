@@ -28,6 +28,8 @@ class TimeDelta;
 
 /**
  * @brief naive time implementation
+ *
+ * @ingroup exposed
  */
 class Time {
   public:

@@ -31,6 +31,7 @@ class FileSystem;
  * @brief Storage caching files in local filesystem
  * 
  * @note at the moment this is pretty naive
+ * @ingroup exposed
  */
 class CacheDirStorage : public LocalStorage {
   public:

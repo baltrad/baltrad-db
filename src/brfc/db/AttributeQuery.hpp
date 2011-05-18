@@ -30,6 +30,7 @@ namespace brfc {
 
 /**
  * @brief query against the database
+ * @ingroup exposed
  */
 class AttributeQuery {
   public:

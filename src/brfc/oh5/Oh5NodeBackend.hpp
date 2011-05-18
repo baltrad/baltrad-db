@@ -31,6 +31,8 @@ class Oh5Node;
 
 /**
  * @brief ABC for Node implementations
+ *
+ * @ingroup exposed
  */
 class Oh5NodeBackend : public boost::noncopyable {
   public:

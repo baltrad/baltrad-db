@@ -28,6 +28,8 @@ class Oh5Attribute;
 
 /**
  * @brief ODIM_H5 Group element
+ *
+ * @ingroup exposed
  */
 class Oh5Group : public Oh5Node {
   public:
