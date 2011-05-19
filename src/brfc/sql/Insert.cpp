@@ -24,6 +24,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/expr/Listcons.hpp>
 
+#include <brfc/sql/Factory.hpp>
+
 namespace brfc {
 namespace sql {
 
@@ -45,9 +47,10 @@ Insert::returning(const Expression& expr) {
 
 Expression
 Insert::expression() const {
+    Factory xpr;
     Expression stmt;
     stmt.push_back(Expression::symbol("insert"));
-    stmt.push_back(Expression(table_));
+    stmt.push_back(xpr.table(table_));
 
     Expression cols, vals;
     cols.push_back(Expression::symbol("insert-columns"));

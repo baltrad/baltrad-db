@@ -26,6 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/comparison.hpp>
 #include <brfc/expr/proc/in.hpp>
 #include <brfc/expr/proc/like.hpp>
+#include <brfc/expr/proc/list.hpp>
 #include <brfc/expr/proc/list_filter.hpp>
 #include <brfc/expr/proc/logic.hpp>
 
@@ -77,6 +78,7 @@ Oh5FileMatcher::Oh5FileMatcher()
     eval_.bind("like", boost::bind(list_filter(proc::like()), _1));
     eval_.bind("in", boost::bind(list_in(), _1));
 
+    eval_.bind("list", boost::bind(proc::list(), _1));
     eval_.bind("attr", boost::bind(boost::ref(attr_), _1));
 }
 

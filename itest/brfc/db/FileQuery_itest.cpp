@@ -386,7 +386,7 @@ TEST_P(db_FileQuery_itest, test_in) {
     l.push_back(xpr.string("CVOL"));
     l.push_back(xpr.string("SCAN"));
 
-    query.filter(xpr.in(xpr.attribute("what/object"), l));
+    query.filter(xpr.in(xpr.attribute("what/object"), xpr.list(l)));
     r.reset(db->execute(query));
 
     EXPECT_EQ(2, r->size());
@@ -401,7 +401,7 @@ TEST_P(db_FileQuery_itest, test_not_in) {
     l.push_back(xpr.int64_(2));
     l.push_back(xpr.int64_(4));
 
-    query.filter(xpr.not_(xpr.in(xpr.attribute("where/ysize"), l)));
+    query.filter(xpr.not_(xpr.in(xpr.attribute("where/ysize"), xpr.list(l))));
     r.reset(db->execute(query));
     
     EXPECT_EQ(2, r->size());

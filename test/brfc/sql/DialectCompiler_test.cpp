@@ -305,7 +305,7 @@ TEST_F(sql_DialectCompiler_test, test_proc_join) {
 TEST_F(sql_DialectCompiler_test, test_proc_literal) {
     DialectCompiler::literal proc(dialect);
 
-    Expression in = Listcons().int64(1).get();
+    Expression in(1);
     Expression out("1");
 
     EXPECT_CALL(dialect, do_literal_to_string(Expression(1)))
@@ -392,7 +392,7 @@ TEST_F(sql_DialectCompiler_test, test_proc_order_dir) {
 TEST_F(sql_DialectCompiler_test, test_proc_limit) {
     DialectCompiler::limit proc;
 
-    Expression in = Listcons().int64(1).get();
+    Expression in = Listcons().string("1").get();
     Expression out("LIMIT 1");
 
     EXPECT_EQ(out, proc(in));
@@ -401,7 +401,7 @@ TEST_F(sql_DialectCompiler_test, test_proc_limit) {
 TEST_F(sql_DialectCompiler_test, test_proc_offset) {
     DialectCompiler::offset proc;
 
-    Expression in = Listcons().int64(1).get();
+    Expression in = Listcons().string("1").get();
     Expression out("OFFSET 1");
 
     EXPECT_EQ(out, proc(in));

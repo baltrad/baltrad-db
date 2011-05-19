@@ -20,40 +20,80 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdexcept>
 
+#include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
+
 #include <brfc/expr/Expression.hpp>
 
 namespace brfc {
+
+namespace {
+
+Expression
+default_literal_proc(const Expression& x) {
+    return x; 
+}
+
+} // namespace anonymous
+
+Eval::Eval()
+        : procs_()
+        , proc_literal_(boost::bind(&default_literal_proc, _1)) {
+}
 
 void
 Eval::bind(const std::string& symbol, proc_t proc) {
     procs_[symbol] = proc;
 }
 
+void
+Eval::bind_special_proc(const std::string& symbol, proc_t proc) {
+    special_procs_[symbol] = proc;
+}
+
+void
+Eval::bind_literal_proc(proc_t proc) {
+    proc_literal_ = proc;
+}
+
 Expression
 Eval::operator()(const Expression& x) {
-    if (x.is_list() and not x.empty()) {
-        Expression newx;
+    if (x.is_list()) {
         Expression::const_iterator it = x.begin(); 
-        for ( ; it != x.end(); ++it) {
-            newx.push_back(operator()(*it));
+        if (it != x.end() and it->is_symbol()) {
+            const std::string& symbol = it->symbol();
+            ++it;
+            return call_proc(symbol, Expression(it, x.end()));
+        } else {
+            throw std::logic_error("invalid list to eval: " + 
+                                   boost::lexical_cast<std::string>(x));
         }
-        if (newx.front().is_symbol()) {
-            proc_t p = proc(newx.front().symbol());
-            newx.pop_front();
-            return p(newx);
-        }
-        return newx;
     } else {
-        return x;
+        return proc_literal_(x);
     }
 }
 
-Eval::proc_t
-Eval::proc(const std::string& symbol) const {
-    procmap_t::const_iterator it = procs_.find(symbol);
-    if (it == procs_.end())
-        throw std::logic_error("no proc for symbol: " + symbol);
-    return it->second;
+Expression
+Eval::call_proc(const std::string& symbol, const Expression& x) {
+    procmap_t::const_iterator it = special_procs_.find(symbol);
+    if (it != special_procs_.end()) {
+        return it->second(x);
+    }
+    it = procs_.find(symbol);
+    if (it != procs_.end()) {
+        return it->second(eval_list(x));
+    }
+    throw std::logic_error("no proc for symbol: " + symbol);
+}
+
+Expression
+Eval::eval_list(const Expression& x) {
+    Expression newx;
+    Expression::const_iterator it = x.begin(); 
+    for ( ; it != x.end(); ++it) {
+        newx.push_back(operator()(*it));
+    }
+    return newx;
 }
 
 } // namespace brfc

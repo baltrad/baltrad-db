@@ -87,4 +87,33 @@ TEST_F(expr_Eval_test, test_proc_call_order) {
     EXPECT_EQ(Expression(30), eval(e));
 };
 
+TEST_F(expr_Eval_test, test_proc_literal_proc) {
+    MockProc p;
+
+    eval.bind_literal_proc(boost::bind(&MockProc::call, &p, _1));
+
+    EXPECT_CALL(p, call(Expression(1)))
+        .WillOnce(Return(Expression(10)));
+    
+    EXPECT_EQ(Expression(10), eval(Expression(1)));
+}
+
+TEST_F(expr_Eval_test, test_proc_special_proc) {
+    MockProc p;
+
+    eval.bind_special_proc("s", boost::bind(&MockProc::call, &p, _1));
+
+    Expression in = Listcons().symbol("s")
+                              .append(Listcons().symbol("b").int64(1).get())
+                              .get();
+    
+    EXPECT_CALL(p, call(Listcons().append(Listcons().symbol("b")
+                                                    .int64(1)
+                                                    .get())
+                                  .get()))
+        .WillOnce(Return(Expression(10)));
+    
+    EXPECT_EQ(Expression(10), eval(in));
+}
+
 } // namespace brfc

@@ -28,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 #include <brfc/expr/Listcons.hpp>
+#include <brfc/expr/proc/quote.hpp>
 
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Insert.hpp>
@@ -40,8 +41,11 @@ DialectCompiler::DialectCompiler(const Dialect* dialect)
         : eval_()
         , dialect_(dialect)
         , bind_() {
+    eval_.bind_special_proc("quote", boost::bind(::brfc::proc::quote(), _1));
+    eval_.bind_literal_proc(boost::bind(literal(*dialect), _1));
+    eval_.bind("list", boost::bind(list(), _1));
     eval_.bind("alias", boost::bind(alias(), _1));
-    eval_.bind("bind", boost::bind(boost::ref(bind_), _1));
+    eval_.bind_special_proc("bind", boost::bind(boost::ref(bind_), _1));
     eval_.bind("+", boost::bind(binop("+"), _1));
     eval_.bind("-", boost::bind(binop("-"), _1));
     eval_.bind("*", boost::bind(binop("*"), _1));
@@ -58,14 +62,14 @@ DialectCompiler::DialectCompiler(const Dialect* dialect)
     eval_.bind("not", boost::bind(unaryop("NOT"), _1));
     eval_.bind("like", boost::bind(like(), _1));
     eval_.bind("in", boost::bind(binop("IN"), _1));
-    eval_.bind("column", boost::bind(column(), _1));
+    eval_.bind_special_proc("column", boost::bind(column(), _1));
     eval_.bind("min", boost::bind(function("MIN"), _1));
     eval_.bind("max", boost::bind(function("MAX"), _1));
     eval_.bind("sum", boost::bind(function("SUM"), _1));
     eval_.bind("count", boost::bind(function("COUNT"), _1));
     eval_.bind("join", boost::bind(join("JOIN"), _1));
     eval_.bind("outerjoin", boost::bind(join("LEFT JOIN"), _1));
-    eval_.bind("lit", boost::bind(literal(*dialect), _1));
+//    eval_.bind("lit", boost::bind(literal(*dialect), _1));
     eval_.bind("label", boost::bind(label(), _1));
     eval_.bind("select", boost::bind(select(), _1));
     eval_.bind("distinct", boost::bind(distinct(), _1));
@@ -79,10 +83,10 @@ DialectCompiler::DialectCompiler(const Dialect* dialect)
     eval_.bind("limit", boost::bind(limit(), _1));
     eval_.bind("offset", boost::bind(offset(), _1));
     eval_.bind("insert", boost::bind(insert(), _1));
-    eval_.bind("insert-columns", boost::bind(insert_columns(), _1));
+    eval_.bind_special_proc("insert-columns", boost::bind(insert_columns(), _1));
     eval_.bind("insert-values", boost::bind(insert_values(), _1));
     eval_.bind("returning", boost::bind(returning(), _1));
-    eval_.bind("table", boost::bind(table(), _1));
+    eval_.bind_special_proc("table", boost::bind(table(), _1));
 }
 
 Expression
@@ -225,9 +229,17 @@ DialectCompiler::join::operator()(const Expression& x) {
 }
 
 Expression
+DialectCompiler::list::operator()(const Expression& x) {
+    Expression e;
+    e.push_back(Expression("("));
+    e.extend(::brfc::join(x.begin(), x.end(), Expression(", ")));
+    e.push_back(Expression(")"));
+    return e;
+}
+
+Expression
 DialectCompiler::literal::operator()(const Expression& x) {
-    BRFC_ASSERT(x.size() == 1);
-    return Expression(dialect_.literal_to_string(x.front()));
+    return Expression(dialect_.literal_to_string(x));
 }
 
 Expression
@@ -305,14 +317,14 @@ Expression
 DialectCompiler::limit::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() == 1);
     
-    return Expression("LIMIT " + boost::lexical_cast<std::string>(x.front().int64()));
+    return Expression("LIMIT " + x.front().string());
 }
 
 Expression
 DialectCompiler::offset::operator()(const Expression& x) {
     BRFC_ASSERT(x.size() == 1);
     
-    return Expression("OFFSET " + boost::lexical_cast<std::string>(x.front().int64()));
+    return Expression("OFFSET " + x.front().string());
 }
 
 Expression

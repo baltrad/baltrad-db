@@ -168,6 +168,17 @@ class DialectCompiler : public Compiler {
     };
 
     /**
+     * @brief sql list
+     */
+    struct list : public proc {
+        /**
+         * @param x `(arg1, arg2, ..., argN)`
+         * @return `("(", arg1, ", ", arg2, ", ", ..., argN, ")")`
+         */
+        Expression operator()(const Expression& x);
+    };
+
+    /**
      * @brief sql literal value
      */
     struct literal : public proc {
@@ -186,7 +197,7 @@ class DialectCompiler : public Compiler {
 
         const sql::Dialect& dialect_;
     };
-
+    
     /**
      * @brief sql label
      */

@@ -129,7 +129,16 @@ class ExpressionFactory {
      * @brief construct Expression containing a bool
      */
     Expression bool_(bool value) const;
+    
+    /**
+     * @brief construct list Exprssion
+     */
+    Expression list(const Expression& x) const;
 
+    /**
+     * @brief quote expression
+     */
+    Expression quote(const Expression& x) const;
 
     Expression binary_op(const std::string& op, const Expression& lhs, const Expression& rhs) const;
     Expression unary_op(const std::string& op, const Expression& arg) const;

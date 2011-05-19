@@ -71,8 +71,8 @@ TEST_F(oh5_Oh5FileMatcher_test, test_what_object_eq) {
 }
 
 TEST_F(oh5_Oh5FileMatcher_test, test_what_object_in) {
-    Expression e1 = xpr.in(xpr.attribute("what/object"), Listcons().string("PVOL").string("CVOL").get());
-    Expression e2 = xpr.in(xpr.attribute("what/object"), Expression());
+    Expression e1 = xpr.in(xpr.attribute("what/object"), xpr.list(Listcons().string("PVOL").string("CVOL").get()));
+    Expression e2 = xpr.in(xpr.attribute("what/object"), xpr.list(Expression()));
     EXPECT_TRUE(matcher.match(f1, e1));
     EXPECT_FALSE(matcher.match(f1, e2));
 }

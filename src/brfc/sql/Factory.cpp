@@ -28,47 +28,57 @@ namespace sql {
 
 Expression
 Factory::literal(const Expression& value) const {
-    return Listcons().symbol("lit").append(value).get();
+    return value;
 }
 
 Expression
 Factory::string(const std::string& value) const {
-    return Listcons().symbol("lit").string(value).get();
+    return Expression(value);
 }
 
 Expression
 Factory::string(const char* value) const {
-    return Listcons().symbol("lit").string(value).get();
+    return Expression(value);
 }
 
 Expression
 Factory::int64_(long long value) const {
-    return Listcons().symbol("lit").int64(value).get();
+    return Expression(value);
 }
 
 Expression
 Factory::double_(double value) const {
-    return Listcons().symbol("lit").double_(value).get();
+    return Expression(value);
 }
 
 Expression
 Factory::date(const Date& value) const {
-    return Listcons().symbol("lit").date(value).get();
+    return Expression(value);
 }
 
 Expression
 Factory::time(const Time& value) const {
-    return Listcons().symbol("lit").time(value).get();
+    return Expression(value);
 }
 
 Expression
 Factory::datetime(const DateTime& value) const {
-    return Listcons().symbol("lit").datetime(value).get();
+    return Expression(value);
 }
 
 Expression
 Factory::bool_(bool value) const {
-    return Listcons().symbol("lit").bool_(value).get();
+    return Expression(value);
+}
+
+Expression
+Factory::list(const Expression& x) const {
+    return Listcons().symbol("list").extend(x).get();
+}
+
+Expression
+Factory::quote(const Expression& x) const {
+    return Listcons().symbol("quote").append(x).get();
 }
 
 Expression
@@ -148,12 +158,18 @@ Factory::unary_op(const std::string& op,
 
 Expression
 Factory::alias(const Expression& x, const std::string& alias) const {
-    return Listcons().symbol("alias").append(x).string(alias).get();
+    return Listcons().symbol("alias")
+                     .append(x)
+                     .append(quote(string(alias)))
+                     .get();
 }
 
 Expression
 Factory::label(const Expression& x, const std::string& alias) const {
-    return Listcons().symbol("label").append(x).string(alias).get();
+    return Listcons().symbol("label")
+                     .append(x)
+                     .append(quote(string(alias)))
+                     .get();
 }
 
 Expression

@@ -83,6 +83,10 @@ class Factory {
      */
     Expression bool_(bool value) const;
 
+    Expression list(const Expression& x) const;
+
+    Expression quote(const Expression& x) const;
+
     Expression bind(const std::string& name) const;
 
     /**

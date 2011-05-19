@@ -39,6 +39,20 @@ class expr_ExpressionFactory_test : public ::testing::Test {
     ExpressionFactory xpr;
 };
 
+TEST_F(expr_ExpressionFactory_test, test_list) {
+    Expression in;
+    in.push_back(Expression(1));
+    in.push_back(Expression(2));
+    Expression out = xpr.list(in);
+    EXPECT_EQ(3u, out.size());
+    Expression::const_iterator it = out.begin();
+    EXPECT_EQ(it->symbol(), "list");
+    ++it;
+    EXPECT_EQ(Expression(1), *it);
+    ++it;
+    EXPECT_EQ(Expression(2), *it);
+}
+
 TEST_F(expr_ExpressionFactory_test, test_combined_datetime) {
     Expression x;
     EXPECT_NO_THROW(x = xpr.combined_datetime("what/date", "what/time"));

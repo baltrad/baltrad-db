@@ -31,6 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/assert.hpp>
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/FileQuery.hpp>
+#include <brfc/expr/Eval.hpp>
 #include <brfc/expr/Listcons.hpp>
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/Model.hpp>
@@ -42,11 +43,12 @@ namespace brfc {
 namespace {
 
 struct attr {
-
     const AttributeMapper* mapper_;
     sql::Factory xpr_;
     sql::FromClause from_; ///< from clause for the statement
     std::map<std::string, std::string> plain_column_map;
+
+    typedef Expression result_type;
     
     attr(const AttributeMapper* mapper)
             : mapper_(mapper)
@@ -108,10 +110,9 @@ struct attr {
     Expression
     operator()(const Expression& x) {
         BRFC_ASSERT(x.is_list());
-        BRFC_ASSERT(x.size() == 3);
+        BRFC_ASSERT(x.size() == 2);
 
         Expression::const_iterator it = x.begin();
-        ++it; // skip symbol
         const std::string& name = (*it).string();
         ++it;
         const std::string& type = (*it).string();
@@ -254,100 +255,63 @@ struct attr {
 };
 
 struct binop {
-    typedef boost::function<Expression(const Expression&)> eval_t;
+    std::string op_;
 
-    eval_t eval;
-    std::map<std::string, std::string> opmap;
+    typedef Expression result_type;
 
-    explicit binop(eval_t eval_)
-            : eval(eval_)
-            , opmap() {
-        boost::assign::insert(opmap)
-            ("!=", "!=")
-            ("=", "=")
-            (">", ">")
-            ("<", "<")
-            ("<=", "<=")
-            (">=", ">=")
-            ("like", "like")
-            ("in", "in")
-            ("and", "and")
-            ("or", "or")
-            ("+", "+")
-            ("-", "-")
-            ("*", "*")
-            ("/", "/")
-        ;
-    }
-
-    Expression operator()(const Expression& x) {
-        BRFC_ASSERT(x.is_list());
-        BRFC_ASSERT(x.size() == 3);
-
-        Expression::const_iterator it = x.begin();
-        std::string op = opmap[it->symbol()];
-        ++it;
-        Expression lhs = eval(*it);
-        ++it;
-        Expression rhs = eval(*it);
-        return Listcons().symbol(op).append(lhs).append(rhs).get();
-    }
-};
-
-struct unaryop {
-    typedef boost::function<Expression(const Expression&)> eval_t;
-
-    eval_t eval;
-    std::map<std::string, std::string> opmap;
-
-    explicit unaryop(eval_t eval_)
-            : eval(eval_)
-            , opmap() {
-        boost::assign::insert(opmap)
-            ("not", "not")
-        ;
-    }
+    explicit binop(const std::string& op) : op_(op) { }
 
     Expression operator()(const Expression& x) {
         BRFC_ASSERT(x.is_list());
         BRFC_ASSERT(x.size() == 2);
+        return Listcons().symbol(op_).extend(x).get();
+    }
+};
 
-        Expression::const_iterator it = x.begin();
-        std::string op = opmap[it->symbol()];
-        ++it;
-        Expression arg = eval(*it);
-        return Listcons().symbol(op).append(arg).get();
+struct unaryop {
+    std::string op_;
+
+    typedef Expression result_type;
+
+    explicit unaryop(const std::string& op) : op_(op) { }
+
+    Expression operator()(const Expression& x) {
+        BRFC_ASSERT(x.is_list());
+        BRFC_ASSERT(x.size() == 1);
+        return Listcons().symbol(op_).extend(x).get();
     }
 };
 
 
 struct func {
-    typedef boost::function<Expression(const Expression&)> eval_t;
+    std::string name_;
 
-    eval_t eval;
+    typedef Expression result_type;
 
-    explicit func(eval_t eval_) : eval(eval_) { }
+    explicit func(const std::string& name) : name_(name) { }
     
     Expression operator()(const Expression& x) {
-        BRFC_ASSERT(x.is_list());
-        BRFC_ASSERT(x.size() >= 1);
-
-        Expression f;
-        f.push_back(Expression::symbol(x.front().symbol()));
-        Expression::const_iterator it = x.begin();
-        ++it; // skip symbol
-        for ( ; it != x.end(); ++it) {
-            f.push_back(eval(*it));
-        }
-        return f;
+        return Listcons().symbol(name_).extend(x).get();
     }
 };
 
 struct literal {
     sql::Factory xpr_;
 
+    typedef Expression result_type;
+
     Expression operator()(const Expression& x) {
         return xpr_.literal(x);
+    }
+};
+
+struct sql_list {
+    sql::Factory xpr_;
+
+    typedef Expression result_type;
+
+    Expression operator()(const Expression& x) {
+        return xpr_.list(x);
     }
 };
 
@@ -362,6 +326,7 @@ struct QueryToSelect::Impl {
     sql::Factory xpr_;
     sql::Select select_; ///< the select statement
 
+    Eval eval_;
     attr attr_cb;
     literal literal_cb;
 
@@ -369,38 +334,38 @@ struct QueryToSelect::Impl {
             : mapper_(mapper)
             , procs_()
             , select_()
+            , eval_()
             , attr_cb(mapper_)
             , literal_cb() { 
         
-        proc_t eval_cb = boost::bind(&QueryToSelect::Impl::eval, this, _1);
+        eval_.bind_literal_proc(literal_cb);
 
-        boost::assign::insert(procs_)
-            ("+",      binop(eval_cb))
-            ("-",      binop(eval_cb))
-            ("*",      binop(eval_cb))
-            ("/",      binop(eval_cb))
+        eval_.bind("+",      boost::bind(binop("+"), _1));
+        eval_.bind("-",      boost::bind(binop("-"), _1));
+        eval_.bind("*",      boost::bind(binop("*"), _1));
+        eval_.bind("/",      boost::bind(binop("/"), _1));
 
-            ("!=",     binop(eval_cb))
-            ("=",      binop(eval_cb))
-            (">",      binop(eval_cb))
-            ("<",      binop(eval_cb))
-            (">=",     binop(eval_cb))
-            ("<=",     binop(eval_cb))
+        eval_.bind("=",      boost::bind(binop("="), _1));
+        eval_.bind("!=",     boost::bind(binop("!="), _1));
+        eval_.bind(">",      boost::bind(binop(">"), _1));
+        eval_.bind("<",      boost::bind(binop("<"), _1));
+        eval_.bind(">=",     boost::bind(binop(">="), _1));
+        eval_.bind("<=",     boost::bind(binop("<="), _1));
 
-            ("and",    binop(eval_cb))
-            ("or",     binop(eval_cb))
-            ("not",    unaryop(eval_cb))
+        eval_.bind("and",    boost::bind(binop("and"), _1));
+        eval_.bind("or",     boost::bind(binop("or"), _1));
+        eval_.bind("not",    boost::bind(unaryop("not"), _1));
 
-            ("like",   binop(eval_cb))
-            ("in",     binop(eval_cb))
+        eval_.bind("like",   boost::bind(binop("like"), _1));
+        eval_.bind("in",     boost::bind(binop("in"), _1));
 
-            ("attr",   attr_cb)
+        eval_.bind("list",   boost::bind(sql_list(), _1));
+        eval_.bind_special_proc("attr",   boost::bind(boost::ref(attr_cb), _1));
 
-            ("count",  func(eval_cb))
-            ("max",    func(eval_cb))
-            ("min",    func(eval_cb))
-            ("sum",    func(eval_cb))
-        ;
+        eval_.bind("count",  boost::bind(func("count"), _1));
+        eval_.bind("max",    boost::bind(func("max"), _1));
+        eval_.bind("min",    boost::bind(func("min"), _1));
+        eval_.bind("sum",    boost::bind(func("sum"), _1));
     }
 
     /**
@@ -412,15 +377,7 @@ struct QueryToSelect::Impl {
     void reset();
 
     Expression eval(const Expression& x) {
-        if (x.is_list() and not x.empty() and x.front().is_symbol()) {
-            const std::string& symbol = x.front().symbol();
-            if (symbol == "attr")
-                return attr_cb(x);
-            else
-                return procs_[symbol](x);
-        } else {
-            return literal_cb(x);
-        }
+        return eval_(x);
     }
 
     sql::Select transform(const FileQuery& query);

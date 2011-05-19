@@ -125,6 +125,11 @@ ExpressionFactory::bool_(bool value) const {
 }
 
 Expression
+ExpressionFactory::list(const Expression& x) const {
+    return Listcons().symbol("list").extend(x).get();
+}
+
+Expression
 ExpressionFactory::unary_op(const std::string& op, const Expression& arg) const {
     return Listcons().symbol(op).append(arg).get();
 }

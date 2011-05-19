@@ -27,23 +27,57 @@ namespace brfc {
 
 class Expression;
 
+/**
+ * @brief Expression evaluator
+ */
 class Eval {
   public:
-    Eval()
-            : procs_() {
-    }
-
+    /**
+     * @brief constructor
+     */
+    Eval();
+    
+    /**
+     * @brief procedure callback
+     */
     typedef boost::function<Expression(const Expression&)> proc_t;
-
+    
+    /**
+     * @brief bind a procedure to @c symbol
+     */
     void bind(const std::string& symbol, proc_t proc);
-
+    
+    /**
+     * @brief bind a literal evaluator
+     */
+    void bind_literal_proc(proc_t proc);
+    
+    /**
+     * @brief bind a special procedur to @c symbol
+     */
+    void bind_special_proc(const std::string& symbol, proc_t proc);
+    
+    /**
+     * @brief evaluate @c x
+     */
     Expression operator()(const Expression& x);
   
   private:
     typedef std::map<std::string, proc_t> procmap_t;
-    proc_t proc(const std::string& symbol) const;
+    
+    /**
+     * @brief call procedure bound to @c symbol with arguments in @c x
+     */
+    Expression call_proc(const std::string& symbol, const Expression& x);
+    
+    /**
+     * @brief evaluate a list of expressions
+     */
+    Expression eval_list(const Expression& x);
 
     procmap_t procs_;
+    procmap_t special_procs_;
+    proc_t proc_literal_;
 };
 
 } // namespace brfc
