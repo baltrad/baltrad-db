@@ -89,9 +89,6 @@ class DateTime {
     const Date& date() const { return date_; }
     const Time& time() const { return time_; }
 
-    Date& date() { return date_; }
-    Time& time() { return time_; }
-
     DateTime& date(const Date& date) { date_ = date; return *this; }
     DateTime& time(const Time& time) { time_ = time; return *this; }
 

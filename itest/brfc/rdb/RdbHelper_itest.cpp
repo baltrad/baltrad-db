@@ -162,8 +162,6 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_id) {
     EXPECT_EQ(entry.uuid(), e2.uuid());
     EXPECT_NE(DateTime(), e2.stored_at());
     DateTime dt1 = entry.stored_at(), dt2 = e2.stored_at();
-    dt1.time().msec(0);
-    dt2.time().msec(0);
     EXPECT_EQ(dt1, dt2);
     EXPECT_GT(e2.lo_id(), 0);
     EXPECT_EQ(entry.lo_id(), e2.lo_id());
@@ -187,8 +185,6 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_uuid) {
     EXPECT_EQ(entry.uuid(), e2.uuid());
     EXPECT_NE(DateTime(), e2.stored_at());
     DateTime dt1 = entry.stored_at(), dt2 = e2.stored_at();
-    dt1.time().msec(0);
-    dt2.time().msec(0);
     EXPECT_EQ(dt1, dt2);
     EXPECT_GT(e2.lo_id(), 0);
     EXPECT_EQ(entry.lo_id(), e2.lo_id());

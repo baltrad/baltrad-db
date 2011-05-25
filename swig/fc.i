@@ -163,8 +163,6 @@ SWIG_JAVABODY_METHODS(public, public, brfc::DateTime);
 %ignore brfc::DateTime::operator=;
 %ignore brfc::DateTime::operator+=;
 %ignore brfc::DateTime::operator!=;
-%ignore brfc::DateTime::date() const; // use non-const
-%ignore brfc::DateTime::time() const; // use non-const
 
 %rename(add) brfc::DateTime::operator+;
 
