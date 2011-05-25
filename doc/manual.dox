@@ -35,14 +35,14 @@ so do that and avoid memory leaks.
 
 @section setup Setting up
 
-You can establish a database connection through brfc::db::Database::create(). It
+You can establish a database connection through brfc::Database::create(). It
 accepts the connection string as an URI. Currently only postgresql:// is
 supported.
 
 @code
-brfc::db::Database* db = 0;
+brfc::Database* db = 0;
 try {
-    db = brfc::db::Database::create("postgresql://baltrad:baltrad@localhost/baltrad");
+    db = brfc::Database::create("postgresql://baltrad:baltrad@localhost/baltrad");
 } catch (const brfc::db_error& e) {
     // problem connecting to the database
 }
@@ -50,13 +50,13 @@ try {
 
 @section file_storing Storing files in the database
 
-Importing a file requires feeding a brfc::oh5::PhysicalFile instance to
-brfc::db::Database::store(). This call will first perform a source lookup
+Importing a file requires feeding a brfc::Oh5PhysicalFile instance to
+brfc::Database::store(). This call will first perform a source lookup
 in the database. The attribute /what/source in the file must uniquely identify
 a source definition in the database (see @ref source_management). Second, it
 will determine if the file itself is unique - i.e this file is not stored
 already in the database. If one of those steps fails, the file will not be
-stored in the database. On success, a brfc::db::FileEntry instance is
+stored in the database. On success, a brfc::FileEntry instance is
 returned - this is the file, as stored in the database. You can now remove
 the file from your filesystem if you want - you can bring it back later from
 the database.
@@ -65,11 +65,11 @@ The database will assign an UUID to the entry. Same file imported twice will
 have a different UUID (but the same metadata hash).
 
 @code
-brfc::db::Database* db; // assuming a database
+brfc::Database* db; // assuming a database
 
-brfc::oh5::hl::HlFile file("/path/to/file.h5");
+brfc::Oh5hl::HlFile file("/path/to/file.h5");
 
-brfc::db::FileEntry* entry = 0;
+brfc::FileEntry* entry = 0;
 std::string uuid;
 
 try {
@@ -83,12 +83,12 @@ try {
 @endcode
 
 There are also methods for checking if a file is already stored
-(brfc::db::Database::is_stored()) and storing it "safely"
-(brfc::db::Database::get_or_store()), refer to their documentation for details.
+(brfc::Database::is_stored()) and storing it "safely"
+(brfc::Database::get_or_store()), refer to their documentation for details.
 
 @section file_entry FileEntry - files in the database
 
-brfc::db::FileEntry implements brfc::oh5::File, using the database as a
+brfc::FileEntry implements brfc::Oh5File, using the database as a
 backend. It also provides access to some additional metadata - storage time,
 UUID, file size. As this represents the file in the database, there's also a
 method for writing the file back from the database to the local disk.
@@ -97,16 +97,16 @@ You can get a hold of an entry in three ways: by knowing the UUID of the entry,
 by the physical file or by querying the database.
 
 @code
-brfc::db::Database* db; // assuming a database
+brfc::Database* db; // assuming a database
 
 std::string uuid = "8774632c-dfd9-4016-bebb-f9f8cf41459a";
-brfc::db::FileEntry* entry = db->entry_by_uuid(uuid);
+brfc::FileEntry* entry = db->entry_by_uuid(uuid);
 
-// access ODIM_H5 metadata as brfc::oh5::File
+// access ODIM_H5 metadata as brfc::Oh5File
 std::string what_object = entry->what_object();
-brfc::oh5::Group* grp = entry->group("/dataset1/what");
-brfc::oh5::Attribute* attr = grp->attribute("elangle");
-brfc::oh5::Scalar elangle = attr->value();
+brfc::Oh5Group* grp = entry->group("/dataset1/what");
+brfc::Oh5Attribute* attr = grp->attribute("elangle");
+brfc::Oh5Scalar elangle = attr->value();
 
 // access additional metadata
 brfc::DateTime dt = entry->stored_at();
@@ -119,22 +119,22 @@ entry->write_to_file("/path/to/file.h5");
 
 @section querying Querying the database
 
-To query for entries in the database, you must create a brfc::db::FileQuery
+To query for entries in the database, you must create a brfc::FileQuery
 instance and execute it on the database. This will return a
-brfc::db::FileResult instance. Simply creating the query (and not specifying
+brfc::FileResult instance. Simply creating the query (and not specifying
 any details) will query for all the files in the database.
 
 @code
-brfc::db::Database* db; // assuming a database
+brfc::Database* db; // assuming a database
 
-brfc::db::FileQuery query;
+brfc::FileQuery query;
 
-brfc::db::FileResult* rset = db->execute(query);
+brfc::FileResult* rset = db->execute(query);
 
 rset->size(); // how many files
 
 // loop through the entries
-brfc::db::FileEntry* entry;
+brfc::FileEntry* entry;
 while (rset->next()) {
     entry = rset->entry();
     // do something useful
@@ -144,22 +144,22 @@ while (rset->next()) {
 @section query_filtering Adding filters to a query
 
 To be more useful, you can add a filter to the query. Filters are composed of
-brfc::expr::Expression elements. The easiest way to create these is using
-brfc::expr::ExpressionFactory. To give an example, lets filter for all file
+brfc::Expression elements. The easiest way to create these is using
+brfc::ExpressionFactory. To give an example, lets filter for all file
 that have an attribute "what/object" equal to "PVOL":
 
 @code
 // create the factory
-brfc::expr::ExpressionFactory xpr;
+brfc::ExpressionFactory xpr;
 
 // create the query
-brfc::db::FileQuery q;
+brfc::FileQuery q;
 q.filter(xpr.eq(xpr.attribute("what/object"), xpr.string("PVOL")));
 @endcode
 
 Successive filters can be given, meaning all specified filters must match and
-is equivalent to using operator brfc::expr::Expression::and_ between the filter
-expressions.
+is equivalent to using operator brfc::ExpressionFactory::and_ between the
+filter expressions.
 
 @note when you use an attribute in a filter, that attribute @b MUST
 be present in the file metadata. If it's missing, it's not matching and
@@ -183,39 +183,39 @@ Here's a list of them:
 @section query_limiting Skipping/limiting query results
 
 @code
-brfc::db::FileQuery q;
+brfc::FileQuery q;
 q.limit(10) // fetch 10 files
 q.skip(5) // skipping 5 files 
 @endcode
 
 @section query_ordering Ordering query results
 
-Query results can be ordered through brfc::db::FileQuery::order_by(). By default,
+Query results can be ordered through brfc::FileQuery::order_by(). By default,
 they are ordered by the time of storing, oldest files first. For an example,
 to sort the smallest files first:
 
 @code
-brfc::db::FileQuery q;
-q.order_by(xpr.attribute("file:size"), brfc::db::FileQuery::ASC);
+brfc::FileQuery q;
+q.order_by(xpr.attribute("file:size"), brfc::FileQuery::ASC);
 @endcode
 
 @section querying_attributes Querying attributes
 
 Sometimes you will want to query for specific attributes instead of files.
-brfc::db::AttributeQuery enables you to do just that. In addition to filtering,
+brfc::AttributeQuery enables you to do just that. In addition to filtering,
 you can specify which attributes to fetch from the database. So to query for
 all files in the database, you would do this:
 
 @code
-brfc::db::Database* db; // assuming a database
-brfc::expr::ExpressionFactory xpr;
+brfc::Database* db; // assuming a database
+brfc::ExpressionFactory xpr;
 
-brfc::db::AttributeQuery q;
+brfc::AttributeQuery q;
 
 // mark attribute for fetching
 q.fetch("uuid", xpr.attribute("file:uuid"));
 // execute
-brfc::db::AttributeResult* r = db->execute(q);
+brfc::AttributeResult* r = db->execute(q);
 
 // loop through results
 while (r->next()) {
@@ -227,46 +227,46 @@ while (r->next()) {
 A problem you might encounter is when a file has the same attribute specified
 in many datasets. You will get as many rows as the number of values for the
 attribute. As in SQL, you can set a query to fetch only distinct rows using
-brfc::db::AttributeQuery::distinct.
+brfc::AttributeQuery::distinct.
 
 @section combine_datetime combining date and time
 
 ODIM_H5 stores date and time values separately, so complex filters are needed
 to accomodate for date changes. There's a more convenient way to handle this
 situation. Add together the date and time attributes. As this is probably quite
-frequently encountered, brfc::expr::ExpressionFactory provides a shorthand just
+frequently encountered, brfc::ExpressionFactory provides a shorthand just
 for that. Again, an example:
 
 @code
-brfc::expr::ExpressionFactory xpr;
+brfc::ExpressionFactory xpr;
 
-brfc::expr::ExpressionPtr x = xpr.combined_datetime("what/date", "what/time");
+brfc::ExpressionPtr x = xpr.combined_datetime("what/date", "what/time");
 
-DateTime now = DateTime::utc_now();
-TimeDelta dt;
+brfc::DateTime now = brfc::DateTime::utc_now();
+brfc::TimeDelta dt;
 dt.add_minutes(-15);
-DateTime past = now - dt;
+brfc::DateTime past = now - dt;
 
 // use in filter;
-brfc::db::FileQuery q;
-q.filter(x->between(past, now));
+brfc::FileQuery q;
+q.filter(xpr.between(x, past, now));
 @endcode
 
 @section removing Removing files
 
-File removal is done using a brfc::db::FileEntry instance, probably attained
+File removal is done using a brfc::FileEntry instance, probably attained
 through querying.
 
 for example, removing files older than from 2009:
 
 @code
-brfc::db::Database* db; // assuming a database
-brfc::expr::ExpressionFactory xpr;
+brfc::Database* db; // assuming a database
+brfc::ExpressionFactory xpr;
 
-brfc::db::FileQuery q;
+brfc::FileQuery q;
 q.filter(xpr.attribute("what/date")->lt(xpr.date(2009, 1, 1)));
 
-brfc::db::FileResult* r = db->execute(q.);
+brfc::FileResult* r = db->execute(q.);
 
 while (r->next()) {
     try {
@@ -281,9 +281,9 @@ while (r->next()) {
 
 As mentioned before, you can't import files to the database if the database
 can't look up and associate a source with the file. You can manage to source
-definitions in the database through brfc::db::Database::sources(),
-brfc::db::Database::add_source(), brfc::db::Database::update_source() and
-brfc::db::Database::remove_source().
+definitions in the database through brfc::Database::sources(),
+brfc::Database::add_source(), brfc::Database::update_source() and
+brfc::Database::remove_source().
 
 @section file_catalog FileCatalog - combining Database with LocalStorage
 
@@ -299,10 +299,8 @@ disk (opting to copy it on import instead).
 
 @section java_bindings Java bindings
 
-Mapping to Java code is quite straightforward. The main package name is
-@c eu.baltrad.fc, this is where namespace brfc is mapped to. All exposed
-subnamespaces map to subpackages (brfc::expr is @c eu.baltrad.fc.expr and
-so on).
+The classes are exposed in package @c eu.baltrad.fc and generally use the
+same name as the C++ class.
 
 There are a few differences though:
 
@@ -318,10 +316,10 @@ Querying:
 
 @code
 import eu.baltrad.fc.FileCatalog;
-import eu.baltrad.fc.db.Database;
-import eu.baltrad.fc.db.FileEntry;
-import eu.baltrad.fc.db.FileQuery;
-import eu.baltrad.fc.expr.ExpressionFactory;
+import eu.baltrad.fc.Database;
+import eu.baltrad.fc.FileEntry;
+import eu.baltrad.fc.FileQuery;
+import eu.baltrad.fc.ExpressionFactory;
 
 // setting up
 String dsn("postgresql://baltrad:baltrad@localhost/baltrad");
@@ -348,6 +346,7 @@ while (r.next()) {
     // access the values
     FileEntry e = r.entry();
 }
+r.delete(); // explicitly release resources
 @endcode
 
 */
