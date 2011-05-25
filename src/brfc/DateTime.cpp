@@ -19,7 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/DateTime.hpp>
 
-#include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <errno.h>

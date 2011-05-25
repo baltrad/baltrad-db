@@ -19,10 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 
-#include <brfc/exceptions.hpp>
-
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/Oh5Scalar.hpp>
 
 namespace brfc {
 

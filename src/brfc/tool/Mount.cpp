@@ -29,8 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/DefaultFileNamer.hpp>
 
-#include <brfc/db/Database.hpp>
-
 #include <brfc/expr/ExpressionFactory.hpp>
 
 #include <brfc/fuse/Daemon.hpp>

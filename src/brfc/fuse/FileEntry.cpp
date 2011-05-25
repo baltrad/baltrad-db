@@ -19,14 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/fuse/FileEntry.hpp>
 
-#include <cstdlib>
-#include <vector>
 #include <unistd.h>
 
+#include <brfc/DateTime.hpp>
 #include <brfc/db/Database.hpp>
 #include <brfc/db/FileEntry.hpp>
-
-#include <iostream>
 
 namespace brfc {
 namespace fuse {

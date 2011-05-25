@@ -21,10 +21,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_SQL_CONNECTION_HPP
 
 #include <map>
+#include <string>
 
 #include <boost/noncopyable.hpp>
 
-#include <brfc/expr/Expression.hpp>
+namespace brfc {
+    class Expression;
+}
 
 namespace brfc {
 namespace sql {
@@ -124,7 +127,9 @@ class Connection : boost::noncopyable {
      * @note caller takes ownership of the result
      * @sa do_execute
      */
-    Result* execute(const Expression& stmt, const BindMap_t& binds=BindMap_t());
+    Result* execute(const Expression& stmt, const BindMap_t& binds);
+
+    Result* execute(const Expression& stmt);
 
     Result* execute(const std::string& stmt);
 

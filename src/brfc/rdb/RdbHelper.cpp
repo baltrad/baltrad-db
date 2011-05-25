@@ -28,14 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/FileHasher.hpp>
-
-#include <brfc/rdb/AttributeMapper.hpp>
-#include <brfc/rdb/Model.hpp>
-#include <brfc/rdb/RdbFileEntry.hpp>
-#include <brfc/rdb/RdbOh5NodeBackend.hpp>
-
-#include <brfc/expr/Expression.hpp>
+#include <brfc/Variant.hpp>
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5DataSet.hpp>
@@ -51,32 +44,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Result.hpp>
 
+#include <brfc/rdb/Model.hpp>
+#include <brfc/rdb/RdbFileEntry.hpp>
+#include <brfc/rdb/RdbOh5NodeBackend.hpp>
+
 #include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {
 
 namespace {
-
-Oh5Scalar
-variant_to_oh5_scalar(const Variant& value) {
-    switch (value.type()) {
-        case Variant::STRING:
-            return Oh5Scalar(value.string());
-        case Variant::INT64:
-            return Oh5Scalar(value.int64_());
-        case Variant::DOUBLE:
-            return Oh5Scalar(value.double_());
-        case Variant::BOOL:
-            return Oh5Scalar(value.bool_());
-        case Variant::DATE:
-            return Oh5Scalar(value.date());
-        case Variant::TIME:
-            return Oh5Scalar(value.time());
-        default:
-            break;
-    }
-    throw std::runtime_error("invalid Variant to Scalar");
-}
 
 Expression
 attr_sql_value(const Oh5Attribute& attr) {

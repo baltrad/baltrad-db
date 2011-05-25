@@ -34,7 +34,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 
-#include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RdbHelper.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/oh5/Oh5Group.hpp>

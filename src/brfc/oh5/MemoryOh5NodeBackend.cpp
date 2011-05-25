@@ -27,12 +27,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/tag.hpp>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
 
 namespace mi = boost::multi_index;

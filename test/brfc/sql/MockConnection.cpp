@@ -17,8 +17,13 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/exceptions.hpp>
+#include <brfc/sql/MockConnection.hpp>
 
 namespace brfc {
+namespace sql {
 
-} // namespace brfc
+MockConnection::MockConnection() { }
+MockConnection::~MockConnection() { }
+
+}
+}

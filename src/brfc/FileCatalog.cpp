@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileCatalog.hpp>
 
 #include <iostream>
-#include <memory>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/LocalStorage.hpp>
@@ -29,9 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileEntry.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
-
-#include <brfc/util/BoostFileSystem.hpp>
-
 
 namespace brfc {
 

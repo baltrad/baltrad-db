@@ -19,8 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Factory.hpp>
 
-#include <brfc/DateTime.hpp>
-
 #include <brfc/expr/Listcons.hpp>
 
 namespace brfc {

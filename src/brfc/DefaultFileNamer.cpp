@@ -21,14 +21,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/algorithm/string/case_conv.hpp>
 
-#include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 
 #include <brfc/db/FileEntry.hpp>
 
 #include <brfc/oh5/Oh5File.hpp>
-#include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {

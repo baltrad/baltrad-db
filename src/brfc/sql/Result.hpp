@@ -20,9 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_RESULT_HPP
 #define BRFC_SQL_RESULT_HPP
 
+#include <string>
+
 #include <boost/noncopyable.hpp>
 
-#include <brfc/Variant.hpp>
+namespace brfc {
+    class Variant;
+}
 
 namespace brfc {
 namespace sql {
@@ -77,17 +81,13 @@ class Result : public boost::noncopyable {
      * @brief get value at @c pos as Variant
      * @throw lookup_error if @c pos is out of range
      */
-    Variant value_at(unsigned int pos) const {
-        return do_value_at(pos);
-    }
+    Variant value_at(unsigned int pos) const;
     
     /**
      * @brief get value in @c column as Variant
      * @throw lookup_error if @c column is not in result
      */
-    Variant value_at(const std::string& column) const {
-        return do_value_at(column);
-    }
+    Variant value_at(const std::string& column) const;
     
     /**
      * @brief number of rows the executed statement affected

@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/RdbOh5NodeBackend.hpp>
 
+#include <brfc/DateTime.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {

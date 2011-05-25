@@ -20,13 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Dialect.hpp>
 
 #include <sstream>
+#include <stdexcept>
 #include <vector>
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/join.hpp>
 
-#include <brfc/exceptions.hpp>
 #include <brfc/expr/Expression.hpp>
 
 namespace brfc {

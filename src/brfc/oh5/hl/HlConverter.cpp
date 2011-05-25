@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/hl/HlConverter.hpp>
 
 #include <string>
-#include <vector>
 
 #include <boost/make_shared.hpp>
 #include <boost/numeric/conversion/cast.hpp>
@@ -31,8 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/hl/hlhdf.hpp>
-
-#include <iostream>
 
 namespace brfc {
 

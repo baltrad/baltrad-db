@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 
 #include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
@@ -31,8 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/quote.hpp>
 
 #include <brfc/sql/Dialect.hpp>
-#include <brfc/sql/Insert.hpp>
-#include <brfc/sql/Select.hpp>
 
 namespace brfc {
 namespace sql {

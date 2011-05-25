@@ -22,6 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gmock/gmock.h>
 
+#include <brfc/expr/Expression.hpp>
+
 #include <brfc/sql/Compiler.hpp>
 
 namespace brfc {

@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-
+#include <brfc/expr/Expression.hpp>
 #include <brfc/sql/Compiler.hpp>
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Insert.hpp>
@@ -84,6 +84,12 @@ Connection::execute(const Select& stmt) {
 
 Result*
 Connection::execute(const Expression& stmt, const BindMap_t& binds) {
+    return execute(replace_binds(stmt, binds));
+}
+
+Result*
+Connection::execute(const Expression& stmt) {
+    BindMap_t binds;
     return execute(replace_binds(stmt, binds));
 }
 

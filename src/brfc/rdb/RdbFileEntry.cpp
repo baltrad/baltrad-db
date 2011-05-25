@@ -17,15 +17,12 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <memory>
 #include <string>
 
 #include <brfc/rdb/RdbFileEntry.hpp>
 
 #include <brfc/assert.hpp>
-#include <brfc/FileHasher.hpp>
 
-#include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/RdbOh5NodeBackend.hpp>
 #include <brfc/rdb/RdbHelper.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>

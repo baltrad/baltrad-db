@@ -23,17 +23,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <brfc/assert.hpp>
 #include <brfc/FileHasher.hpp>
-
 #include <brfc/rdb/RdbHelper.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
-
 #include <brfc/oh5/Oh5Node.hpp>
 #include <brfc/oh5/PhysicalOh5File.hpp>
-#include <brfc/oh5/Oh5Source.hpp>
-
 #include <brfc/sql/Connection.hpp>
 
 namespace brfc {

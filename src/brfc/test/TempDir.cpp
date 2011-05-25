@@ -21,16 +21,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <cstdlib>
 #include <cstring>
-#include <dirent.h>
-#include <errno.h>
 #include <iostream>
 #include <stdexcept>
-#include <string>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
-#include <string>
+#include <dirent.h>
+#include <errno.h>
+#include <unistd.h>
 
 namespace brfc {
 namespace test {

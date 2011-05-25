@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_SELECT_HPP
 #define BRFC_SQL_SELECT_HPP
 
-#include <brfc/expr/Expression.hpp>
 #include <brfc/sql/FromClause.hpp>
 
 namespace brfc {

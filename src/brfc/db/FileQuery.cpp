@@ -19,10 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileQuery.hpp>
 
-#include <boost/foreach.hpp>
-
-#include <brfc/exceptions.hpp>
-
 #include <brfc/expr/Listcons.hpp>
 
 namespace brfc {

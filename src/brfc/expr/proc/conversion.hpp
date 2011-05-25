@@ -19,8 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_EXPR_PROC_AGGREGATE_HPP
 #define BRFC_EXPR_PROC_AGGREGATE_HPP
 
-#include <brfc/expr/Expression.hpp>
-
 #include <brfc/expr/proc/dispatch.hpp>
 
 namespace brfc {

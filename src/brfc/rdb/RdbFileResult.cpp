@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <memory>
 
+#include <brfc/Variant.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RdbFileResult.hpp>
 

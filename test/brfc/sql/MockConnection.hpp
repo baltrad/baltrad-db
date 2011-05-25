@@ -34,6 +34,9 @@ namespace sql {
 
 class MockConnection : public Connection {
   public:
+    MockConnection();
+    virtual ~MockConnection();
+
     MOCK_CONST_METHOD0(do_is_open, bool());
     MOCK_METHOD0(do_close, void());
 

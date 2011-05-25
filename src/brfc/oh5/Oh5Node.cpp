@@ -19,8 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Node.hpp>
 
-#include <memory>
 #include <list>
+#include <memory>
 
 #include <boost/foreach.hpp>
 
@@ -31,7 +31,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/oh5/Oh5Attribute.hpp>
-#include <brfc/oh5/Oh5DataSet.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/Oh5NodeBackend.hpp>
 

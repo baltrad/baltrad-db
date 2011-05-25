@@ -27,7 +27,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/exceptions.hpp>
 
-#include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5NodeBackend.hpp>
 
 namespace brfc {

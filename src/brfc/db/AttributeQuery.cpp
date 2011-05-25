@@ -21,8 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <utility>
 
-#include <boost/foreach.hpp>
-
 #include <brfc/exceptions.hpp>
 #include <brfc/expr/Listcons.hpp>
 

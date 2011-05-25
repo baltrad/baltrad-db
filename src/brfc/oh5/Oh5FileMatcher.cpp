@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/proc/arithmetic.hpp>
 #include <brfc/expr/proc/binary_list.hpp>
 #include <brfc/expr/proc/comparison.hpp>
-#include <brfc/expr/proc/in.hpp>
 #include <brfc/expr/proc/like.hpp>
 #include <brfc/expr/proc/list.hpp>
 #include <brfc/expr/proc/list_filter.hpp>

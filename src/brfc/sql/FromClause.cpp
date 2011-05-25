@@ -21,8 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 
-#include <brfc/expr/Listcons.hpp>
-
 namespace brfc {
 namespace sql {
 

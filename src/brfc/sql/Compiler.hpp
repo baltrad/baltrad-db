@@ -20,7 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_COMPILER_HPP
 #define BRFC_SQL_COMPILER_HPP
 
-#include <brfc/expr/Expression.hpp>
+namespace brfc {
+    class Expression;
+}
 
 namespace brfc {
 namespace sql {
@@ -38,9 +40,7 @@ class Compiler {
      * expressions in form `(bind "bindname")` that are placeholders for
      * literals to be bound later.
      */
-    Expression compile(const Expression& x) {
-        return do_compile(x);
-    }
+    Expression compile(const Expression& x);
     
     virtual ~Compiler() { }
 

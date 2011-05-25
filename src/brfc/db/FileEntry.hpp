@@ -19,10 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_FILE_ENTRY_HPP
 #define BRFC_DB_FILE_ENTRY_HPP
 
-#include <brfc/DateTime.hpp>
 #include <brfc/oh5/Oh5File.hpp>
 
 namespace brfc {
+
+class DateTime;
 
 /**
  * @brief File entry in Database
@@ -48,7 +49,7 @@ class FileEntry : public Oh5File {
      */
     long long size() const { return do_size(); }
 
-    DateTime stored_at() const { return do_stored_at(); }
+    DateTime stored_at() const;
 
   protected:
     virtual std::string do_uuid() const = 0;

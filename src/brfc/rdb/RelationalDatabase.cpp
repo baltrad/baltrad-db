@@ -19,19 +19,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/RelationalDatabase.hpp>
 
-#include <deque>
 #include <memory>
 
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/FileHasher.hpp>
 #include <brfc/SHA1AttributeHasher.hpp>
-
-#include <brfc/db/FileQuery.hpp>
-#include <brfc/db/FileResult.hpp>
+#include <brfc/Variant.hpp>
 
 #include <brfc/rdb/AttributeMapper.hpp>
 #include <brfc/rdb/Model.hpp>
@@ -41,8 +37,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RdbFileResult.hpp>
 #include <brfc/rdb/RdbHelper.hpp>
 #include <brfc/rdb/SaveFile.hpp>
-
-#include <brfc/expr/Expression.hpp>
 
 #include <brfc/oh5/PhysicalOh5File.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
