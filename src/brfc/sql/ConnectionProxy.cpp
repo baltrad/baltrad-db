@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/ConnectionProxy.hpp>
 
+#include <memory>
+
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
@@ -29,7 +31,7 @@ namespace brfc {
 namespace sql {
 
 ConnectionProxy::ConnectionProxy(Connection* proxied,
-                                 shared_ptr<ConnectionDtor> conn_dtor)
+                                 boost::shared_ptr<ConnectionDtor> conn_dtor)
         : proxied_(proxied)
         , conn_dtor_(conn_dtor)
         , results_() {
@@ -95,8 +97,8 @@ ConnectionProxy::do_rollback() {
 
 Result*
 ConnectionProxy::do_execute(const std::string& stmt) {
-    auto_ptr<Result> r(proxied().do_execute(stmt));
-    auto_ptr<ResultProxy> rp(new ResultProxy(this, r.release()));
+    std::auto_ptr<Result> r(proxied().do_execute(stmt));
+    std::auto_ptr<ResultProxy> rp(new ResultProxy(this, r.release()));
     results_.push_back(rp.get());
     return rp.release();
 }

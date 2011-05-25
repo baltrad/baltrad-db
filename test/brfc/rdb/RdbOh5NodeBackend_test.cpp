@@ -20,17 +20,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-
-#include <brfc/rdb/RdbOh5NodeBackend.hpp>
-#include <brfc/rdb/RelationalDatabase.hpp>
-
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/PhysicalOh5File.hpp>
-
 #include <brfc/oh5/MockNode.hpp>
+#include <brfc/rdb/RdbOh5NodeBackend.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionPool.hpp>
+#include <brfc/util/no_delete.hpp>
 
 using ::testing::_;
 using ::testing::Ref;
@@ -59,7 +57,7 @@ class rdb_RdbOh5NodeBackend_test : public ::testing::Test {
 
     sql::MockConnection conn;
     sql::MockConnectionPool pool;
-    shared_ptr<sql::ConnectionPool> pool_ptr;
+    boost::shared_ptr<sql::ConnectionPool> pool_ptr;
     RelationalDatabase db;
     ::testing::NiceMock<MockNode> node;
     RdbOh5NodeBackend backend;

@@ -22,23 +22,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem.hpp>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/itest_config.hpp>
+#include <brfc/test_common.hpp>
 #include <brfc/Date.hpp>
+#include <brfc/ITestEnv.hpp>
 #include <brfc/Time.hpp>
-
 #include <brfc/db/FileEntry.hpp>
-
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
-
 #include <brfc/oh5/hl/HlFile.hpp>
-
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/test/TempH5File.hpp>
 
-#include <brfc/test_common.hpp>
-
-#include <brfc/itest_config.hpp>
-#include <brfc/ITestEnv.hpp>
+using boost::scoped_ptr;
 
 namespace fs = boost::filesystem;
 
@@ -163,7 +159,7 @@ TEST_P(db_Database_itest, store_with_invalid_attributes) {
     // add an invalid attribute
     file.root().add(new Oh5Attribute("invalid", Oh5Scalar(1)));
 
-    auto_ptr<FileEntry> e(db->store(file));
+    std::auto_ptr<FileEntry> e(db->store(file));
 }
 
 TEST_P(db_Database_itest, test_sources) {

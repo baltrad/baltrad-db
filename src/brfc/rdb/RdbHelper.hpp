@@ -23,8 +23,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 
-#include <brfc/smart_ptr.hpp>
 #include <brfc/expr/Expression.hpp>
 #include <brfc/sql/Factory.hpp>
 
@@ -53,7 +53,7 @@ namespace brfc {
  */
 class RdbHelper : boost::noncopyable {
   public:
-    RdbHelper(shared_ptr<sql::Connection> conn);
+    RdbHelper(boost::shared_ptr<sql::Connection> conn);
 
     virtual ~RdbHelper();
 
@@ -164,7 +164,7 @@ class RdbHelper : boost::noncopyable {
     void compile_insert_node_query();
     void compile_insert_attr_query();
 
-    shared_ptr<sql::Connection> conn_;
+    boost::shared_ptr<sql::Connection> conn_;
     sql::Factory sql_;
     Expression insert_node_qry_;
     Expression insert_attr_qry_;

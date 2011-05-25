@@ -20,8 +20,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_RDB_ATTRIBUTE_RESULT_HPP
 #define BRFC_DB_RDB_ATTRIBUTE_RESULT_HPP
 
-#include <brfc/smart_ptr.hpp>
 #include <brfc/db/AttributeResult.hpp>
+
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace brfc {
     namespace sql {
@@ -41,7 +43,7 @@ class RdbAttributeResult : public AttributeResult {
      * @param result the sql query result
      * @note ownership of @c result transfers to this
      */
-    RdbAttributeResult(shared_ptr<sql::Connection> conn,
+    RdbAttributeResult(boost::shared_ptr<sql::Connection> conn,
                        sql::Result* result)
             : conn_(conn)
             , result_(result) {
@@ -57,8 +59,8 @@ class RdbAttributeResult : public AttributeResult {
     virtual Variant do_value_at(const std::string& name) const;
 
   private:
-    shared_ptr<sql::Connection> conn_;
-    scoped_ptr<sql::Result> result_;
+    boost::shared_ptr<sql::Connection> conn_;
+    boost::scoped_ptr<sql::Result> result_;
 };
 
 } // namespace brfc

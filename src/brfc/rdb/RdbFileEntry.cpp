@@ -129,7 +129,7 @@ RdbFileEntry::do_stored_at() const {
 
 void
 RdbFileEntry::do_write_to_file(const std::string& path) const {
-    shared_ptr<sql::Connection> conn = rdb().conn();
+    boost::shared_ptr<sql::Connection> conn = rdb().conn();
     conn->begin();
     try {
         conn->large_object_to_file(lo_id_, path);

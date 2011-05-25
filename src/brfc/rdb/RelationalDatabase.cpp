@@ -20,6 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <deque>
+#include <memory>
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
@@ -64,7 +65,7 @@ RelationalDatabase::RelationalDatabase(const Url& dsn)
     populate_hasher();
 }
 
-RelationalDatabase::RelationalDatabase(shared_ptr<sql::ConnectionPool> pool)
+RelationalDatabase::RelationalDatabase(boost::shared_ptr<sql::ConnectionPool> pool)
         : creator_()
         , pool_(pool)
         , mapper_(new AttributeMapper())
@@ -95,9 +96,9 @@ RelationalDatabase::create_pool(sql::ConnectionCreator* conn_ctor,
 }
                                 
 
-shared_ptr<sql::Connection>
+boost::shared_ptr<sql::Connection>
 RelationalDatabase::conn() const {
-    return shared_ptr<sql::Connection>(pool_->get());
+    return boost::shared_ptr<sql::Connection>(pool_->get());
 }
 
 AttributeMapper&
@@ -113,7 +114,7 @@ RelationalDatabase::mapper() const {
 bool
 RelationalDatabase::do_is_stored(const PhysicalOh5File& file) {
     try {
-        auto_ptr<FileEntry> e(entry_by_file(file));
+        std::auto_ptr<FileEntry> e(entry_by_file(file));
     } catch (lookup_error) {
         return false;
     }
@@ -128,7 +129,7 @@ RelationalDatabase::do_store(const PhysicalOh5File& file) {
 FileEntry*
 RelationalDatabase::do_entry_by_file(const PhysicalOh5File& file) {
     const std::string& hash = file_hasher().hash(file);
-    shared_ptr<sql::Connection> c = conn();
+    boost::shared_ptr<sql::Connection> c = conn();
     long long src_id = RdbHelper(c).select_source_id(file.source());
 
     sql::Factory xpr;
@@ -142,7 +143,7 @@ RelationalDatabase::do_entry_by_file(const PhysicalOh5File& file) {
         )
     );
 
-    auto_ptr<sql::Result> result(c->execute(qry));
+    std::auto_ptr<sql::Result> result(c->execute(qry));
     if (result->size() > 1 or not result->next())
         throw lookup_error(file.path() + " is not stored");
     
@@ -151,7 +152,7 @@ RelationalDatabase::do_entry_by_file(const PhysicalOh5File& file) {
 
 FileEntry*
 RelationalDatabase::do_entry_by_uuid(const std::string& uuid) {
-    auto_ptr<RdbFileEntry> entry(new RdbFileEntry(this));
+    std::auto_ptr<RdbFileEntry> entry(new RdbFileEntry(this));
     entry->uuid(uuid);
     entry->load();
     return entry.release();
@@ -160,16 +161,16 @@ RelationalDatabase::do_entry_by_uuid(const std::string& uuid) {
 FileResult*
 RelationalDatabase::do_execute(const FileQuery& query) {
     const sql::Select& select = QueryToSelect(&mapper()).transform(query);
-    shared_ptr<sql::Connection> c = conn();
-    auto_ptr<sql::Result> res(c->execute(select));
+    boost::shared_ptr<sql::Connection> c = conn();
+    std::auto_ptr<sql::Result> res(c->execute(select));
     return new RdbFileResult(this, c, res.release());
 }
 
 AttributeResult*
 RelationalDatabase::do_execute(const AttributeQuery& query) {
     const sql::Select& select = QueryToSelect(&mapper()).transform(query);
-    shared_ptr<sql::Connection> c = conn();
-    auto_ptr<sql::Result> res(c->execute(select));
+    boost::shared_ptr<sql::Connection> c = conn();
+    std::auto_ptr<sql::Result> res(c->execute(select));
     return new RdbAttributeResult(c, res.release());
 }
 
@@ -201,8 +202,8 @@ RelationalDatabase::do_remove(const FileEntry& entry) {
     sql::Connection::BindMap_t binds;
     binds["uuid"] = Expression(entry.uuid());
 
-    shared_ptr<sql::Connection> c = conn();
-    auto_ptr<sql::Result> r (c->execute(stmt, binds));
+    boost::shared_ptr<sql::Connection> c = conn();
+    std::auto_ptr<sql::Result> r (c->execute(stmt, binds));
     return r->affected_rows();
 }
 

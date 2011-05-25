@@ -20,9 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileCatalog.hpp>
 
 #include <iostream>
+#include <memory>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/smart_ptr.hpp>
 #include <brfc/LocalStorage.hpp>
 
 #include <brfc/db/Database.hpp>
@@ -79,7 +79,7 @@ FileCatalog::store(const std::string& path) {
 
 FileEntry*
 FileCatalog::store(const PhysicalOh5File& file) {
-    auto_ptr<FileEntry> e(db_->store(file));
+    std::auto_ptr<FileEntry> e(db_->store(file));
     try {
         storage_->prestore(*e, file.path());
     } catch (const std::runtime_error& e) {
@@ -97,7 +97,7 @@ FileCatalog::get_or_store(const std::string& path) {
 
 FileEntry*
 FileCatalog::get_or_store(const PhysicalOh5File& file) {
-    auto_ptr<FileEntry> e(db_->get_or_store(file));
+    std::auto_ptr<FileEntry> e(db_->get_or_store(file));
     try {
         storage_->prestore(*e, file.path());
     } catch (const std::runtime_error& e) {
@@ -121,7 +121,7 @@ FileCatalog::remove(const FileEntry& entry) {
 
 std::string
 FileCatalog::local_path_for_uuid(const std::string& uuid) {
-    auto_ptr<FileEntry> e(database().entry_by_uuid(uuid));
+    std::auto_ptr<FileEntry> e(database().entry_by_uuid(uuid));
     return storage().store(*e);
 }
 

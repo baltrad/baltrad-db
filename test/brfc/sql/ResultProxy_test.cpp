@@ -19,15 +19,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/sql/ResultProxy.hpp>
-
 #include <brfc/exceptions.hpp>
-#include <brfc/smart_ptr.hpp>
 #include <brfc/test_common.hpp>
+#include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/MockResult.hpp>
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionDtor.hpp>
-#include <brfc/sql/ConnectionProxy.hpp>
+#include <brfc/sql/ResultProxy.hpp>
+#include <brfc/util/no_delete.hpp>
 
 using ::testing::Return;
 
@@ -51,11 +50,11 @@ class sql_ResultProxy_test : public ::testing::Test {
         EXPECT_CALL(conn_dtor, do_destroy(&conn));
     }
 
-    auto_ptr<MockResult> result_ptr;
+    std::auto_ptr<MockResult> result_ptr;
     MockResult& result;
     MockConnection conn;
     MockConnectionDtor conn_dtor;
-    shared_ptr<MockConnectionDtor> conn_dtor_ptr;
+    boost::shared_ptr<MockConnectionDtor> conn_dtor_ptr;
     ConnectionProxy connproxy;
     ResultProxy proxy;
 };

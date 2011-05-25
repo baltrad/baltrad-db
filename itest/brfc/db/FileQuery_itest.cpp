@@ -23,27 +23,20 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string/erase.hpp>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/itest_config.hpp>
+#include <brfc/test_common.hpp>
 #include <brfc/DateTime.hpp>
-
+#include <brfc/ITestEnv.hpp>
 #include <brfc/db/FileEntry.hpp>
 #include <brfc/db/FileQuery.hpp>
 #include <brfc/db/FileResult.hpp>
-
 #include <brfc/expr/ExpressionFactory.hpp>
-
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
-
 #include <brfc/oh5/hl/HlFile.hpp>
-
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/test/TempH5File.hpp>
-
-#include <brfc/test_common.hpp>
-
-#include <brfc/itest_config.hpp>
-#include <brfc/ITestEnv.hpp>
 
 namespace brfc {
 
@@ -124,8 +117,8 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
         db->clean();
     }
 
-    auto_ptr<FileEntry> entry(FileResult& r) {
-        return auto_ptr<FileEntry>(r.entry());
+    std::auto_ptr<FileEntry> entry(FileResult& r) {
+        return std::auto_ptr<FileEntry>(r.entry());
     }
     
     ExpressionFactory xpr;
@@ -133,9 +126,9 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
     test::TestRDB* db;
     HlFile td1, td2, td3, td4, td5;
     test::TempH5File tf1, tf2, tf3, tf4, tf5;
-    scoped_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
+    boost::scoped_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     FileQuery query;
-    scoped_ptr<FileResult> r;
+    boost::scoped_ptr<FileResult> r;
 };
 
 TEST_P(db_FileQuery_itest, test_queried_entry) {
@@ -145,7 +138,7 @@ TEST_P(db_FileQuery_itest, test_queried_entry) {
     EXPECT_EQ(1, r->size());
     ASSERT_TRUE(r->next());
     
-    auto_ptr<FileEntry> e(r->entry());
+    std::auto_ptr<FileEntry> e(r->entry());
     
     ASSERT_TRUE(e.get());
     

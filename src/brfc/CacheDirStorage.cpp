@@ -21,6 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileEntry.hpp>
 
+#include <brfc/util/no_delete.hpp>
 #include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {

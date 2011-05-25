@@ -24,12 +24,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 
 #include <boost/foreach.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/assign/ptr_map_inserter.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/program_options.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/smart_ptr.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/tool/Benchmark.hpp>
@@ -161,7 +161,7 @@ main(int argc, char** argv) {
     }
     
     // XXX: get from a factory
-    brfc::shared_ptr<brfc::Database> db;
+    boost::shared_ptr<brfc::Database> db;
 
     if (dsn.size() < 1) {
         std::cerr << "missing DSN" << std::endl;

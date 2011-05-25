@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
+#include <boost/make_shared.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
 #include <utf8/utf8.h>
@@ -35,7 +36,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-shared_ptr<const HlConverter>
+boost::shared_ptr<const HlConverter>
 HlConverter::create_from_hlhdf_node(const HL_Node& node) {
     HL_Node* node_ptr = const_cast<HL_Node*>(&node);
     HL_FormatSpecifier fmt = HLNode_getFormat(node_ptr);
@@ -43,29 +44,29 @@ HlConverter::create_from_hlhdf_node(const HL_Node& node) {
         case HLHDF_INT:
         case HLHDF_LONG:
         case HLHDF_LLONG:
-            return make_shared<HlInt64Converter>();
+            return boost::make_shared<HlInt64Converter>();
         case HLHDF_FLOAT:
         case HLHDF_DOUBLE:
         case HLHDF_LDOUBLE:
-            return make_shared<HlDoubleConverter>();
+            return boost::make_shared<HlDoubleConverter>();
         case HLHDF_STRING:
-            return make_shared<HlStringConverter>();
+            return boost::make_shared<HlStringConverter>();
         default:
-            return shared_ptr<HlConverter>();
+            return boost::shared_ptr<HlConverter>();
     }
 }
 
-shared_ptr<const HlConverter>
+boost::shared_ptr<const HlConverter>
 HlConverter::create_from_variant(const Oh5Scalar& variant) {
     switch (variant.type()) {
         case Oh5Scalar::INT64:
-            return make_shared<HlInt64Converter>();
+            return boost::make_shared<HlInt64Converter>();
         case Oh5Scalar::DOUBLE:
-            return make_shared<HlDoubleConverter>();
+            return boost::make_shared<HlDoubleConverter>();
         case Oh5Scalar::STRING:
-            return make_shared<HlStringConverter>();
+            return boost::make_shared<HlStringConverter>();
         default:
-            return shared_ptr<HlConverter>();
+            return boost::shared_ptr<HlConverter>();
     }
 }
 

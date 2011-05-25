@@ -40,7 +40,7 @@ class sql_Dialect_itest : public testing::TestWithParam<const char*> {
     }
     
     test::TestRDB* db;
-    shared_ptr<Connection> conn;
+    boost::shared_ptr<Connection> conn;
     const Dialect& dialect;
 };
 

@@ -19,8 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_PG_CONNECTION_HPP
 #define BRFC_SQL_PG_CONNECTION_HPP
 
-
-#include <brfc/smart_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/DialectCompiler.hpp>
@@ -87,8 +86,8 @@ class Connection : public sql::Connection {
     void load_type_oids();
 
     Types types_;
-    shared_ptr<pqxx::connection_base> conn_;
-    shared_ptr<pqxx::dbtransaction> transaction_;
+    boost::shared_ptr<pqxx::connection_base> conn_;
+    boost::shared_ptr<pqxx::dbtransaction> transaction_;
     Dialect dialect_;
     DialectCompiler compiler_;
 };

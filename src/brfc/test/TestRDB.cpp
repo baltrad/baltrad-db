@@ -61,7 +61,7 @@ TestRDB::drop() {
 
 void
 TestRDB::clean() {
-    scoped_ptr<sql::Result> r(conn()->execute(std::string("DELETE FROM bdb_files")));
+    boost::scoped_ptr<sql::Result> r(conn()->execute(std::string("DELETE FROM bdb_files")));
 }
 
 namespace {
@@ -92,10 +92,10 @@ TestRDB::exec_queries_from(const std::string& file) {
 
     std::list<std::string> queries;
     load_queries(qf_path, queries);
-    shared_ptr<sql::Connection> c = conn();
+    boost::shared_ptr<sql::Connection> c = conn();
     c->begin();
     try {
-        scoped_ptr<sql::Result> result;
+        boost::scoped_ptr<sql::Result> result;
         BOOST_FOREACH(const std::string& stmt, queries) {
             result.reset(c->execute(stmt));
         }

@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_FUSE_DIR_FACTORY_HPP
 #define BRFC_FUSE_DIR_FACTORY_HPP
 
+#include <boost/shared_ptr.hpp>
+
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/identity.hpp>
 #include <boost/multi_index/indexed_by.hpp>
@@ -74,7 +76,7 @@ class DirFactory : public EntryFactory {
 
     struct set_valid {
         set_valid(bool valid) : valid_(valid) { }
-        void operator()(shared_ptr<DirEntry>& entry) const {
+        void operator()(boost::shared_ptr<DirEntry>& entry) const {
             entry->valid(valid_);
         }
 
@@ -86,7 +88,7 @@ class DirFactory : public EntryFactory {
     struct by_valid {};
 
     typedef boost::multi_index_container<
-        shared_ptr<DirEntry>,
+        boost::shared_ptr<DirEntry>,
         boost::multi_index::indexed_by<
             boost::multi_index::ordered_unique<
                 boost::multi_index::tag<by_name>,
@@ -107,7 +109,7 @@ class DirFactory : public EntryFactory {
     void invalidate_all();
     void remove_invalid();
 
-    shared_ptr<DirEntry> create_entry(const Variant& value);
+    boost::shared_ptr<DirEntry> create_entry(const Variant& value);
     
     Database& database() { return *db_; }
 

@@ -19,11 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/Connection.hpp>
 
+#include <memory>
 #include <sstream>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
-#include <brfc/smart_ptr.hpp>
 
 #include <brfc/sql/Compiler.hpp>
 #include <brfc/sql/Dialect.hpp>
@@ -89,7 +89,7 @@ Connection::execute(const Expression& stmt, const BindMap_t& binds) {
 
 Result*
 Connection::execute(const std::string& stmt) {
-    auto_ptr<Result> result;
+    std::auto_ptr<Result> result;
     if (not in_transaction()) {
         try {
             begin();

@@ -19,16 +19,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/sql/ConnectionProxy.hpp>
-#include <brfc/sql/ResultProxy.hpp>
-
 #include <brfc/exceptions.hpp>
 #include <brfc/test_common.hpp>
+#include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/MockCompiler.hpp>
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionDtor.hpp>
 #include <brfc/sql/MockDialect.hpp>
 #include <brfc/sql/MockResult.hpp>
+#include <brfc/sql/ResultProxy.hpp>
+#include <brfc/util/no_delete.hpp>
 
 using ::testing::Ref;
 using ::testing::Return;
@@ -56,7 +56,7 @@ class sql_ConnectionProxy_test : public ::testing::Test {
     }
     
     MockConnectionDtor conn_dtor;
-    shared_ptr<MockConnectionDtor> conn_dtor_ptr;
+    boost::shared_ptr<MockConnectionDtor> conn_dtor_ptr;
     MockConnection conn;
     ConnectionProxy proxy;
 };
@@ -155,7 +155,7 @@ TEST_F(sql_ConnectionProxy_test, test_execute) {
     EXPECT_CALL(conn, do_execute("stmt"))
         .WillOnce(Return(r));
     
-    auto_ptr<Result> rp(proxy.execute("stmt"));
+    std::auto_ptr<Result> rp(proxy.execute("stmt"));
     ResultProxy* rpp = dynamic_cast<ResultProxy*>(rp.get());
     ASSERT_TRUE(rpp);
 }

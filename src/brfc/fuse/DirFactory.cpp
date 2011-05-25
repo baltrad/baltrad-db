@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/fuse/DirFactory.hpp>
 
+#include <boost/make_shared.hpp>
+
 #include <brfc/assert.hpp>
 #include <brfc/Variant.hpp>
 
@@ -75,7 +77,7 @@ DirFactory::do_update() {
     if (not filter_.empty())
         qry.filter(filter_);
     
-    scoped_ptr<AttributeResult> result(database().execute(qry));
+    boost::scoped_ptr<AttributeResult> result(database().execute(qry));
 
     EntryByName_t& es = entries_.get<by_name>();
     EntryByName_t::iterator iter;
@@ -128,11 +130,11 @@ DirFactory::remove_invalid() {
 }
 
 
-shared_ptr<DirEntry>
+boost::shared_ptr<DirEntry>
 DirFactory::create_entry(const Variant& value) {
     static ExpressionFactory xpr;
-    shared_ptr<DirEntry> entry = make_shared<DirEntry>(value.to_string(),
-                                                       *cfactory_);
+    boost::shared_ptr<DirEntry> entry =
+        boost::make_shared<DirEntry>(value.to_string(), *cfactory_);
     Expression cfilter = xpr.eq(attr_, xpr.literal(value));
     if (not filter_.empty())
         cfilter = xpr.and_(filter_, cfilter);

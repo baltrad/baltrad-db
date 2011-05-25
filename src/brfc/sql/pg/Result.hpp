@@ -20,9 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_PG_RESULT_HPP
 #define BRFC_SQL_PG_RESULT_HPP
 
-#include <brfc/sql/Result.hpp>
-#include <brfc/smart_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
+#include <brfc/sql/Result.hpp>
 
 namespace pqxx {
     class result;
@@ -59,7 +59,7 @@ class Result : public sql::Result {
     pqxx::result& result();
     const pqxx::result& result() const;
 
-    scoped_ptr<pqxx::result> result_;
+    boost::scoped_ptr<pqxx::result> result_;
     const Types* types_;
     int row_;
 };

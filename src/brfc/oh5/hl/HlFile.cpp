@@ -71,7 +71,7 @@ HlFile::~HlFile() {
 namespace {
 
 void add_attribute(Oh5Node& parent, const std::string& name, HL_Node* node) {
-    shared_ptr<const HlConverter> converter =
+    boost::shared_ptr<const HlConverter> converter =
         HlConverter::create_from_hlhdf_node(*node);
     if (not converter)
         throw std::runtime_error(std::string("could not convert ") +
@@ -111,8 +111,8 @@ HlFile::load() {
     init_hlhdflib();
 
     std::string path_utf8 = path();
-    shared_ptr<HL_NodeList> nodes(HLNodeList_read(path_utf8.c_str()),
-                                  &HLNodeList_free);
+    boost::shared_ptr<HL_NodeList> nodes(HLNodeList_read(path_utf8.c_str()),
+                                         &HLNodeList_free);
     if (not nodes)
         throw fs_error("could not open file: " + path_utf8);
 

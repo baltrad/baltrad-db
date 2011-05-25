@@ -25,18 +25,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/AttributeResult.hpp>
 #include <brfc/db/FileQuery.hpp>
 #include <brfc/db/FileResult.hpp>
-#include <brfc/rdb/RelationalDatabase.hpp>
-
-#include <brfc/sql/DialectCompiler.hpp>
-
 #include <brfc/db/MockFileEntry.hpp>
 #include <brfc/oh5/MockPhysicalFile.hpp>
+#include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/sql/BasicConnectionPool.hpp>
+#include <brfc/sql/DialectCompiler.hpp>
 #include <brfc/sql/MockDialect.hpp>
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionCreator.hpp>
 #include <brfc/sql/MockConnectionPool.hpp>
 #include <brfc/sql/MockResult.hpp>
+#include <brfc/util/no_delete.hpp>
 
 using ::testing::_;
 using ::testing::Return;
@@ -69,8 +68,8 @@ class rdb_RelationalDatabase_test : public ::testing::Test {
     ::testing::NiceMock<sql::MockDialect> dialect;
     sql::DialectCompiler compiler;
     sql::MockConnectionPool pool;
-    shared_ptr<sql::ConnectionPool> pool_ptr;
-    auto_ptr<sql::MockResult> result_ptr;
+    boost::shared_ptr<sql::ConnectionPool> pool_ptr;
+    std::auto_ptr<sql::MockResult> result_ptr;
     sql::MockResult& result;
     RelationalDatabase rdb;
 };
@@ -80,7 +79,7 @@ TEST_F(rdb_RelationalDatabase_test, test_create_pool) {
     sql::MockConnectionCreator c;
 
     Url url("scheme://user:password@host/database?pool_max_size=3");
-    auto_ptr<sql::ConnectionPool> cp(RelationalDatabase::create_pool(&c, url));
+    std::auto_ptr<sql::ConnectionPool> cp(RelationalDatabase::create_pool(&c, url));
 
     sql::BasicConnectionPool* bcp =
         dynamic_cast<sql::BasicConnectionPool*>(cp.get());
@@ -101,7 +100,7 @@ TEST_F(rdb_RelationalDatabase_test, test_create_pool_default) {
     sql::MockConnectionCreator c;
 
     Url url("scheme://user:password@host/database");
-    auto_ptr<sql::ConnectionPool> cp(RelationalDatabase::create_pool(&c, url));
+    std::auto_ptr<sql::ConnectionPool> cp(RelationalDatabase::create_pool(&c, url));
 
     sql::BasicConnectionPool* bcp =
         dynamic_cast<sql::BasicConnectionPool*>(cp.get());
@@ -117,7 +116,7 @@ TEST_F(rdb_RelationalDatabase_test, test_execute_attribute_query) {
         .WillOnce(Return(result_ptr.release()));
 
     AttributeQuery q;
-    scoped_ptr<AttributeResult> r(rdb.execute(q));
+    boost::scoped_ptr<AttributeResult> r(rdb.execute(q));
 }
 
 TEST_F(rdb_RelationalDatabase_test, test_execute_file_query) {
@@ -127,7 +126,7 @@ TEST_F(rdb_RelationalDatabase_test, test_execute_file_query) {
         .WillOnce(Return(result_ptr.release()));
 
     FileQuery q;
-    scoped_ptr<FileResult> r(rdb.execute(q));
+    boost::scoped_ptr<FileResult> r(rdb.execute(q));
 }
 
 TEST_F(rdb_RelationalDatabase_test, test_remove) {

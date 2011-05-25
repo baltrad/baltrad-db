@@ -34,6 +34,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test_common.hpp>
 
+using ::boost::shared_ptr;
+
 namespace brfc {
 namespace sql {
 

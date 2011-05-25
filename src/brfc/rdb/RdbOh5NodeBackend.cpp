@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/RdbOh5NodeBackend.hpp>
 
+#include <memory>
+
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/composite_key.hpp>
 #include <boost/multi_index/indexed_by.hpp>
@@ -161,7 +163,7 @@ struct RdbOh5NodeBackend::Impl {
     }
 
     void add(Oh5Node* _node) {
-        auto_ptr<Oh5Node> node(_node);
+        std::auto_ptr<Oh5Node> node(_node);
         if (not entries.insert(node_entry(_node)).second)
             throw duplicate_entry(node->path());
         nodes.push_back(node);

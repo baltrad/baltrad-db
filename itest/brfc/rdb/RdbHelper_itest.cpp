@@ -73,7 +73,7 @@ class rdb_RdbHelper_itest : public ::testing::TestWithParam<const char*> {
     }
 
     test::TestRDB* db;
-    shared_ptr<sql::Connection> conn;
+    boost::shared_ptr<sql::Connection> conn;
     RdbHelper helper;
     RdbFileEntry entry;
     RdbOh5NodeBackend& backend;

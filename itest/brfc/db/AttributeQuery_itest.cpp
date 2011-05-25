@@ -23,28 +23,22 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string/erase.hpp>
 
 #include <brfc/exceptions.hpp>
+#include <brfc/itest_config.hpp>
 #include <brfc/DateTime.hpp>
 #include <brfc/FileHasher.hpp>
+#include <brfc/ITestEnv.hpp>
 #include <brfc/Variant.hpp>
-
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/AttributeResult.hpp>
 #include <brfc/db/FileEntry.hpp>
-
 #include <brfc/expr/Expression.hpp>
 #include <brfc/expr/ExpressionFactory.hpp>
-
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
-
 #include <brfc/oh5/hl/HlFile.hpp>
-
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/test/TempH5File.hpp>
-
-#include <brfc/itest_config.hpp>
-#include <brfc/ITestEnv.hpp>
 
 namespace brfc {
 
@@ -131,9 +125,9 @@ struct db_AttributeQuery_itest : public testing::TestWithParam<const char*> {
     test::TestRDB* db;
     HlFile td1, td2, td3, td4, td5;
     test::TempH5File tf1, tf2, tf3, tf4, tf5;
-    scoped_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
+    boost::scoped_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     AttributeQuery query;
-    scoped_ptr<AttributeResult> r;
+    boost::scoped_ptr<AttributeResult> r;
 };
 
 

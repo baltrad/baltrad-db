@@ -17,30 +17,17 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_TEST_TEMP_DIR_HPP
-#define BRFC_TEST_TEMP_DIR_HPP
-
-#include <boost/shared_ptr.hpp>
+#ifndef BRFC_UTIL_NO_DELETE_HPP
+#define BRFC_UTIL_NO_DELETE_HPP
 
 namespace brfc {
 
-namespace test {
+/**
+ * @brief null deleter for shared_ptr
+ */
+void
+no_delete(const void* ptr);
 
-class TempDir {
-  public:
-    TempDir();
-    ~TempDir();
-    std::string path() const;
-
-    void unlink();
-
-  private:
-    void rmdir_recurse(const char* path);
-
-    boost::shared_ptr<char> path_;
-};
-
-}
 } // namespace brfc
 
-#endif // BRFC_TEST_TEMP_DIR_HPP
+#endif // BRFC_UTIL_NO_DELETE_HPP

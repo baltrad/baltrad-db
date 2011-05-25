@@ -45,7 +45,7 @@ FileEntry*
 RdbFileResult::do_entry() {
     long long id = result_->value_at(0).int64_();
 
-    auto_ptr<RdbFileEntry> entry(new RdbFileEntry(rdb_));
+    std::auto_ptr<RdbFileEntry> entry(new RdbFileEntry(rdb_));
     entry->id(id);
     return entry.release();
 }

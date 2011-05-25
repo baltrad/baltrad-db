@@ -20,7 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_CACHE_DIR_STORAGE_HPP
 #define BRFC_CACHE_DIR_STORAGE_HPP
 
-#include <brfc/smart_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <brfc/LocalStorage.hpp>
 
 namespace brfc {
@@ -68,7 +69,7 @@ class CacheDirStorage : public LocalStorage {
     const FileSystem& fs() const;
 
     std::string dir_;
-    shared_ptr<const FileSystem> fs_;
+    boost::shared_ptr<const FileSystem> fs_;
 };
 
 } // namespace brfc

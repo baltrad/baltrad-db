@@ -22,7 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <errno.h>
 
-#include <brfc/smart_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+
 #include <brfc/fuse/Entry.hpp>
 
 namespace brfc {
@@ -78,7 +79,7 @@ class DirEntry : public Entry {
     virtual Entry* do_child(const std::string& name);
 
     std::string name_;
-    scoped_ptr<EntryFactory> cfactory_;
+    boost::scoped_ptr<EntryFactory> cfactory_;
     bool valid_;
 };
 

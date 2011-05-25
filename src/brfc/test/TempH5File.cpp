@@ -143,7 +143,7 @@ class GatherHLNodes {
     }
 
   private:
-    shared_ptr<HL_NodeList> nodes_;
+    boost::shared_ptr<HL_NodeList> nodes_;
 };
 
 } // namespace anonymous

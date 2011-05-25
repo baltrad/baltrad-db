@@ -19,9 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 %module(directors="1") fc
 
-#define SWIG_SHARED_PTR_NAMESPACE brfc
 %include "enums.swg"
-%include "boost_shared_ptr.i"
 %include "std_string.i"
 %include "std_vector.i"
 %include "stdint.i"
@@ -31,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <sstream>
 
     #include <brfc/exceptions.hpp>
-    #include <brfc/smart_ptr.hpp>
     #include <brfc/FileCatalog.hpp>
     #include <brfc/FileNamer.hpp>
     #include <brfc/DefaultFileNamer.hpp>

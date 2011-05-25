@@ -54,7 +54,7 @@ TEST_F(sql_BasicConnectionPool_test, test_get) {
     EXPECT_CALL(creator, do_create())
         .WillOnce(Return(conn));
     
-    auto_ptr<Connection> c(pool.get());
+    std::auto_ptr<Connection> c(pool.get());
     ConnectionProxy* cp = dynamic_cast<ConnectionProxy*>(c.get());
 
     ASSERT_TRUE(cp);
@@ -81,8 +81,8 @@ TEST_F(sql_BasicConnectionPool_test, test_get_limit_reached) {
         .WillOnce(Return(conn1))
         .WillOnce(Return(conn2));
      
-    auto_ptr<Connection> c1(pool.get()); 
-    auto_ptr<Connection> c2(pool.get());
+    std::auto_ptr<Connection> c1(pool.get()); 
+    std::auto_ptr<Connection> c2(pool.get());
     EXPECT_THROW(pool.get(), db_error);
     c2.reset();
     EXPECT_NO_THROW(c2.reset(pool.get()));
@@ -97,7 +97,7 @@ TEST_F(sql_BasicConnectionPool_test, test_size) {
         .WillOnce(Return(conn1));
 
     EXPECT_EQ(0u, pool.size());
-    auto_ptr<Connection> c1(pool.get());
+    std::auto_ptr<Connection> c1(pool.get());
     EXPECT_EQ(1u, pool.size());
     c1.reset();
     EXPECT_EQ(1u, pool.size());
@@ -121,7 +121,7 @@ TEST_F(sql_BasicConnectionPool_test, test_put_closed_conn) {
     EXPECT_CALL(*conn1, do_is_open())
         .WillOnce(Return(false));
 
-    auto_ptr<Connection> c1(pool.get());
+    std::auto_ptr<Connection> c1(pool.get());
     c1.reset();
 
     EXPECT_EQ(0u, pool.size()); // has gone through dispose();

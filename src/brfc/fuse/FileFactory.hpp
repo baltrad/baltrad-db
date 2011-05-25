@@ -20,14 +20,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_FUSE_FILE_FACTORY_HPP
 #define BRFC_FUSE_FILE_FACTORY_HPP
 
+#include <boost/shared_ptr.hpp>
+
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/identity.hpp>
 #include <boost/multi_index/indexed_by.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/tag.hpp>
-
-#include <brfc/smart_ptr.hpp>
 
 #include <brfc/expr/Expression.hpp>
 
@@ -72,7 +72,7 @@ class FileFactory : public EntryFactory {
 
     struct set_valid {
         set_valid(bool valid) : valid_(valid) { }
-        void operator()(shared_ptr<FileEntry>& entry) const {
+        void operator()(boost::shared_ptr<FileEntry>& entry) const {
             entry->valid(valid_);
         }
 
@@ -85,7 +85,7 @@ class FileFactory : public EntryFactory {
     struct by_valid {};
 
     typedef boost::multi_index_container<
-        shared_ptr<FileEntry>,
+        boost::shared_ptr<FileEntry>,
         boost::multi_index::indexed_by<
             boost::multi_index::ordered_unique<
                 boost::multi_index::tag<by_uuid>,
@@ -115,7 +115,7 @@ class FileFactory : public EntryFactory {
     void invalidate_all();
     void remove_invalid();
 
-    shared_ptr<FileEntry> create_entry(const ::brfc::FileEntry& fe);
+    boost::shared_ptr<FileEntry> create_entry(const ::brfc::FileEntry& fe);
     
     Database* db_; 
     FileNamer* namer_;

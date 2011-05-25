@@ -20,9 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_RDB_RELATIONAL_DATABASE_HPP
 #define BRFC_DB_RDB_RELATIONAL_DATABASE_HPP
 
-#include <map>
-
-#include <brfc/smart_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <brfc/db/Database.hpp>
 
@@ -61,7 +60,7 @@ class RelationalDatabase : public Database {
      */
     explicit RelationalDatabase(const Url& dsn);
     
-    explicit RelationalDatabase(shared_ptr<sql::ConnectionPool> pool);
+    explicit RelationalDatabase(boost::shared_ptr<sql::ConnectionPool> pool);
 
     /**
      * @brief destructor
@@ -75,7 +74,7 @@ class RelationalDatabase : public Database {
     /**
      * @brief acquire a connection from the associated pool
      */
-    shared_ptr<sql::Connection> conn() const;    
+    boost::shared_ptr<sql::Connection> conn() const;    
 
     FileHasher& file_hasher() { return *file_hasher_; }
 
@@ -106,11 +105,11 @@ class RelationalDatabase : public Database {
     void populate_mapper();
     void populate_hasher();
 
-    scoped_ptr<sql::ConnectionCreator> creator_;
-    shared_ptr<sql::ConnectionPool> pool_;
-    shared_ptr<AttributeMapper> mapper_;
-    shared_ptr<FileHasher> file_hasher_;
-    shared_ptr<RdbHelper> helper_;
+    boost::scoped_ptr<sql::ConnectionCreator> creator_;
+    boost::shared_ptr<sql::ConnectionPool> pool_;
+    boost::shared_ptr<AttributeMapper> mapper_;
+    boost::shared_ptr<FileHasher> file_hasher_;
+    boost::shared_ptr<RdbHelper> helper_;
 };
 
 } // namespace brfc

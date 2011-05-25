@@ -17,12 +17,12 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <memory>
+
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/smart_ptr.hpp>
 #include <brfc/Url.hpp>
-
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/DefaultConnectionCreator.hpp>
 
@@ -32,14 +32,14 @@ namespace sql {
 TEST(sql_DefaultConnectionCreator_test, test_create_valid_url) {
     Url url("postgresql://user:password@unknown-host/dbname");
     DefaultConnectionCreator c(url);
-    auto_ptr<Connection> p;    
+    std::auto_ptr<Connection> p;    
     EXPECT_THROW(p.reset(c.create()), db_error); // url is valid, no db though
 }
 
 TEST(sql_DefaultConnectionCreator_test, test_create_invalid_url) {
     Url url("bla://user:password@localhost/dbname");
     DefaultConnectionCreator c(url);
-    auto_ptr<Connection> p;
+    std::auto_ptr<Connection> p;
     EXPECT_THROW(p.reset(c.create()), value_error);
 }
 

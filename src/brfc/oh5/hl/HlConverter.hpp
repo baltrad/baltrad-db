@@ -27,7 +27,7 @@ extern "C" {
 #include <string>
 #include <vector>
 
-#include <brfc/smart_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace brfc {
 
@@ -76,11 +76,11 @@ class HL_Data {
 class HlConverter {
   public:
     static
-    shared_ptr<const HlConverter>
+    boost::shared_ptr<const HlConverter>
     create_from_hlhdf_node(const HL_Node& node);
 
     static
-    shared_ptr<const HlConverter>
+    boost::shared_ptr<const HlConverter>
     create_from_variant(const Oh5Scalar& variant);
 
     /**

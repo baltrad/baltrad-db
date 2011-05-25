@@ -19,6 +19,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/fuse/FileFactory.hpp>
 
+#include <boost/make_shared.hpp>
+#include <boost/scoped_ptr.hpp>
+
 #include <brfc/assert.hpp>
 #include <brfc/FileNamer.hpp>
 
@@ -69,12 +72,12 @@ FileFactory::do_update() {
     FileQuery qry;
     if (not filter_.empty())
         qry.filter(filter_);
-    scoped_ptr<FileResult> result(database().execute(qry));
+    boost::scoped_ptr<FileResult> result(database().execute(qry));
 
     EntryByUuid_t& es = entries_.get<by_uuid>();
     EntryByUuid_t::iterator iter;
     
-    scoped_ptr< ::brfc::FileEntry> fe;
+    boost::scoped_ptr< ::brfc::FileEntry> fe;
     while (result->next()) {
         fe.reset(result->entry());
         const std::string& uuid = fe->uuid();
@@ -125,10 +128,10 @@ FileFactory::remove_invalid() {
     es.erase(es.lower_bound(false), es.upper_bound(false));
 }
 
-shared_ptr<FileEntry>
+boost::shared_ptr<FileEntry>
 FileFactory::create_entry(const ::brfc::FileEntry& fe) {
     const std::string& name = namer().name(fe);
-    return make_shared<FileEntry>(db_, fe, name);
+    return boost::make_shared<FileEntry>(db_, fe, name);
 }
 
 

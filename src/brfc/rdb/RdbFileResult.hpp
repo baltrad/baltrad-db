@@ -20,7 +20,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_RDB_RDB_FILE_RESULT_HPP
 #define BRFC_DB_RDB_RDB_FILE_RESULT_HPP
 
-#include <brfc/smart_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <brfc/db/FileResult.hpp>
 
 namespace brfc {
@@ -38,7 +40,7 @@ namespace brfc {
 class RdbFileResult : public FileResult {
   public:
     RdbFileResult(RelationalDatabase* rdb,
-                  shared_ptr<sql::Connection> conn,
+                  boost::shared_ptr<sql::Connection> conn,
                   sql::Result* result)
             : rdb_(rdb)
             , conn_(conn)
@@ -53,8 +55,8 @@ class RdbFileResult : public FileResult {
   
   private:
     RelationalDatabase* rdb_;
-    shared_ptr<sql::Connection> conn_;
-    scoped_ptr<sql::Result> result_;
+    boost::shared_ptr<sql::Connection> conn_;
+    boost::scoped_ptr<sql::Result> result_;
 };
 
 } // namespace brfc

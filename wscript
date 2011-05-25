@@ -242,7 +242,6 @@ def configure(conf):
 
     boost_headers = (
         "bimap.hpp",
-        "enable_shared_from_this.hpp",
         "foreach.hpp",
         "lexical_cast.hpp",
         "multi_index_container.hpp",

@@ -20,7 +20,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_TEMPORARY_H5_FILE_HPP
 #define BRFC_TEMPORARY_H5_FILE_HPP
 
-#include <brfc/smart_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace brfc {
 
@@ -53,7 +53,7 @@ class TempH5File {
     void copy(const std::string& dest) const;
 
   private:
-    shared_ptr<char> path_;
+    boost::shared_ptr<char> path_;
 };
 
 } // namepsace test

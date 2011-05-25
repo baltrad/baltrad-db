@@ -20,7 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_RESULT_PROXY_HPP
 #define BRFC_SQL_RESULT_PROXY_HPP
 
-#include <brfc/smart_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+
 #include <brfc/sql/Result.hpp>
 
 namespace brfc {
@@ -90,7 +91,7 @@ class ResultProxy : public Result {
     void invalidate();
 
     ConnectionProxy* conn_;
-    scoped_ptr<Result> result_;
+    boost::scoped_ptr<Result> result_;
 };
 
 } // namespace sql

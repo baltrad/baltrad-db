@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/BasicConnectionPool.hpp>
 
+#include <memory>
+
 #include <boost/foreach.hpp>
 #include <boost/thread/locks.hpp>
 
@@ -26,6 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/ConnectionCreator.hpp>
 #include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/PoolReturner.hpp>
+#include <brfc/util/no_delete.hpp>
 
 namespace brfc {
 namespace sql {
@@ -59,7 +62,7 @@ BasicConnectionPool::returner(PoolReturner* returner) {
 
 Connection*
 BasicConnectionPool::do_get() {
-    auto_ptr<Connection> conn;
+    std::auto_ptr<Connection> conn;
     try {
         conn.reset(pool_.get_nowait());
     } catch (const queue_empty&) {
@@ -87,7 +90,7 @@ BasicConnectionPool::create() {
     boost::lock_guard<boost::mutex> lock(size_mutex_);
     if (size_ >= pool_.max_size())
         throw db_error("pool limit reached");
-    auto_ptr<Connection> c(creator_->create());
+    std::auto_ptr<Connection> c(creator_->create());
     ++size_;
     return c.release();
 }

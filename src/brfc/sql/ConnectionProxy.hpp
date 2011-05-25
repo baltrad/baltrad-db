@@ -22,7 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <list>
 
-#include <brfc/smart_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <brfc/sql/Connection.hpp>
 
 namespace brfc {
@@ -42,7 +43,7 @@ class ConnectionProxy : public Connection {
      * @param conn_dtor destructor used when this proxy is closed
      */
     ConnectionProxy(Connection* proxied,
-                    shared_ptr<ConnectionDtor> conn_dtor);
+                    boost::shared_ptr<ConnectionDtor> conn_dtor);
 
     /**
      * @brief destructor
@@ -123,7 +124,7 @@ class ConnectionProxy : public Connection {
   private:
 
     Connection* proxied_;
-    shared_ptr<ConnectionDtor> conn_dtor_;
+    boost::shared_ptr<ConnectionDtor> conn_dtor_;
     std::list<ResultProxy*> results_;
 };
 

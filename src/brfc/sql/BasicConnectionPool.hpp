@@ -20,7 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 #define BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 
-#include <brfc/smart_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <brfc/sql/ConnectionPool.hpp>
 #include <brfc/util/Queue.hpp>
 
@@ -91,7 +92,7 @@ class BasicConnectionPool : public ConnectionPool {
     void dispose(Connection* conn);
 
     ConnectionCreator* creator_;
-    shared_ptr<PoolReturner> returner_;
+    boost::shared_ptr<PoolReturner> returner_;
     size_t size_; ///< number of allocated connections
     boost::mutex size_mutex_;
     Queue<Connection*> pool_;

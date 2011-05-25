@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/pg/Connection.hpp>
 
+#include <memory>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/numeric/conversion/cast.hpp>
@@ -30,6 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/Url.hpp>
 #include <brfc/sql/pg/Result.hpp>
+#include <brfc/util/no_delete.hpp>
 
 namespace brfc {
 namespace sql {
@@ -99,7 +102,7 @@ Connection::do_rollback() {
 
 sql::Result*
 Connection::do_execute(const std::string& query) {
-    auto_ptr<sql::Result> result;
+    std::auto_ptr<sql::Result> result;
     try {
         pqxx::result pg_result = transaction_->exec(query);
         result.reset(new Result(pg_result, &types_));
