@@ -328,8 +328,7 @@ def _build_shared_library(bld):
     for src in bld.path.ant_glob("src/brfc/tool/*.cpp"):
         sources.remove(src)
 
-    bld(
-        features="cxx cshlib",
+    bld.shlib(
         source=sources,
         target="brfc",
         includes="src",
@@ -348,8 +347,7 @@ def _build_bdbtool(bld):
     else:
         sources.remove("src/brfc/tool/Mount.cpp")
 
-    bld(
-        features="cxx cshlib",
+    bld.shlib(
         source=sources,
         target="brfc-tool",
         includes="src",
@@ -360,8 +358,7 @@ def _build_bdbtool(bld):
     
     sources = sorted(bld.path.ant_glob("bin/bdbtool/**/*.cpp"))
 
-    bld(
-        features="cxx cprogram",
+    bld.program(
         source=sources,
         target="bdbtool",
         includes="bin src",
@@ -375,8 +372,7 @@ def _strlit(var):
 def _build_gtest_gmock_lib(bld):
     sources = bld.path.ant_glob("src/gmock-gtest-all/*.cc")
 
-    bld(
-        features="cxx cstlib",
+    bld.stlib(
         source=sources,
         target="gtest-gmock",
         env=bld.env_of_name("testenv").copy(),
@@ -398,8 +394,7 @@ def _build_gtest_tests(bld):
                 sources.remove(src)
         local_libs.append("brfc-tool")
 
-    lib = bld(
-        features="cxx cprogram",
+    bld.program(
         source=sources,
         target="test_runner",
         env=bld.env_of_name("testenv").copy(),
@@ -437,8 +432,7 @@ def _build_gtest_itests(bld):
     sources.insert(0, "test/brfc/test_common.cpp")
     sources.insert(0, "itest/brfc/itest_config.cpp")
 
-    lib = bld(
-        features="cxx cprogram",
+    bld.program(
         source=sources,
         target="itest_runner",
         env=bld.env_of_name("testenv").copy(),
@@ -453,45 +447,17 @@ def _build_gtest_itests(bld):
     )
 
 def _build_java_wrapper(bld):
-    swig_files = [
-        "fc.i",
-    ]
-    
-    swig_targets = []
-
-    for filename in swig_files:
-        name = filename.split(".")[0]
-        elms = name.split("_")
-
-        outdir = "swig/eu/baltrad/" + "/".join(elms)
-        package = "eu.baltrad." + ".".join(elms)
-        target = name + "_gen"
-        swig_targets.append(target)
-
-        bld(
-            features="cxx",
-            source="swig/" + filename,
-            swig_flags="-c++ -java -outdir %s -package %s" % (outdir, package),
-            includes="src",
-            use="HLHDF BOOST JNI.H",
-            target=target,
-            # build shared objects (these flags are platform/compiler specific)
-            # -fPIC -DPIC is for gcc on Linux
-            cxxflags="-fPIC",
-            defines="PIC",
-        )
-        
-#    bld.add_group("link_java_wrapper")
-
-    t = bld(
-        features="cxx cshlib",
-        target="brfc_java",
-        add_objects=swig_targets,
+    bld.shlib(
+        features="cxx cxxshlib",
+        source="swig/fc.i",
+        swig_flags="-c++ -java "
+                   "-outdir swig/eu/baltrad/fc "
+                   "-package eu.baltrad.fc",
         includes="src",
-        use="BOOST JNI.H brfc",
-        install_path="${PREFIX}/lib",
+        use="brfc HLHDF BOOST JNI.H",
+        target="brfc_java"
     )
-
+        
     bld.add_group("compile_java_wrapper")
     
     bld(
@@ -508,10 +474,8 @@ def _build_java_wrapper(bld):
 
     jbrfc = bld.path.find_or_declare("jbrfc.jar")
     
-    #XXX: the correct dependency should be files produced by swig
-    for filename in swig_files:
-        bld.add_manual_dependency(jbrfc,
-                                  bld.path.find_resource("swig/" + filename))
+    bld.add_manual_dependency(jbrfc,
+                              bld.path.find_resource("swig/fc.i"))
     
     for filename in bld.path.ant_glob("swig/java/**/*.java"):
         bld.add_manual_dependency(jbrfc, filename)
