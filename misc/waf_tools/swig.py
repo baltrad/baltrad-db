@@ -12,9 +12,7 @@ from TaskGen import extension
 from Configure import conf
 import preproc
 
-SWIG_EXTS = ['.swig', '.i']
-
-swig_str = '${SWIG} ${SWIGFLAGS} ${_CCINCFLAGS} ${_CXXINCFLAGS} ${_CCDEFFLAGS} ${_CXXDEFFLAGS} ${SRC}'
+swig_str = '${SWIG} ${SWIGFLAGS} ${SWIGPATH_ST:INCPATHS} ${SRC}'
 cls = Task.simple_task_type('swig', swig_str, color='BLUE', ext_in='.i .h', ext_out='.o .c .cxx', shell=False)
 
 re_module = re.compile('%module(?:\s*\(.*\))?\s+(.+)', re.M)
@@ -25,7 +23,8 @@ re_3 = re.compile('#include ["<](.*)[">]', re.M)
 
 def scan(self):
     "scan for swig dependencies, climb the .i files"
-
+    print("scanner")
+    print(self.generator.includes_nodes)
     env = self.env
 
     lst_src = []
@@ -35,20 +34,20 @@ def scan(self):
 
     while to_see:
         node = to_see.pop(0)
-        if node.id in seen:
+        if node in seen:
             continue
-        seen.append(node.id)
+        seen.append(node)
         lst_src.append(node)
 
         # read the file
-        code = node.read(env)
+        code = node.read()
         code = preproc.re_nl.sub('', code)
         code = preproc.re_cpp.sub(preproc.repl, code)
 
         # find .i files and project headers
         names = re_2.findall(code) + re_3.findall(code)
         for n in names:
-            for d in self.generator.env.INC_PATHS + [node.parent]:
+            for d in self.generator.includes_nodes + [node.parent]:
                 u = d.find_resource(n)
                 if u:
                     to_see.append(u)
@@ -62,75 +61,53 @@ def scan(self):
     return (lst_src, [])
 cls.scan = scan
 
-# provide additional language processing
-swig_langs = {}
-def swig(fun):
-    swig_langs[fun.__name__.replace('swig_', '')] = fun
-
-@swig
-def swig_python(tsk):
-    tsk.set_outputs(tsk.inputs[0].parent.find_or_declare(tsk.module + '.py'))
-
-@swig
-def swig_ocaml(tsk):
-    tsk.set_outputs(tsk.inputs[0].parent.find_or_declare(tsk.module + '.ml'))
-    tsk.set_outputs(tsk.inputs[0].parent.find_or_declare(tsk.module + '.mli'))
-
-@swig
-def swig_java(tsk):
-    tsk.set_outputs(tsk.inputs[0].parent.find_or_declare(tsk.module + ".java"))
-    tsk.set_outputs(tsk.inputs[0].parent.find_or_declare(tsk.module + "JNI.java"))
-
-@extension(SWIG_EXTS)
+@extension(".swig", ".i")
 def i_file(self, node):
-    tsk = self.create_task('swig')
-    tsk.set_inputs(node)
-    tsk.module = getattr(self, 'swig_module', None)
+    gen_tsk = self.create_task('swig')
+    gen_tsk.set_inputs(node)
+    gen_tsk.module = getattr(self, 'swig_module', None)
 
-    if not tsk.module:
+    if not gen_tsk.module:
         # search the module name
-        txt = node.read(self.env)
+        txt = node.read()
         m = re_module.search(txt)
         if not m:
             raise ValueError("could not find the swig module name")
-        tsk.module = m.group(1)
+        gen_tsk.module = m.group(1)
 
     flags = self.to_list(getattr(self, 'swig_flags', []))
-
-    if not '-outdir' in flags:
-        flags.append('-outdir')
-        flags.append('') # placeholder
-        self.outdir_node = node.parent
+    
+    if '-outdir' in flags:
+        idx = flags.index("-outdir")
+        flags.pop(idx)
+        outdir = self.path.get_bld().make_node(flags.pop(idx)).abspath()
     else:
-        outdir = flags[flags.index('-outdir') + 1]
-        self.outdir_node = self.path.ensure_dir_node_from_path(outdir)
-
-    outdir = self.outdir_node.abspath(self.env) 
-    idx = flags.index("-outdir") + 1
-    flags[idx] = outdir
+        outdir = node.parent.get_bld().abspath()
+    flags.append("-outdir")
+    flags.append(outdir)
     Utils.check_dir(outdir)
-
+    
     ext = '.swigwrap_%d.c' % self.idx
     if '-c++' in flags:
         ext += 'xx'
-    out_node = node.parent.find_or_declare(tsk.module + ext)
+    out_node = node.parent.find_or_declare(gen_tsk.module + ext)
 
     try:
         if '-c++' in flags:
-            fun = self.cxx_hook
+            compile_fun = self.cxx_hook
         else:
-            fun = self.c_hook
+            compile_fun = self.c_hook
     except AttributeError:
         raise Utils.WafError('No c%s compiler was found to process swig files' % ('-c++' in flags and '++' or ''))
 
-    tsk.outputs.append(out_node)
+    gen_tsk.outputs.append(out_node)
 
-    task = fun(out_node)
-    task.set_run_after(tsk)
+    compile_tsk = compile_fun(out_node)
+    compile_tsk.set_run_after(gen_tsk)
 
     if not '-o' in flags:
         flags.append('-o')
-        flags.append(out_node.abspath(self.env))
+        flags.append(out_node.abspath())
 
     self.env.append_value('SWIGFLAGS', flags)
 
@@ -158,15 +135,16 @@ def check_swig_version(conf, minver=None):
         conf.check_message('swig version', '>= %s' % (minver_str,), result, option=swigver_full)
     return result
 
-def detect(conf):
+def configure(conf):
     paths = [] # when left empty, uses SWIG, then searches on PATH
     if Options.options.swig:
         # force searching only in the user-supplied directory
         paths.append(os.path.dirname(Options.options.swig))
     conf.find_program('swig', var='SWIG', path_list=paths, mandatory=True)
+    conf.env.SWIGPATH_ST="-I%s"
 
-def set_options(opt):
-    grp = opt.get_option_group("--prefix") # configuration options group
+def options(opt):
+    grp = opt.add_option_group("SWIG options") # configuration options group
     grp.add_option("--swig", action="store",
                    default=None,
                    help="SWIG executable")

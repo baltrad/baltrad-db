@@ -16,11 +16,7 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import Constants
-import Options
-import Node
-import Task
-from TaskGen import feature
+from waflib import Options, Node, Task, TaskGen
 
 cls = Task.simple_task_type("exec_ant", "${ANT} -f ${ANT_BUILDFILE} ${ANT_PROPERTIES} ${ANT_COMMAND}", shell=True)
 
@@ -28,13 +24,13 @@ def _transform_properties(props, env):
     propstrs = []
     for k, v in props.iteritems():
         if isinstance(v, Node.Node):
-            vstr = v.abspath(env)
+            vstr = v.abspath()
         else:
             vstr = str(v)
         propstrs.append("-D%s=%s" % (k, vstr))
     return " ".join(propstrs)
 
-@feature("ant")
+@TaskGen.feature("ant")
 def ant(self):
     """
     recognized attributes:
@@ -55,12 +51,12 @@ def ant(self):
     propstr = _transform_properties(getattr(self, "properties", {}), self.env)
     self.env.append_value("ANT_PROPERTIES", propstr)
 
-    buildfile = self.path.get_file(getattr(self, "buildfile", "build.xml"))
+    buildfile = self.path.find_or_declare(getattr(self, "buildfile", "build.xml"))
     self.env.append_value("ANT_BUILDFILE", buildfile.abspath())
 
     tsk = self.create_task("exec_ant")
     if getattr(self, "always", False):
-        always_run = lambda s: Constants.RUN_ME
+        always_run = lambda s: Task.RUN_ME
         new_rs = type(Task.TaskBase.run)(always_run, tsk, tsk.__class__)
         tsk.runnable_status = new_rs
     
@@ -68,13 +64,14 @@ def ant(self):
     for target in targets:
         tsk.outputs.append(self.path.find_or_declare(target))
 
-def set_options(opt):
-    grp = opt.get_option_group("--prefix") # configuration options group
+def options(opt):
+#    grp = opt.get_option_group("--prefix") # configuration options group
+    grp = opt.add_option_group("ant options") # configuration options group
     grp.add_option("--ant", action="store",
                    help="ant executable [default: search from $PATH]")
 
-def detect(conf):
-    paths = [] # when left empty, uses SWIG, then searches on PATH
+def configure(conf):
+    paths = [] # when left empty, uses ANT, then searches on PATH
     if Options.options.ant:
         # force searching only in the user-supplied directory
         paths.append(os.path.dirname(Options.options.ant))

@@ -19,12 +19,7 @@ import optparse
 import os
 import sys
 
-import Build
-import Configure
-import Environment
-import Options
-import Scripting
-import Utils
+from waflib import Build, Logs, Options, Utils
 
 sys.path.append("./misc")
 from build_helper import urlsplit
@@ -74,11 +69,8 @@ def _store_bool(option, opt, value, parser):
         raise optparse.OptionValueError("%s must be one of: %s" % (opt, vals))
     setattr(parser.values, option.dest, value)
             
-def set_options(opt):
-    grp = opt.get_option_group("--prefix") # configuration options group
-
-    grp.remove_option("--srcdir")
-    grp.remove_option("--download")
+def options(opt):
+    grp = opt.add_option_group("project specific options")
 
     grp.add_option("--debug", action="callback",
                    callback=_store_bool, type="string", nargs=1,
@@ -131,7 +123,7 @@ def _lib_path_opts_to_env(env, libname):
 def configure(conf):
     conf.check_tool("compiler_cc")
     conf.check_tool("compiler_cxx")
-    conf.check_tool("misc")
+#    conf.check_tool("misc")
 
     env = conf.env
 
@@ -313,46 +305,17 @@ def configure(conf):
 def build(bld):
     _build_shared_library(bld)
 
-    env = bld.env
-
-    if env.build_java:
-        _build_java_wrapper(bld)
-    
-    if env.build_bdbtool:
+    if bld.env.build_bdbtool:
         _build_bdbtool(bld)
 
-    if env.build_tests:
-        _build_gtest_gmock_lib(bld)
-        _build_gtest_tests(bld)
-        _build_gtest_itests(bld)
-        if env.build_java:
-            _build_java_tests(bld)
-
+    if bld.env.build_java:
+        _build_java_wrapper(bld)
+    
     bld.install_files("${PREFIX}/share/baltrad-db/sql/postgresql",
                       bld.path.ant_glob("schema/postgresql/*.sql"))
 
-def test(ctx):
-    bld = Build.BuildContext()
-    proj = Environment.Environment(Options.lockfile)
-    bld.load_dirs(proj['srcdir'], proj['blddir'])
-    bld.load_envs()
-
-    bld.add_subdirs([os.path.split(Utils.g_module.root_path)[0]])
-    
-    if not bld.env.build_tests:
-        Utils.pprint("RED", "tests are not set to be built, "
-                            "(re-)configure with '--build_tests=yes'")
-        sys.exit(1)
-    
-    # add test running targets
-    _run_tests(bld)
-    
-    bld.compile()  
-
 def _build_shared_library(bld):
-    bld.add_group("build_shared_library")
-
-    sources = sorted(bld.path.ant_glob("src/brfc/**/*.cpp").split(" "))
+    sources = sorted(bld.path.ant_glob("src/brfc/**/*.cpp"))
     libs = [
         "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM", "BOOST_THREAD",
         "HDF5", "HLHDF",
@@ -360,9 +323,9 @@ def _build_shared_library(bld):
         "PTHREAD",
     ]
 
-    for src in bld.path.ant_glob("src/brfc/fuse/*.cpp").split(" "):
+    for src in bld.path.ant_glob("src/brfc/fuse/*.cpp"):
         sources.remove(src)
-    for src in bld.path.ant_glob("src/brfc/tool/*.cpp").split(" "):
+    for src in bld.path.ant_glob("src/brfc/tool/*.cpp"):
         sources.remove(src)
 
     bld(
@@ -370,19 +333,17 @@ def _build_shared_library(bld):
         source=sources,
         target="brfc",
         includes="src",
-        export_incdirs="src",
-        uselib=libs,
+        export_includes="src",
+        use=libs,
         install_path="${PREFIX}/lib",
     )
 
 def _build_bdbtool(bld):
-    bld.add_group("build_bdbtool")
-
-    libs = ["BOOST_PROGRAM_OPTIONS"]
-    sources = bld.path.ant_glob("src/brfc/tool/*.cpp").split(" ")
+    libs = ["brfc", "BOOST_PROGRAM_OPTIONS"]
+    sources = bld.path.ant_glob("src/brfc/tool/*.cpp")
 
     if bld.env.build_bdbfs:
-        sources.extend(bld.path.ant_glob("src/brfc/fuse/*.cpp").split(" "))
+        sources.extend(bld.path.ant_glob("src/brfc/fuse/*.cpp"))
         libs.append("FUSE");
     else:
         sources.remove("src/brfc/tool/Mount.cpp")
@@ -392,20 +353,19 @@ def _build_bdbtool(bld):
         source=sources,
         target="brfc-tool",
         includes="src",
-        export_incdirs="src",
-        uselib=libs,
-        uselib_local="brfc",
+        export_includes="src",
+        use=libs,
         install_path="${PREFIX}/lib",
     )
     
-    sources = sorted(bld.path.ant_glob("bin/bdbtool/**/*.cpp").split(" "))
+    sources = sorted(bld.path.ant_glob("bin/bdbtool/**/*.cpp"))
 
     bld(
         features="cxx cprogram",
         source=sources,
         target="bdbtool",
-        includes="bin",
-        uselib_local=["brfc", "brfc-tool"],
+        includes="bin src",
+        use=["brfc", "brfc-tool",],
         install_path="${PREFIX}/bin",
     )
 
@@ -413,12 +373,10 @@ def _strlit(var):
     return "\"%s\"" % var
 
 def _build_gtest_gmock_lib(bld):
-    bld.add_group("build_gtest_gmock_lib")
-
-    sources = bld.path.ant_glob("src/gmock-gtest-all/*.cc").split(" ")
+    sources = bld.path.ant_glob("src/gmock-gtest-all/*.cc")
 
     bld(
-        features="cxx cstaticlib",
+        features="cxx cstlib",
         source=sources,
         target="gtest-gmock",
         env=bld.env_of_name("testenv").copy(),
@@ -426,19 +384,17 @@ def _build_gtest_gmock_lib(bld):
     )
 
 def _build_gtest_tests(bld):
-    bld.add_group("build_gtest_tests")
-
-    sources = sorted(bld.path.ant_glob("test/brfc/**/*.cpp").split(" "))
+    sources = sorted(bld.path.ant_glob("test/brfc/**/*.cpp"))
     local_libs = ["brfc", "gtest-gmock"]
     
     if not bld.env.build_bdbtool:
-        for src in bld.path.ant_glob("test/brfc/tool/*.cpp").split(" "):
+        for src in bld.path.ant_glob("test/brfc/tool/*.cpp"):
             sources.remove(src)
-        for src in bld.path.ant_glob("test/brfc/fuse/*.cpp").split(" "):
+        for src in bld.path.ant_glob("test/brfc/fuse/*.cpp"):
             sources.remove(src)
     else:
         if not bld.env.build_bdbfs:
-            for src in bld.path.ant_glob("test/brfc/fuse/*.cpp").split(" "):
+            for src in bld.path.ant_glob("test/brfc/fuse/*.cpp"):
                 sources.remove(src)
         local_libs.append("brfc-tool")
 
@@ -448,15 +404,11 @@ def _build_gtest_tests(bld):
         target="test_runner",
         env=bld.env_of_name("testenv").copy(),
         includes="src test",
-        uselib_local=local_libs,
+        use=local_libs,
         install_path=None,
     )
 
-
 def _build_gtest_itests(bld):
-    bld.add_group("build_gtest_itests")
-    bld.use_the_magic()
-
     cfg_values = {
         "test_dsn_count": len(bld.env.test_db_dsns),
         "test_dsns": ",\n".join(map(_strlit, bld.env.test_db_dsns)),
@@ -470,7 +422,7 @@ def _build_gtest_itests(bld):
         on_results=True,
     )
 
-    cfg_cpp.dict = cfg_values
+    cfg_cpp.dct = cfg_values
 
     cfg_hpp = bld(
         features="subst",
@@ -478,9 +430,9 @@ def _build_gtest_itests(bld):
         target = "itest/brfc/itest_config.hpp",
         on_results=True,
     )
-    cfg_hpp.dict = cfg_values
+    cfg_hpp.dct = cfg_values
 
-    sources = sorted(bld.path.ant_glob("itest/brfc/**/*.cpp").split(" "))
+    sources = sorted(bld.path.ant_glob("itest/brfc/**/*.cpp"))
 
     sources.insert(0, "test/brfc/test_common.cpp")
     sources.insert(0, "itest/brfc/itest_config.cpp")
@@ -491,18 +443,16 @@ def _build_gtest_itests(bld):
         target="itest_runner",
         env=bld.env_of_name("testenv").copy(),
         includes="src test itest",
-        uselib=[
+        use=[
             "BOOST", "BOOST_SYSTEM", "BOOST_FILESYSTEM",
             "HDF5", "HLHDF",
             "PQXX",
+            "brfc", "gtest-gmock",
         ],
-        uselib_local=["brfc", "gtest-gmock"],
         install_path=None,
     )
 
 def _build_java_wrapper(bld):
-    bld.add_group("build_java_wrapper")
-
     swig_files = [
         "fc.i",
     ]
@@ -523,7 +473,7 @@ def _build_java_wrapper(bld):
             source="swig/" + filename,
             swig_flags="-c++ -java -outdir %s -package %s" % (outdir, package),
             includes="src",
-            uselib="HLHDF BOOST JNI.H",
+            use="HLHDF BOOST JNI.H",
             target=target,
             # build shared objects (these flags are platform/compiler specific)
             # -fPIC -DPIC is for gcc on Linux
@@ -531,15 +481,14 @@ def _build_java_wrapper(bld):
             defines="PIC",
         )
         
-    bld.add_group("link_java_wrapper")
+#    bld.add_group("link_java_wrapper")
 
     t = bld(
         features="cxx cshlib",
         target="brfc_java",
         add_objects=swig_targets,
         includes="src",
-        uselib="BOOST JNI.H",
-        uselib_local="brfc",
+        use="BOOST JNI.H brfc",
         install_path="${PREFIX}/lib",
     )
 
@@ -549,7 +498,7 @@ def _build_java_wrapper(bld):
         features="ant",
         buildfile="build.xml",
         properties={
-            "waf.builddir": bld.path,
+            "waf.builddir": bld.path.get_bld().abspath(),
         },
         command="build",
         target="jbrfc.jar",
@@ -564,9 +513,8 @@ def _build_java_wrapper(bld):
         bld.add_manual_dependency(jbrfc,
                                   bld.path.find_resource("swig/" + filename))
     
-    for filename in bld.path.ant_glob("swig/java/**/*.java").split():
-        bld.add_manual_dependency(jbrfc,
-                                  bld.path.find_resource(filename))
+    for filename in bld.path.ant_glob("swig/java/**/*.java"):
+        bld.add_manual_dependency(jbrfc, filename)
 
     bld.add_manual_dependency(jbrfc,
                               bld.path.find_resource("build.xml"))
@@ -577,7 +525,7 @@ def _build_java_tests(bld):
     bld(
         features="ant",
         properties={
-            "waf.builddir": bld.path,
+            "waf.builddir": bld.path.get_bld().abspath(),
         },
         command="build-tests",
         target="jbrfc_test.jar",
@@ -585,9 +533,8 @@ def _build_java_tests(bld):
 
     jbrfc_test = bld.path.find_or_declare("jbrfc_test.jar")
 
-    for filename in bld.path.ant_glob("test/java/**/*.java").split():
-        bld.add_manual_dependency(jbrfc_test,
-                                  bld.path.find_resource(filename))
+    for node in bld.path.ant_glob("test/java/**/*.java"):
+        bld.add_manual_dependency(jbrfc_test, node)
     bld.add_manual_dependency(jbrfc_test,
                               bld.path.find_resource("build.xml"))
     
@@ -606,12 +553,38 @@ def _ant_testdb_properties(dsns):
         }
     return {}
 
+def _build_tests(bld):
+    if not bld.env.build_tests:
+        Logs.error("tests are not set to be built, "
+                   "(re-)configure with '--build_tests=yes'")
+        sys.exit(1)
+    
+    build(bld)
+    _build_gtest_gmock_lib(bld)
+    _build_gtest_tests(bld)
+    _build_gtest_itests(bld)
+    if bld.env.build_java:
+        _build_java_tests(bld)
+
+class test(Build.BuildContext):
+    cmd = 'test'
+    fun = '_test'
+    help = "build & run tests"
+
+def _test(bld):
+    _build_tests(bld)
+    _run_tests(bld)
+
+class run_tests(Build.BuildContext):
+    cmd = 'run_tests'
+    fun = '_run_tests'
+
 def _run_tests(bld):
     # set up LD_LIBRARY_PATH for running tests
 
     env=bld.env_of_name("testenv").copy()
-
-    bdir = os.path.join(bld.bdir, bld.path.variant(env))
+    
+    bdir = bld.path.get_bld().abspath()
 
     ld_path = os.environ.get("LD_LIBRARY_PATH", "").split(":")
     ld_path = [os.path.abspath(path) for path in ld_path if path]
@@ -639,18 +612,18 @@ def _run_tests(bld):
      
     bld.add_group("run_gtest_tests")
     bld(
-        rule="${SRC} --gmock_catch_leaked_mocks=1 --gmock_verbose=error --gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gtest.xml"),
+        rule="${SRC[0].abspath()} --gmock_catch_leaked_mocks=1 --gmock_verbose=error --gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gtest.xml"),
         source="test_runner",
-        uselib_local="brfc",
+        use="brfc",
         env=env,
         always=True,
     )
 
     bld.add_group("run_gtest_itests")
     bld(
-        rule="${SRC} --gmock_catch_leaked_mocks=1 --gmock_verbose=error --gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gitest.xml"),
+        rule="${SRC[0].abspath()} --gmock_catch_leaked_mocks=1 --gmock_verbose=error --gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gitest.xml"),
         source="itest_runner",
-        uselib_local="brfc",
+        use="brfc",
         env=env,
         always=True,
     )
@@ -661,8 +634,8 @@ def _run_tests(bld):
     bld.add_group("run_simple_java_tests")
 
     props = {
-        "waf.builddir": bld.path,
-        "db.test_db_schema_dir": bld.path.get_dir("schema").abspath(),
+        "waf.builddir": bld.path.get_bld().abspath(),
+        "db.test_db_schema_dir": bld.path.find_dir("schema").abspath(),
     }
 
     bld(
