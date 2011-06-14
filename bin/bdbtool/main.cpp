@@ -37,7 +37,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifdef BDB_BUILD_BDBFS
     #include <brfc/tool/Mount.hpp>
 #endif // BDB_BUILD_BDBFS
-
+#include <brfc/tool/Show.hpp>
 
 namespace po = boost::program_options;
 
@@ -55,6 +55,7 @@ struct Commands {
 #ifdef BDB_BUILD_BDBFS
         ptr_map_insert<Mount>(map_)("mount");
 #endif // BDB_BUILD_BDBFS
+        ptr_map_insert<Show>(map_)("show");
     }
 
     Command* by_name(const std::string& name) {
