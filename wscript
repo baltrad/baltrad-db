@@ -345,7 +345,7 @@ def _build_bdbtool(bld):
         sources.extend(bld.path.ant_glob("src/brfc/fuse/*.cpp"))
         libs.append("FUSE");
     else:
-        sources.remove("src/brfc/tool/Mount.cpp")
+        sources.remove(bld.path.find_resource("src/brfc/tool/Mount.cpp"))
 
     bld.shlib(
         source=sources,
