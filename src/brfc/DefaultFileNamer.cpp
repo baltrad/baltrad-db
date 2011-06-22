@@ -50,17 +50,13 @@ DefaultFileNamer::do_name(const Oh5File& file) const {
     name.append("T");
     name.append(file.what_time().to_iso_string());
     name.append("Z");
+    const FileEntry* entry = dynamic_cast<const FileEntry*>(&file);
+    if (entry) {
+        const std::string& uuid = entry->uuid();
+        const std::string& version = "_" + uuid.substr(0, uuid.find("-"));
+        name.append(version);
+    }
     name.append(".h5");
-    return name;
-}
-
-std::string
-DefaultFileNamer::do_name(const FileEntry& entry) const {
-    const Oh5File& file = static_cast<const Oh5File&>(entry);
-    std::string name = this->name(file);
-    const std::string& uuid = entry.uuid();
-    const std::string& version = "_" + uuid.substr(0, uuid.find("-"));
-    name.insert(name.rfind("."), version);
     return name;
 }
 

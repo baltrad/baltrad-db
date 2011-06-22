@@ -43,14 +43,6 @@ class DefaultFileNamer : public FileNamer {
      *     as @c yyyyMMddThhmmssZ
      */
     virtual std::string do_name(const Oh5File& file) const;
-
-    /**
-     * @brief name a FileEntry
-     *
-     * use the name given by name(const File&), but inject the first group
-     * of the uuid before the file extension.
-     */
-    virtual std::string do_name(const FileEntry& entry) const;
 };
 
 } // namespace brfc

@@ -48,17 +48,6 @@ class FileNamer {
     }
     
     /**
-     * @brief name a FileEntry
-     * @param entry FileEntry to be named
-     * @return the generated filename
-     *
-     * @sa do_name(const FileEntry&)
-     */
-    std::string name(const FileEntry& entry) const {
-        return do_name(entry);
-    }
-
-    /**
      * @brief destructor
      */
     virtual ~FileNamer() { }
@@ -68,11 +57,6 @@ class FileNamer {
      * @brief name(const File&) implementation
      */
     virtual std::string do_name(const Oh5File& file) const = 0;
-
-    /**
-     * @brief name(const File&) implementation
-     */
-    virtual std::string do_name(const FileEntry& entry) const = 0;
 };
 
 } // namespace brfc
