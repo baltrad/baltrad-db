@@ -404,7 +404,6 @@ SWIG_JAVABODY_METHODS(public, public, brfc::Expression)
 %ignore brfc::Oh5Node::Oh5Node;
 %ignore brfc::Oh5Node::begin;
 %ignore brfc::Oh5Node::end;
-%ignore brfc::Oh5Node::add_child;
 %ignore brfc::Oh5Node::backend;
 %ignore brfc::Oh5Node::children() const;
 %ignore brfc::Oh5Node::parent() const;
@@ -412,11 +411,7 @@ SWIG_JAVABODY_METHODS(public, public, brfc::Expression)
 %ignore brfc::Oh5Node::child(const std::string&) const;
 %ignore brfc::Oh5Node::file() const;
 
-// ignore Oh5Node constructors (std::auto_ptr)
-%ignore brfc::Oh5Attribute::Oh5Attribute;
-%ignore brfc::Oh5Dataset::Oh5Dataset;
-%ignore brfc::Oh5Group::Oh5Group;
-%ignore brfc::Oh5Node::Oh5Node;
+%delobject brfc::Oh5Node::add;
 
 %template(Oh5NodeVector) std::vector<brfc::Oh5Node* >;
 
