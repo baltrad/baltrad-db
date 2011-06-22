@@ -48,7 +48,7 @@ struct oh5_Oh5File_test : public testing::Test {
             .WillByDefault(ReturnRef(root));
 
         what = static_cast<Oh5Group*>(&root.add(new Oh5Group("what")));
-        what->add(new Oh5Attribute("object", Oh5Scalar("pvol")));
+        what_object = &what->add(new Oh5Attribute("object", Oh5Scalar("pvol")));
         what->add(new Oh5Attribute("date", Oh5Scalar(Date(2000, 1, 2))));
         what->add(new Oh5Attribute("time", Oh5Scalar(Time(12, 5))));
         what->add(new Oh5Attribute("source", Oh5Scalar("WMO:02606")));
@@ -58,6 +58,7 @@ struct oh5_Oh5File_test : public testing::Test {
     MemoryOh5NodeBackend node_backend;
     Oh5Node& root;
     Oh5Group* what;
+    Oh5Node* what_object;
 };
 
 TEST_F(oh5_Oh5File_test, test_group) {
@@ -65,6 +66,12 @@ TEST_F(oh5_Oh5File_test, test_group) {
     EXPECT_EQ(what, file.group("/what"));
     EXPECT_FALSE(file.group("/what/source"));
     EXPECT_FALSE(file.group("/nx"));
+}
+
+TEST_F(oh5_Oh5File_test, test_attribute) {
+    EXPECT_FALSE(file.attribute("/"));
+    EXPECT_FALSE(file.attribute("/what"));
+    EXPECT_EQ(what_object, file.attribute("/what/object"));
 }
 
 TEST_F(oh5_Oh5File_test, test_node) {

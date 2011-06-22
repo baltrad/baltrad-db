@@ -88,6 +88,17 @@ Oh5File::node(const std::string& path) const {
     return root().child(path);
 }
 
+const Oh5Attribute*
+Oh5File::attribute(const std::string& path) const {
+    return dynamic_cast<const Oh5Attribute*>(node(path));
+}
+
+Oh5Attribute*
+Oh5File::attribute(const std::string& path) {
+    const Oh5File* self = const_cast<const Oh5File*>(this);
+    return const_cast<Oh5Attribute*>(self->attribute(path));
+}
+
 Oh5Group*
 Oh5File::group(const std::string& path) {
     const Oh5File* self = const_cast<const Oh5File*>(this);

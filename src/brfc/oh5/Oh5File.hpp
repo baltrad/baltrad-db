@@ -61,6 +61,20 @@ class Oh5File : public boost::noncopyable {
     Oh5Node* node(const std::string& path);
 
     /**
+     * @brief get hold of Attribute at @c path
+     * @param path path to Attribute, where elements are separated by '/'
+     * @return pointer to requested Attribute if found
+     */
+    const Oh5Attribute* attribute(const std::string& path) const;
+
+    /**
+     * @brief get hold of Attribute at @c path
+     * @param path path to Attribute, where elements are separated by '/'
+     * @return pointer to requested Attribute if found
+     */
+    Oh5Attribute* attribute(const std::string& path);
+
+    /**
      * @brief get hold of Group at path
      * @param path path to Group, where elements are separated by '/'
      * @return pointer to requested Group if found
