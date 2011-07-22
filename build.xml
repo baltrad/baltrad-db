@@ -43,6 +43,7 @@
       <classpath location="deplib/postgresql-8.4-701.jdbc4.jar" />
       <transaction src="schema/postgresql/drop.sql" />
       <transaction src="schema/postgresql/create.sql" />
+      <transaction src="schema/postgresql/data.sql" />
     </sql>
   </target>
 
