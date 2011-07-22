@@ -52,6 +52,7 @@ TestRDB::~TestRDB() {
 void
 TestRDB::create() {
     exec_queries_from("create.sql");
+    exec_queries_from("data.sql");
 }
 
 void
