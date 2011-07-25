@@ -202,3 +202,4 @@ INSERT INTO bdb_sources (id, name) VALUES (53, 'dkvir');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (53, 'PLC', 'Virring');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (53, 'WMO', '06103');
 ALTER SEQUENCE bdb_sources_id_seq RESTART WITH 54;
+INSERT INTO bdb_source_kvs (source_id, key, value) SELECT id, 'NOD', name FROM bdb_sources;
