@@ -61,20 +61,20 @@ struct FileCatalog_test : public ::testing::Test {
 };
 
 TEST_F(FileCatalog_test, test_ctor_null_db) {
-    EXPECT_THROW(FileCatalog(0, &storage), value_error);
+    EXPECT_THROW(FileCatalog(0, &storage), std::invalid_argument);
 }
 
 TEST_F(FileCatalog_test, test_ctor_null_storage) {
-    EXPECT_THROW(FileCatalog(&db, 0), value_error);
+    EXPECT_THROW(FileCatalog(&db, 0), std::invalid_argument);
 }
 
 TEST_F(FileCatalog_test, test_database_nullptr) {
-    EXPECT_THROW(fc.database(0), value_error);
+    EXPECT_THROW(fc.database(0), std::invalid_argument);
     EXPECT_EQ(&db, &fc.database());
 }
 
 TEST_F(FileCatalog_test, test_storage_nullptr) {
-    EXPECT_THROW(fc.storage(0), value_error);
+    EXPECT_THROW(fc.storage(0), std::invalid_argument);
     EXPECT_EQ(&storage, &fc.storage());
 }
 

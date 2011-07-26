@@ -82,7 +82,7 @@ RelationalDatabase::create_pool(sql::ConnectionCreator* conn_ctor,
         try {
             max_size = boost::lexical_cast<size_t>(opts["pool_max_size"]);
         } catch (const boost::bad_lexical_cast& e) {
-            throw value_error("invalid value for pool_max_size: "
+            throw std::invalid_argument("invalid value for pool_max_size: "
                               + opts["pool_max_size"]);
         }
     }

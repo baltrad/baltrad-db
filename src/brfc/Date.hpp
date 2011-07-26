@@ -34,7 +34,7 @@ class Date {
   public:
     /**
      * @brief construct from year, month, day values
-     * @throw value_error if the resulting date is not valid
+     * @throw std::invalid_argument if the resulting date is not valid
      */
     Date(int year, int month, int day);
     
@@ -68,17 +68,17 @@ class Date {
     int day() const;
     
     /**
-     * @throw value_error if resulting date would be invalid
+     * @throw std::invalid_argument if resulting date would be invalid
      */
     Date& year(int year);
 
     /**
-     * @throw value_error if resulting date would be invalid
+     * @throw std::invalid_argument if resulting date would be invalid
      */
     Date& month(int month);
 
     /**
-     * @throw value_error if resulting date would be invalid
+     * @throw std::invalid_argument if resulting date would be invalid
      */
     Date& day(int day);
 
@@ -95,7 +95,7 @@ class Date {
     
     /**
      * @brief calculate Julian Day Number from a (proleptic) Gregorian date
-     * @throw value_error for dates before -4713-11-14
+     * @throw std::invalid_argument for dates before -4713-11-14
      */
     static unsigned int jdn_from_date(int year,
                                       int month,
@@ -126,7 +126,7 @@ class Date {
     /**
      * @brief parse date in ISO8601 format from @c str
      *
-     * @throw value_error if a valid date can not be parsed
+     * @throw std::invalid_argument if a valid date can not be parsed
      */
     static Date from_iso_string(const std::string& str);
 

@@ -178,7 +178,7 @@ main(int argc, char** argv) {
 
     try {
         cmd->parse_args(cmd_args);
-    } catch (const brfc::value_error& e) {
+    } catch (const std::invalid_argument& e) {
         std::cout << "bdbtool: " << e.what() << std::endl;
         return 1;
     }

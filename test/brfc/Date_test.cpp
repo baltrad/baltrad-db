@@ -61,17 +61,17 @@ TEST(Date_test, test_days_in_month) {
     EXPECT_EQ(29, Date::days_in_month(2000, 2));
     EXPECT_EQ(28, Date::days_in_month(2001, 2));
     EXPECT_EQ(31, Date::days_in_month(2000, 1));
-    EXPECT_THROW(Date::days_in_month(2000, 13), value_error);
+    EXPECT_THROW(Date::days_in_month(2000, 13), std::invalid_argument);
 }
 
 TEST(Date_test, test_construct_invalid_date) {
-    EXPECT_THROW(Date(1, 13, 1), value_error);
-    EXPECT_THROW(Date(1, 12, 32), value_error);
-    EXPECT_THROW(Date(0, 12, 1), value_error);
+    EXPECT_THROW(Date(1, 13, 1), std::invalid_argument);
+    EXPECT_THROW(Date(1, 12, 32), std::invalid_argument);
+    EXPECT_THROW(Date(0, 12, 1), std::invalid_argument);
 }
 
 TEST(Date_test, test_construct_february_29) {
-    EXPECT_THROW(Date(2001, 2, 29), value_error);
+    EXPECT_THROW(Date(2001, 2, 29), std::invalid_argument);
     EXPECT_NO_THROW(Date(2001, 2, 28));
     EXPECT_NO_THROW(Date(2000, 2, 29));
 }
@@ -95,7 +95,7 @@ TEST(Date_test, test_set_year) {
     EXPECT_EQ(2, d.month());
     EXPECT_EQ(15, d.day());
     
-    EXPECT_THROW(Date(2000, 2, 29).year(2001), value_error);
+    EXPECT_THROW(Date(2000, 2, 29).year(2001), std::invalid_argument);
 }
 
 TEST(Date_test, test_set_month) {
@@ -110,9 +110,9 @@ TEST(Date_test, test_set_month) {
     EXPECT_EQ(1, d.month());
     EXPECT_EQ(15, d.day());
     
-    EXPECT_THROW(d.month(0), value_error);
-    EXPECT_THROW(d.month(13), value_error);
-    EXPECT_THROW(Date(2000, 1, 31).month(2), value_error);
+    EXPECT_THROW(d.month(0), std::invalid_argument);
+    EXPECT_THROW(d.month(13), std::invalid_argument);
+    EXPECT_THROW(Date(2000, 1, 31).month(2), std::invalid_argument);
 }
 
 TEST(Date_test, test_set_day) {
@@ -127,8 +127,8 @@ TEST(Date_test, test_set_day) {
     EXPECT_EQ(2, d.month());
     EXPECT_EQ(1, d.day());
     
-    EXPECT_THROW(d.day(0), value_error);
-    EXPECT_THROW(Date(2000, 2, 29).day(30), value_error);
+    EXPECT_THROW(d.day(0), std::invalid_argument);
+    EXPECT_THROW(Date(2000, 2, 29).day(30), std::invalid_argument);
 }
 
 TEST(Date_test, test_eq) {
@@ -169,8 +169,8 @@ TEST(Date_test, test_to_iso_string_extended) {
 TEST(Date_test, test_from_iso_string) {
     EXPECT_EQ(Date(2000, 1, 2), Date::from_iso_string("20000102"));
     EXPECT_EQ(Date(2000, 1, 2), Date::from_iso_string("2000-01-02"));
-    EXPECT_THROW(Date::from_iso_string("2000:01:02"), value_error);
-    EXPECT_THROW(Date::from_iso_string("200000102"), value_error);
+    EXPECT_THROW(Date::from_iso_string("2000:01:02"), std::invalid_argument);
+    EXPECT_THROW(Date::from_iso_string("200000102"), std::invalid_argument);
 }
 
 } // namespace brfc

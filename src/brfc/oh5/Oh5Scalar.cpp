@@ -49,7 +49,7 @@ Oh5Scalar::get() const {
     try {
         return boost::get<T>(value_);
     } catch (const boost::bad_get&) {
-        throw value_error("held value (" +
+        throw std::invalid_argument("held value (" +
                           std::string(value_.type().name()) +
                           ") is not of requested type (" +
                           std::string(typeid(T).name()) + ")");
@@ -110,7 +110,7 @@ class scalar_to_int64 : public boost::static_visitor<long long> {
         try {
             return boost::lexical_cast<long long>(value);
         } catch (const boost::bad_lexical_cast& e) {
-            throw value_error(e.what());
+            throw std::invalid_argument(e.what());
         }
     }
 
@@ -124,7 +124,7 @@ class scalar_to_double : public boost::static_visitor<double> {
         try {
             return boost::lexical_cast<double>(value);
         } catch (const boost::bad_lexical_cast& e) {
-            throw value_error(e.what());
+            throw std::invalid_argument(e.what());
         }
     }
 
@@ -140,7 +140,7 @@ class scalar_to_bool : public boost::static_visitor<bool> {
         else if (value == "True")
             return true;
         else
-            throw value_error("can't convert '" + value + "' to bool");
+            throw std::invalid_argument("can't convert '" + value + "' to bool");
     }
 
     bool operator()(long long value) const { return value; }
@@ -151,13 +151,13 @@ class scalar_to_date : public boost::static_visitor<Date> {
   public:
     Date operator()(const std::string& value) const {
         if (value.length() != 8)
-            throw value_error("Scalar not convertible to Date");
+            throw std::invalid_argument("Scalar not convertible to Date");
         return Date::from_iso_string(value);
     }
 
     template<typename T>
     Date operator()(const T&) const {
-        throw value_error("can't convert type " +
+        throw std::invalid_argument("can't convert type " +
                           std::string(typeid(T).name()) +
                           " to Date");
     }
@@ -167,13 +167,13 @@ class scalar_to_time : public boost::static_visitor<Time> {
   public:
     Time operator()(const std::string& value) const {
         if (value.length() != 6)
-            throw value_error("Scalar not convertible to Time");
+            throw std::invalid_argument("Scalar not convertible to Time");
         return Time::from_iso_string(value);
     }
 
     template<typename T>
     Time operator()(const T&) const {
-        throw value_error("can't convert type " +
+        throw std::invalid_argument("can't convert type " +
                           std::string(typeid(T).name()) +
                           " to Time");
     }

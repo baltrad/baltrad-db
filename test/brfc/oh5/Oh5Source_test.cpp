@@ -50,9 +50,9 @@ TEST(oh5_Oh5Source_test, test_from_string_skip_empty) {
 }
 
 TEST(oh5_Oh5Source_test, test_from_string_invalid) {
-    EXPECT_THROW(Oh5Source::from_string("a:b,sd"), value_error);
-    EXPECT_THROW(Oh5Source::from_string("a:b:c"), value_error);
-    EXPECT_THROW(Oh5Source::from_string("a,b,"), value_error);
+    EXPECT_THROW(Oh5Source::from_string("a:b,sd"), std::invalid_argument);
+    EXPECT_THROW(Oh5Source::from_string("a:b:c"), std::invalid_argument);
+    EXPECT_THROW(Oh5Source::from_string("a,b,"), std::invalid_argument);
 }
 
 TEST(oh5_Oh5Source_test, test_add) {

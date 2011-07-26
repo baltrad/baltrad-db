@@ -187,7 +187,7 @@ Expression
 ExpressionFactory::and_(const Expression& x) const {
     BRFC_ASSERT(x.is_list());
     if (x.size() < 1)
-        throw value_error("Expression must have at least 1 element");
+        throw std::invalid_argument("Expression must have at least 1 element");
     Expression::const_iterator it = x.begin();
     Expression result = *it;
     ++it;
@@ -206,7 +206,7 @@ Expression
 ExpressionFactory::or_(const Expression& x) const {
     BRFC_ASSERT(x.is_list());
     if (x.size() < 1)
-        throw value_error("Expression must have at least 1 element");
+        throw std::invalid_argument("Expression must have at least 1 element");
     Expression::const_iterator it = x.begin();
     Expression result = *it;
     ++it;

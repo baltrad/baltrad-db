@@ -76,11 +76,11 @@ Benchmark::do_parse_args(const ArgVector& args) {
                   options(optdesc_).run(), vm);
         po::notify(vm);
     } catch (const po::error& e) {
-        throw value_error(e.what());
+        throw std::invalid_argument(e.what());
     }
 
     if (not vm.count("input-file")) {
-        throw value_error("input-file not specified");
+        throw std::invalid_argument("input-file not specified");
     }
 
     infile_ = vm["input-file"].as<std::string>();

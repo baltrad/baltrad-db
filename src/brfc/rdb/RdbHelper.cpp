@@ -208,17 +208,17 @@ RdbHelper::insert_attribute(long long node_id, const Oh5Attribute& attr) {
         try {
             bool val = attr.value().to_bool();
             binds["value_bool"] = Expression(val);
-        } catch (const value_error&) { /* pass */ }
+        } catch (const std::invalid_argument&) { /* pass */ }
 
         try {
             Date date = attr.value().to_date();
             binds["value_date"] = Expression(date);
-        } catch (const value_error&) { /* pass */ }
+        } catch (const std::invalid_argument&) { /* pass */ }
 
         try {
             Time time = attr.value().to_time();
             binds["value_time"] = Expression(time);
-        } catch (const value_error&) { /* pass */ }
+        } catch (const std::invalid_argument&) { /* pass */ }
     }
 
     boost::scoped_ptr<sql::Result>(conn().execute(insert_attr_qry_, binds));

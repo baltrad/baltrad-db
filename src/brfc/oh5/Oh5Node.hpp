@@ -133,7 +133,7 @@ class Oh5Node : public boost::noncopyable {
     /**
      * @brief test for a child node
      * @param path path to the child, relative to this node
-     * @throw value_error if the path is absolute and this node is not root
+     * @throw std::invalid_argument if the path is absolute and this node is not root
      * @return true if the child exists
      */
     bool has_child(const std::string& path) const;
@@ -141,7 +141,7 @@ class Oh5Node : public boost::noncopyable {
     /**
      * @brief access child node at @c path
      * @param path path to the child, relative to this node
-     * @throw value_error if the path is absolute and this node is not root
+     * @throw std::invalid_argument if the path is absolute and this node is not root
      * @return pointer to Node or null if not found.
      */
     Oh5Node* child(const std::string& path);

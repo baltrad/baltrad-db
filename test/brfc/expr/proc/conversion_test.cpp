@@ -41,7 +41,7 @@ TEST(expr_proc_conversion_date_test, test_string) {
 }
 
 TEST(expr_proc_conversion_date_test, test_string_invalid) {
-    EXPECT_THROW(date()(std::string("foo")), value_error);
+    EXPECT_THROW(date()(std::string("foo")), std::invalid_argument);
 }
 
 TEST(expr_proc_conversion_date_test, test_date) {
@@ -67,7 +67,7 @@ TEST(expr_proc_conversion_time_test, test_string) {
 }
 
 TEST(expr_proc_conversion_time_test, test_string_invalid) {
-    EXPECT_THROW(time()(std::string("foo")), value_error);
+    EXPECT_THROW(time()(std::string("foo")), std::invalid_argument);
 }
 
 TEST(expr_proc_conversion_time_test, test_time) {
@@ -93,7 +93,7 @@ TEST(expr_proc_conversion_datetime_test, test_string) {
 }
 
 TEST(expr_proc_conversion_datetime_test, test_string_invalid) {
-    EXPECT_THROW(datetime()(std::string("foo")), value_error);
+    EXPECT_THROW(datetime()(std::string("foo")), std::invalid_argument);
 }
 
 

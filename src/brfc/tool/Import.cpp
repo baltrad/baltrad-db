@@ -48,7 +48,7 @@ Import::do_help(std::ostream& /*out*/) const {
 void
 Import::do_parse_args(const ArgVector& args) {
     if (args.empty())
-        throw value_error("missing input files");
+        throw std::invalid_argument("missing input files");
 
     args_ = args;
 }

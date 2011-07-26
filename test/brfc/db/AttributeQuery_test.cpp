@@ -133,7 +133,7 @@ TEST_F(db_AttributeQuery_test, test_fetch_duplicate_name) {
 }
 
 TEST_F(db_AttributeQuery_test, test_fetch_empty_name) {
-    EXPECT_THROW(query.fetch("", Expression(1)), value_error);
+    EXPECT_THROW(query.fetch("", Expression(1)), std::invalid_argument);
 }
 
 TEST_F(db_AttributeQuery_test, test_filter) {

@@ -42,7 +42,7 @@ TestRDB::TestRDB(const std::string& dsn, const std::string& schema_dir)
         : RelationalDatabase(dsn)
         , schema_dir_(schema_dir) {
     if (not BoostFileSystem().is_absolute(schema_dir_))
-        throw value_error("schema dir must be a complete path");
+        throw std::invalid_argument("schema dir must be a complete path");
 }
 
 TestRDB::~TestRDB() {

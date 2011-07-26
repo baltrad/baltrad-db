@@ -131,7 +131,7 @@ class Time {
     /**
      * @brief parse time in format 'hhmmss' from @c str
      *
-     * @throw value_error if a valid time can not be parsed
+     * @throw std::invalid_argument if a valid time can not be parsed
      */
     static Time from_iso_string(const std::string& str);
     

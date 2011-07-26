@@ -40,7 +40,7 @@ DefaultConnectionCreator::do_create() const {
     if (dsn_.scheme() == "postgresql")
         return new pg::Connection(dsn_);
     else
-        throw value_error("no mapping found for dsn scheme: " + dsn_.scheme());
+        throw std::invalid_argument("no mapping found for dsn scheme: " + dsn_.scheme());
 
 }
 

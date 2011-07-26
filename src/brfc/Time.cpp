@@ -36,21 +36,21 @@ Time::Time(int hour,
             second * MSECS_IN_SEC +
             msec;
     if (hour < 0 or hour >= HOURS_IN_DAY)
-        throw value_error("hour value out of range");
+        throw std::invalid_argument("hour value out of range");
     if (minute < 0 or minute >= MINS_IN_HOUR)
-        throw value_error("minute value out of range");
+        throw std::invalid_argument("minute value out of range");
     if (second < 0 or second >= SECS_IN_MIN)
-        throw value_error("second value out of range");
+        throw std::invalid_argument("second value out of range");
     if (msec < 0 or msec >= MSECS_IN_SEC)
-        throw value_error("msec value out of range");
+        throw std::invalid_argument("msec value out of range");
     if (msec_ >= MSECS_IN_DAY)
-        throw value_error("time value out of range");
+        throw std::invalid_argument("time value out of range");
 }
 
 Time::Time(unsigned int msec)
         : msec_(msec) {
     if (msec_ >= MSECS_IN_DAY)
-        throw value_error("time value out of range");
+        throw std::invalid_argument("time value out of range");
 }
 
 Time::Time(const Time& other)
@@ -98,7 +98,7 @@ Time::msec() const {
 Time&
 Time::hour(int _hour) {
     if (_hour < 0 or _hour >= HOURS_IN_DAY)
-        throw value_error("invalid hour");
+        throw std::invalid_argument("invalid hour");
     msec_ = msec_ - (hour() * MSECS_IN_HOUR) + (_hour * MSECS_IN_HOUR);
     return *this;
 }
@@ -106,7 +106,7 @@ Time::hour(int _hour) {
 Time&
 Time::minute(int _minute) {
     if (_minute < 0 or _minute >= MINS_IN_HOUR)
-        throw value_error("invalid minute");
+        throw std::invalid_argument("invalid minute");
     msec_ = msec_ - (minute() * MSECS_IN_MIN) + (_minute * MSECS_IN_MIN);
     return *this;
 }
@@ -114,7 +114,7 @@ Time::minute(int _minute) {
 Time&
 Time::second(int _second) {
     if (_second < 0 or _second >= SECS_IN_MIN)
-        throw value_error("invalid second");
+        throw std::invalid_argument("invalid second");
     msec_ = msec_ - (second() * MSECS_IN_SEC) + (_second * MSECS_IN_SEC);
     return *this;
 }
@@ -122,7 +122,7 @@ Time::second(int _second) {
 Time&
 Time::msec(int _msec) {
     if (_msec < 0 or _msec >= MSECS_IN_SEC)
-        throw value_error("invalid msec");
+        throw std::invalid_argument("invalid msec");
     msec_ = msec_ - msec() + _msec;
     return *this;
 }
@@ -143,7 +143,7 @@ Time
 Time::from_iso_string(const std::string& str) {
     iso8601::time t;
     if (not iso8601::parse_time(str, t))
-        throw value_error("invalid ISO8601 time: " + str);
+        throw std::invalid_argument("invalid ISO8601 time: " + str);
     return Time(t.hour, t.minute, t.second, t.usec / 1000);
 }
 

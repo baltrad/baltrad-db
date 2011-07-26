@@ -51,7 +51,7 @@ Oh5Source::from_string(const std::string& source) {
             src.add(key, value);
         }
     } catch (const assertion_error& e) {
-        throw value_error("Invalid source string: " + source);
+        throw std::invalid_argument("Invalid source string: " + source);
     }
     return src;
 }

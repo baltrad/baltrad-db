@@ -228,49 +228,49 @@ class Variant {
      */
     /**
      * @brief access STRING variant
-     * @throw value_error if type() != STRING
+     * @throw std::invalid_argument if type() != STRING
      */
     const std::string& string() const;
     
     /**
      * @brief access INT64 variant
-     * @throw value_error if type() != INT64
+     * @throw std::invalid_argument if type() != INT64
      */
     long long int64_() const;
 
     /**
      * @brief access DOUBLE variant
-     * @throw value_error if type() != DOUBLE
+     * @throw std::invalid_argument if type() != DOUBLE
      */
     double double_() const;
 
     /**
      * @brief access BOOL variant
-     * @throw value_error if type() != BOOL
+     * @throw std::invalid_argument if type() != BOOL
      */
     bool bool_() const;
 
     /**
      * @brief access DATE variant
-     * @throw value_error if type() != DATE
+     * @throw std::invalid_argument if type() != DATE
      */
     const Date& date() const;
 
     /**
      * @brief access TIME variant
-     * @throw value_error if type() != TIME
+     * @throw std::invalid_argument if type() != TIME
      */
     const Time& time() const;
 
     /**
      * @brief access DATETIME variant
-     * @throw value_error if type() != DATETIME
+     * @throw std::invalid_argument if type() != DATETIME
      */
     const DateTime& datetime() const;
 
     /**
      * @brief access TIMEDELTA variant
-     * @throw value_error if type() != TIMEDELTA
+     * @throw std::invalid_argument if type() != TIMEDELTA
      */
     const TimeDelta& timedelta() const;
     ///@}
@@ -300,7 +300,7 @@ class Variant {
     
     /**
      * @brief convert to 64-bit integer
-     * @throw value_error if not convertible
+     * @throw std::invalid_argument if not convertible
      * 
      * conversions:
      *  - NULL variant is converted to 0

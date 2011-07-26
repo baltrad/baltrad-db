@@ -110,14 +110,14 @@ class Oh5File : public boost::noncopyable {
     /**
      * @brief access /what/object
      * @throw lookup_error if attribute is missing
-     * @throw value_error if attribute value is not a std::string
+     * @throw std::invalid_argument if attribute value is not a std::string
      */
     std::string what_object() const;
 
     /**
      * @brief access /what/date
      * @throw lookup_error if attribute is missing
-     * @throw value_error if attribute value is not a Date or a std::string in
+     * @throw std::invalid_argument if attribute value is not a Date or a std::string in
      *                    'yyyyMMdd' format
      */
     Date what_date() const;
@@ -125,7 +125,7 @@ class Oh5File : public boost::noncopyable {
     /**
      * @brief access /what/time
      * @throw lookup_error if attribute is missing
-     * @throw value_error if attribute value is not a Time or a std::string in
+     * @throw std::invalid_argument if attribute value is not a Time or a std::string in
      *                    'hhmmss' format
      */
     Time what_time() const;
@@ -134,7 +134,7 @@ class Oh5File : public boost::noncopyable {
      * @brief access /what/source
      *
      * @throw lookup_error if attribute is missing
-     * @throw value_error if attribute value is not a std::string
+     * @throw std::invalid_argument if attribute value is not a std::string
      */
     std::string what_source() const;
     ///@}
@@ -147,7 +147,7 @@ class Oh5File : public boost::noncopyable {
 
     /**
      * @brief source() default implementation
-     * @throw value_error if /what/source is not correctly formed
+     * @throw std::invalid_argument if /what/source is not correctly formed
      * @return Source parsed from /what/source or empty Source if
      *         /what/source is missing
      */

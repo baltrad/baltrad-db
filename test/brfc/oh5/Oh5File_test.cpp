@@ -104,7 +104,7 @@ TEST_F(oh5_Oh5File_test, what_date_conversion) {
     EXPECT_EQ(Date(2000, 12, 13), file.what_date());
 
     what->attribute("date")->value(Oh5Scalar("foo"));
-    EXPECT_THROW(file.what_date(), value_error);
+    EXPECT_THROW(file.what_date(), std::invalid_argument);
 }
 
 TEST_F(oh5_Oh5File_test, what_time_conversion) {
@@ -112,7 +112,7 @@ TEST_F(oh5_Oh5File_test, what_time_conversion) {
     EXPECT_EQ(Time(12, 34, 56), file.what_time());
 
     what->attribute("time")->value(Oh5Scalar("bar"));
-    EXPECT_THROW(file.what_time(), value_error);
+    EXPECT_THROW(file.what_time(), std::invalid_argument);
 }
 
 TEST_F(oh5_Oh5File_test, test_source_get) {

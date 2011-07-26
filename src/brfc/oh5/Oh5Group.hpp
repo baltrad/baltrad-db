@@ -83,8 +83,8 @@ class Oh5Group : public Oh5Node {
     
     /**
      * @brief access child group by path, trying to create missing groups
-     * @throw value_error if an invalid name is encountered in @c path
-     * @throw value_error if the path is absolute and this not is not root
+     * @throw std::invalid_argument if an invalid name is encountered in @c path
+     * @throw std::invalid_argument if the path is absolute and this not is not root
      * @return reference to the last created group
      *
      * @note this is not atomic. If an error occurs when creating missing

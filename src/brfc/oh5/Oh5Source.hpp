@@ -63,7 +63,7 @@ class Oh5Source {
     /**
      * @brief construct from a string
      * @param source key:value pairs separated by comma
-     * @throw value_error when source is incorrectly formed
+     * @throw std::invalid_argument when source is incorrectly formed
      */
     static Oh5Source from_string(const std::string& source);
     

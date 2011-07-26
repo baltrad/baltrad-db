@@ -75,11 +75,11 @@ TEST(Url_test, test_ctor5) {
 }
 
 TEST(Url_test, test_invalid_url_throws) {
-    EXPECT_THROW(Url("invalid_url"), value_error);
-    EXPECT_THROW(Url("scheme://example.com:port/"), value_error);
-    EXPECT_THROW(Url("scheme:///"), value_error);
-    EXPECT_THROW(Url("scheme://"), value_error);
-    EXPECT_THROW(Url("scheme://:@:/"), value_error);
+    EXPECT_THROW(Url("invalid_url"), std::invalid_argument);
+    EXPECT_THROW(Url("scheme://example.com:port/"), std::invalid_argument);
+    EXPECT_THROW(Url("scheme:///"), std::invalid_argument);
+    EXPECT_THROW(Url("scheme://"), std::invalid_argument);
+    EXPECT_THROW(Url("scheme://:@:/"), std::invalid_argument);
 }
 
 TEST(Url_test, test_http_path) {

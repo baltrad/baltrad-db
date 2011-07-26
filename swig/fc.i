@@ -98,6 +98,10 @@ namespace boost {
         jclass cls = jenv->FindClass("eu/baltrad/fc/FileCatalogError");
         jenv->ThrowNew(cls, e.what());
         return $null;
+    } catch (const std::invalid_argument& e) {
+        jclass cls = jenv->FindClass("java/lang/IllegalArgumentException");
+        jenv->ThrowNew(cls, e.what());
+        return $null;
     } catch (const std::exception& e) {
         jclass cls = jenv->FindClass("java/lang/RuntimeException");
         jenv->ThrowNew(cls, e.what());

@@ -70,7 +70,7 @@ TEST_F(oh5_Oh5NodeBackend_test, test_add_duplicate) {
         .WillOnce(ReturnRef(n));
     
     backend.add(root, &n);
-    EXPECT_THROW(backend.add(root, &n), value_error);
+    EXPECT_THROW(backend.add(root, &n), std::invalid_argument);
 }
 
 TEST_F(oh5_Oh5NodeBackend_test, test_add_invalid_parent) {
@@ -83,11 +83,11 @@ TEST_F(oh5_Oh5NodeBackend_test, test_add_invalid_parent) {
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
 
-    EXPECT_THROW(backend.add(r2, n), value_error); 
+    EXPECT_THROW(backend.add(r2, n), std::invalid_argument); 
 }
 
 TEST_F(oh5_Oh5NodeBackend_test, test_add_null) {
-    EXPECT_THROW(backend.add(root, 0), value_error);
+    EXPECT_THROW(backend.add(root, 0), std::invalid_argument);
 }
 
 TEST_F(oh5_Oh5NodeBackend_test, test_node) {

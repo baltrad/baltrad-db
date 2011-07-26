@@ -166,7 +166,7 @@ class Oh5Scalar {
     
     /**
      * @brief convert to Date
-     * @throw value_error if conversion fails
+     * @throw std::invalid_argument if conversion fails
      *
      * convert from string to Date using 'yyyyMMdd' as format
      */
@@ -174,7 +174,7 @@ class Oh5Scalar {
 
     /**
      * @brief convert to Time
-     * @throw value_error if conversion fails
+     * @throw std::invalid_argument if conversion fails
      *
      * convert from string to Time using 'hhmmss' as format
      */
@@ -182,7 +182,7 @@ class Oh5Scalar {
     
     /**
      * @brief convert to bool
-     * @throw value_error if conversion fails
+     * @throw std::invalid_argument if conversion fails
      */
     bool to_bool() const;
   

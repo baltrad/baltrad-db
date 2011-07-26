@@ -31,7 +31,7 @@ TEST(Variant_test, null) {
     EXPECT_TRUE(v.is_null());
     EXPECT_EQ(v.type(), Variant::NONE);
     EXPECT_FALSE(v.is_string());
-    EXPECT_THROW(v.int64_(), value_error);
+    EXPECT_THROW(v.int64_(), std::invalid_argument);
 }
 
 TEST(Variant_test, int64_) {
@@ -39,7 +39,7 @@ TEST(Variant_test, int64_) {
     EXPECT_FALSE(v.is_null());
     EXPECT_EQ(v.int64_(), 10);
     EXPECT_EQ(v.type(), Variant::INT64);
-    EXPECT_THROW(v.string(), value_error);
+    EXPECT_THROW(v.string(), std::invalid_argument);
 }
 
 TEST(Variant_test, copy_ctor) {
@@ -65,7 +65,7 @@ TEST(Variant_test, string) {
     EXPECT_EQ(v.type(), Variant::STRING);
     EXPECT_EQ(v.string(), val);
     EXPECT_FALSE(v.is_null());
-    EXPECT_THROW(v.int64_(), value_error);
+    EXPECT_THROW(v.int64_(), std::invalid_argument);
 }
 
 TEST(Variant_test, from_string_literal) {
@@ -106,29 +106,29 @@ TEST(Variant_test, to_string) {
 TEST(Variant_test, to_int64) {
     EXPECT_EQ(0, Variant().to_int64());
     EXPECT_EQ(10, Variant("10").to_int64());
-    EXPECT_THROW(Variant("foo").to_int64(), value_error);
+    EXPECT_THROW(Variant("foo").to_int64(), std::invalid_argument);
     EXPECT_EQ(10, Variant(10).to_int64());
     EXPECT_EQ(1, Variant(1.2).to_int64());
     EXPECT_EQ(1, Variant(true).to_int64());
     EXPECT_EQ(0, Variant(false).to_int64());
-    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_int64(), value_error);
-    EXPECT_THROW(Variant(Time(12, 34, 56)).to_int64(), value_error);
-    EXPECT_THROW(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_int64(), value_error);
-    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_double(), value_error);
+    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_int64(), std::invalid_argument);
+    EXPECT_THROW(Variant(Time(12, 34, 56)).to_int64(), std::invalid_argument);
+    EXPECT_THROW(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_int64(), std::invalid_argument);
+    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_double(), std::invalid_argument);
 }
 
 TEST(Variant_test, to_double) {
     EXPECT_EQ(0.0, Variant().to_double());
     EXPECT_EQ(10.0, Variant("10").to_double());
-    EXPECT_THROW(Variant("foo").to_double(), value_error);
+    EXPECT_THROW(Variant("foo").to_double(), std::invalid_argument);
     EXPECT_EQ(10.0, Variant(10).to_double());
     EXPECT_EQ(1.2, Variant(1.2).to_double());
     EXPECT_EQ(1.0, Variant(true).to_double());
     EXPECT_EQ(0.0, Variant(false).to_double());
-    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_double(), value_error);
-    EXPECT_THROW(Variant(Time(12, 34, 56)).to_double(), value_error);
-    EXPECT_THROW(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_double(), value_error);
-    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_double(), value_error);
+    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_double(), std::invalid_argument);
+    EXPECT_THROW(Variant(Time(12, 34, 56)).to_double(), std::invalid_argument);
+    EXPECT_THROW(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_double(), std::invalid_argument);
+    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_double(), std::invalid_argument);
 }
 
 TEST(Variant_test, to_bool) {
@@ -149,57 +149,57 @@ TEST(Variant_test, to_bool) {
 }
 
 TEST(Variant_test, to_time) {
-    EXPECT_THROW(Variant().to_time(), value_error);
-    EXPECT_THROW(Variant("foo").to_time(), value_error);
+    EXPECT_THROW(Variant().to_time(), std::invalid_argument);
+    EXPECT_THROW(Variant("foo").to_time(), std::invalid_argument);
     EXPECT_EQ(Time(12, 34, 56), Variant("12:34:56").to_time());
-    EXPECT_THROW(Variant(10).to_time(), value_error);
-    EXPECT_THROW(Variant(1.2).to_time(), value_error);
-    EXPECT_THROW(Variant(true).to_time(), value_error);
-    EXPECT_THROW(Variant(false).to_time(), value_error);
-    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_time(), value_error);
+    EXPECT_THROW(Variant(10).to_time(), std::invalid_argument);
+    EXPECT_THROW(Variant(1.2).to_time(), std::invalid_argument);
+    EXPECT_THROW(Variant(true).to_time(), std::invalid_argument);
+    EXPECT_THROW(Variant(false).to_time(), std::invalid_argument);
+    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_time(), std::invalid_argument);
     EXPECT_EQ(Time(12, 34, 56), Variant(Time(12, 34, 56)).to_time());
     EXPECT_EQ(Time(23, 45, 56), Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_time());
-    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_time(), value_error);
+    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_time(), std::invalid_argument);
 }
 
 TEST(Variant_test, to_date) {
-    EXPECT_THROW(Variant().to_date(), value_error);
-    EXPECT_THROW(Variant("foo").to_date(), value_error);
+    EXPECT_THROW(Variant().to_date(), std::invalid_argument);
+    EXPECT_THROW(Variant("foo").to_date(), std::invalid_argument);
     EXPECT_EQ(Date(2000, 11, 12), Variant("2000-11-12").to_date());
-    EXPECT_THROW(Variant(10).to_date(), value_error);
-    EXPECT_THROW(Variant(1.2).to_date(), value_error);
-    EXPECT_THROW(Variant(true).to_date(), value_error);
-    EXPECT_THROW(Variant(false).to_date(), value_error);
+    EXPECT_THROW(Variant(10).to_date(), std::invalid_argument);
+    EXPECT_THROW(Variant(1.2).to_date(), std::invalid_argument);
+    EXPECT_THROW(Variant(true).to_date(), std::invalid_argument);
+    EXPECT_THROW(Variant(false).to_date(), std::invalid_argument);
     EXPECT_EQ(Date(2000, 11, 12), Variant(Date(2000, 11, 12)).to_date());
-    EXPECT_THROW(Variant(Time(12, 34, 56)).to_date(), value_error);
+    EXPECT_THROW(Variant(Time(12, 34, 56)).to_date(), std::invalid_argument);
     EXPECT_EQ(Date(2000, 11, 12), Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_date());
-    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_date(), value_error);
+    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_date(), std::invalid_argument);
 }
 
 TEST(Variant_test, to_datetime) {
-    EXPECT_THROW(Variant().to_datetime(), value_error);
-    EXPECT_THROW(Variant("foo").to_datetime(), value_error);
+    EXPECT_THROW(Variant().to_datetime(), std::invalid_argument);
+    EXPECT_THROW(Variant("foo").to_datetime(), std::invalid_argument);
     EXPECT_EQ(DateTime(2000, 11, 12, 23, 45, 56), Variant("2000-11-12 23:45:56").to_datetime());
-    EXPECT_THROW(Variant(10).to_datetime(), value_error);
-    EXPECT_THROW(Variant(1.2).to_datetime(), value_error);
-    EXPECT_THROW(Variant(true).to_datetime(), value_error);
-    EXPECT_THROW(Variant(false).to_datetime(), value_error);
-    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_datetime(), value_error);
-    EXPECT_THROW(Variant(Time(12, 34, 56)).to_datetime(), value_error);
+    EXPECT_THROW(Variant(10).to_datetime(), std::invalid_argument);
+    EXPECT_THROW(Variant(1.2).to_datetime(), std::invalid_argument);
+    EXPECT_THROW(Variant(true).to_datetime(), std::invalid_argument);
+    EXPECT_THROW(Variant(false).to_datetime(), std::invalid_argument);
+    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_datetime(), std::invalid_argument);
+    EXPECT_THROW(Variant(Time(12, 34, 56)).to_datetime(), std::invalid_argument);
     EXPECT_EQ(DateTime(2000, 11, 12, 23, 45, 56), Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_datetime());
-    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_datetime(), value_error);
+    EXPECT_THROW(Variant(TimeDelta(1, 2)).to_datetime(), std::invalid_argument);
 }
 
 TEST(Variant_test, to_timedelta) {
-    EXPECT_THROW(Variant().to_timedelta(), value_error);
-    EXPECT_THROW(Variant("foo").to_timedelta(), value_error);
-    EXPECT_THROW(Variant(10).to_timedelta(), value_error);
-    EXPECT_THROW(Variant(1.2).to_timedelta(), value_error);
-    EXPECT_THROW(Variant(true).to_timedelta(), value_error);
-    EXPECT_THROW(Variant(false).to_timedelta(), value_error);
-    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_timedelta(), value_error);
-    EXPECT_THROW(Variant(Time(12, 34, 56)).to_timedelta(), value_error);
-    EXPECT_THROW(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_timedelta(), value_error);
+    EXPECT_THROW(Variant().to_timedelta(), std::invalid_argument);
+    EXPECT_THROW(Variant("foo").to_timedelta(), std::invalid_argument);
+    EXPECT_THROW(Variant(10).to_timedelta(), std::invalid_argument);
+    EXPECT_THROW(Variant(1.2).to_timedelta(), std::invalid_argument);
+    EXPECT_THROW(Variant(true).to_timedelta(), std::invalid_argument);
+    EXPECT_THROW(Variant(false).to_timedelta(), std::invalid_argument);
+    EXPECT_THROW(Variant(Date(2000, 11, 12)).to_timedelta(), std::invalid_argument);
+    EXPECT_THROW(Variant(Time(12, 34, 56)).to_timedelta(), std::invalid_argument);
+    EXPECT_THROW(Variant(DateTime(2000, 11, 12, 23, 45, 56)).to_timedelta(), std::invalid_argument);
     EXPECT_EQ(TimeDelta(1, 2), Variant(TimeDelta(1, 2)).to_timedelta());
 }
 

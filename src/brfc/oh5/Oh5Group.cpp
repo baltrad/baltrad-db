@@ -65,7 +65,7 @@ Oh5Group::effective_attribute(const std::string& name) const {
 Oh5Group&
 Oh5Group::get_or_create_group(const std::string& pathstr) {
     if (boost::starts_with(pathstr, "/") and parent())
-        throw value_error("path must not be absolute");
+        throw std::invalid_argument("path must not be absolute");
     
     std::list<std::string> path;
     boost::split(path, pathstr, boost::is_any_of("/"), boost::token_compress_on);

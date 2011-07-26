@@ -114,7 +114,7 @@ TEST_F(oh5_Oh5Group_test, test_effective_attribute_access) {
 
 TEST_F(oh5_Oh5Group_test, test_get_or_create_group_absolute_path_throws) {
     Oh5Group& g2 = static_cast<Oh5Group&>(g.add(new Oh5Group("g2")));
-    EXPECT_THROW(g2.get_or_create_group("/dataset1"), value_error);
+    EXPECT_THROW(g2.get_or_create_group("/dataset1"), std::invalid_argument);
     EXPECT_FALSE(g2.has_child("dataset1"));
 }
 

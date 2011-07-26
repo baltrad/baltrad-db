@@ -282,7 +282,7 @@ class ExpressionFactory {
      * @brief combine date and time attribute to datetime
      * @param date name of the date attribute
      * @param time name of the time attribute
-     * @throw value_error if attributes are of incorrect type
+     * @throw std::invalid_argument if attributes are of incorrect type
      */
     Expression combined_datetime(const std::string& date,
                            const std::string& time) const;

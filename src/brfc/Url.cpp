@@ -85,7 +85,7 @@ Url::parse(const std::string& str) {
 
     smatch match;
     if (not regex_match(str, match, re)) {
-        throw value_error("invalid url");
+        throw std::invalid_argument("invalid url");
     }
 
     scheme(match[t_scheme]);

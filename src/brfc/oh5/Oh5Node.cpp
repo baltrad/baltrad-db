@@ -42,7 +42,7 @@ Oh5Node::Oh5Node(const std::string& name)
         , backend_(0)
         , parent_(0) {
     if (name.find("/") != std::string::npos)
-        throw value_error("invalid node name: " + name);
+        throw std::invalid_argument("invalid node name: " + name);
 }
 
 Oh5Node::Oh5Node(const Oh5Node& other)

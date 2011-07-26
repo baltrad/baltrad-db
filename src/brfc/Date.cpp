@@ -35,13 +35,13 @@ static int _days_in_months[] = {
 Date::Date(int year, int month, int day)
         : jdn_(jdn_from_date(year, month, day)) {
     if (year < 1)
-        throw value_error("year out of range");
+        throw std::invalid_argument("year out of range");
     if (month <= 0 or month > 12)
-        throw value_error("month out of range");
+        throw std::invalid_argument("month out of range");
     if (day <= 0 or day > _days_in_months[month - 1])
-        throw value_error("day out of range");
+        throw std::invalid_argument("day out of range");
     if (not is_leap_year(year) and month == 2 and day > 28)
-        throw value_error("day out of range");
+        throw std::invalid_argument("day out of range");
 }
 
 Date::Date(unsigned int jdn)
@@ -84,7 +84,7 @@ Date::is_leap_year(int year) {
 int
 Date::days_in_month(int year, int month) {
     if (month < 1 or month > 12)
-        throw value_error("month out of range: "
+        throw std::invalid_argument("month out of range: "
                           + boost::lexical_cast<std::string>(month));
     if (month == 2 and not is_leap_year(year)) {
         return 28;
@@ -129,7 +129,7 @@ Date::year(int year) {
     int _, month, day;
     date_from_jdn(jdn_, _, month, day);
     if (days_in_month(year, month) < day)
-        throw value_error("setting year would result in invalid date");
+        throw std::invalid_argument("setting year would result in invalid date");
     jdn_ = jdn_from_date(year, month, day);
     return *this;
 }
@@ -139,7 +139,7 @@ Date::month(int month) {
     int year, _, day;
     date_from_jdn(jdn_, year, _, day);
     if (days_in_month(year, month) < day)
-        throw value_error("setting month would result in invalid date");
+        throw std::invalid_argument("setting month would result in invalid date");
     jdn_ = jdn_from_date(year, month, day);
     return *this;
 }
@@ -149,7 +149,7 @@ Date::day(int day) {
     int year, month, _;
     date_from_jdn(jdn_, year, month, _);
     if (day < 1 or days_in_month(year, month) < day)
-        throw value_error("setting month would result in invalid date");
+        throw std::invalid_argument("setting month would result in invalid date");
     jdn_ = jdn_from_date(year, month, day);
     return *this;
 }
@@ -169,7 +169,7 @@ Date
 Date::from_iso_string(const std::string& str) {
     iso8601::date d;
     if (not iso8601::parse_date(str, d))
-        throw value_error("invalid ISO8601 date: " + str);
+        throw std::invalid_argument("invalid ISO8601 date: " + str);
     return Date(d.year, d.month, d.day);
 }
 

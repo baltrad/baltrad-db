@@ -97,7 +97,7 @@ HlDoubleConverter::do_convert(HL_FormatSpecifier format,
             val = numeric_cast<double>(*reinterpret_cast<long double*>(data));
             break;
         default:
-            throw value_error("invalid format for conversion to double");
+            throw std::invalid_argument("invalid format for conversion to double");
     }
     return Oh5Scalar(val);
 }
@@ -105,7 +105,7 @@ HlDoubleConverter::do_convert(HL_FormatSpecifier format,
 HL_Data
 HlDoubleConverter::do_convert(const Oh5Scalar& value) const {
     if (value.type() != Oh5Scalar::DOUBLE)
-        throw value_error("invalid Scalar conversion to HLHDF double");
+        throw std::invalid_argument("invalid Scalar conversion to HLHDF double");
 
     double v = value.double_();
     return HL_Data(sizeof(double), "double",
@@ -128,7 +128,7 @@ HlInt64Converter::do_convert(HL_FormatSpecifier format,
             val = *reinterpret_cast<long long*>(data);
             break;
         default:
-            throw value_error("invalid format for conversion to int64");
+            throw std::invalid_argument("invalid format for conversion to int64");
     }
     return Oh5Scalar(val);
 }
@@ -136,7 +136,7 @@ HlInt64Converter::do_convert(HL_FormatSpecifier format,
 HL_Data
 HlInt64Converter::do_convert(const Oh5Scalar& value) const {
     if (value.type() != Oh5Scalar::INT64)
-        throw value_error("invalid Scalar conversion to HLHDF llong");
+        throw std::invalid_argument("invalid Scalar conversion to HLHDF llong");
     
     long long v = value.int64_();
     return HL_Data(sizeof(long long), "llong",
@@ -147,18 +147,18 @@ Oh5Scalar
 HlStringConverter::do_convert(HL_FormatSpecifier format,
                            unsigned char* data) const {
     if (format != HLHDF_STRING)
-        throw value_error("invalid format for conversion to std::string");
+        throw std::invalid_argument("invalid format for conversion to std::string");
     std::string s(reinterpret_cast<char*>(data));
     std::string::iterator end = s.end();
     if (utf8::find_invalid(s.begin(), s.end()) != s.end())
-        throw value_error("invalid utf-8: " + s);
+        throw std::invalid_argument("invalid utf-8: " + s);
     return Oh5Scalar(s);
 }
 
 HL_Data
 HlStringConverter::do_convert(const Oh5Scalar& value) const {
     if (value.type() != Oh5Scalar::STRING)
-        throw value_error("invalid Scalar conversion to HLHDF string");
+        throw std::invalid_argument("invalid Scalar conversion to HLHDF string");
     std::string v = value.string();
     return HL_Data(v.size() + 1, "string",
                    reinterpret_cast<unsigned char*>(

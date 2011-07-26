@@ -75,7 +75,7 @@ class FileCatalog {
     /**
      * @brief bind a Database instance
      * @param db the database to bind (caller retains ownership)
-     * @throw value_error if db is null
+     * @throw std::invalid_argument if db is null
      */
     void database(Database* db);
     
@@ -87,7 +87,7 @@ class FileCatalog {
     /**
      * @brief bind a LocalStorage instance
      * @param storage the storage to bind (caller retains ownership)
-     * @throw value_error if storage is null
+     * @throw std::invalid_argument if storage is null
      */
     void storage(LocalStorage* storage);
 

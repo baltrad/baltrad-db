@@ -40,7 +40,7 @@ TEST(sql_DefaultConnectionCreator_test, test_create_invalid_url) {
     Url url("bla://user:password@localhost/dbname");
     DefaultConnectionCreator c(url);
     std::auto_ptr<Connection> p;
-    EXPECT_THROW(p.reset(c.create()), value_error);
+    EXPECT_THROW(p.reset(c.create()), std::invalid_argument);
 }
 
 } // namespace sql

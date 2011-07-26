@@ -70,7 +70,7 @@ AttributeQuery::distinct(bool distinct) {
 AttributeQuery&
 AttributeQuery::fetch(const std::string& name, const Expression& expr) {
     if (name.empty())
-        throw value_error("empty name for AttributeQuery::fetch");
+        throw std::invalid_argument("empty name for AttributeQuery::fetch");
     if (fetch_.find(name) != fetch_.end())
         throw duplicate_entry("duplicate AttributeQuery::fetch: " + name);
     fetch_[name] = expr;

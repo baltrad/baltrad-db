@@ -40,12 +40,12 @@ Oh5NodeBackend::~Oh5NodeBackend() {
 Oh5Node&
 Oh5NodeBackend::add(const Oh5Node& parent, Oh5Node* node) {
     if (not node)
-        throw value_error("node == 0");
+        throw std::invalid_argument("node == 0");
     if (node->has_backend())
-        throw value_error("node already attached to backend");
+        throw std::invalid_argument("node already attached to backend");
     std::auto_ptr<Oh5Node> nodep(node); // take ownership
     if (&parent.backend() != this)
-        throw value_error("parent not attached to this backend");
+        throw std::invalid_argument("parent not attached to this backend");
     node->parent(const_cast<Oh5Node*>(&parent));
     Oh5Node& rnode = do_add(nodep.release());
     rnode.backend(this);
@@ -85,7 +85,7 @@ Oh5NodeBackend::child_by_name(const Oh5Node& node, const std::string& name) cons
 const Oh5Node*
 Oh5NodeBackend::child_by_path(const Oh5Node& node, const std::string& path) const {
     if (boost::starts_with(path, "/") and node.parent())
-        throw value_error("path must not be absolute");
+        throw std::invalid_argument("path must not be absolute");
     std::list<std::string> names;
     boost::split(names, path, boost::is_any_of("/"),
                  boost::token_compress_on);

@@ -32,7 +32,7 @@ Database::create(const std::string& dsn) {
     if (url.scheme() == "postgresql") {
         return new RelationalDatabase(dsn);
     } else {
-        throw value_error("unknown database scheme: " + url.scheme());
+        throw std::invalid_argument("unknown database scheme: " + url.scheme());
     }
 }
 

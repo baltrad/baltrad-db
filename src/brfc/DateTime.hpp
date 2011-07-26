@@ -98,7 +98,7 @@ class DateTime {
     
     /**
      * @brief convert to tm
-     * @throw value_error if not convertible
+     * @throw std::invalid_argument if not convertible
      */
     struct tm to_tm() const;
 

@@ -88,7 +88,7 @@ class HlConverter {
      * @param format format as defined in HLHDF library
      * @param data value bytes
      * @return Scalar containing the value
-     * @throw value_error if the conversion fails
+     * @throw std::invalid_argument if the conversion fails
      *
      * @see do_convert(HL_FormatSpecifier, unsigned char*) const
      */
@@ -97,7 +97,7 @@ class HlConverter {
     /**
      * @brief convert a Scalar to HLHDF format
      * @param value the Scalar to convert
-     * @throw value_error if the conversion fails
+     * @throw std::invalid_argument if the conversion fails
      *
      * @see do_convert(const Scalar&) const
      */

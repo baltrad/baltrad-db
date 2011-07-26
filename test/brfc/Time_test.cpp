@@ -31,10 +31,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 TEST(Time_test, test_construct_invalid_time) {
-    EXPECT_THROW(Time(24, 0), value_error);
-    EXPECT_THROW(Time(0, 60), value_error);
-    EXPECT_THROW(Time(0, 0, 60), value_error);
-    EXPECT_THROW(Time(0, 0, 0, 1000), value_error);
+    EXPECT_THROW(Time(24, 0), std::invalid_argument);
+    EXPECT_THROW(Time(0, 60), std::invalid_argument);
+    EXPECT_THROW(Time(0, 0, 60), std::invalid_argument);
+    EXPECT_THROW(Time(0, 0, 0, 1000), std::invalid_argument);
 }
 
 TEST(Time_test, test_accessors) {
@@ -59,8 +59,8 @@ TEST(Time_test, test_set_hour) {
     EXPECT_EQ(6, t.second());
     EXPECT_EQ(7, t.msec());
 
-    EXPECT_THROW(t.hour(-1), value_error);
-    EXPECT_THROW(t.hour(24), value_error);
+    EXPECT_THROW(t.hour(-1), std::invalid_argument);
+    EXPECT_THROW(t.hour(24), std::invalid_argument);
 }
 
 TEST(Time_test, test_set_minute) {
@@ -77,8 +77,8 @@ TEST(Time_test, test_set_minute) {
     EXPECT_EQ(6, t.second());
     EXPECT_EQ(7, t.msec());
 
-    EXPECT_THROW(t.minute(-1), value_error);
-    EXPECT_THROW(t.minute(60), value_error);
+    EXPECT_THROW(t.minute(-1), std::invalid_argument);
+    EXPECT_THROW(t.minute(60), std::invalid_argument);
 }
 
 TEST(Time_test, test_set_second) {
@@ -95,8 +95,8 @@ TEST(Time_test, test_set_second) {
     EXPECT_EQ(1, t.second());
     EXPECT_EQ(7, t.msec());
 
-    EXPECT_THROW(t.second(-1), value_error);
-    EXPECT_THROW(t.second(60), value_error);
+    EXPECT_THROW(t.second(-1), std::invalid_argument);
+    EXPECT_THROW(t.second(60), std::invalid_argument);
 }
 
 TEST(Time_test, test_set_msec) {
@@ -113,8 +113,8 @@ TEST(Time_test, test_set_msec) {
     EXPECT_EQ(6, t.second());
     EXPECT_EQ(1, t.msec());
 
-    EXPECT_THROW(t.msec(-1), value_error);
-    EXPECT_THROW(t.msec(1000), value_error);
+    EXPECT_THROW(t.msec(-1), std::invalid_argument);
+    EXPECT_THROW(t.msec(1000), std::invalid_argument);
 }
 
 TEST(Time_test, test_eq) {
@@ -180,8 +180,8 @@ TEST(Time_test, test_from_iso_string) {
     EXPECT_EQ(Time(12, 13, 14, 15), Time::from_iso_string("12:13:14.015"));
     EXPECT_EQ(Time(12, 13, 14, 15), Time::from_iso_string("121314.015"));
     EXPECT_EQ(Time(12, 13, 14, 0), Time::from_iso_string("12:13:14"));
-    EXPECT_THROW(Time::from_iso_string("121314015"), value_error);
-    EXPECT_THROW(Time::from_iso_string("12-13-14"), value_error);
+    EXPECT_THROW(Time::from_iso_string("121314015"), std::invalid_argument);
+    EXPECT_THROW(Time::from_iso_string("12-13-14"), std::invalid_argument);
 }
 
 TEST(Time_test, test_to_iso_string) {

@@ -41,7 +41,7 @@ class db_Database_test : public ::testing::Test {
 };
 
 TEST_F(db_Database_test, test_create_invalid_dsn) {
-    EXPECT_THROW(Database::create("invalid_dsn"), value_error);
+    EXPECT_THROW(Database::create("invalid_dsn"), std::invalid_argument);
 }
 
 TEST_F(db_Database_test, test_get_or_store_stored) {

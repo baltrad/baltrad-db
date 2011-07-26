@@ -45,7 +45,7 @@ class DefaultConnectionCreator : public ConnectionCreator {
   protected:
     /**
      * @brief create a Connection instance from dsn
-     * @throw value_error if url with invalid scheme is supplied
+     * @throw std::invalid_argument if url with invalid scheme is supplied
      *
      * construct a connection according to Url::scheme.
      *

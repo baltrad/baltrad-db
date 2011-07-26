@@ -84,11 +84,11 @@ Mount::do_parse_args(const ArgVector& args) {
                   options(optdesc_).positional(p_optdesc_).run(), vm);
         po::notify(vm);
     } catch (const po::error& e) {
-        throw value_error(e.what());
+        throw std::invalid_argument(e.what());
     }
 
     if (not vm.count("mount-point") == 1)
-        throw value_error("missing mount-point");
+        throw std::invalid_argument("missing mount-point");
 
     mount_point_ = vm["mount-point"].as<std::string>();
 

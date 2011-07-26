@@ -125,7 +125,7 @@ class variant_to_int64 : public boost::static_visitor<long long> {
         try {
             return boost::lexical_cast<long long>(value);
         } catch (const boost::bad_lexical_cast& e) {
-            throw value_error(e.what());
+            throw std::invalid_argument(e.what());
         }
     }
 
@@ -135,7 +135,7 @@ class variant_to_int64 : public boost::static_visitor<long long> {
 
     template<typename T>
     long long operator()(const T&) const {
-        throw value_error("held variant (" +
+        throw std::invalid_argument("held variant (" +
                           std::string(typeid(T).name()) + ") "
                           "can't be converted to int64");
     }
@@ -147,7 +147,7 @@ class variant_to_double : public boost::static_visitor<double> {
         try {
             return boost::lexical_cast<double>(value);
         } catch (const boost::bad_lexical_cast& e) {
-            throw value_error(e.what());
+            throw std::invalid_argument(e.what());
         }
     }
 
@@ -157,7 +157,7 @@ class variant_to_double : public boost::static_visitor<double> {
 
     template<typename T>
     double operator()(const T&) const {
-        throw value_error("held variant (" +
+        throw std::invalid_argument("held variant (" +
                           std::string(typeid(T).name()) + ") "
                           "can't be converted to double");
     }
@@ -195,7 +195,7 @@ class variant_to_time : public boost::static_visitor<Time> {
 
     template<typename T>
     Time operator()(const T&) const {
-        throw value_error("held variant (" +
+        throw std::invalid_argument("held variant (" +
                           std::string(typeid(T).name()) + ") "
                           "can't be converted to Time");
     }
@@ -213,7 +213,7 @@ class variant_to_date : public boost::static_visitor<Date> {
 
     template<typename T>
     Date operator()(const T&) const {
-        throw value_error("held variant (" +
+        throw std::invalid_argument("held variant (" +
                           std::string(typeid(T).name()) + ") "
                           "can't be converted to Date");
     }
@@ -229,7 +229,7 @@ class variant_to_datetime : public boost::static_visitor<DateTime> {
 
     template<typename T>
     DateTime operator()(const T&) const {
-        throw value_error("held variant (" +
+        throw std::invalid_argument("held variant (" +
                           std::string(typeid(T).name()) + ") "
                           "can't be converted to DateTime");
     }
@@ -241,7 +241,7 @@ class variant_to_timedelta : public boost::static_visitor<TimeDelta> {
 
     template<typename T>
     TimeDelta operator()(const T&) const {
-        throw value_error("held variant (" +
+        throw std::invalid_argument("held variant (" +
                           std::string(typeid(T).name()) + ") "
                           "can't be converted to TimeDelta");
     }
@@ -277,28 +277,28 @@ Variant::to_bool() const {
 Time
 Variant::to_time() const {
     if (type_ == NONE)
-        throw value_error("held variant (NULL) can't be converted to Time");
+        throw std::invalid_argument("held variant (NULL) can't be converted to Time");
     return boost::apply_visitor(variant_to_time(), value_);
 }
 
 Date
 Variant::to_date() const {
     if (type_ == NONE)
-        throw value_error("held variant (NULL) can't be converted to Date");
+        throw std::invalid_argument("held variant (NULL) can't be converted to Date");
     return boost::apply_visitor(variant_to_date(), value_);
 }
 
 DateTime
 Variant::to_datetime() const {
     if (type_ == NONE)
-        throw value_error("held variant (NULL) can't be converted to DateTime");
+        throw std::invalid_argument("held variant (NULL) can't be converted to DateTime");
     return boost::apply_visitor(variant_to_datetime(), value_);
 }
 
 TimeDelta
 Variant::to_timedelta() const {
     if (type_ == NONE)
-        throw value_error("held variant (NULL) can't be converted to TimeDelta");
+        throw std::invalid_argument("held variant (NULL) can't be converted to TimeDelta");
     return boost::apply_visitor(variant_to_timedelta(), value_);
 }
 
@@ -307,7 +307,7 @@ T Variant::get() const {
     try {
         return boost::get<T>(value_);
     } catch (const boost::bad_get&) {
-        throw value_error("held variant (" +
+        throw std::invalid_argument("held variant (" +
                           std::string(value_.type().name()) +
                           ") is not of requested type (" +
                           std::string(typeid(T).name()) + ")");

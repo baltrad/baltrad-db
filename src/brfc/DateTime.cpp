@@ -71,7 +71,7 @@ DateTime
 DateTime::from_iso_string(const std::string& str) {
     iso8601::datetime dt;
     if (not iso8601::parse_datetime(str, dt))
-        throw value_error("invalid ISO8601 datetime: " + str);
+        throw std::invalid_argument("invalid ISO8601 datetime: " + str);
     return DateTime(dt.date.year, dt.date.month, dt.date.day,
                     dt.time.hour, dt.time.minute, dt.time.second,
                     dt.time.usec / 1000);
@@ -80,7 +80,7 @@ DateTime::from_iso_string(const std::string& str) {
 struct tm
 DateTime::to_tm() const {
     if (date().year() < 1900)
-        throw value_error("can't convert DateTime to tm: year < 1900");
+        throw std::invalid_argument("can't convert DateTime to tm: year < 1900");
     struct tm t;
     t.tm_year = date().year() - 1900;
     t.tm_mon = date().month() - 1;

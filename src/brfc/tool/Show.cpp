@@ -48,7 +48,7 @@ Show::do_help(std::ostream& /*out*/) const {
 void
 Show::do_parse_args(const ArgVector& args) {
     if (args.empty())
-        throw value_error("missing input uuids");
+        throw std::invalid_argument("missing input uuids");
 
     args_ = args;
 }

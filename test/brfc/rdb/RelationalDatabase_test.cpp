@@ -92,7 +92,7 @@ TEST_F(rdb_RelationalDatabase_test, test_create_pool_invalid) {
     sql::MockConnectionCreator c;
 
     Url url("scheme://user:password@host/database?pool_max_size=-3");
-    EXPECT_THROW(RelationalDatabase::create_pool(&c, url), value_error);
+    EXPECT_THROW(RelationalDatabase::create_pool(&c, url), std::invalid_argument);
 }
 
 TEST_F(rdb_RelationalDatabase_test, test_create_pool_default) {

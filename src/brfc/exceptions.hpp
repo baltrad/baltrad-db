@@ -49,16 +49,6 @@ class brfc_error : public std::runtime_error {
 };
 
 /**
- * @brief invalid value supplied
- */
-class value_error : public brfc_error {
-  public:
-    explicit value_error(const std::string& what)
-            : brfc_error(what) {
-    }
-};
-
-/**
  * @brief object lookup failed
  *
  * equivalent exception in java bindings is @c LookupError

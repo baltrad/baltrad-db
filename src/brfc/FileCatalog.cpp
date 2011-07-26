@@ -45,14 +45,14 @@ FileCatalog::~FileCatalog() {
 void
 FileCatalog::database(Database* db) {
     if (not db)
-        throw value_error("null Database");
+        throw std::invalid_argument("null Database");
     db_ = db;
 }
 
 void
 FileCatalog::storage(LocalStorage* storage) {
     if (not storage)
-        throw value_error("null LocalStorage");
+        throw std::invalid_argument("null LocalStorage");
     storage_ = storage;
 }
 

@@ -57,7 +57,7 @@ class Command {
     /**
      * @brief parse command-line arguments
      * @param args arguments to the command
-     * @throw value_error if @c args can't be parsed
+     * @throw std::invalid_argument if @c args can't be parsed
      *
      * will split the args using whitespace as delimiter
      */
@@ -66,7 +66,7 @@ class Command {
     /**
      * @brief parse command-line arguments
      * @param args arguments to the command
-     * @throw value_error if @c args can't be parsed
+     * @throw std::invalid_argument if @c args can't be parsed
      */
 
     void parse_args(const ArgVector& args) {

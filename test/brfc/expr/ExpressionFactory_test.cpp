@@ -73,7 +73,7 @@ TEST_F(expr_ExpressionFactory_test, test_and_list) {
 }
 
 TEST_F(expr_ExpressionFactory_test, test_and_list_empty) {
-    EXPECT_THROW(xpr.and_(Expression()), value_error);
+    EXPECT_THROW(xpr.and_(Expression()), std::invalid_argument);
 }
 
 TEST_F(expr_ExpressionFactory_test, test_and_list_single) {
@@ -95,7 +95,7 @@ TEST_F(expr_ExpressionFactory_test, test_or_list) {
 }
 
 TEST_F(expr_ExpressionFactory_test, test_or_list_empty) {
-    EXPECT_THROW(xpr.or_(Expression()), value_error);
+    EXPECT_THROW(xpr.or_(Expression()), std::invalid_argument);
 }
 
 TEST_F(expr_ExpressionFactory_test, test_or_list_single) {
