@@ -296,9 +296,7 @@ TEST_P(db_FileQuery_itest, test_filter_by_place) {
 }
 
 TEST_P(db_FileQuery_itest, test_is_stored) {
-    bool result = false;
-    ASSERT_NO_THROW(result = db->is_stored(td1));
-    EXPECT_TRUE(result);
+    EXPECT_TRUE(db->is_stored(td1));
 }
 
 TEST_P(db_FileQuery_itest, test_has_nx_file) {

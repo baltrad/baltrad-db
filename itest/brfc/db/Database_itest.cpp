@@ -89,9 +89,8 @@ TEST_P(db_Database_itest, entry_by_uuid) {
     file.path(tf.path());
     
     scoped_ptr<FileEntry> e1, e2;
-    ASSERT_NO_THROW(e1.reset(db->store(file)));
-     
-    ASSERT_NO_THROW(e2.reset(db->entry_by_uuid(e1->uuid())));
+    e1.reset(db->store(file));
+    e2.reset(db->entry_by_uuid(e1->uuid()));
 
     EXPECT_EQ(e1->uuid(), e2->uuid());
     EXPECT_EQ(e1->hash(), e2->hash());
@@ -108,9 +107,8 @@ TEST_P(db_Database_itest, entry_by_file) {
     EXPECT_THROW(db->entry_by_file(file), lookup_error);
     
     scoped_ptr<FileEntry> e1, e2;
-    ASSERT_NO_THROW(e1.reset(db->store(file)));
-    
-    ASSERT_NO_THROW(e2.reset(db->entry_by_file(file)));
+    e1.reset(db->store(file));
+    e2.reset(db->entry_by_file(file));
 
     EXPECT_EQ(e1->uuid(), e2->uuid());
     EXPECT_EQ(e1->hash(), e2->hash());

@@ -62,40 +62,36 @@ class RdbHelper : boost::noncopyable {
     const sql::Dialect& dialect();
     
     /**
-     * @brief access RdbNodeBacked on @c node
-     * @param node the node to get the backend from
-     * @throw runtime_error if no backend or backend is not RdbOh5NodeBackend
+     * @brief insert nodes into the database
+     * @param file_id id if the file to associate the nodes with
+     * @param root the root node
      */
-    RdbOh5NodeBackend& backend(Oh5Node& node) const;
-
-    /**
-     * @brief access RdbNodeBacked on @c node
-     * @param node the node to get the backend from
-     * @throw runtime_error if no backend or backend is not RdbOh5NodeBackend
-     */
-    const RdbOh5NodeBackend& backend(const Oh5Node& node) const;
+    void insert_nodes(long long file_id, const Oh5Node& root);
 
     /**
      * @brief insert @c node to database
+     * @param file_id database id of the file entry
+     * @param parent_id database id of the parent node
      * @param node the node to insert
-     * @pre node is associated with RdbFileEntry (and it has database id)
-     * @post node backend has database id
+     * @return database id of the inserted node
      *
      * if @c node is Attribute, call insert_attribute
      */
-    void insert_node(long long file_id, Oh5Node& node);
+    long long insert_node(long long file_id,
+                          long long parent_id,
+                          const Oh5Node& node);
     
     /**
      * @brief insert @c attr to database
+     * @param node_id database id of the node entry
      * @param attr the attribute to insert
-     * @pre node backend has database id
      *
      * if attribute value is of type Scalar::STRING, check if it
      * is convertible to bool, Date and Time and store the value for all
      * successful conversions.
      */
-    void insert_attribute(Oh5Attribute& attr);
-    
+    void insert_attribute(long long node_id, const Oh5Attribute& attr);
+
     /**
      * @brief insert @c entry to database
      * @param entry the entry to insert
@@ -103,7 +99,7 @@ class RdbHelper : boost::noncopyable {
      * @post entry has database id
      */
     void insert_file(RdbFileEntry& entry,
-                             const PhysicalOh5File& file);
+                     const PhysicalOh5File& file);
     
     /**
      * @brief insert file content to database
@@ -145,10 +141,11 @@ class RdbHelper : boost::noncopyable {
     void load_file(RdbFileEntry& entry);
     
     /**
-     * @brief load all child nodes of @c node from database
-     * @pre node has database id
+     * @brief load nodes associated with file from database
+     * @param file_id database id of the file whose nodes to load
+     * @param root root node loaded nodes will be attached to
      */
-    void load_children(Oh5Node& node);
+    void load_nodes(long long file_id, Oh5Node& root);
 
     std::vector<Oh5Source> select_all_sources();
 

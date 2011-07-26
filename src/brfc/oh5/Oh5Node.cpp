@@ -189,13 +189,6 @@ Oh5NodeIterator<T>::Oh5NodeIterator(T* node)
 }
 
 template<typename T>
-template<typename OtherT>
-Oh5NodeIterator<T>::Oh5NodeIterator(const Oh5NodeIterator<OtherT>& other)
-        : stack_(other.stack_.begin(), other.stack_.end()) {
-
-}
-
-template<typename T>
 void
 Oh5NodeIterator<T>::increment() {
     if (not stack_.empty()) {

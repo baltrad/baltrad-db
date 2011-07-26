@@ -61,12 +61,7 @@ SaveFile::operator()(const PhysicalOh5File& file) {
         RdbHelper helper(conn);
         helper.insert_file(*entry_, file);
         helper.insert_file_content(*entry_, file.path());
-        long long file_id = entry_->id();
-        
-        BOOST_FOREACH(Oh5Node& node, entry_->root()) {
-            helper.insert_node(file_id, node);
-        }
-
+        helper.insert_nodes(entry_->id(), entry_->root());
         conn->commit();
     } catch (...) {
         conn->rollback();

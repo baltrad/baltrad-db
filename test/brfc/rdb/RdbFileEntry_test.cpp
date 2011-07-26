@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/PhysicalOh5File.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
-#include <brfc/rdb/RdbOh5NodeBackend.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionPool.hpp>
@@ -60,9 +59,6 @@ class rdb_RdbFileEntry_test : public ::testing::Test {
 
 TEST_F(rdb_RdbFileEntry_test, test_ctor) {
     EXPECT_EQ(0, entry.root().parent());
-    RdbOh5NodeBackend* be = dynamic_cast<RdbOh5NodeBackend*>(&entry.root().backend());
-    ASSERT_TRUE(be);
-    EXPECT_FALSE(be->loaded(entry.root()));
 }
 
 } // namespace brfc

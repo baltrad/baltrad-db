@@ -259,7 +259,9 @@ class Oh5NodeIterator :
     explicit Oh5NodeIterator(T* node=0);
 
     template<typename OtherT>
-    Oh5NodeIterator(const Oh5NodeIterator<OtherT>& other);
+    Oh5NodeIterator(const Oh5NodeIterator<OtherT>& other)
+            : stack_(other.stack_.begin(), other.stack_.end()) {
+    }
 
   private:
     friend class boost::iterator_core_access;

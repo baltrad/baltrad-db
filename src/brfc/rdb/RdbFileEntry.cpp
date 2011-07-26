@@ -23,7 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 
-#include <brfc/rdb/RdbOh5NodeBackend.hpp>
 #include <brfc/rdb/RdbHelper.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
@@ -41,9 +40,8 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         , uuid_()
         , hash_()
         , size_(0)
-        , nodes_(rdb) {
+        , nodes_() {
     BRFC_ASSERT(rdb_ != 0);
-    nodes_.loaded(nodes_.root(), false);
 }
 
 RdbFileEntry::~RdbFileEntry() {
@@ -82,8 +80,7 @@ RdbFileEntry::load() const {
         self->loaded(false);
         throw;
     }
-    self->nodes_.id(nodes_.root(), helper.select_root_id(*this));
-    self->nodes_.loaded(nodes_.root(), false);
+    helper.load_nodes(id(), self->root());
 }
 
 const Oh5Node&

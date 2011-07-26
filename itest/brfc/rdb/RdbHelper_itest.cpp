@@ -29,7 +29,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/RdbHelper.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
-#include <brfc/rdb/RdbOh5NodeBackend.hpp>
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5DataSet.hpp>
@@ -57,7 +56,6 @@ class rdb_RdbHelper_itest : public ::testing::TestWithParam<const char*> {
             , conn(db->conn())
             , helper(conn)
             , entry(db)
-            , backend(entry.node_backend())
             , file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Karlskrona") {
     }
 
@@ -76,17 +74,8 @@ class rdb_RdbHelper_itest : public ::testing::TestWithParam<const char*> {
     boost::shared_ptr<sql::Connection> conn;
     RdbHelper helper;
     RdbFileEntry entry;
-    RdbOh5NodeBackend& backend;
     HlFile file;
 };
-
-TEST_P(rdb_RdbHelper_itest, test_backend) {
-    Oh5Group* grp = new Oh5Group("grp");
-    EXPECT_THROW(helper.backend(*grp), std::runtime_error);
-    
-    entry.root().add(grp);
-    EXPECT_NO_THROW(helper.backend(*grp));
-}
 
 TEST_P(rdb_RdbHelper_itest, test_insert_file) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
@@ -114,34 +103,33 @@ TEST_P(rdb_RdbHelper_itest, test_insert_file_content) {
 
 TEST_P(rdb_RdbHelper_itest, test_insert_node_group) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
-
+    
     Oh5Node& grp = entry.root();
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), grp));
-    EXPECT_GT(backend.id(grp), 0);
-    EXPECT_TRUE(backend.loaded(grp));
-
-    EXPECT_ANY_THROW(helper.insert_node(entry.id(), file.root()));
+    long long id = helper.insert_node(entry.id(), 0, grp);
+    EXPECT_GT(id, 0);
 }
 
 TEST_P(rdb_RdbHelper_itest, test_insert_node_attribute) {
+    long long pid;
     EXPECT_NO_THROW(helper.insert_file(entry, file));
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), entry.root()));
+    EXPECT_NO_THROW(pid = helper.insert_node(entry.id(), 0, entry.root()));
     
     Oh5Node& attr = entry.root().add(new Oh5Attribute("attr", Oh5Scalar(1)));
 
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), attr));
+    EXPECT_NO_THROW(helper.insert_node(entry.id(), pid, attr));
 }
 
 TEST_P(rdb_RdbHelper_itest, test_insert_node_dataset) {
+    long long id;
     EXPECT_NO_THROW(helper.insert_file(entry, file));
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), entry.root()));
+    EXPECT_NO_THROW(id = helper.insert_node(entry.id(), 0, entry.root()));
     Oh5Node& parent = entry.root().add(new Oh5Group("data1"));
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), parent));
+    EXPECT_NO_THROW(id = helper.insert_node(entry.id(), id, parent));
     
     Oh5Node& ds = parent.add(new Oh5DataSet("data"));
 
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), ds));
-    EXPECT_GT(backend.id(ds), 0);
+    EXPECT_NO_THROW(id = helper.insert_node(entry.id(), id, ds));
+    EXPECT_GT(id, 0);
 }
 
 TEST_P(rdb_RdbHelper_itest, test_load_file_by_id) {
@@ -192,19 +180,19 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_uuid) {
 
 TEST_P(rdb_RdbHelper_itest, test_select_root_id_by_id) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), entry.root()));
+    EXPECT_NO_THROW(helper.insert_node(entry.id(), 0, entry.root()));
 
     RdbFileEntry e2(db);
     e2.id(entry.id());
 
     long long id = 0;
     EXPECT_NO_THROW(id = helper.select_root_id(e2));
-    EXPECT_EQ(backend.id(entry.root()), id);
+    EXPECT_GT(id, 0);
 }
 
 TEST_P(rdb_RdbHelper_itest, test_select_root_id_by_uuid) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), entry.root()));
+    EXPECT_NO_THROW(helper.insert_node(entry.id(), 0, entry.root()));
     conn->commit();
 
     RdbFileEntry e2(db);
@@ -213,7 +201,7 @@ TEST_P(rdb_RdbHelper_itest, test_select_root_id_by_uuid) {
     long long id = 0;
     id = helper.select_root_id(e2);
     EXPECT_NO_THROW(id = helper.select_root_id(e2));
-    EXPECT_EQ(backend.id(entry.root()), id);
+    EXPECT_GT(id, 0);
 }
 
 
@@ -274,7 +262,7 @@ TEST_P(rdb_RdbHelper_itest, test_load_source_by_plc_unicode) {
     EXPECT_EQ("plswi", src.get("_name"));
 }
 
-TEST_P(rdb_RdbHelper_itest, test_load_children) {
+TEST_P(rdb_RdbHelper_itest, test_load_nodes) {
     Oh5Node& g1 = entry.root().add(new Oh5Group("g1"));
     Oh5Node& g2 = entry.root().add(new Oh5Group("g2"));
     Oh5Node& a1 = entry.root().add(new Oh5Attribute("a1", Oh5Scalar(1)));
@@ -282,42 +270,28 @@ TEST_P(rdb_RdbHelper_itest, test_load_children) {
     Oh5Node& ds1 = g2.add(new Oh5DataSet("ds1"));
     Oh5Node& a3 = ds1.add(new Oh5Attribute("a3", Oh5Scalar(3)));
 
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
-    BOOST_FOREACH(Oh5Node& node, entry.root()) {
-        EXPECT_NO_THROW(helper.insert_node(entry.id(), node));
-    }
+    helper.insert_file(entry, file);
+    helper.insert_nodes(entry.id(), entry.root());
     conn->commit();
-
-    RdbOh5NodeBackend be(db);
+    
+    MemoryOh5NodeBackend be;
     Oh5Node& r = be.root();
-    be.id(r, backend.id(entry.root()));
-    be.loaded(r, false);
-
-    EXPECT_NO_THROW(helper.load_children(r));
-    EXPECT_TRUE(be.loaded(r));
+    helper.load_nodes(entry.id(), r);
 
     EXPECT_EQ(3u, r.children().size());
 
     Oh5Node* g = r.group("g1");
     ASSERT_TRUE(g);
-    EXPECT_EQ(backend.id(g1), be.id(*g));
-    EXPECT_FALSE(be.loaded(*g));
     
     g = r.group("g2");
     ASSERT_TRUE(g);
-    EXPECT_EQ(backend.id(g2), be.id(*g));
-    EXPECT_FALSE(be.loaded(*g));
 
     Oh5Attribute* a = r.attribute("a1");
     ASSERT_TRUE(a);
-    EXPECT_EQ(backend.id(a1), be.id(*a));
-    EXPECT_FALSE(be.loaded(*a));
     EXPECT_EQ(Oh5Scalar(1), a->value());
 
     Oh5DataSet* d = dynamic_cast<Oh5DataSet*>(r.child("g2/ds1"));
     ASSERT_TRUE(d);
-    EXPECT_EQ(backend.id(ds1), be.id(*d));
-    EXPECT_FALSE(be.loaded(*d));
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1

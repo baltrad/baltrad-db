@@ -46,7 +46,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
-#include <brfc/rdb/RdbOh5NodeBackend.hpp>
 
 #include <brfc/util/BoostFileSystem.hpp>
 
@@ -121,16 +120,6 @@ RdbHelper::conn() {
     return *conn_;
 }
 
-RdbOh5NodeBackend&
-RdbHelper::backend(Oh5Node& node) const {
-    return dynamic_cast<RdbOh5NodeBackend&>(node.backend());
-}
-
-const RdbOh5NodeBackend&
-RdbHelper::backend(const Oh5Node& node) const {
-    return dynamic_cast<const RdbOh5NodeBackend&>(node.backend());
-}
-
 long long
 RdbHelper::last_id(sql::Result& result) {
     if (dialect().has_feature(sql::Dialect::RETURNING) and result.next()) {
@@ -157,17 +146,28 @@ RdbHelper::compile_insert_node_query() {
 }
 
 void
-RdbHelper::insert_node(long long file_id, Oh5Node& node) {
+RdbHelper::insert_nodes(long long file_id, const Oh5Node& root) {
+    std::map<const Oh5Node*, long long> ids;
+    Oh5Node::const_iterator iter = root.begin();
+    ids[&(*iter)] = insert_node(file_id, 0, *iter);
+    ++iter;
+    Oh5Node::const_iterator end = root.end();
+    for ( ; iter != end; ++iter) {
+       ids[&(*iter)] = insert_node(file_id, ids[iter->parent()], *iter);
+    }
+}
+
+long long
+RdbHelper::insert_node(long long file_id,
+                       long long parent_id,
+                       const Oh5Node& node) {
     if (not insert_node_qry_)
         compile_insert_node_query();
     
     sql::Connection::BindMap_t binds;
-    Expression parent_id;
-    const Oh5Node* parent = node.parent();
-    if (parent) {
-        parent_id = Expression(backend(*parent).id(*parent));
+    if (parent_id) {
+        binds["parent_id"] = Expression(parent_id);
     }
-    binds["parent_id"] = parent_id;
     binds["type"] = Expression(node_sql_type(node));
     binds["file_id"] = Expression(file_id);
     binds["name"] = Expression(node.name());
@@ -175,13 +175,10 @@ RdbHelper::insert_node(long long file_id, Oh5Node& node) {
     boost::scoped_ptr<sql::Result> result(conn().execute(insert_node_qry_, binds));
 
     long long db_id = last_id(*result);
-    backend(node).id(node, db_id);
-
-    if (Oh5Attribute* attr = dynamic_cast<Oh5Attribute*>(&node)) {
-        insert_attribute(*attr);
+    if (const Oh5Attribute* attr = dynamic_cast<const Oh5Attribute*>(&node)) {
+        insert_attribute(db_id, *attr);
     }
-
-    backend(node).loaded(node, true);
+    return db_id;
 }
 
 void
@@ -200,12 +197,12 @@ RdbHelper::compile_insert_attr_query() {
 }
 
 void
-RdbHelper::insert_attribute(Oh5Attribute& attr) {
+RdbHelper::insert_attribute(long long node_id, const Oh5Attribute& attr) {
     if (not insert_attr_qry_)
         compile_insert_attr_query();
     
     sql::Connection::BindMap_t binds;
-    binds["node_id"] = Expression(backend(attr).id(attr));
+    binds["node_id"] = Expression(node_id);
     binds[attr_sql_column(attr)] = attr_sql_value(attr);
     if (attr.value().type() == Oh5Scalar::STRING) {
         try {
@@ -288,7 +285,8 @@ RdbHelper::load_file(RdbFileEntry& entry) {
         sql_.table(m::file_content::name()),
         sql_.eq(m::files::column("id"), m::file_content::column("file_id"))
     );
-
+    
+    qry.what(m::files::column("id"));
     qry.what(m::files::column("uuid"));
     qry.what(m::files::column("source_id"));
     qry.what(m::files::column("hash"));
@@ -308,7 +306,8 @@ RdbHelper::load_file(RdbFileEntry& entry) {
         throw brfc::lookup_error("no RdbFileEntry found by id=" +
                                  boost::lexical_cast<std::string>(entry.id()) +
                                  " uuid=" + entry.uuid());
-
+    
+    entry.id(result->value_at("id").int64_());
     entry.uuid(result->value_at("uuid").string());
     entry.source_id(result->value_at("source_id").int64_());
     entry.hash(result->value_at("hash").string());
@@ -525,8 +524,39 @@ RdbHelper::remove_source(const Oh5Source& source) {
         throw lookup_error("source not stored in database");
 }
 
+namespace {
+
+std::auto_ptr<Oh5Node>
+node_from_row(sql::Result& r) {
+    std::string name = r.value_at("name").string();
+    long long type = r.value_at("type").int64_();
+    std::auto_ptr<Oh5Node> child;
+    if (type == 1) { // GROUP
+        child.reset(new Oh5Group(name));
+    } else if (type == 2) { // ATTRIBUTE
+        Oh5Scalar value(0);
+        if (not r.value_at("value_str").is_null()) {
+            value = Oh5Scalar(r.value_at("value_str").string());
+        } else if (not r.value_at("value_int").is_null()) {
+            value = Oh5Scalar(r.value_at("value_int").int64_());
+        } else if (not r.value_at("value_double").is_null()) {
+            value = Oh5Scalar(r.value_at("value_double").double_());
+        } else {
+            BRFC_ASSERT(false);
+        }
+        child.reset(new Oh5Attribute(name, value));
+    } else if (type == 3) { // DATASET
+        child.reset(new Oh5DataSet(name));
+    } else {
+        BRFC_ASSERT(false);
+    }
+    return child;
+}
+
+} // namespace anonymous
+
 void
-RdbHelper::load_children(Oh5Node& node) {
+RdbHelper::load_nodes(long long file_id, Oh5Node& root) {
     sql::Select qry;
     qry.from(sql_.table(m::nodes::name()));
     qry.outerjoin(
@@ -536,8 +566,8 @@ RdbHelper::load_children(Oh5Node& node) {
             m::attrvals::column("node_id")
         )
     );
-
     qry.what(m::nodes::column("id"));
+    qry.what(m::nodes::column("parent_id"));
     qry.what(m::nodes::column("name"));
     qry.what(m::nodes::column("type"));
     qry.what(m::attrvals::column("value_int"));
@@ -546,47 +576,24 @@ RdbHelper::load_children(Oh5Node& node) {
     qry.what(m::attrvals::column("value_bool"));
     qry.what(m::attrvals::column("value_date"));
     qry.what(m::attrvals::column("value_time"));
-
-    RdbOh5NodeBackend& be = backend(node);
-
-    long long id = be.id(node);
-
-    qry.where(sql_.eq(m::nodes::column("parent_id"), sql_.int64_(id)));
+    qry.where(sql_.eq(m::nodes::column("file_id"), sql_.int64_(file_id)));
+    qry.append_order_by(m::nodes::column("id"), sql::Select::ASC);
 
     boost::scoped_ptr<sql::Result> r(conn().execute(qry));
 
+    std::map<long long, Oh5Node*> nodes;
+    
+    if (!r->next())
+        return;
+    nodes[r->value_at("id").int64_()] = &root;
+
     while (r->next()) {
-        std::string name = r->value_at("name").string();
         long long id = r->value_at("id").int64_();
-        long long type = r->value_at("type").int64_();
+        long long parent_id = r->value_at("parent_id").int64_(); // to_ ?
 
-        std::auto_ptr<Oh5Node> child;
-        if (type == 1) { // GROUP
-            child.reset(new Oh5Group(name));
-        } else if (type == 2) { // ATTRIBUTE
-            Oh5Scalar value(0);
-            if (not r->value_at("value_str").is_null()) {
-                value = Oh5Scalar(r->value_at("value_str").string());
-            } else if (not r->value_at("value_int").is_null()) {
-                value = Oh5Scalar(r->value_at("value_int").int64_());
-            } else if (not r->value_at("value_double").is_null()) {
-                value = Oh5Scalar(r->value_at("value_double").double_());
-            } else {
-                BRFC_ASSERT(false);
-            }
-            child.reset(new Oh5Attribute(name, value));
-        } else if (type == 3) { // DATASET
-            child.reset(new Oh5DataSet(name));
-        } else {
-            BRFC_ASSERT(false);
-        }
-        
-        Oh5Node& c = be.add(node, child.release());
-        be.id(c, id);
-        be.loaded(c, false);
+        std::auto_ptr<Oh5Node> child(node_from_row(*r));
+        nodes[id] = &nodes[parent_id]->add(child.release());
     }
-
-    be.loaded(node, true);
 }
 
 } // namespace brfc
