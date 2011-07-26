@@ -23,8 +23,6 @@ re_3 = re.compile('#include ["<](.*)[">]', re.M)
 
 def scan(self):
     "scan for swig dependencies, climb the .i files"
-    print("scanner")
-    print(self.generator.includes_nodes)
     env = self.env
 
     lst_src = []
