@@ -178,33 +178,6 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_uuid) {
     EXPECT_EQ(entry.lo_id(), e2.lo_id());
 }
 
-TEST_P(rdb_RdbHelper_itest, test_select_root_id_by_id) {
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), 0, entry.root()));
-
-    RdbFileEntry e2(db);
-    e2.id(entry.id());
-
-    long long id = 0;
-    EXPECT_NO_THROW(id = helper.select_root_id(e2));
-    EXPECT_GT(id, 0);
-}
-
-TEST_P(rdb_RdbHelper_itest, test_select_root_id_by_uuid) {
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), 0, entry.root()));
-    conn->commit();
-
-    RdbFileEntry e2(db);
-    e2.uuid(entry.uuid());
-    
-    long long id = 0;
-    id = helper.select_root_id(e2);
-    EXPECT_NO_THROW(id = helper.select_root_id(e2));
-    EXPECT_GT(id, 0);
-}
-
-
 TEST_P(rdb_RdbHelper_itest, test_load_source) {
     long long src_id = 0;
     Oh5Source src = Oh5Source::from_string("PLC:Legionowo");

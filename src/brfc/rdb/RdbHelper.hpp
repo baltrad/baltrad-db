@@ -119,14 +119,7 @@ class RdbHelper : boost::noncopyable {
      * A source is considered found when exactly one database id is found.
      */
     long long select_source_id(const Oh5Source& source);
-    
-    /**
-     * @brief lookup id for the root node of @c entry
-     * @return database id of the node or 0 if not found
-     * @pre entry has database id
-     */
-    long long select_root_id(const RdbFileEntry& entry);
-    
+        
     /**
      * @brief load source by database id
      * @return source with all key/value pairs defined in database or

@@ -317,31 +317,6 @@ RdbHelper::load_file(RdbFileEntry& entry) {
 }
 
 long long
-RdbHelper::select_root_id(const RdbFileEntry& entry) {
-    sql::Select qry;
-    qry.from(sql_.table(m::files::name()));
-    qry.join(
-        sql_.table(m::nodes::name()),
-        sql_.eq(m::files::column("id"), m::nodes::column("file_id"))
-    );
-    qry.what(m::nodes::column("id"));
-    qry.where(sql_.eq(m::nodes::column("name"), sql_.string("")));
-    if (entry.id() != 0)
-        qry.append_where(sql_.eq(m::files::column("id"), sql_.int64_(entry.id())));
-    else if (entry.uuid() != "")
-        qry.append_where(sql_.eq(m::files::column("uuid"), sql_.string(entry.uuid())));
-    else
-        throw std::runtime_error("no uuid or id to load file from db");
-
-    boost::scoped_ptr<sql::Result> r(conn().execute(qry));
-    
-    if (not r->next())
-        return 0;
-
-    return r->value_at(0).int64_();
-}
-
-long long
 RdbHelper::select_source_id(const Oh5Source& src) {
     sql::Select qry;
     qry.distinct(true);
