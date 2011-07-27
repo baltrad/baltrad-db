@@ -30,9 +30,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <pqxx/transaction>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Url.hpp>
 #include <brfc/sql/pg/Result.hpp>
 #include <brfc/util/no_delete.hpp>
+#include <brfc/util/Url.hpp>
 
 namespace brfc {
 namespace sql {

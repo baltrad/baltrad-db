@@ -22,9 +22,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Url.hpp>
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/DefaultConnectionCreator.hpp>
+#include <brfc/util/Url.hpp>
 
 namespace brfc {
 namespace sql {

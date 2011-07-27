@@ -20,7 +20,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Url.hpp>
 #include <brfc/db/AttributeQuery.hpp>
 #include <brfc/db/AttributeResult.hpp>
 #include <brfc/db/FileQuery.hpp>
@@ -36,6 +35,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/MockConnectionPool.hpp>
 #include <brfc/sql/MockResult.hpp>
 #include <brfc/util/no_delete.hpp>
+#include <brfc/util/Url.hpp>
 
 using ::testing::_;
 using ::testing::Return;

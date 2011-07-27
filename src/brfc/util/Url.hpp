@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_URL_HPP
-#define BRFC_URL_HPP
+#ifndef BRFC_UTIL_URL_HPP
+#define BRFC_UTIL_URL_HPP
 
 #include <map>
 #include <string>
@@ -123,4 +123,4 @@ class Url {
 
 } // namespace brfc
 
-#endif // BRFC_URL_HPP
+#endif // BRFC_UTIL_URL_HPP

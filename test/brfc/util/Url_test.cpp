@@ -20,11 +20,11 @@ along with baltrad-db. If not, see <scheme://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Url.hpp>
+#include <brfc/util/Url.hpp>
 
 namespace brfc {
 
-TEST(Url_test, test_ctor1) {
+TEST(util_Url_test, test_ctor1) {
     Url url("scheme://user:password@example.com:1234/path/to/resource");
     EXPECT_EQ("scheme", url.scheme());
     EXPECT_EQ("user", url.user_name());
@@ -34,7 +34,7 @@ TEST(Url_test, test_ctor1) {
     EXPECT_EQ("path/to/resource", url.path());
 }
 
-TEST(Url_test, test_ctor2) {
+TEST(util_Url_test, test_ctor2) {
     Url url("scheme://user@example.com:1234/path/to/resource");
     EXPECT_EQ("scheme", url.scheme());
     EXPECT_EQ("user", url.user_name());
@@ -44,7 +44,7 @@ TEST(Url_test, test_ctor2) {
     EXPECT_EQ("path/to/resource", url.path());
 }
 
-TEST(Url_test, test_ctor3) {
+TEST(util_Url_test, test_ctor3) {
     Url url("scheme://user@example.com/path/to/resource");
     EXPECT_EQ("scheme", url.scheme());
     EXPECT_EQ("user", url.user_name());
@@ -54,7 +54,7 @@ TEST(Url_test, test_ctor3) {
     EXPECT_EQ("path/to/resource", url.path());
 }
 
-TEST(Url_test, test_ctor4) {
+TEST(util_Url_test, test_ctor4) {
     Url url("scheme://example.com/path/to/resource");
     EXPECT_EQ("scheme", url.scheme());
     EXPECT_EQ("", url.user_name());
@@ -64,7 +64,7 @@ TEST(Url_test, test_ctor4) {
     EXPECT_EQ("path/to/resource", url.path());
 }
 
-TEST(Url_test, test_ctor5) {
+TEST(util_Url_test, test_ctor5) {
     Url url("scheme://example.com");
     EXPECT_EQ("scheme", url.scheme());
     EXPECT_EQ("", url.user_name());
@@ -74,7 +74,7 @@ TEST(Url_test, test_ctor5) {
     EXPECT_EQ("", url.path());
 }
 
-TEST(Url_test, test_invalid_url_throws) {
+TEST(util_Url_test, test_invalid_url_throws) {
     EXPECT_THROW(Url("invalid_url"), std::invalid_argument);
     EXPECT_THROW(Url("scheme://example.com:port/"), std::invalid_argument);
     EXPECT_THROW(Url("scheme:///"), std::invalid_argument);
@@ -82,13 +82,13 @@ TEST(Url_test, test_invalid_url_throws) {
     EXPECT_THROW(Url("scheme://:@:/"), std::invalid_argument);
 }
 
-TEST(Url_test, test_http_path) {
+TEST(util_Url_test, test_http_path) {
     Url url;
     url.path("path/to/resource?arg1=val1&arg2=val2");
     EXPECT_EQ("path/to/resource", url.http_path());
 }
 
-TEST(Url_test, test_http_searchpart) {
+TEST(util_Url_test, test_http_searchpart) {
     Url url;
     url.path("path/to/resource?arg1=val1&arg2=val2&arg3=val3");
     std::map<std::string, std::string> q = url.http_searchpart();
@@ -101,7 +101,7 @@ TEST(Url_test, test_http_searchpart) {
     EXPECT_EQ("val3", q["arg3"]);
 }
 
-TEST(Url_test, test_http_searchpath_empty) {
+TEST(util_Url_test, test_http_searchpath_empty) {
     Url url;
     url.path("path/to/resource");
     std::map<std::string, std::string> q;

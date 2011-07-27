@@ -27,13 +27,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string/split.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/Url.hpp>
-
 #include <brfc/sql/Connection.hpp>
 #include <brfc/sql/Dialect.hpp>
 #include <brfc/sql/Result.hpp>
-
 #include <brfc/util/BoostFileSystem.hpp>
+#include <brfc/util/Url.hpp>
 
 namespace brfc {
 namespace test {

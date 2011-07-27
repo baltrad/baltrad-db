@@ -20,8 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_DEFAULT_CONNETION_CREATOR_HPP
 #define BRFC_SQL_DEFAULT_CONNETION_CREATOR_HPP
 
-#include <brfc/Url.hpp>
 #include <brfc/sql/ConnectionCreator.hpp>
+#include <brfc/util/Url.hpp>
 
 namespace brfc {
 namespace sql {

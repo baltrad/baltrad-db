@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/Url.hpp>
+#include <brfc/util/Url.hpp>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/xpressive/xpressive_static.hpp>
