@@ -625,6 +625,6 @@ def _run_tests(bld):
 
 
 def doc(bld):
-    Utils.exec_command("doxygen", cwd="doc")
+    bld.exec_command("doxygen", cwd="doc")
 
 # vim:filetype=python:et:ts=4:sw=4:
