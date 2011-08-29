@@ -85,11 +85,11 @@ class RelationalDatabase : public Database {
     /**
      * @brief check if file hash is unique in database
      */
-    virtual bool do_is_stored(const PhysicalOh5File& file);
+    virtual bool do_is_stored(const Oh5PhysicalFile& file);
     virtual bool do_remove(const FileEntry& entry);
 
-    virtual FileEntry* do_store(const PhysicalOh5File& file);
-    virtual FileEntry* do_entry_by_file(const PhysicalOh5File& file);
+    virtual FileEntry* do_store(const Oh5PhysicalFile& file);
+    virtual FileEntry* do_entry_by_file(const Oh5PhysicalFile& file);
     virtual FileEntry* do_entry_by_uuid(const std::string& uuid);
     
     virtual FileResult* do_execute(const FileQuery& query);

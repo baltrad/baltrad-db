@@ -34,7 +34,7 @@ namespace brfc {
     class Oh5Attribute;
     class Oh5Group;
     class Oh5Node;
-    class PhysicalOh5File;
+    class Oh5PhysicalFile;
     class Oh5Source;
     class RdbFileEntry;
     class RdbOh5NodeBackend;
@@ -99,7 +99,7 @@ class RdbHelper : boost::noncopyable {
      * @post entry has database id
      */
     void insert_file(RdbFileEntry& entry,
-                     const PhysicalOh5File& file);
+                     const Oh5PhysicalFile& file);
     
     /**
      * @brief insert file content to database

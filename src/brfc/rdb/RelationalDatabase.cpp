@@ -38,7 +38,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RdbHelper.hpp>
 #include <brfc/rdb/SaveFile.hpp>
 
-#include <brfc/oh5/PhysicalOh5File.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
 #include <brfc/sql/BasicConnectionPool.hpp>
@@ -106,7 +106,7 @@ RelationalDatabase::mapper() const {
 }
 
 bool
-RelationalDatabase::do_is_stored(const PhysicalOh5File& file) {
+RelationalDatabase::do_is_stored(const Oh5PhysicalFile& file) {
     try {
         std::auto_ptr<FileEntry> e(entry_by_file(file));
     } catch (lookup_error) {
@@ -116,12 +116,12 @@ RelationalDatabase::do_is_stored(const PhysicalOh5File& file) {
 }
 
 FileEntry*
-RelationalDatabase::do_store(const PhysicalOh5File& file) {
+RelationalDatabase::do_store(const Oh5PhysicalFile& file) {
     return SaveFile(this)(file);
 }
 
 FileEntry*
-RelationalDatabase::do_entry_by_file(const PhysicalOh5File& file) {
+RelationalDatabase::do_entry_by_file(const Oh5PhysicalFile& file) {
     const std::string& hash = file_hasher().hash(file);
     boost::shared_ptr<sql::Connection> c = conn();
     long long src_id = RdbHelper(c).select_source_id(file.source());

@@ -17,33 +17,15 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_OH5_PHSYICAL_FILE_HPP
-#define BRFC_OH5_PHSYICAL_FILE_HPP
-
-#include <string>
-
-#include <brfc/oh5/Oh5File.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 
 namespace brfc {
 
-/**
- * @ingroup exposed
- */
-class PhysicalOh5File : public Oh5File {
-  public:
-    /**
-     * @brief absolute file path
-     */
-    const std::string& path() const {
-        return do_path();
-    }
-
-    std::string name() const;
-
-  protected:
-    virtual const std::string& do_path() const = 0;
-};
+std::string
+Oh5PhysicalFile::name() const {
+    const std::string& p = path();
+    size_t idx = p.rfind('/');
+    return idx == std::string::npos ? p : p.substr(idx + 1);
+}
 
 } // namespace brfc
-
-#endif // BRFC_OH5_PHSYICAL_FILE_HPP

@@ -34,7 +34,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5DataSet.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
-#include <brfc/oh5/PhysicalOh5File.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 
 #include <brfc/sql/Compiler.hpp>
 #include <brfc/sql/Factory.hpp>
@@ -226,7 +226,7 @@ RdbHelper::insert_attribute(long long node_id, const Oh5Attribute& attr) {
 
 void
 RdbHelper::insert_file(RdbFileEntry& entry,
-                       const PhysicalOh5File& file) {
+                       const Oh5PhysicalFile& file) {
     long long source_id = select_source_id(file.source());
 
     boost::uuids::basic_random_generator<boost::mt19937> gen;

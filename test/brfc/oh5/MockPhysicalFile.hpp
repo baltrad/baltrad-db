@@ -22,11 +22,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gmock/gmock.h>
 
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/PhysicalOh5File.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 
 namespace brfc {
 
-class MockPhysicalFile : public PhysicalOh5File {
+class MockPhysicalFile : public Oh5PhysicalFile {
   public:
     MOCK_CONST_METHOD0(do_root, const Oh5Group&());
     MOCK_CONST_METHOD0(do_path, const std::string&());

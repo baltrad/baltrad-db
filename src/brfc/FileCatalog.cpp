@@ -63,7 +63,7 @@ FileCatalog::is_stored(const std::string& path) const {
 }
 
 bool
-FileCatalog::is_stored(const PhysicalOh5File& f) const {
+FileCatalog::is_stored(const Oh5PhysicalFile& f) const {
     return db_->is_stored(f);
 }
 
@@ -74,7 +74,7 @@ FileCatalog::store(const std::string& path) {
 }
 
 FileEntry*
-FileCatalog::store(const PhysicalOh5File& file) {
+FileCatalog::store(const Oh5PhysicalFile& file) {
     std::auto_ptr<FileEntry> e(db_->store(file));
     try {
         storage_->prestore(*e, file.path());
@@ -92,7 +92,7 @@ FileCatalog::get_or_store(const std::string& path) {
 }
 
 FileEntry*
-FileCatalog::get_or_store(const PhysicalOh5File& file) {
+FileCatalog::get_or_store(const Oh5PhysicalFile& file) {
     std::auto_ptr<FileEntry> e(db_->get_or_store(file));
     try {
         storage_->prestore(*e, file.path());

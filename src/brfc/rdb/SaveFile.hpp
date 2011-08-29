@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class Oh5Node;
-class PhysicalOh5File;
+class Oh5PhysicalFile;
 class RdbFileEntry;
 class RelationalDatabase;
 
@@ -43,7 +43,7 @@ class SaveFile {
      * @param file the file to be saved
      * @return file entry in the database
      */
-    RdbFileEntry* operator()(const PhysicalOh5File& file);
+    RdbFileEntry* operator()(const Oh5PhysicalFile& file);
 
   private:
     Oh5Node& parent_on_entry(const Oh5Node& node);

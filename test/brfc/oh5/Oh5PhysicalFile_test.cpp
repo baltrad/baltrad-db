@@ -28,15 +28,15 @@ using ::testing::ReturnRef;
 
 namespace brfc {
 
-struct oh5_PhysicalOh5File_test : public testing::Test {
-    oh5_PhysicalOh5File_test()
+struct oh5_Oh5PhysicalFile_test : public testing::Test {
+    oh5_Oh5PhysicalFile_test()
             : file() {
     }
 
     ::testing::NiceMock<MockPhysicalFile> file;
 };
 
-TEST_F(oh5_PhysicalOh5File_test, test_name) {
+TEST_F(oh5_Oh5PhysicalFile_test, test_name) {
     std::string path;
     EXPECT_CALL(file, do_path())
         .WillRepeatedly(ReturnRef(path));

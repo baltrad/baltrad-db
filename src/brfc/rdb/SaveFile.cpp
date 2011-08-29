@@ -28,7 +28,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/oh5/Oh5Node.hpp>
-#include <brfc/oh5/PhysicalOh5File.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 #include <brfc/sql/Connection.hpp>
 
 namespace brfc {
@@ -38,7 +38,7 @@ SaveFile::SaveFile(RelationalDatabase* rdb)
 }
 
 RdbFileEntry*
-SaveFile::operator()(const PhysicalOh5File& file) {
+SaveFile::operator()(const Oh5PhysicalFile& file) {
     std::auto_ptr<RdbFileEntry> entry_(new RdbFileEntry(rdb_));
     entry_.reset(new RdbFileEntry(rdb_));
     entry_->hash(rdb_->file_hasher().hash(file));

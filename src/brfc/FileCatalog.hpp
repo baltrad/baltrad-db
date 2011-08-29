@@ -29,7 +29,7 @@ namespace brfc {
     class Database;
     class FileEntry;
     class LocalStorage;
-    class PhysicalOh5File;
+    class Oh5PhysicalFile;
 }
 
 namespace brfc {
@@ -118,7 +118,7 @@ class FileCatalog {
      * already present in database. For the exact rules on how the unique id
      * is determined, refer to File documentation.
      */
-    bool is_stored(const PhysicalOh5File& f) const;
+    bool is_stored(const Oh5PhysicalFile& f) const;
     
     /**
      * @brief import file to catalog
@@ -151,7 +151,7 @@ class FileCatalog {
      * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
      * is considered failed.
      */
-    FileEntry* store(const PhysicalOh5File& file);
+    FileEntry* store(const Oh5PhysicalFile& file);
     
     /**
      * @brief get FileEntry for a file, storing it if necessary
@@ -181,7 +181,7 @@ class FileCatalog {
      * Exceptions thrown by LocalStorage::prestore are ignored and prestoring
      * is considered failed.
      */
-    FileEntry* get_or_store(const PhysicalOh5File& file);
+    FileEntry* get_or_store(const Oh5PhysicalFile& file);
     
     /**
      * @brief remove file from catalog
