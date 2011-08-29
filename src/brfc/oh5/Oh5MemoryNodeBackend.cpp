@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/MemoryOh5NodeBackend.hpp>
+#include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/composite_key.hpp>
@@ -37,7 +37,7 @@ namespace mi = boost::multi_index;
 
 namespace brfc {
 
-struct MemoryOh5NodeBackend::Impl {
+struct Oh5MemoryNodeBackend::Impl {
 
     struct by_node {};
     struct by_parent {};
@@ -119,33 +119,33 @@ struct MemoryOh5NodeBackend::Impl {
     NodeSet_t entries;
 };
 
-MemoryOh5NodeBackend::MemoryOh5NodeBackend()
+Oh5MemoryNodeBackend::Oh5MemoryNodeBackend()
         : impl_(new Impl()) {
     impl_->root().backend(this);
 }
 
-MemoryOh5NodeBackend::~MemoryOh5NodeBackend() {
+Oh5MemoryNodeBackend::~Oh5MemoryNodeBackend() {
 
 }
 
 Oh5Node&
-MemoryOh5NodeBackend::do_add(Oh5Node* node) {
+Oh5MemoryNodeBackend::do_add(Oh5Node* node) {
     impl_->add(node);
     return *node;
 }
 
 bool
-MemoryOh5NodeBackend::do_has(const Oh5Node& node) const {
+Oh5MemoryNodeBackend::do_has(const Oh5Node& node) const {
     return impl_->has(node);
 }
 
 const Oh5Node&
-MemoryOh5NodeBackend::do_root() const {
+Oh5MemoryNodeBackend::do_root() const {
     return impl_->root();
 }
 
 std::vector<const Oh5Node*>
-MemoryOh5NodeBackend::do_children(const Oh5Node& node) const {
+Oh5MemoryNodeBackend::do_children(const Oh5Node& node) const {
     return impl_->children(node);
 }
 

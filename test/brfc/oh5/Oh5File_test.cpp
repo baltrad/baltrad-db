@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/MemoryOh5NodeBackend.hpp>
+#include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
 #include <brfc/test_common.hpp>
@@ -55,7 +55,7 @@ struct oh5_Oh5File_test : public testing::Test {
     }
 
     ::testing::NiceMock<MockOh5File> file;
-    MemoryOh5NodeBackend node_backend;
+    Oh5MemoryNodeBackend node_backend;
     Oh5Node& root;
     Oh5Group* what;
     Oh5Node* what_object;
@@ -89,7 +89,7 @@ TEST_F(oh5_Oh5File_test, required_attribute_shortcuts) {
 }
 
 TEST_F(oh5_Oh5File_test, required_attribute_shortcuts_when_missing) {
-    MemoryOh5NodeBackend be;
+    Oh5MemoryNodeBackend be;
     EXPECT_CALL(file, do_root())
         .WillRepeatedly(ReturnRef(be.root()));
 
@@ -119,7 +119,7 @@ TEST_F(oh5_Oh5File_test, test_source_get) {
     EXPECT_EQ("WMO:02606", file.source().to_string());
     
     // missing /what/source
-    MemoryOh5NodeBackend be;
+    Oh5MemoryNodeBackend be;
     EXPECT_CALL(file, do_root())
         .WillRepeatedly(ReturnRef(be.root()));
 

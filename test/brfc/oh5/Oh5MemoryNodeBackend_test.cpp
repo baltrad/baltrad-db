@@ -22,23 +22,23 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 
 #include <brfc/oh5/MockNode.hpp>
-#include <brfc/oh5/MemoryOh5NodeBackend.hpp>
+#include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
 
 using ::testing::_;
 using ::testing::Return;
 
 namespace brfc {
 
-class oh5_MemoryOh5NodeBackend_test : public ::testing::Test {
+class oh5_Oh5MemoryNodeBackend_test : public ::testing::Test {
   public:
-    oh5_MemoryOh5NodeBackend_test()
+    oh5_Oh5MemoryNodeBackend_test()
             : backend() {
     }
   
-    MemoryOh5NodeBackend backend;
+    Oh5MemoryNodeBackend backend;
 };
 
-TEST_F(oh5_MemoryOh5NodeBackend_test, test_add) {
+TEST_F(oh5_Oh5MemoryNodeBackend_test, test_add) {
     MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
@@ -48,7 +48,7 @@ TEST_F(oh5_MemoryOh5NodeBackend_test, test_add) {
     EXPECT_EQ(n, &rn); // reuses node
 }
 
-TEST_F(oh5_MemoryOh5NodeBackend_test, test_add_duplicate_entry) {
+TEST_F(oh5_Oh5MemoryNodeBackend_test, test_add_duplicate_entry) {
     MockNode* n1 = new MockNode("n");
     MockNode* n2 = new MockNode("n");
     ON_CALL(*n1, do_accepts_child(_))
@@ -60,7 +60,7 @@ TEST_F(oh5_MemoryOh5NodeBackend_test, test_add_duplicate_entry) {
     EXPECT_THROW(backend.root().add(n2), duplicate_entry);
 }
 
-TEST_F(oh5_MemoryOh5NodeBackend_test, test_has) {
+TEST_F(oh5_Oh5MemoryNodeBackend_test, test_has) {
     MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
@@ -71,7 +71,7 @@ TEST_F(oh5_MemoryOh5NodeBackend_test, test_has) {
     EXPECT_TRUE(backend.has(*n));
 }
 
-TEST_F(oh5_MemoryOh5NodeBackend_test, test_parent) {
+TEST_F(oh5_Oh5MemoryNodeBackend_test, test_parent) {
     MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection
@@ -81,7 +81,7 @@ TEST_F(oh5_MemoryOh5NodeBackend_test, test_parent) {
     EXPECT_EQ(&backend.root(), n->parent());
 }
 
-TEST_F(oh5_MemoryOh5NodeBackend_test, test_children) {
+TEST_F(oh5_Oh5MemoryNodeBackend_test, test_children) {
     MockNode* n = new MockNode("n");
     ON_CALL(*n, do_accepts_child(_))
         .WillByDefault(Return(true)); // for leak detection

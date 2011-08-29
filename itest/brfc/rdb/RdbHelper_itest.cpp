@@ -247,7 +247,7 @@ TEST_P(rdb_RdbHelper_itest, test_load_nodes) {
     helper.insert_nodes(entry.id(), entry.root());
     conn->commit();
     
-    MemoryOh5NodeBackend be;
+    Oh5MemoryNodeBackend be;
     Oh5Node& r = be.root();
     helper.load_nodes(entry.id(), r);
 

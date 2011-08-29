@@ -29,14 +29,14 @@ namespace brfc {
 /**
  * @brief NodeBackend storing nodes only in memory
  */
-class MemoryOh5NodeBackend : public Oh5NodeBackend {
+class Oh5MemoryNodeBackend : public Oh5NodeBackend {
   public:
     /**
      * @brief constructor
      */
-    MemoryOh5NodeBackend();
+    Oh5MemoryNodeBackend();
 
-    virtual ~MemoryOh5NodeBackend();
+    virtual ~Oh5MemoryNodeBackend();
   
   private:
 

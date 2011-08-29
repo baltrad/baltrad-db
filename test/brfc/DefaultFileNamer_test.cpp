@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/MemoryOh5NodeBackend.hpp>
+#include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/test_common.hpp>
@@ -63,7 +63,7 @@ class DefaultFileNamer_test : public ::testing::Test {
     }
     
     DefaultFileNamer namer;
-    MemoryOh5NodeBackend node_backend;
+    Oh5MemoryNodeBackend node_backend;
     Oh5Node& root, &what;
     ::testing::NiceMock<MockOh5File> file;
     ::testing::NiceMock<MockFileEntry> entry;

@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5DataSet.hpp>
-#include <brfc/oh5/MemoryOh5NodeBackend.hpp>
+#include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
 
 #include <brfc/test_common.hpp>
@@ -37,7 +37,7 @@ struct oh5_Oh5Group_test : public ::testing::Test {
 
     }
     
-    MemoryOh5NodeBackend backend;
+    Oh5MemoryNodeBackend backend;
     Oh5Group& g;
 };
 
