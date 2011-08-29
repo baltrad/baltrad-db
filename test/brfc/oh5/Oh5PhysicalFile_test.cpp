@@ -22,7 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Group.hpp>
 
 #include <brfc/test_common.hpp>
-#include <brfc/oh5/MockPhysicalFile.hpp>
+#include <brfc/oh5/MockOh5PhysicalFile.hpp>
 
 using ::testing::ReturnRef;
 
@@ -33,7 +33,7 @@ struct oh5_Oh5PhysicalFile_test : public testing::Test {
             : file() {
     }
 
-    ::testing::NiceMock<MockPhysicalFile> file;
+    ::testing::NiceMock<MockOh5PhysicalFile> file;
 };
 
 TEST_F(oh5_Oh5PhysicalFile_test, test_name) {

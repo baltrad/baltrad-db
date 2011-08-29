@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-class MockPhysicalFile : public Oh5PhysicalFile {
+class MockOh5PhysicalFile : public Oh5PhysicalFile {
   public:
     MOCK_CONST_METHOD0(do_root, const Oh5Group&());
     MOCK_CONST_METHOD0(do_path, const std::string&());
