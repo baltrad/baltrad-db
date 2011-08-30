@@ -89,6 +89,13 @@ class FileSystem {
     long long file_size(const std::string& path) const {
         return do_file_size(path);
     }
+
+    /**
+     * @brief create a directory
+     */
+    void create_directory(const std::string& path) const {
+        do_create_directory(path);
+    }
     
     /**
      * @brief remove all files in directory @c path
@@ -108,7 +115,8 @@ class FileSystem {
                                 const std::string& elem) const = 0;
     
     virtual long long do_file_size(const std::string& path) const = 0;
-
+    
+    virtual void do_create_directory(const std::string& path) const = 0;
     virtual void do_clear_directory(const std::string& path) const = 0;
 };
 

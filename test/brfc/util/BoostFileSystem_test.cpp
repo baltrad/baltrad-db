@@ -45,4 +45,8 @@ TEST_F(util_BoostFileSystem_test, test_clear_directory_nxfile) {
     EXPECT_THROW(fs.clear_directory("/path/to/nxfile"), fs_error);
 }
 
+TEST_F(util_BoostFileSystem_test, test_create_directory_badpath) {
+    EXPECT_THROW(fs.create_directory("/path/to/dir"), fs_error);
+}
+
 } // namespace brfc

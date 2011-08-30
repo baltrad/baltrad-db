@@ -73,6 +73,15 @@ BoostFileSystem::do_file_size(const std::string& path) const {
 }
 
 void
+BoostFileSystem::do_create_directory(const std::string& path) const {
+    try {
+        fs::create_directory(path);
+    } catch (const fs::filesystem_error& e) {
+        throw fs_error(e.what());
+    }
+}
+
+void
 BoostFileSystem::do_clear_directory(const std::string& path) const {
     try {
         fs::directory_iterator iter(path);

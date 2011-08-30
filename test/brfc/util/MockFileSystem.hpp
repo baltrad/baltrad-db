@@ -45,6 +45,8 @@ class MockFileSystem : public FileSystem {
         std::string(const std::string&, const std::string&));
     MOCK_CONST_METHOD1(do_file_size,
         long long(const std::string&));
+    MOCK_CONST_METHOD1(do_create_directory,
+        void(const std::string&));
     MOCK_CONST_METHOD1(do_clear_directory,
         void(const std::string&));
 };
