@@ -30,6 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Node.hpp>
 #include <brfc/oh5/Oh5PhysicalFile.hpp>
 #include <brfc/sql/Connection.hpp>
+#include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {
 
@@ -54,13 +55,18 @@ SaveFile::operator()(const Oh5PhysicalFile& file) {
         be.add(iter->parent()->path(), iter->clone());
     }
 
+    long long size = BoostFileSystem().file_size(file.path());
+    entry_->size(size);
+
+
     boost::shared_ptr<sql::Connection> conn = rdb_->conn();
     
     conn->begin();
     try { 
         RdbHelper helper(conn);
         helper.insert_file(*entry_, file);
-        helper.insert_file_content(*entry_, file.path());
+        long long lo_id = helper.insert_file_content(entry_->id(), file.path(), size);
+        entry_->lo_id(lo_id);
         helper.insert_nodes(entry_->id(), entry_->root());
         conn->commit();
     } catch (...) {

@@ -94,9 +94,8 @@ TEST_P(rdb_RdbHelper_itest, test_insert_file_content) {
     test::TempH5File tf;
     tf.write(file);
  
-    EXPECT_NO_THROW(helper.insert_file_content(entry, tf.path()));
-    EXPECT_GT(entry.lo_id(), 0);
-    EXPECT_GT(entry.size(), 0);
+    long long lo_id = helper.insert_file_content(entry.id(), tf.path(), 1);
+    EXPECT_GT(lo_id, 0);
 
     EXPECT_NO_THROW(conn->commit());
 }
@@ -136,7 +135,7 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_id) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
     test::TempH5File tf;
     tf.write(file);
-    EXPECT_NO_THROW(helper.insert_file_content(entry, tf.path()));
+    long long lo_id = helper.insert_file_content(entry.id(), tf.path(), 1);
     conn->commit();
 
     RdbFileEntry e2(db);
@@ -152,14 +151,14 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_id) {
     DateTime dt1 = entry.stored_at(), dt2 = e2.stored_at();
     EXPECT_EQ(dt1, dt2);
     EXPECT_GT(e2.lo_id(), 0);
-    EXPECT_EQ(entry.lo_id(), e2.lo_id());
+    EXPECT_EQ(lo_id, e2.lo_id());
 }
 
 TEST_P(rdb_RdbHelper_itest, test_load_file_by_uuid) {
     EXPECT_NO_THROW(helper.insert_file(entry, file));
     test::TempH5File tf;
     tf.write(file);
-    EXPECT_NO_THROW(helper.insert_file_content(entry, tf.path()));
+    long long lo_id = helper.insert_file_content(entry.id(), tf.path(), 1);
     conn->commit();
 
     RdbFileEntry e2(db);
@@ -175,7 +174,7 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_uuid) {
     DateTime dt1 = entry.stored_at(), dt2 = e2.stored_at();
     EXPECT_EQ(dt1, dt2);
     EXPECT_GT(e2.lo_id(), 0);
-    EXPECT_EQ(entry.lo_id(), e2.lo_id());
+    EXPECT_EQ(lo_id, e2.lo_id());
 }
 
 TEST_P(rdb_RdbHelper_itest, test_load_source) {

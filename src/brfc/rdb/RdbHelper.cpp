@@ -46,7 +46,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RdbFileEntry.hpp>
 
 #include <brfc/util/uuid.hpp>
-#include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {
 
@@ -254,21 +253,20 @@ RdbHelper::insert_file(RdbFileEntry& entry,
     entry.loaded(true);
 }
 
-void
-RdbHelper::insert_file_content(RdbFileEntry& entry, const std::string& path) {
+long long
+RdbHelper::insert_file_content(long long entry_id,
+                               const std::string& path,
+                               long long size) {
     // transfer the file to database
-    long long size = BoostFileSystem().file_size(path);
     long long lo_id = conn().store_large_object(path);
 
     sql::Insert qry(m::file_content::name());
-    qry.value("file_id", sql_.int64_(entry.id()));
+    qry.value("file_id", sql_.int64_(entry_id));
     qry.value("lo_id", sql_.int64_(lo_id));
     qry.value("size", sql_.int64_(size));
 
     boost::scoped_ptr<sql::Result>(conn().execute(qry));
-
-    entry.lo_id(lo_id);
-    entry.size(size);
+    return lo_id;
 }
 
 void
