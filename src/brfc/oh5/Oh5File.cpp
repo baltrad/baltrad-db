@@ -53,6 +53,24 @@ get_attribute(const Oh5Node& node, const std::string& name) {
     return *attr;
 }
 
+Oh5Group&
+get_or_create_group(Oh5Node& node, const std::string& name) {
+    Oh5Group* group = node.group(name);
+    if (not group)
+        return static_cast<Oh5Group&>(node.add(new Oh5Group(name)));
+    return *group;
+}
+
+Oh5Attribute&
+get_or_create_attribute(Oh5Node& node, const std::string& name) {
+    Oh5Attribute* attr = node.attribute(name);
+    if (not attr)
+        return static_cast<Oh5Attribute&>(
+            node.add(new Oh5Attribute(name, Oh5Scalar("")))
+        );
+    return *attr;
+}
+
 } // namespace anonymous
 
 std::string
@@ -60,9 +78,23 @@ Oh5File::what_object() const {
     return get_attribute(root(), "what/object").value().string();
 }
 
+void
+Oh5File::what_object(const std::string& value) {
+    Oh5Node& what = get_or_create_group(root(), "what");
+    Oh5Attribute& attr = get_or_create_attribute(what, "object");
+    attr.value(Oh5Scalar(value));
+}
+
 Date
 Oh5File::what_date() const {
     return get_attribute(root(), "what/date").value().to_date();
+}
+
+void
+Oh5File::what_date(const Date& value) {
+    Oh5Node& what = get_or_create_group(root(), "what");
+    Oh5Attribute& attr = get_or_create_attribute(what, "date");
+    attr.value(Oh5Scalar(value.to_iso_string()));  
 }
 
 Time
@@ -70,9 +102,23 @@ Oh5File::what_time() const {
     return get_attribute(root(), "what/time").value().to_time();
 }
 
+void
+Oh5File::what_time(const Time& value) {
+    Oh5Node& what = get_or_create_group(root(), "what");
+    Oh5Attribute& attr = get_or_create_attribute(what, "time");
+    attr.value(Oh5Scalar(value.to_iso_string()));  
+}
+
 std::string
 Oh5File::what_source() const {
     return get_attribute(root(), "what/source").value().string();
+}
+
+void
+Oh5File::what_source(const std::string& value) {
+    Oh5Node& what = get_or_create_group(root(), "what");
+    Oh5Attribute& attr = get_or_create_attribute(what, "source");
+    attr.value(Oh5Scalar(value));
 }
 
 Oh5Node*

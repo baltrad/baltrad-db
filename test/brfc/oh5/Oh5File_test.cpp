@@ -38,7 +38,9 @@ namespace brfc {
 struct oh5_Oh5File_test : public testing::Test {
     oh5_Oh5File_test()
             : file()
+            , empty_file()
             , node_backend()
+            , empty_backend()
             , root(node_backend.root())
             , what() {
     }
@@ -46,6 +48,9 @@ struct oh5_Oh5File_test : public testing::Test {
     virtual void SetUp() {
         ON_CALL(file, do_root())
             .WillByDefault(ReturnRef(root));
+        
+        ON_CALL(empty_file, do_root())
+            .WillByDefault(ReturnRef(empty_backend.root()));
 
         what = static_cast<Oh5Group*>(&root.add(new Oh5Group("what")));
         what_object = &what->add(new Oh5Attribute("object", Oh5Scalar("pvol")));
@@ -54,8 +59,8 @@ struct oh5_Oh5File_test : public testing::Test {
         what->add(new Oh5Attribute("source", Oh5Scalar("WMO:02606")));
     }
 
-    ::testing::NiceMock<MockOh5File> file;
-    Oh5MemoryNodeBackend node_backend;
+    ::testing::NiceMock<MockOh5File> file, empty_file;
+    Oh5MemoryNodeBackend node_backend, empty_backend;
     Oh5Node& root;
     Oh5Group* what;
     Oh5Node* what_object;
@@ -124,6 +129,62 @@ TEST_F(oh5_Oh5File_test, test_source_get) {
         .WillRepeatedly(ReturnRef(be.root()));
 
     EXPECT_EQ("", file.source().to_string());
+}
+
+TEST_F(oh5_Oh5File_test, test_set_what_object) {
+    file.what_object("scan");
+    Oh5Attribute* a = file.attribute("/what/object");
+    ASSERT_TRUE(a);
+    EXPECT_EQ("scan", a->value().string());
+}
+
+TEST_F(oh5_Oh5File_test, test_set_what_object_new) {
+    empty_file.what_object("scan");
+    Oh5Attribute* a = empty_file.attribute("/what/object");
+    ASSERT_TRUE(a);
+    EXPECT_EQ("scan", a->value().string());
+}
+
+TEST_F(oh5_Oh5File_test, test_set_what_date) {
+    file.what_date(Date(2011, 1, 2));
+    Oh5Attribute* a = file.attribute("/what/date");
+    ASSERT_TRUE(a);
+    EXPECT_EQ("20110102", a->value().string());
+}
+
+TEST_F(oh5_Oh5File_test, test_set_what_date_new) {
+    empty_file.what_date(Date(2011, 1, 2));
+    Oh5Attribute* a = empty_file.attribute("/what/date");
+    ASSERT_TRUE(a);
+    EXPECT_EQ("20110102", a->value().string());
+}
+
+TEST_F(oh5_Oh5File_test, test_set_what_time) {
+    file.what_time(Time(11, 12, 13));
+    Oh5Attribute* a = file.attribute("/what/time");
+    ASSERT_TRUE(a);
+    EXPECT_EQ("111213", a->value().string());
+}
+
+TEST_F(oh5_Oh5File_test, test_set_what_time_new) {
+    empty_file.what_time(Time(11, 12, 13));
+    Oh5Attribute* a = empty_file.attribute("/what/time");
+    ASSERT_TRUE(a);
+    EXPECT_EQ("111213", a->value().string());
+}
+
+TEST_F(oh5_Oh5File_test, test_set_what_source) {
+    file.what_source("WMO:02666");
+    Oh5Attribute* a = file.attribute("/what/source");
+    ASSERT_TRUE(a);
+    EXPECT_EQ("WMO:02666", a->value().string());
+}
+
+TEST_F(oh5_Oh5File_test, test_set_what_source_new) {
+    empty_file.what_source("WMO:02666");
+    Oh5Attribute* a = empty_file.attribute("/what/source");
+    ASSERT_TRUE(a);
+    EXPECT_EQ("WMO:02666", a->value().string());
 }
 
 } // namespace brfc

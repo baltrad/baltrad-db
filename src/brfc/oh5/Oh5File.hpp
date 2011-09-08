@@ -104,15 +104,16 @@ class Oh5File : public boost::noncopyable {
     Oh5Source source() const;
     
     /**
-     * @name mandatory attribute access shorthands
-     * @{
-     */
-    /**
      * @brief access /what/object
      * @throw lookup_error if attribute is missing
      * @throw std::invalid_argument if attribute value is not a std::string
      */
     std::string what_object() const;
+    
+    /**
+     * @brief set /what/object, creating /what group if missing
+     */
+    void what_object(const std::string& value);
 
     /**
      * @brief access /what/date
@@ -123,6 +124,11 @@ class Oh5File : public boost::noncopyable {
     Date what_date() const;
 
     /**
+     * @brief set /what/date, creating /what group if missing
+     */
+    void what_date(const Date& value);
+
+    /**
      * @brief access /what/time
      * @throw lookup_error if attribute is missing
      * @throw std::invalid_argument if attribute value is not a Time or a std::string in
@@ -131,13 +137,22 @@ class Oh5File : public boost::noncopyable {
     Time what_time() const;
 
     /**
+     * @brief set /what/time, creating /what group if missing
+     */
+    void what_time(const Time& value);
+
+    /**
      * @brief access /what/source
      *
      * @throw lookup_error if attribute is missing
      * @throw std::invalid_argument if attribute value is not a std::string
      */
     std::string what_source() const;
-    ///@}
+
+    /**
+     * @brief set /what/source, creating /what group if missing
+     */
+    void what_source(const std::string& value);
   
   protected:
     /**
