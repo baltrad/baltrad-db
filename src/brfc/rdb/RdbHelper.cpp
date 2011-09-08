@@ -222,35 +222,23 @@ RdbHelper::insert_attribute(long long node_id, const Oh5Attribute& attr) {
     boost::scoped_ptr<sql::Result>(conn().execute(insert_attr_qry_, binds));
 }
 
-void
-RdbHelper::insert_file(RdbFileEntry& entry,
-                       const Oh5PhysicalFile& file) {
-    long long source_id = select_source_id(file.source());
-
-    std::string uuid = uuid_string();
-
-    DateTime stored_at = DateTime::utc_now();
-    
+long long
+RdbHelper::insert_file(const RdbFileEntry& entry) {    
     sql::Insert qry(m::files::name());
-    qry.value("uuid", sql_.string(uuid));
+    qry.value("uuid", sql_.string(entry.uuid()));
     qry.value("hash", sql_.string(entry.hash())); 
-    qry.value("source_id", sql_.int64_(source_id));
-    qry.value("stored_at", sql_.datetime(stored_at));
-    qry.value("what_object", sql_.string(file.what_object()));
-    qry.value("what_date", sql_.date(file.what_date()));
-    qry.value("what_time", sql_.time(file.what_time()));
+    qry.value("source_id", sql_.int64_(entry.source_id()));
+    qry.value("stored_at", sql_.datetime(entry.stored_at()));
+    qry.value("what_object", sql_.string(entry.what_object()));
+    qry.value("what_date", sql_.date(entry.what_date()));
+    qry.value("what_time", sql_.time(entry.what_time()));
 
     if (dialect().has_feature(sql::Dialect::RETURNING))
         qry.returning(m::files::column("id"));
 
     boost::scoped_ptr<sql::Result> result(conn().execute(qry));
-
-    long long file_id = last_id(*result);
-    entry.uuid(uuid);
-    entry.id(file_id);
-    entry.source_id(source_id);
-    entry.stored_at(stored_at);
-    entry.loaded(true);
+    
+    return last_id(*result);
 }
 
 long long

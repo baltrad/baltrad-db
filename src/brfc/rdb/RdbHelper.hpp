@@ -95,11 +95,9 @@ class RdbHelper : boost::noncopyable {
     /**
      * @brief insert @c entry to database
      * @param entry the entry to insert
-     * @param file the file this entry is for
-     * @post entry has database id
+     * @return database id of the entry
      */
-    void insert_file(RdbFileEntry& entry,
-                     const Oh5PhysicalFile& file);
+    long long insert_file(const RdbFileEntry& entry);
     
     /**
      * @brief insert file content to database

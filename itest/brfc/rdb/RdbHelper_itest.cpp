@@ -61,6 +61,13 @@ class rdb_RdbHelper_itest : public ::testing::TestWithParam<const char*> {
 
     virtual void SetUp() {
         conn->begin();
+        entry.loaded(true);
+        entry.uuid("057c5a4b-d29c-4ac7-9267-d3fe7ef54000");
+        entry.source_id(1);
+        entry.what_object("PVOL");
+        entry.what_date(Date(2000, 1, 1));
+        entry.what_time(Time(12, 0));
+        entry.stored_at(DateTime(2011, 1, 1, 12, 13, 14));
         entry.hash("hash");
     }
 
@@ -78,68 +85,61 @@ class rdb_RdbHelper_itest : public ::testing::TestWithParam<const char*> {
 };
 
 TEST_P(rdb_RdbHelper_itest, test_insert_file) {
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
+    long long entry_id = helper.insert_file(entry);
 
-    EXPECT_GT(entry.id(), 0);
-    EXPECT_TRUE("" != entry.uuid());
-    EXPECT_GT(entry.source_id(), 0);
-    EXPECT_EQ("hash", entry.hash());
-    EXPECT_NE(DateTime(), entry.stored_at());
-    EXPECT_GT(entry.id(), 0);
+    EXPECT_GT(entry_id, 0);
 }
 
 TEST_P(rdb_RdbHelper_itest, test_insert_file_content) {
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
+    long long entry_id = helper.insert_file(entry);
 
     test::TempH5File tf;
     tf.write(file);
  
-    long long lo_id = helper.insert_file_content(entry.id(), tf.path(), 1);
+    long long lo_id = helper.insert_file_content(entry_id, tf.path(), 1);
     EXPECT_GT(lo_id, 0);
 
     EXPECT_NO_THROW(conn->commit());
 }
 
 TEST_P(rdb_RdbHelper_itest, test_insert_node_group) {
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
+    long long entry_id = helper.insert_file(entry);
     
     Oh5Node& grp = entry.root();
-    long long id = helper.insert_node(entry.id(), 0, grp);
+    long long id = helper.insert_node(entry_id, 0, grp);
     EXPECT_GT(id, 0);
 }
 
 TEST_P(rdb_RdbHelper_itest, test_insert_node_attribute) {
-    long long pid;
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
-    EXPECT_NO_THROW(pid = helper.insert_node(entry.id(), 0, entry.root()));
+    long long entry_id = helper.insert_file(entry);
+    long long pid = helper.insert_node(entry_id, 0, entry.root());
     
     Oh5Node& attr = entry.root().add(new Oh5Attribute("attr", Oh5Scalar(1)));
 
-    EXPECT_NO_THROW(helper.insert_node(entry.id(), pid, attr));
+    EXPECT_NO_THROW(helper.insert_node(entry_id, pid, attr));
 }
 
 TEST_P(rdb_RdbHelper_itest, test_insert_node_dataset) {
-    long long id;
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
-    EXPECT_NO_THROW(id = helper.insert_node(entry.id(), 0, entry.root()));
+    long long entry_id = helper.insert_file(entry);
+    long long id = helper.insert_node(entry_id, 0, entry.root());
     Oh5Node& parent = entry.root().add(new Oh5Group("data1"));
-    EXPECT_NO_THROW(id = helper.insert_node(entry.id(), id, parent));
+    id = helper.insert_node(entry_id, id, parent);
     
     Oh5Node& ds = parent.add(new Oh5DataSet("data"));
 
-    EXPECT_NO_THROW(id = helper.insert_node(entry.id(), id, ds));
+    id = helper.insert_node(entry_id, id, ds);
     EXPECT_GT(id, 0);
 }
 
 TEST_P(rdb_RdbHelper_itest, test_load_file_by_id) {
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
+    long long entry_id = helper.insert_file(entry);
     test::TempH5File tf;
     tf.write(file);
-    long long lo_id = helper.insert_file_content(entry.id(), tf.path(), 1);
+    long long lo_id = helper.insert_file_content(entry_id, tf.path(), 1);
     conn->commit();
 
     RdbFileEntry e2(db);
-    e2.id(entry.id());
+    e2.id(entry_id);
 
     EXPECT_NO_THROW(helper.load_file(e2));
 
@@ -155,10 +155,10 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_id) {
 }
 
 TEST_P(rdb_RdbHelper_itest, test_load_file_by_uuid) {
-    EXPECT_NO_THROW(helper.insert_file(entry, file));
+    long long entry_id = helper.insert_file(entry);
     test::TempH5File tf;
     tf.write(file);
-    long long lo_id = helper.insert_file_content(entry.id(), tf.path(), 1);
+    long long lo_id = helper.insert_file_content(entry_id, tf.path(), 1);
     conn->commit();
 
     RdbFileEntry e2(db);
@@ -242,15 +242,15 @@ TEST_P(rdb_RdbHelper_itest, test_load_nodes) {
     Oh5Node& ds1 = g2.add(new Oh5DataSet("ds1"));
     Oh5Node& a3 = ds1.add(new Oh5Attribute("a3", Oh5Scalar(3)));
 
-    helper.insert_file(entry, file);
-    helper.insert_nodes(entry.id(), entry.root());
+    long long entry_id = helper.insert_file(entry);
+    helper.insert_nodes(entry_id, entry.root());
     conn->commit();
     
     Oh5MemoryNodeBackend be;
     Oh5Node& r = be.root();
-    helper.load_nodes(entry.id(), r);
+    helper.load_nodes(entry_id, r);
 
-    EXPECT_EQ(3u, r.children().size());
+    EXPECT_EQ(4u, r.children().size());
 
     Oh5Node* g = r.group("g1");
     ASSERT_TRUE(g);

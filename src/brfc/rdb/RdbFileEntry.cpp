@@ -40,6 +40,7 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         , uuid_()
         , hash_()
         , size_(0)
+        , stored_at_()
         , nodes_() {
     BRFC_ASSERT(rdb_ != 0);
 }
@@ -116,7 +117,7 @@ RdbFileEntry::do_size() const {
 
 DateTime
 RdbFileEntry::do_stored_at() const {
-    if (not loaded())
+    if (stored_at_ == DateTime() and not loaded())
         load();
     return stored_at_;
 }
