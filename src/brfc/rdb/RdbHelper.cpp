@@ -23,8 +23,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
@@ -47,6 +45,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
 
+#include <brfc/util/uuid.hpp>
 #include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {
@@ -229,12 +228,7 @@ RdbHelper::insert_file(RdbFileEntry& entry,
                        const Oh5PhysicalFile& file) {
     long long source_id = select_source_id(file.source());
 
-    boost::uuids::basic_random_generator<boost::mt19937> gen;
-    boost::uuids::uuid u = gen();
-
-    std::stringstream ss;
-    ss << u;
-    std::string uuid(ss.str());
+    std::string uuid = uuid_string();
 
     DateTime stored_at = DateTime::utc_now();
     
