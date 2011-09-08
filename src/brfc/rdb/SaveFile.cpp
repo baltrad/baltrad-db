@@ -71,7 +71,7 @@ SaveFile::operator()(const Oh5PhysicalFile& file) {
         entry_->source_id(source_id);
         long long file_id = helper.insert_file(*entry_);
         entry_->id(file_id);
-        long long lo_id = helper.insert_file_content(entry_->id(), file.path(), size);
+        long long lo_id = helper.insert_file_content(entry_->id(), file.path());
         entry_->lo_id(lo_id);
         helper.insert_nodes(entry_->id(), entry_->root());
 

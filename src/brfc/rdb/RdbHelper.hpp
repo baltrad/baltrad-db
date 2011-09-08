@@ -103,12 +103,10 @@ class RdbHelper : boost::noncopyable {
      * @brief insert file content to database
      * @param entry_id the entry id the data is for
      * @param path path to the file in filesystem
-     * @param size the file size
      * @return large object id of the file content
      */
     long long insert_file_content(long long entry_id,
-                                  const std::string& path,
-                                  long long size);
+                                  const std::string& path);
     
     /**
      * @brief lookup id for @c source

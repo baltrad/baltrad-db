@@ -60,17 +60,6 @@ struct m {
         }
     };
 
-    struct file_content {
-        static std::string name() { return "bdb_file_content"; }
-
-        static Expression column(const std::string& colname) {
-            return Listcons().symbol("column")
-                                   .string(name())
-                                   .string(colname)
-                                   .get();
-        }
-    };
-
     struct nodes {
         static std::string name() { return "bdb_nodes"; }
 

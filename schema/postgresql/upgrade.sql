@@ -32,6 +32,10 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION bdbupgrade_add_size_to_bdb_file_content() RETURNS VOID AS $$
 BEGIN
+  PERFORM true FROM information_schema.tables WHERE table_name = 'bdb_file_content';
+  IF NOT FOUND THEN
+    RETURN; /* bdb_file_content has been removed */
+  END IF;
   PERFORM true FROM information_schema.columns
     WHERE table_name = 'bdb_file_content' AND column_name = 'size';
   IF NOT FOUND THEN
@@ -130,10 +134,31 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION bdbupgrade_merge_file_content_to_files() RETURNS VOID AS $$
+BEGIN
+  PERFORM true FROM information_schema.tables WHERE table_name = 'bdb_file_content';
+  IF FOUND THEN
+    RAISE NOTICE 'merging bdb_file_content to bdb_files (this may take a while)';
+    ALTER TABLE bdb_files ADD COLUMN size INTEGER DEFAULT 0;
+    ALTER TABLE bdb_files ADD COLUMN lo_id INTEGER DEFAULT NULL;
+    UPDATE bdb_files
+      SET size = c.size, lo_id = c.lo_id
+      FROM bdb_file_content AS c
+      WHERE id = c.file_id;
+    ALTER TABLE bdb_files ALTER COLUMN size DROP DEFAULT;
+    ALTER TABLE bdb_files ALTER COLUMN size SET NOT NULL;
+    CREATE RULE remove_lo AS ON DELETE TO bdb_files
+        DO SELECT lo_unlink(OLD.lo_id);
+    DROP TABLE bdb_file_content;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 SELECT bdbupgrade_add_size_to_bdb_file_content();
 SELECT bdbupgrade_del_bdb_nodes_indexes();
 SELECT bdbupgrade_add_bdb_nodes_indexes();
 SELECT bdbupgrade_add_bdb_files_indexes();
+SELECT bdbupgrade_merge_file_content_to_files();
 SELECT restart_seq_with_max('bdb_sources', 'id');
 SELECT bdbupgrade_add_source_dkvir();
 SELECT bdbupgrade_add_sources_nod_key();
@@ -144,5 +169,6 @@ DROP FUNCTION bdbupgrade_add_bdb_nodes_indexes();
 DROP FUNCTION bdbupgrade_add_bdb_files_indexes();
 DROP FUNCTION bdbupgrade_add_source_dkvir();
 DROP FUNCTION bdbupgrade_add_sources_nod_key();
+DROP FUNCTION bdbupgrade_merge_file_content_to_files();
 DROP FUNCTION restart_seq_with_max(TEXT, TEXT);
 DROP FUNCTION make_plpgsql();

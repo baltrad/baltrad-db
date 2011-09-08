@@ -12,6 +12,8 @@ CREATE TABLE bdb_files (
     what_date DATE NOT NULL,
     what_time TIME WITHOUT TIME ZONE NOT NULL, 
     source_id INTEGER NOT NULL REFERENCES bdb_sources(id),
+    size INTEGER NOT NULL,
+    lo_id INTEGER,
     UNIQUE (hash, source_id)
 );
 CREATE INDEX bdb_files_stored_at_key ON bdb_files(stored_at);
@@ -19,15 +21,7 @@ CREATE INDEX bdb_files_what_object_key ON bdb_files(what_object);
 CREATE INDEX bdb_files_what_date_key ON bdb_files(what_date);
 CREATE INDEX bdb_files_what_time_key ON bdb_files(what_time);
 CREATE INDEX bdb_files_combined_datetime_key ON bdb_files((what_date + what_time));
-
-CREATE TABLE bdb_file_content (
-    file_id INTEGER NOT NULL PRIMARY KEY
-        REFERENCES bdb_files(id) ON DELETE CASCADE,
-    size INTEGER NOT NULL,
-    lo_id INTEGER
-);
-
-CREATE RULE remove_lo AS ON DELETE TO bdb_file_content
+CREATE RULE remove_lo AS ON DELETE TO bdb_files
     DO SELECT lo_unlink(OLD.lo_id);
 
 CREATE TABLE bdb_nodes (

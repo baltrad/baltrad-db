@@ -232,6 +232,7 @@ RdbHelper::insert_file(const RdbFileEntry& entry) {
     qry.value("what_object", sql_.string(entry.what_object()));
     qry.value("what_date", sql_.date(entry.what_date()));
     qry.value("what_time", sql_.time(entry.what_time()));
+    qry.value("size", sql_.int64_(entry.size()));
 
     if (dialect().has_feature(sql::Dialect::RETURNING))
         qry.returning(m::files::column("id"));
@@ -243,17 +244,22 @@ RdbHelper::insert_file(const RdbFileEntry& entry) {
 
 long long
 RdbHelper::insert_file_content(long long entry_id,
-                               const std::string& path,
-                               long long size) {
+                               const std::string& path) {
     // transfer the file to database
     long long lo_id = conn().store_large_object(path);
 
-    sql::Insert qry(m::file_content::name());
-    qry.value("file_id", sql_.int64_(entry_id));
-    qry.value("lo_id", sql_.int64_(lo_id));
-    qry.value("size", sql_.int64_(size));
+    Expression stmt = Listcons().string("UPDATE ")
+                                .string(m::files::name())
+                                .string(" SET lo_id = ")
+                                .append(sql_.bind("lo_id"))
+                                .string(" WHERE id = ")
+                                .append(sql_.bind("id"))
+                                .get();
+    sql::Connection::BindMap_t binds;
+    binds["lo_id"] = sql_.int64_(lo_id);
+    binds["id"] = sql_.int64_(entry_id);
 
-    boost::scoped_ptr<sql::Result>(conn().execute(qry));
+    boost::scoped_ptr<sql::Result>(conn().execute(stmt, binds));
     return lo_id;
 }
 
@@ -261,18 +267,14 @@ void
 RdbHelper::load_file(RdbFileEntry& entry) {
     sql::Select qry;
     qry.from(sql_.table(m::files::name()));
-    qry.outerjoin(
-        sql_.table(m::file_content::name()),
-        sql_.eq(m::files::column("id"), m::file_content::column("file_id"))
-    );
     
     qry.what(m::files::column("id"));
     qry.what(m::files::column("uuid"));
     qry.what(m::files::column("source_id"));
     qry.what(m::files::column("hash"));
     qry.what(m::files::column("stored_at"));
-    qry.what(m::file_content::column("lo_id"));
-    qry.what(m::file_content::column("size"));
+    qry.what(m::files::column("lo_id"));
+    qry.what(m::files::column("size"));
     if (entry.id() != 0)
         qry.where(sql_.eq(m::files::column("id"), sql_.int64_(entry.id())));
     else if (entry.uuid() != "")

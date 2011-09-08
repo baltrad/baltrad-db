@@ -69,6 +69,7 @@ class rdb_RdbHelper_itest : public ::testing::TestWithParam<const char*> {
         entry.what_time(Time(12, 0));
         entry.stored_at(DateTime(2011, 1, 1, 12, 13, 14));
         entry.hash("hash");
+        entry.size(2);
     }
 
     virtual void TearDown() {
@@ -96,7 +97,7 @@ TEST_P(rdb_RdbHelper_itest, test_insert_file_content) {
     test::TempH5File tf;
     tf.write(file);
  
-    long long lo_id = helper.insert_file_content(entry_id, tf.path(), 1);
+    long long lo_id = helper.insert_file_content(entry_id, tf.path());
     EXPECT_GT(lo_id, 0);
 
     EXPECT_NO_THROW(conn->commit());
@@ -135,7 +136,7 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_id) {
     long long entry_id = helper.insert_file(entry);
     test::TempH5File tf;
     tf.write(file);
-    long long lo_id = helper.insert_file_content(entry_id, tf.path(), 1);
+    long long lo_id = helper.insert_file_content(entry_id, tf.path());
     conn->commit();
 
     RdbFileEntry e2(db);
@@ -158,7 +159,7 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_uuid) {
     long long entry_id = helper.insert_file(entry);
     test::TempH5File tf;
     tf.write(file);
-    long long lo_id = helper.insert_file_content(entry_id, tf.path(), 1);
+    long long lo_id = helper.insert_file_content(entry_id, tf.path());
     conn->commit();
 
     RdbFileEntry e2(db);
