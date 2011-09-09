@@ -185,7 +185,7 @@ RelationalDatabase::file_to_entry(const Oh5PhysicalFile& file) {
 void
 RelationalDatabase::entry_to_file(const RdbFileEntry& entry,
                                   const std::string& path) {
-    storage_->write_to_file(entry, path);
+    storage_->retrieve(entry, path);
 }
 
 FileEntry*

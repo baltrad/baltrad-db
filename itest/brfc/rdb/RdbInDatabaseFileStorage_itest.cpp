@@ -72,13 +72,13 @@ TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_store) {
     EXPECT_GT(e->lo_id(), 0);
 }
 
-TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_write_to_file) {
+TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_retrieve) {
     boost::scoped_ptr<RdbFileEntry> e(db->file_to_entry(file));
     storage.store(*e, file.path());
     
     test::TempH5File tf;
 
-    storage.write_to_file(*e, tf.path());
+    storage.retrieve(*e, tf.path());
     
     BoostFileSystem fsys;
     long long file_size = fsys.file_size(tf.path());

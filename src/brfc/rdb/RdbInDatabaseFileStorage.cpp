@@ -81,8 +81,8 @@ RdbInDatabaseFileStorage::do_remove(const RdbFileEntry&) {
 }
 
 void
-RdbInDatabaseFileStorage::do_write_to_file(const RdbFileEntry& entry,
-                                           const std::string& path) {
+RdbInDatabaseFileStorage::do_retrieve(const RdbFileEntry& entry,
+                                      const std::string& path) {
     const long long lo_id = entry.lo_id();
     BRFC_ASSERT(lo_id > 0);
     boost::shared_ptr<sql::Connection> conn(connection(*this));

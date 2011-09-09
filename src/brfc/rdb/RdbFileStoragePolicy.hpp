@@ -56,8 +56,8 @@ class RdbFileStoragePolicy {
     /**
      * @brief write the fileentry to a physical file at @c path
      */
-    void write_to_file(const RdbFileEntry& e, const std::string& path) {
-        do_write_to_file(e, path);
+    void retrieve(const RdbFileEntry& e, const std::string& path) {
+        do_retrieve(e, path);
     }
   
   private:
@@ -67,8 +67,7 @@ class RdbFileStoragePolicy {
 
     virtual bool do_remove(const RdbFileEntry& e) = 0;
 
-    virtual void do_write_to_file(const RdbFileEntry& e,
-                                  const std::string& path) = 0;
+    virtual void do_retrieve(const RdbFileEntry& e, const std::string& p) = 0;
 };
 
 inline

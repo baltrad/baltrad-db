@@ -38,8 +38,7 @@ class RdbInDatabaseFileStorage : public RdbFileStoragePolicy {
 
     virtual bool do_remove(const RdbFileEntry& e);
 
-    virtual void do_write_to_file(const RdbFileEntry& e,
-                                  const std::string& path);
+    virtual void do_retrieve(const RdbFileEntry& e, const std::string& path);
     
     RelationalDatabase* db_;
 };
