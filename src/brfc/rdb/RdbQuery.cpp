@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/RdbHelper.hpp>
+#include <brfc/rdb/RdbQuery.hpp>
 
 #include <memory>
 
@@ -97,29 +97,29 @@ attr_sql_column(const Oh5Attribute& attr) {
 
 
 
-RdbHelper::RdbHelper(boost::shared_ptr<sql::Connection> conn)
+RdbQuery::RdbQuery(boost::shared_ptr<sql::Connection> conn)
         : conn_(conn)
         , sql_()
         , insert_node_qry_()
         , insert_attr_qry_() {
 }
 
-RdbHelper::~RdbHelper() {
+RdbQuery::~RdbQuery() {
 
 }
 
 const sql::Dialect&
-RdbHelper::dialect() {
+RdbQuery::dialect() {
     return conn().dialect();    
 }
 
 sql::Connection&
-RdbHelper::conn() {
+RdbQuery::conn() {
     return *conn_;
 }
 
 long long
-RdbHelper::last_id(sql::Result& result) {
+RdbQuery::last_id(sql::Result& result) {
     if (dialect().has_feature(sql::Dialect::RETURNING) and result.next()) {
         return result.value_at(0).int64_();
     } else if (dialect().has_feature(sql::Dialect::LAST_INSERT_ID)) {
@@ -130,7 +130,7 @@ RdbHelper::last_id(sql::Result& result) {
 }
 
 void
-RdbHelper::compile_insert_node_query() {
+RdbQuery::compile_insert_node_query() {
     sql::Insert qry(m::nodes::name());
     if (dialect().has_feature(sql::Dialect::RETURNING))
         qry.returning(m::nodes::column("id"));
@@ -144,7 +144,7 @@ RdbHelper::compile_insert_node_query() {
 }
 
 void
-RdbHelper::insert_nodes(long long file_id, const Oh5Node& root) {
+RdbQuery::insert_nodes(long long file_id, const Oh5Node& root) {
     std::map<const Oh5Node*, long long> ids;
     Oh5Node::const_iterator iter = root.begin();
     ids[&(*iter)] = insert_node(file_id, 0, *iter);
@@ -156,7 +156,7 @@ RdbHelper::insert_nodes(long long file_id, const Oh5Node& root) {
 }
 
 long long
-RdbHelper::insert_node(long long file_id,
+RdbQuery::insert_node(long long file_id,
                        long long parent_id,
                        const Oh5Node& node) {
     if (not insert_node_qry_)
@@ -180,7 +180,7 @@ RdbHelper::insert_node(long long file_id,
 }
 
 void
-RdbHelper::compile_insert_attr_query() {
+RdbQuery::compile_insert_attr_query() {
     sql::Insert qry(m::attrvals::name());
 
     qry.value("node_id", sql_.bind("node_id"));
@@ -195,7 +195,7 @@ RdbHelper::compile_insert_attr_query() {
 }
 
 void
-RdbHelper::insert_attribute(long long node_id, const Oh5Attribute& attr) {
+RdbQuery::insert_attribute(long long node_id, const Oh5Attribute& attr) {
     if (not insert_attr_qry_)
         compile_insert_attr_query();
     
@@ -223,7 +223,7 @@ RdbHelper::insert_attribute(long long node_id, const Oh5Attribute& attr) {
 }
 
 long long
-RdbHelper::insert_file(const RdbFileEntry& entry) {    
+RdbQuery::insert_file(const RdbFileEntry& entry) {    
     sql::Insert qry(m::files::name());
     qry.value("uuid", sql_.string(entry.uuid()));
     qry.value("hash", sql_.string(entry.hash())); 
@@ -243,7 +243,7 @@ RdbHelper::insert_file(const RdbFileEntry& entry) {
 }
 
 long long
-RdbHelper::insert_file_content(long long entry_id,
+RdbQuery::insert_file_content(long long entry_id,
                                const std::string& path) {
     // transfer the file to database
     long long lo_id = conn().store_large_object(path);
@@ -264,13 +264,13 @@ RdbHelper::insert_file_content(long long entry_id,
 }
 
 bool
-RdbHelper::is_stored(long long source_id, const std::string& hash) {
+RdbQuery::is_stored(long long source_id, const std::string& hash) {
     const std::string& uuid = uuid_by_source_and_hash(source_id, hash);
     return not uuid.empty();
 }
 
 std::string
-RdbHelper::uuid_by_source_and_hash(long long source_id,
+RdbQuery::uuid_by_source_and_hash(long long source_id,
                                    const std::string& hash) {
     sql::Select qry;
     qry.what(m::files::column("uuid"));
@@ -290,7 +290,7 @@ RdbHelper::uuid_by_source_and_hash(long long source_id,
 }
 
 void
-RdbHelper::load_file(RdbFileEntry& entry) {
+RdbQuery::load_file(RdbFileEntry& entry) {
     sql::Select qry;
     qry.from(sql_.table(m::files::name()));
     
@@ -325,7 +325,7 @@ RdbHelper::load_file(RdbFileEntry& entry) {
 }
 
 long long
-RdbHelper::select_source_id(const Oh5Source& src) {
+RdbQuery::select_source_id(const Oh5Source& src) {
     sql::Select qry;
     qry.distinct(true);
     qry.what(m::sources::column("id"));
@@ -357,7 +357,7 @@ RdbHelper::select_source_id(const Oh5Source& src) {
 }
 
 Oh5Source
-RdbHelper::select_source(long long id) {
+RdbQuery::select_source(long long id) {
     sql::Select qry;
     qry.what(m::source_kvs::column("key"));
     qry.what(m::source_kvs::column("value"));
@@ -389,7 +389,7 @@ RdbHelper::select_source(long long id) {
 }
 
 std::vector<Oh5Source>
-RdbHelper::select_all_sources() {
+RdbQuery::select_all_sources() {
     sql::Select qry;
     qry.from(sql_.table(m::sources::name()));
     qry.outerjoin(
@@ -430,7 +430,7 @@ RdbHelper::select_all_sources() {
 }
 
 void
-RdbHelper::add_source(const Oh5Source& source) {
+RdbQuery::add_source(const Oh5Source& source) {
     boost::scoped_ptr<sql::Result> r;
     try {
         conn().begin();
@@ -457,7 +457,7 @@ RdbHelper::add_source(const Oh5Source& source) {
 }
 
 void
-RdbHelper::update_source(const Oh5Source& source) {
+RdbQuery::update_source(const Oh5Source& source) {
     long long id = boost::lexical_cast<long long>(source.get("_id"));
     boost::scoped_ptr<sql::Result> r;
     try {
@@ -496,7 +496,7 @@ RdbHelper::update_source(const Oh5Source& source) {
 }
 
 void
-RdbHelper::remove_source(const Oh5Source& source) {
+RdbQuery::remove_source(const Oh5Source& source) {
     Expression stmt = Listcons().string("DELETE FROM bdb_sources WHERE id=")
                                 .append(sql_.bind("id"))
                                 .get();
@@ -539,7 +539,7 @@ node_from_row(sql::Result& r) {
 } // namespace anonymous
 
 void
-RdbHelper::load_nodes(long long file_id, Oh5Node& root) {
+RdbQuery::load_nodes(long long file_id, Oh5Node& root) {
     sql::Select qry;
     qry.from(sql_.table(m::nodes::name()));
     qry.outerjoin(

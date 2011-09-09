@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 
-#include <brfc/rdb/RdbHelper.hpp>
+#include <brfc/rdb/RdbQuery.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/sql/Connection.hpp>
@@ -74,14 +74,14 @@ void
 RdbFileEntry::load() const {
     RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
     self->loaded(true); // to disable recursion
-    RdbHelper helper(rdb().conn());
+    RdbQuery query(rdb().conn());
     try {
-        helper.load_file(*self);
+        query.load_file(*self);
     } catch (...) {
         self->loaded(false);
         throw;
     }
-    helper.load_nodes(id(), self->root());
+    query.load_nodes(id(), self->root());
 }
 
 const Oh5Node&
@@ -93,10 +93,10 @@ RdbFileEntry::do_root() const {
 
 Oh5Source
 RdbFileEntry::do_source() const {
-    RdbHelper helper(rdb().conn());
+    RdbQuery query(rdb().conn());
     if (source_.empty()) {
         RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
-        self->source_ = helper.select_source(source_id());
+        self->source_ = query.select_source(source_id());
     }
     return source_;
 }

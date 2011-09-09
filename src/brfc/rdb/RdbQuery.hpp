@@ -16,9 +16,8 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-
-#ifndef BRFC_DB_RDB_RDB_HELPER_HPP
-#define BRFC_DB_RDB_RDB_HELPER_HPP
+#ifndef BRFC_RDB_QUERY_HPP
+#define BRFC_RDB_QUERY_HPP
 
 #include <vector>
 
@@ -51,11 +50,11 @@ namespace brfc {
 /**
  * @brief gather & simplify database queries
  */
-class RdbHelper : boost::noncopyable {
+class RdbQuery : boost::noncopyable {
   public:
-    RdbHelper(boost::shared_ptr<sql::Connection> conn);
+    RdbQuery(boost::shared_ptr<sql::Connection> conn);
 
-    virtual ~RdbHelper();
+    virtual ~RdbQuery();
 
     sql::Connection& conn();
 
@@ -171,4 +170,4 @@ class RdbHelper : boost::noncopyable {
 
 } // namespace brfc
 
-#endif // BRFC_DB_RDB_RDB_HELPER_HPP
+#endif // BRFC_RDB_QUERY_HPP

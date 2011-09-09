@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
-#include <brfc/rdb/RdbHelper.hpp>
+#include <brfc/rdb/RdbQuery.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/sql/Connection.hpp>
 
@@ -61,12 +61,12 @@ RdbInDatabaseFileStorage::do_store(RdbFileEntry& entry,
     boost::shared_ptr<sql::Connection> conn(connection(*this));
     conn->begin();
     try { 
-        RdbHelper helper(conn);
-        long long entry_id = helper.insert_file(entry);
+        RdbQuery query(conn);
+        long long entry_id = query.insert_file(entry);
         entry.id(entry_id);
-        long long lo_id = helper.insert_file_content(entry_id, path);
+        long long lo_id = query.insert_file_content(entry_id, path);
         entry.lo_id(lo_id);
-        helper.insert_nodes(entry_id, entry.root());
+        query.insert_nodes(entry_id, entry.root());
         conn->commit();
     } catch (...) {
         conn->rollback();

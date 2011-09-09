@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/FileHasher.hpp>
 #include <brfc/Time.hpp>
 
-#include <brfc/rdb/RdbHelper.hpp>
+#include <brfc/rdb/RdbQuery.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
 
 #include <brfc/oh5/Oh5Attribute.hpp>
@@ -47,12 +47,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-class rdb_RdbHelper_itest : public ::testing::TestWithParam<const char*> {
+class rdb_RdbQuery_itest : public ::testing::TestWithParam<const char*> {
   public:
-    rdb_RdbHelper_itest()
+    rdb_RdbQuery_itest()
             : db(ITestEnv::get_database(GetParam()))
             , conn(db->conn())
-            , helper(conn)
+            , query(conn)
             , entry(db)
             , file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Karlskrona") {
     }
@@ -78,85 +78,85 @@ class rdb_RdbHelper_itest : public ::testing::TestWithParam<const char*> {
 
     test::TestRDB* db;
     boost::shared_ptr<sql::Connection> conn;
-    RdbHelper helper;
+    RdbQuery query;
     RdbFileEntry entry;
     HlFile file;
 };
 
-TEST_P(rdb_RdbHelper_itest, test_insert_file) {
-    long long entry_id = helper.insert_file(entry);
+TEST_P(rdb_RdbQuery_itest, test_insert_file) {
+    long long entry_id = query.insert_file(entry);
 
     EXPECT_GT(entry_id, 0);
 }
 
-TEST_P(rdb_RdbHelper_itest, test_insert_file_content) {
-    long long entry_id = helper.insert_file(entry);
+TEST_P(rdb_RdbQuery_itest, test_insert_file_content) {
+    long long entry_id = query.insert_file(entry);
 
     test::TempH5File tf;
     tf.write(file);
  
-    long long lo_id = helper.insert_file_content(entry_id, tf.path());
+    long long lo_id = query.insert_file_content(entry_id, tf.path());
     EXPECT_GT(lo_id, 0);
 
     EXPECT_NO_THROW(conn->commit());
 }
 
-TEST_P(rdb_RdbHelper_itest, test_is_stored) {
-    long long entry_id = helper.insert_file(entry);
+TEST_P(rdb_RdbQuery_itest, test_is_stored) {
+    long long entry_id = query.insert_file(entry);
     
-    EXPECT_FALSE(helper.is_stored(1, "hashh"));
-    EXPECT_TRUE(helper.is_stored(1, "hash"));
+    EXPECT_FALSE(query.is_stored(1, "hashh"));
+    EXPECT_TRUE(query.is_stored(1, "hash"));
 }
 
-TEST_P(rdb_RdbHelper_itest, test_uuid_by_source_and_hash) {
-    long long entry_id = helper.insert_file(entry);
+TEST_P(rdb_RdbQuery_itest, test_uuid_by_source_and_hash) {
+    long long entry_id = query.insert_file(entry);
     
-    std::string uuid = helper.uuid_by_source_and_hash(1, "hashh");
+    std::string uuid = query.uuid_by_source_and_hash(1, "hashh");
     EXPECT_EQ("", uuid);
-    uuid = helper.uuid_by_source_and_hash(1, "hash");
+    uuid = query.uuid_by_source_and_hash(1, "hash");
     EXPECT_EQ(entry.uuid(), uuid);
 }
 
-TEST_P(rdb_RdbHelper_itest, test_insert_node_group) {
-    long long entry_id = helper.insert_file(entry);
+TEST_P(rdb_RdbQuery_itest, test_insert_node_group) {
+    long long entry_id = query.insert_file(entry);
     
     Oh5Node& grp = entry.root();
-    long long id = helper.insert_node(entry_id, 0, grp);
+    long long id = query.insert_node(entry_id, 0, grp);
     EXPECT_GT(id, 0);
 }
 
-TEST_P(rdb_RdbHelper_itest, test_insert_node_attribute) {
-    long long entry_id = helper.insert_file(entry);
-    long long pid = helper.insert_node(entry_id, 0, entry.root());
+TEST_P(rdb_RdbQuery_itest, test_insert_node_attribute) {
+    long long entry_id = query.insert_file(entry);
+    long long pid = query.insert_node(entry_id, 0, entry.root());
     
     Oh5Node& attr = entry.root().add(new Oh5Attribute("attr", Oh5Scalar(1)));
 
-    EXPECT_NO_THROW(helper.insert_node(entry_id, pid, attr));
+    EXPECT_NO_THROW(query.insert_node(entry_id, pid, attr));
 }
 
-TEST_P(rdb_RdbHelper_itest, test_insert_node_dataset) {
-    long long entry_id = helper.insert_file(entry);
-    long long id = helper.insert_node(entry_id, 0, entry.root());
+TEST_P(rdb_RdbQuery_itest, test_insert_node_dataset) {
+    long long entry_id = query.insert_file(entry);
+    long long id = query.insert_node(entry_id, 0, entry.root());
     Oh5Node& parent = entry.root().add(new Oh5Group("data1"));
-    id = helper.insert_node(entry_id, id, parent);
+    id = query.insert_node(entry_id, id, parent);
     
     Oh5Node& ds = parent.add(new Oh5DataSet("data"));
 
-    id = helper.insert_node(entry_id, id, ds);
+    id = query.insert_node(entry_id, id, ds);
     EXPECT_GT(id, 0);
 }
 
-TEST_P(rdb_RdbHelper_itest, test_load_file_by_id) {
-    long long entry_id = helper.insert_file(entry);
+TEST_P(rdb_RdbQuery_itest, test_load_file_by_id) {
+    long long entry_id = query.insert_file(entry);
     test::TempH5File tf;
     tf.write(file);
-    long long lo_id = helper.insert_file_content(entry_id, tf.path());
+    long long lo_id = query.insert_file_content(entry_id, tf.path());
     conn->commit();
 
     RdbFileEntry e2(db);
     e2.id(entry_id);
 
-    EXPECT_NO_THROW(helper.load_file(e2));
+    EXPECT_NO_THROW(query.load_file(e2));
 
     EXPECT_GT(e2.source_id(), 0);
     EXPECT_EQ(entry.source_id(), e2.source_id());
@@ -169,17 +169,17 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_id) {
     EXPECT_EQ(lo_id, e2.lo_id());
 }
 
-TEST_P(rdb_RdbHelper_itest, test_load_file_by_uuid) {
-    long long entry_id = helper.insert_file(entry);
+TEST_P(rdb_RdbQuery_itest, test_load_file_by_uuid) {
+    long long entry_id = query.insert_file(entry);
     test::TempH5File tf;
     tf.write(file);
-    long long lo_id = helper.insert_file_content(entry_id, tf.path());
+    long long lo_id = query.insert_file_content(entry_id, tf.path());
     conn->commit();
 
     RdbFileEntry e2(db);
     e2.uuid(entry.uuid());
 
-    EXPECT_NO_THROW(helper.load_file(e2));
+    EXPECT_NO_THROW(query.load_file(e2));
 
     EXPECT_GT(e2.source_id(), 0);
     EXPECT_EQ(entry.source_id(), e2.source_id());
@@ -192,14 +192,14 @@ TEST_P(rdb_RdbHelper_itest, test_load_file_by_uuid) {
     EXPECT_EQ(lo_id, e2.lo_id());
 }
 
-TEST_P(rdb_RdbHelper_itest, test_load_source) {
+TEST_P(rdb_RdbQuery_itest, test_load_source) {
     long long src_id = 0;
     Oh5Source src = Oh5Source::from_string("PLC:Legionowo");
-    EXPECT_NO_THROW(src_id = helper.select_source_id(src));
+    EXPECT_NO_THROW(src_id = query.select_source_id(src));
     EXPECT_GT(src_id, 0);
     
     src.clear();
-    EXPECT_NO_THROW(src = helper.select_source(src_id));
+    EXPECT_NO_THROW(src = query.select_source(src_id));
 
     ASSERT_TRUE(src.has("PLC"));
     EXPECT_EQ("Legionowo", src.get("PLC"));
@@ -209,20 +209,20 @@ TEST_P(rdb_RdbHelper_itest, test_load_source) {
     EXPECT_EQ("plleg", src.get("_name"));
 }
 
-TEST_P(rdb_RdbHelper_itest, test_select_source_nx) {
+TEST_P(rdb_RdbQuery_itest, test_select_source_nx) {
     Oh5Source src;
-    EXPECT_NO_THROW(helper.select_source(-1));
+    EXPECT_NO_THROW(query.select_source(-1));
     EXPECT_TRUE(src.empty());
 }
 
-TEST_P(rdb_RdbHelper_itest, test_load_source_unicode) {
+TEST_P(rdb_RdbQuery_itest, test_load_source_unicode) {
     long long src_id = 0;
     Oh5Source src = Oh5Source::from_string("PLC:Legionowo");
-    EXPECT_NO_THROW(src_id = helper.select_source_id(src));
+    EXPECT_NO_THROW(src_id = query.select_source_id(src));
     EXPECT_GT(src_id, 0);
     
     src.clear();
-    EXPECT_NO_THROW(src = helper.select_source(src_id));
+    EXPECT_NO_THROW(src = query.select_source(src_id));
 
     ASSERT_TRUE(src.has("PLC"));
     EXPECT_EQ("Legionowo", src.get("PLC"));
@@ -232,14 +232,14 @@ TEST_P(rdb_RdbHelper_itest, test_load_source_unicode) {
     EXPECT_EQ("plleg", src.get("_name"));
 }
 
-TEST_P(rdb_RdbHelper_itest, test_load_source_by_plc_unicode) {
+TEST_P(rdb_RdbQuery_itest, test_load_source_by_plc_unicode) {
     long long src_id = 0;
     Oh5Source src = Oh5Source::from_string("PLC:Świdwin");
-    EXPECT_NO_THROW(src_id = helper.select_source_id(src));
+    EXPECT_NO_THROW(src_id = query.select_source_id(src));
     EXPECT_GT(src_id, 0);
 
     src.clear();
-    EXPECT_NO_THROW(src = helper.select_source(src_id));
+    EXPECT_NO_THROW(src = query.select_source(src_id));
 
     ASSERT_TRUE(src.has("PLC"));
     EXPECT_EQ("Świdwin", src.get("PLC"));
@@ -249,7 +249,7 @@ TEST_P(rdb_RdbHelper_itest, test_load_source_by_plc_unicode) {
     EXPECT_EQ("plswi", src.get("_name"));
 }
 
-TEST_P(rdb_RdbHelper_itest, test_load_nodes) {
+TEST_P(rdb_RdbQuery_itest, test_load_nodes) {
     Oh5Node& g1 = entry.root().add(new Oh5Group("g1"));
     Oh5Node& g2 = entry.root().add(new Oh5Group("g2"));
     Oh5Node& a1 = entry.root().add(new Oh5Attribute("a1", Oh5Scalar(1)));
@@ -257,13 +257,13 @@ TEST_P(rdb_RdbHelper_itest, test_load_nodes) {
     Oh5Node& ds1 = g2.add(new Oh5DataSet("ds1"));
     Oh5Node& a3 = ds1.add(new Oh5Attribute("a3", Oh5Scalar(3)));
 
-    long long entry_id = helper.insert_file(entry);
-    helper.insert_nodes(entry_id, entry.root());
+    long long entry_id = query.insert_file(entry);
+    query.insert_nodes(entry_id, entry.root());
     conn->commit();
     
     Oh5MemoryNodeBackend be;
     Oh5Node& r = be.root();
-    helper.load_nodes(entry_id, r);
+    query.load_nodes(entry_id, r);
 
     EXPECT_EQ(4u, r.children().size());
 
@@ -282,8 +282,8 @@ TEST_P(rdb_RdbHelper_itest, test_load_nodes) {
 }
 
 #if BRFC_TEST_DSN_COUNT >= 1
-INSTANTIATE_TEST_CASE_P(rdb_RdbHelper_itest_p,
-                        rdb_RdbHelper_itest,
+INSTANTIATE_TEST_CASE_P(rdb_RdbQuery_itest_p,
+                        rdb_RdbQuery_itest,
                         ::testing::ValuesIn(TEST_DSNS));
 #endif // BRFC_TEST_DSN_COUNT
 
