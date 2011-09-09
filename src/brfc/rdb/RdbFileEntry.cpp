@@ -124,15 +124,7 @@ RdbFileEntry::do_stored_at() const {
 
 void
 RdbFileEntry::do_write_to_file(const std::string& path) const {
-    boost::shared_ptr<sql::Connection> conn = rdb().conn();
-    conn->begin();
-    try {
-        conn->large_object_to_file(lo_id_, path);
-        conn->commit();
-    } catch (...) {
-        conn->rollback();
-        throw;
-    }
+    rdb().entry_to_file(*this, path);
 }
 
 } // namespace brfc

@@ -36,9 +36,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RdbFileResult.hpp>
 #include <brfc/rdb/RdbHelper.hpp>
-#include <brfc/rdb/SaveFile.hpp>
+#include <brfc/rdb/RdbInDatabaseFileStorage.hpp>
 
 #include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5Node.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
 #include <brfc/sql/BasicConnectionPool.hpp>
@@ -47,26 +48,37 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Select.hpp>
 
+#include <brfc/util/no_delete.hpp>
+#include <brfc/util/uuid.hpp>
+#include <brfc/util/BoostFileSystem.hpp>
+
 namespace brfc {
 
 RelationalDatabase::RelationalDatabase(const Url& dsn)
         : creator_(new sql::DefaultConnectionCreator(dsn))
         , pool_(create_pool(creator_.get(), dsn))
+        , storage_(new RdbInDatabaseFileStorage())
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher()) {
+    init();
     conn(); // check if connection is valid
-    populate_mapper();
-    populate_hasher();
 }
 
 RelationalDatabase::RelationalDatabase(boost::shared_ptr<sql::ConnectionPool> pool)
         : creator_()
         , pool_(pool)
+        , storage_(new RdbInDatabaseFileStorage())
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher()) {
     BRFC_ASSERT(pool);
+    init();
+}
+
+void
+RelationalDatabase::init() {
     populate_mapper();
     populate_hasher();
+    storage_->database(this);
 }
 
 RelationalDatabase::~RelationalDatabase() {
@@ -105,6 +117,12 @@ RelationalDatabase::mapper() const {
     return *mapper_;
 }
 
+void
+RelationalDatabase::storage_policy(RdbFileStoragePolicy* policy) {
+    BRFC_ASSERT(policy);
+    storage_.reset(policy, no_delete);
+}
+
 bool
 RelationalDatabase::do_is_stored(const Oh5PhysicalFile& file) {
     try {
@@ -117,7 +135,47 @@ RelationalDatabase::do_is_stored(const Oh5PhysicalFile& file) {
 
 FileEntry*
 RelationalDatabase::do_store(const Oh5PhysicalFile& file) {
-    return SaveFile(this)(file);
+    std::auto_ptr<RdbFileEntry> entry(file_to_entry(file));
+
+    storage_->store(*entry, file.path()); 
+    return entry.release();
+}
+
+RdbFileEntry*
+RelationalDatabase::file_to_entry(const Oh5PhysicalFile& file) {
+    std::auto_ptr<RdbFileEntry> entry(new RdbFileEntry(this));
+
+    entry->hash(file_hasher().hash(file));
+    entry->loaded(true); // XXX: why?
+
+    // copy nodes from file to entry
+    Oh5NodeBackend& be = entry->root().backend();
+    Oh5Node::const_iterator iter = file.root().begin();
+    Oh5Node::const_iterator end = file.root().end();
+    ++iter; // skip root;
+    for ( ; iter != end; ++iter) {
+        be.add(iter->parent()->path(), iter->clone());
+    }
+
+    // set attributes
+    std::string uuid = uuid_string();
+    entry->uuid(uuid);
+    DateTime stored_at = DateTime::utc_now();
+    entry->stored_at(stored_at);
+    long long size = BoostFileSystem().file_size(file.path());
+    entry->size(size);
+
+    RdbHelper helper(conn());
+    long long source_id = helper.select_source_id(file.source());
+    entry->source_id(source_id);
+
+    return entry.release();
+}
+
+void
+RelationalDatabase::entry_to_file(const RdbFileEntry& entry,
+                                  const std::string& path) {
+    storage_->write_to_file(entry, path);
 }
 
 FileEntry*

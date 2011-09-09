@@ -16,41 +16,34 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef BRFC_RDB_IN_DATABASE_FILE_STORAGE_HPP
+#define BRFC_RDB_IN_DATABASE_FILE_STORAGE_HPP
 
-#ifndef BRFC_DB_RDB_SAVE_FILE_HPP
-#define BRFC_DB_RDB_SAVE_FILE_HPP
+#include <brfc/rdb/RdbFileStoragePolicy.hpp>
 
 namespace brfc {
 
-class Oh5Node;
-class Oh5PhysicalFile;
-class RdbFileEntry;
-class RelationalDatabase;
-
-/**
- * @brief save PhysicalFile instances to database
- */
-class SaveFile {
+class RdbInDatabaseFileStorage : public RdbFileStoragePolicy {
   public:
-    /**
-     * @brief constructor
-     * @param rdb the database
-     */
-    explicit SaveFile(RelationalDatabase* rdb);
+    RdbInDatabaseFileStorage();
+    virtual ~RdbInDatabaseFileStorage();
 
-    /**
-     * @brief save a PhysicalFile instance to database
-     * @param file the file to be saved
-     * @return file entry in the database
-     */
-    RdbFileEntry* operator()(const Oh5PhysicalFile& file);
-
+    using RdbFileStoragePolicy::database;
+    RelationalDatabase* database();
+  
   private:
-    Oh5Node& parent_on_entry(const Oh5Node& node);
+    virtual void do_database(RelationalDatabase* db);
 
-    RelationalDatabase* rdb_;
+    virtual void do_store(RdbFileEntry& e, const std::string& path);
+
+    virtual bool do_remove(const RdbFileEntry& e);
+
+    virtual void do_write_to_file(const RdbFileEntry& e,
+                                  const std::string& path);
+    
+    RelationalDatabase* db_;
 };
 
 } // namespace brfc
 
-#endif // BRFC_DB_RDB_SAVE_FILE_HPP
+#endif // BRFC_RDB_IN_DATABASE_FILE_STORAGE_HPP

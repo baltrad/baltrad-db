@@ -145,7 +145,7 @@ TEST_P(db_Database_itest, write_entry_to_file) {
     
     // test writing
     test::TempH5File tef;
-    EXPECT_NO_THROW(e->write_to_file(tef.path()));
+    e->write_to_file(tef.path());
     EXPECT_EQ(fs::file_size(tef.path()), fs::file_size(tf.path()));
 }
 

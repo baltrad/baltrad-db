@@ -31,6 +31,8 @@ namespace brfc {
     class FileHasher;
     class Oh5File;
     class Oh5Source;
+    class RdbFileEntry;
+    class RdbFileStoragePolicy;
     class RdbHelper;
     class Url;
     class Variant;
@@ -72,6 +74,12 @@ class RelationalDatabase : public Database {
     const AttributeMapper& mapper() const;
     
     /**
+     * @brief set storage policy
+     * @param policy storage policy to set (caller retains ownership)
+     */
+    void storage_policy(RdbFileStoragePolicy* policy);
+    
+    /**
      * @brief acquire a connection from the associated pool
      */
     boost::shared_ptr<sql::Connection> conn() const;    
@@ -80,6 +88,9 @@ class RelationalDatabase : public Database {
 
     static sql::ConnectionPool* create_pool(sql::ConnectionCreator* conn_ctor,
                                             const Url& dsn);
+
+    void entry_to_file(const RdbFileEntry& entry, const std::string& path);
+    RdbFileEntry* file_to_entry(const Oh5PhysicalFile& file);
 
   protected:
     /**
@@ -102,11 +113,14 @@ class RelationalDatabase : public Database {
     virtual void do_remove_source(const Oh5Source& source);
 
   private:
+    void init();
+
     void populate_mapper();
     void populate_hasher();
 
     boost::scoped_ptr<sql::ConnectionCreator> creator_;
     boost::shared_ptr<sql::ConnectionPool> pool_;
+    boost::shared_ptr<RdbFileStoragePolicy> storage_;
     boost::shared_ptr<AttributeMapper> mapper_;
     boost::shared_ptr<FileHasher> file_hasher_;
     boost::shared_ptr<RdbHelper> helper_;
