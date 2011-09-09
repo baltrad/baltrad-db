@@ -101,6 +101,22 @@ TEST_P(rdb_RdbHelper_itest, test_insert_file_content) {
     EXPECT_NO_THROW(conn->commit());
 }
 
+TEST_P(rdb_RdbHelper_itest, test_is_stored) {
+    long long entry_id = helper.insert_file(entry);
+    
+    EXPECT_FALSE(helper.is_stored(1, "hashh"));
+    EXPECT_TRUE(helper.is_stored(1, "hash"));
+}
+
+TEST_P(rdb_RdbHelper_itest, test_uuid_by_source_and_hash) {
+    long long entry_id = helper.insert_file(entry);
+    
+    std::string uuid = helper.uuid_by_source_and_hash(1, "hashh");
+    EXPECT_EQ("", uuid);
+    uuid = helper.uuid_by_source_and_hash(1, "hash");
+    EXPECT_EQ(entry.uuid(), uuid);
+}
+
 TEST_P(rdb_RdbHelper_itest, test_insert_node_group) {
     long long entry_id = helper.insert_file(entry);
     

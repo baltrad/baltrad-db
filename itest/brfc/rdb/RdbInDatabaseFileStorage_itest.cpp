@@ -21,7 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/scoped_ptr.hpp>
 
-#include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
 #include <brfc/oh5/hl/HlFile.hpp>
@@ -33,6 +32,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/itest_config.hpp>
 #include <brfc/ITestEnv.hpp>
+
+#include <brfc/test_common.hpp>
 
 namespace brfc {
 
@@ -71,12 +72,6 @@ TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_store) {
     EXPECT_GT(e->lo_id(), 0);
 }
 
-TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_store_double) {
-    boost::scoped_ptr<RdbFileEntry> e(db->file_to_entry(file));
-    storage.store(*e, file.path());
-    EXPECT_THROW(storage.store(*e, file.path()), duplicate_entry);
-}
-
 TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_write_to_file) {
     boost::scoped_ptr<RdbFileEntry> e(db->file_to_entry(file));
     storage.store(*e, file.path());
@@ -90,5 +85,11 @@ TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_write_to_file) {
     EXPECT_GT(file_size, 0);
     EXPECT_EQ(e->size(), file_size);
 }
+
+#if BRFC_TEST_DSN_COUNT >= 1
+INSTANTIATE_TEST_CASE_P(rdb_RdbInDatabaseFileStorage_itest_p,
+                        rdb_RdbInDatabaseFileStorage_itest,
+                        ::testing::ValuesIn(TEST_DSNS));
+#endif // BRFC_TEST_DSN_COUNT
 
 } // namespace brfc

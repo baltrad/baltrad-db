@@ -91,7 +91,7 @@ class RdbHelper : boost::noncopyable {
      * successful conversions.
      */
     void insert_attribute(long long node_id, const Oh5Attribute& attr);
-
+    
     /**
      * @brief insert @c entry to database
      * @param entry the entry to insert
@@ -108,6 +108,18 @@ class RdbHelper : boost::noncopyable {
     long long insert_file_content(long long entry_id,
                                   const std::string& path);
     
+    /**
+     * @brief check if entry is stored in the database
+     */
+    bool is_stored(long long source_id, const std::string& hash);
+    
+    /**
+     * @brief query uuid for source_id and hash combination
+     * @return the uuid or empty string if not found
+     */
+    std::string uuid_by_source_and_hash(long long source_id,
+                                        const std::string& hash);
+
     /**
      * @brief lookup id for @c source
      * @return database id of the source or 0 if source is not found

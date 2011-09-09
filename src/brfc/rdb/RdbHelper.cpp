@@ -263,6 +263,32 @@ RdbHelper::insert_file_content(long long entry_id,
     return lo_id;
 }
 
+bool
+RdbHelper::is_stored(long long source_id, const std::string& hash) {
+    const std::string& uuid = uuid_by_source_and_hash(source_id, hash);
+    return not uuid.empty();
+}
+
+std::string
+RdbHelper::uuid_by_source_and_hash(long long source_id,
+                                   const std::string& hash) {
+    sql::Select qry;
+    qry.what(m::files::column("uuid"));
+    qry.from(sql_.table(m::files::name()));
+    qry.where(
+        sql_.and_(
+            sql_.eq(m::files::column("source_id"), sql_.int64_(source_id)),
+            sql_.eq(m::files::column("hash"), sql_.string(hash))
+        )
+    );
+
+    boost::scoped_ptr<sql::Result> result(conn().execute(qry));
+    
+    if (not result->next())
+        return "";
+    return result->value_at("uuid").string();
+}
+
 void
 RdbHelper::load_file(RdbFileEntry& entry) {
     sql::Select qry;

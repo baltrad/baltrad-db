@@ -137,6 +137,16 @@ FileEntry*
 RelationalDatabase::do_store(const Oh5PhysicalFile& file) {
     std::auto_ptr<RdbFileEntry> entry(file_to_entry(file));
 
+    {
+        RdbHelper helper(conn());
+    
+        const std::string& uuid =
+            helper.uuid_by_source_and_hash(entry->source_id(), entry->hash());
+        if (not uuid.empty()) {
+            throw duplicate_entry(file.path() + " already stored as " + uuid);
+        }
+    }
+
     storage_->store(*entry, file.path()); 
     return entry.release();
 }
@@ -181,25 +191,14 @@ RelationalDatabase::entry_to_file(const RdbFileEntry& entry,
 FileEntry*
 RelationalDatabase::do_entry_by_file(const Oh5PhysicalFile& file) {
     const std::string& hash = file_hasher().hash(file);
-    boost::shared_ptr<sql::Connection> c = conn();
-    long long src_id = RdbHelper(c).select_source_id(file.source());
+    RdbHelper helper(conn());
+    long long src_id = helper.select_source_id(file.source());
+    const std::string& uuid = helper.uuid_by_source_and_hash(src_id, hash);
 
-    sql::Factory xpr;
-    sql::Select qry;
-    qry.what(m::files::column("uuid"));
-    qry.from(xpr.table(m::files::name()));
-    qry.where(
-        xpr.and_(
-            xpr.eq(m::files::column("hash"), xpr.string(hash)),
-            xpr.eq(m::files::column("source_id"), xpr.int64_(src_id))
-        )
-    );
-
-    std::auto_ptr<sql::Result> result(c->execute(qry));
-    if (result->size() > 1 or not result->next())
+    if (uuid.empty())
         throw lookup_error(file.path() + " is not stored");
     
-    return entry_by_uuid(result->value_at("uuid").string());
+    return entry_by_uuid(uuid);
 }
 
 FileEntry*

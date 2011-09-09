@@ -80,6 +80,18 @@ TEST_P(db_Database_itest, store) {
     EXPECT_EQ(file.what_time(), e->what_time());
 }
 
+TEST_P(db_Database_itest, store_duplicate) {
+    HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    test::TempH5File tf;
+    tf.write(file);
+    file.path(tf.path());
+    
+    scoped_ptr<FileEntry> e(db->store(file));
+    ASSERT_TRUE(e);
+    EXPECT_THROW(e.reset(db->store(file)), duplicate_entry);
+}
+
+
 TEST_P(db_Database_itest, entry_by_uuid) {
     EXPECT_THROW(db->entry_by_uuid("nxuuid"), lookup_error);
 
