@@ -27,6 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/MockFileEntry.hpp>
 #include <brfc/oh5/MockOh5PhysicalFile.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
+#include <brfc/rdb/MockRdbFileStoragePolicy.hpp>
 #include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/DialectCompiler.hpp>
 #include <brfc/sql/MockDialect.hpp>
@@ -40,6 +41,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::Ref;
 
 namespace brfc {
 
@@ -108,6 +110,15 @@ TEST_F(rdb_RelationalDatabase_test, test_create_pool_default) {
     EXPECT_EQ(5u, bcp->max_size());
 }
 
+TEST_F(rdb_RelationalDatabase_test, test_set_storage_policy) {
+    delete conn; // XXX: shows up leaked, fix the fixture/tests
+    MockRdbFileStoragePolicy* storage = new MockRdbFileStoragePolicy();
+
+    EXPECT_CALL(*storage, do_database(&rdb));
+
+    rdb.storage_policy(storage);
+}
+
 
 TEST_F(rdb_RelationalDatabase_test, test_execute_attribute_query) {
     EXPECT_CALL(pool, do_get())
@@ -130,16 +141,15 @@ TEST_F(rdb_RelationalDatabase_test, test_execute_file_query) {
 }
 
 TEST_F(rdb_RelationalDatabase_test, test_remove) {
-    MockFileEntry e;
-    EXPECT_CALL(pool, do_get())
-        .WillOnce(Return(conn));
-    EXPECT_CALL(e, do_uuid())
-        .WillOnce(Return("abcdefg"));
-    EXPECT_CALL(*conn, do_execute(_)) // check statement
-        .WillOnce(Return(result_ptr.release()));
-    EXPECT_CALL(result, do_affected_rows())
-        .WillOnce(Return(1));
+    delete conn; // XXX: shows up leaked, fix the fixture/tests
+    MockRdbFileStoragePolicy* storage = new MockRdbFileStoragePolicy();
+    RdbFileEntry e(&rdb);
 
+    EXPECT_CALL(*storage, do_database(&rdb));
+    EXPECT_CALL(*storage, do_remove(Ref(e)))
+        .WillOnce(Return(true));
+
+    rdb.storage_policy(storage);
     EXPECT_TRUE(rdb.remove(e));
 }
 

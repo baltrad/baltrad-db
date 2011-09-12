@@ -120,6 +120,7 @@ void
 RelationalDatabase::storage_policy(RdbFileStoragePolicy* policy) {
     BRFC_ASSERT(policy);
     storage_.reset(policy);
+    storage_->database(this);
 }
 
 bool
@@ -245,16 +246,7 @@ RelationalDatabase::populate_hasher() {
 
 bool
 RelationalDatabase::do_remove(const FileEntry& entry) {
-    sql::Factory xpr;
-    Expression stmt = Listcons().string("DELETE FROM bdb_files WHERE uuid = ")
-                                .append(xpr.bind("uuid"))
-                                .get();
-    sql::Connection::BindMap_t binds;
-    binds["uuid"] = Expression(entry.uuid());
-
-    boost::shared_ptr<sql::Connection> c = conn();
-    std::auto_ptr<sql::Result> r (c->execute(stmt, binds));
-    return r->affected_rows();
+    return storage_->remove(dynamic_cast<const RdbFileEntry&>(entry));
 }
 
 std::vector<Oh5Source>

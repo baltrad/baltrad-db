@@ -86,6 +86,13 @@ TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_retrieve) {
     EXPECT_EQ(e->size(), file_size);
 }
 
+TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_remove) {
+    boost::scoped_ptr<RdbFileEntry> e(db->file_to_entry(file));
+    storage.store(*e, file.path());
+
+    EXPECT_TRUE(storage.remove(*e));
+}
+
 #if BRFC_TEST_DSN_COUNT >= 1
 INSTANTIATE_TEST_CASE_P(rdb_RdbInDatabaseFileStorage_itest_p,
                         rdb_RdbInDatabaseFileStorage_itest,

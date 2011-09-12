@@ -20,10 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RdbInDatabaseFileStorage.hpp>
 
 #include <brfc/assert.hpp>
+#include <brfc/expr/Listcons.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RdbQuery.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/sql/Connection.hpp>
+#include <brfc/sql/Factory.hpp>
+#include <brfc/sql/Result.hpp>
 
 namespace brfc {
 
@@ -75,9 +78,17 @@ RdbInDatabaseFileStorage::do_store(RdbFileEntry& entry,
 }
 
 bool
-RdbInDatabaseFileStorage::do_remove(const RdbFileEntry&) {
-    // taken care of by a database rule in postgresql
-    return true;
+RdbInDatabaseFileStorage::do_remove(const RdbFileEntry& entry) {
+    sql::Factory xpr;
+    Expression stmt = Listcons().string("DELETE FROM bdb_files WHERE uuid = ")
+                                .append(xpr.bind("uuid"))
+                                .get();
+    sql::Connection::BindMap_t binds;
+    binds["uuid"] = Expression(entry.uuid());
+
+    boost::shared_ptr<sql::Connection> conn(connection(*this));
+    std::auto_ptr<sql::Result> r (conn->execute(stmt, binds));
+    return r->affected_rows();
 }
 
 void
