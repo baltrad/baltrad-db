@@ -87,8 +87,6 @@ class HlFile : public Oh5PhysicalFile {
     virtual const Oh5Node& do_root() const { return nodes_.root(); }
 
   private:
-    void load();
-    
     Oh5MemoryNodeBackend nodes_;
     std::string path_;
 };
