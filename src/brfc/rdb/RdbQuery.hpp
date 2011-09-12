@@ -147,6 +147,11 @@ class RdbQuery : boost::noncopyable {
      * @param root root node loaded nodes will be attached to
      */
     void load_nodes(long long file_id, Oh5Node& root);
+    
+    /**
+     * @brief remove file entry from the database
+     */
+    bool remove_file_entry(const std::string& uuid);
 
     std::vector<Oh5Source> select_all_sources();
 

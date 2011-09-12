@@ -324,6 +324,21 @@ RdbQuery::load_file(RdbFileEntry& entry) {
     entry.stored_at(result->value_at("stored_at").to_datetime());
 }
 
+bool
+RdbQuery::remove_file_entry(const std::string& uuid) {
+    sql::Factory xpr;
+    Expression stmt = Listcons().string("DELETE FROM ")
+                                .string(m::files::name())
+                                .string(" WHERE uuid = ")
+                                .append(xpr.bind("uuid"))
+                                .get();
+    sql::Connection::BindMap_t binds;
+    binds["uuid"] = Expression(uuid);
+
+    std::auto_ptr<sql::Result> r (conn().execute(stmt, binds));
+    return r->affected_rows();
+}
+
 long long
 RdbQuery::select_source_id(const Oh5Source& src) {
     sql::Select qry;
