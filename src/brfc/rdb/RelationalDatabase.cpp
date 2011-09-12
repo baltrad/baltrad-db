@@ -48,7 +48,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Select.hpp>
 
-#include <brfc/util/no_delete.hpp>
 #include <brfc/util/uuid.hpp>
 #include <brfc/util/BoostFileSystem.hpp>
 
@@ -120,7 +119,7 @@ RelationalDatabase::mapper() const {
 void
 RelationalDatabase::storage_policy(RdbFileStoragePolicy* policy) {
     BRFC_ASSERT(policy);
-    storage_.reset(policy, no_delete);
+    storage_.reset(policy);
 }
 
 bool

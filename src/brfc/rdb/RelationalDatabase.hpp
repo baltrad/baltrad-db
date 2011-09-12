@@ -75,7 +75,7 @@ class RelationalDatabase : public Database {
     
     /**
      * @brief set storage policy
-     * @param policy storage policy to set (caller retains ownership)
+     * @param policy storage policy to set (ownership is transfered)
      */
     void storage_policy(RdbFileStoragePolicy* policy);
     
@@ -120,7 +120,7 @@ class RelationalDatabase : public Database {
 
     boost::scoped_ptr<sql::ConnectionCreator> creator_;
     boost::shared_ptr<sql::ConnectionPool> pool_;
-    boost::shared_ptr<RdbFileStoragePolicy> storage_;
+    boost::scoped_ptr<RdbFileStoragePolicy> storage_;
     boost::shared_ptr<AttributeMapper> mapper_;
     boost::shared_ptr<FileHasher> file_hasher_;
     boost::shared_ptr<RdbQuery> query_;
