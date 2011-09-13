@@ -35,8 +35,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/hl/HlFile.hpp>
+#include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 #include <brfc/test/TestRDB.hpp>
-#include <brfc/test/TempH5File.hpp>
+#include <brfc/util/NamedTemporaryFile.hpp>
 
 namespace brfc {
 
@@ -80,30 +81,30 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
     virtual void SetUp() {
         add_attribute(td1, "dataset1/where/xsize", Oh5Scalar(1));
         add_attribute(td1, "dataset1/where/ysize", Oh5Scalar(2));
-        tf1.write(td1);
+        writer.write(td1, tf1.path());
         td1.path(tf1.path());
 
         add_attribute(td2, "dataset1/where/xsize", Oh5Scalar(2));
         add_attribute(td2, "dataset1/where/ysize", Oh5Scalar(2));
-        tf2.write(td2);
+        writer.write(td2, tf2.path());
         td2.path(tf2.path());
 
         add_attribute(td3, "dataset1/where/xsize", Oh5Scalar(3));
         add_attribute(td3, "dataset2/where/xsize", Oh5Scalar(3));
-        tf3.write(td3);
+        writer.write(td3, tf3.path());
         td3.path(tf3.path());
 
         add_attribute(td4, "dataset1/where/xsize", Oh5Scalar(6));
         add_attribute(td4, "dataset1/where/ysize", Oh5Scalar(4));
         add_attribute(td4, "dataset2/where/ysize", Oh5Scalar(5));
-        tf4.write(td4);
+        writer.write(td4, tf4.path());
         td4.path(tf4.path());
 
         add_attribute(td5, "dataset1/where/xsize", Oh5Scalar(5));
         add_attribute(td5, "dataset1/where/ysize", Oh5Scalar(2));
         add_attribute(td5, "dataset2/where/xsize", Oh5Scalar(2));
         add_attribute(td5, "dataset2/where/ysize", Oh5Scalar(5));
-        tf5.write(td5);
+        writer.write(td5, tf5.path());
         td5.path(tf5.path());
 
         fe1.reset(db->store(td1));
@@ -125,7 +126,8 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
     std::string src1, src2;
     test::TestRDB* db;
     HlFile td1, td2, td3, td4, td5;
-    test::TempH5File tf1, tf2, tf3, tf4, tf5;
+    Oh5HlFileWriter writer;
+    NamedTemporaryFile tf1, tf2, tf3, tf4, tf5;
     boost::scoped_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
     FileQuery query;
     boost::scoped_ptr<FileResult> r;

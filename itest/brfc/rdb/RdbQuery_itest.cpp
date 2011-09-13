@@ -34,11 +34,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 #include <brfc/oh5/hl/HlFile.hpp>
+#include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 
 #include <brfc/sql/Connection.hpp>
 
 #include <brfc/test/TestRDB.hpp>
-#include <brfc/test/TempH5File.hpp>
+#include <brfc/util/NamedTemporaryFile.hpp>
 
 #include <brfc/itest_config.hpp>
 #include <brfc/ITestEnv.hpp>
@@ -91,9 +92,10 @@ TEST_P(rdb_RdbQuery_itest, test_insert_file) {
 
 TEST_P(rdb_RdbQuery_itest, test_insert_file_content) {
     long long entry_id = query.insert_file(entry);
-
-    test::TempH5File tf;
-    tf.write(file);
+    
+    NamedTemporaryFile tf;
+    Oh5HlFileWriter writer;
+    writer.write(file, tf.path());
  
     long long lo_id = query.insert_file_content(entry_id, tf.path());
     EXPECT_GT(lo_id, 0);
@@ -148,8 +150,9 @@ TEST_P(rdb_RdbQuery_itest, test_insert_node_dataset) {
 
 TEST_P(rdb_RdbQuery_itest, test_load_file_by_id) {
     long long entry_id = query.insert_file(entry);
-    test::TempH5File tf;
-    tf.write(file);
+    NamedTemporaryFile tf;
+    Oh5HlFileWriter writer;
+    writer.write(file, tf.path());
     long long lo_id = query.insert_file_content(entry_id, tf.path());
     conn->commit();
 
@@ -171,8 +174,9 @@ TEST_P(rdb_RdbQuery_itest, test_load_file_by_id) {
 
 TEST_P(rdb_RdbQuery_itest, test_load_file_by_uuid) {
     long long entry_id = query.insert_file(entry);
-    test::TempH5File tf;
-    tf.write(file);
+    NamedTemporaryFile tf;
+    Oh5HlFileWriter writer;
+    writer.write(file, tf.path());
     long long lo_id = query.insert_file_content(entry_id, tf.path());
     conn->commit();
 

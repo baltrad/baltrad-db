@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.fc;
 
+import java.io.File;
 import java.util.List;
 
 import eu.baltrad.fc.Date;
@@ -32,13 +33,12 @@ import eu.baltrad.fc.Database;
 import eu.baltrad.fc.FileEntry;
 import eu.baltrad.fc.FileQuery;
 
-import eu.baltrad.fc.Oh5File;
-import eu.baltrad.fc.Oh5Source;
 import eu.baltrad.fc.HlFile;
+import eu.baltrad.fc.Oh5File;
+import eu.baltrad.fc.Oh5HlFileWriter;
+import eu.baltrad.fc.Oh5Source;
 
 import eu.baltrad.fc.TestRDB;
-import eu.baltrad.fc.TempH5File;
-import eu.baltrad.fc.TempDir;
 
 import junit.framework.TestCase;
 
@@ -48,13 +48,10 @@ public class TestFileCatalog extends TestCase {
   private String schema_dir;
   private FileCatalog fc;
   private HlFile file;
-  private TempH5File tempfile;
-  private TempDir tempdir;
 
   public void setUp() {
     dsn = System.getProperty("db.test_db_dsn");
     schema_dir = System.getProperty("db.test_db_schema_dir");
-    tempdir = new TempDir();
     rdb = new TestRDB(dsn, schema_dir);
     fc = new FileCatalog(Database.create(dsn), new NullStorage());
 
@@ -62,18 +59,17 @@ public class TestFileCatalog extends TestCase {
                       new Date(2000, 05, 01),
                       new Time(12, 01, 05),
                       "RAD:SE50");
-    tempfile = new TempH5File();
-    tempfile.write(file);
   }
 
   public void tearDown() {
-    tempfile.unlink();
-    tempdir.unlink();
     rdb.clean();
   }
 
-  public void testStore() {
-    FileEntry f = fc.store(tempfile.path());
+  public void testStore() throws Exception {
+    File tempfile = File.createTempFile("bdbtest", ".h5");
+    Oh5HlFileWriter writer = new Oh5HlFileWriter();
+    writer.write(file, tempfile.getAbsolutePath());
+    FileEntry f = fc.store(tempfile.getAbsolutePath());
     assertTrue(f.uuid() != "");
   }
 

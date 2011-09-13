@@ -22,15 +22,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/exceptions.hpp>
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
-
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5DataSet.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
-
 #include <brfc/oh5/hl/HlFile.hpp>
-
-#include <brfc/test/TempH5File.hpp>
+#include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
+#include <brfc/util/NamedTemporaryFile.hpp>
 
 #include <brfc/test_common.hpp>
 
@@ -58,9 +56,10 @@ TEST_F(oh5_hl_HlFile_test, test_load_from_filesystem) {
     what.add(new Oh5Attribute("date", d_2000_01_02));
     Oh5Node& data1 = file.root().add(new Oh5Group("data1"));
     data1.add(new Oh5DataSet("data"));
-
-    test::TempH5File tempfile;
-    tempfile.write(file);
+    
+    NamedTemporaryFile tempfile;
+    Oh5HlFileWriter writer;
+    writer.write(file, tempfile.path());
 
     HlFile g(tempfile.path());
     EXPECT_EQ(g.path(), tempfile.path());

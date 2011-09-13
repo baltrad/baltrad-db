@@ -31,8 +31,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/hl/HlFile.hpp>
+#include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 #include <brfc/test/TestRDB.hpp>
-#include <brfc/test/TempH5File.hpp>
+#include <brfc/util/NamedTemporaryFile.hpp>
 
 using boost::scoped_ptr;
 
@@ -61,15 +62,19 @@ class db_Database_itest : public testing::TestWithParam<const char*> {
         return i;
     }
 
+    void write_to_temp(HlFile& file) {
+        writer.write(file, tf.path());
+        file.path(tf.path());
+    }
+
     test::TestRDB* db;
+    NamedTemporaryFile tf;
+    Oh5HlFileWriter writer;
 };
 
 TEST_P(db_Database_itest, store) {
     HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
-
+    write_to_temp(file);
     
     scoped_ptr<FileEntry> e;
     EXPECT_NO_THROW(e.reset(db->store(file)));
@@ -82,9 +87,7 @@ TEST_P(db_Database_itest, store) {
 
 TEST_P(db_Database_itest, store_duplicate) {
     HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
+    write_to_temp(file);
     
     scoped_ptr<FileEntry> e(db->store(file));
     ASSERT_TRUE(e);
@@ -96,9 +99,7 @@ TEST_P(db_Database_itest, entry_by_uuid) {
     EXPECT_THROW(db->entry_by_uuid("nxuuid"), lookup_error);
 
     HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
+    write_to_temp(file);
     
     scoped_ptr<FileEntry> e1, e2;
     e1.reset(db->store(file));
@@ -112,9 +113,7 @@ TEST_P(db_Database_itest, entry_by_uuid) {
 
 TEST_P(db_Database_itest, entry_by_file) {
     HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
+    write_to_temp(file);
 
     EXPECT_THROW(db->entry_by_file(file), lookup_error);
     
@@ -128,9 +127,7 @@ TEST_P(db_Database_itest, entry_by_file) {
 
 TEST_P(db_Database_itest, remove) {
     HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
+    write_to_temp(file);
     
     scoped_ptr<FileEntry> e;
     EXPECT_NO_THROW(e.reset(db->store(file)));
@@ -147,25 +144,21 @@ TEST_P(db_Database_itest, remove) {
 //XXX: this should be tested somewhere else?
 TEST_P(db_Database_itest, write_entry_to_file) {
     HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
+    write_to_temp(file);
     
     scoped_ptr<FileEntry> e;
     EXPECT_NO_THROW(e.reset(db->store(file)));
     ASSERT_TRUE(e);
     
     // test writing
-    test::TempH5File tef;
+    NamedTemporaryFile tef;
     e->write_to_file(tef.path());
     EXPECT_EQ(fs::file_size(tef.path()), fs::file_size(tf.path()));
 }
 
 TEST_P(db_Database_itest, store_with_invalid_attributes) {
     HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
-    test::TempH5File tf;
-    tf.write(file);
-    file.path(tf.path());
+    write_to_temp(file);
     // add an invalid attribute
     file.root().add(new Oh5Attribute("invalid", Oh5Scalar(1)));
 

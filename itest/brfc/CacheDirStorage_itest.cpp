@@ -26,9 +26,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 
 #include <brfc/oh5/hl/HlFile.hpp>
+#include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 
 #include <brfc/test/TempDir.hpp>
-#include <brfc/test/TempH5File.hpp>
+
+#include <brfc/util/BoostFileSystem.hpp>
+#include <brfc/util/NamedTemporaryFile.hpp>
 
 #include <brfc/test_common.hpp>
 #include <brfc/db/MockFileEntry.hpp>
@@ -52,14 +55,20 @@ class CacheDirStorage_itest : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        tmpfile.write(file);
+        Oh5HlFileWriter writer;
+        writer.write(file, tmpfile.path());
         file.path(tmpfile.path());
         ON_CALL(entry, do_uuid()).WillByDefault(Return("uuid"));
+    }
+
+    void copy_tmpfile(const std::string& path) {
+        fs.copy_file(tmpfile.path(), path);
     }
     
     test::TempDir dir;
     CacheDirStorage storage;
-    test::TempH5File tmpfile;
+    NamedTemporaryFile tmpfile;
+    BoostFileSystem fs;
     HlFile file;
     ::testing::NiceMock<MockFileEntry> entry;
 };
@@ -75,7 +84,7 @@ TEST_F(CacheDirStorage_itest, test_prestore) {
 
 TEST_F(CacheDirStorage_itest, test_store) {
     EXPECT_CALL(entry, do_write_to_file(_))
-        .WillOnce(Invoke(&tmpfile, &test::TempH5File::copy));
+        .WillOnce(Invoke(this, &CacheDirStorage_itest::copy_tmpfile));
 
     const std::string& rpath = storage.store(entry);
 
@@ -84,7 +93,7 @@ TEST_F(CacheDirStorage_itest, test_store) {
 
 TEST_F(CacheDirStorage_itest, test_double_store) {
     EXPECT_CALL(entry, do_write_to_file(_))
-        .WillOnce(Invoke(&tmpfile, &test::TempH5File::copy));
+        .WillOnce(Invoke(this, &CacheDirStorage_itest::copy_tmpfile));
     
     const std::string& rpath1 = storage.store(entry);
     EXPECT_TRUE(fs::exists(rpath1));
@@ -97,7 +106,7 @@ TEST_F(CacheDirStorage_itest, test_double_store) {
 
 TEST_F(CacheDirStorage_itest, test_remove) {
     const std::string& path = storage.entry_path(entry);
-    tmpfile.copy(path);
+    fs.copy_file(tmpfile.path(), path);
 
     EXPECT_TRUE(storage.remove(entry));
     EXPECT_FALSE(fs::exists(path));
@@ -112,7 +121,7 @@ TEST_F(CacheDirStorage_itest, test_remove_nx) {
 
 TEST_F(CacheDirStorage_itest, test_clean) {
     const std::string& path = storage.entry_path(entry);
-    tmpfile.copy(path);
+    fs.copy_file(tmpfile.path(), path);
 
     EXPECT_NO_THROW(storage.clean());
     EXPECT_FALSE(fs::exists(path));

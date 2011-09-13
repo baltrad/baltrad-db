@@ -27,8 +27,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RdbInDatabaseFileStorage.hpp>
 #include <brfc/test/TestRDB.hpp>
-#include <brfc/test/TempH5File.hpp>
 #include <brfc/util/BoostFileSystem.hpp>
+#include <brfc/util/NamedTemporaryFile.hpp>
+#include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 
 #include <brfc/itest_config.hpp>
 #include <brfc/ITestEnv.hpp>
@@ -50,7 +51,8 @@ class rdb_RdbInDatabaseFileStorage_itest :
 
     virtual void SetUp() {
         storage.database(db);
-        temp_file.write(file);
+        Oh5HlFileWriter writer;
+        writer.write(file, temp_file.path());
         file.path(temp_file.path());
     }
     
@@ -61,7 +63,7 @@ class rdb_RdbInDatabaseFileStorage_itest :
     test::TestRDB* db;
     RdbInDatabaseFileStorage storage;
     HlFile file;
-    test::TempH5File temp_file;
+    NamedTemporaryFile temp_file;
 };
 
 TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_store) {
@@ -76,8 +78,7 @@ TEST_P(rdb_RdbInDatabaseFileStorage_itest, test_retrieve) {
     boost::scoped_ptr<RdbFileEntry> e(db->file_to_entry(file));
     storage.store(*e, file.path());
     
-    test::TempH5File tf;
-
+    NamedTemporaryFile tf;
     storage.retrieve(*e, tf.path());
     
     BoostFileSystem fsys;
