@@ -58,7 +58,7 @@ class rdb_RdbFileEntry_test : public ::testing::Test {
 };
 
 TEST_F(rdb_RdbFileEntry_test, test_ctor) {
-    EXPECT_EQ(0, entry.root().parent());
+    EXPECT_EQ(0, entry.metadata().root().parent());
 }
 
 } // namespace brfc

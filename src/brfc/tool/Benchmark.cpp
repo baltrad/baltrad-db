@@ -35,7 +35,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileEntry.hpp>
 
 #include <brfc/oh5/Oh5Attribute.hpp>
-#include <brfc/oh5/hl/HlFile.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 
 namespace po = boost::program_options;
 
@@ -93,7 +94,7 @@ Benchmark::do_execute(Database& db) {
     boost::timer timer;
 
     // read the "template" file
-    HlFile f(infile_);
+    Oh5PhysicalFile f(infile_);
     double load_secs = timer.elapsed();
 
     DateTime dt(Date(3000, 1, 1));
@@ -104,8 +105,8 @@ Benchmark::do_execute(Database& db) {
     boost::progress_display progress(iterations_);
 
     for (int i=0; i < iterations_; ++i) {
-        f.root().attribute("what/date")->value(Oh5Scalar(dt.date()));
-        f.root().attribute("what/time")->value(Oh5Scalar(dt.time()));
+        f.metadata().root().attribute("what/date")->value(Oh5Scalar(dt.date()));
+        f.metadata().root().attribute("what/time")->value(Oh5Scalar(dt.time()));
 
         timer.restart();
         stored_files.push_back(db.store(f));

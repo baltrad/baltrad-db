@@ -20,10 +20,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RdbInDatabaseFileStorage.hpp>
 
 #include <brfc/assert.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RdbQuery.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/sql/Connection.hpp>
+
 
 namespace brfc {
 
@@ -66,7 +68,7 @@ RdbInDatabaseFileStorage::do_store(RdbFileEntry& entry,
         entry.id(entry_id);
         long long lo_id = query.insert_file_content(entry_id, path);
         entry.lo_id(lo_id);
-        query.insert_nodes(entry_id, entry.root());
+        query.insert_nodes(entry_id, entry.metadata().root());
         conn->commit();
     } catch (...) {
         conn->rollback();

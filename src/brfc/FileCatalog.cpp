@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/Database.hpp>
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/oh5/hl/HlFile.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 
 namespace brfc {
 
@@ -58,7 +58,7 @@ FileCatalog::storage(LocalStorage* storage) {
 
 bool
 FileCatalog::is_stored(const std::string& path) const {
-    HlFile f(path);
+    Oh5PhysicalFile f(path);
     return is_stored(f);
 }
 
@@ -69,7 +69,7 @@ FileCatalog::is_stored(const Oh5PhysicalFile& f) const {
 
 FileEntry*
 FileCatalog::store(const std::string& path) {
-    HlFile f(path);
+    Oh5PhysicalFile f(path);
     return store(f); 
 }
 
@@ -87,7 +87,7 @@ FileCatalog::store(const Oh5PhysicalFile& file) {
 
 FileEntry*
 FileCatalog::get_or_store(const std::string& path) {
-    HlFile f(path);
+    Oh5PhysicalFile f(path);
     return get_or_store(f);
 }
 

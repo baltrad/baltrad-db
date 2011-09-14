@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 #include <brfc/db/Database.hpp>
 #include <brfc/db/FileEntry.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
 
 namespace po = boost::program_options;
 
@@ -63,10 +64,11 @@ Show::do_execute(Database& db) {
             std::cout << uuid << " not found" << std::endl;
             continue;
         }
+        const Oh5Metadata& meta = entry->metadata();
         std::cout << uuid << " "
-                  << entry->what_date().to_iso_string(true) << "T"
-                  << entry->what_time().to_iso_string(true) << " "
-                  << entry->what_object() << " "
+                  << meta.what_date().to_iso_string(true) << "T"
+                  << meta.what_time().to_iso_string(true) << " "
+                  << meta.what_object() << " "
                   << entry->source().get("_name")
                   << std::endl;
         std::cout.flush();

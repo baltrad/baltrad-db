@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5File.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
 
 #include <brfc/util/algorithm.hpp>
 
@@ -72,7 +73,7 @@ SHA1AttributeHasher::do_hash(const Oh5File& file) const {
 
     const std::list<std::string>& ign = ignored();
 
-    BOOST_FOREACH(const Oh5Node& node, file.root()) {
+    BOOST_FOREACH(const Oh5Node& node, file.metadata().root()) {
         attr = dynamic_cast<const Oh5Attribute*>(&node);
         if (attr and not contains(ign.begin(), ign.end(), attr->full_name())) {
             strs.push_back(attribute_string(*attr));

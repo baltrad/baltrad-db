@@ -33,9 +33,9 @@ import eu.baltrad.fc.Database;
 import eu.baltrad.fc.FileEntry;
 import eu.baltrad.fc.FileQuery;
 
-import eu.baltrad.fc.HlFile;
 import eu.baltrad.fc.Oh5File;
 import eu.baltrad.fc.Oh5HlFileWriter;
+import eu.baltrad.fc.Oh5PhysicalFile;
 import eu.baltrad.fc.Oh5Source;
 
 import eu.baltrad.fc.TestRDB;
@@ -47,7 +47,7 @@ public class TestFileCatalog extends TestCase {
   private String dsn;
   private String schema_dir;
   private FileCatalog fc;
-  private HlFile file;
+  private Oh5PhysicalFile file;
 
   public void setUp() {
     dsn = System.getProperty("db.test_db_dsn");
@@ -55,10 +55,9 @@ public class TestFileCatalog extends TestCase {
     rdb = new TestRDB(dsn, schema_dir);
     fc = new FileCatalog(Database.create(dsn), new NullStorage());
 
-    file = new HlFile("pvol",
-                      new Date(2000, 05, 01),
-                      new Time(12, 01, 05),
-                      "RAD:SE50");
+    file = new Oh5PhysicalFile(
+      "pvol", new Date(2000, 05, 01), new Time(12, 01, 05), "RAD:SE50"
+    );
   }
 
   public void tearDown() {

@@ -41,7 +41,7 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         , hash_()
         , size_(0)
         , stored_at_()
-        , nodes_() {
+        , metadata_() {
     BRFC_ASSERT(rdb_ != 0);
 }
 
@@ -81,14 +81,14 @@ RdbFileEntry::load() const {
         self->loaded(false);
         throw;
     }
-    query.load_nodes(id(), self->root());
+    query.load_nodes(id(), self->metadata().root());
 }
 
-const Oh5Node&
-RdbFileEntry::do_root() const {
+const Oh5Metadata&
+RdbFileEntry::do_metadata() const {
     if ((id_ or not uuid_.empty()) and not loaded())
         load();
-    return nodes_.root();
+    return metadata_;
 }
 
 Oh5Source

@@ -229,9 +229,9 @@ RdbQuery::insert_file(const RdbFileEntry& entry) {
     qry.value("hash", sql_.string(entry.hash())); 
     qry.value("source_id", sql_.int64_(entry.source_id()));
     qry.value("stored_at", sql_.datetime(entry.stored_at()));
-    qry.value("what_object", sql_.string(entry.what_object()));
-    qry.value("what_date", sql_.date(entry.what_date()));
-    qry.value("what_time", sql_.time(entry.what_time()));
+    qry.value("what_object", sql_.string(entry.metadata().what_object()));
+    qry.value("what_date", sql_.date(entry.metadata().what_date()));
+    qry.value("what_time", sql_.time(entry.metadata().what_time()));
     qry.value("size", sql_.int64_(entry.size()));
 
     if (dialect().has_feature(sql::Dialect::RETURNING))

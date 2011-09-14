@@ -19,7 +19,46 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5PhysicalFile.hpp>
 
+#include <brfc/exceptions.hpp>
+#include <brfc/Date.hpp>
+#include <brfc/Time.hpp>
+
+#include <brfc/oh5/Oh5Attribute.hpp>
+#include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5Scalar.hpp>
+
+#include <brfc/oh5/hl/Oh5HlFileReader.hpp>
+
 namespace brfc {
+
+Oh5PhysicalFile::Oh5PhysicalFile()
+        : metadata_()
+        , path_() {
+}
+
+Oh5PhysicalFile::Oh5PhysicalFile(const std::string& path)
+        : metadata_()
+        , path_(path) {
+    Oh5HlFileReader().read(path, *this);
+}
+
+Oh5PhysicalFile::Oh5PhysicalFile(const std::string& object,
+                 const Date& date,
+                 const Time& time,
+                 const std::string& source,
+                 const std::string& version)
+        : metadata_()
+        , path_() {
+    Oh5Node& root = metadata().root();
+    root.add(new Oh5Attribute("Conventions", Oh5Scalar("ODIM_H5/V2_0")));
+    Oh5Node& what = root.add(new Oh5Group("what"));
+    what.add(new Oh5Attribute("object", Oh5Scalar(object)));
+    what.add(new Oh5Attribute("version", Oh5Scalar(version)));
+    what.add(new Oh5Attribute("date", Oh5Scalar(date)));
+    what.add(new Oh5Attribute("time", Oh5Scalar(time)));
+    what.add(new Oh5Attribute("source", Oh5Scalar(source)));
+}
+
 
 std::string
 Oh5PhysicalFile::name() const {

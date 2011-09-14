@@ -27,6 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5DataSet.hpp>
 #include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/hl/hlhdf.hpp>
 #include <brfc/oh5/hl/HlConverter.hpp>
@@ -83,7 +84,7 @@ Oh5HlFileReader::do_read(const std::string& from, Oh5File& to) const {
     HLNodeList_selectAllNodes(nodes.get());
     HLNodeList_fetchMarkedNodes(nodes.get());
 
-    Oh5Node& root = to.root();
+    Oh5Node& root = to.metadata().root();
     for (int i=0; i < HLNodeList_getNumberOfNodes(nodes.get()); ++i) {
         HL_Node* node = HLNodeList_getNodeByIndex(nodes.get(), i);
         add_node(root, node);

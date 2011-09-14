@@ -159,9 +159,9 @@ RelationalDatabase::file_to_entry(const Oh5PhysicalFile& file) {
     entry->loaded(true); // XXX: why?
 
     // copy nodes from file to entry
-    Oh5NodeBackend& be = entry->root().backend();
-    Oh5Node::const_iterator iter = file.root().begin();
-    Oh5Node::const_iterator end = file.root().end();
+    Oh5NodeBackend& be = entry->metadata().root().backend();
+    Oh5Node::const_iterator iter = file.metadata().root().begin();
+    Oh5Node::const_iterator end = file.metadata().root().end();
     ++iter; // skip root;
     for ( ; iter != end; ++iter) {
         be.add(iter->parent()->path(), iter->clone());
@@ -176,7 +176,7 @@ RelationalDatabase::file_to_entry(const Oh5PhysicalFile& file) {
     entry->size(size);
 
     RdbQuery query(conn());
-    long long source_id = query.select_source_id(file.source());
+    long long source_id = query.select_source_id(file.metadata().source());
     entry->source_id(source_id);
 
     return entry.release();
@@ -192,7 +192,7 @@ FileEntry*
 RelationalDatabase::do_entry_by_file(const Oh5PhysicalFile& file) {
     const std::string& hash = file_hasher().hash(file);
     RdbQuery query(conn());
-    long long src_id = query.select_source_id(file.source());
+    long long src_id = query.select_source_id(file.metadata().source());
     const std::string& uuid = query.uuid_by_source_and_hash(src_id, hash);
 
     if (uuid.empty())

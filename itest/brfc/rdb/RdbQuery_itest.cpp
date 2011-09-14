@@ -31,9 +31,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5DataSet.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
-#include <brfc/oh5/hl/HlFile.hpp>
 #include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 
 #include <brfc/sql/Connection.hpp>
@@ -63,9 +63,9 @@ class rdb_RdbQuery_itest : public ::testing::TestWithParam<const char*> {
         entry.loaded(true);
         entry.uuid("057c5a4b-d29c-4ac7-9267-d3fe7ef54000");
         entry.source_id(1);
-        entry.what_object("PVOL");
-        entry.what_date(Date(2000, 1, 1));
-        entry.what_time(Time(12, 0));
+        entry.metadata().what_object("PVOL");
+        entry.metadata().what_date(Date(2000, 1, 1));
+        entry.metadata().what_time(Time(12, 0));
         entry.stored_at(DateTime(2011, 1, 1, 12, 13, 14));
         entry.hash("hash");
         entry.size(2);
@@ -81,7 +81,7 @@ class rdb_RdbQuery_itest : public ::testing::TestWithParam<const char*> {
     boost::shared_ptr<sql::Connection> conn;
     RdbQuery query;
     RdbFileEntry entry;
-    HlFile file;
+    Oh5PhysicalFile file;
 };
 
 TEST_P(rdb_RdbQuery_itest, test_insert_file) {
@@ -104,14 +104,14 @@ TEST_P(rdb_RdbQuery_itest, test_insert_file_content) {
 }
 
 TEST_P(rdb_RdbQuery_itest, test_is_stored) {
-    long long entry_id = query.insert_file(entry);
+    query.insert_file(entry);
     
     EXPECT_FALSE(query.is_stored(1, "hashh"));
     EXPECT_TRUE(query.is_stored(1, "hash"));
 }
 
 TEST_P(rdb_RdbQuery_itest, test_uuid_by_source_and_hash) {
-    long long entry_id = query.insert_file(entry);
+    query.insert_file(entry);
     
     std::string uuid = query.uuid_by_source_and_hash(1, "hashh");
     EXPECT_EQ("", uuid);
@@ -122,24 +122,26 @@ TEST_P(rdb_RdbQuery_itest, test_uuid_by_source_and_hash) {
 TEST_P(rdb_RdbQuery_itest, test_insert_node_group) {
     long long entry_id = query.insert_file(entry);
     
-    Oh5Node& grp = entry.root();
+    Oh5Node& grp = entry.metadata().root();
     long long id = query.insert_node(entry_id, 0, grp);
     EXPECT_GT(id, 0);
 }
 
 TEST_P(rdb_RdbQuery_itest, test_insert_node_attribute) {
     long long entry_id = query.insert_file(entry);
-    long long pid = query.insert_node(entry_id, 0, entry.root());
+    Oh5Node& root = entry.metadata().root();
+    long long pid = query.insert_node(entry_id, 0, root);
     
-    Oh5Node& attr = entry.root().add(new Oh5Attribute("attr", Oh5Scalar(1)));
+    Oh5Node& attr = root.add(new Oh5Attribute("attr", Oh5Scalar(1)));
 
     EXPECT_NO_THROW(query.insert_node(entry_id, pid, attr));
 }
 
 TEST_P(rdb_RdbQuery_itest, test_insert_node_dataset) {
     long long entry_id = query.insert_file(entry);
-    long long id = query.insert_node(entry_id, 0, entry.root());
-    Oh5Node& parent = entry.root().add(new Oh5Group("data1"));
+    Oh5Node& root = entry.metadata().root();
+    long long id = query.insert_node(entry_id, 0, root);
+    Oh5Node& parent = root.add(new Oh5Group("data1"));
     id = query.insert_node(entry_id, id, parent);
     
     Oh5Node& ds = parent.add(new Oh5DataSet("data"));
@@ -254,15 +256,16 @@ TEST_P(rdb_RdbQuery_itest, test_load_source_by_plc_unicode) {
 }
 
 TEST_P(rdb_RdbQuery_itest, test_load_nodes) {
-    Oh5Node& g1 = entry.root().add(new Oh5Group("g1"));
-    Oh5Node& g2 = entry.root().add(new Oh5Group("g2"));
-    Oh5Node& a1 = entry.root().add(new Oh5Attribute("a1", Oh5Scalar(1)));
+    Oh5Node& root = entry.metadata().root();
+    Oh5Node& g1 = root.add(new Oh5Group("g1"));
+    Oh5Node& g2 = root.add(new Oh5Group("g2"));
+    Oh5Node& a1 = root.add(new Oh5Attribute("a1", Oh5Scalar(1)));
     Oh5Node& a2 = g2.add(new Oh5Attribute("a2", Oh5Scalar(2)));
     Oh5Node& ds1 = g2.add(new Oh5DataSet("ds1"));
     Oh5Node& a3 = ds1.add(new Oh5Attribute("a3", Oh5Scalar(3)));
 
     long long entry_id = query.insert_file(entry);
-    query.insert_nodes(entry_id, entry.root());
+    query.insert_nodes(entry_id, root);
     conn->commit();
     
     Oh5MemoryNodeBackend be;

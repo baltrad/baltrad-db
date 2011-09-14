@@ -34,15 +34,16 @@ struct oh5_extract_attr_test : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        Oh5Node& what = f1.root().add(new Oh5Group("what"));
+        Oh5Node& f1root = f1.metadata().root();
+        Oh5Node& what = f1root.add(new Oh5Group("what"));
         what.add(new Oh5Attribute("source", Oh5Scalar("WMO:012345,CMT:foo")));
 
-        Oh5Node& ds1 = f1.root().add(new Oh5Group("dataset1"));
+        Oh5Node& ds1 = f1root.add(new Oh5Group("dataset1"));
         Oh5Node& ds1_where = ds1.add(new Oh5Group("where"));
         ds1_where.add(new Oh5Attribute("xsize", Oh5Scalar(1)));
         ds1_where.add(new Oh5Attribute("ysize", Oh5Scalar(2)));
 
-        Oh5Node& ds2 = f1.root().add(new Oh5Group("dataset2"));
+        Oh5Node& ds2 = f1root.add(new Oh5Group("dataset2"));
         Oh5Node& ds2_where = ds2.add(new Oh5Group("where"));
         ds2_where.add(new Oh5Attribute("xsize", Oh5Scalar(3)));
         ds2_where.add(new Oh5Attribute("ysize", Oh5Scalar(4)));

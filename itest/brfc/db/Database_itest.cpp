@@ -29,8 +29,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/Time.hpp>
 #include <brfc/db/FileEntry.hpp>
 #include <brfc/oh5/Oh5Attribute.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
-#include <brfc/oh5/hl/HlFile.hpp>
 #include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/util/NamedTemporaryFile.hpp>
@@ -62,7 +63,7 @@ class db_Database_itest : public testing::TestWithParam<const char*> {
         return i;
     }
 
-    void write_to_temp(HlFile& file) {
+    void write_to_temp(Oh5PhysicalFile& file) {
         writer.write(file, tf.path());
         file.path(tf.path());
     }
@@ -73,7 +74,7 @@ class db_Database_itest : public testing::TestWithParam<const char*> {
 };
 
 TEST_P(db_Database_itest, store) {
-    HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     
     scoped_ptr<FileEntry> e;
@@ -81,12 +82,12 @@ TEST_P(db_Database_itest, store) {
     ASSERT_TRUE(e);
     EXPECT_FALSE(e->source().empty());
     EXPECT_TRUE(e->source().has("_name"));
-    EXPECT_EQ(file.what_date(), e->what_date());
-    EXPECT_EQ(file.what_time(), e->what_time());
+    EXPECT_EQ(file.metadata().what_date(), e->metadata().what_date());
+    EXPECT_EQ(file.metadata().what_time(), e->metadata().what_time());
 }
 
 TEST_P(db_Database_itest, store_duplicate) {
-    HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     
     scoped_ptr<FileEntry> e(db->store(file));
@@ -98,7 +99,7 @@ TEST_P(db_Database_itest, store_duplicate) {
 TEST_P(db_Database_itest, entry_by_uuid) {
     EXPECT_THROW(db->entry_by_uuid("nxuuid"), lookup_error);
 
-    HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     
     scoped_ptr<FileEntry> e1, e2;
@@ -107,12 +108,12 @@ TEST_P(db_Database_itest, entry_by_uuid) {
 
     EXPECT_EQ(e1->uuid(), e2->uuid());
     EXPECT_EQ(e1->hash(), e2->hash());
-    EXPECT_EQ(e1->what_date(), e2->what_date());
-    EXPECT_EQ(e1->what_time(), e2->what_time());
+    EXPECT_EQ(e1->metadata().what_date(), e2->metadata().what_date());
+    EXPECT_EQ(e1->metadata().what_time(), e2->metadata().what_time());
 }
 
 TEST_P(db_Database_itest, entry_by_file) {
-    HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
 
     EXPECT_THROW(db->entry_by_file(file), lookup_error);
@@ -126,7 +127,7 @@ TEST_P(db_Database_itest, entry_by_file) {
 }
 
 TEST_P(db_Database_itest, remove) {
-    HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     
     scoped_ptr<FileEntry> e;
@@ -143,7 +144,7 @@ TEST_P(db_Database_itest, remove) {
 
 //XXX: this should be tested somewhere else?
 TEST_P(db_Database_itest, write_entry_to_file) {
-    HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     
     scoped_ptr<FileEntry> e;
@@ -157,10 +158,10 @@ TEST_P(db_Database_itest, write_entry_to_file) {
 }
 
 TEST_P(db_Database_itest, store_with_invalid_attributes) {
-    HlFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     // add an invalid attribute
-    file.root().add(new Oh5Attribute("invalid", Oh5Scalar(1)));
+    file.metadata().root().add(new Oh5Attribute("invalid", Oh5Scalar(1)));
 
     std::auto_ptr<FileEntry> e(db->store(file));
 }

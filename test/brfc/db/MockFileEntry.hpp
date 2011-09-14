@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/DateTime.hpp>
 #include <brfc/db/FileEntry.hpp>
-#include <brfc/oh5/Oh5Node.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {
@@ -36,7 +36,7 @@ class MockFileEntry : public FileEntry {
     MOCK_CONST_METHOD0(do_hash, std::string());
     MOCK_CONST_METHOD0(do_size, long long());
     MOCK_CONST_METHOD0(do_stored_at, DateTime());
-    MOCK_CONST_METHOD0(do_root, const Oh5Node&());
+    MOCK_CONST_METHOD0(do_metadata, const Oh5Metadata&());
 };
 
 } // namespace brfc

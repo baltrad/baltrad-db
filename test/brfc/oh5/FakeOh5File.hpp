@@ -20,20 +20,22 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_OH5_FAKE_FILE_HPP
 
 #include <brfc/oh5/Oh5File.hpp>
-#include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
 
 namespace brfc {
 
 class FakeOh5File : public Oh5File {
   public:
     FakeOh5File()
-            : backend_() {
+            : metadata_() {
     }
 
   private:
-    virtual const Oh5Node& do_root() const { return backend_.root(); }
+    virtual const Oh5Metadata& do_metadata() const {
+        return metadata_;
+    }
 
-    Oh5MemoryNodeBackend backend_;
+    Oh5Metadata metadata_;
 };
 
 } // namepsace brfc

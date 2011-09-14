@@ -35,8 +35,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/ExpressionFactory.hpp>
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
-#include <brfc/oh5/hl/HlFile.hpp>
 #include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 #include <brfc/test/TestRDB.hpp>
 #include <brfc/util/NamedTemporaryFile.hpp>
@@ -77,7 +77,7 @@ struct db_AttributeQuery_itest : public testing::TestWithParam<const char*> {
         const std::string attr_name = path.substr(path.rfind('/') + 1);
         boost::erase_tail(path, attr_name.length() + 1);
 
-        Oh5Node& g = static_cast<Oh5Group&>(file.root()).get_or_create_group(path);
+        Oh5Node& g = static_cast<Oh5Group&>(file.metadata().root()).get_or_create_group(path);
         g.add(new Oh5Attribute(attr_name, value));
     }
 
@@ -124,7 +124,7 @@ struct db_AttributeQuery_itest : public testing::TestWithParam<const char*> {
     ExpressionFactory xpr;
     std::string src1, src2;
     test::TestRDB* db;
-    HlFile td1, td2, td3, td4, td5;
+    Oh5PhysicalFile td1, td2, td3, td4, td5;
     Oh5HlFileWriter writer;
     NamedTemporaryFile tf1, tf2, tf3, tf4, tf5;
     boost::scoped_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;

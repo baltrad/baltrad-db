@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5DataSet.hpp>
 #include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/oh5/hl/hlhdf.hpp>
@@ -126,11 +127,13 @@ class GatherHLNodes {
 void
 Oh5HlFileWriter::do_write(const Oh5File& from, const std::string& to) const {
     GatherHLNodes node_gather;
+
+    const Oh5Node& root = from.metadata().root();
     
-    Oh5Node::const_iterator iter = from.root().begin();
+    Oh5Node::const_iterator iter = root.begin();
     
     ++iter; // skip root
-    for ( ; iter != from.root().end(); ++iter) {
+    for ( ; iter != root.end(); ++iter) {
         visit(*iter, node_gather);
     }
 

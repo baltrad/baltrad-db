@@ -24,6 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 
 class DateTime;
+class Oh5Source;
 
 /**
  * @brief File entry in Database
@@ -50,8 +51,13 @@ class FileEntry : public Oh5File {
     long long size() const { return do_size(); }
 
     DateTime stored_at() const;
-
-  protected:
+    
+    /**
+     * @brief source as stored in the database
+     */
+    Oh5Source source() const;
+  
+  private:
     virtual std::string do_uuid() const = 0;
 
     virtual void do_write_to_file(const std::string& path) const = 0;
@@ -61,6 +67,8 @@ class FileEntry : public Oh5File {
     virtual long long do_size() const = 0;
 
     virtual DateTime do_stored_at() const = 0;
+
+    virtual Oh5Source do_source() const = 0;
 };
 
 } // namespace brfc

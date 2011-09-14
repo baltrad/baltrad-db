@@ -20,12 +20,18 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileEntry.hpp>
 
 #include <brfc/DateTime.hpp>
+#include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {
 
 DateTime
 FileEntry::stored_at() const {
     return do_stored_at();
+}
+
+Oh5Source
+FileEntry::source() const {
+    return do_source();
 }
 
 } // namespace brfc

@@ -53,7 +53,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     #include <brfc/oh5/Oh5PhysicalFile.hpp>
     #include <brfc/oh5/Oh5Group.hpp>
     #include <brfc/oh5/Oh5Source.hpp>
-    #include <brfc/oh5/hl/HlFile.hpp>
     #include <brfc/oh5/Oh5FileReader.hpp>
     #include <brfc/oh5/Oh5FileWriter.hpp>
     #include <brfc/oh5/hl/Oh5HlFileReader.hpp>
@@ -514,7 +513,6 @@ SWIG_JAVABODY_METHODS(public, public, brfc::Oh5PhysicalFile);
 %include <brfc/oh5/Oh5FileReader.hpp>
 %include <brfc/oh5/Oh5FileWriter.hpp>
 %include <brfc/oh5/Oh5PhysicalFile.hpp>
-%include <brfc/oh5/hl/HlFile.hpp>
 %include <brfc/oh5/hl/Oh5HlFileReader.hpp>
 %include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 

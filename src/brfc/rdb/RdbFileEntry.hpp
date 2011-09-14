@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileEntry.hpp>
 
 #include <brfc/DateTime.hpp>
-#include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {
@@ -107,16 +107,13 @@ class RdbFileEntry : public FileEntry {
      */
     void load() const;
     
-  protected:
+  private:
     virtual std::string do_uuid() const;
 
     virtual void do_write_to_file(const std::string& path) const;
 
-    virtual const Oh5Node& do_root() const;
+    virtual const Oh5Metadata& do_metadata() const;
     
-    /**
-     * @brief source as stored in the database
-     */
     virtual Oh5Source do_source() const;
 
     virtual std::string do_hash() const;
@@ -125,7 +122,6 @@ class RdbFileEntry : public FileEntry {
 
     virtual DateTime do_stored_at() const;
     
-  private:
     RelationalDatabase* rdb_;
     
     bool loaded_;
@@ -137,7 +133,7 @@ class RdbFileEntry : public FileEntry {
     std::string hash_;
     long long size_;
     DateTime stored_at_;
-    Oh5MemoryNodeBackend nodes_;
+    Oh5Metadata metadata_;
 };
 
 } // namespace brfc

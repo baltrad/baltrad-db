@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 
 #include <brfc/test_common.hpp>
@@ -42,9 +42,9 @@ class DefaultFileNamer_test : public ::testing::Test {
   public:
     DefaultFileNamer_test()
             : namer()
-            , node_backend()
-            , root(node_backend.root())
-            , what(node_backend.add(node_backend.root(), new Oh5Group("what")))
+            , metadata()
+            , root(metadata.root())
+            , what(root.add(new Oh5Group("what")))
             , file()
             , entry() {
     }
@@ -52,10 +52,10 @@ class DefaultFileNamer_test : public ::testing::Test {
     virtual void SetUp() {
         ON_CALL(entry, do_uuid())
             .WillByDefault(Return("abcd0123-0000-0000-0000-000000000000"));
-        ON_CALL(entry, do_root())
-            .WillByDefault(ReturnRef(root));
-        ON_CALL(file, do_root())
-            .WillByDefault(ReturnRef(root));
+        ON_CALL(entry, do_metadata())
+            .WillByDefault(ReturnRef(metadata));
+        ON_CALL(file, do_metadata())
+            .WillByDefault(ReturnRef(metadata));
         
         what.add(new Oh5Attribute("object", Oh5Scalar("pvol")));
         what.add(new Oh5Attribute("date", Oh5Scalar(Date(2010, 11, 12))));
@@ -63,7 +63,7 @@ class DefaultFileNamer_test : public ::testing::Test {
     }
     
     DefaultFileNamer namer;
-    Oh5MemoryNodeBackend node_backend;
+    Oh5Metadata metadata;
     Oh5Node& root, &what;
     ::testing::NiceMock<MockOh5File> file;
     ::testing::NiceMock<MockFileEntry> entry;

@@ -26,8 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
-
-#include <brfc/oh5/hl/HlFile.hpp>
+#include <brfc/oh5/Oh5PhysicalFile.hpp>
 
 #include <brfc/test_common.hpp>
 
@@ -51,7 +50,7 @@ class SHA1AttributeHasher_test : public ::testing::Test {
         hasher.ignore("ignore");
     }
     
-    HlFile f1, f2, f3;
+    Oh5PhysicalFile f1, f2, f3;
     SHA1AttributeHasher hasher;
 };
 
@@ -81,10 +80,11 @@ TEST_F(SHA1AttributeHasher_test, test_fips180_1_sample3) {
 }
 
 TEST_F(SHA1AttributeHasher_test, attribute_string) {
-    Oh5Attribute& a1 = static_cast<Oh5Attribute&>(f1.root().add(new Oh5Attribute("a1", Oh5Scalar(1))));
+    Oh5Node& f1root = f1.metadata().root();
+    Oh5Attribute& a1 = static_cast<Oh5Attribute&>(f1root.add(new Oh5Attribute("a1", Oh5Scalar(1))));
     EXPECT_EQ("/a1=1", SHA1AttributeHasher::attribute_string(a1));
 
-    Oh5Group& dataset1 = static_cast<Oh5Group&>(f1.root().add(new Oh5Group("dataset1")));
+    Oh5Group& dataset1 = static_cast<Oh5Group&>(f1root.add(new Oh5Group("dataset1")));
     Oh5Group& what = static_cast<Oh5Group&>(dataset1.add(new Oh5Group("what")));
     Oh5Attribute& a2 = static_cast<Oh5Attribute&>(what.add(new Oh5Attribute("a2", Oh5Scalar(1))));
     EXPECT_EQ("/dataset1/what/a2=1", SHA1AttributeHasher::attribute_string(a2));
@@ -112,9 +112,10 @@ TEST_F(SHA1AttributeHasher_test, hash_different_meta) {
 
 TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
     std::string hash1 = hasher.hash(f1);
-    f1.root().add(new Oh5Attribute("ignore", Oh5Scalar("val")));
+    Oh5Node& f1root = f1.metadata().root();
+    f1root.add(new Oh5Attribute("ignore", Oh5Scalar("val")));
     std::string hash2 = hasher.hash(f1);
-    f1.root().attribute("ignore")->value(Oh5Scalar("val2"));
+    f1root.attribute("ignore")->value(Oh5Scalar("val2"));
     std::string hash3 = hasher.hash(f1);
 
     EXPECT_EQ(hash1, hash2);
@@ -124,9 +125,10 @@ TEST_F(SHA1AttributeHasher_test, hash_ignores_attributes) {
 
 TEST_F(SHA1AttributeHasher_test, hash_changes_when_meta_changes) {
     std::string hash1 = hasher.hash(f1);
-    f1.root().add(new Oh5Attribute("attr", Oh5Scalar("val")));
+    Oh5Node& f1root = f1.metadata().root();
+    f1root.add(new Oh5Attribute("attr", Oh5Scalar("val")));
     std::string hash2 = hasher.hash(f1);
-    f1.root().attribute("attr")->value(Oh5Scalar("val2"));
+    f1root.attribute("attr")->value(Oh5Scalar("val2"));
     std::string hash3 = hasher.hash(f1);
 
     EXPECT_NE(hash1, hash2);
