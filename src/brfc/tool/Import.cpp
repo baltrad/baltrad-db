@@ -29,6 +29,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/Database.hpp>
 
 #include <brfc/oh5/Oh5File.hpp>
+#include <brfc/oh5/hl/Oh5HlFileReader.hpp>
 
 namespace po = boost::program_options;
 
@@ -58,7 +59,9 @@ Import::do_execute(Database& db) {
     BOOST_FOREACH(const std::string& path, args_) {
         std::cout << "importing " << path << std::endl;;
         std::cout.flush();
-        Oh5File file(path);
+        Oh5File file;
+        Oh5HlFileReader reader;
+        reader.read(path, file);
         db.store(file);
     }
     return 0;

@@ -25,19 +25,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
 
-#include <brfc/oh5/hl/Oh5HlFileReader.hpp>
-
 namespace brfc {
 
 Oh5File::Oh5File()
         : metadata_()
         , path_() {
-}
-
-Oh5File::Oh5File(const std::string& path)
-        : metadata_()
-        , path_(path) {
-    Oh5HlFileReader().read(path, *this);
 }
 
 Oh5File::Oh5File(const std::string& object,

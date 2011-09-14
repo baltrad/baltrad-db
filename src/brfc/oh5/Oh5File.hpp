@@ -40,13 +40,6 @@ class Oh5File : public boost::noncopyable {
      * @brief construct an empty File
      */
     Oh5File();
-
-    /**
-     * @brief construct from physical file
-     * @param path absolute path to the file
-     * @throw fs_error if file can not be opened
-     */
-    explicit Oh5File(const std::string& path);
     
     /**
      * @brief construct with mandatory attributes present
