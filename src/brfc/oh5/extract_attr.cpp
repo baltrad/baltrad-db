@@ -28,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Expression.hpp>
 
 #include <brfc/oh5/Oh5Attribute.hpp>
-#include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/Oh5Metadata.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
@@ -54,7 +53,7 @@ extract_attr::operator()(const Expression& args) const {
 Expression
 extract_attr::find_source(const std::string& path) const {
     Expression result;
-    const Oh5Source& s = file_->metadata().source();
+    const Oh5Source& s = metadata_->source();
     const std::string& key = path.substr(path.find_first_of(':') + 1);
     if (s.has(key)) {
         result.push_back(Expression(s.get(key)));
@@ -65,8 +64,8 @@ extract_attr::find_source(const std::string& path) const {
 Expression
 extract_attr::find_all(const std::string& path,
                        const std::string& type) const {
-    Oh5Node::const_iterator it = file_->metadata().root().begin();
-    Oh5Node::const_iterator end = file_->metadata().root().end();
+    Oh5Node::const_iterator it = metadata_->root().begin();
+    Oh5Node::const_iterator end = metadata_->root().end();
     
     Expression result;
     for ( ; it != end; ++it) {

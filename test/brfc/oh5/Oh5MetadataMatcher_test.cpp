@@ -24,19 +24,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/Oh5Attribute.hpp>
-#include <brfc/oh5/Oh5File.hpp>
-#include <brfc/oh5/Oh5FileMatcher.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
+#include <brfc/oh5/Oh5MetadataMatcher.hpp>
 
 namespace brfc {
 
-struct oh5_Oh5FileMatcher_test : public ::testing::Test {
-    oh5_Oh5FileMatcher_test()
-            : f1()
+struct oh5_Oh5MetadataMatcher_test : public ::testing::Test {
+    oh5_Oh5MetadataMatcher_test()
+            : metadata()
             , matcher() {
     }
 
     virtual void SetUp() {
-        Oh5Node& root = f1.metadata().root();
+        Oh5Node& root = metadata.root();
         Oh5Node& what = root.add(new Oh5Group("what"));
         what.add(new Oh5Attribute("source", Oh5Scalar("WMO:012345")));
         what.add(new Oh5Attribute("date", Oh5Scalar("20111213")));
@@ -59,34 +59,34 @@ struct oh5_Oh5FileMatcher_test : public ::testing::Test {
         ds2_d1_where.add(new Oh5Attribute("ysize", Oh5Scalar(6)));
     }
 
-    Oh5File f1;
-    Oh5FileMatcher matcher;
+    Oh5Metadata metadata;
+    Oh5MetadataMatcher matcher;
     ExpressionFactory xpr;
 };
 
-TEST_F(oh5_Oh5FileMatcher_test, test_what_object_eq) {
+TEST_F(oh5_Oh5MetadataMatcher_test, test_what_object_eq) {
     Expression e1 = xpr.eq(xpr.attribute("what/object"), xpr.string("PVOL"));
     Expression e2 = xpr.eq(xpr.attribute("what/object"), xpr.string("SCAN"));
-    EXPECT_TRUE(matcher.match(f1, e1));
-    EXPECT_FALSE(matcher.match(f1, e2));
+    EXPECT_TRUE(matcher.match(metadata, e1));
+    EXPECT_FALSE(matcher.match(metadata, e2));
 }
 
-TEST_F(oh5_Oh5FileMatcher_test, test_what_object_in) {
+TEST_F(oh5_Oh5MetadataMatcher_test, test_what_object_in) {
     Expression e1 = xpr.in(xpr.attribute("what/object"), xpr.list(Listcons().string("PVOL").string("CVOL").get()));
     Expression e2 = xpr.in(xpr.attribute("what/object"), xpr.list(Expression()));
-    EXPECT_TRUE(matcher.match(f1, e1));
-    EXPECT_FALSE(matcher.match(f1, e2));
+    EXPECT_TRUE(matcher.match(metadata, e1));
+    EXPECT_FALSE(matcher.match(metadata, e2));
 }
 
-TEST_F(oh5_Oh5FileMatcher_test, test_what_source_wmo_eq) {
+TEST_F(oh5_Oh5MetadataMatcher_test, test_what_source_wmo_eq) {
     Expression e1 = xpr.eq(xpr.attribute("what/source:WMO"), xpr.string("012345"));
     Expression e2 = xpr.eq(xpr.attribute("what/source:WMO"), xpr.string("054321"));
 
-    EXPECT_TRUE(matcher.match(f1, e1));
-    EXPECT_FALSE(matcher.match(f1, e2));
+    EXPECT_TRUE(matcher.match(metadata, e1));
+    EXPECT_FALSE(matcher.match(metadata, e2));
 }
 
-TEST_F(oh5_Oh5FileMatcher_test, test_and) {
+TEST_F(oh5_Oh5MetadataMatcher_test, test_and) {
     Expression e1 = xpr.and_(
         xpr.lt(xpr.attribute("where/xsize"), xpr.int64_(2)),
         xpr.gt(xpr.attribute("where/ysize"), xpr.int64_(2))
@@ -97,11 +97,11 @@ TEST_F(oh5_Oh5FileMatcher_test, test_and) {
         xpr.gt(xpr.attribute("where/ysize"), xpr.int64_(2))
     );
 
-    EXPECT_TRUE(matcher.match(f1, e1));
-    EXPECT_FALSE(matcher.match(f1, e2));
+    EXPECT_TRUE(matcher.match(metadata, e1));
+    EXPECT_FALSE(matcher.match(metadata, e2));
 }
 
-TEST_F(oh5_Oh5FileMatcher_test, test_or) {
+TEST_F(oh5_Oh5MetadataMatcher_test, test_or) {
     Expression e1 = xpr.or_(
         xpr.lt(xpr.attribute("where/xsize"), xpr.int64_(1)),
         xpr.gt(xpr.attribute("where/ysize"), xpr.int64_(2))
@@ -112,8 +112,8 @@ TEST_F(oh5_Oh5FileMatcher_test, test_or) {
         xpr.gt(xpr.attribute("where/ysize"), xpr.int64_(6))
     );
 
-    EXPECT_TRUE(matcher.match(f1, e1));
-    EXPECT_FALSE(matcher.match(f1, e2));
+    EXPECT_TRUE(matcher.match(metadata, e1));
+    EXPECT_FALSE(matcher.match(metadata, e2));
 }
 
 } // namespace brfc

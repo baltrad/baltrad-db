@@ -23,27 +23,27 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/extract_attr.hpp>
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/Oh5File.hpp>
+#include <brfc/oh5/Oh5Metadata.hpp>
 
 namespace brfc {
 
 struct oh5_extract_attr_test : public ::testing::Test {
     oh5_extract_attr_test()
-            : f1()
+            : metadata()
             , proc() {
     }
 
     virtual void SetUp() {
-        Oh5Node& f1root = f1.metadata().root();
-        Oh5Node& what = f1root.add(new Oh5Group("what"));
+        Oh5Node& root = metadata.root();
+        Oh5Node& what = root.add(new Oh5Group("what"));
         what.add(new Oh5Attribute("source", Oh5Scalar("WMO:012345,CMT:foo")));
 
-        Oh5Node& ds1 = f1root.add(new Oh5Group("dataset1"));
+        Oh5Node& ds1 = root.add(new Oh5Group("dataset1"));
         Oh5Node& ds1_where = ds1.add(new Oh5Group("where"));
         ds1_where.add(new Oh5Attribute("xsize", Oh5Scalar(1)));
         ds1_where.add(new Oh5Attribute("ysize", Oh5Scalar(2)));
 
-        Oh5Node& ds2 = f1root.add(new Oh5Group("dataset2"));
+        Oh5Node& ds2 = root.add(new Oh5Group("dataset2"));
         Oh5Node& ds2_where = ds2.add(new Oh5Group("where"));
         ds2_where.add(new Oh5Attribute("xsize", Oh5Scalar(3)));
         ds2_where.add(new Oh5Attribute("ysize", Oh5Scalar(4)));
@@ -53,10 +53,10 @@ struct oh5_extract_attr_test : public ::testing::Test {
         ds2_d1_where.add(new Oh5Attribute("xsize", Oh5Scalar(5)));
         ds2_d1_where.add(new Oh5Attribute("ysize", Oh5Scalar(6)));
 
-        proc.file(&f1);
+        proc.metadata(&metadata);
     }
 
-    Oh5File f1;
+    Oh5Metadata metadata;
     extract_attr proc;
 };
 

@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
     class Expression;
-    class Oh5File;
+    class Oh5Metadata;
     class Oh5Scalar;
 }
 
@@ -35,7 +35,7 @@ namespace brfc {
 struct extract_attr {
     typedef Expression result_type;
 
-    extract_attr() : file_(0) { }
+    extract_attr() : metadata_(0) { }
     
     /**
      * @param args `(attrpath, attrtype)`
@@ -46,14 +46,14 @@ struct extract_attr {
     Expression find_source(const std::string& path) const;
 
     Expression find_all(const std::string& path,
-                              const std::string& type) const;
+                        const std::string& type) const;
 
     Expression value_expression(const Oh5Scalar& value,
-                                      const std::string& type) const;
+                                const std::string& type) const;
 
-    void file(const Oh5File* f) { file_ = f; }
+    void metadata(const Oh5Metadata* m) { metadata_ = m; }
 
-    const Oh5File* file_;
+    const Oh5Metadata* metadata_;
 };
 
 } // namespace brfc

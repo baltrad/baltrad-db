@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/oh5/Oh5FileMatcher.hpp>
+#include <brfc/oh5/Oh5MetadataMatcher.hpp>
 
 #include <boost/bind.hpp>
 
@@ -54,7 +54,7 @@ struct list_in {
     }
 };
 
-Oh5FileMatcher::Oh5FileMatcher()
+Oh5MetadataMatcher::Oh5MetadataMatcher()
         : attr_() 
         , eval_() {
     using ::brfc::proc::binary_list;
@@ -82,10 +82,10 @@ Oh5FileMatcher::Oh5FileMatcher()
 }
 
 bool
-Oh5FileMatcher::match(const Oh5File& file, const Expression& x) {
-    attr_.file(&file);
+Oh5MetadataMatcher::match(const Oh5Metadata& metadata, const Expression& x) {
+    attr_.metadata(&metadata);
     const Expression& result = eval_(x);
-    attr_.file(0);
+    attr_.metadata(0);
     return result;
 }
 

@@ -16,30 +16,30 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef BRFC_OH5_FILE_MATCHER_HPP
-#define BRFC_OH5_FILE_MATCHER_HPP
+#ifndef BRFC_OH5_METADATA_MATCHER_HPP
+#define BRFC_OH5_METADATA_MATCHER_HPP
 
 #include <brfc/expr/Eval.hpp>
 #include <brfc/oh5/extract_attr.hpp>
 
 namespace brfc {
 
-class Oh5File;
+class Oh5Metadata;
 
 /**
  * @brief match files against filters
  *
  * @ingroup exposed
  */
-class Oh5FileMatcher {
+class Oh5MetadataMatcher {
   public:
-    Oh5FileMatcher();
+    Oh5MetadataMatcher();
     
     /**
-     * @brief test if @c file matches @c x
+     * @brief test if @c metadata matches @c x
      * @return true if @c x evaluates to true on @c file
      */
-    bool match(const Oh5File& file, const Expression& x);
+    bool match(const Oh5Metadata& metadata, const Expression& x);
     
   private:
     extract_attr attr_;
@@ -48,4 +48,4 @@ class Oh5FileMatcher {
 
 } // namespace brfc
 
-#endif // BRFC_OH5_FILE_MATCHER_HPP
+#endif // BRFC_OH5_METADATA_MATCHER_HPP
