@@ -17,28 +17,20 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_OH5_FILE_READER_HPP
-#define BRFC_OH5_FILE_READER_HPP
+#include <brfc/oh5/MockOh5FileReader.hpp>
 
-#include <string>
+using ::testing::Ref;
 
 namespace brfc {
 
-class Oh5File;
+TEST(oh5_Oh5FileReader_test, test_read) {
+    Oh5File file;
+    MockOh5FileReader reader;
 
-class Oh5FileReader {
-  public:
-    virtual ~Oh5FileReader() = 0;
-    
-    void read(const std::string& from, Oh5File& to) const;
+    EXPECT_CALL(reader, do_read("/path", Ref(file)));
 
-  private:
-    virtual void do_read(const std::string& from, Oh5File& to) const = 0;
-};
-
-inline
-Oh5FileReader::~Oh5FileReader() { }
+    reader.read("/path", file);
+    EXPECT_EQ("/path", file.path());
+}
 
 } // namespace brfc
-
-#endif // BRFC_OH5_FILE_READER_HPP
