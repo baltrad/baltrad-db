@@ -21,7 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/sql/MockConnection.hpp>

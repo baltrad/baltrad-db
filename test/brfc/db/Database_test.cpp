@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/MockDatabase.hpp>
 #include <brfc/db/MockFileEntry.hpp>
 
-#include <brfc/oh5/MockOh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 using ::testing::Ref;
 using ::testing::Return;
@@ -45,7 +45,7 @@ TEST_F(db_Database_test, test_create_invalid_dsn) {
 }
 
 TEST_F(db_Database_test, test_get_or_store_stored) {
-    MockOh5PhysicalFile f; 
+    Oh5File f; 
     MockFileEntry fe;
     EXPECT_CALL(db, do_is_stored(Ref(f)))
         .WillOnce(Return(true));
@@ -56,7 +56,7 @@ TEST_F(db_Database_test, test_get_or_store_stored) {
 }
 
 TEST_F(db_Database_test, test_get_or_store_not_stored) {
-    MockOh5PhysicalFile f; 
+    Oh5File f; 
     MockFileEntry fe;
     EXPECT_CALL(db, do_is_stored(Ref(f)))
         .WillOnce(Return(false));

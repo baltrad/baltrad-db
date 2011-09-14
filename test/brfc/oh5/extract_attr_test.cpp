@@ -21,9 +21,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/Listcons.hpp>
 
 #include <brfc/oh5/extract_attr.hpp>
-#include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/Oh5Attribute.hpp>
-#include <brfc/oh5/FakeOh5File.hpp>
+#include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 namespace brfc {
 
@@ -56,7 +56,7 @@ struct oh5_extract_attr_test : public ::testing::Test {
         proc.file(&f1);
     }
 
-    FakeOh5File f1;
+    Oh5File f1;
     extract_attr proc;
 };
 

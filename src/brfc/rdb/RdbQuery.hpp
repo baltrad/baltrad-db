@@ -33,7 +33,7 @@ namespace brfc {
     class Oh5Attribute;
     class Oh5Group;
     class Oh5Node;
-    class Oh5PhysicalFile;
+    class Oh5File;
     class Oh5Source;
     class RdbFileEntry;
     class RdbOh5NodeBackend;

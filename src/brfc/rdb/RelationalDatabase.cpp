@@ -38,7 +38,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RdbQuery.hpp>
 #include <brfc/rdb/RdbInDatabaseFileStorage.hpp>
 
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/Oh5Node.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
@@ -124,7 +124,7 @@ RelationalDatabase::storage_policy(RdbFileStoragePolicy* policy) {
 }
 
 bool
-RelationalDatabase::do_is_stored(const Oh5PhysicalFile& file) {
+RelationalDatabase::do_is_stored(const Oh5File& file) {
     try {
         std::auto_ptr<FileEntry> e(entry_by_file(file));
     } catch (lookup_error) {
@@ -134,7 +134,7 @@ RelationalDatabase::do_is_stored(const Oh5PhysicalFile& file) {
 }
 
 FileEntry*
-RelationalDatabase::do_store(const Oh5PhysicalFile& file) {
+RelationalDatabase::do_store(const Oh5File& file) {
     std::auto_ptr<RdbFileEntry> entry(file_to_entry(file));
 
     {
@@ -152,7 +152,7 @@ RelationalDatabase::do_store(const Oh5PhysicalFile& file) {
 }
 
 RdbFileEntry*
-RelationalDatabase::file_to_entry(const Oh5PhysicalFile& file) {
+RelationalDatabase::file_to_entry(const Oh5File& file) {
     std::auto_ptr<RdbFileEntry> entry(new RdbFileEntry(this));
 
     entry->hash(file_hasher().hash(file));
@@ -189,7 +189,7 @@ RelationalDatabase::entry_to_file(const RdbFileEntry& entry,
 }
 
 FileEntry*
-RelationalDatabase::do_entry_by_file(const Oh5PhysicalFile& file) {
+RelationalDatabase::do_entry_by_file(const Oh5File& file) {
     const std::string& hash = file_hasher().hash(file);
     RdbQuery query(conn());
     long long src_id = query.select_source_id(file.metadata().source());

@@ -24,7 +24,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/Oh5Attribute.hpp>
-#include <brfc/oh5/FakeOh5File.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/Oh5FileMatcher.hpp>
 
 namespace brfc {
@@ -59,7 +59,7 @@ struct oh5_Oh5FileMatcher_test : public ::testing::Test {
         ds2_d1_where.add(new Oh5Attribute("ysize", Oh5Scalar(6)));
     }
 
-    FakeOh5File f1;
+    Oh5File f1;
     Oh5FileMatcher matcher;
     ExpressionFactory xpr;
 };

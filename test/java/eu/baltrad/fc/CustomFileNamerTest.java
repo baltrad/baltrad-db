@@ -31,7 +31,7 @@ public class CustomFileNamerTest extends TestCase {
       }
     };
 
-    Oh5File file = new Oh5PhysicalFile();
+    Oh5File file = new Oh5File();
     assertEquals("file", namer.name(file));
   }
 }

@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/MockLocalStorage.hpp>
 #include <brfc/db/MockDatabase.hpp>
 #include <brfc/db/MockFileEntry.hpp>
-#include <brfc/oh5/MockOh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 using ::testing::Ref;
 using ::testing::Return;
@@ -46,9 +46,6 @@ struct FileCatalog_test : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        ON_CALL(file, do_path())
-            .WillByDefault(ReturnRef(path));
-        
         fc.storage(&storage);
     }
 
@@ -57,7 +54,7 @@ struct FileCatalog_test : public ::testing::Test {
     MockLocalStorage storage;
     FileCatalog fc;
     std::string path;
-    ::testing::NiceMock<MockOh5PhysicalFile> file;
+    Oh5File file;
 };
 
 TEST_F(FileCatalog_test, test_ctor_null_db) {

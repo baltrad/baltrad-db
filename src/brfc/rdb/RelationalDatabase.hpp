@@ -90,17 +90,17 @@ class RelationalDatabase : public Database {
                                             const Url& dsn);
 
     void entry_to_file(const RdbFileEntry& entry, const std::string& path);
-    RdbFileEntry* file_to_entry(const Oh5PhysicalFile& file);
+    RdbFileEntry* file_to_entry(const Oh5File& file);
 
   protected:
     /**
      * @brief check if file hash is unique in database
      */
-    virtual bool do_is_stored(const Oh5PhysicalFile& file);
+    virtual bool do_is_stored(const Oh5File& file);
     virtual bool do_remove(const FileEntry& entry);
 
-    virtual FileEntry* do_store(const Oh5PhysicalFile& file);
-    virtual FileEntry* do_entry_by_file(const Oh5PhysicalFile& file);
+    virtual FileEntry* do_store(const Oh5File& file);
+    virtual FileEntry* do_entry_by_file(const Oh5File& file);
     virtual FileEntry* do_entry_by_uuid(const std::string& uuid);
     
     virtual FileResult* do_execute(const FileQuery& query);

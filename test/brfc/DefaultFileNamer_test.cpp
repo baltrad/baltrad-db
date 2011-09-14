@@ -31,7 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/test_common.hpp>
 #include <brfc/db/MockFileEntry.hpp>
-#include <brfc/oh5/MockOh5File.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -45,7 +45,7 @@ class DefaultFileNamer_test : public ::testing::Test {
             , metadata()
             , root(metadata.root())
             , what(root.add(new Oh5Group("what")))
-            , file()
+            , file("pvol", Date(2010, 11, 12), Time(14, 15), "WMO:02666")
             , entry() {
     }
     
@@ -53,8 +53,6 @@ class DefaultFileNamer_test : public ::testing::Test {
         ON_CALL(entry, do_uuid())
             .WillByDefault(Return("abcd0123-0000-0000-0000-000000000000"));
         ON_CALL(entry, do_metadata())
-            .WillByDefault(ReturnRef(metadata));
-        ON_CALL(file, do_metadata())
             .WillByDefault(ReturnRef(metadata));
         
         what.add(new Oh5Attribute("object", Oh5Scalar("pvol")));
@@ -65,12 +63,12 @@ class DefaultFileNamer_test : public ::testing::Test {
     DefaultFileNamer namer;
     Oh5Metadata metadata;
     Oh5Node& root, &what;
-    ::testing::NiceMock<MockOh5File> file;
+    Oh5File file;
     ::testing::NiceMock<MockFileEntry> entry;
 };
 
 TEST_F(DefaultFileNamer_test, name_file) {
-    what.add(new Oh5Attribute("source", Oh5Scalar("_name:seang")));
+    file.metadata().attribute("what/source")->value(Oh5Scalar("_name:seang"));
     
     EXPECT_EQ("pvol_seang_20101112T141500Z.h5", namer.name(file));
 }

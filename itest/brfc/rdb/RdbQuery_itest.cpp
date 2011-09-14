@@ -31,7 +31,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5DataSet.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 #include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
@@ -81,7 +81,7 @@ class rdb_RdbQuery_itest : public ::testing::TestWithParam<const char*> {
     boost::shared_ptr<sql::Connection> conn;
     RdbQuery query;
     RdbFileEntry entry;
-    Oh5PhysicalFile file;
+    Oh5File file;
 };
 
 TEST_P(rdb_RdbQuery_itest, test_insert_file) {

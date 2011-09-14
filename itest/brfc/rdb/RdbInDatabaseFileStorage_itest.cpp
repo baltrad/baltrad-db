@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/Date.hpp>
 #include <brfc/Time.hpp>
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RdbInDatabaseFileStorage.hpp>
@@ -62,7 +62,7 @@ class rdb_RdbInDatabaseFileStorage_itest :
 
     test::TestRDB* db;
     RdbInDatabaseFileStorage storage;
-    Oh5PhysicalFile file;
+    Oh5File file;
     NamedTemporaryFile temp_file;
 };
 

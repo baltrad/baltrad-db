@@ -26,7 +26,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 #include <brfc/test_common.hpp>
 
@@ -50,7 +50,7 @@ class SHA1AttributeHasher_test : public ::testing::Test {
         hasher.ignore("ignore");
     }
     
-    Oh5PhysicalFile f1, f2, f3;
+    Oh5File f1, f2, f3;
     SHA1AttributeHasher hasher;
 };
 

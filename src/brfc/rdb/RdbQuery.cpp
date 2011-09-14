@@ -32,7 +32,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5DataSet.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 #include <brfc/sql/Compiler.hpp>
 #include <brfc/sql/Factory.hpp>

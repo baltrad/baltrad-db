@@ -30,7 +30,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileEntry.hpp>
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Metadata.hpp>
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 #include <brfc/test/TestRDB.hpp>
@@ -63,7 +63,7 @@ class db_Database_itest : public testing::TestWithParam<const char*> {
         return i;
     }
 
-    void write_to_temp(Oh5PhysicalFile& file) {
+    void write_to_temp(Oh5File& file) {
         writer.write(file, tf.path());
         file.path(tf.path());
     }
@@ -74,7 +74,7 @@ class db_Database_itest : public testing::TestWithParam<const char*> {
 };
 
 TEST_P(db_Database_itest, store) {
-    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     
     scoped_ptr<FileEntry> e;
@@ -87,7 +87,7 @@ TEST_P(db_Database_itest, store) {
 }
 
 TEST_P(db_Database_itest, store_duplicate) {
-    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     
     scoped_ptr<FileEntry> e(db->store(file));
@@ -99,7 +99,7 @@ TEST_P(db_Database_itest, store_duplicate) {
 TEST_P(db_Database_itest, entry_by_uuid) {
     EXPECT_THROW(db->entry_by_uuid("nxuuid"), lookup_error);
 
-    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     
     scoped_ptr<FileEntry> e1, e2;
@@ -113,7 +113,7 @@ TEST_P(db_Database_itest, entry_by_uuid) {
 }
 
 TEST_P(db_Database_itest, entry_by_file) {
-    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
 
     EXPECT_THROW(db->entry_by_file(file), lookup_error);
@@ -127,7 +127,7 @@ TEST_P(db_Database_itest, entry_by_file) {
 }
 
 TEST_P(db_Database_itest, remove) {
-    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     
     scoped_ptr<FileEntry> e;
@@ -144,7 +144,7 @@ TEST_P(db_Database_itest, remove) {
 
 //XXX: this should be tested somewhere else?
 TEST_P(db_Database_itest, write_entry_to_file) {
-    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     
     scoped_ptr<FileEntry> e;
@@ -158,7 +158,7 @@ TEST_P(db_Database_itest, write_entry_to_file) {
 }
 
 TEST_P(db_Database_itest, store_with_invalid_attributes) {
-    Oh5PhysicalFile file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
+    Oh5File file("PVOL", Date(2000, 1, 1), Time(12, 0), "PLC:Legionowo");
     write_to_temp(file);
     // add an invalid attribute
     file.metadata().root().add(new Oh5Attribute("invalid", Oh5Scalar(1)));

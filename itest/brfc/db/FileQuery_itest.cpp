@@ -33,7 +33,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/expr/ExpressionFactory.hpp>
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 #include <brfc/test/TestRDB.hpp>
@@ -125,7 +125,7 @@ struct db_FileQuery_itest : public testing::TestWithParam<const char*> {
     ExpressionFactory xpr;
     std::string src1, src2;
     test::TestRDB* db;
-    Oh5PhysicalFile td1, td2, td3, td4, td5;
+    Oh5File td1, td2, td3, td4, td5;
     Oh5HlFileWriter writer;
     NamedTemporaryFile tf1, tf2, tf3, tf4, tf5;
     boost::scoped_ptr<FileEntry> fe1, fe2, fe3, fe4, fe5;
@@ -303,7 +303,7 @@ TEST_P(db_FileQuery_itest, test_is_stored) {
 
 TEST_P(db_FileQuery_itest, test_has_nx_file) {
     bool result = false;
-    Oh5PhysicalFile td("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
+    Oh5File td("PVOL", Date(2000, 1, 10), Time(12, 0), src1);
     ASSERT_NO_THROW(result = db->is_stored(td));
     EXPECT_FALSE(result);
 }

@@ -25,7 +25,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/FileQuery.hpp>
 #include <brfc/db/FileResult.hpp>
 #include <brfc/db/MockFileEntry.hpp>
-#include <brfc/oh5/MockOh5PhysicalFile.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/rdb/MockRdbFileStoragePolicy.hpp>
 #include <brfc/sql/BasicConnectionPool.hpp>

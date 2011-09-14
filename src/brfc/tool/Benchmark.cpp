@@ -36,7 +36,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Metadata.hpp>
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 namespace po = boost::program_options;
 
@@ -94,7 +94,7 @@ Benchmark::do_execute(Database& db) {
     boost::timer timer;
 
     // read the "template" file
-    Oh5PhysicalFile f(infile_);
+    Oh5File f(infile_);
     double load_secs = timer.elapsed();
 
     DateTime dt(Date(3000, 1, 1));

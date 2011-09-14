@@ -33,7 +33,7 @@ class AttributeResult;
 class FileEntry;
 class FileQuery;
 class FileResult;
-class Oh5PhysicalFile;
+class Oh5File;
 
 /**
  * @brief ABC for Database access
@@ -56,7 +56,7 @@ class Database : public boost::noncopyable {
     /**
      * @brief is file stored
      */
-    bool is_stored(const Oh5PhysicalFile& file) {
+    bool is_stored(const Oh5File& file) {
         return do_is_stored(file);
     }
     
@@ -77,7 +77,7 @@ class Database : public boost::noncopyable {
      * @throw duplicate_entry if file is already stored to database
      * @note caller takes ownership of the entry
      */
-    FileEntry* store(const Oh5PhysicalFile& file) {
+    FileEntry* store(const Oh5File& file) {
         return do_store(file);
     }
     
@@ -95,14 +95,14 @@ class Database : public boost::noncopyable {
      * }
      * @endcode
      */
-    FileEntry* get_or_store(const Oh5PhysicalFile& file);
+    FileEntry* get_or_store(const Oh5File& file);
     
     /**
      * @brief get FileEntry by physical file
      * @param file the physical file to look up
      * @note caller takes ownership of the entry
      */
-    FileEntry* entry_by_file(const Oh5PhysicalFile& file) {
+    FileEntry* entry_by_file(const Oh5File& file) {
         return do_entry_by_file(file);
     }
 
@@ -160,10 +160,10 @@ class Database : public boost::noncopyable {
     }
    
   protected:
-    virtual bool do_is_stored(const Oh5PhysicalFile& file) = 0;
+    virtual bool do_is_stored(const Oh5File& file) = 0;
     virtual bool do_remove(const FileEntry& entry) = 0;
-    virtual FileEntry* do_store(const Oh5PhysicalFile& file) = 0;
-    virtual FileEntry* do_entry_by_file(const Oh5PhysicalFile& file) = 0;
+    virtual FileEntry* do_store(const Oh5File& file) = 0;
+    virtual FileEntry* do_entry_by_file(const Oh5File& file) = 0;
     virtual FileEntry* do_entry_by_uuid(const std::string& uuid) = 0;
 
     virtual FileResult* do_execute(const FileQuery& query) = 0;

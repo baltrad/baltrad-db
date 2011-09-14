@@ -26,20 +26,20 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/Database.hpp>
 #include <brfc/db/FileQuery.hpp>
 #include <brfc/db/FileEntry.hpp>
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 namespace brfc {
 
 class MockDatabase : public Database {
   public:
     MOCK_METHOD1(do_is_stored,
-        bool(const Oh5PhysicalFile&));
+        bool(const Oh5File&));
     MOCK_METHOD1(do_remove,
         bool(const FileEntry&));
     MOCK_METHOD1(do_store,
-        FileEntry*(const Oh5PhysicalFile&));
+        FileEntry*(const Oh5File&));
     MOCK_METHOD1(do_entry_by_file,
-        FileEntry*(const Oh5PhysicalFile&));
+        FileEntry*(const Oh5File&));
     MOCK_METHOD1(do_entry_by_uuid,
         FileEntry*(const std::string&));
     MOCK_METHOD1(do_execute,

@@ -25,7 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5DataSet.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/hl/Oh5HlFileWriter.hpp>
 #include <brfc/util/NamedTemporaryFile.hpp>
@@ -34,15 +34,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-struct oh5_Oh5PhysicalFile_test : public testing::Test {
-    oh5_Oh5PhysicalFile_test()
+struct oh5_Oh5File_test : public testing::Test {
+    oh5_Oh5File_test()
             : file() {
     }
     
-    Oh5PhysicalFile file;
+    Oh5File file;
 };
 
-TEST_F(oh5_Oh5PhysicalFile_test, test_name) {
+TEST_F(oh5_Oh5File_test, test_name) {
     file.path("");
     EXPECT_EQ(file.name(), "");
 
@@ -53,11 +53,11 @@ TEST_F(oh5_Oh5PhysicalFile_test, test_name) {
     EXPECT_EQ(file.name(), "filename2");
 }
 
-TEST_F(oh5_Oh5PhysicalFile_test, test_open_nx_file) {
-    EXPECT_THROW(Oh5PhysicalFile("/path/to/nxfile"), fs_error);
+TEST_F(oh5_Oh5File_test, test_open_nx_file) {
+    EXPECT_THROW(Oh5File("/path/to/nxfile"), fs_error);
 }
 
-TEST_F(oh5_Oh5PhysicalFile_test, test_load_from_filesystem) {
+TEST_F(oh5_Oh5File_test, test_load_from_filesystem) {
     Oh5Scalar t_12_05_01(Time(12, 5, 1));
     Oh5Scalar d_2000_01_02(Date(2000, 1, 2));
 
@@ -73,7 +73,7 @@ TEST_F(oh5_Oh5PhysicalFile_test, test_load_from_filesystem) {
     Oh5HlFileWriter writer;
     writer.write(file, tempfile.path());
 
-    Oh5PhysicalFile g(tempfile.path());
+    Oh5File g(tempfile.path());
     EXPECT_EQ(g.path(), tempfile.path());
     const Oh5Node& groot = g.metadata().root();
     EXPECT_EQ((size_t)4, groot.children().size());

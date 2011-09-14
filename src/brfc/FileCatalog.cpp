@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/Database.hpp>
 #include <brfc/db/FileEntry.hpp>
 
-#include <brfc/oh5/Oh5PhysicalFile.hpp>
+#include <brfc/oh5/Oh5File.hpp>
 
 namespace brfc {
 
@@ -58,23 +58,23 @@ FileCatalog::storage(LocalStorage* storage) {
 
 bool
 FileCatalog::is_stored(const std::string& path) const {
-    Oh5PhysicalFile f(path);
+    Oh5File f(path);
     return is_stored(f);
 }
 
 bool
-FileCatalog::is_stored(const Oh5PhysicalFile& f) const {
+FileCatalog::is_stored(const Oh5File& f) const {
     return db_->is_stored(f);
 }
 
 FileEntry*
 FileCatalog::store(const std::string& path) {
-    Oh5PhysicalFile f(path);
+    Oh5File f(path);
     return store(f); 
 }
 
 FileEntry*
-FileCatalog::store(const Oh5PhysicalFile& file) {
+FileCatalog::store(const Oh5File& file) {
     std::auto_ptr<FileEntry> e(db_->store(file));
     try {
         storage_->prestore(*e, file.path());
@@ -87,12 +87,12 @@ FileCatalog::store(const Oh5PhysicalFile& file) {
 
 FileEntry*
 FileCatalog::get_or_store(const std::string& path) {
-    Oh5PhysicalFile f(path);
+    Oh5File f(path);
     return get_or_store(f);
 }
 
 FileEntry*
-FileCatalog::get_or_store(const Oh5PhysicalFile& file) {
+FileCatalog::get_or_store(const Oh5File& file) {
     std::auto_ptr<FileEntry> e(db_->get_or_store(file));
     try {
         storage_->prestore(*e, file.path());
