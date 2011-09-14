@@ -37,27 +37,36 @@ namespace brfc {
 class FileNamer {
   public:
     /**
-     * @brief name a File
-     * @param file File to be named
+     * @brief destructor
+     */
+    virtual ~FileNamer() = 0;
+
+    /**
+     * @brief name a file
+     * @param file file to be named
      * @return the generated filename
-     *
-     * @sa do_name(const File&)
      */
     std::string name(const Oh5File& file) const {
         return do_name(file);
     }
-    
-    /**
-     * @brief destructor
-     */
-    virtual ~FileNamer() { }
 
-  protected:
     /**
-     * @brief name(const File&) implementation
+     * @brief name a file entry
+     * @param entry file entry to be named
+     * @return the generated filename
      */
+    std::string name(const FileEntry& entry) const {
+        return do_name(entry);
+    }
+    
+  protected:
     virtual std::string do_name(const Oh5File& file) const = 0;
+
+    virtual std::string do_name(const FileEntry& entry) const = 0;
+
 };
+
+inline FileNamer::~FileNamer() { }
 
 } // namespace brfc
 

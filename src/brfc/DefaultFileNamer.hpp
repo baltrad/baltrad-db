@@ -32,7 +32,7 @@ class DefaultFileNamer : public FileNamer {
   public:
     DefaultFileNamer();
 
-  protected:
+  private:
     /**
      * name files as \$(type)_\$(source)_\$(timestamp).h5
      *
@@ -43,6 +43,18 @@ class DefaultFileNamer : public FileNamer {
      *     as @c yyyyMMddThhmmssZ
      */
     virtual std::string do_name(const Oh5File& file) const;
+
+    /**
+     * name files as \$(type)_\$(source)_\$(timestamp)_\$(uuid).h5
+     *
+     * where:
+     *   - @c type is the value of "/what/object"
+     *   - @c source is the value of 'name' key in Source or 'unknown'
+     *   - @c timestamp is the value of "/what/date" and "/what/time" formatted
+     *   - @c uuid is the first segment of the entry's uuid
+     *     as @c yyyyMMddThhmmssZ
+     */
+    virtual std::string do_name(const FileEntry& file) const;
 };
 
 } // namespace brfc

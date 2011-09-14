@@ -17,31 +17,21 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/db/FileEntry.hpp>
+package eu.baltrad.fc;
 
-#include <brfc/DateTime.hpp>
-#include <brfc/oh5/Oh5Source.hpp>
+import eu.baltrad.fc.FileNamer;
 
-namespace brfc {
+import junit.framework.TestCase;
 
-const Oh5Metadata&
-FileEntry::metadata() const {
-    return do_metadata();
+public class CustomFileNamerTest extends TestCase {
+  public void testCustomFileNamer() {
+    FileNamer namer = new FileNamer() {
+      protected String do_name(Oh5File file) {
+        return "file";
+      }
+    };
+
+    Oh5File file = new Oh5PhysicalFile();
+    assertEquals("file", namer.name(file));
+  }
 }
-
-Oh5Metadata&
-FileEntry::metadata() {
-    return const_cast<Oh5Metadata&>(do_metadata());
-}
-
-DateTime
-FileEntry::stored_at() const {
-    return do_stored_at();
-}
-
-Oh5Source
-FileEntry::source() const {
-    return do_source();
-}
-
-} // namespace brfc

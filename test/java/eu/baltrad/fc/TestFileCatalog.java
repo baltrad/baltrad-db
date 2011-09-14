@@ -22,6 +22,8 @@ package eu.baltrad.fc;
 import java.io.File;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import eu.baltrad.fc.Date;
 import eu.baltrad.fc.FileCatalog;
 import eu.baltrad.fc.FileSystemError;
@@ -39,8 +41,6 @@ import eu.baltrad.fc.Oh5PhysicalFile;
 import eu.baltrad.fc.Oh5Source;
 
 import eu.baltrad.fc.TestRDB;
-
-import junit.framework.TestCase;
 
 public class TestFileCatalog extends TestCase {
   private TestRDB rdb;
@@ -79,16 +79,6 @@ public class TestFileCatalog extends TestCase {
     } catch (FileSystemError e) {
       // pass
     }
-  }
-
-  public void testCustomFileNamer() {
-    FileNamer namer = new FileNamer() {
-      protected String do_name(Oh5File file) {
-        return "file";
-      }
-    };
-
-    assertEquals("file", namer.name(file));
   }
 
   public void testSourceList() {

@@ -19,20 +19,24 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_DB_FILE_ENTRY_HPP
 #define BRFC_DB_FILE_ENTRY_HPP
 
-#include <brfc/oh5/Oh5File.hpp>
+#include <string>
 
 namespace brfc {
 
 class DateTime;
 class Oh5Source;
+class Oh5Metadata;
 
 /**
  * @brief File entry in Database
  * @ingroup exposed
  */
-class FileEntry : public Oh5File {
+class FileEntry {
   public:
     virtual ~FileEntry() { }
+
+    const Oh5Metadata& metadata() const;
+    Oh5Metadata& metadata();
 
     /**
      * @brief universally unique identifier
@@ -58,6 +62,8 @@ class FileEntry : public Oh5File {
     Oh5Source source() const;
   
   private:
+    virtual const Oh5Metadata& do_metadata() const = 0;
+
     virtual std::string do_uuid() const = 0;
 
     virtual void do_write_to_file(const std::string& path) const = 0;
@@ -69,6 +75,7 @@ class FileEntry : public Oh5File {
     virtual DateTime do_stored_at() const = 0;
 
     virtual Oh5Source do_source() const = 0;
+
 };
 
 } // namespace brfc
