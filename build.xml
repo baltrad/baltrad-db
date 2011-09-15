@@ -86,6 +86,7 @@
       <test name="eu.baltrad.fc.TestDateTime" todir="${waf.builddir}/test/reports" />
       <test name="eu.baltrad.fc.StdExceptionTest" todir="${waf.builddir}/test/reports" />
       <test name="eu.baltrad.fc.ExpressionTest" todir="${waf.builddir}/test/reports" />
+      <test name="eu.baltrad.fc.Oh5NodeTest" todir="${waf.builddir}/test/reports" />
       <test name="eu.baltrad.fc.Oh5SourceTest" todir="${waf.builddir}/test/reports" />
       <test name="eu.baltrad.fc.CustomFileNamerTest" todir="${waf.builddir}/test/reports" />
     </junit>

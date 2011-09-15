@@ -417,7 +417,14 @@ SWIG_JAVABODY_METHODS(public, public, brfc::Expression)
 %ignore brfc::Oh5Node::child(const std::string&) const;
 %ignore brfc::Oh5Node::file() const;
 
-%delobject brfc::Oh5Node::add;
+%rename(_add) brfc::Oh5Node::add;
+%typemap(javacode) brfc::Oh5Node, brfc::Oh5Node* %{
+  public Oh5Node add(Oh5Node node) {
+    Oh5Node result = _add(node);
+    node.swigCMemOwn = false;
+    return result;
+  }
+%}
 
 %template(Oh5NodeVector) std::vector<brfc::Oh5Node* >;
 
