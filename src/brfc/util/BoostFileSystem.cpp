@@ -82,15 +82,26 @@ BoostFileSystem::do_create_directory(const std::string& path) const {
 }
 
 void
-BoostFileSystem::do_clear_directory(const std::string& path) const {
+BoostFileSystem::do_create_directories(const std::string& path) const {
+    try {
+        fs::create_directories(path);
+    } catch (const fs::filesystem_error& e) {
+        throw fs_error(e.what());
+    }
+}
+
+std::vector<std::string>
+BoostFileSystem::do_list_directory(const std::string& path) const {
+    std::vector<std::string> result;
     try {
         fs::directory_iterator iter(path);
         for ( ; iter != fs::directory_iterator(); ++iter) {
-            fs::remove(iter->path());
+            result.push_back(iter->filename());
         }
     } catch (const fs::filesystem_error& e) {
         throw fs_error(e.what());
     }
+    return result;
 }
 
 } // namespace brfc

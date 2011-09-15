@@ -25,6 +25,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/MockFileEntry.hpp>
 #include <brfc/util/MockFileSystem.hpp>
 
+using ::testing::_;
 using ::testing::InSequence;
 using ::testing::Return;
 
@@ -47,13 +48,18 @@ class CacheDirStorage_test : public ::testing::Test {
     virtual void SetUp() {
         EXPECT_CALL(entry, do_uuid())
             .WillRepeatedly(Return("uuid"));
+
+        ON_CALL(fs, do_join(_, _))
+            .WillByDefault(Invoke(this, &CacheDirStorage_test::join_path));
+    }
+
+    std::string join_path(const std::string& a, const std::string& b) {
+        return a + "/" + b;
     }
 
 };
 
 TEST_F(CacheDirStorage_test, test_store) {
-    EXPECT_CALL(fs, do_join(dir, "uuid.h5"))
-        .WillOnce(Return(dir + "/uuid.h5"));
     EXPECT_CALL(fs, do_exists("/tmp/uuid.h5"))
         .WillOnce(Return(false));
     EXPECT_CALL(entry, do_write_to_file("/tmp/uuid.h5"));
@@ -62,8 +68,6 @@ TEST_F(CacheDirStorage_test, test_store) {
 }
 
 TEST_F(CacheDirStorage_test, test_store_existing) {
-    EXPECT_CALL(fs, do_join(dir, "uuid.h5"))
-        .WillOnce(Return(dir + "/uuid.h5"));
     EXPECT_CALL(fs, do_exists("/tmp/uuid.h5"))
         .WillOnce(Return(true));
 
@@ -71,8 +75,6 @@ TEST_F(CacheDirStorage_test, test_store_existing) {
 }
 
 TEST_F(CacheDirStorage_test, test_prestore) {
-    EXPECT_CALL(fs, do_join(dir, "uuid.h5"))
-        .WillOnce(Return(dir + "/uuid.h5"));
     EXPECT_CALL(fs, do_copy_file("/infile.h5", "/tmp/uuid.h5"));
 
     storage.prestore(entry, "/infile.h5");
@@ -81,8 +83,6 @@ TEST_F(CacheDirStorage_test, test_prestore) {
 TEST_F(CacheDirStorage_test, test_remove) {
     {
         InSequence s;
-        EXPECT_CALL(fs, do_join(dir, "uuid.h5"))
-            .WillOnce(Return(dir + "/uuid.h5"));
         EXPECT_CALL(fs, do_exists("/tmp/uuid.h5"))
             .WillOnce(Return(true));
         EXPECT_CALL(fs, do_remove("/tmp/uuid.h5"));
@@ -94,8 +94,6 @@ TEST_F(CacheDirStorage_test, test_remove) {
 }
 
 TEST_F(CacheDirStorage_test, test_remove_nx_entry) {
-    EXPECT_CALL(fs, do_join(dir, "uuid.h5"))
-        .WillOnce(Return(dir + "/uuid.h5"));
     EXPECT_CALL(fs, do_exists("/tmp/uuid.h5"))
         .WillRepeatedly(Return(false));
     
@@ -104,7 +102,14 @@ TEST_F(CacheDirStorage_test, test_remove_nx_entry) {
 
 
 TEST_F(CacheDirStorage_test, test_clean) {
-    EXPECT_CALL(fs, do_clear_directory(dir));
+    std::vector<std::string> dir_content;
+    dir_content.push_back("entry1");
+    dir_content.push_back("entry2");
+
+    EXPECT_CALL(fs, do_list_directory(dir))
+        .WillOnce(Return(dir_content));
+    EXPECT_CALL(fs, do_remove("/tmp/entry1"));
+    EXPECT_CALL(fs, do_remove("/tmp/entry2"));
 
     storage.clean();
 }

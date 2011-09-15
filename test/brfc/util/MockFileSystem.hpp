@@ -47,8 +47,10 @@ class MockFileSystem : public FileSystem {
         long long(const std::string&));
     MOCK_CONST_METHOD1(do_create_directory,
         void(const std::string&));
-    MOCK_CONST_METHOD1(do_clear_directory,
+    MOCK_CONST_METHOD1(do_create_directories,
         void(const std::string&));
+    MOCK_CONST_METHOD1(do_list_directory,
+        std::vector<std::string>(const std::string&));
 };
 
 } // namespace brfc

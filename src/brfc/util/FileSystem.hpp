@@ -21,6 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_UTIL_FILE_SYSTEM_HPP
 
 #include <string>
+#include <vector>
 
 namespace brfc {
 
@@ -98,11 +99,20 @@ class FileSystem {
     }
     
     /**
+     * @brief create all missing directories on path
+     */
+    void create_directories(const std::string& path) const {
+        do_create_directories(path);
+    }
+
+    std::vector<std::string> list_directory(const std::string& path) const {
+        return do_list_directory(path);
+    }
+    
+    /**
      * @brief remove all files in directory @c path
      */
-    void clear_directory(const std::string& path) const {
-        do_clear_directory(path);
-    }
+    void clear_directory(const std::string& path) const;
   
   private:
     virtual bool do_exists(const std::string& path) const = 0;
@@ -117,7 +127,8 @@ class FileSystem {
     virtual long long do_file_size(const std::string& path) const = 0;
     
     virtual void do_create_directory(const std::string& path) const = 0;
-    virtual void do_clear_directory(const std::string& path) const = 0;
+    virtual void do_create_directories(const std::string& path) const = 0;
+    virtual std::vector<std::string> do_list_directory(const std::string& path) const = 0;
 };
 
 } // namespace brfc

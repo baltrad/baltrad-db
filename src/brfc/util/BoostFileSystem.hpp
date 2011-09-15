@@ -41,7 +41,8 @@ class BoostFileSystem : public FileSystem {
     virtual long long do_file_size(const std::string& path) const;
 
     virtual void do_create_directory(const std::string& path) const;
-    virtual void do_clear_directory(const std::string& path) const;
+    virtual void do_create_directories(const std::string& path) const;
+    virtual std::vector<std::string> do_list_directory(const std::string& path) const;
 };
 
 } // namespace brfc
