@@ -287,6 +287,11 @@ def configure(conf):
 
     env.VERSION = VERSION
     env.test_db_dsns = _validate_test_db_dsns(Options.options.test_db_dsns, env)
+
+    if env.build_bdbfs:
+        conf.define("BDB_BUILD_BDBFS", 1);
+
+    conf.write_config_header("src/brfc/buildconfig.h")
     
     # set up environment for building tests
     testenv = env.copy()
@@ -296,11 +301,6 @@ def configure(conf):
     # always add debugging information to tests
     testenv.append_unique("CXXFLAGS", "-g")
     conf.set_env_name("testenv", testenv)
-
-    if env.build_bdbfs:
-        conf.define("BDB_BUILD_BDBFS", 1);
-
-    conf.write_config_header("src/brfc/buildconfig.h")
 
 def build(bld):
     _build_shared_library(bld)
