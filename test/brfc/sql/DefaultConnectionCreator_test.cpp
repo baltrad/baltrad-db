@@ -33,14 +33,14 @@ TEST(sql_DefaultConnectionCreator_test, test_create_valid_url) {
     Url url("postgresql://user:password@unknown-host/dbname");
     DefaultConnectionCreator c(url);
     std::auto_ptr<Connection> p;    
-    EXPECT_THROW(p.reset(c.create()), db_error); // url is valid, no db though
+    EXPECT_THROW(p.reset(c()), db_error); // url is valid, no db though
 }
 
 TEST(sql_DefaultConnectionCreator_test, test_create_invalid_url) {
     Url url("bla://user:password@localhost/dbname");
     DefaultConnectionCreator c(url);
     std::auto_ptr<Connection> p;
-    EXPECT_THROW(p.reset(c.create()), std::invalid_argument);
+    EXPECT_THROW(p.reset(c()), std::invalid_argument);
 }
 
 } // namespace sql

@@ -27,14 +27,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/db/MockFileEntry.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/rdb/MockRdbFileStoragePolicy.hpp>
-#include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/DialectCompiler.hpp>
 #include <brfc/sql/MockDialect.hpp>
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionCreator.hpp>
 #include <brfc/sql/MockConnectionPool.hpp>
 #include <brfc/sql/MockResult.hpp>
-#include <brfc/util/no_delete.hpp>
 #include <brfc/util/Url.hpp>
 
 using ::testing::_;
@@ -51,10 +49,9 @@ class rdb_RelationalDatabase_test : public ::testing::Test {
             , dialect()
             , compiler(&dialect)
             , pool()
-            , pool_ptr(&pool, no_delete)
             , result_ptr(new sql::MockResult())
             , result(*result_ptr)
-            , rdb(pool_ptr) {
+            , rdb(&pool) {
     }
 
     virtual void SetUp() {
@@ -69,45 +66,10 @@ class rdb_RelationalDatabase_test : public ::testing::Test {
     ::testing::NiceMock<sql::MockDialect> dialect;
     sql::DialectCompiler compiler;
     sql::MockConnectionPool pool;
-    boost::shared_ptr<sql::ConnectionPool> pool_ptr;
     std::auto_ptr<sql::MockResult> result_ptr;
     sql::MockResult& result;
     RelationalDatabase rdb;
 };
-
-TEST_F(rdb_RelationalDatabase_test, test_create_pool) {
-    delete conn; // XXX: shows up leaked, fix the fixture/tests
-    sql::MockConnectionCreator c;
-
-    Url url("scheme://user:password@host/database?pool_max_size=3");
-    std::auto_ptr<sql::ConnectionPool> cp(RelationalDatabase::create_pool(&c, url));
-
-    sql::BasicConnectionPool* bcp =
-        dynamic_cast<sql::BasicConnectionPool*>(cp.get());
-    ASSERT_TRUE(bcp);
-    EXPECT_EQ(3u, bcp->max_size());
-}
-
-TEST_F(rdb_RelationalDatabase_test, test_create_pool_invalid) {
-    delete conn; // XXX: shows up leaked, fix the fixture/tests
-    sql::MockConnectionCreator c;
-
-    Url url("scheme://user:password@host/database?pool_max_size=-3");
-    EXPECT_THROW(RelationalDatabase::create_pool(&c, url), std::invalid_argument);
-}
-
-TEST_F(rdb_RelationalDatabase_test, test_create_pool_default) {
-    delete conn; // XXX: shows up leaked, fix the fixture/tests
-    sql::MockConnectionCreator c;
-
-    Url url("scheme://user:password@host/database");
-    std::auto_ptr<sql::ConnectionPool> cp(RelationalDatabase::create_pool(&c, url));
-
-    sql::BasicConnectionPool* bcp =
-        dynamic_cast<sql::BasicConnectionPool*>(cp.get());
-    ASSERT_TRUE(bcp);
-    EXPECT_EQ(5u, bcp->max_size());
-}
 
 TEST_F(rdb_RelationalDatabase_test, test_set_storage_policy) {
     delete conn; // XXX: shows up leaked, fix the fixture/tests

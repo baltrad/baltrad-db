@@ -19,7 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/DefaultConnectionCreator.hpp>
 
-#include <brfc/exceptions.hpp>
+#include <stdexcept>
 
 #include <brfc/sql/pg/Connection.hpp>
 
@@ -30,22 +30,12 @@ DefaultConnectionCreator::DefaultConnectionCreator(const Url& dsn)
         : dsn_(dsn) {
 }
 
-DefaultConnectionCreator::~DefaultConnectionCreator() {
-
-}
-
 Connection*
-DefaultConnectionCreator::do_create() const {
+DefaultConnectionCreator::operator()() const {
     if (dsn_.scheme() == "postgresql")
         return new pg::Connection(dsn_);
     else
         throw std::invalid_argument("no mapping found for dsn scheme: " + dsn_.scheme());
-
-}
-
-DefaultConnectionCreator*
-DefaultConnectionCreator::do_clone() const {
-    return new DefaultConnectionCreator(dsn_);
 }
 
 } // namespace sql

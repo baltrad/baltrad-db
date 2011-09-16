@@ -20,14 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_MOCK_CONNETION_CREATOR_HPP
 #define BRFC_SQL_MOCK_CONNETION_CREATOR_HPP
 
-#include <brfc/sql/ConnectionCreator.hpp>
-
 namespace brfc {
 namespace sql {
 
-class MockConnectionCreator : public ConnectionCreator {
+class MockConnectionCreator {
   public:
-    MOCK_CONST_METHOD0(do_create, Connection*());
+    Connection* operator()() const { return call(); }
+    MOCK_CONST_METHOD0(call, Connection*());
 };
 
 } // namespace sql

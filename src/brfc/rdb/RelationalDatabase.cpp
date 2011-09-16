@@ -21,8 +21,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <memory>
 
-#include <boost/lexical_cast.hpp>
-
 #include <brfc/assert.hpp>
 #include <brfc/exceptions.hpp>
 #include <brfc/FileHasher.hpp>
@@ -44,18 +42,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/Connection.hpp>
-#include <brfc/sql/DefaultConnectionCreator.hpp>
 #include <brfc/sql/Result.hpp>
 #include <brfc/sql/Select.hpp>
 
+#include <brfc/util/no_delete.hpp>
 #include <brfc/util/uuid.hpp>
 #include <brfc/util/BoostFileSystem.hpp>
 
 namespace brfc {
 
 RelationalDatabase::RelationalDatabase(const Url& dsn)
-        : creator_(new sql::DefaultConnectionCreator(dsn))
-        , pool_(create_pool(creator_.get(), dsn))
+        : pool_(new sql::BasicConnectionPool(dsn))
         , storage_(new RdbInDatabaseFileStorage())
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher()) {
@@ -63,9 +60,8 @@ RelationalDatabase::RelationalDatabase(const Url& dsn)
     conn(); // check if connection is valid
 }
 
-RelationalDatabase::RelationalDatabase(boost::shared_ptr<sql::ConnectionPool> pool)
-        : creator_()
-        , pool_(pool)
+RelationalDatabase::RelationalDatabase(sql::ConnectionPool* pool)
+        : pool_(pool, no_delete)
         , storage_(new RdbInDatabaseFileStorage())
         , mapper_(new AttributeMapper())
         , file_hasher_(new SHA1AttributeHasher()) {
@@ -83,23 +79,6 @@ RelationalDatabase::init() {
 RelationalDatabase::~RelationalDatabase() {
 
 }
-
-sql::ConnectionPool*
-RelationalDatabase::create_pool(sql::ConnectionCreator* conn_ctor,
-                                const Url& dsn) {
-    std::map<std::string, std::string> opts = dsn.http_searchpart();
-    size_t max_size = 5;
-    if (opts.find("pool_max_size") != opts.end()) {
-        try {
-            max_size = boost::lexical_cast<size_t>(opts["pool_max_size"]);
-        } catch (const boost::bad_lexical_cast& e) {
-            throw std::invalid_argument("invalid value for pool_max_size: "
-                              + opts["pool_max_size"]);
-        }
-    }
-    return new sql::BasicConnectionPool(conn_ctor, max_size);
-}
-                                
 
 boost::shared_ptr<sql::Connection>
 RelationalDatabase::conn() const {

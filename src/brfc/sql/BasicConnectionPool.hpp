@@ -20,29 +20,42 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 #define BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <brfc/sql/ConnectionPool.hpp>
 #include <brfc/util/Queue.hpp>
 
 namespace brfc {
-namespace sql {
+    class Url;
 
-class ConnectionCreator;
-class ConnectionProxy;
-class PoolReturner;
+    namespace sql {
+        class ConnectionProxy;
+        class PoolReturner;
+    }
+}
+
+namespace brfc {
+namespace sql {
 
 /**
  * @brief a very basic pool with no limits
  */
 class BasicConnectionPool : public ConnectionPool {
   public:
+    typedef boost::function<Connection*()> ConnectionCreator;
+
     /**
      * @brief constructor
      * @param creator the database connection creator
      * @param max_size maximum number of connections allowed to allocate
      */
-    explicit BasicConnectionPool(ConnectionCreator* creator, int max_size=5);
+    explicit BasicConnectionPool(ConnectionCreator creator, int max_size=5);
+    
+    /**
+     * @brief construct from url
+     */
+    explicit BasicConnectionPool(const Url& url);
     
     /**
      * @brief destructor
@@ -91,7 +104,7 @@ class BasicConnectionPool : public ConnectionPool {
      */
     void dispose(Connection* conn);
 
-    ConnectionCreator* creator_;
+    ConnectionCreator creator_;
     boost::shared_ptr<PoolReturner> returner_;
     size_t size_; ///< number of allocated connections
     boost::mutex size_mutex_;

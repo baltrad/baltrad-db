@@ -19,12 +19,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <boost/ref.hpp>
+
 #include <brfc/exceptions.hpp>
 #include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionCreator.hpp>
 #include <brfc/sql/PoolReturner.hpp>
+#include <brfc/util/Url.hpp>
 
 using ::testing::Return;
 
@@ -35,7 +38,7 @@ class sql_BasicConnectionPool_test : public ::testing::Test {
   public:
     sql_BasicConnectionPool_test()
         : creator()
-        , pool(&creator, 2) {
+        , pool(boost::ref(creator), 2) {
 
     }
 
@@ -46,12 +49,29 @@ class sql_BasicConnectionPool_test : public ::testing::Test {
     BasicConnectionPool pool;
 };
 
+TEST_F(sql_BasicConnectionPool_test, test_ctor_url) {
+    Url url("scheme://user:password@host/database?pool_max_size=3");
+    BasicConnectionPool p(url);
+    EXPECT_EQ(3u, p.max_size());
+}
+
+TEST_F(sql_BasicConnectionPool_test, test_ctor_url_default) {
+    Url url("scheme://user:password@host/database");
+    BasicConnectionPool p(url);
+    EXPECT_EQ(5u, p.max_size());
+}
+
+TEST_F(sql_BasicConnectionPool_test, test_ctor_url_invalid) {
+    Url url("scheme://user:password@host/database?pool_max_size=-3");
+    EXPECT_THROW(BasicConnectionPool p(url), std::invalid_argument);
+}
+
 TEST_F(sql_BasicConnectionPool_test, test_get) {
     MockConnection* conn = new MockConnection();
     ON_CALL(*conn, do_is_open())
         .WillByDefault(Return(true)); // for leak detection
 
-    EXPECT_CALL(creator, do_create())
+    EXPECT_CALL(creator, call())
         .WillOnce(Return(conn));
     
     std::auto_ptr<Connection> c(pool.get());
@@ -77,7 +97,7 @@ TEST_F(sql_BasicConnectionPool_test, test_get_limit_reached) {
     ON_CALL(*conn2, do_is_open())
         .WillByDefault(Return(true)); // for leak detection
 
-    EXPECT_CALL(creator, do_create())
+    EXPECT_CALL(creator, call())
         .WillOnce(Return(conn1))
         .WillOnce(Return(conn2));
      
@@ -93,7 +113,7 @@ TEST_F(sql_BasicConnectionPool_test, test_size) {
     ON_CALL(*conn1, do_is_open())
         .WillByDefault(Return(true)); // for leak detection
 
-    EXPECT_CALL(creator, do_create())
+    EXPECT_CALL(creator, call())
         .WillOnce(Return(conn1));
 
     EXPECT_EQ(0u, pool.size());
@@ -106,7 +126,7 @@ TEST_F(sql_BasicConnectionPool_test, test_size) {
 TEST_F(sql_BasicConnectionPool_test, test_dtor) {
     PoolReturner returner;
     {
-        BasicConnectionPool p(&creator);
+        BasicConnectionPool p(boost::ref(creator));
         p.returner(&returner);
         EXPECT_EQ(&p, returner.pool());
     }
@@ -116,7 +136,7 @@ TEST_F(sql_BasicConnectionPool_test, test_dtor) {
 TEST_F(sql_BasicConnectionPool_test, test_put_closed_conn) {
     MockConnection* conn1 = new MockConnection();
      
-    EXPECT_CALL(creator, do_create())
+    EXPECT_CALL(creator, call())
         .WillOnce(Return(conn1));
     EXPECT_CALL(*conn1, do_is_open())
         .WillOnce(Return(false));

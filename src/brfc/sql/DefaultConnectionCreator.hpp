@@ -20,42 +20,26 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_DEFAULT_CONNETION_CREATOR_HPP
 #define BRFC_SQL_DEFAULT_CONNETION_CREATOR_HPP
 
-#include <brfc/sql/ConnectionCreator.hpp>
 #include <brfc/util/Url.hpp>
 
 namespace brfc {
 namespace sql {
 
+class Connection;
+
 /**
  * @brief default ConnectionCreator implementation
  */
-class DefaultConnectionCreator : public ConnectionCreator {
+class DefaultConnectionCreator {
   public:
     /**
      * @brief constructor
      * @param dsn database url
      */
     DefaultConnectionCreator(const Url& dsn);
+
+    Connection* operator()() const;
     
-    /**
-     * @brief destructor
-     */
-    virtual ~DefaultConnectionCreator();
-  
-  protected:
-    /**
-     * @brief create a Connection instance from dsn
-     * @throw std::invalid_argument if url with invalid scheme is supplied
-     *
-     * construct a connection according to Url::scheme.
-     *
-     * schemes map as:
-     *  - postgresql -> PostgresConnection
-     */
-    virtual Connection* do_create() const;
-
-    virtual DefaultConnectionCreator* do_clone() const;
-
   private:
     Url dsn_;
 };

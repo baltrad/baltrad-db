@@ -19,20 +19,42 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/sql/BasicConnectionPool.hpp>
 
+#include <map>
 #include <memory>
 
+#include <boost/lexical_cast.hpp>
 #include <boost/thread/locks.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/sql/ConnectionCreator.hpp>
 #include <brfc/sql/ConnectionProxy.hpp>
+#include <brfc/sql/DefaultConnectionCreator.hpp>
 #include <brfc/sql/PoolReturner.hpp>
+#include <brfc/util/Url.hpp>
 #include <brfc/util/no_delete.hpp>
 
 namespace brfc {
 namespace sql {
 
-BasicConnectionPool::BasicConnectionPool(ConnectionCreator* creator,
+namespace {
+
+size_t
+get_pool_max_size(const Url& url, size_t value=5) {
+    std::map<std::string, std::string> opts = url.http_searchpart();
+    if (opts.find("pool_max_size") != opts.end()) {
+        try {
+            value = boost::lexical_cast<size_t>(opts["pool_max_size"]);
+        } catch (const boost::bad_lexical_cast& e) {
+            throw std::invalid_argument(
+                "invalid value for pool_max_size: " + opts["pool_max_size"]
+            );
+        }
+    }
+    return value;
+}
+
+} // namespace anonymous
+
+BasicConnectionPool::BasicConnectionPool(ConnectionCreator creator,
                                          int max_size)
         : creator_(creator)
         , returner_(new PoolReturner(this))
@@ -40,6 +62,14 @@ BasicConnectionPool::BasicConnectionPool(ConnectionCreator* creator,
         , size_mutex_()
         , pool_(max_size) {
 
+}
+
+BasicConnectionPool::BasicConnectionPool(const Url& url)
+        : creator_(DefaultConnectionCreator(url))
+        , returner_(new PoolReturner(this))
+        , size_(0)
+        , size_mutex_()
+        , pool_(get_pool_max_size(url)) {
 }
 
 BasicConnectionPool::~BasicConnectionPool() {
@@ -89,7 +119,7 @@ BasicConnectionPool::create() {
     boost::lock_guard<boost::mutex> lock(size_mutex_);
     if (size_ >= pool_.max_size())
         throw db_error("pool limit reached");
-    std::auto_ptr<Connection> c(creator_->create());
+    std::auto_ptr<Connection> c(creator_());
     ++size_;
     return c.release();
 }

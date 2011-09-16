@@ -26,7 +26,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/RelationalDatabase.hpp>
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionPool.hpp>
-#include <brfc/util/no_delete.hpp>
 
 using ::testing::_;
 using ::testing::Ref;
@@ -39,8 +38,7 @@ class rdb_RdbFileEntry_test : public ::testing::Test {
     rdb_RdbFileEntry_test()
             : conn()
             , pool()
-            , pool_ptr(&pool, no_delete)
-            , db(pool_ptr)
+            , db(&pool)
             , entry(&db) {
     
     }
@@ -52,7 +50,6 @@ class rdb_RdbFileEntry_test : public ::testing::Test {
     
     sql::MockConnection conn;
     sql::MockConnectionPool pool;
-    boost::shared_ptr<sql::ConnectionPool> pool_ptr;
     RelationalDatabase db;
     RdbFileEntry entry;
 };

@@ -39,7 +39,6 @@ namespace brfc {
 
     namespace sql {
         class Connection;
-        class ConnectionCreator;
         class ConnectionPool;
     }
 }
@@ -62,7 +61,7 @@ class RelationalDatabase : public Database {
      */
     explicit RelationalDatabase(const Url& dsn);
     
-    explicit RelationalDatabase(boost::shared_ptr<sql::ConnectionPool> pool);
+    explicit RelationalDatabase(sql::ConnectionPool* pool);
 
     /**
      * @brief destructor
@@ -85,9 +84,6 @@ class RelationalDatabase : public Database {
     boost::shared_ptr<sql::Connection> conn() const;    
 
     FileHasher& file_hasher() { return *file_hasher_; }
-
-    static sql::ConnectionPool* create_pool(sql::ConnectionCreator* conn_ctor,
-                                            const Url& dsn);
 
     void entry_to_file(const RdbFileEntry& entry, const std::string& path);
     RdbFileEntry* file_to_entry(const Oh5File& file);
@@ -118,7 +114,6 @@ class RelationalDatabase : public Database {
     void populate_mapper();
     void populate_hasher();
 
-    boost::scoped_ptr<sql::ConnectionCreator> creator_;
     boost::shared_ptr<sql::ConnectionPool> pool_;
     boost::scoped_ptr<RdbFileStoragePolicy> storage_;
     boost::shared_ptr<AttributeMapper> mapper_;
