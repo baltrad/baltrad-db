@@ -23,14 +23,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <gmock/gmock.h>
 
 #include <brfc/sql/Connection.hpp>
-#include <brfc/sql/ConnectionDtor.hpp>
 
 namespace brfc {
 namespace sql {
 
-class MockConnectionDtor : public ConnectionDtor {
+class MockConnectionDtor {
   public:
-    MOCK_METHOD1(do_destroy, void(Connection* c));
+    void operator()(Connection* c) const { call(c); }
+    MOCK_CONST_METHOD1(call, void(Connection* c));
 };
 
 } // namespace sql

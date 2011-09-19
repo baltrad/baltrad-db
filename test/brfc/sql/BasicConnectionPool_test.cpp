@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
+#include <boost/checked_delete.hpp>
+#include <boost/bind.hpp>
 #include <boost/ref.hpp>
 
 #include <brfc/exceptions.hpp>
@@ -26,7 +28,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/MockConnection.hpp>
 #include <brfc/sql/MockConnectionCreator.hpp>
-#include <brfc/sql/PoolReturner.hpp>
 #include <brfc/util/Url.hpp>
 
 using ::testing::Return;
@@ -76,7 +77,9 @@ TEST_F(sql_BasicConnectionPool_test, test_get) {
     
     std::auto_ptr<Connection> c(pool.get());
     ConnectionProxy* cp = dynamic_cast<ConnectionProxy*>(c.get());
-
+    
+    // "destroyed" using put
+    EXPECT_TRUE(cp->connection_dtor() == boost::bind(&BasicConnectionPool::put, &pool, _1));
     ASSERT_TRUE(cp);
     Connection* proxied = &cp->proxied();
 
@@ -124,13 +127,18 @@ TEST_F(sql_BasicConnectionPool_test, test_size) {
 }
 
 TEST_F(sql_BasicConnectionPool_test, test_dtor) {
-    PoolReturner returner;
+    MockConnection* conn1 = new MockConnection();
+    ON_CALL(*conn1, do_is_open())
+        .WillByDefault(Return(true)); // for leak detection
+    
+    EXPECT_CALL(creator, call())
+        .WillOnce(Return(conn1));
+
+    std::auto_ptr<Connection> c1;
     {
         BasicConnectionPool p(boost::ref(creator));
-        p.returner(&returner);
-        EXPECT_EQ(&p, returner.pool());
+        c1.reset(p.get());
     }
-    EXPECT_FALSE(returner.pool());
 }
 
 TEST_F(sql_BasicConnectionPool_test, test_put_closed_conn) {

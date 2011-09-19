@@ -24,14 +24,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/foreach.hpp>
 
 #include <brfc/exceptions.hpp>
-#include <brfc/sql/ConnectionDtor.hpp>
 #include <brfc/sql/ResultProxy.hpp>
 
 namespace brfc {
 namespace sql {
 
-ConnectionProxy::ConnectionProxy(Connection* proxied,
-                                 boost::shared_ptr<ConnectionDtor> conn_dtor)
+ConnectionProxy::ConnectionProxy(Connection* proxied, ConnectionDtor conn_dtor)
         : proxied_(proxied)
         , conn_dtor_(conn_dtor)
         , results_() {
@@ -64,7 +62,7 @@ ConnectionProxy::remove(ResultProxy* result) {
 void
 ConnectionProxy::do_close() {
     if (proxied_) {
-        conn_dtor_->destroy(proxied_);
+        conn_dtor_(proxied_);
         proxied_ = 0;
     }
     BOOST_FOREACH(ResultProxy* rp, results_) {

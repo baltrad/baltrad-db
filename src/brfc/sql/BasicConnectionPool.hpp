@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 #define BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 
+#include <map>
+
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -31,7 +33,6 @@ namespace brfc {
 
     namespace sql {
         class ConnectionProxy;
-        class PoolReturner;
     }
 }
 
@@ -66,15 +67,6 @@ class BasicConnectionPool : public ConnectionPool {
 
     size_t max_size() const { return pool_.max_size(); }
     
-    /**
-     * @brief set a returner
-     * @param returner the returner to set (caller retains ownership)
-     *
-     * this is for testing purposes, already created connections keep the
-     * old returner
-     */
-    void returner(PoolReturner* returner);
-
   protected:
     /**
      * @brief get a proxied database connection
@@ -93,6 +85,7 @@ class BasicConnectionPool : public ConnectionPool {
     virtual void do_put(Connection* db);
   
   private:
+    typedef std::map<Connection*, ConnectionProxy*> LeaseMap;
     /**
      * @brief create, locking size_mutex_
      * @throw db_error if size limit reached
@@ -105,10 +98,10 @@ class BasicConnectionPool : public ConnectionPool {
     void dispose(Connection* conn);
 
     ConnectionCreator creator_;
-    boost::shared_ptr<PoolReturner> returner_;
     size_t size_; ///< number of allocated connections
     boost::mutex size_mutex_;
     Queue<Connection*> pool_;
+    LeaseMap leased_;
 };
 
 } // namespace sql

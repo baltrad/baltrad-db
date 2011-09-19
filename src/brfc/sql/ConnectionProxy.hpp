@@ -22,6 +22,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <list>
 
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <brfc/sql/Connection.hpp>
@@ -29,7 +30,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-class ConnectionDtor;
 class ResultProxy;
 
 /**
@@ -37,13 +37,14 @@ class ResultProxy;
  */
 class ConnectionProxy : public Connection {
   public:
+    typedef boost::function<void(Connection*)> ConnectionDtor;
+   
     /**
      * @brief constructor
      * @param proxied the proxied database connection
      * @param conn_dtor destructor used when this proxy is closed
      */
-    ConnectionProxy(Connection* proxied,
-                    boost::shared_ptr<ConnectionDtor> conn_dtor);
+    ConnectionProxy(Connection* proxied, ConnectionDtor conn_dtor);
 
     /**
      * @brief destructor
@@ -51,6 +52,9 @@ class ConnectionProxy : public Connection {
      * close, if not closed
      */
     virtual ~ConnectionProxy();
+
+    void connection_dtor(ConnectionDtor dtor) { conn_dtor_ = dtor; }
+    ConnectionDtor connection_dtor() const { return conn_dtor_; }
 
     void remove(ResultProxy* result);
 
@@ -124,7 +128,7 @@ class ConnectionProxy : public Connection {
   private:
 
     Connection* proxied_;
-    boost::shared_ptr<ConnectionDtor> conn_dtor_;
+    ConnectionDtor conn_dtor_;
     std::list<ResultProxy*> results_;
 };
 

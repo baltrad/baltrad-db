@@ -22,13 +22,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <memory>
 
+#include <boost/bind.hpp>
+#include <boost/checked_delete.hpp>
+#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread/locks.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/DefaultConnectionCreator.hpp>
-#include <brfc/sql/PoolReturner.hpp>
 #include <brfc/util/Url.hpp>
 #include <brfc/util/no_delete.hpp>
 
@@ -57,7 +59,6 @@ get_pool_max_size(const Url& url, size_t value=5) {
 BasicConnectionPool::BasicConnectionPool(ConnectionCreator creator,
                                          int max_size)
         : creator_(creator)
-        , returner_(new PoolReturner(this))
         , size_(0)
         , size_mutex_()
         , pool_(max_size) {
@@ -66,14 +67,15 @@ BasicConnectionPool::BasicConnectionPool(ConnectionCreator creator,
 
 BasicConnectionPool::BasicConnectionPool(const Url& url)
         : creator_(DefaultConnectionCreator(url))
-        , returner_(new PoolReturner(this))
         , size_(0)
         , size_mutex_()
         , pool_(get_pool_max_size(url)) {
 }
 
 BasicConnectionPool::~BasicConnectionPool() {
-    returner_->pool(0);
+    BOOST_FOREACH(const LeaseMap::value_type& lease, leased_) {
+        lease.second->connection_dtor(boost::checked_deleter<Connection>());
+    }
     while (true) {
         try {
             delete pool_.get_nowait();
@@ -81,12 +83,6 @@ BasicConnectionPool::~BasicConnectionPool() {
             break;
         }
     }
-}
-
-void
-BasicConnectionPool::returner(PoolReturner* returner) {
-    returner_.reset(returner, no_delete);
-    returner_->pool(this);
 }
 
 Connection*
@@ -97,7 +93,16 @@ BasicConnectionPool::do_get() {
     } catch (const queue_empty&) {
         conn.reset(create());
     }
-    return new ConnectionProxy(conn.release(), returner_);
+    
+    std::auto_ptr<ConnectionProxy> proxy(
+        new ConnectionProxy(
+            conn.release(),
+            boost::bind(&BasicConnectionPool::put, this, _1)
+        )
+    );
+
+    leased_.insert(std::make_pair(&proxy->proxied(), proxy.get()));
+    return proxy.release();
 }
 
 void
@@ -112,6 +117,7 @@ BasicConnectionPool::do_put(Connection* conn) {
     } catch (const queue_full&) {
         dispose(conn);
     }
+    leased_.erase(conn);
 }
 
 Connection*

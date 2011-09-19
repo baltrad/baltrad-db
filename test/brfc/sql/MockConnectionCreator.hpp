@@ -20,6 +20,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_MOCK_CONNETION_CREATOR_HPP
 #define BRFC_SQL_MOCK_CONNETION_CREATOR_HPP
 
+#include <gmock/gmock.h>
+
 namespace brfc {
 namespace sql {
 
