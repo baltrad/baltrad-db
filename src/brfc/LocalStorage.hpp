@@ -40,15 +40,14 @@ class LocalStorage {
      * @param path absolute path to the file in filesystem
      * @return absolute path to the stored file
      */
-    std::string prestore(const FileEntry& entry, const std::string& path) {
-        return do_prestore(entry, path);
+    std::string store(const FileEntry& entry, const std::string& path) {
+        return do_store(entry, path);
     }
 
     /**
      * @brief write the file to storage from FileEntry content stream
      * @return absolute path to the stored file
      */
-
     std::string store(const FileEntry& entry) {
         return do_store(entry);
     }
@@ -60,26 +59,13 @@ class LocalStorage {
     bool remove(const FileEntry& entry) {
         return do_remove(entry);
     }
-    
-    /**
-     * @brief remove all files
-     */
-    void clean() {
-        do_clean();
-    }
-
-    /**
-     * @brief check if the storage is valid
-     */
-    bool is_valid() const {
-        return do_is_valid();
-    }
 
   protected:
     /**
      * @return absolute path to the stored file
      */
-    virtual std::string do_prestore(const FileEntry& entry, const std::string& path) = 0;
+    virtual std::string do_store(const FileEntry& entry,
+                                 const std::string& path) = 0;
 
     /**
      * @return absolute path to the stored file
@@ -90,10 +76,6 @@ class LocalStorage {
      * @return true if the file no longer exists
      */
     virtual bool do_remove(const FileEntry& entry) = 0;
-
-    virtual void do_clean() = 0;
-
-    virtual bool do_is_valid() const = 0;
 };
 
 } // namespace brfc

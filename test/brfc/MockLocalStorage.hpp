@@ -29,10 +29,8 @@ namespace brfc {
 class MockLocalStorage : public LocalStorage {
   public:
     MOCK_METHOD1(do_store, std::string(const FileEntry&));
-    MOCK_METHOD2(do_prestore, std::string(const FileEntry&, const std::string&));
+    MOCK_METHOD2(do_store, std::string(const FileEntry&, const std::string&));
     MOCK_METHOD1(do_remove, bool(const FileEntry&));
-    MOCK_METHOD0(do_clean, void());
-    MOCK_CONST_METHOD0(do_is_valid, bool());
 };
 
 } // namespace brfc

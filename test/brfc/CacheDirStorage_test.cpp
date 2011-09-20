@@ -77,7 +77,7 @@ TEST_F(CacheDirStorage_test, test_store_existing) {
 TEST_F(CacheDirStorage_test, test_prestore) {
     EXPECT_CALL(fs, do_copy_file("/infile.h5", "/tmp/uuid.h5"));
 
-    storage.prestore(entry, "/infile.h5");
+    storage.store(entry, "/infile.h5");
 }
 
 TEST_F(CacheDirStorage_test, test_remove) {
@@ -98,58 +98,6 @@ TEST_F(CacheDirStorage_test, test_remove_nx_entry) {
         .WillRepeatedly(Return(false));
     
     EXPECT_TRUE(storage.remove(entry));
-}
-
-
-TEST_F(CacheDirStorage_test, test_clean) {
-    std::vector<std::string> dir_content;
-    dir_content.push_back("entry1");
-    dir_content.push_back("entry2");
-
-    EXPECT_CALL(fs, do_list_directory(dir))
-        .WillOnce(Return(dir_content));
-    EXPECT_CALL(fs, do_remove("/tmp/entry1"));
-    EXPECT_CALL(fs, do_remove("/tmp/entry2"));
-
-    storage.clean();
-}
-
-TEST_F(CacheDirStorage_test, test_is_valid) {
-    EXPECT_CALL(fs, do_is_absolute(dir))
-        .WillOnce(Return(true));
-    EXPECT_CALL(fs, do_exists(dir))
-        .WillOnce(Return(true));
-    EXPECT_CALL(fs, do_is_directory(dir))
-        .WillOnce(Return(true));
-    
-    EXPECT_TRUE(storage.is_valid());
-}
-
-TEST_F(CacheDirStorage_test, test_is_valid_not_absolute) {
-    EXPECT_CALL(fs, do_is_absolute(dir))
-        .WillOnce(Return(false));
-    
-    EXPECT_FALSE(storage.is_valid());
-}
-
-TEST_F(CacheDirStorage_test, test_is_valid_nonexistant_dir) {
-    EXPECT_CALL(fs, do_is_absolute(dir))
-        .WillOnce(Return(true));
-    EXPECT_CALL(fs, do_exists(dir))
-        .WillOnce(Return(false));
-    
-    EXPECT_FALSE(storage.is_valid());
-}
-
-TEST_F(CacheDirStorage_test, test_is_valid_not_directory) {
-    EXPECT_CALL(fs, do_is_absolute(dir))
-        .WillOnce(Return(true));
-    EXPECT_CALL(fs, do_exists(dir))
-        .WillOnce(Return(true));
-    EXPECT_CALL(fs, do_is_directory(dir))
-        .WillOnce(Return(false));
-    
-    EXPECT_FALSE(storage.is_valid());
 }
 
 } // namespace brfc

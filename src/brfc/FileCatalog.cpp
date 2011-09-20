@@ -82,7 +82,7 @@ FileEntry*
 FileCatalog::store(const Oh5File& file) {
     std::auto_ptr<FileEntry> e(db_->store(file));
     try {
-        storage_->prestore(*e, file.path());
+        storage_->store(*e, file.path());
     } catch (const std::runtime_error& e) {
         std::cerr << "IGNORED EXCEPTION: LocalStorage::prestore: "
                   << e.what() << std::endl << std::flush;
@@ -102,7 +102,7 @@ FileEntry*
 FileCatalog::get_or_store(const Oh5File& file) {
     std::auto_ptr<FileEntry> e(db_->get_or_store(file));
     try {
-        storage_->prestore(*e, file.path());
+        storage_->store(*e, file.path());
     } catch (const std::runtime_error& e) {
         std::cerr << "IGNORED EXCEPTION: LocalStorage::prestore: "
                   << e.what() << std::endl << std::flush;

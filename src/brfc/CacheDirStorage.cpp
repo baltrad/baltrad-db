@@ -62,7 +62,7 @@ CacheDirStorage::do_store(const FileEntry& entry) {
 }
 
 std::string
-CacheDirStorage::do_prestore(const FileEntry& entry, const std::string& path) {
+CacheDirStorage::do_store(const FileEntry& entry, const std::string& path) {
     const std::string& new_path = entry_path(entry);
     fs().copy_file(path, new_path);
     return new_path;
@@ -77,22 +77,6 @@ CacheDirStorage::do_remove(const FileEntry& entry) {
     }
 
     return not fs().exists(fs_path);
-}
-
-void
-CacheDirStorage::do_clean() {
-    fs().clear_directory(dir_);
-}
-
-bool
-CacheDirStorage::do_is_valid() const {
-    if (not fs().is_absolute(dir_))
-        return false;
-    if (not fs().exists(dir_))
-        return false;
-    if (not fs().is_directory(dir_))
-        return false;
-    return true;
 }
 
 } // namespace brfc

@@ -75,7 +75,7 @@ class CacheDirStorage_itest : public ::testing::Test {
 
 TEST_F(CacheDirStorage_itest, test_prestore) {
     const std::string& fpath = file.path();
-    const std::string& rpath = storage.prestore(entry, fpath);
+    const std::string& rpath = storage.store(entry, fpath);
 
     EXPECT_NE(rpath, fpath);
     EXPECT_TRUE(fs::exists(rpath));
@@ -116,14 +116,6 @@ TEST_F(CacheDirStorage_itest, test_remove_nx) {
     const std::string& path = storage.entry_path(entry);
 
     EXPECT_TRUE(storage.remove(entry));
-    EXPECT_FALSE(fs::exists(path));
-}
-
-TEST_F(CacheDirStorage_itest, test_clean) {
-    const std::string& path = storage.entry_path(entry);
-    fs.copy_file(tmpfile.path(), path);
-
-    EXPECT_NO_THROW(storage.clean());
     EXPECT_FALSE(fs::exists(path));
 }
 

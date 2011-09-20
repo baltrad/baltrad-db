@@ -34,7 +34,7 @@ class NullStorage : public LocalStorage {
     /**
      * no-op
      */
-    virtual std::string do_prestore(const FileEntry&, const std::string&) {
+    virtual std::string do_store(const FileEntry&, const std::string&) {
         return "";
     } 
     
@@ -51,13 +51,6 @@ class NullStorage : public LocalStorage {
     virtual bool do_remove(const FileEntry&) {
         return true;
     }
-
-    virtual void do_clean() { }
-    
-    /**
-     * @return always true
-     */
-    virtual bool do_is_valid() const { return true; }
 };
 
 } // namespace brfc

@@ -82,7 +82,7 @@ TEST_F(FileCatalog_test, test_store_nx_file_by_path) {
 TEST_F(FileCatalog_test, test_store) {
     EXPECT_CALL(db, do_store(Ref(file)))
         .WillOnce(Return(&entry));
-    EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
+    EXPECT_CALL(storage, do_store(Ref(entry), file.path()))
         .WillOnce(Return("/path/to/file"));
     
     FileEntry* e = 0;
@@ -102,10 +102,10 @@ TEST_F(FileCatalog_test, test_store_on_db_failure) {
     EXPECT_EQ(orig_path, file.path());
 }
 
-TEST_F(FileCatalog_test, test_store_on_prestore_failure) {
+TEST_F(FileCatalog_test, test_store_on_localstore_failure) {
     EXPECT_CALL(db, do_store(Ref(file)))
         .WillOnce(Return(&entry));
-    EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
+    EXPECT_CALL(storage, do_store(Ref(entry), file.path()))
         .WillOnce(Throw(std::runtime_error("error")));
     
     FileEntry* e = 0;
@@ -118,7 +118,7 @@ TEST_F(FileCatalog_test, test_get_or_store) {
         .WillOnce(Return(true));
     EXPECT_CALL(db, do_entry_by_file(Ref(file)))
         .WillOnce(Return(&entry));
-    EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
+    EXPECT_CALL(storage, do_store(Ref(entry), file.path()))
         .WillOnce(Return("/path/to/file"));
     
     FileEntry* e = 0;
@@ -133,12 +133,12 @@ TEST_F(FileCatalog_test, test_get_or_store_on_db_failure) {
     EXPECT_THROW(fc.get_or_store(file), db_error);
 }
 
-TEST_F(FileCatalog_test, test_get_or_store_on_prestore_failure) {
+TEST_F(FileCatalog_test, test_get_or_store_on_localstore_failure) {
     EXPECT_CALL(db, do_is_stored(Ref(file)))
         .WillOnce(Return(true));
     EXPECT_CALL(db, do_entry_by_file(Ref(file)))
         .WillOnce(Return(&entry));
-    EXPECT_CALL(storage, do_prestore(Ref(entry), file.path()))
+    EXPECT_CALL(storage, do_store(Ref(entry), file.path()))
         .WillOnce(Throw(std::runtime_error("error")));
     
     FileEntry* e = 0;
