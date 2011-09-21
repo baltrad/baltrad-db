@@ -299,6 +299,7 @@ def configure(conf):
 def build(bld):
     _build_shared_library(bld)
     _build_bdbtool(bld)
+    _build_java_wrapper(bld)
 
     bld.install_files("${PREFIX}/share/baltrad-db/sql/postgresql",
                       bld.path.ant_glob("schema/postgresql/*.sql"))
