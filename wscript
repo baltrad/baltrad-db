@@ -19,10 +19,9 @@ import optparse
 import os
 import sys
 
-from waflib import Build, Logs, Options, Utils
+from waflib import Build, Options, Utils
 
 sys.path.append("./misc")
-from build_helper import urlsplit
 
 APPNAME = "baltrad-db"
 VERSION = "devel"
@@ -80,10 +79,6 @@ def options(opt):
                    callback=_store_bool, type="string", nargs=1,
                    default=True, metavar="BOOL",
                    help="build java wrappers [default: %default]")
-    grp.add_option("--build_tests", action="callback",
-                   callback=_store_bool, type="string", nargs=1,
-                   default=True, metavar="BOOL",
-                   help="build tests [default: %default]")
     grp.add_option("--build_bdbtool", action="callback",
                    callback=_store_bool, type="string", nargs=1,
                    default=True, metavar="BOOL",
@@ -128,7 +123,6 @@ def configure(conf):
     env = conf.env
 
     env.build_java = Options.options.build_java
-    env.build_tests = Options.options.build_tests
     env.build_bdbtool = Options.options.build_bdbtool
     env.build_bdbfs = Options.options.build_bdbfs
     
@@ -304,13 +298,8 @@ def configure(conf):
 
 def build(bld):
     _build_shared_library(bld)
+    _build_bdbtool(bld)
 
-    if bld.env.build_bdbtool:
-        _build_bdbtool(bld)
-
-    if bld.env.build_java:
-        _build_java_wrapper(bld)
-    
     bld.install_files("${PREFIX}/share/baltrad-db/sql/postgresql",
                       bld.path.ant_glob("schema/postgresql/*.sql"))
 
@@ -335,9 +324,12 @@ def _build_shared_library(bld):
         export_includes="src",
         use=libs,
         install_path="${PREFIX}/lib",
+        idx=0,
     )
 
-def _build_bdbtool(bld):
+    if not bld.env.build_bdbtool:
+        return
+
     libs = ["brfc", "BOOST_PROGRAM_OPTIONS"]
     sources = bld.path.ant_glob("src/brfc/tool/*.cpp")
 
@@ -354,8 +346,13 @@ def _build_bdbtool(bld):
         export_includes="src",
         use=libs,
         install_path="${PREFIX}/lib",
+        idx=1,
     )
-    
+
+def _build_bdbtool(bld):
+    if not bld.env.build_bdbtool:
+        return
+
     sources = sorted(bld.path.ant_glob("bin/bdbtool/**/*.cpp"))
 
     bld.program(
@@ -377,9 +374,10 @@ def _build_gtest_gmock_lib(bld):
         target="gtest-gmock",
         env=bld.env_of_name("testenv").copy(),
         includes="src",
+        idx=10,
     )
 
-def _build_gtest_tests(bld):
+def _build_gtest_test(bld):
     sources = sorted(bld.path.ant_glob("test/brfc/**/*.cpp"))
     local_libs = ["brfc", "gtest-gmock"]
     
@@ -401,9 +399,10 @@ def _build_gtest_tests(bld):
         includes="src test",
         use=local_libs,
         install_path=None,
+        idx=11,
     )
 
-def _build_gtest_itests(bld):
+def _build_gtest_itest(bld):
     cfg_values = {
         "test_dsn_count": len(bld.env.test_db_dsns),
         "test_dsns": ",\n".join(map(_strlit, bld.env.test_db_dsns)),
@@ -444,9 +443,13 @@ def _build_gtest_itests(bld):
             "brfc", "gtest-gmock",
         ],
         install_path=None,
+        idx=12,
     )
 
 def _build_java_wrapper(bld):
+    if not bld.env.build_java:
+        return
+
     bld.shlib(
         features="cxx cxxshlib",
         source="swig/fc.i",
@@ -483,7 +486,10 @@ def _build_java_wrapper(bld):
     bld.add_manual_dependency(jbrfc,
                               bld.path.find_resource("build.xml"))
 
-def _build_java_tests(bld):
+def _build_java_test(bld):
+    if not bld.env.build_java:
+        return
+
     bld.add_group()
 
     bld(
@@ -502,50 +508,56 @@ def _build_java_tests(bld):
     bld.add_manual_dependency(jbrfc_test,
                               bld.path.find_resource("build.xml"))
     
-def _ant_testdb_properties(dsns):
-    # pick out postgresql dsn if present
-    for dsn in dsns:
-        url = urlsplit(dsn)
-        if url.scheme != "postgresql":
-            continue
-        jdbc_url = "".join(["jdbc:", url.scheme, "://", url.hostname, url.path])
-        return {
-            "db.url": jdbc_url,
-            "db.username": url.username,
-            "db.password": url.password,
-            "db.test_db_dsn": dsn,
-        }
-    return {}
-
-def _build_tests(bld):
-    if not bld.env.build_tests:
-        Logs.error("tests are not set to be built, "
-                   "(re-)configure with '--build_tests=yes'")
-        sys.exit(1)
-    
-    build(bld)
-    _build_gtest_gmock_lib(bld)
-    _build_gtest_tests(bld)
-    _build_gtest_itests(bld)
-    if bld.env.build_java:
-        _build_java_tests(bld)
-
 class test(Build.BuildContext):
+    "build & run unit tests"
     cmd = 'test'
     fun = '_test'
-    help = "build & run tests"
 
 def _test(bld):
-    _build_tests(bld)
-    _run_tests(bld)
+    _build_shared_library(bld)
+    _build_gtest_gmock_lib(bld)
+    _build_gtest_test(bld)
+    _run_test(bld)
 
-class run_tests(Build.BuildContext):
-    cmd = 'run_tests'
-    fun = '_run_tests'
+class itest(Build.BuildContext):
+    "build & run integration tests"
+    cmd = 'itest'
+    fun = '_itest'
 
-def _run_tests(bld):
-    # set up LD_LIBRARY_PATH for running tests
+def _itest(bld):
+    _build_shared_library(bld)
+    _build_gtest_gmock_lib(bld)
+    _build_gtest_itest(bld)
+    _run_itest(bld)
 
+class jtest(Build.BuildContext):
+    "build & run java tests"
+    cmd = 'jtest'
+    fun = '_jtest'
+
+def _jtest(bld):
+    _build_shared_library(bld)
+    _build_java_wrapper(bld)
+    _build_java_test(bld)
+    _run_java_test(bld)
+
+class _tests_all(Build.BuildContext):
+    "build & run all tests"
+    cmd = 'test_all'
+    fun = '_test_all'
+
+def _test_all(bld):
+    _build_shared_library(bld)
+    _build_java_wrapper(bld)
+    _build_gtest_gmock_lib(bld)
+    _build_gtest_test(bld)
+    _build_gtest_itest(bld)
+    _build_java_test(bld)
+    _run_test(bld)
+    _run_itest(bld)
+    _run_java_test(bld)
+
+def _get_test_env(bld):
     env=bld.env_of_name("testenv").copy()
     
     bdir = bld.path.get_bld().abspath()
@@ -553,7 +565,6 @@ def _run_tests(bld):
     ld_path = os.environ.get("LD_LIBRARY_PATH", "").split(":")
     ld_path = [os.path.abspath(path) for path in ld_path if path]
     ld_path.insert(0, bdir)
-
 
     libs = [
        "BOOST_SYSTEM", "BOOST_FILESYSTEM",
@@ -573,29 +584,47 @@ def _run_tests(bld):
     if not env["env"]:
         env.env = os.environ.copy()
     env.env["LD_LIBRARY_PATH"] = ":".join(ld_path)
-     
+    
+    return env
+
+def _run_test(bld):
+    env = _get_test_env(bld)
+    bdir = bld.path.get_bld().abspath()
+
     bld.add_group("run_gtest_tests")
     bld(
-        rule="${SRC[0].abspath()} --gmock_catch_leaked_mocks=1 --gmock_verbose=error --gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gtest.xml"),
+        rule="${SRC[0].abspath()} "
+             "--gmock_catch_leaked_mocks=1 "
+             "--gmock_verbose=error "
+             "--gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gtest.xml"),
         source="test_runner",
         use="brfc",
         env=env,
         always=True,
     )
 
+def _run_itest(bld):
+    env = _get_test_env(bld)
+    bdir = bld.path.get_bld().abspath()
+
     bld.add_group("run_gtest_itests")
     bld(
-        rule="${SRC[0].abspath()} --gmock_catch_leaked_mocks=1 --gmock_verbose=error --gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gitest.xml"),
+        rule="${SRC[0].abspath()} "
+             "--gmock_catch_leaked_mocks=1 "
+             "--gmock_verbose=error "
+             "--gtest_output=xml:%s" % os.path.join(bdir, "test/reports/gitest.xml"),
         source="itest_runner",
         use="brfc",
         env=env,
         always=True,
     )
 
+def _run_java_test(bld):
+    env = _get_test_env(bld)
     if not env.build_java:
         return
 
-    bld.add_group("run_simple_java_tests")
+    bld.add_group("run_java_tests")
 
     props = {
         "waf.builddir": bld.path.get_bld().abspath(),
@@ -604,25 +633,13 @@ def _run_tests(bld):
 
     bld(
         features="ant",
-        command="execute-simple-tests",
+        command="execute-tests",
         properties=props,
         env=env,
         always=True,
     )
 
     bld.add_group("run_database_java_tests")
-
-    testdb_props = _ant_testdb_properties(bld.env.test_db_dsns)
-    if testdb_props:
-        props.update(testdb_props)
-        bld(
-            features="ant",
-            command="execute-database-tests",
-            properties=props,
-            env=env,
-            always=True,
-        )
-
 
 def doc(bld):
     bld.exec_command("doxygen", cwd="doc")
