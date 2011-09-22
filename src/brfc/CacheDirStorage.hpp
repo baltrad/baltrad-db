@@ -24,14 +24,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/LocalStorage.hpp>
 
+#include <boost/thread/mutex.hpp>
+#include <brfc/util/FixedSizeSet.hpp>
+
 namespace brfc {
 
 class FileSystem;
 
 /**
  * @brief Storage caching files in local filesystem
- * 
- * @note at the moment this is pretty naive
+ *
  * @ingroup exposed
  */
 class CacheDirStorage : public LocalStorage {
@@ -39,35 +41,47 @@ class CacheDirStorage : public LocalStorage {
     /**
      * @brief constructor
      * @param dir path in local filesystem to use as storage root
+     * @param max_size size limit
      *
      * BoostFileSystem is used for filesystem access.
      */
-    CacheDirStorage(const std::string& dir);
+    CacheDirStorage(const std::string& dir, size_t max_size=1000);
     
     /**
-     * @brief constructor
-     * @param dir path in local filesystem to use as storage root
-     * @param fs filesystem access (caller retains ownership)
+     * @brief initialize
+     *
+     * bring up-to-date with the filesystem
      */
-    CacheDirStorage(const std::string& dir, const FileSystem* fs);
-
+    void init();
+    
+    /**
+     * @brief destructor
+     */
     virtual ~CacheDirStorage();
     
     /**
      * @brief absolute path this entry should be stored to
      */
     std::string entry_path(const FileEntry& entry) const;
+    
+    /**
+     * @brief set FileSystem implementation
+     */
+    void file_system(const FileSystem* fs);
  
-  protected:
+  private:
     virtual std::string do_store(const FileEntry& entry,
                                  const std::string& path);
     virtual std::string do_store(const FileEntry& entry);
     virtual bool do_remove(const FileEntry& entry);
   
-  private:
     const FileSystem& fs() const;
+    
+    void remove_from_filesystem(const std::string& path);
 
+    boost::mutex mutex_;
     std::string dir_;
+    FixedSizeSet<std::string> files_;
     boost::shared_ptr<const FileSystem> fs_;
 };
 

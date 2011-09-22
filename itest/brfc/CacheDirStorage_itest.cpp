@@ -108,6 +108,7 @@ TEST_F(CacheDirStorage_itest, test_remove) {
     const std::string& path = storage.entry_path(entry);
     fs.copy_file(tmpfile.path(), path);
 
+    storage.init();
     EXPECT_TRUE(storage.remove(entry));
     EXPECT_FALSE(fs::exists(path));
 }

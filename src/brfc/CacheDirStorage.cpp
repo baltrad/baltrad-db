@@ -19,6 +19,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/CacheDirStorage.hpp>
 
+#include <boost/bind.hpp>
+#include <boost/foreach.hpp>
+
 #include <brfc/db/FileEntry.hpp>
 
 #include <brfc/util/no_delete.hpp>
@@ -26,25 +29,35 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 namespace brfc {
 
-CacheDirStorage::CacheDirStorage(const std::string& dir)
-        : dir_(dir)
+CacheDirStorage::CacheDirStorage(const std::string& dir, size_t max_size)
+        : mutex_()
+        , dir_(dir)
+        , files_(max_size)
         , fs_(new BoostFileSystem()) {
-
-}
-
-CacheDirStorage::CacheDirStorage(const std::string& dir, const FileSystem* fs)
-        : dir_(dir)
-        , fs_(fs, no_delete) {
-
+    files_.removal_callback(
+        boost::bind(&CacheDirStorage::remove_from_filesystem, this, _1)
+    );
 }
 
 CacheDirStorage::~CacheDirStorage() {
 
 }
 
+void
+CacheDirStorage::init() {
+    BOOST_FOREACH(const std::string& filename, fs().list_directory(dir_)) {
+        files_.add(fs().join(dir_, filename));
+    }
+}
+
 const FileSystem&
 CacheDirStorage::fs() const {
     return *fs_;
+}
+
+void
+CacheDirStorage::file_system(const FileSystem* fs) {
+    fs_.reset(fs, no_delete);
 }
 
 std::string
@@ -54,27 +67,39 @@ CacheDirStorage::entry_path(const FileEntry& entry) const {
 
 std::string
 CacheDirStorage::do_store(const FileEntry& entry) {
+    boost::lock_guard<boost::mutex> lock(mutex_);
+
     const std::string& path = entry_path(entry);
     if (not fs().exists(path)) {
         entry.write_to_file(path);
     }
+    files_.add(path);
+
     return path;
 }
 
 std::string
 CacheDirStorage::do_store(const FileEntry& entry, const std::string& path) {
+    boost::lock_guard<boost::mutex> lock(mutex_);
+
     const std::string& new_path = entry_path(entry);
     fs().copy_file(path, new_path);
+    files_.add(new_path);
+
     return new_path;
+}
+
+void
+CacheDirStorage::remove_from_filesystem(const std::string& path) {
+    fs().remove(path);
 }
 
 bool
 CacheDirStorage::do_remove(const FileEntry& entry) {
-    const std::string& fs_path(entry_path(entry));
+    boost::lock_guard<boost::mutex> lock(mutex_);
 
-    if (fs().exists(fs_path)) {
-        fs().remove(fs_path);
-    }
+    const std::string& fs_path(entry_path(entry));
+    files_.remove(fs_path);
 
     return not fs().exists(fs_path);
 }

@@ -37,7 +37,7 @@ class CacheDirStorage_test : public ::testing::Test {
             : dir("/tmp")
             , fs()
             , entry()
-            , storage(dir, &fs) {
+            , storage(dir, 3) {
     }
     
     std::string dir;
@@ -46,6 +46,7 @@ class CacheDirStorage_test : public ::testing::Test {
     CacheDirStorage storage;
 
     virtual void SetUp() {
+        storage.file_system(&fs);
         EXPECT_CALL(entry, do_uuid())
             .WillRepeatedly(Return("uuid"));
 
@@ -58,6 +59,21 @@ class CacheDirStorage_test : public ::testing::Test {
     }
 
 };
+
+TEST_F(CacheDirStorage_test, test_init) {
+    std::vector<std::string> entries;
+    entries.push_back("a");
+    entries.push_back("b");
+    entries.push_back("c");
+    entries.push_back("d");
+
+    EXPECT_CALL(fs, do_list_directory(dir))
+        .WillOnce(Return(entries));
+    
+    EXPECT_CALL(fs, do_remove("/tmp/a")); // exceeds overflow
+    
+    storage.init();
+}
 
 TEST_F(CacheDirStorage_test, test_store) {
     EXPECT_CALL(fs, do_exists("/tmp/uuid.h5"))
@@ -74,22 +90,56 @@ TEST_F(CacheDirStorage_test, test_store_existing) {
     EXPECT_EQ("/tmp/uuid.h5", storage.store(entry));
 }
 
+TEST_F(CacheDirStorage_test, test_store_overflow) {
+    std::vector<std::string> entries;
+    entries.push_back("a");
+    entries.push_back("b");
+    entries.push_back("c");
+
+    EXPECT_CALL(fs, do_list_directory(dir))
+        .WillOnce(Return(entries));
+
+    EXPECT_CALL(fs, do_exists("/tmp/uuid.h5"))
+        .WillOnce(Return(false));
+    EXPECT_CALL(entry, do_write_to_file("/tmp/uuid.h5"));
+    EXPECT_CALL(fs, do_remove("/tmp/a"));
+    
+    storage.init();
+    storage.store(entry);
+}
+
 TEST_F(CacheDirStorage_test, test_prestore) {
     EXPECT_CALL(fs, do_copy_file("/infile.h5", "/tmp/uuid.h5"));
 
     storage.store(entry, "/infile.h5");
 }
 
-TEST_F(CacheDirStorage_test, test_remove) {
-    {
-        InSequence s;
-        EXPECT_CALL(fs, do_exists("/tmp/uuid.h5"))
-            .WillOnce(Return(true));
-        EXPECT_CALL(fs, do_remove("/tmp/uuid.h5"));
-        EXPECT_CALL(fs, do_exists("/tmp/uuid.h5"))
-            .WillRepeatedly(Return(false));
-    }
+TEST_F(CacheDirStorage_test, test_prestore_overflow) {
+    std::vector<std::string> entries;
+    entries.push_back("a");
+    entries.push_back("b");
+    entries.push_back("c");
 
+    EXPECT_CALL(fs, do_list_directory(dir))
+        .WillOnce(Return(entries));
+    EXPECT_CALL(fs, do_copy_file("/infile.h5", "/tmp/uuid.h5"));
+    EXPECT_CALL(fs, do_remove("/tmp/a"));
+    
+    storage.init();
+    storage.store(entry, "/infile.h5");
+}
+
+TEST_F(CacheDirStorage_test, test_remove) {
+    std::vector<std::string> files;
+    files.push_back("uuid.h5");
+
+    EXPECT_CALL(fs, do_list_directory("/tmp"))
+        .WillOnce(Return(files));
+    EXPECT_CALL(fs, do_remove("/tmp/uuid.h5"));
+    EXPECT_CALL(fs, do_exists("/tmp/uuid.h5"))
+        .WillRepeatedly(Return(false));
+    
+    storage.init();
     EXPECT_TRUE(storage.remove(entry));
 }
 
