@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <brfc/rdb/RdbQuery.hpp>
+#include <brfc/rdb/RdbDefaultFileManager.hpp>
 
 #include <memory>
 
@@ -97,29 +97,29 @@ attr_sql_column(const Oh5Attribute& attr) {
 
 
 
-RdbQuery::RdbQuery(boost::shared_ptr<sql::Connection> conn)
+RdbDefaultFileManager::RdbDefaultFileManager(boost::shared_ptr<sql::Connection> conn)
         : conn_(conn)
         , sql_()
         , insert_node_qry_()
         , insert_attr_qry_() {
 }
 
-RdbQuery::~RdbQuery() {
+RdbDefaultFileManager::~RdbDefaultFileManager() {
 
 }
 
 const sql::Dialect&
-RdbQuery::dialect() {
+RdbDefaultFileManager::dialect() {
     return conn().dialect();    
 }
 
 sql::Connection&
-RdbQuery::conn() {
+RdbDefaultFileManager::conn() {
     return *conn_;
 }
 
 long long
-RdbQuery::last_id(sql::Result& result) {
+RdbDefaultFileManager::last_id(sql::Result& result) {
     if (dialect().has_feature(sql::Dialect::RETURNING) and result.next()) {
         return result.value_at(0).int64_();
     } else if (dialect().has_feature(sql::Dialect::LAST_INSERT_ID)) {
@@ -130,7 +130,7 @@ RdbQuery::last_id(sql::Result& result) {
 }
 
 void
-RdbQuery::compile_insert_node_query() {
+RdbDefaultFileManager::compile_insert_node_query() {
     sql::Insert qry(m::nodes::name());
     if (dialect().has_feature(sql::Dialect::RETURNING))
         qry.returning(m::nodes::column("id"));
@@ -144,7 +144,7 @@ RdbQuery::compile_insert_node_query() {
 }
 
 void
-RdbQuery::insert_nodes(long long file_id, const Oh5Node& root) {
+RdbDefaultFileManager::do_insert_nodes(long long file_id, const Oh5Node& root) {
     std::map<const Oh5Node*, long long> ids;
     Oh5Node::const_iterator iter = root.begin();
     ids[&(*iter)] = insert_node(file_id, 0, *iter);
@@ -156,7 +156,7 @@ RdbQuery::insert_nodes(long long file_id, const Oh5Node& root) {
 }
 
 long long
-RdbQuery::insert_node(long long file_id,
+RdbDefaultFileManager::insert_node(long long file_id,
                        long long parent_id,
                        const Oh5Node& node) {
     if (not insert_node_qry_)
@@ -180,7 +180,7 @@ RdbQuery::insert_node(long long file_id,
 }
 
 void
-RdbQuery::compile_insert_attr_query() {
+RdbDefaultFileManager::compile_insert_attr_query() {
     sql::Insert qry(m::attrvals::name());
 
     qry.value("node_id", sql_.bind("node_id"));
@@ -195,7 +195,7 @@ RdbQuery::compile_insert_attr_query() {
 }
 
 void
-RdbQuery::insert_attribute(long long node_id, const Oh5Attribute& attr) {
+RdbDefaultFileManager::insert_attribute(long long node_id, const Oh5Attribute& attr) {
     if (not insert_attr_qry_)
         compile_insert_attr_query();
     
@@ -223,7 +223,7 @@ RdbQuery::insert_attribute(long long node_id, const Oh5Attribute& attr) {
 }
 
 long long
-RdbQuery::insert_file(const RdbFileEntry& entry) {    
+RdbDefaultFileManager::do_insert_file(const RdbFileEntry& entry) {    
     sql::Insert qry(m::files::name());
     qry.value("uuid", sql_.string(entry.uuid()));
     qry.value("hash", sql_.string(entry.hash())); 
@@ -243,8 +243,8 @@ RdbQuery::insert_file(const RdbFileEntry& entry) {
 }
 
 long long
-RdbQuery::insert_file_content(long long entry_id,
-                               const std::string& path) {
+RdbDefaultFileManager::do_insert_file_content(long long entry_id,
+                                              const std::string& path) {
     // transfer the file to database
     long long lo_id = conn().store_large_object(path);
 
@@ -263,15 +263,9 @@ RdbQuery::insert_file_content(long long entry_id,
     return lo_id;
 }
 
-bool
-RdbQuery::is_stored(long long source_id, const std::string& hash) {
-    const std::string& uuid = uuid_by_source_and_hash(source_id, hash);
-    return not uuid.empty();
-}
-
 std::string
-RdbQuery::uuid_by_source_and_hash(long long source_id,
-                                   const std::string& hash) {
+RdbDefaultFileManager::do_uuid_by_source_and_hash(long long source_id,
+                                                  const std::string& hash) {
     sql::Select qry;
     qry.what(m::files::column("uuid"));
     qry.from(sql_.table(m::files::name()));
@@ -290,7 +284,7 @@ RdbQuery::uuid_by_source_and_hash(long long source_id,
 }
 
 void
-RdbQuery::load_file(RdbFileEntry& entry) {
+RdbDefaultFileManager::do_load_file(RdbFileEntry& entry) {
     sql::Select qry;
     qry.from(sql_.table(m::files::name()));
     
@@ -325,7 +319,7 @@ RdbQuery::load_file(RdbFileEntry& entry) {
 }
 
 bool
-RdbQuery::remove_file_entry(const std::string& uuid) {
+RdbDefaultFileManager::do_remove_file(const std::string& uuid) {
     sql::Factory xpr;
     Expression stmt = Listcons().string("DELETE FROM ")
                                 .string(m::files::name())
@@ -337,189 +331,6 @@ RdbQuery::remove_file_entry(const std::string& uuid) {
 
     std::auto_ptr<sql::Result> r (conn().execute(stmt, binds));
     return r->affected_rows();
-}
-
-long long
-RdbQuery::select_source_id(const Oh5Source& src) {
-    sql::Select qry;
-    qry.distinct(true);
-    qry.what(m::sources::column("id"));
-    qry.from(sql_.table(m::sources::name()));
-    qry.join(
-        sql_.table(m::source_kvs::name()),
-        sql_.eq(
-            m::sources::column("id"),
-            m::source_kvs::column("source_id")
-        )
-    );
-    qry.what(m::sources::column("id"));
-
-    qry.where(sql_.bool_(false));
-    Expression x;
-    BOOST_FOREACH(const std::string& key, src.keys()) {
-        x = sql_.and_(
-            sql_.eq(m::source_kvs::column("key"), sql_.string(key)),
-            sql_.eq(m::source_kvs::column("value"), sql_.string(src.get(key)))
-        );
-        qry.where(sql_.or_(qry.where(), x));
-    }
-
-    boost::scoped_ptr<sql::Result> r(conn().execute(qry));
-    if (r->size() == 1 and r->next())
-        return r->value_at(0).int64_();
-    else
-        return 0;
-}
-
-Oh5Source
-RdbQuery::select_source(long long id) {
-    sql::Select qry;
-    qry.what(m::source_kvs::column("key"));
-    qry.what(m::source_kvs::column("value"));
-    qry.from(sql_.table(m::source_kvs::name()));
-    qry.where(sql_.eq(m::source_kvs::column("source_id"), sql_.int64_(id)));
-
-    boost::scoped_ptr<sql::Result> r(conn().execute(qry));
-
-    Oh5Source src;
-    
-    while (r->next()) {
-        src.add(r->value_at("key").string(), r->value_at("value").string());
-    }
-
-    qry = sql::Select();
-    qry.what(m::sources::column("id"));
-    qry.what(m::sources::column("name"));
-    qry.from(sql_.table(m::sources::name()));
-    qry.where(sql_.eq(m::sources::column("id"), sql_.int64_(id)));
-
-    r.reset(conn().execute(qry));
-
-    if (r->next()) {
-        src.add("_name", r->value_at("name").string());
-        src.add("_id", r->value_at("id").to_string());
-    }
-
-    return src;
-}
-
-std::vector<Oh5Source>
-RdbQuery::select_all_sources() {
-    sql::Select qry;
-    qry.from(sql_.table(m::sources::name()));
-    qry.outerjoin(
-        sql_.table(m::source_kvs::name()),
-        sql_.eq(
-            m::sources::column("id"),
-            m::source_kvs::column("source_id")
-        )
-    );
-
-    qry.what(m::sources::column("id"));
-    qry.what(m::sources::column("name"));
-    qry.what(m::source_kvs::column("key"));
-    qry.what(m::source_kvs::column("value"));
-
-    boost::scoped_ptr<sql::Result> r(conn().execute(qry));
-
-    Oh5Source src;
-    long long prev_id = 0, id = 0;
-    std::vector<Oh5Source> sources;
-    while (r->next()) {
-        id = r->value_at("id").int64_();
-        if (id != prev_id) {
-            if (prev_id != 0) {
-                sources.push_back(src);
-                src.clear();
-            }
-            prev_id = id;
-            src.add("_name", r->value_at("name").string());
-            src.add("_id", boost::lexical_cast<std::string>(id));
-        }
-        if (r->value_at("key").is_null())
-            continue; // no key:value pairs associated
-        src.add(r->value_at("key").string(), r->value_at("value").string());
-    }
-    sources.push_back(src);
-    return sources;
-}
-
-void
-RdbQuery::add_source(const Oh5Source& source) {
-    boost::scoped_ptr<sql::Result> r;
-    try {
-        conn().begin();
-        sql::Insert qry(m::sources::name());
-        qry.value("name", sql_.string(source.get("_name")));
-        if (dialect().has_feature(sql::Dialect::RETURNING))
-            qry.returning(m::sources::column("id"));
-        r.reset(conn().execute(qry));
-        long long id = last_id(*r);
-
-        BOOST_FOREACH(const std::string& key, source.keys()) {
-            qry = sql::Insert(m::source_kvs::name());
-            qry.value("source_id", sql_.int64_(id));
-            qry.value("key", sql_.string(key));
-            qry.value("value", sql_.string(source.get(key)));
-            r.reset(conn().execute(qry));
-        }
-
-        conn().commit();
-    } catch (...) {
-        conn().rollback();
-        throw;
-    }
-}
-
-void
-RdbQuery::update_source(const Oh5Source& source) {
-    long long id = boost::lexical_cast<long long>(source.get("_id"));
-    boost::scoped_ptr<sql::Result> r;
-    try {
-        conn().begin();
-
-        Expression stmt = Listcons().string("UPDATE bdb_sources SET name = ")
-                                    .append(sql_.bind("name"))
-                                    .string(" WHERE id = ")
-                                    .append(sql_.bind("id"))
-                                    .get();
-        sql::Connection::BindMap_t binds;
-        binds["name"] = Expression(source.get("_name"));
-        binds["id"] = Expression(id);
-        r.reset(conn().execute(stmt, binds));
-
-        stmt = Listcons().string("DELETE FROM bdb_source_kvs WHERE source_id =")
-                         .append(sql_.bind("id"))
-                         .get();
-        binds.clear();
-        binds["id"] = Expression(id);
-        r.reset(conn().execute(stmt, binds));
-    
-        BOOST_FOREACH(const std::string& key, source.keys()) {
-            sql::Insert qry(m::source_kvs::name());
-            qry.value("source_id", sql_.int64_(id));
-            qry.value("key", sql_.string(key));
-            qry.value("value", sql_.string(source.get(key)));
-            r.reset(conn().execute(qry));
-        }
-
-        conn().commit();
-    } catch (...) {
-        conn().rollback();
-        throw;
-    }
-}
-
-void
-RdbQuery::remove_source(const Oh5Source& source) {
-    Expression stmt = Listcons().string("DELETE FROM bdb_sources WHERE id=")
-                                .append(sql_.bind("id"))
-                                .get();
-    sql::Connection::BindMap_t binds;
-    binds["id"] = Expression(boost::lexical_cast<int>(source.get("_id")));
-    boost::scoped_ptr<sql::Result> r(conn().execute(stmt, binds));
-    if (not r->affected_rows())
-        throw lookup_error("source not stored in database");
 }
 
 namespace {
@@ -554,7 +365,7 @@ node_from_row(sql::Result& r) {
 } // namespace anonymous
 
 void
-RdbQuery::load_nodes(long long file_id, Oh5Node& root) {
+RdbDefaultFileManager::do_load_nodes(long long file_id, Oh5Node& root) {
     sql::Select qry;
     qry.from(sql_.table(m::nodes::name()));
     qry.outerjoin(

@@ -33,7 +33,6 @@ namespace brfc {
     class Oh5Source;
     class RdbFileEntry;
     class RdbFileStoragePolicy;
-    class RdbQuery;
     class Url;
     class Variant;
 
@@ -118,7 +117,6 @@ class RelationalDatabase : public Database {
     boost::scoped_ptr<RdbFileStoragePolicy> storage_;
     boost::shared_ptr<AttributeMapper> mapper_;
     boost::shared_ptr<FileHasher> file_hasher_;
-    boost::shared_ptr<RdbQuery> query_;
 };
 
 } // namespace brfc

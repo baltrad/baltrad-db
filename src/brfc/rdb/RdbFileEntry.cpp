@@ -23,7 +23,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/assert.hpp>
 
-#include <brfc/rdb/RdbQuery.hpp>
+#include <brfc/rdb/RdbDefaultFileManager.hpp>
+#include <brfc/rdb/RdbDefaultSourceManager.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
 
 #include <brfc/sql/Connection.hpp>
@@ -74,14 +75,14 @@ void
 RdbFileEntry::load() const {
     RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
     self->loaded(true); // to disable recursion
-    RdbQuery query(rdb().conn());
+    RdbDefaultFileManager fmgr(rdb().conn());
     try {
-        query.load_file(*self);
+        fmgr.load_file(*self);
     } catch (...) {
         self->loaded(false);
         throw;
     }
-    query.load_nodes(id(), self->metadata().root());
+    fmgr.load_nodes(id(), self->metadata().root());
 }
 
 const Oh5Metadata&
@@ -93,10 +94,10 @@ RdbFileEntry::do_metadata() const {
 
 Oh5Source
 RdbFileEntry::do_source() const {
-    RdbQuery query(rdb().conn());
+    RdbDefaultSourceManager smgr(rdb().conn());
     if (source_.empty()) {
         RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
-        self->source_ = query.select_source(source_id());
+        self->source_ = smgr.source_by_id(source_id());
     }
     return source_;
 }

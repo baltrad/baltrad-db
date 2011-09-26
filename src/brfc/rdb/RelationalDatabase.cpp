@@ -31,9 +31,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/rdb/Model.hpp>
 #include <brfc/rdb/QueryToSelect.hpp>
 #include <brfc/rdb/RdbAttributeResult.hpp>
+#include <brfc/rdb/RdbDefaultFileManager.hpp>
+#include <brfc/rdb/RdbDefaultSourceManager.hpp>
 #include <brfc/rdb/RdbFileEntry.hpp>
 #include <brfc/rdb/RdbFileResult.hpp>
-#include <brfc/rdb/RdbQuery.hpp>
 #include <brfc/rdb/RdbInDatabaseFileStorage.hpp>
 
 #include <brfc/oh5/Oh5File.hpp>
@@ -117,10 +118,10 @@ RelationalDatabase::do_store(const Oh5File& file) {
     std::auto_ptr<RdbFileEntry> entry(file_to_entry(file));
 
     {
-        RdbQuery query(conn());
+        RdbDefaultFileManager fmgr(conn());
     
         const std::string& uuid =
-            query.uuid_by_source_and_hash(entry->source_id(), entry->hash());
+            fmgr.uuid_by_source_and_hash(entry->source_id(), entry->hash());
         if (not uuid.empty()) {
             throw duplicate_entry(file.path() + " already stored as " + uuid);
         }
@@ -154,8 +155,8 @@ RelationalDatabase::file_to_entry(const Oh5File& file) {
     long long size = BoostFileSystem().file_size(file.path());
     entry->size(size);
 
-    RdbQuery query(conn());
-    long long source_id = query.select_source_id(file.metadata().source());
+    RdbDefaultSourceManager smgr(conn());
+    long long source_id = smgr.source_id(file.metadata().source());
     entry->source_id(source_id);
 
     return entry.release();
@@ -170,9 +171,11 @@ RelationalDatabase::entry_to_file(const RdbFileEntry& entry,
 FileEntry*
 RelationalDatabase::do_entry_by_file(const Oh5File& file) {
     const std::string& hash = file_hasher().hash(file);
-    RdbQuery query(conn());
-    long long src_id = query.select_source_id(file.metadata().source());
-    const std::string& uuid = query.uuid_by_source_and_hash(src_id, hash);
+    boost::shared_ptr<sql::Connection> c = conn();
+    RdbDefaultSourceManager smgr(c);
+    long long src_id = smgr.source_id(file.metadata().source());
+    RdbDefaultFileManager fmgr(c);
+    const std::string& uuid = fmgr.uuid_by_source_and_hash(src_id, hash);
 
     if (uuid.empty())
         throw lookup_error(file.path() + " is not stored");
@@ -230,22 +233,22 @@ RelationalDatabase::do_remove(const FileEntry& entry) {
 
 std::vector<Oh5Source>
 RelationalDatabase::do_sources() const {
-    return RdbQuery(conn()).select_all_sources();
+    return RdbDefaultSourceManager(conn()).all_sources();
 }
 
 void
 RelationalDatabase::do_add_source(const Oh5Source& source) {
-    RdbQuery(conn()).add_source(source);
+    RdbDefaultSourceManager(conn()).add_source(source);
 }
 
 void
 RelationalDatabase::do_update_source(const Oh5Source& source) {
-    RdbQuery(conn()).update_source(source);
+    RdbDefaultSourceManager(conn()).update_source(source);
 }
 
 void
 RelationalDatabase::do_remove_source(const Oh5Source& source) {
-    RdbQuery(conn()).remove_source(source);
+    RdbDefaultSourceManager(conn()).remove_source(source);
 }
 
 } // namespace brfc
