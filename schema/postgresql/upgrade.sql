@@ -134,6 +134,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION bdbupgrade_rename_source_eetal_to_eehar() RETURNS VOID AS $$
+BEGIN
+  UPDATE bdb_sources
+    SET name = 'eehar'
+    WHERE id = 13 AND name = 'eetal';
+  UPDATE bdb_source_kvs
+    SET value = 'eehar'
+    WHERE source_id = 13 AND key = 'NOD' AND value = 'eetal';
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION bdbupgrade_merge_file_content_to_files() RETURNS VOID AS $$
 BEGIN
   PERFORM true FROM information_schema.tables WHERE table_name = 'bdb_file_content';
@@ -162,6 +174,7 @@ SELECT bdbupgrade_merge_file_content_to_files();
 SELECT restart_seq_with_max('bdb_sources', 'id');
 SELECT bdbupgrade_add_source_dkvir();
 SELECT bdbupgrade_add_sources_nod_key();
+SELECT bdbupgrade_rename_source_eetal_to_eehar();
 
 DROP FUNCTION bdbupgrade_add_size_to_bdb_file_content();
 DROP FUNCTION bdbupgrade_del_bdb_nodes_indexes();
@@ -169,6 +182,7 @@ DROP FUNCTION bdbupgrade_add_bdb_nodes_indexes();
 DROP FUNCTION bdbupgrade_add_bdb_files_indexes();
 DROP FUNCTION bdbupgrade_add_source_dkvir();
 DROP FUNCTION bdbupgrade_add_sources_nod_key();
+DROP FUNCTION bdbupgrade_rename_source_eetal_to_eehar();
 DROP FUNCTION bdbupgrade_merge_file_content_to_files();
 DROP FUNCTION restart_seq_with_max(TEXT, TEXT);
 DROP FUNCTION make_plpgsql();

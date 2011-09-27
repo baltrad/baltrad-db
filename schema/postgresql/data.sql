@@ -38,7 +38,7 @@ INSERT INTO bdb_sources (id, name) VALUES (12, 'dksin');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (12, 'PLC', 'Sindal');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (12, 'RAD', 'DN43');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (12, 'WMO', '0');
-INSERT INTO bdb_sources (id, name) VALUES (13, 'eetal');
+INSERT INTO bdb_sources (id, name) VALUES (13, 'eehar');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (13, 'PLC', 'Harku');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (13, 'RAD', 'EE-HARKU');
 INSERT INTO bdb_source_kvs (source_id, key, value) VALUES (13, 'WMO', '26038');
