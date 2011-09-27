@@ -146,6 +146,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION bdbupgrade_update_danish_source_wmo_numbers() RETURNS VOID AS $$
+BEGIN
+  UPDATE bdb_source_kvs
+    SET value = '06173'
+    WHERE source_id = 10 AND key = 'WMO' AND value = '06180';
+  UPDATE bdb_source_kvs
+    SET value = '06096'
+    WHERE source_id = 11 AND key = 'WMO' AND value = '0';
+  UPDATE bdb_source_kvs
+    SET value = '06034'
+    WHERE source_id = 12 AND key = 'WMO' AND value = '0';
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION bdbupgrade_merge_file_content_to_files() RETURNS VOID AS $$
 BEGIN
   PERFORM true FROM information_schema.tables WHERE table_name = 'bdb_file_content';
@@ -175,6 +189,7 @@ SELECT restart_seq_with_max('bdb_sources', 'id');
 SELECT bdbupgrade_add_source_dkvir();
 SELECT bdbupgrade_add_sources_nod_key();
 SELECT bdbupgrade_rename_source_eetal_to_eehar();
+SELECT bdbupgrade_update_danish_source_wmo_numbers();
 
 DROP FUNCTION bdbupgrade_add_size_to_bdb_file_content();
 DROP FUNCTION bdbupgrade_del_bdb_nodes_indexes();
@@ -183,6 +198,7 @@ DROP FUNCTION bdbupgrade_add_bdb_files_indexes();
 DROP FUNCTION bdbupgrade_add_source_dkvir();
 DROP FUNCTION bdbupgrade_add_sources_nod_key();
 DROP FUNCTION bdbupgrade_rename_source_eetal_to_eehar();
+DROP FUNCTION bdbupgrade_update_danish_source_wmo_numbers();
 DROP FUNCTION bdbupgrade_merge_file_content_to_files();
 DROP FUNCTION restart_seq_with_max(TEXT, TEXT);
 DROP FUNCTION make_plpgsql();
