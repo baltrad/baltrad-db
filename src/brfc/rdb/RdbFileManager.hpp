@@ -20,10 +20,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_RDB_FILE_MANAGER_HPP
 
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace brfc {
     class Oh5Node;
     class RdbFileEntry;
+
+    namespace sql {
+        class Connection;
+    } // namespace sql
 }
 
 namespace brfc {
@@ -31,6 +36,13 @@ namespace brfc {
 class RdbFileManager : public boost::noncopyable {
   public:
     virtual ~RdbFileManager();
+    
+    /**
+     * @brief set database connection to use
+     */
+    void connection(boost::shared_ptr<sql::Connection> value) {
+        do_connection(value);
+    }
 
     /**
      * @brief insert @c entry to database
@@ -95,6 +107,8 @@ class RdbFileManager : public boost::noncopyable {
     }
 
   private:
+    virtual void do_connection(boost::shared_ptr<sql::Connection> value) = 0;
+
     virtual long long do_insert_file(const RdbFileEntry& entry) = 0;
     virtual long long do_insert_file_content(long long file_id,
                                              const std::string& path) = 0;

@@ -96,6 +96,12 @@ attr_sql_column(const Oh5Attribute& attr) {
 } // namespace anonymous
 
 
+RdbDefaultFileManager::RdbDefaultFileManager()
+        : conn_()
+        , sql_()
+        , insert_node_qry_()
+        , insert_attr_qry_() {
+}
 
 RdbDefaultFileManager::RdbDefaultFileManager(boost::shared_ptr<sql::Connection> conn)
         : conn_(conn)
@@ -106,6 +112,11 @@ RdbDefaultFileManager::RdbDefaultFileManager(boost::shared_ptr<sql::Connection> 
 
 RdbDefaultFileManager::~RdbDefaultFileManager() {
 
+}
+
+void
+RdbDefaultFileManager::do_connection(boost::shared_ptr<sql::Connection> conn) {
+    conn_ = conn;
 }
 
 const sql::Dialect&

@@ -31,7 +31,6 @@ namespace brfc {
     class Oh5Group;
 
     namespace sql {
-        class Connection;
         class Dialect;
         class Result;
     }
@@ -44,6 +43,8 @@ namespace brfc {
  */
 class RdbDefaultFileManager : public RdbFileManager {
   public:
+    RdbDefaultFileManager();
+
     RdbDefaultFileManager(boost::shared_ptr<sql::Connection> conn);
 
     virtual ~RdbDefaultFileManager();
@@ -74,6 +75,8 @@ class RdbDefaultFileManager : public RdbFileManager {
 
 
   private:
+    virtual void do_connection(boost::shared_ptr<sql::Connection> value);
+
     virtual long long do_insert_file(const RdbFileEntry& entry);
     virtual long long do_insert_file_content(long long file_id,
                                              const std::string& path);
