@@ -68,28 +68,11 @@ class sql_Connection_test : public testing::Test {
     Factory xpr;
 };
 
-TEST_F(sql_Connection_test, test_close) {
-    EXPECT_CALL(conn, do_is_open())
-        .WillOnce(Return(true));
-    EXPECT_CALL(conn, do_close());
-    
-    conn.close();
-}
-
-TEST_F(sql_Connection_test, test_close_on_closed) {
-    EXPECT_CALL(conn, do_is_open())
-        .WillOnce(Return(false));
-
-    EXPECT_NO_THROW(conn.close());
-}
-
 TEST_F(sql_Connection_test, test_no_transaction_execute) {
     MockResult result;
     std::string stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(false))  // execute()
-        .WillOnce(Return(false))  // begin()
-        .WillRepeatedly(Return(true));
+        .WillOnce(Return(false));
     EXPECT_CALL(conn, do_begin());
     EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Return(&result));
@@ -101,9 +84,7 @@ TEST_F(sql_Connection_test, test_no_transaction_execute) {
 TEST_F(sql_Connection_test, test_no_transaction_excute_throws) {
     std::string stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(false)) // execute()
-        .WillOnce(Return(false)) // being()
-        .WillRepeatedly(Return(true));
+        .WillOnce(Return(false));
     EXPECT_CALL(conn, do_begin());
     EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Throw(std::runtime_error("")));
@@ -116,7 +97,7 @@ TEST_F(sql_Connection_test, test_in_transaction_execute) {
     MockResult result;
     std::string stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
-        .WillRepeatedly(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Return(&result));
     
@@ -126,79 +107,11 @@ TEST_F(sql_Connection_test, test_in_transaction_execute) {
 TEST_F(sql_Connection_test, test_in_transaction_execute_throws) {
     std::string stmt("query");
     EXPECT_CALL(conn, do_in_transaction())
-        .WillRepeatedly(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Throw(std::runtime_error("")));
     
     EXPECT_THROW(conn.execute(stmt), db_error);
-}
-
-TEST_F(sql_Connection_test, test_begin) {
-    EXPECT_CALL(conn, do_is_open())
-        .WillOnce(Return(true));
-    EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(false));
-    EXPECT_CALL(conn, do_begin());
-
-    EXPECT_NO_THROW(conn.begin());
-}
-
-TEST_F(sql_Connection_test, test_begin_in_transaction) {
-    EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(true));
-
-    EXPECT_THROW(conn.begin(), db_error);
-}
-
-TEST_F(sql_Connection_test, test_begin_on_closed_connection) {
-    EXPECT_CALL(conn, do_is_open())
-        .WillOnce(Return(false));
-    
-    EXPECT_THROW(conn.begin(), db_error);
-}
-
-TEST_F(sql_Connection_test, test_rollback_in_transaction) {
-    EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(true));
-    EXPECT_CALL(conn, do_rollback());
-
-    EXPECT_NO_THROW(conn.rollback());
-}
-
-TEST_F(sql_Connection_test, test_rollback_no_transaction) {
-    EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(false));
-
-    EXPECT_THROW(conn.rollback(), db_error);
-}
-
-TEST_F(sql_Connection_test, test_rollback_on_closed_connection) {
-    EXPECT_CALL(conn, do_is_open())
-        .WillOnce(Return(false));
-    
-    EXPECT_THROW(conn.rollback(), db_error);
-}
-
-TEST_F(sql_Connection_test, test_commit_in_transaction) {
-    EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(true));
-    EXPECT_CALL(conn, do_commit());
-
-    EXPECT_NO_THROW(conn.commit());
-}
-
-TEST_F(sql_Connection_test, test_commit_no_transaction) {
-    EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(false));
-
-    EXPECT_THROW(conn.commit(), db_error);
-}
-
-TEST_F(sql_Connection_test, test_commit_on_closed_connection) {
-    EXPECT_CALL(conn, do_is_open())
-        .WillOnce(Return(false));
-    
-    EXPECT_THROW(conn.commit(), db_error);
 }
 
 TEST_F(sql_Connection_test, test_execute_sqlquery) {
@@ -206,7 +119,7 @@ TEST_F(sql_Connection_test, test_execute_sqlquery) {
     MockResult result;
 
     EXPECT_CALL(conn, do_in_transaction())
-        .WillRepeatedly(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(conn, do_execute(stmt))
         .WillOnce(Return(&result));
     
@@ -221,7 +134,7 @@ TEST_F(sql_Connection_test, test_execute_insert) {
     EXPECT_CALL(compiler, do_compile(query.expression()))
         .WillOnce(Return(compiled));
     EXPECT_CALL(conn, do_in_transaction())
-        .WillRepeatedly(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(conn, do_execute("query"))
         .WillOnce(Return(&result));
     
@@ -236,7 +149,7 @@ TEST_F(sql_Connection_test, test_execute_select) {
     EXPECT_CALL(compiler, do_compile(query.expression()))
         .WillOnce(Return(compiled));
     EXPECT_CALL(conn, do_in_transaction())
-        .WillRepeatedly(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(conn, do_execute("query"))
         .WillOnce(Return(&result));
     
@@ -253,7 +166,7 @@ TEST_F(sql_Connection_test, test_execute_replaces_binds) {
         .WillByDefault(Return(&result));
 
     EXPECT_CALL(conn, do_in_transaction())
-        .WillRepeatedly(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(conn, do_execute("query 1"))
         .WillOnce(Return(&result));
     

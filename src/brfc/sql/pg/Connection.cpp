@@ -86,17 +86,25 @@ Connection::do_close() {
 
 void
 Connection::do_begin() {
+    if (not conn_)
+        throw db_error("connection not open");
+    if (transaction_)
+        throw db_error("transaction already started");
     transaction_.reset(new pqxx::transaction<>(*conn_));
 }
 
 void
 Connection::do_commit() {
+    if (not transaction_)
+        throw db_error("no active transaction");
     transaction_->commit();
     transaction_.reset();
 }
 
 void
 Connection::do_rollback() {
+    if (not transaction_)
+        throw db_error("no active transaction");
     transaction_.reset();
 }
 

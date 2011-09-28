@@ -57,18 +57,14 @@ class Connection : boost::noncopyable {
     
     /**
      * @brief close the connection
-     * @throw db_error if connection is not open
      * @sa do_close
      */
     void close();
 
     /**
      * @brief start a transaction
-     * @throw db_error if no conenction open or a transaction is already
+     * @throw db_error if no connection open or a transaction is already
      *        active
-     *
-     * a check for open connection and no active transaction is made prior
-     * to forwading the call to do_begin()
      * @sa do_begin
      */
     void begin();    
@@ -76,9 +72,6 @@ class Connection : boost::noncopyable {
     /**
      * @brief rollback current transaction
      * @throw db_error if no connection open or no active transaction
-     *
-     * a check for open connection and active transaction is made prior
-     * to forwading the call to do_rollback()
      * @sa do_rollback
      */
     void rollback();    
@@ -86,9 +79,6 @@ class Connection : boost::noncopyable {
     /**
      * @brief commit current transaction
      * @throw db_error if no connection open or no active transaction
-     *
-     * a check for open connection and active transaction is made prior
-     * to forwading the call to do_commit()
      * @sa do_commit
      */
     void commit();

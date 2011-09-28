@@ -71,8 +71,6 @@ TEST_F(sql_ConnectionProxy_test, test_dtor) {
 
 TEST_F(sql_ConnectionProxy_test, test_close) {
     MockConnection c;
-    EXPECT_CALL(c, do_is_open())
-        .WillOnce(Return(true));
     EXPECT_CALL(conn_dtor, call(&c));
     ConnectionProxy p(&c, boost::ref(conn_dtor));
 
@@ -115,8 +113,6 @@ TEST_F(sql_ConnectionProxy_test, test_is_open_on_closed) {
 }
 
 TEST_F(sql_ConnectionProxy_test, test_begin) {
-    EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(false));
     EXPECT_CALL(conn, do_begin());
 
     proxy.begin();
@@ -124,16 +120,12 @@ TEST_F(sql_ConnectionProxy_test, test_begin) {
 
 
 TEST_F(sql_ConnectionProxy_test, test_commit) {
-    EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(true));
     EXPECT_CALL(conn, do_commit());
 
     proxy.commit();
 }
 
 TEST_F(sql_ConnectionProxy_test, test_rollback) {
-    EXPECT_CALL(conn, do_in_transaction())
-        .WillOnce(Return(true));
     EXPECT_CALL(conn, do_rollback());
 
     proxy.rollback();

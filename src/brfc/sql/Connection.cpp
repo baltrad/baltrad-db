@@ -40,35 +40,21 @@ Connection::~Connection() {
 
 void
 Connection::close() {
-    if (is_open())
-        do_close();
+    do_close();
 }
 
 void
 Connection::begin() {
-    if (not is_open())
-        throw db_error("no open connection");
-    if (in_transaction())
-        throw db_error("transaction already active");
     do_begin();
 }
 
 void
 Connection::rollback() {
-    if (not is_open())
-        throw db_error("no open connection");
-    if (not in_transaction())
-        throw db_error("no active transaction");
-
     do_rollback();
 }
 
 void
 Connection::commit() {
-    if (not is_open())
-        throw db_error("no open connection");
-    if (not in_transaction())
-        throw db_error("no active transaction");
     do_commit();
 }
 
