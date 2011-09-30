@@ -22,6 +22,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileEntry.hpp>
 
+#include <boost/thread/recursive_mutex.hpp>
+
 #include <brfc/DateTime.hpp>
 #include <brfc/oh5/Oh5Metadata.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
@@ -98,9 +100,9 @@ class RdbFileEntry : public FileEntry {
 
     void stored_at(const DateTime& dt) { stored_at_ = dt; }
 
-    bool loaded() const { return loaded_; }
+    bool loaded() const;
 
-    void loaded(bool loaded) { loaded_ = loaded; }
+    void loaded(bool loaded);
 
     /**
      * @brief load database entry
@@ -123,7 +125,7 @@ class RdbFileEntry : public FileEntry {
     virtual DateTime do_stored_at() const;
     
     RelationalDatabase* rdb_;
-    
+    mutable boost::recursive_mutex mutex_;
     bool loaded_;
     long long id_;
     long long lo_id_;
