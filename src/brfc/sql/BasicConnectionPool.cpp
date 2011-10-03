@@ -59,40 +59,50 @@ get_pool_max_size(const Url& url, size_t value=5) {
 BasicConnectionPool::BasicConnectionPool(ConnectionCreator creator,
                                          int max_size)
         : creator_(creator)
-        , size_(0)
+        , max_size_(max_size)
         , mutex_()
-        , pool_(max_size) {
+        , pool_() {
 
 }
 
 BasicConnectionPool::BasicConnectionPool(const Url& url)
         : creator_(DefaultConnectionCreator(url))
-        , size_(0)
+        , max_size_(get_pool_max_size(url))
         , mutex_()
-        , pool_(get_pool_max_size(url)) {
+        , pool_() {
+
 }
 
 BasicConnectionPool::~BasicConnectionPool() {
     BOOST_FOREACH(const LeaseMap::value_type& lease, leased_) {
         lease.second->connection_dtor(boost::checked_deleter<Connection>());
     }
-    while (true) {
-        try {
-            delete pool_.get_nowait();
-        } catch (const queue_empty&) {
-            break;
-        }
+    BOOST_FOREACH(Connection* conn, pool_) {
+        delete conn;
     }
+}
+
+size_t
+BasicConnectionPool::size() const {
+    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
+    
+    return pool_.size() + leased_.size();
+}
+
+size_t
+BasicConnectionPool::max_size() const {
+    return max_size_;
 }
 
 Connection*
 BasicConnectionPool::do_get() {
     boost::lock_guard<boost::recursive_mutex> lock(mutex_);
-
+    
     std::auto_ptr<Connection> conn;
-    try {
-        conn.reset(pool_.get_nowait());
-    } catch (const queue_empty&) {
+    if (not pool_.empty()) {
+        conn.reset(pool_.front());
+        pool_.pop_front();
+    } else {
         conn.reset(create());
     }
     
@@ -111,32 +121,27 @@ void
 BasicConnectionPool::do_put(Connection* conn) {
     boost::lock_guard<boost::recursive_mutex> lock(mutex_);
 
-    if (not conn->is_open()) {
+    leased_.erase(conn);
+
+    if (not conn->is_open() or (size() > max_size_)) {
         dispose(conn);
-        return;
+    } else {
+        pool_.push_back(conn);
     }
 
-    try {
-        pool_.put_nowait(conn);
-    } catch (const queue_full&) {
-        dispose(conn);
-    }
-    leased_.erase(conn);
 }
 
 Connection*
 BasicConnectionPool::create() {
-    if (size_ >= pool_.max_size())
+    if (size() >= max_size_)
         throw db_error("pool limit reached");
     std::auto_ptr<Connection> c(creator_());
-    ++size_;
     return c.release();
 }
 
 void
 BasicConnectionPool::dispose(Connection* conn) {
     delete conn;
-    --size_;
 }
 
 } // namespace sql

@@ -20,13 +20,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 #define BRFC_SQL_BASIC_CONNECTION_POOL_HPP
 
+#include <list>
 #include <map>
 
 #include <boost/function.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
 #include <brfc/sql/ConnectionPool.hpp>
-#include <brfc/util/Queue.hpp>
 
 namespace brfc {
     class Url;
@@ -63,9 +63,9 @@ class BasicConnectionPool : public ConnectionPool {
      */
     virtual ~BasicConnectionPool();
 
-    size_t size() const { return size_; }
+    size_t size() const;
 
-    size_t max_size() const { return pool_.max_size(); }
+    size_t max_size() const;
     
   protected:
     /**
@@ -98,9 +98,9 @@ class BasicConnectionPool : public ConnectionPool {
     void dispose(Connection* conn);
 
     ConnectionCreator creator_;
-    size_t size_; ///< number of allocated connections
-    boost::recursive_mutex mutex_;
-    Queue<Connection*> pool_;
+    size_t max_size_;
+    mutable boost::recursive_mutex mutex_;
+    std::list<Connection*> pool_;
     LeaseMap leased_;
 };
 
