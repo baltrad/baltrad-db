@@ -200,9 +200,10 @@ struct time_generator : ka::grammar<OutputIterator, time()> {
         hour = ka::right_align(2, '0')[ka::uint_];
         minute = ka::right_align(2, '0')[ka::uint_];
         second = ka::right_align(2, '0')[ka::uint_];
-        usec = '.' << ka::right_align(6, '0')[ka::uint_];
-        if (not with_usec)
-            usec = ka::omit[usec];
+        if (with_usec)
+            usec = '.' << ka::right_align(6, '0')[ka::uint_];
+        else
+            ka::omit[ka::uint_];
 
         if (fmt == format::EXTENDED) {
             start = hour << ':' << minute << ':' << second << usec;

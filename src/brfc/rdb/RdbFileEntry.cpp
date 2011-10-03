@@ -17,22 +17,19 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <string>
-
 #include <brfc/rdb/RdbFileEntry.hpp>
 
 #include <brfc/assert.hpp>
-
 #include <brfc/rdb/RdbDefaultFileManager.hpp>
 #include <brfc/rdb/RdbDefaultSourceManager.hpp>
 #include <brfc/rdb/RelationalDatabase.hpp>
-
 #include <brfc/sql/Connection.hpp>
 
 namespace brfc {
 
 RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         : rdb_(rdb)
+        , mutex_()
         , loaded_(false)
         , id_(0)
         , lo_id_(0)
@@ -71,8 +68,24 @@ RdbFileEntry::source_id() const {
     return source_id_;
 }
 
+bool
+RdbFileEntry::loaded() const {
+    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
+
+    return loaded_;
+}
+
+void
+RdbFileEntry::loaded(bool loaded) {
+    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
+
+    loaded_ = loaded;
+}
+
 void
 RdbFileEntry::load() const {
+    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
+
     RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
     self->loaded(true); // to disable recursion
     RdbDefaultFileManager fmgr(rdb().conn());
@@ -94,6 +107,8 @@ RdbFileEntry::do_metadata() const {
 
 Oh5Source
 RdbFileEntry::do_source() const {
+    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
+
     RdbDefaultSourceManager smgr(rdb().conn());
     if (source_.empty()) {
         RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
