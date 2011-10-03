@@ -60,7 +60,7 @@ BasicConnectionPool::BasicConnectionPool(ConnectionCreator creator,
                                          int max_size)
         : creator_(creator)
         , size_(0)
-        , size_mutex_()
+        , mutex_()
         , pool_(max_size) {
 
 }
@@ -68,7 +68,7 @@ BasicConnectionPool::BasicConnectionPool(ConnectionCreator creator,
 BasicConnectionPool::BasicConnectionPool(const Url& url)
         : creator_(DefaultConnectionCreator(url))
         , size_(0)
-        , size_mutex_()
+        , mutex_()
         , pool_(get_pool_max_size(url)) {
 }
 
@@ -87,6 +87,8 @@ BasicConnectionPool::~BasicConnectionPool() {
 
 Connection*
 BasicConnectionPool::do_get() {
+    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
+
     std::auto_ptr<Connection> conn;
     try {
         conn.reset(pool_.get_nowait());
@@ -107,6 +109,8 @@ BasicConnectionPool::do_get() {
 
 void
 BasicConnectionPool::do_put(Connection* conn) {
+    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
+
     if (not conn->is_open()) {
         dispose(conn);
         return;
@@ -122,7 +126,6 @@ BasicConnectionPool::do_put(Connection* conn) {
 
 Connection*
 BasicConnectionPool::create() {
-    boost::lock_guard<boost::mutex> lock(size_mutex_);
     if (size_ >= pool_.max_size())
         throw db_error("pool limit reached");
     std::auto_ptr<Connection> c(creator_());
@@ -132,7 +135,6 @@ BasicConnectionPool::create() {
 
 void
 BasicConnectionPool::dispose(Connection* conn) {
-    boost::lock_guard<boost::mutex> lock(size_mutex_);
     delete conn;
     --size_;
 }

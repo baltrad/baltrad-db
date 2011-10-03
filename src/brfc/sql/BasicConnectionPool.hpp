@@ -23,7 +23,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 #include <brfc/sql/ConnectionPool.hpp>
 #include <brfc/util/Queue.hpp>
@@ -99,7 +99,7 @@ class BasicConnectionPool : public ConnectionPool {
 
     ConnectionCreator creator_;
     size_t size_; ///< number of allocated connections
-    boost::mutex size_mutex_;
+    boost::recursive_mutex mutex_;
     Queue<Connection*> pool_;
     LeaseMap leased_;
 };
