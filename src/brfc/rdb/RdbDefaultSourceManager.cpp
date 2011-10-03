@@ -105,6 +105,15 @@ RdbDefaultSourceManager::do_source_id(const Oh5Source& src) {
     }
 
     boost::scoped_ptr<sql::Result> r(conn().execute(qry));
+    if (r->size() == 1) {
+        r->next();
+        return r->value_at(0).int64_();
+    } else if (r->size() == 0) {
+        throw lookup_error("no matches found for " + src.to_string());
+    } else {
+        throw lookup_error("multiple matches found for " + src.to_string());
+    }
+        
     if (r->size() == 1 and r->next())
         return r->value_at(0).int64_();
     else

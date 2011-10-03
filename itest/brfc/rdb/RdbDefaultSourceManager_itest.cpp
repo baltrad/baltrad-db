@@ -19,14 +19,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <stdexcept>
-
-#include <brfc/rdb/RdbDefaultSourceManager.hpp>
-
+#include <brfc/exceptions.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
-
+#include <brfc/rdb/RdbDefaultSourceManager.hpp>
 #include <brfc/sql/Connection.hpp>
-
 #include <brfc/test/TestRDB.hpp>
 
 #include <brfc/itest_config.hpp>
@@ -58,6 +54,21 @@ class rdb_RdbDefaultSourceManager_itest : public ::testing::TestWithParam<const 
     boost::shared_ptr<sql::Connection> conn;
     RdbDefaultSourceManager manager;
 };
+
+TEST_P(rdb_RdbDefaultSourceManager_itest, test_source_id)  {
+    Oh5Source src = Oh5Source::from_string("WMO:02666");
+    EXPECT_EQ(52, manager.source_id(src));
+}
+
+TEST_P(rdb_RdbDefaultSourceManager_itest, test_source_id_no_source) {
+    Oh5Source src = Oh5Source::from_string("WMO:12345");
+    EXPECT_THROW(manager.source_id(src), lookup_error);
+}
+
+TEST_P(rdb_RdbDefaultSourceManager_itest, test_source_id_multiple_sources) {
+    Oh5Source src = Oh5Source::from_string("WMO:02666,PLC:Ängelholm");
+    EXPECT_THROW(manager.source_id(src), lookup_error);
+}
 
 TEST_P(rdb_RdbDefaultSourceManager_itest, test_source_by_id) {
     long long src_id = 0;

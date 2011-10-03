@@ -36,7 +36,8 @@ class RdbSourceManager : boost::noncopyable {
 
     /**
      * @brief lookup id for @c source
-     * @return database id of the source or 0 if source is not found
+     * @return database id of the source
+     * @throw lookup_error if source lookup fails
      *
      * m::source_kvs is queryied for key/value pairs defined in source.
      * A source is considered found when exactly one database id is found.
