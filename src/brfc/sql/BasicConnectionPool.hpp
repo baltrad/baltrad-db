@@ -45,19 +45,26 @@ namespace sql {
 class BasicConnectionPool : public ConnectionPool {
   public:
     typedef boost::function<Connection*()> ConnectionCreator;
+    typedef boost::function<void(Connection*)> ConnectionDeleter;
+   
+    /**
+     * @brief construct from url
+     *
+     * uses DefaultConnectionCreator to create connections and
+     * boost::checked_deleter to delete them.
+     */
+    explicit BasicConnectionPool(const Url& url);
 
     /**
      * @brief constructor
-     * @param creator the database connection creator
+     * @param conn_creator the database connection creator
+     * @param conn_deleter the database connection destructor
      * @param max_size maximum number of connections allowed to allocate
      */
-    explicit BasicConnectionPool(ConnectionCreator creator, int max_size=5);
-    
-    /**
-     * @brief construct from url
-     */
-    explicit BasicConnectionPool(const Url& url);
-    
+    BasicConnectionPool(ConnectionCreator conn_creator,
+                        ConnectionDeleter conn_deleter,
+                        int max_size=5);
+        
     /**
      * @brief destructor
      */
@@ -66,8 +73,12 @@ class BasicConnectionPool : public ConnectionPool {
     size_t size() const;
 
     size_t max_size() const;
-    
-  protected:
+
+    size_t lease_count() const;
+  
+  private:
+    typedef std::map<Connection*, ConnectionProxy*> LeaseMap;
+
     /**
      * @brief get a proxied database connection
      * @return ConnectionProxy instance
@@ -84,8 +95,6 @@ class BasicConnectionPool : public ConnectionPool {
      */
     virtual void do_put(Connection* db);
   
-  private:
-    typedef std::map<Connection*, ConnectionProxy*> LeaseMap;
     /**
      * @brief create, locking size_mutex_
      * @throw db_error if size limit reached
@@ -97,7 +106,8 @@ class BasicConnectionPool : public ConnectionPool {
      */
     void dispose(Connection* conn);
 
-    ConnectionCreator creator_;
+    ConnectionCreator conn_creator_;
+    ConnectionDeleter conn_deleter_;
     size_t max_size_;
     mutable boost::recursive_mutex mutex_;
     std::list<Connection*> pool_;

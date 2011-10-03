@@ -19,12 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <brfc/sql/BasicConnectionPool.hpp>
-#include <brfc/sql/FakeConnection.hpp>
-
 #include <boost/thread.hpp>
 
-#include <iostream>
+#include <brfc/sql/BasicConnectionPool.hpp>
+#include <brfc/sql/FakeConnection.hpp>
+#include <brfc/util/no_delete.hpp>
 
 namespace brfc {
 namespace sql {
@@ -58,7 +57,7 @@ class connection_access {
 
 TEST(BasicConnectionPool_itest, test_thread_safety) {
     
-    BasicConnectionPool pool(create_connection);
+    BasicConnectionPool pool(create_connection, no_delete);
 
     const int THREAD_COUNT = 2;
     const int CHECKOUT_COUNT = 500;

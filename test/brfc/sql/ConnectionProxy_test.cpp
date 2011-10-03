@@ -26,11 +26,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/MockCompiler.hpp>
 #include <brfc/sql/MockConnection.hpp>
-#include <brfc/sql/MockConnectionDtor.hpp>
+#include <brfc/sql/MockConnectionPool.hpp>
 #include <brfc/sql/MockDialect.hpp>
 #include <brfc/sql/MockResult.hpp>
 #include <brfc/sql/ResultProxy.hpp>
-#include <brfc/util/no_delete.hpp>
 
 using ::testing::Ref;
 using ::testing::Return;
@@ -43,48 +42,44 @@ namespace sql {
 class sql_ConnectionProxy_test : public ::testing::Test {
   public:
     sql_ConnectionProxy_test()
-            : conn_dtor()
+            : pool()
             , conn() 
-            , proxy(&conn, boost::ref(conn_dtor)) {
+            , proxy(&conn, &pool) {
     }
 
     virtual void SetUp() {
-        ON_CALL(conn, do_is_open())
-            .WillByDefault(Return(true));
-        ON_CALL(conn, do_in_transaction())
-            .WillByDefault(Return(true));
-        EXPECT_CALL(conn_dtor, call(&conn));
+        EXPECT_CALL(pool, do_put(&conn));
     }
     
-    MockConnectionDtor conn_dtor;
+    MockConnectionPool pool;
     MockConnection conn;
     ConnectionProxy proxy;
 };
 
 TEST_F(sql_ConnectionProxy_test, test_dtor) {
     MockConnection c;
-    EXPECT_CALL(conn_dtor, call(&c));
+    EXPECT_CALL(pool, do_put(&c));
     {
-        ConnectionProxy p(&c, boost::ref(conn_dtor));
+        ConnectionProxy p(&c, &pool);
     }
 }
 
 TEST_F(sql_ConnectionProxy_test, test_close) {
     MockConnection c;
-    EXPECT_CALL(conn_dtor, call(&c));
-    ConnectionProxy p(&c, boost::ref(conn_dtor));
+    EXPECT_CALL(pool, do_put(&c));
+    ConnectionProxy p(&c, &pool);
 
     p.close();
 }
 
 TEST_F(sql_ConnectionProxy_test, test_close_on_closed) {
-    ConnectionProxy p(0, boost::ref(conn_dtor));
+    ConnectionProxy p(0, &pool);
 
     p.close();
 }
 
 TEST_F(sql_ConnectionProxy_test, test_throws_when_closed) {
-    ConnectionProxy p(0, boost::ref(conn_dtor));
+    ConnectionProxy p(0, &pool);
     
     EXPECT_THROW(p.begin(), db_error);
     EXPECT_THROW(p.commit(), db_error);
@@ -108,7 +103,7 @@ TEST_F(sql_ConnectionProxy_test, test_is_open) {
 }
 
 TEST_F(sql_ConnectionProxy_test, test_is_open_on_closed) {
-    ConnectionProxy p(0, boost::ref(conn_dtor));
+    ConnectionProxy p(0, &pool);
     EXPECT_FALSE(p.is_open());
 }
 

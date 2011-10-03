@@ -22,7 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <memory>
 
-#include <boost/bind.hpp>
 #include <boost/checked_delete.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
@@ -32,7 +31,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/DefaultConnectionCreator.hpp>
 #include <brfc/util/Url.hpp>
-#include <brfc/util/no_delete.hpp>
 
 namespace brfc {
 namespace sql {
@@ -56,9 +54,11 @@ get_pool_max_size(const Url& url, size_t value=5) {
 
 } // namespace anonymous
 
-BasicConnectionPool::BasicConnectionPool(ConnectionCreator creator,
+BasicConnectionPool::BasicConnectionPool(ConnectionCreator conn_creator,
+                                         ConnectionDeleter conn_deleter,
                                          int max_size)
-        : creator_(creator)
+        : conn_creator_(conn_creator)
+        , conn_deleter_(conn_deleter)
         , max_size_(max_size)
         , mutex_()
         , pool_() {
@@ -66,7 +66,8 @@ BasicConnectionPool::BasicConnectionPool(ConnectionCreator creator,
 }
 
 BasicConnectionPool::BasicConnectionPool(const Url& url)
-        : creator_(DefaultConnectionCreator(url))
+        : conn_creator_(DefaultConnectionCreator(url))
+        , conn_deleter_(boost::checked_deleter<Connection>())
         , max_size_(get_pool_max_size(url))
         , mutex_()
         , pool_() {
@@ -75,10 +76,10 @@ BasicConnectionPool::BasicConnectionPool(const Url& url)
 
 BasicConnectionPool::~BasicConnectionPool() {
     BOOST_FOREACH(const LeaseMap::value_type& lease, leased_) {
-        lease.second->connection_dtor(boost::checked_deleter<Connection>());
+        lease.second->close();
     }
     BOOST_FOREACH(Connection* conn, pool_) {
-        delete conn;
+        dispose(conn);
     }
 }
 
@@ -94,6 +95,13 @@ BasicConnectionPool::max_size() const {
     return max_size_;
 }
 
+size_t
+BasicConnectionPool::lease_count() const {
+    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
+
+    return leased_.size();
+}
+
 Connection*
 BasicConnectionPool::do_get() {
     boost::lock_guard<boost::recursive_mutex> lock(mutex_);
@@ -107,13 +115,10 @@ BasicConnectionPool::do_get() {
     }
     
     std::auto_ptr<ConnectionProxy> proxy(
-        new ConnectionProxy(
-            conn.release(),
-            boost::bind(&BasicConnectionPool::put, this, _1)
-        )
+        new ConnectionProxy(conn.release(), this)
     );
 
-    leased_.insert(std::make_pair(&proxy->proxied(), proxy.get()));
+    leased_.insert(std::make_pair(proxy->conn(), proxy.get()));
     return proxy.release();
 }
 
@@ -135,13 +140,12 @@ Connection*
 BasicConnectionPool::create() {
     if (size() >= max_size_)
         throw db_error("pool limit reached");
-    std::auto_ptr<Connection> c(creator_());
-    return c.release();
+    return conn_creator_();
 }
 
 void
 BasicConnectionPool::dispose(Connection* conn) {
-    delete conn;
+    conn_deleter_(conn);
 }
 
 } // namespace sql

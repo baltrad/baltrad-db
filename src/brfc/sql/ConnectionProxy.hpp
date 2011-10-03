@@ -22,14 +22,12 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <list>
 
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-
 #include <brfc/sql/Connection.hpp>
 
 namespace brfc {
 namespace sql {
 
+class ConnectionPool;
 class ResultProxy;
 
 /**
@@ -37,14 +35,12 @@ class ResultProxy;
  */
 class ConnectionProxy : public Connection {
   public:
-    typedef boost::function<void(Connection*)> ConnectionDtor;
-   
     /**
      * @brief constructor
-     * @param proxied the proxied database connection
-     * @param conn_dtor destructor used when this proxy is closed
+     * @param conn the proxied database connection
+     * @param pool pool the proxied connection is from
      */
-    ConnectionProxy(Connection* proxied, ConnectionDtor conn_dtor);
+    ConnectionProxy(Connection* conn, ConnectionPool* pool);
 
     /**
      * @brief destructor
@@ -53,48 +49,51 @@ class ConnectionProxy : public Connection {
      */
     virtual ~ConnectionProxy();
 
-    void connection_dtor(ConnectionDtor dtor) { conn_dtor_ = dtor; }
-    ConnectionDtor connection_dtor() const { return conn_dtor_; }
-
     void remove(ResultProxy* result);
 
-    Connection& proxied();
-    const Connection& proxied() const;
+    Connection* conn() { return conn_; }
+    const Connection* conn() const { return conn_; }
     
-  protected:
+  private:
     /**
-     * @brief call ConnectionDtor::destroy for the proxied connection
+     * @brief return the proxied connection back to the pool
      */
     virtual void do_close();
 
     /**
      * @brief forward the call to the proxied database connection
+     * @throw std::logic_error if the connection is closed
      */
     virtual bool do_is_open() const;
 
     /**
      * @brief forward the call to the proxied database connection
+     * @throw std::logic_error if the connection is closed
      */
     virtual void do_begin();
 
     /**
      * @brief forward the call to the proxied database connection
+     * @throw std::logic_error if the connection is closed
      */
     virtual void do_commit();
 
     /**
      * @brief forward the call to the proxied database connection
+     * @throw std::logic_error if the connection is closed
      */
     virtual void do_rollback();
 
     /**
      * @brief forward the call to the proxied database connection
+     * @throw std::logic_error if the connection is closed
      */
     virtual bool do_in_transaction() const;
 
     /**
      * @brief forward the call to the proxied database connection
      * @return the proxied result
+     * @throw std::logic_error if the connection is closed
      *
      * proxy the result of the call with ResultProxy
      */
@@ -102,33 +101,41 @@ class ConnectionProxy : public Connection {
 
     /**
      * @brief forward the call to the proxied database connection
+     * @throw std::logic_error if the connection is closed
      */
     virtual const Dialect& do_dialect() const;
 
     /**
      * @brief forward the call to the proxied database connection
+     * @throw std::logic_error if the connection is closed
      */
     virtual Compiler& do_compiler();
     
     /**
      * @brief forward the call to the proxied database connection
+     * @throw std::logic_error if the connection is closed
      */
     virtual long long do_store_large_object(const std::string& path);
     
     /**
      * @brief forward the call to the proxied database connection
+     * @throw std::logic_error if the connection is closed
      */
     virtual void do_large_object_to_file(long long id, const std::string& path);
     
     /**
      * @brief forward the call to the proxied database connection
+     * @throw std::logic_error if the connection is closed
      */
     virtual long long do_last_insert_id() const;
 
   private:
 
-    Connection* proxied_;
-    ConnectionDtor conn_dtor_;
+    Connection& conn_ref();
+    const Connection& conn_ref() const;
+
+    Connection* conn_;
+    ConnectionPool* pool_;
     std::list<ResultProxy*> results_;
 };
 

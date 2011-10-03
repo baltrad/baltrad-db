@@ -24,7 +24,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <brfc/sql/ConnectionProxy.hpp>
 #include <brfc/sql/MockResult.hpp>
 #include <brfc/sql/ResultProxy.hpp>
-#include <brfc/util/no_delete.hpp>
 
 using ::testing::Return;
 
@@ -36,7 +35,7 @@ class sql_ResultProxy_test : public ::testing::Test {
     sql_ResultProxy_test()
             : result_ptr(new MockResult())
             , result(*result_ptr)
-            , connproxy(0, no_delete)
+            , connproxy(0, 0)
             , proxy(&connproxy, result_ptr.release()) {
     
     }

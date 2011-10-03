@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BRFC_SQL_MOCK_CONNECTION_DTOR_HPP
-#define BRFC_SQL_MOCK_CONNECTION_DTOR_HPP
+#ifndef BRFC_SQL_MOCK_CONNECTION_DELETER_HPP
+#define BRFC_SQL_MOCK_CONNECTION_DELETER_HPP
 
 #include <gmock/gmock.h>
 
@@ -27,7 +27,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 namespace brfc {
 namespace sql {
 
-class MockConnectionDtor {
+class MockConnectionDeleter {
   public:
     void operator()(Connection* c) const { call(c); }
     MOCK_CONST_METHOD1(call, void(Connection* c));
@@ -36,4 +36,4 @@ class MockConnectionDtor {
 } // namespace sql
 } // namespace brfc
 
-#endif // BRFC_SQL_MOCK_CONNECTION_DTOR_HPP
+#endif // BRFC_SQL_MOCK_CONNECTION_DELETER_HPP

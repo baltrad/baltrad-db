@@ -19,16 +19,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
-#include <boost/checked_delete.hpp>
-#include <boost/bind.hpp>
 #include <boost/ref.hpp>
 
 #include <brfc/exceptions.hpp>
 #include <brfc/sql/BasicConnectionPool.hpp>
 #include <brfc/sql/ConnectionProxy.hpp>
-#include <brfc/sql/MockConnection.hpp>
+#include <brfc/sql/FakeConnection.hpp>
 #include <brfc/sql/MockConnectionCreator.hpp>
+#include <brfc/sql/MockConnectionDeleter.hpp>
 #include <brfc/util/Url.hpp>
+#include <brfc/util/no_delete.hpp>
 
 using ::testing::Return;
 
@@ -39,14 +39,15 @@ class sql_BasicConnectionPool_test : public ::testing::Test {
   public:
     sql_BasicConnectionPool_test()
         : creator()
-        , pool(boost::ref(creator), 2) {
-
+        , deleter()
+        , pool(boost::ref(creator), no_delete, 2) {
     }
 
     virtual void SetUp() {
     }
     
     ::testing::StrictMock<MockConnectionCreator> creator;
+    ::testing::StrictMock<MockConnectionDeleter> deleter;
     BasicConnectionPool pool;
 };
 
@@ -68,56 +69,39 @@ TEST_F(sql_BasicConnectionPool_test, test_ctor_url_invalid) {
 }
 
 TEST_F(sql_BasicConnectionPool_test, test_get) {
-    MockConnection* conn = new MockConnection();
-    ON_CALL(*conn, do_is_open())
-        .WillByDefault(Return(true)); // for leak detection
+    FakeConnection conn;
 
     EXPECT_CALL(creator, call())
-        .WillOnce(Return(conn));
+        .WillOnce(Return(&conn));
     
     std::auto_ptr<Connection> c(pool.get());
     ConnectionProxy* cp = dynamic_cast<ConnectionProxy*>(c.get());
     
-    // "destroyed" using put
-    EXPECT_TRUE(cp->connection_dtor() == boost::bind(&BasicConnectionPool::put, &pool, _1));
     ASSERT_TRUE(cp);
-    Connection* proxied = &cp->proxied();
-
-    c.reset(); // put back to pool
-    
-    // same connection
-    c.reset(pool.get());
-    cp = dynamic_cast<ConnectionProxy*>(c.get());
-    ASSERT_TRUE(cp);
-    EXPECT_EQ(proxied, &cp->proxied());
+    EXPECT_EQ(&conn, cp->conn());
+    EXPECT_EQ(1u, pool.size());
+    EXPECT_EQ(1u, pool.lease_count());
 }
 
 TEST_F(sql_BasicConnectionPool_test, test_get_limit_reached) {
-    MockConnection* conn1 = new MockConnection();
-    MockConnection* conn2 = new MockConnection();
-    ON_CALL(*conn1, do_is_open())
-        .WillByDefault(Return(true)); // for leak detection
-    ON_CALL(*conn2, do_is_open())
-        .WillByDefault(Return(true)); // for leak detection
+    FakeConnection conn1, conn2;
 
     EXPECT_CALL(creator, call())
-        .WillOnce(Return(conn1))
-        .WillOnce(Return(conn2));
+        .WillOnce(Return(&conn1))
+        .WillOnce(Return(&conn2));
      
     std::auto_ptr<Connection> c1(pool.get()); 
     std::auto_ptr<Connection> c2(pool.get());
     EXPECT_THROW(pool.get(), db_error);
-    c2.reset();
-    EXPECT_NO_THROW(c2.reset(pool.get()));
+    EXPECT_EQ(2u, pool.size());
+    EXPECT_EQ(2u, pool.lease_count());
 }
 
 TEST_F(sql_BasicConnectionPool_test, test_size) {
-    MockConnection* conn1 = new MockConnection();
-    ON_CALL(*conn1, do_is_open())
-        .WillByDefault(Return(true)); // for leak detection
+    FakeConnection conn1;
 
     EXPECT_CALL(creator, call())
-        .WillOnce(Return(conn1));
+        .WillOnce(Return(&conn1));
 
     EXPECT_EQ(0u, pool.size());
     std::auto_ptr<Connection> c1(pool.get());
@@ -127,32 +111,46 @@ TEST_F(sql_BasicConnectionPool_test, test_size) {
 }
 
 TEST_F(sql_BasicConnectionPool_test, test_dtor) {
-    MockConnection* conn1 = new MockConnection();
-    ON_CALL(*conn1, do_is_open())
-        .WillByDefault(Return(true)); // for leak detection
+    FakeConnection conn1;
     
     EXPECT_CALL(creator, call())
-        .WillOnce(Return(conn1));
+        .WillOnce(Return(&conn1));
+    EXPECT_CALL(deleter, call(&conn1));
 
     std::auto_ptr<Connection> c1;
     {
-        BasicConnectionPool p(boost::ref(creator));
+        BasicConnectionPool p(boost::ref(creator), boost::ref(deleter));
         c1.reset(p.get());
     }
+    EXPECT_FALSE(c1->is_open());
 }
 
-TEST_F(sql_BasicConnectionPool_test, test_put_closed_conn) {
-    MockConnection* conn1 = new MockConnection();
-     
+TEST_F(sql_BasicConnectionPool_test, test_put) {
+    FakeConnection conn1;
+
     EXPECT_CALL(creator, call())
-        .WillOnce(Return(conn1));
-    EXPECT_CALL(*conn1, do_is_open())
-        .WillOnce(Return(false));
+        .WillOnce(Return(&conn1));
 
     std::auto_ptr<Connection> c1(pool.get());
     c1.reset();
+    
+    EXPECT_EQ(1u, pool.size());
+    EXPECT_EQ(0u, pool.lease_count());
+}
 
-    EXPECT_EQ(0u, pool.size()); // has gone through dispose();
+TEST_F(sql_BasicConnectionPool_test, test_put_closed_conn) {
+    FakeConnection conn1;
+     
+    EXPECT_CALL(creator, call())
+        .WillOnce(Return(&conn1));
+
+    std::auto_ptr<Connection> c1(pool.get());
+    EXPECT_TRUE(c1.get());
+    conn1.close();
+    c1.reset();
+
+    EXPECT_EQ(0u, pool.size());
+    EXPECT_EQ(0u, pool.lease_count());
 }
 
 } // namespace sql
