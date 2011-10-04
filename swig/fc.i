@@ -265,6 +265,8 @@ SWIG_JAVABODY_METHODS(public, public, brfc::Variant);
 /***
  * brfc::FileEntry
  */
+%newobject brfc::FileEntry::clone;
+
 SWIG_JAVABODY_METHODS(public, public, brfc::FileEntry);
 
 /***

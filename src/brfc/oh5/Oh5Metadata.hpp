@@ -62,6 +62,8 @@ class Oh5Metadata {
 
     void swap(Oh5Metadata& other);
 
+    Oh5Metadata& operator=(const Oh5Metadata& rhs);
+
     /**
      * @brief get the root group
      */

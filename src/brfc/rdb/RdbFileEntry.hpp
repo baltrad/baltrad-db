@@ -22,8 +22,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/db/FileEntry.hpp>
 
-#include <boost/thread/recursive_mutex.hpp>
-
 #include <brfc/DateTime.hpp>
 #include <brfc/oh5/Oh5Metadata.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
@@ -110,6 +108,8 @@ class RdbFileEntry : public FileEntry {
     void load() const;
     
   private:
+    RdbFileEntry(const RdbFileEntry& other);
+
     virtual std::string do_uuid() const;
 
     virtual void do_write_to_file(const std::string& path) const;
@@ -123,9 +123,10 @@ class RdbFileEntry : public FileEntry {
     virtual long long do_size() const;
 
     virtual DateTime do_stored_at() const;
+
+    virtual RdbFileEntry* do_clone() const;
     
     RelationalDatabase* rdb_;
-    mutable boost::recursive_mutex mutex_;
     bool loaded_;
     long long id_;
     long long lo_id_;

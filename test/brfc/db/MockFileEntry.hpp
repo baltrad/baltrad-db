@@ -37,6 +37,7 @@ class MockFileEntry : public FileEntry {
     MOCK_CONST_METHOD0(do_size, long long());
     MOCK_CONST_METHOD0(do_stored_at, DateTime());
     MOCK_CONST_METHOD0(do_metadata, const Oh5Metadata&());
+    MOCK_CONST_METHOD0(do_clone, FileEntry*());
 };
 
 } // namespace brfc

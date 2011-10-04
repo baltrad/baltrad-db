@@ -29,7 +29,6 @@ namespace brfc {
 
 RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         : rdb_(rdb)
-        , mutex_()
         , loaded_(false)
         , id_(0)
         , lo_id_(0)
@@ -41,6 +40,21 @@ RdbFileEntry::RdbFileEntry(RelationalDatabase* rdb)
         , stored_at_()
         , metadata_() {
     BRFC_ASSERT(rdb_ != 0);
+}
+
+RdbFileEntry::RdbFileEntry(const RdbFileEntry& other)
+        : rdb_(other.rdb_)
+        , loaded_(other.loaded_)
+        , id_(other.id_)
+        , lo_id_(other.lo_id_)
+        , source_id_(other.source_id_)
+        , source_(other.source_)
+        , uuid_(other.uuid_)
+        , hash_(other.hash_)
+        , size_(other.size_)
+        , stored_at_(other.stored_at_)
+        , metadata_(other.metadata_) {
+
 }
 
 RdbFileEntry::~RdbFileEntry() {
@@ -70,22 +84,16 @@ RdbFileEntry::source_id() const {
 
 bool
 RdbFileEntry::loaded() const {
-    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
-
     return loaded_;
 }
 
 void
 RdbFileEntry::loaded(bool loaded) {
-    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
-
     loaded_ = loaded;
 }
 
 void
 RdbFileEntry::load() const {
-    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
-
     RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
     self->loaded(true); // to disable recursion
     RdbDefaultFileManager fmgr(rdb().conn());
@@ -107,8 +115,6 @@ RdbFileEntry::do_metadata() const {
 
 Oh5Source
 RdbFileEntry::do_source() const {
-    boost::lock_guard<boost::recursive_mutex> lock(mutex_);
-
     RdbDefaultSourceManager smgr(rdb().conn());
     if (source_.empty()) {
         RdbFileEntry* self = const_cast<RdbFileEntry*>(this);
@@ -141,6 +147,11 @@ RdbFileEntry::do_stored_at() const {
 void
 RdbFileEntry::do_write_to_file(const std::string& path) const {
     rdb().entry_to_file(*this, path);
+}
+
+RdbFileEntry*
+RdbFileEntry::do_clone() const {
+    return new RdbFileEntry(*this);
 }
 
 } // namespace brfc

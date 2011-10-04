@@ -60,8 +60,16 @@ class FileEntry {
      * @brief source as stored in the database
      */
     Oh5Source source() const;
+
+    FileEntry* clone() const { return do_clone(); }
+    
+  protected:
+    FileEntry() { }
+    FileEntry(const FileEntry& other);
   
   private:
+    FileEntry& operator=(const FileEntry& other);
+
     virtual const Oh5Metadata& do_metadata() const = 0;
 
     virtual std::string do_uuid() const = 0;
@@ -75,6 +83,8 @@ class FileEntry {
     virtual DateTime do_stored_at() const = 0;
 
     virtual Oh5Source do_source() const = 0;
+
+    virtual FileEntry* do_clone() const = 0;
 
 };
 
