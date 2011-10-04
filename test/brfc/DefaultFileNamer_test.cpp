@@ -68,7 +68,7 @@ class DefaultFileNamer_test : public ::testing::Test {
 };
 
 TEST_F(DefaultFileNamer_test, name_file) {
-    file.metadata().attribute("what/source")->value(Oh5Scalar("_name:seang"));
+    file.metadata().attribute("what/source")->value(Oh5Scalar("NOD:seang"));
     
     EXPECT_EQ("pvol_seang_20101112T141500Z.h5", namer.name(file));
 }
@@ -78,7 +78,7 @@ TEST_F(DefaultFileNamer_test, name_file_unknown_source) {
 }
 
 TEST_F(DefaultFileNamer_test, name_entry) {
-    what.add(new Oh5Attribute("source", Oh5Scalar("_name:seang")));
+    what.add(new Oh5Attribute("source", Oh5Scalar("PLC:asd")));
 
     ON_CALL(entry, do_source())
         .WillByDefault(Return(Oh5Source::from_string("_name:seang")));

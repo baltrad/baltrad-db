@@ -39,12 +39,14 @@ DefaultFileNamer::DefaultFileNamer() {
 namespace {
 
 std::string
-name_from_metadata(const Oh5Metadata& meta) {
+name_from_metadata(const Oh5Metadata& meta, const Oh5Source& source) {
     std::string name;
     name.append(boost::to_lower_copy(meta.what_object()));
     name.append("_");
-    if (meta.source().has("_name")) {
-        name.append(boost::to_lower_copy(meta.source().get("_name")));
+    if (source.has("_name")) {
+        name.append(boost::to_lower_copy(source.get("_name")));
+    } else if (source.has("NOD")) {
+        name.append(boost::to_lower_copy(source.get("NOD")));
     } else {
         name.append("unknown");
     }
@@ -54,6 +56,11 @@ name_from_metadata(const Oh5Metadata& meta) {
     name.append(meta.what_time().to_iso_string());
     name.append("Z");
     return name;
+}
+
+std::string
+name_from_metadata(const Oh5Metadata& meta) {
+    return name_from_metadata(meta, meta.source());
 }
 
 } // namespace anonymous
@@ -67,7 +74,7 @@ DefaultFileNamer::do_name(const Oh5File& file) const {
 
 std::string
 DefaultFileNamer::do_name(const FileEntry& entry) const {
-    std::string name = name_from_metadata(entry.metadata());
+    std::string name = name_from_metadata(entry.metadata(), entry.source());
     name.append("_");
     const std::string& uuid = entry.uuid();
     name.append(uuid.substr(0, uuid.find("-")));
