@@ -25,13 +25,19 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5Attribute.hpp>
 #include <brfc/oh5/Oh5Group.hpp>
+#include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
 #include <brfc/oh5/Oh5Scalar.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
 namespace brfc {
 
 Oh5Metadata::Oh5Metadata()
-        : nodes_() {
+        : nodes_(new Oh5MemoryNodeBackend()) {
+
+}
+
+Oh5Metadata::Oh5Metadata(const Oh5Metadata& other)
+        : nodes_(other.nodes_->clone()) {
 
 }
 
@@ -39,14 +45,25 @@ Oh5Metadata::~Oh5Metadata() {
 
 }
 
+Oh5Metadata&
+Oh5Metadata::operator=(Oh5Metadata rhs) {
+    rhs.swap(*this);
+    return *this;
+}
+
+void
+Oh5Metadata::swap(Oh5Metadata& other) {
+    boost::swap(nodes_, other.nodes_);
+}
+
 const Oh5Node&
 Oh5Metadata::root() const {
-    return nodes_.root();
+    return nodes_->root();
 }
 
 Oh5Node&
 Oh5Metadata::root() {
-    return nodes_.root();
+    return nodes_->root();
 }
 
 const Oh5Node*

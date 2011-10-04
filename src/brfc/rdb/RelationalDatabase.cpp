@@ -39,6 +39,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5File.hpp>
 #include <brfc/oh5/Oh5Node.hpp>
+#include <brfc/oh5/Oh5NodeBackend.hpp>
 #include <brfc/oh5/Oh5Source.hpp>
 
 #include <brfc/sql/BasicConnectionPool.hpp>

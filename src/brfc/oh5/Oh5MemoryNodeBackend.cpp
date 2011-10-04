@@ -19,6 +19,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 #include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
 
+#include <map>
+
+#include <boost/foreach.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/composite_key.hpp>
 #include <boost/multi_index/identity.hpp>
@@ -26,11 +29,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/tag.hpp>
-
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <brfc/exceptions.hpp>
-
 #include <brfc/oh5/Oh5Group.hpp>
 
 namespace mi = boost::multi_index;
@@ -77,8 +78,6 @@ struct Oh5MemoryNodeBackend::Impl {
     Impl()
             : nodes()
             , entries() {
-        nodes.push_back(new Oh5Group(""));
-        entries.insert(&root());
     }
 
     ~Impl() {
@@ -121,7 +120,22 @@ struct Oh5MemoryNodeBackend::Impl {
 
 Oh5MemoryNodeBackend::Oh5MemoryNodeBackend()
         : impl_(new Impl()) {
-    impl_->root().backend(this);
+    Oh5Node* root = new Oh5Group("");
+    root->backend(this);
+    impl_->add(root);
+}
+
+Oh5MemoryNodeBackend::Oh5MemoryNodeBackend(const Oh5MemoryNodeBackend& other)
+        : impl_(new Impl()) {
+    std::map<const Oh5Node*, Oh5Node*> node_map;
+    
+    BOOST_FOREACH(const Oh5Node& old_node, other.impl_->nodes) {
+        Oh5Node* new_node = old_node.clone();
+        node_map[&old_node] = new_node;
+        new_node->parent(node_map[old_node.parent()]);
+        new_node->backend(this);
+        impl_->add(new_node);
+    }
 }
 
 Oh5MemoryNodeBackend::~Oh5MemoryNodeBackend() {
@@ -149,5 +163,9 @@ Oh5MemoryNodeBackend::do_children(const Oh5Node& node) const {
     return impl_->children(node);
 }
 
-} // namespace brfc
+Oh5MemoryNodeBackend*
+Oh5MemoryNodeBackend::do_clone() const {
+    return new Oh5MemoryNodeBackend(*this);
+}
 
+} // namespace brfc

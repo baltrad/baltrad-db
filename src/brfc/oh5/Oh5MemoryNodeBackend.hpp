@@ -37,8 +37,9 @@ class Oh5MemoryNodeBackend : public Oh5NodeBackend {
     Oh5MemoryNodeBackend();
 
     virtual ~Oh5MemoryNodeBackend();
-  
+
   private:
+    Oh5MemoryNodeBackend(const Oh5MemoryNodeBackend& other);
 
     virtual Oh5Node& do_add(Oh5Node* node);
 
@@ -47,6 +48,8 @@ class Oh5MemoryNodeBackend : public Oh5NodeBackend {
     virtual const Oh5Node& do_root() const;
 
     virtual std::vector<const Oh5Node*> do_children(const Oh5Node& node) const;
+
+    virtual Oh5MemoryNodeBackend* do_clone() const;
 
     struct Impl;
     boost::scoped_ptr<Impl> impl_;

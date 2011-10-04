@@ -21,9 +21,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 #define BRFC_OH5_METADATA_HPP
 
 #include <string>
-
-#include <boost/noncopyable.hpp>
-#include <brfc/oh5/Oh5MemoryNodeBackend.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace brfc {
 
@@ -31,6 +29,7 @@ class Date;
 class Oh5Attribute;
 class Oh5Group;
 class Oh5Node;
+class Oh5NodeBackend;
 class Oh5Source;
 class Time;
 
@@ -39,17 +38,29 @@ class Time;
  *
  * @ingroup exposed
  */
-class Oh5Metadata : public boost::noncopyable {
+class Oh5Metadata {
   public:
     /**
      * @brief constructor
      */
     Oh5Metadata();
+    
+    /**
+     * @brief copy constructor
+     */
+    Oh5Metadata(const Oh5Metadata& other);
 
     /**
      * @brief destructor
      */
     ~Oh5Metadata();
+    
+    /**
+     * @brief copy assignment
+     */
+    Oh5Metadata& operator=(Oh5Metadata rhs);
+
+    void swap(Oh5Metadata& other);
 
     /**
      * @brief get the root group
@@ -160,8 +171,25 @@ class Oh5Metadata : public boost::noncopyable {
     void what_source(const std::string& value);
 
   private:
-    Oh5MemoryNodeBackend nodes_;
+    boost::scoped_ptr<Oh5NodeBackend> nodes_;
 };
 
+inline
+void swap(Oh5Metadata& lhs, Oh5Metadata& rhs) {
+    lhs.swap(rhs);
+}
+
+
 } // namespace brfc
+
+namespace std {
+
+template<>
+inline
+void swap(brfc::Oh5Metadata& lhs, brfc::Oh5Metadata& rhs) {
+    lhs.swap(rhs);
+}
+
+} // namespace std
+
 #endif // BRFC_OH5_METADATA_HPP

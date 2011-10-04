@@ -176,5 +176,13 @@ TEST_F(oh5_Oh5Metadata_test, test_set_what_source_new) {
     EXPECT_EQ("WMO:02666", a->value().string());
 }
 
+TEST_F(oh5_Oh5Metadata_test, test_copy_constructor) {
+    Oh5Metadata m(meta);
+
+    EXPECT_EQ(meta.what_object(), m.what_object());
+    m.what_object("qwe");
+    EXPECT_NE(meta.what_object(), m.what_object());
+}
+
 
 } // namespace brfc

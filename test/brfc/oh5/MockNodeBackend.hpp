@@ -33,6 +33,7 @@ class MockNodeBackend : public Oh5NodeBackend {
     MOCK_CONST_METHOD1(do_has, bool(const Oh5Node&));
     MOCK_CONST_METHOD0(do_root, const Oh5Node&());
     MOCK_CONST_METHOD1(do_children, std::vector<const Oh5Node*>(const Oh5Node&));
+    MOCK_CONST_METHOD0(do_clone, Oh5NodeBackend*());
 };
 
 } // namespace brfc
