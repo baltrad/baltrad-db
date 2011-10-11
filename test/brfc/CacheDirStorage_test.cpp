@@ -66,11 +66,25 @@ TEST_F(CacheDirStorage_test, test_init) {
     entries.push_back("b");
     entries.push_back("c");
     entries.push_back("d");
-
+    
+    EXPECT_CALL(fs, do_exists(dir))
+        .WillOnce(Return(true));
     EXPECT_CALL(fs, do_list_directory(dir))
         .WillOnce(Return(entries));
     
     EXPECT_CALL(fs, do_remove("/tmp/a")); // exceeds overflow
+    
+    storage.init();
+}
+
+TEST_F(CacheDirStorage_test, test_init_creates_dir) {
+    std::vector<std::string> entries;
+
+    EXPECT_CALL(fs, do_exists(dir))
+        .WillOnce(Return(false));
+    EXPECT_CALL(fs, do_create_directory(dir));
+    EXPECT_CALL(fs, do_list_directory(dir))
+        .WillOnce(Return(entries));
     
     storage.init();
 }
@@ -96,6 +110,8 @@ TEST_F(CacheDirStorage_test, test_store_overflow) {
     entries.push_back("b");
     entries.push_back("c");
 
+    EXPECT_CALL(fs, do_exists(dir))
+        .WillOnce(Return(true));
     EXPECT_CALL(fs, do_list_directory(dir))
         .WillOnce(Return(entries));
 
@@ -120,6 +136,8 @@ TEST_F(CacheDirStorage_test, test_prestore_overflow) {
     entries.push_back("b");
     entries.push_back("c");
 
+    EXPECT_CALL(fs, do_exists(dir))
+        .WillOnce(Return(true));
     EXPECT_CALL(fs, do_list_directory(dir))
         .WillOnce(Return(entries));
     EXPECT_CALL(fs, do_copy_file("/infile.h5", "/tmp/uuid.h5"));
@@ -133,6 +151,8 @@ TEST_F(CacheDirStorage_test, test_remove) {
     std::vector<std::string> files;
     files.push_back("uuid.h5");
 
+    EXPECT_CALL(fs, do_exists(dir))
+        .WillOnce(Return(true));
     EXPECT_CALL(fs, do_list_directory("/tmp"))
         .WillOnce(Return(files));
     EXPECT_CALL(fs, do_remove("/tmp/uuid.h5"));

@@ -50,7 +50,7 @@ class CacheDirStorage : public LocalStorage {
     /**
      * @brief initialize
      *
-     * bring up-to-date with the filesystem
+     * create the directory if missing, bring up-to-date with the filesystem
      */
     void init();
     

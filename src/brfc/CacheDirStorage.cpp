@@ -45,6 +45,9 @@ CacheDirStorage::~CacheDirStorage() {
 
 void
 CacheDirStorage::init() {
+    if (not fs().exists(dir_)) {
+        fs().create_directory(dir_);
+    }
     BOOST_FOREACH(const std::string& filename, fs().list_directory(dir_)) {
         files_.add(fs().join(dir_, filename));
     }
