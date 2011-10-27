@@ -5,3 +5,4 @@ test/reports
 .*.swp
 .lock*
 .waf-*
+src/baltrad.bdb.egg-info/
