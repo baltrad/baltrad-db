@@ -1,5 +1,6 @@
 build/
 doc/html
+doc/_build
 test/reports
 *.pyc
 .*.swp
