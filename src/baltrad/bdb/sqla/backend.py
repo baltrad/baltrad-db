@@ -91,6 +91,9 @@ class SqlAlchemyBackend(Backend):
 
         metadata_hash = self._hasher.hash(meta)
         source_id = self.get_source_id(meta.source())
+        if not source_id:
+            raise LookupError("failed to look up source for " +
+                              meta.source().to_string())
         if _has_file_by_hash_and_source(conn, metadata_hash, source_id):
             raise DuplicateEntry()
 
@@ -123,7 +126,7 @@ class SqlAlchemyBackend(Backend):
         conn = self.get_connection()
         qry = sql.select(
             [schema.files.c.lo_id],
-            schema.files.c.uuid==uuid
+            schema.files.c.uuid==str(uuid)
         )
         oid = conn.execute(qry).scalar()
         return self._file_storage.read(conn, oid);
@@ -133,7 +136,7 @@ class SqlAlchemyBackend(Backend):
 
         qry = sql.select(
             [schema.files],
-            schema.files.c.uuid==uuid
+            schema.files.c.uuid==str(uuid)
         )
         row = conn.execute(qry).fetchone()
         if not row:
@@ -154,7 +157,7 @@ class SqlAlchemyBackend(Backend):
     def remove_file(self, uuid):
         conn = self.get_connection()
         qry = schema.files.delete(
-            schema.files.c.uuid==uuid
+            schema.files.c.uuid==str(uuid)
         )
         return bool(conn.execute(qry).rowcount)
 
@@ -163,7 +166,7 @@ class SqlAlchemyBackend(Backend):
             [schema.source_kvs],
             from_obj=[schema.files.join(schema.sources).join(schema.source_kvs)],
         )
-        qry = qry.where(schema.files.c.uuid==uuid)
+        qry = qry.where(schema.files.c.uuid==str(uuid))
 
         conn = self.get_connection()
         result = conn.execute(qry).fetchall()

@@ -44,7 +44,7 @@ class Backend(object):
         """get a file from the database
 
         :param uuid: UUID the file was stored with
-        :type uuid: string
+        :type uuid: :class:`uuid.UUID`
         :return: file content as a string or `None` if file not found
         :rtype: string
         """
@@ -55,7 +55,7 @@ class Backend(object):
         """get file metadata from the database
 
         :param uuid: UUID the file was stored with
-        :type uuid: string
+        :type uuid: :class:`uuid.UUID`
         :return: :class:`baltrad.bdb.oh5.Metadata` instance
                  or `None` if file not found
         """
@@ -66,7 +66,7 @@ class Backend(object):
         """remove a file stored in the database
 
         :param uuid: UUID the file was stored with
-        :type uuid: string
+        :type uuid: :class:`uuid.UUID`
         :return: `True` if the file was removed or `False` if it didn't exist
         """
         raise NotImplemented()

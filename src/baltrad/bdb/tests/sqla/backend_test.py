@@ -1,6 +1,7 @@
 import os
 import sqlite3
 from tempfile import NamedTemporaryFile
+import uuid
 
 from nose.tools import eq_, ok_, raises
 
@@ -113,8 +114,8 @@ class TestSqlAlchemyBackendItest(object):
         self.backend.store_file(h5file.name)
     
     def test_get_file_metadata_nx(self):
-        uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
-        eq_(None, self.backend.get_file_metadata(uuid))
+        uuid_ = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+        eq_(None, self.backend.get_file_metadata(uuid_))
     
     def test_get_file_metadata(self):
         meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
@@ -147,12 +148,12 @@ class TestSqlAlchemyBackendItest(object):
             "file content mismatch")
     
     def test_get_file_nx(self):
-        uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
-        eq_(None, self.backend.get_file(uuid))
+        uuid_ = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+        eq_(None, self.backend.get_file(uuid_))
     
     def test_remove_file_nx(self):
-        uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
-        eq_(False, self.backend.remove_file(uuid))
+        uuid_ = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+        eq_(False, self.backend.remove_file(uuid_))
     
     def test_remove_file(self):
         meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
