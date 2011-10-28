@@ -59,52 +59,44 @@ class TestMetadata(object):
 
         eq_({"NOD": "eesur", "PLC": "Sürgavere"}, self.meta.source())
 
-    def test_to_json_empty(self):
-        expected = "".join([
-            '{',
-              '"children": [], ',
-              '"name": "", ',
-              '"type": "group"',
-            '}'
-        ])
+    def test_json_repr_empty(self):
+        expected = {
+            "children": [],
+            "name": "",
+            "type": "group",
+        }
 
-        eq_(expected, self.meta.to_json())
+        eq_(expected, self.meta.json_repr())
 
-    def test_to_json(self):
+    def test_json_repr(self):
         self.meta.add_group("/a")
         self.meta.add_group("/a/b")
         self.meta.add_attribute("/attr1", 1)
         self.meta.add_attribute("/a/attr2", 2)
         
-        expected = "".join([
-          '{',
-            '"children": [',
-              '{',
-                '"children": [',
-                  '{',
-                    '"children": [], ',
-                    '"name": "b", ',
-                    '"type": "group"',
-                  '}, {',
-                    '"name": "attr2", ',
-                    '"type": "attribute", ',
-                    '"value": 2',
-                  '}',
-                '], ',
-                '"name": "a", ',
-                '"type": "group"',
-              '}, {',
-                '"name": "attr1", ',
-                '"type": "attribute", ',
-                '"value": 1',
-              '}',
-            '], ',
-            '"name": "", ',
-            '"type": "group"',
-          '}'
-        ])
+        expected = {
+            "children": [{
+                "children": [{
+                    "children": [],
+                    "name": "b",
+                    "type": "group",
+                }, {
+                    "name": "attr2",
+                    "type": "attribute",
+                    "value": 2
+                }],
+                "name": "a", 
+                "type": "group",
+           }, {
+                "name": "attr1",
+                "type": "attribute",
+                "value": 1,
+           }],
+           "name": "",
+           "type": "group",
+         }
 
-        eq_(expected, self.meta.to_json())
+        eq_(expected, self.meta.json_repr())
 
 class TestMetadataAttributeShortcuts(object):
     PropDef = collections.namedtuple(

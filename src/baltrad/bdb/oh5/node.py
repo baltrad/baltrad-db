@@ -77,6 +77,12 @@ class Node(object):
 
     parent = property(_get_parent, _set_parent)
 
+    def json_repr(self):
+        return {
+            "name": self.name,
+            "children": [child.json_repr() for child in self.children()],
+        }
+
 class Group(Node):
     """Group node
     """
@@ -84,11 +90,9 @@ class Group(Node):
     type_id = 1
     
     def json_repr(self):
-        return {
-            "type": "group",
-            "name": self.name,
-            "children": self.children()
-        }
+        repr_ = super(Group, self).json_repr()
+        repr_["type"] = "group"
+        return repr_
     
 class Attribute(Node):
     type_id = 2
@@ -122,25 +126,16 @@ class Attribute(Node):
         return {
             "type": "attribute",
             "name": self.name,
-            "value": self.value
+            "value": self.value,
         }
 
 class Dataset(Node):
     type_id = 3
 
     def json_repr(self):
-        return {
-            "type": "dataset",
-            "name": obj.name,
-            "children": obj.children()
-        }
- 
-class NodeJsonEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if (isinstance(obj, Node)):
-            return obj.json_repr()
-        else:
-            return super(NodeJsonEncoder, self).default(obj)
+        repr_ = super(Dataset, self).json_repr()
+        repr_["type"] = "dataset"
+        return repr_
 
 class NodeIterator(object):
     def __init__(self, node=None):

@@ -20,7 +20,7 @@ import os.path
 
 import _pyhl as pyhl
 
-from . node import Attribute, Group, Dataset, NodeIterator, NodeJsonEncoder
+from . node import Attribute, Group, Dataset, NodeIterator
 
 class AttributeProperty(object):
     def __init__(self, path, fget=None):
@@ -116,9 +116,8 @@ class Metadata(object):
         reader = HlHdfMetadataReader()
         return reader.read(filepath)
 
-    def to_json(self):
-        encoder = NodeJsonEncoder(sort_keys=True)
-        return encoder.encode(self.root())
+    def json_repr(self):
+        return self.root().json_repr()
 
 class HlHdfMetadataReader(object):
     def __init__(self):

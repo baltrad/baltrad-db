@@ -54,7 +54,7 @@ def add_file(ctx):
         except DuplicateEntry:
             raise HttpConflict("duplicate file entry")
 
-    response = JsonResponse({"metadata": metadata.to_json()}, status=201)
+    response = JsonResponse({"metadata": metadata.json_repr()}, status=201)
     response.headers["Location"] = ctx.make_url("file/" + metadata.bdb_uuid)
 
     return response
@@ -95,7 +95,7 @@ def get_file_metadata(ctx, uuid):
     if metadata is None:
         raise HttpNotFound()
 
-    return JsonResponse({"metadata": metadata.to_json()})
+    return JsonResponse({"metadata": metadata.json_repr()})
 
 def remove_file(ctx, uuid):
     """remove the file from the database

@@ -32,7 +32,7 @@ class TestFileHandlers(object):
         )
         metadata = Mock(spec_set=Metadata)
         self.backend.get_file_metadata.return_value = metadata
-        metadata.to_json.return_value = "metadatajson"
+        metadata.json_repr.return_value = {"key": "value"}
         metadata.bdb_uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
 
         self.backend.store_file.return_value = metadata
@@ -40,7 +40,7 @@ class TestFileHandlers(object):
         self.backend.store_file.assert_called_once()
         eq_(201, response.status_code)
         eq_("/file/6ba7b810-9dad-11d1-80b4-00c04fd430c8", response.headers["Location"])
-        eq_('{"metadata": "metadatajson"}', response.data)
+        eq_('{"metadata": {"key": "value"}}', response.data)
     
     @raises(HttpConflict)
     def test_add_file_duplicate(self):
@@ -73,12 +73,12 @@ class TestFileHandlers(object):
     def test_get_file_metadata(self):
         metadata = Mock(spec_set=Metadata)
         self.backend.get_file_metadata.return_value = metadata
-        metadata.to_json.return_value = "metadatajson"
+        metadata.json_repr.return_value = {"key": "value"}
 
         uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
         response = handler.get_file_metadata(self.ctx, uuid)
         eq_(200, response.status_code)
-        eq_('{"metadata": "metadatajson"}', response.data)
+        eq_('{"metadata": {"key": "value"}}', response.data)
 
     @raises(HttpNotFound)
     def test_get_file_metadata_nx(self):

@@ -19,7 +19,7 @@ import datetime
 
 from nose.tools import eq_, raises
 
-from baltrad.bdb.oh5.node import Attribute, Group, Node, NodeJsonEncoder
+from baltrad.bdb.oh5.node import Attribute, Group, Dataset, Node
 
 class TestNode(object):
     def test_path_no_parent(self):
@@ -70,31 +70,32 @@ class TestAttribute(object):
         attr = Attribute("attr", "asd")
         attr.value_time()
 
-class TestNodeJsonEncoder(object):
-    def setUp(self):
-        self.encoder = NodeJsonEncoder(indent=None, sort_keys=True)
-    
+class TestNodeJsonRepr(object):
     def test_group(self):
         a = Group("a")
 
-        expected = "".join([
-            '{',
-              '"children": [], ',
-              '"name": "a", ',
-              '"type": "group"',
-            '}'
-        ])
-
-        eq_(expected, self.encoder.encode(a))
+        expected = {
+            "children": [],
+            "name": "a",
+            "type": "group",
+        }
+        eq_(expected, a.json_repr())
     
     def test_attribute(self):
         a = Attribute("a", 1)
-        expected = "".join([
-            '{',
-              '"name": "a", ',
-              '"type": "attribute", ',
-              '"value": 1',
-            '}'
-        ])
-        eq_(expected, self.encoder.encode(a))
-   
+        expected = {
+            "name": "a",
+            "type": "attribute",
+            "value": 1
+        }
+        eq_(expected, a.json_repr())
+    
+    def test_dataset(self):
+        a = Dataset("a")
+
+        expected = {
+            "children": [],
+            "name": "a",
+            "type": "dataset",
+        }
+        eq_(expected, a.json_repr())
