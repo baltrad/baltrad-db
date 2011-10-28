@@ -16,7 +16,6 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 import base64
-
 from tempfile import NamedTemporaryFile
 
 from .util import (
@@ -47,7 +46,7 @@ def add_file(ctx):
     """
     data = ctx.request.get_json_data()
     
-    with open("/tmp/asd.h5", "w+b") as tmp:
+    with NamedTemporaryFile() as tmp:
         tmp.write(base64.standard_b64decode(data["data"]))
         tmp.flush()
         try:
