@@ -70,3 +70,8 @@ class Backend(object):
         :return: `True` if the file was removed or `False` if it didn't exist
         """
         raise NotImplemented()
+
+def create_from_config(config):
+    from .sqla.backend import SqlAlchemyBackend
+    if config["type"] == "sqlalchemy":
+        return SqlAlchemyBackend.create_from_config(config)

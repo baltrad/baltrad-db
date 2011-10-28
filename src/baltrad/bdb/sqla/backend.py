@@ -80,8 +80,8 @@ class SqlAlchemyBackend(Backend):
             self._file_storage = GenericDatabaseFileStorage()
 
     @staticmethod
-    def create_from_config(conf):
-        return SqlAlchemyBackend(conf["backend_sqlalchemy"]["url"])
+    def create_from_config(config):
+        return SqlAlchemyBackend(config["url"])
 
         
     def store_file(self, path):

@@ -4,7 +4,7 @@ import os
 import sys
 
 from .web.app import Application, serve
-from .sqla.backend import SqlAlchemyBackend
+from . import backend
 
 DEFAULT_CONF = os.path.join(
     os.path.dirname(__file__),
@@ -37,7 +37,11 @@ def run():
         else:
             assert False, "uhandled option: " + opt
     
+    
     config = parse_config(conffiles)
-    backend = SqlAlchemyBackend.create_from_config(config)
-    app = Application(backend)
+
+    backend_section = "backend_" + config["server"]["backend"]
+
+    be = backend.create_from_config(config[backend_section])
+    app = Application(be)
     serve(app, config)
