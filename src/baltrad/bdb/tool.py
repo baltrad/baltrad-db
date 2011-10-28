@@ -78,6 +78,17 @@ def remove_file(server_url, args):
     else:
         print "couldn't delete", target_uuid, response.status
 
+def list_sources(server_url, args):
+    response = http_request(
+        server_url, "GET", "/source/"
+    )
+
+    if response.status == httplib.OK:
+        data = json.loads(response.read())
+        pprint.pprint(data["sources"])
+    else:
+        print "error", response.status
+
 def run():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "", ["url="])
@@ -101,3 +112,5 @@ def run():
         show_file_metadata(server_url, args)
     elif command == "remove":
         remove_file(server_url, args)
+    elif command == "sources":
+        list_sources(server_url, args)

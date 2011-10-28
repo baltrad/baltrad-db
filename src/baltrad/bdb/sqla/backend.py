@@ -219,6 +219,22 @@ class SqlAlchemyBackend(Backend):
             source[row["key"]] = row["value"]
         return source
     
+    def get_sources(self):
+        conn = self.get_connection()
+
+        qry = sql.select(
+            [schema.sources, schema.source_kvs],
+            from_obj=schema.source_kvs.join(schema.sources)
+        )
+
+        sources = {}
+
+        for row in conn.execute(qry):
+            name = row["name"]
+            source = sources.setdefault(name, oh5.Source({"_name": name}))
+            source[row["key"]] = row["value"]
+        return sources.values()
+    
 def _insert_file(conn, meta, source_id):
     return conn.execute(
         schema.files.insert(),

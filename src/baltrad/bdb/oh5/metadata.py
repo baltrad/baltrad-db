@@ -196,11 +196,21 @@ class Source(collections.MutableMapping):
     
     def __iter__(self):
         return iter(self._values)
+
+    def __eq__(self, other):
+        if isinstance(other, Source):
+            return self._values == other._values
+        elif isinstance(other, collections.Mapping):
+            return self._values == other
+        return False
     
     name = property(
         lambda self: self._values.get("_name"),
         lambda self, value: self._values.update({"_name": value})
     )
+
+    def __repr__(self):
+        return "Source(%r)" % self._values
 
     def to_string(self, include_hidden=False):
         items = []

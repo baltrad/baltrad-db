@@ -22,15 +22,16 @@ class TestSqlAlchemyBackendItest(object):
     backend = None
 
     sources = [
-        Source({"_name": "eesur", "NOD": "eesur"}),
-        Source({"_name": "eehar", "NOD": "eehar"})
+        Source({"_name": "eesur", "NOD": "eesur", "PLC": "Syrgavere"}),
+        Source({"_name": "eehar", "NOD": "eehar", "PLC": "Harku"})
     ]
 
 
     @classmethod
     def _insert_sources(cls):
         conn = cls.engine.connect()
-        for source in cls.sources:
+        for src in cls.sources:
+            source = Source(dict(src))
             name = source.pop("_name")
             
             source_id = conn.execute(
@@ -81,9 +82,10 @@ class TestSqlAlchemyBackendItest(object):
     
     def test_get_source_by_id(self):
         source = self.backend.get_source_by_id(1)
-        eq_(2, len(source))
+        eq_(3, len(source))
         eq_("eesur", source["NOD"])
         eq_("eesur", source.name)
+        eq_("Syrgavere", source["PLC"])
 
     def test_get_source_id(self):
         source = {"NOD": "eesur"}
@@ -101,7 +103,7 @@ class TestSqlAlchemyBackendItest(object):
         ok_(stored_meta.bdb_file_size)
         ok_(stored_meta.bdb_stored_date)
         ok_(stored_meta.bdb_stored_time)
-        eq_("NOD:eesur,_name:eesur", stored_meta.bdb_source)
+        eq_("NOD:eesur,PLC:Syrgavere,_name:eesur", stored_meta.bdb_source)
     
     @raises(DuplicateEntry)
     def test_store_file_duplicate(self):
@@ -164,3 +166,9 @@ class TestSqlAlchemyBackendItest(object):
         stored_meta = self.backend.store_file(h5file.name)
 
         eq_(True, self.backend.remove_file(stored_meta.bdb_uuid))
+    
+    def test_get_sources(self):
+        sources = self.backend.get_sources()
+        eq_(2, len(sources))
+        ok_(self.sources[0] in sources)
+        ok_(self.sources[1] in sources)

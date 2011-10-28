@@ -92,7 +92,7 @@ class TestSourceRoutes(object):
     
     def test_sourceroot_GET(self):
         endpoint, args = self.adapter.match("/source/", "GET")
-        eq_("handler.list_sources", endpoint)
+        eq_("handler.get_sources", endpoint)
     
     @raises(MethodNotAllowed)
     def test_sourceroot_POST(self):

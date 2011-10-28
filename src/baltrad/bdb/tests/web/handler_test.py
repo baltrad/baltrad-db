@@ -1,6 +1,10 @@
-from nose.tools import eq_, raises
+import httplib
 
 from mock import Mock
+
+from nose.tools import eq_, raises
+
+from werkzeug.test import EnvironBuilder
 
 from baltrad.bdb.backend import Backend, DuplicateEntry
 from baltrad.bdb.web import handler
@@ -10,10 +14,7 @@ from baltrad.bdb.web.util import (
     Request,
     RequestContext,
 )
-
-from baltrad.bdb.oh5 import Metadata
-
-from werkzeug.test import EnvironBuilder
+from baltrad.bdb.oh5 import Metadata, Source
 
 class TestFileHandlers(object):
     def setup(self):
@@ -38,7 +39,7 @@ class TestFileHandlers(object):
         self.backend.store_file.return_value = metadata
         response = handler.add_file(self.ctx)
         self.backend.store_file.assert_called_once()
-        eq_(201, response.status_code)
+        eq_(httplib.CREATED, response.status_code)
         eq_("/file/6ba7b810-9dad-11d1-80b4-00c04fd430c8", response.headers["Location"])
         eq_('{"metadata": {"key": "value"}}', response.data)
     
@@ -60,7 +61,7 @@ class TestFileHandlers(object):
         response = handler.get_file(self.ctx, uuid)
         self.backend.get_file.assert_call_once_with(uuid)
 
-        eq_(200, response.status_code)
+        eq_(httplib.OK, response.status_code)
         eq_('{"data": "ZmlsZWNvbnRlbnQ="}', response.data)
     
     @raises(HttpNotFound)
@@ -77,7 +78,7 @@ class TestFileHandlers(object):
 
         uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
         response = handler.get_file_metadata(self.ctx, uuid)
-        eq_(200, response.status_code)
+        eq_(httplib.OK, response.status_code)
         eq_('{"metadata": {"key": "value"}}', response.data)
 
     @raises(HttpNotFound)
@@ -90,10 +91,31 @@ class TestFileHandlers(object):
         self.backend.remove_file.return_value = True
         uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
         response = handler.remove_file(self.ctx, uuid)
-        eq_(200, response.status_code)
+        eq_(httplib.OK, response.status_code)
  
     @raises(HttpNotFound)
     def test_remove_file_nx(self):
         self.backend.remove_file.return_value = False
         uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
         handler.remove_file(self.ctx, uuid)
+
+class TestSourceHandlers(object):
+    def setup(self):
+        self.backend = Mock(spec_set=Backend)
+        self.ctx = RequestContext(None, self.backend)
+
+    def test_get_sources(self):
+        self.backend.get_sources.return_value = [
+            Source.from_string("_name:src1,key1:value1"),
+            Source.from_string("_name:src2,key2:value2"),
+        ]
+        
+        response = handler.get_sources(self.ctx)
+        eq_(httplib.OK, response.status_code) 
+        expected = (
+            '{"sources": ['
+                '{"key1": "value1", "_name": "src1"}, '
+                '{"key2": "value2", "_name": "src2"}'
+            ']}'
+        )
+        eq_(expected, response.data)

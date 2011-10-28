@@ -112,7 +112,16 @@ def remove_file(ctx, uuid):
     
     return JsonResponse("")
 
-def list_sources(ctx):
+def get_sources(ctx):
     """get a list of sources
+
+    on success, the body contains: ::
+
+      { "sources": [ {"_name": "name", "key": "value", ...}, ...] }
+
+    :param ctx: the request context
+    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
+    :return: :class:`baltrad.bdb.web.util.JsonResponse` with status *200 OK*
     """
-    pass
+    sources = ctx.backend.get_sources()
+    return JsonResponse({"sources": [dict(src) for src in sources]})

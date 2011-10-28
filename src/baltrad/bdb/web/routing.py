@@ -52,7 +52,7 @@ URL_MAP = Map(
         ]),
         Submount("/source", [
             Rule("/", methods=["GET"],
-                endpoint="handler.list_sources"
+                endpoint="handler.get_sources"
             ),
         ])
     ],
