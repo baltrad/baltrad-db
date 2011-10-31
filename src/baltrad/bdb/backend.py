@@ -34,7 +34,7 @@ class Backend(object):
         :param path: path to the file
         :type path: string
         :return: metadata extracted from the file
-        :rtype: :class:`baltrad.bdb.oh5.metadata.Metadata`
+        :rtype: :class:`baltrad.bdb.oh5.meta.Metadata`
         :raise: :class:`baltrad.bdb.backend.DuplicateEntry` if file is already stored
         """
         raise NotImplemented()
@@ -56,7 +56,7 @@ class Backend(object):
 
         :param uuid: UUID the file was stored with
         :type uuid: :class:`uuid.UUID`
-        :return: :class:`baltrad.bdb.oh5.metadata.Metadata` instance
+        :return: :class:`baltrad.bdb.oh5.meta.Metadata` instance
                  or `None` if file not found
         """
         raise NotImplemented()
@@ -75,7 +75,7 @@ class Backend(object):
     def get_sources(self):
         """get a list of sources defined in the database
 
-        :return: list of :class:`baltrad.bdb.oh5.metadata.Source` instances
+        :return: list of :class:`baltrad.bdb.oh5.meta.Source` instances
         """
         raise NotImplemented()
 
