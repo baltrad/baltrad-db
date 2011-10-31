@@ -1,11 +1,8 @@
 import os
-import sqlite3
 from tempfile import NamedTemporaryFile
 import uuid
 
 from nose.tools import eq_, ok_, raises
-
-from sqlalchemy import engine, event
 
 from baltrad.bdb.sqla import schema
 from baltrad.bdb.sqla.backend import SqlAlchemyBackend
@@ -14,9 +11,6 @@ from baltrad.bdb.backend import DuplicateEntry
 from baltrad.bdb.oh5.meta import Metadata, Source
 from baltrad.bdb.oh5.io import HlHdfMetadataWriter 
 
-def force_sqlite_foreign_keys(dbapi_con, con_record):
-    if (isinstance(dbapi_con, sqlite3.Connection)):
-        dbapi_con.execute("pragma foreign_keys=ON")
 
 class TestSqlAlchemyBackendItest(object):
     engine = None
@@ -27,10 +21,9 @@ class TestSqlAlchemyBackendItest(object):
         Source({"_name": "eehar", "NOD": "eehar", "PLC": "Harku"})
     ]
 
-
     @classmethod
     def _insert_sources(cls):
-        conn = cls.engine.connect()
+        conn = cls.backend.get_connection()
         for src in cls.sources:
             source = Source(dict(src))
             name = source.pop("_name")
@@ -56,20 +49,17 @@ class TestSqlAlchemyBackendItest(object):
     @classmethod
     def setUpClass(cls):
         url = os.environ.get("BDB_TEST_DB", "sqlite:///:memory:")
-        cls.engine = engine.create_engine(url)
-        event.listen(cls.engine, "connect", force_sqlite_foreign_keys)
-        schema.meta.drop_all(cls.engine)
-        schema.meta.create_all(cls.engine)
+        cls.backend = SqlAlchemyBackend(url)
+        schema.meta.drop_all(cls.backend.get_connection())
+        schema.meta.create_all(cls.backend.get_connection())
         cls._insert_sources()
-        cls.backend = SqlAlchemyBackend(cls.engine)
     
     @classmethod
     def tearDownClass(cls):
-        #schema.meta.drop_all(cls.engine)
-        pass
+        schema.meta.drop_all(cls.backend.get_connection())
     
     def tearDown(self):
-        self.engine.execute(schema.files.delete())
+        self.backend.get_connection().execute(schema.files.delete())
 
     @staticmethod
     def create_metadata(what_object, what_date, what_time, what_source):

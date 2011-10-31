@@ -17,14 +17,19 @@
 
 import datetime
 import os
+import sqlite3
 import stat
 import uuid
 
-from sqlalchemy import engine, sql
+from sqlalchemy import engine, event, sql
 
 from . import schema
 from .. import oh5
 from .. backend import Backend, DuplicateEntry
+
+def force_sqlite_foreign_keys(dbapi_con, con_record):
+    if (isinstance(dbapi_con, sqlite3.Connection)):
+        dbapi_con.execute("pragma foreign_keys=ON")
 
 class GenericDatabaseFileStorage(object):
     def store(self, conn, path):
@@ -78,6 +83,8 @@ class SqlAlchemyBackend(Backend):
             self._file_storage = Psycopg2DatabaseFileStorage()
         else:
             self._file_storage = GenericDatabaseFileStorage()
+
+        event.listen(self._engine, "connect", force_sqlite_foreign_keys)
 
     @staticmethod
     def create_from_config(config):
