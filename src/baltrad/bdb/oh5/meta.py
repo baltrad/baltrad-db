@@ -18,9 +18,8 @@
 import collections
 import os.path
 
-import _pyhl as pyhl
-
 from . node import Attribute, Group, Dataset, NodeIterator
+from . io import HlHdfMetadataReader
 
 class AttributeProperty(object):
     def __init__(self, path, fget=None):
@@ -118,65 +117,6 @@ class Metadata(object):
 
     def json_repr(self):
         return self.root().json_repr()
-
-class HlHdfMetadataReader(object):
-    def __init__(self):
-        pass
-    
-    def read(self, filepath):
-        nodelist = pyhl.read_nodelist(filepath)
-        nodelist.selectMetadata()
-        nodelist.fetch()
-
-        nodes = nodelist.getNodeNames()
-        
-        nodenames = sorted(nodes.keys())
-
-        meta = Metadata()
-        for name in nodenames:
-            node_type = nodes[name]
-            if node_type == pyhl.ATTRIBUTE_ID:
-                meta.add_attribute(name, nodelist.getNode(name).data())
-            elif node_type == pyhl.GROUP_ID:
-                meta.add_group(name)
-            elif node_type == pyhl.DATASET_ID:
-                meta.add_dataset(name)
-            else:
-                raise RuntimeError("unhandled hlhdf node type: %s" % node_type)
-        return meta
-
-class HlHdfMetadataWriter(object):
-    def __init__(self):
-        pass
-    
-    def write(self, metadata, filepath):
-        hlnodes = pyhl.nodelist()
-
-        iterator = metadata.iternodes()
-        iterator.next() # skip root
-        for node in iterator:
-            hlnodes.addNode(self._create_hlnode(node))
-        hlnodes.write(filepath)
-    
-    def _create_hlnode(self, node):
-        if isinstance(node, Group):
-            return pyhl.node(pyhl.GROUP_ID, node.path())
-        elif isinstance(node, Attribute):
-            hlnode = pyhl.node(pyhl.ATTRIBUTE_ID, node.path())
-            hlnode.setScalarValue(-1, node.value, self._get_hl_attribute_type(node.value), -1)
-            return hlnode
-        else:
-            raise RuntimeError("unhandled node type: %s" % node.type_id)
-    
-    def _get_hl_attribute_type(self, value):
-        if isinstance(value, int):
-            return "int"
-        elif isinstance(value, str):
-            return "string"
-        elif isinstance(value, float):
-            return "double"
-        else:
-            raise RuntimeError("unhandled attribute value type: %s" % type(value))
 
 class Source(collections.MutableMapping):
     def __init__(self, default={}):

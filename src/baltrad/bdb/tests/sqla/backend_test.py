@@ -11,7 +11,8 @@ from baltrad.bdb.sqla import schema
 from baltrad.bdb.sqla.backend import SqlAlchemyBackend
 from baltrad.bdb.backend import DuplicateEntry
 
-from baltrad.bdb.oh5.meta import Metadata, HlHdfMetadataWriter, Source
+from baltrad.bdb.oh5.meta import Metadata, Source
+from baltrad.bdb.oh5.io import HlHdfMetadataWriter 
 
 def force_sqlite_foreign_keys(dbapi_con, con_record):
     if (isinstance(dbapi_con, sqlite3.Connection)):
