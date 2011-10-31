@@ -78,6 +78,16 @@ class Backend(object):
         :return: list of :class:`baltrad.bdb.oh5.meta.Source` instances
         """
         raise NotImplemented()
+    
+    @abc.abstractmethod
+    def add_source(self, source):
+        """add a new source definition to the database
+
+        :param source: the source definition to add
+        :type source: :class:`baltrad.bdb.oh5.meta.Source`
+        :raise: :class:`DuplicateEntry` if this source is already defined
+        """
+        raise NotImplemented()
 
 def create_from_config(config):
     from .sqla.backend import SqlAlchemyBackend

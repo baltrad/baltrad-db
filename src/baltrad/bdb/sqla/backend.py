@@ -242,6 +242,29 @@ class SqlAlchemyBackend(Backend):
             source[row["key"]] = row["value"]
         return sources.values()
     
+    def add_source(self, source):
+        conn = self.get_connection()
+        
+        source_id = conn.execute(
+            schema.sources.insert(),
+            name=source["_name"],
+        ).inserted_primary_key[0]
+  
+        kvs = []
+        for k, v in source.iteritems():
+            if k.startswith("_"):
+                continue
+            kvs.append({
+                "source_id": source_id,
+                "key": k,
+                "value": v,
+            })
+  
+        conn.execute(
+            schema.source_kvs.insert(),
+            kvs
+        )
+    
 def _insert_file(conn, meta, source_id):
     return conn.execute(
         schema.files.insert(),

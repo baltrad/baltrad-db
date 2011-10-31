@@ -23,28 +23,8 @@ class TestSqlAlchemyBackendItest(object):
 
     @classmethod
     def _insert_sources(cls):
-        conn = cls.backend.get_connection()
         for src in cls.sources:
-            source = Source(dict(src))
-            name = source.pop("_name")
-            
-            source_id = conn.execute(
-                schema.sources.insert(),
-                name=name,
-            ).inserted_primary_key[0]
-  
-            kvs = []
-            for k, v in source.iteritems():
-                kvs.append({
-                    "source_id": source_id,
-                    "key": k,
-                    "value": v,
-                })
-  
-            conn.execute(
-                schema.source_kvs.insert(),
-                kvs
-            )
+            cls.backend.add_source(src)
 
     @classmethod
     def setUpClass(cls):
