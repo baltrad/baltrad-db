@@ -136,6 +136,8 @@ class SqlAlchemyBackend(Backend):
             schema.files.c.uuid==str(uuid)
         )
         oid = conn.execute(qry).scalar()
+        if not oid:
+            return None
         return self._file_storage.read(conn, oid);
     
     def get_file_metadata(self, uuid):
