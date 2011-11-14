@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
 import operator
 
 from sqlalchemy import sql
@@ -52,7 +53,10 @@ class ExprToSql(object):
             "desc": lambda col: col.desc(),
             
             "list": lambda *args: list(args),
-            "lit": sql.literal,
+            "date": lambda *args: datetime.date(*args),
+            "time": lambda *args: datetime.time(*args),
+            "datetime": lambda *args: datetime.datetime(*args),
+
             "count": sql.func.count,
             "max": sql.func.max,
             "min": sql.func.min,

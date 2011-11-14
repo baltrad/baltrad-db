@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
+
 def add(lhs, rhs):
     return ["+", lhs, rhs]
 
@@ -41,10 +43,15 @@ def attribute(name, type_):
 
 def literal(lit):
     if isinstance(lit, list):
-        result = list(["list"])
-        result.extend(lit)
-        return result
-    return ["lit", lit]
+        return ["list"] + lit
+    elif isinstance(lit, datetime.datetime):
+        return ["datetime", lit.year, lit.month, lit.day,
+                            lit.hour, lit.minute, lit.second]
+    elif isinstance(lit, datetime.date):
+        return ["date", lit.year, lit.month, lit.day]
+    elif isinstance(lit, datetime.time):
+        return ["time", lit.hour, lit.minute, lit.second]
+    return lit
 
 def eq(lhs, rhs):
     return ["=", lhs, rhs]
