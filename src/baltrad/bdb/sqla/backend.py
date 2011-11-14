@@ -23,7 +23,7 @@ import uuid
 
 from sqlalchemy import engine, event, sql
 
-from . import schema
+from . import schema, query
 from .. import oh5
 from .. backend import Backend, DuplicateEntry
 
@@ -74,7 +74,7 @@ class SqlAlchemyBackend(Backend):
         :param engine_or_url: sqlalchemy engine or database url
         """
         if isinstance(engine_or_url, basestring):
-            self._engine = engine.create_engine(engine_or_url)
+            self._engine = engine.create_engine(engine_or_url, echo=True)
         else:
             self._engine = engine_or_url
         self._hasher = oh5.MetadataHasher()
@@ -266,7 +266,23 @@ class SqlAlchemyBackend(Backend):
             schema.source_kvs.insert(),
             kvs
         )
+        return source_id
     
+    def execute_file_query(self, qry):
+        stmt = query.transform_file_query(qry)
+        conn = self.get_connection()
+        result = conn.execute(stmt).fetchall()
+        return [row[schema.files.c.uuid] for row in result]
+    
+    def execute_attribute_query(self, qry):
+        stmt = query.transform_attribute_query(qry)
+        conn = self.get_connection()
+        result = conn.execute(stmt)
+        r = []
+        for row in result.fetchall():
+            r.append(dict(zip(result.keys(), row)))
+        return r
+ 
 def _insert_file(conn, meta, source_id):
     return conn.execute(
         schema.files.insert(),

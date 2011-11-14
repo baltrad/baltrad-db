@@ -88,8 +88,49 @@ class Backend(object):
         :raise: :class:`DuplicateEntry` if this source is already defined
         """
         raise NotImplemented()
+    
+    @abc.abstractmethod
+    def execute_file_query(self, query):
+        """execute a file query
+        
+        :param query: the query to execute
+        :type query: :class:`FileQuery` instance
+        """
+        raise NotImplemented()
+    
+    @abc.abstractmethod
+    def execute_attribute_query(self, query):
+        """execute an attribute query
+        
+        :param query: the query to execute
+        :type query: :class:`AttributeQuery` instance
+        """
+        raise NotImplemented()
 
 def create_from_config(config):
     from .sqla.backend import SqlAlchemyBackend
     if config["type"] == "sqlalchemy":
         return SqlAlchemyBackend.create_from_config(config)
+
+class FileQuery(object):
+    def __init__(self):
+        self.filter = None
+        self.order = []
+        self.limit = None
+        self.skip = None
+    
+    def execute(self, backend):
+        return backend.execute_file_query(self)
+
+class AttributeQuery(object):
+    def __init__(self):
+        self.fetch = {}
+        self.filter = None
+        self.distinct = False
+        self.order = []
+        self.group = []
+        self.limit = None
+        self.skip = None
+        
+    def execute(self, backend):
+        return backend.execute_attribute_query(self)

@@ -58,6 +58,9 @@ class Node(object):
         child.parent = self
         return child
     
+    def has_child_by_name(self, name):
+        return name in self._children
+    
     def child_by_name(self, name):
         return self._children[name]
     

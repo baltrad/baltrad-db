@@ -1,10 +1,10 @@
 baltrad.bdb.oh5.*
 =================
 
-:mod:`metadata` module
---------
-.. automodule:: baltrad.bdb.oh5.metadata
+:mod:`meta` module
+------------------
+.. automodule:: baltrad.bdb.oh5.meta
 
 :mod:`node` module
-----
+------------------
 .. automodule:: baltrad.bdb.oh5.node
