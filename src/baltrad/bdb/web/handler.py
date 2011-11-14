@@ -24,7 +24,7 @@ from .util import (
     JsonResponse,
 )
 
-from ..backend import DuplicateEntry
+from ..backend import AttributeQuery, DuplicateEntry, FileQuery
 
 def add_file(ctx):
     """add a file to the database
@@ -125,3 +125,58 @@ def get_sources(ctx):
     """
     sources = ctx.backend.get_sources()
     return JsonResponse({"sources": [dict(src) for src in sources]})
+
+def query_file(ctx):
+    """execute a file query
+
+    on success, the body contains: ::
+    
+      { "data": [uuid, .... ] }
+    
+    :param ctx: the request context
+    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
+    :return: :class:`baltrad.bdb.web.util.JsonResponse` with status *200 OK*
+    """
+
+    data = ctx.request.get_json_data()
+
+    query = FileQuery()
+    query.filter = data.get("filter", query.filter)
+    query.order = data.get("order", query.order)
+    query.limit = data.get("limit", query.limit)
+    query.skip = data.get("skip", query.skip)
+
+    result = query.execute(ctx.backend)
+
+    return JsonResponse({"data": result})
+
+def query_attribute(ctx):
+    """execute an attribute query
+
+    on success, the body contains: ::
+
+      { "data": [
+            {"attr": "value1", ...},
+            ...
+        ]
+      }
+
+    :param ctx: the request context
+    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
+    :return: :class:`baltrad.bdb.web.util.JsonResponse` with status *200 OK*
+    """
+
+    data = ctx.request.get_json_data()
+
+    query = AttributeQuery()
+    query.fetch = data.get("fetch", query.fetch)
+    query.filter = data.get("filter", query.filter)
+    query.distinct = data.get("distinct", query.distinct)
+    query.order = data.get("order", query.order)
+    query.group = data.get("group", query.group)
+    query.limit = data.get("limit", query.limit)
+    query.skip = data.get("skip", query.skip)
+
+    result = query.execute(ctx.backend)
+
+    return JsonResponse({"data": result})

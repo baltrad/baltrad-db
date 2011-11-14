@@ -119,3 +119,71 @@ class TestSourceHandlers(object):
             ']}'
         )
         eq_(expected, response.data)
+
+
+class TestQueryHandlers(object):
+    def setup(self):
+        self.backend = Mock(spec_set=Backend)
+        self.ctx = RequestContext(None, self.backend)
+
+    def create_request(self, method, data):
+        return EnvironBuilder(
+            method=method,
+            data=data,
+        ).get_request(Request)
+    
+    def test_query_file(self):
+        self.ctx.request = self.create_request("POST",
+            data=(
+                '{"data": {'
+                    '"filter": null,'
+                    '"order": [],'
+                    '"limit": 2,'
+                    '"skip": 1'
+                '}}'
+            )
+        )
+        self.backend.execute_file_query.return_value = [
+            "00000000-0000-0000-0004-000000000001",
+            "00000000-0000-0000-0004-000000000002"
+        ]
+
+        response = handler.query_file(self.ctx)
+        eq_(httplib.OK, response.status_code)
+        expected = (
+            '{"data": ['
+                '"00000000-0000-0000-0004-000000000001", '
+                '"00000000-0000-0000-0004-000000000002"'
+            ']}'
+        )
+        eq_(expected, response.data)
+    
+    def test_query_attribute(self):
+        self.ctx.request = self.create_request("POST",
+            data=(
+                '{"data": {'
+                    '"fetch": {"uuid": ["attr", "file:uuid", "string"]},'
+                    '"filter": null,'
+                    '"distinct": false,'
+                    '"order": [],'
+                    '"group": [],'
+                    '"limit": 2,'
+                    '"skip": 1'
+                '}}'
+            )
+        )
+
+        self.backend.execute_attribute_query.return_value = [
+            {"uuid": "00000000-0000-0000-0004-000000000001"},
+            {"uuid": "00000000-0000-0000-0004-000000000002"}
+        ]
+
+        response = handler.query_attribute(self.ctx)
+        eq_(httplib.OK, response.status_code)
+        expected = (
+            '{"data": ['
+                '{"uuid": "00000000-0000-0000-0004-000000000001"}, '
+                '{"uuid": "00000000-0000-0000-0004-000000000002"}'
+            ']}'
+        )
+        eq_(expected, response.data)

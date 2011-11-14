@@ -106,6 +106,43 @@ class TestSourceRoutes(object):
     def test_sourceroot_DELETE(self):
         self.adapter.match("/source/", "DELETE")
 
+class TestQueryRoutes(object):
+    @classmethod
+    def setup_class(cls):
+        cls.adapter = URL_MAP.bind("/")
+    
+    @raises(MethodNotAllowed)
+    def test_query_file_GET(self):
+        self.adapter.match("/query/file", "GET")
+    
+    def test_query_file_POST(self):
+        endpoint, args = self.adapter.match("/query/file", "POST")
+        eq_("handler.query_file", endpoint)
+
+    @raises(MethodNotAllowed)
+    def test_query_file_PUT(self):
+        self.adapter.match("/query/file", "PUT")
+
+    @raises(MethodNotAllowed)
+    def test_query_file_DELETE(self):
+        self.adapter.match("/query/file", "DELETE")
+
+    @raises(MethodNotAllowed)
+    def test_query_attribute_GET(self):
+        self.adapter.match("/query/attribute", "GET")
+    
+    def test_query_attribute_POST(self):
+        endpoint, args = self.adapter.match("/query/attribute", "POST")
+        eq_("handler.query_attribute", endpoint)
+
+    @raises(MethodNotAllowed)
+    def test_query_attribute_PUT(self):
+        self.adapter.match("/query/attribute", "PUT")
+
+    @raises(MethodNotAllowed)
+    def test_query_attribute_DELETE(self):
+        self.adapter.match("/query/attribute", "DELETE")
+
 def test_get_handler():
     import baltrad.bdb.web.handler
 

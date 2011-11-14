@@ -48,7 +48,12 @@ URL_MAP = Map(
             ),
         ]),
         Submount("/query", [
-
+            Rule("/file", methods=["POST"],
+                endpoint="handler.query_file"
+            ),
+            Rule("/attribute", methods=["POST"],
+                endpoint="handler.query_attribute"
+            ),
         ]),
         Submount("/source", [
             Rule("/", methods=["GET"],
