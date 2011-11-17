@@ -1,8 +1,8 @@
-import base64
 import getopt
 import httplib
 import json
 import pprint
+import shutil
 import sys
 
 def create_http_connection(server_url):
@@ -16,13 +16,11 @@ def http_request(server_url, method, path, data="", headers={}):
 def import_file(server_url, args):
     source = args[0]
     
-    data = json.dumps({
-        "data": base64.encodestring(open(source, "r").read())
-    })
+    data = open(source, "r").read()
     response = http_request(
         server_url, "POST", "/file/", data,
         headers={
-            "Content-Type": "application/json",
+            "Content-Type": "application/x-hdf5",
         }
     )
     
@@ -55,9 +53,8 @@ def export_file(server_url, args):
     )
 
     if response.status == httplib.OK:
-        data = json.loads(response.read())["data"]
         outf = open(outfile, "w")
-        outf.write(base64.standard_b64decode(data))
+        shutil.copyfileobj(response, outf)
     elif response.status == httplib.NOT_FOUND:
         print "file not found"
     else:

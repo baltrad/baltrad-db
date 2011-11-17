@@ -56,9 +56,18 @@ class RequestContext(object):
     def make_url(self, path):
         return "/" + path
 
+class Response(BaseResponse,
+               CommonResponseDescriptorsMixin):
+    def __init__(self, response, content_type="text/plain", status=httplib.OK):
+        BaseResponse.__init__(
+            self, response,
+            content_type=content_type,
+            status=status
+        )
+
 class JsonResponse(BaseResponse,
                    CommonResponseDescriptorsMixin):
-    def __init__(self, response, status=200):
+    def __init__(self, response, status=httplib.OK):
         if not isinstance(response, basestring):
             response = json.dumps(response)
         BaseResponse.__init__(

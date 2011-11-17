@@ -28,9 +28,7 @@ class TestFileHandlers(object):
         ).get_request(Request)
 
     def test_add_file(self):
-        self.ctx.request = self.create_request("POST",
-            data='{"data": "ZmlsZWNvbnRlbnQ="}'
-        )
+        self.ctx.request = self.create_request("POST", data="filecontent")
         metadata = Mock(spec_set=Metadata)
         self.backend.get_file_metadata.return_value = metadata
         metadata.json_repr.return_value = {"key": "value"}
@@ -46,7 +44,7 @@ class TestFileHandlers(object):
     @raises(HttpConflict)
     def test_add_file_duplicate(self):
         self.ctx.request = self.create_request("POST",
-            data='{"data": "ZmlsZWNvbnRlbnQ="}'
+            data='filecontent'
         )
 
         metadata = Metadata()
@@ -62,7 +60,7 @@ class TestFileHandlers(object):
         self.backend.get_file.assert_call_once_with(uuid)
 
         eq_(httplib.OK, response.status_code)
-        eq_('{"data": "ZmlsZWNvbnRlbnQ="}', response.data)
+        eq_('filecontent', response.data)
     
     @raises(HttpNotFound)
     def test_get_file_nx(self):
