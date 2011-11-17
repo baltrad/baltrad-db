@@ -133,12 +133,12 @@ class TestQueryHandlers(object):
     def test_query_file(self):
         self.ctx.request = self.create_request("POST",
             data=(
-                '{"data": {'
+                '{'
                     '"filter": null,'
                     '"order": [],'
                     '"limit": 2,'
                     '"skip": 1'
-                '}}'
+                '}'
             )
         )
         self.backend.execute_file_query.return_value = [
@@ -149,7 +149,7 @@ class TestQueryHandlers(object):
         response = handler.query_file(self.ctx)
         eq_(httplib.OK, response.status_code)
         expected = (
-            '{"data": ['
+            '{"rows": ['
                 '"00000000-0000-0000-0004-000000000001", '
                 '"00000000-0000-0000-0004-000000000002"'
             ']}'
@@ -159,7 +159,7 @@ class TestQueryHandlers(object):
     def test_query_attribute(self):
         self.ctx.request = self.create_request("POST",
             data=(
-                '{"data": {'
+                '{'
                     '"fetch": {"uuid": ["attr", "file:uuid", "string"]},'
                     '"filter": null,'
                     '"distinct": false,'
@@ -167,7 +167,7 @@ class TestQueryHandlers(object):
                     '"group": [],'
                     '"limit": 2,'
                     '"skip": 1'
-                '}}'
+                '}'
             )
         )
 
@@ -179,7 +179,7 @@ class TestQueryHandlers(object):
         response = handler.query_attribute(self.ctx)
         eq_(httplib.OK, response.status_code)
         expected = (
-            '{"data": ['
+            '{"rows": ['
                 '{"uuid": "00000000-0000-0000-0004-000000000001"}, '
                 '{"uuid": "00000000-0000-0000-0004-000000000002"}'
             ']}'

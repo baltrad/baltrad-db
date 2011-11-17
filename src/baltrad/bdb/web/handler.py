@@ -139,7 +139,7 @@ def query_file(ctx):
 
     result = query.execute(ctx.backend)
 
-    return JsonResponse({"data": result})
+    return JsonResponse({"rows": result})
 
 def query_attribute(ctx):
     """execute an attribute query
@@ -164,4 +164,4 @@ def query_attribute(ctx):
 
     result = query.execute(ctx.backend)
 
-    return JsonResponse({"data": result})
+    return JsonResponse({"rows": result})

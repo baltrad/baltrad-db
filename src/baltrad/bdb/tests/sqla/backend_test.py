@@ -295,11 +295,11 @@ class TestFileQuery(object):
     def test_all_files(self):
         result = backend.execute_file_query(self.query)
         eq_(5, len(result))
-        ok_(self.files[0]["bdb_uuid"] in result)
-        ok_(self.files[1]["bdb_uuid"] in result)
-        ok_(self.files[2]["bdb_uuid"] in result)
-        ok_(self.files[3]["bdb_uuid"] in result)
-        ok_(self.files[4]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
 
     def test_filter_by_uuid(self):
         uuid = "00000000-0000-0000-0004-000000000004"
@@ -310,7 +310,7 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(1, len(result))
-        ok_(uuid in result)
+        ok_({"uuid": uuid} in result)
     
     def test_filter_by_object(self):
         self.query.filter = expr.eq(
@@ -320,9 +320,9 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(3, len(result))
-        ok_(self.files[0]["bdb_uuid"] in result)
-        ok_(self.files[1]["bdb_uuid"] in result)
-        ok_(self.files[2]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
     
     def test_filter_by_xsize(self):
         self.query.filter = expr.eq(
@@ -332,8 +332,8 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(2, len(result))
-        ok_(self.files[1]["bdb_uuid"] in result)
-        ok_(self.files[4]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
     
     def test_file_by_xsize_or_ysize(self):
         self.query.filter = expr.or_(
@@ -349,9 +349,9 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(3, len(result))
-        ok_(self.files[0]["bdb_uuid"] in result)
-        ok_(self.files[1]["bdb_uuid"] in result)
-        ok_(self.files[4]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
     
     def test_filter_by_combined_datetime(self):
         self.query.filter = expr.between(
@@ -365,9 +365,9 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(3, len(result)) 
-        ok_(self.files[1]["bdb_uuid"] in result)
-        ok_(self.files[2]["bdb_uuid"] in result)
-        ok_(self.files[3]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
     
     def test_filter_by_source_PLC(self):
         self.query.filter = expr.eq(
@@ -377,8 +377,8 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(2, len(result)) 
-        ok_(self.files[1]["bdb_uuid"] in result)
-        ok_(self.files[3]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
     
     def test_filter_by_source_name_or_source_NOD(self):
         self.query.filter = expr.or_(
@@ -394,8 +394,8 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(2, len(result)) 
-        ok_(self.files[1]["bdb_uuid"] in result)
-        ok_(self.files[3]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
     
     def test_filter_by_source_name_like(self):
         self.query.filter = expr.like(
@@ -405,11 +405,11 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(5, len(result))
-        ok_(self.files[0]["bdb_uuid"] in result)
-        ok_(self.files[1]["bdb_uuid"] in result)
-        ok_(self.files[2]["bdb_uuid"] in result)
-        ok_(self.files[3]["bdb_uuid"] in result)
-        ok_(self.files[4]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
     
     def test_filter_by_object_in(self):
         self.query.filter = expr.in_(
@@ -419,8 +419,8 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(2, len(result))
-        ok_(self.files[3]["bdb_uuid"] in result)
-        ok_(self.files[4]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
     
     def test_file_by_ysize_not_in(self):
         self.query.filter = expr.not_(
@@ -432,8 +432,8 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(2, len(result))
-        ok_(self.files[3]["bdb_uuid"] in result)
-        ok_(self.files[4]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
     
     def test_order_by(self):
         self.query.order = [
@@ -442,27 +442,27 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(5, len(result))
-        eq_(self.files[3]["bdb_uuid"], result[0])
-        eq_(self.files[4]["bdb_uuid"], result[1])
-        eq_(self.files[2]["bdb_uuid"], result[2])
-        eq_(self.files[1]["bdb_uuid"], result[3])
-        eq_(self.files[0]["bdb_uuid"], result[4])
+        eq_(self.files[3]["bdb_uuid"], result[0]["uuid"])
+        eq_(self.files[4]["bdb_uuid"], result[1]["uuid"])
+        eq_(self.files[2]["bdb_uuid"], result[2]["uuid"])
+        eq_(self.files[1]["bdb_uuid"], result[3]["uuid"])
+        eq_(self.files[0]["bdb_uuid"], result[4]["uuid"])
     
     def test_limit(self):
         self.query.limit = 2
 
         result = backend.execute_file_query(self.query)
         eq_(2, len(result))
-        ok_(self.files[0]["bdb_uuid"] in result)
-        ok_(self.files[1]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
     
     def test_skip(self):
         self.query.skip = 3
 
         result = backend.execute_file_query(self.query)
         eq_(2, len(result))
-        ok_(self.files[3]["bdb_uuid"] in result)
-        ok_(self.files[4]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
     
     def test_skip_with_limit(self):
         self.query.skip = 2
@@ -470,8 +470,8 @@ class TestFileQuery(object):
 
         result = backend.execute_file_query(self.query)
         eq_(2, len(result))
-        ok_(self.files[2]["bdb_uuid"] in result)
-        ok_(self.files[3]["bdb_uuid"] in result)
+        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
 
 
 class TestAttributeQuery(object):

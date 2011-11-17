@@ -272,7 +272,10 @@ class SqlAlchemyBackend(Backend):
         stmt = query.transform_file_query(qry)
         conn = self.get_connection()
         result = conn.execute(stmt).fetchall()
-        return [row[schema.files.c.uuid] for row in result]
+        r = []
+        for row in result:
+            r.append({"uuid" : row[schema.files.c.uuid]})
+        return r
     
     def execute_attribute_query(self, qry):
         stmt = query.transform_attribute_query(qry)
