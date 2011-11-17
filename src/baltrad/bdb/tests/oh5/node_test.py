@@ -75,8 +75,7 @@ class TestNodeJsonRepr(object):
         a = Group("a")
 
         expected = {
-            "children": [],
-            "name": "a",
+            "path": "/a",
             "type": "group",
         }
         eq_(expected, a.json_repr())
@@ -84,7 +83,7 @@ class TestNodeJsonRepr(object):
     def test_attribute(self):
         a = Attribute("a", 1)
         expected = {
-            "name": "a",
+            "path": "/a",
             "type": "attribute",
             "value": 1
         }
@@ -94,8 +93,7 @@ class TestNodeJsonRepr(object):
         a = Dataset("a")
 
         expected = {
-            "children": [],
-            "name": "a",
+            "path": "/a",
             "type": "dataset",
         }
         eq_(expected, a.json_repr())

@@ -16,7 +16,6 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
-import json
 import os.path
 import weakref
 
@@ -82,8 +81,7 @@ class Node(object):
 
     def json_repr(self):
         return {
-            "name": self.name,
-            "children": [child.json_repr() for child in self.children()],
+            "path": self.path(),
         }
 
 class Group(Node):
@@ -126,11 +124,10 @@ class Attribute(Node):
         return datetime.datetime.strptime(self.value, "%Y%m%d").date()
     
     def json_repr(self):
-        return {
-            "type": "attribute",
-            "name": self.name,
-            "value": self.value,
-        }
+        repr_ = super(Attribute, self).json_repr()
+        repr_["type"] = "attribute"
+        repr_["value"] = self.value
+        return repr_
 
 class Dataset(Node):
     type_id = 3

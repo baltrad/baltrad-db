@@ -60,11 +60,7 @@ class TestMetadata(object):
         eq_({"NOD": "eesur", "PLC": "Sürgavere"}, self.meta.source())
 
     def test_json_repr_empty(self):
-        expected = {
-            "children": [],
-            "name": "",
-            "type": "group",
-        }
+        expected = [{"path": "/", "type": "group"}]
 
         eq_(expected, self.meta.json_repr())
 
@@ -74,27 +70,13 @@ class TestMetadata(object):
         self.meta.add_attribute("/attr1", 1)
         self.meta.add_attribute("/a/attr2", 2)
         
-        expected = {
-            "children": [{
-                "children": [{
-                    "children": [],
-                    "name": "b",
-                    "type": "group",
-                }, {
-                    "name": "attr2",
-                    "type": "attribute",
-                    "value": 2
-                }],
-                "name": "a", 
-                "type": "group",
-           }, {
-                "name": "attr1",
-                "type": "attribute",
-                "value": 1,
-           }],
-           "name": "",
-           "type": "group",
-         }
+        expected = [
+            {"path": "/", "type": "group"},
+            {"path": "/a", "type": "group"},
+            {"path": "/attr1", "type": "attribute", "value": 1},
+            {"path": "/a/b", "type": "group"},
+            {"path": "/a/attr2", "type": "attribute", "value": 2}
+        ]
 
         eq_(expected, self.meta.json_repr())
 

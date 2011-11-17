@@ -116,7 +116,7 @@ class Metadata(object):
         return reader.read(filepath)
 
     def json_repr(self):
-        return self.root().json_repr()
+        return [node.json_repr() for node in self.iternodes()]
 
 class Source(collections.MutableMapping):
     def __init__(self, default={}):
