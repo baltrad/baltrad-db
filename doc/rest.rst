@@ -47,9 +47,9 @@ Store file
     Location: http://example.com/file/00000000-0000-0000-0004-000000000001
     
     {
-      "metadata": {
-        {"name": "", "type": "group", "children": []}
-      }
+      "metadata": [
+        {"path": "/", "type": "group"}
+      ]
     }
 
 .. _doc-rest-op-get-file:
@@ -104,9 +104,10 @@ Get file metadata
     Content-Length: nnn
     
     {
-      "metadata": {
-        {"name": "", "type": "group", "children": []}
-      }
+      "metadata": [
+        {"path": "/", "type": "group"}
+      ]
+
     }
 
 .. _doc-rest-op-remove-file:
