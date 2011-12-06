@@ -131,6 +131,26 @@ Remove file
 
     HTTP/1.1 204 NoContent
 
+.. _doc-rest-op-remove-all-files:
+
+Remove all files
+''''''''''''''''
+**Request**
+  :Synopsis: DELETE /file/{UUID of the file}
+
+  ::
+
+    DELETE /file/00000000-0000-0000-0004-000000000001 HTTP/1.1
+    Host: example.com
+
+**Response**
+  :Status:
+    * **204 NoContent** - file was removed
+
+  ::
+
+    HTTP/1.1 204 NoContent
+
 .. _doc-rest-op-query-file:
 
 Query for files

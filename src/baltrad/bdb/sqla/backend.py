@@ -169,6 +169,10 @@ class SqlAlchemyBackend(Backend):
             schema.files.c.uuid==str(uuid)
         )
         return bool(conn.execute(qry).rowcount)
+    
+    def remove_all_files(self):
+        conn = self.get_connection()
+        conn.execute(schema.files.delete())
 
     def file_source(self, uuid):
         qry = sql.select(

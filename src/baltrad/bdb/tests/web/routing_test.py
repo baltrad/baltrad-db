@@ -41,9 +41,9 @@ class TestFileRoutes(object):
     def test_fileroot_PUT(self):
         self.adapter.match("/file/", "PUT")
      
-    @raises(MethodNotAllowed)
     def test_fileroot_DELETE(self):
-        self.adapter.match("/file/", "DELETE")
+        endpoint, args = self.adapter.match("/file/", "DELETE")
+        eq_("handler.remove_all_files", endpoint)
     
     def test_file_GET(self):
         endpoint, args = self.adapter.match("/file/" + str(self.uuid), "GET")

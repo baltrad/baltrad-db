@@ -65,6 +65,12 @@ class Response(BaseResponse,
             status=status
         )
 
+class NoContentResponse(BaseResponse,
+                        CommonResponseDescriptorsMixin):
+    
+    def __init__(self):
+        BaseResponse.__init__(self, None, status=httplib.NO_CONTENT)
+
 class JsonResponse(BaseResponse,
                    CommonResponseDescriptorsMixin):
     def __init__(self, response, status=httplib.OK):

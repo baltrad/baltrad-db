@@ -89,13 +89,17 @@ class TestFileHandlers(object):
         self.backend.remove_file.return_value = True
         uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
         response = handler.remove_file(self.ctx, uuid)
-        eq_(httplib.OK, response.status_code)
+        eq_(httplib.NO_CONTENT, response.status_code)
  
     @raises(HttpNotFound)
     def test_remove_file_nx(self):
         self.backend.remove_file.return_value = False
         uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
         handler.remove_file(self.ctx, uuid)
+    
+    def test_remove_all_files(self):
+        response = handler.remove_all_files(self.ctx)
+        eq_(httplib.NO_CONTENT, response.status_code)
 
 class TestSourceHandlers(object):
     def setup(self):

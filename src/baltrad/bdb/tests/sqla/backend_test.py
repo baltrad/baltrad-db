@@ -70,6 +70,13 @@ class TestSqlAlchemyBackendItest(object):
         meta.add_attribute("/what/source", "NOD:eesur")
         return meta
     
+    @staticmethod
+    def write_metadata(meta):
+        h5file = NamedTemporaryFile()
+        writer = HlHdfMetadataWriter()
+        writer.write(meta, h5file.name)
+        return h5file
+    
     def test_get_source_by_id(self):
         source = self.backend.get_source_by_id(self.source_ids[0])
         eq_(3, len(source))
@@ -83,9 +90,7 @@ class TestSqlAlchemyBackendItest(object):
     
     def test_store_file(self):
         meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = NamedTemporaryFile()
-        writer = HlHdfMetadataWriter()
-        writer.write(meta, h5file.name)
+        h5file = self.write_metadata(meta)
 
         stored_meta = self.backend.store_file(h5file.name)
         ok_(stored_meta.bdb_uuid)
@@ -98,9 +103,7 @@ class TestSqlAlchemyBackendItest(object):
     @raises(DuplicateEntry)
     def test_store_file_duplicate(self):
         meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = NamedTemporaryFile()
-        writer = HlHdfMetadataWriter()
-        writer.write(meta, h5file.name)
+        h5file = self.write_metadata(meta)
 
         self.backend.store_file(h5file.name)
         self.backend.store_file(h5file.name)
@@ -111,9 +114,7 @@ class TestSqlAlchemyBackendItest(object):
     
     def test_get_file_metadata(self):
         meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = NamedTemporaryFile()
-        writer = HlHdfMetadataWriter()
-        writer.write(meta, h5file.name)
+        h5file = self.write_metadata(meta)
 
         meta = self.backend.store_file(h5file.name)
 
@@ -130,9 +131,7 @@ class TestSqlAlchemyBackendItest(object):
     
     def test_get_file(self):
         meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = NamedTemporaryFile()
-        writer = HlHdfMetadataWriter()
-        writer.write(meta, h5file.name)
+        h5file = self.write_metadata(meta)
 
         meta = self.backend.store_file(h5file.name)
         expected = open(h5file.name, "r").read()
@@ -149,13 +148,24 @@ class TestSqlAlchemyBackendItest(object):
     
     def test_remove_file(self):
         meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = NamedTemporaryFile()
-        writer = HlHdfMetadataWriter()
-        writer.write(meta, h5file.name)
+        h5file = self.write_metadata(meta)
 
         stored_meta = self.backend.store_file(h5file.name)
 
         eq_(True, self.backend.remove_file(stored_meta.bdb_uuid))
+    
+    def test_remove_files(self):        
+        meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
+        h5file = self.write_metadata(meta)
+
+        meta = self.create_metadata("pvol", "20000131", "131416", "NOD:eesur")
+        h5file = self.write_metadata(meta)
+
+        self.backend.store_file(h5file.name)
+
+        self.backend.remove_all_files()
+
+        eq_(0, self.backend.get_connection().execute(schema.files.count()).scalar())
     
     def test_get_sources(self):
         sources = self.backend.get_sources()

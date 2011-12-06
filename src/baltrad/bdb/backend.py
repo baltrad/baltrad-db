@@ -70,6 +70,12 @@ class Backend(object):
         :return: `True` if the file was removed or `False` if it didn't exist
         """
         raise NotImplemented()
+
+    @abc.abstractmethod
+    def remove_all_files(self, query):
+        """remove all files from the database
+        """
+        raise NotImplemented()
     
     @abc.abstractmethod
     def get_sources(self):
@@ -106,7 +112,7 @@ class Backend(object):
         :type query: :class:`AttributeQuery` instance
         """
         raise NotImplemented()
-
+    
 def create_from_config(config):
     from .sqla.backend import SqlAlchemyBackend
     if config["type"] == "sqlalchemy":

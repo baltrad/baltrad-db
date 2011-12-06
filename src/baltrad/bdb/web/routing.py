@@ -37,6 +37,9 @@ URL_MAP = Map(
             Rule("/", methods=["POST"],
                 endpoint="handler.add_file"
             ),
+            Rule("/", methods=["DELETE"],
+                endpoint="handler.remove_all_files"
+            ),
             Rule("/<uuid:uuid>", methods=["GET"],
                 endpoint="handler.get_file"
             ),

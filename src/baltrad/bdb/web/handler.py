@@ -23,6 +23,7 @@ from .util import (
     HttpConflict,
     HttpNotFound,
     JsonResponse,
+    NoContentResponse,
     Response,
 )
 
@@ -95,8 +96,7 @@ def remove_file(ctx, uuid):
 
     :param ctx: the request context
     :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
-    :return: :class:`baltrad.bdb.web.util.JsonResponse` with status *200 OK*
-             with no body
+    :return: :class:`baltrad.bdb.web.util.NoContentResponse`
     :raise: :class:`baltrad.bdb.web.util.HttpNotFound` when file not found
 
     See :ref:`doc-rest-op-remove-file` for details
@@ -105,7 +105,17 @@ def remove_file(ctx, uuid):
     if not found:
         raise HttpNotFound()
     
-    return JsonResponse("")
+    return NoContentResponse()
+
+def remove_all_files(ctx):
+    """remove all files from the database
+
+    :param ctx: the request context
+    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
+    :return: :class:`baltrad.bdb.web.util.NoContentResponse`
+    """
+    ctx.backend.remove_all_files()
+    return NoContentResponse()
 
 def get_sources(ctx):
     """get a list of sources
