@@ -5,23 +5,23 @@ import uuid
 
 from nose.tools import eq_, ok_, raises
 
-from baltrad.bdb.sqla import schema
-from baltrad.bdb.sqla.backend import (
+from baltrad.bdbserver.sqla import schema
+from baltrad.bdbserver.sqla.backend import (
     _insert_metadata,
     _insert_file,
     SqlAlchemyBackend
 )
 
-from baltrad.bdb.backend import (
+from baltrad.bdbserver.backend import (
     AttributeQuery,
     DuplicateEntry,
     FileQuery
 )
 
-from baltrad.bdb.oh5.meta import Metadata, Source
-from baltrad.bdb.oh5.io import HlHdfMetadataWriter 
-from baltrad.bdb.oh5.node import Attribute, Group
-from baltrad.bdb import expr
+from baltrad.bdbcommon.oh5.meta import Metadata, Source
+from baltrad.bdbcommon.oh5.io import HlHdfMetadataWriter 
+from baltrad.bdbcommon.oh5.node import Attribute, Group
+from baltrad.bdbcommon import expr
 
 backend = None
 

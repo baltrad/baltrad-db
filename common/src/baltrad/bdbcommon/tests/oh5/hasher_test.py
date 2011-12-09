@@ -3,7 +3,7 @@ import datetime
 #from mock import patch, sentinel, Mock
 from nose.tools import eq_
 
-from baltrad.bdb.oh5 import Metadata, MetadataHasher
+from baltrad.bdbcommon.oh5 import Metadata, MetadataHasher
 
 class TestMetadataHasher(object):
     def setUp(self):

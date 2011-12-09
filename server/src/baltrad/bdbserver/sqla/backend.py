@@ -23,8 +23,9 @@ import uuid
 
 from sqlalchemy import engine, event, sql
 
+from baltrad.bdbcommon import oh5
+
 from . import schema, query
-from .. import oh5
 from .. backend import Backend, DuplicateEntry
 
 def force_sqlite_foreign_keys(dbapi_con, con_record):

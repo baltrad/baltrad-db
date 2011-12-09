@@ -6,15 +6,15 @@ from nose.tools import eq_, raises
 
 from werkzeug.test import EnvironBuilder
 
-from baltrad.bdb.backend import Backend, DuplicateEntry
-from baltrad.bdb.web import handler
-from baltrad.bdb.web.util import (
+from baltrad.bdbserver.backend import Backend, DuplicateEntry
+from baltrad.bdbserver.web import handler
+from baltrad.bdbserver.web.util import (
     HttpConflict,
     HttpNotFound,
     Request,
     RequestContext,
 )
-from baltrad.bdb.oh5 import Metadata, Source
+from baltrad.bdbcommon.oh5 import Metadata, Source
 
 class TestFileHandlers(object):
     def setup(self):

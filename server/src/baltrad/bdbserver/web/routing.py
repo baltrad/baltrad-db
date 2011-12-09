@@ -70,4 +70,4 @@ URL_MAP = Map(
 )
 
 def get_handler(handler_str):
-    return import_string("baltrad.bdb.web." + handler_str)
+    return import_string("baltrad.bdbserver.web." + handler_str)

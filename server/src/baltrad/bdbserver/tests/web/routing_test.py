@@ -19,7 +19,7 @@ import uuid
 
 from nose.tools import eq_, raises
 
-from baltrad.bdb.web.routing import URL_MAP, get_handler
+from baltrad.bdbserver.web.routing import URL_MAP, get_handler
 
 from werkzeug.exceptions import MethodNotAllowed
 
@@ -144,6 +144,9 @@ class TestQueryRoutes(object):
         self.adapter.match("/query/attribute", "DELETE")
 
 def test_get_handler():
-    import baltrad.bdb.web.handler
+    import baltrad.bdbserver.web.handler
 
-    eq_(baltrad.bdb.web.handler.get_file, get_handler("handler.get_file"))
+    eq_(
+      baltrad.bdbserver.web.handler.get_file,
+      get_handler("handler.get_file")
+    )

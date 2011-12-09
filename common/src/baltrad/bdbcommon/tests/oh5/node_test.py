@@ -19,7 +19,7 @@ import datetime
 
 from nose.tools import eq_, raises
 
-from baltrad.bdb.oh5.node import Attribute, Group, Dataset, Node
+from baltrad.bdbcommon.oh5.node import Attribute, Group, Dataset, Node
 
 class TestNode(object):
     def test_path_no_parent(self):

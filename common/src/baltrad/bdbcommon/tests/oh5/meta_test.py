@@ -6,7 +6,7 @@ import os
 
 from nose.tools import eq_, raises
 
-from baltrad.bdb.oh5 import Metadata, Source
+from baltrad.bdbcommon.oh5 import Metadata, Source
 
 class TestMetadata(object):
     def setUp(self):

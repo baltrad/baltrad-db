@@ -1,9 +1,10 @@
-build/
-doc/html
-doc/_build
-test/reports
 *.pyc
 .*.swp
 .lock*
 .waf-*
-src/baltrad.bdb.egg-info/
+build/
+common/src/baltrad.bdbcommon.egg-info/
+doc/html
+server/src/baltrad.bdbserver.egg-info/
+server/doc/_build
+test/reports

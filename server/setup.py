@@ -3,7 +3,7 @@ from distribute_setup import use_setuptools
 use_setuptools()
 import setuptools
 
-setuptools.setup(name="baltrad.bdb",
+setuptools.setup(name="baltrad.bdbserver",
     version="0.1-dev",
     namespace_packages=["baltrad"],
     setup_requires=['nose>=1.0'],
@@ -15,15 +15,14 @@ setuptools.setup(name="baltrad.bdb",
         "": "src"
     },
     install_requires=[
+        "baltrad.bdbcommon",
         "configparser >= 3.2",
-#        "hlhdf",
         "SQLAlchemy >= 0.7",
         "werkzeug >= 0.8",
     ],
     entry_points = {
         "console_scripts" : [
-            "baltrad-db-server = baltrad.bdb.main:run",
-            "baltrad-db-tool = baltrad.bdb.tool:run"
+            "baltrad-db-server = baltrad.bdbserver.main:run",
         ]
     },
     test_suite="nose.collector",
