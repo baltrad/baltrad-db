@@ -89,8 +89,7 @@ class SqlAlchemyBackend(Backend):
 
     @staticmethod
     def create_from_config(config):
-        return SqlAlchemyBackend(config["url"])
-
+        return SqlAlchemyBackend(config["backend.uri"])
         
     def store_file(self, path):
         conn = self._engine.connect()

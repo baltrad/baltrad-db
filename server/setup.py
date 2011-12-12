@@ -16,7 +16,7 @@ setuptools.setup(name="baltrad.bdbserver",
     },
     install_requires=[
         "baltrad.bdbcommon",
-        "configparser >= 3.2",
+        "jprops >= 0.1",
         "SQLAlchemy >= 0.7",
         "werkzeug >= 0.8",
     ],

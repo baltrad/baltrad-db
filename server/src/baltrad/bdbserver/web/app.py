@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
+import urlparse
+
 from werkzeug.serving import run_simple
 from werkzeug.exceptions import HTTPException
 
@@ -42,8 +44,13 @@ class Application(object):
         return response(env, start_response)
 
 def serve(app, config):
-    host = config["server"].get("host")
-    port = config["server"].getint("port")
-    use_reloader = config["server"].getboolean("use_reloader")
+    if config["type"] != "werkzeug":
+        raise RuntimeError("server type '%s' not supported" % config["type"])
+
+    uri = urlparse.urlparse(config["uri"])
+
+    host = uri.hostname
+    port = uri.port or 80
+    use_reloader = config.get_boolean("use_reloader", False)
 
     run_simple(host, port, app, use_reloader=use_reloader)

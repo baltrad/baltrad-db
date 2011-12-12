@@ -1,26 +1,10 @@
-import configparser
 import getopt
 import os
 import sys
 
+from .config import Properties
 from .web.app import Application, serve
 from . import backend
-
-DEFAULT_CONF = os.path.join(
-    os.path.dirname(__file__),
-    "defaults.ini"
-)
-
-def parse_config(conffiles):
-    parser = configparser.ConfigParser()
-    for conffile in conffiles:
-        try:
-            fp = open(conffile, "r")
-            parser.read_file(fp)
-        except IOError:
-            print >> sys.stderr, "failed to read configuration from ", conffile
-            continue
-    return parser
 
 def run():
     try:
@@ -28,20 +12,21 @@ def run():
     except getopt.GetoptError, err:
         print >> sys.stderr, str(err)
         raise SystemExit
-
-    conffiles = [DEFAULT_CONF]
-
+    
+    conffile = None
     for opt, value in opts:
         if opt == "--conf":
-            conffiles.append(os.path.abspath(value))
+            conffile = os.path.abspath(value)
         else:
             assert False, "uhandled option: " + opt
     
+    try:
+        config = Properties.load(conffile)
+    except IOError:
+        raise SystemExit("failed to read configuration from " + conffile)
     
-    config = parse_config(conffiles)
+    config = config.filter("baltrad.bdb.server.")
 
-    backend_section = "backend_" + config["server"]["backend"]
-
-    be = backend.create_from_config(config[backend_section])
+    be = backend.create_from_config(config)
     app = Application(be)
     serve(app, config)

@@ -114,9 +114,12 @@ class Backend(object):
         raise NotImplemented()
     
 def create_from_config(config):
-    from .sqla.backend import SqlAlchemyBackend
-    if config["type"] == "sqlalchemy":
+    backend_type = config["backend.type"]
+    if backend_type == "sqlalchemy":
+        from .sqla.backend import SqlAlchemyBackend
         return SqlAlchemyBackend.create_from_config(config)
+    else:
+        raise ValueError("unsupported backend type: " + backend_type)
 
 class FileQuery(object):
     def __init__(self):
