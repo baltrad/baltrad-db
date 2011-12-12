@@ -19,7 +19,7 @@ setuptools.setup(name="baltrad.bdbclient",
     ],
     entry_points = {
         "console_scripts" : [
-            "baltrad-db-tool = baltrad.bdb.tool:run"
+            "baltrad-db-tool = baltrad.bdbclient.tool:run"
         ]
     },
     test_suite="nose.collector",
