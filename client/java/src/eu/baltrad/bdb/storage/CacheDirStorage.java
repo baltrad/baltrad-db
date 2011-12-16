@@ -33,6 +33,12 @@ public final class CacheDirStorage implements LocalStorage {
   private final File storageRoot;
   private final int fileLimit;
 
+  private static final int DEFAULT_LIMIT = 1000;
+
+  CacheDirStorage(File storageRoot) {
+    this(storageRoot, DEFAULT_LIMIT);
+  }
+
   CacheDirStorage(File storageRoot, int fileLimit) {
     this.storageRoot = storageRoot;
     this.fileLimit = fileLimit;
