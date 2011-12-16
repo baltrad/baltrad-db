@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2010-2011 Estonian Meteorological and Hydrological Institute
+
+This file is part of baltrad-db.
+
+baltrad-db is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+baltrad-db is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
+-->
+<project name="baltrad-bdb-client" default="build" basedir=".">
+  <property file="etc/build.properties" />
+
+  <property name="app.name" value="baltrad-bdb-client" />
+  <property name="app.version" value="0.1" />
+  <property name="app.root.dir" value="${basedir}" />
+  <property name="build.dir" value="${basedir}/build" />
+  <property name="build.classes.dir" value="${build.dir}/classes" />
+  <property name="build.test.dir" value="${build.dir}/test" />
+  <property name="build.itest.dir" value="${build.dir}/itest" />
+  <property name="build.instrument.dir" value="${build.dir}/instrument" />
+  <property name="dist.dir" value="${basedir}/dist" />
+  <property name="source.dir" value="${basedir}/src" />
+  <property name="lib.dir" value="${basedir}/lib" />
+  <property name="examples.dir" value="${basedir}/examples" />
+  <property name="compile.debug" value="true" />
+  <property name="compile.optimize" value="true" />
+  <property name="compile.includeAntRuntime" value="no" />
+
+  <property file="etc/develop.properties" />
+  <property name="prefix" value="/usr/local" />
+
+  <property file="etc/testdb.properties" />
+
+  <path id="lib.path">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar"/>
+      <exclude name="cglib/*.jar"/>
+      <exclude name="easymock/*.jar"/>
+      <exclude name="junit/*.jar"/>
+      <exclude name="objenesis/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="test.lib.path">
+    <fileset dir="${lib.dir}">
+      <include name="cglib/*.jar"/>
+      <include name="easymock/*.jar"/>
+      <include name="junit/*.jar"/>
+      <include name="objenesis/*.jar"/>
+    </fileset>
+  </path>
+
+  <!-- Generates the deliverables -->
+  <target name="build" depends="clean,compile">
+    <mkdir dir="${dist.dir}" />
+    <jar destfile="${dist.dir}/${app.name}.jar">
+      <fileset dir="${build.classes.dir}"/>
+    </jar>
+  </target>
+
+  <!-- same as running build and execute.test -->
+  <target name="distribution" depends="build, execute.test" />
+
+  <target name="install" depends="distribution, install-files" />
+
+  <target name="install-files">
+    <mkdir dir="${prefix}/share/baltrad-bdb/java/" />
+    <copy todir="${prefix}/share/baltrad-bdb/java/libs" flatten="true">
+      <fileset dir="${lib.dir}">
+        <include name="**/*.jar"/>
+        <exclude name="ant/*.jar" />
+        <exclude name="junit/*.jar"/>
+        <exclude name="easymock/*.jar"/>
+        <exclude name="objenesis/*.jar"/>
+        <exclude name="cglib/*.jar/"/>
+      </fileset>
+    </copy>
+    <copy file="${dist.dir}/${app.name}.jar"
+          todir="${prefix}/share/baltrad-bdb/java"/>
+  </target>
+
+  <!-- Compile the code -->
+  <target name="compile" depends="prepare">
+    <mkdir dir="${build.classes.dir}"/>
+    <javac srcdir="${source.dir}"
+           encoding="8859_1"
+           deprecation="on"
+           debug="${compile.debug}"
+           includeAntRuntime="${compile.includeAntRuntime}"
+           optimize="${compile.optimize}"
+           destdir="${build.classes.dir}">
+      <classpath refid="lib.path"/>
+      <compilerarg value="-Xlint"/>
+    </javac>
+  </target>
+
+  <!-- UNIT TESTS -->
+  <target name="test" depends="build,execute.test" />
+
+  <target name="compile.test">
+    <mkdir dir="${build.test.dir}"/>
+    <javac srcdir="${app.root.dir}/test"
+           encoding="8859_1"
+           deprecation="on"
+           debug="${compile.debug}"
+           includeAntRuntime="${compile.includeAntRuntime}"     
+           optimize="${compile.optimize}"
+           destdir="${build.test.dir}">
+      <classpath location="${build.classes.dir}"/>
+      <classpath refid="lib.path"/>
+      <classpath refid="test.lib.path"/>
+    </javac>
+    
+    <!-- copy any resources -->
+    <copy todir="${build.test.dir}">
+      <fileset dir="${app.root.dir}/test">
+        <include name="**/*.xml"/>
+        <include name="**/*.properties"/>
+        <include name="**/*.groovy"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="prepare.test" depends="compile.test">
+    <mkdir dir="${build.test.dir}" />
+    <mkdir dir="${dist.dir}/junit-reports" />
+  </target> 
+  
+  <target name="execute.test" depends="prepare.test">
+  <mkdir dir="${dist.dir}/junit-reports" />
+  <junit dir="${build.test.dir}" showoutput="true" forkmode="perBatch" printsummary="no" >
+    <jvmarg line="-Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=512m"/>
+    <formatter type="xml"/> 
+    <formatter type="brief" usefile="false" if="test.format.brief" />
+    <classpath refid="test.lib.path"/>
+    <classpath location="${build.classes.dir}"/>
+    <classpath refid="lib.path"/>
+    <classpath location="${build.test.dir}" />
+    <batchtest fork="yes" todir="${dist.dir}/junit-reports">
+      <fileset dir="${build.test.dir}" includes="**/*Test.class" />
+    </batchtest>
+  </junit>
+  </target>
+  
+  <!-- INTEGRATION TESTS -->
+  <target name="itest" depends="build,execute.itest" />
+
+  <target name="compile.itest">
+    <mkdir dir="${build.itest.dir}"/>
+    <javac srcdir="${app.root.dir}/itest"
+           encoding="8859_1"
+           deprecation="on"
+           debug="${compile.debug}"
+           includeAntRuntime="${compile.includeAntRuntime}"     
+           optimize="${compile.optimize}"
+           destdir="${build.itest.dir}">
+      <classpath location="${build.classes.dir}"/>
+      <classpath refid="lib.path"/>
+      <classpath refid="test.lib.path"/>
+    </javac>
+
+    <!-- copy any resources -->
+    <copy todir="${build.itest.dir}">
+      <fileset dir="${app.root.dir}/itest">
+        <include name="**/*.h5"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="prepare.itest">
+    <mkdir dir="${build.itest.dir}" />
+    <mkdir dir="${dist.dir}/junit-reports" />
+  </target>
+
+  <target name="execute.itest" depends="prepare.itest,compile.itest">
+    <junit dir="${build.itest.dir}" showoutput="true" forkmode="perBatch" printsummary="no" >
+      <jvmarg line="-Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=512m"/>
+      <formatter type="xml"/> 
+      <formatter type="brief" usefile="false" if="test.format.brief" />
+      <classpath refid="test.lib.path"/>
+      <classpath location="${build.classes.dir}"/>
+      <classpath refid="lib.path"/>
+      <classpath location="${build.itest.dir}" />
+      <sysproperty key="itest.restdb.uri" value="${itest.restdb.uri}"/>
+      <batchtest fork="yes" todir="${dist.dir}/junit-reports">
+        <fileset dir="${build.itest.dir}" includes="**/*Test.class" />
+      </batchtest>
+    </junit>
+  </target> 
+
+  <!-- clean directories for building -->
+  <target name="clean">
+    <delete dir="${build.dir}" />
+    <delete dir="${dist.dir}" />
+  </target>
+  
+  <!-- Prepare for compilation and jar-generation, copy files -->
+  <target name="prepare">
+    <mkdir dir="${build.dir}" />
+    <mkdir dir="${build.classes.dir}" />
+
+    <!-- Copy misc extra files that resides in the src into classes -->
+    <copy todir="${build.classes.dir}" preservelastmodified="true">
+      <fileset dir="${source.dir}">
+        <include name="**/*.properties"/>
+        <include name="**/*.handlers"/>
+        <include name="**/*.schemas"/>
+        <include name="**/*.xml"/>
+        <include name="**/*.dtd"/>
+        <include name="**/*.xsd"/>
+        <include name="**/*.vm"/>
+        <include name="**/*.ftl"/>
+        <include name="**/*.types"/>
+      </fileset>
+    </copy>
+  </target>
+</project>
+

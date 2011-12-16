@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<attributes>
+  <attribute name="Conventions"        type="string" />
+
+  <!--
+   * Table 1
+   * Mandatory top-level what header Attributes for all weather
+   * radar files
+  -->
+  <attribute name="what/object"        type="string" />
+  <attribute name="what/version"       type="string" />
+  <attribute name="what/date"          type="date" />
+  <attribute name="what/time"          type="time" />
+  <attribute name="what/source"        type="string" />
+
+
+  <!--
+   * Table 4
+   * where Attributes for polar data objects
+  -->
+  <attribute name="where/lon"          type="double" />
+  <attribute name="where/lat"          type="double" />
+  <attribute name="where/height"       type="double" />
+  <!-- Dataset specific -->
+  <attribute name="where/elangle"      type="double" />
+  <attribute name="where/nbins"        type="long" />
+  <attribute name="where/rstart"       type="double" />
+  <attribute name="where/rscale"       type="double" />
+  <attribute name="where/nrays"        type="long" />
+  <attribute name="where/a1gate"       type="long" />
+  <!-- Sector specific -->
+  <attribute name="where/startaz"      type="double" />
+  <attribute name="where/stopaz"       type="double" />
+  
+
+  <!--
+   * Table 5
+   * where Attributes for geographical image data Groups
+  -->
+  <attribute name="where/projdef"      type="string" />
+  <attribute name="where/xsize"        type="long" />
+  <attribute name="where/ysize"        type="long" />
+  <attribute name="where/xscale"       type="double" />
+  <attribute name="where/yscale"       type="double" />
+  <attribute name="where/LL_lon"       type="double" />
+  <attribute name="where/LL_lat"       type="double" />
+  <attribute name="where/UL_lon"       type="double" />
+  <attribute name="where/UL_lat"       type="double" />
+  <attribute name="where/UR_lon"       type="double" />
+  <attribute name="where/UR_lat"       type="double" />
+  <attribute name="where/LR_lon"       type="double" />
+  <attribute name="where/LR_lat"       type="double" />
+
+
+  <!--
+   * Table 6
+   * where for cross-section data Group
+  -->
+  <!-- Common Attributes -->
+  <!-- XXX: duplicates
+  <attribute name="where/xsize"        type="long" />
+  <attribute name="where/ysize"        type="long" />
+  <attribute name="where/xscale"       type="double" />
+  <attribute name="where/yscale"       type="double" />
+  -->
+  <attribute name="where/minheight"    type="double" />
+  <attribute name="where/maxheight"    type="double" />
+  <!-- RHI specific -->
+  <!-- XXX: duplicates
+  <attribute name="where/lon"          type="double" />
+  <attribute name="where/lat"          type="double" />
+  -->
+  <attribute name="where/az_angle"     type="double" />
+  <attribute name="where/angles"       type="sequence" />
+  <attribute name="where/range"        type="double" />
+  <!-- Cross section and side panel specific -->
+  <attribute name="where/start_lon"    type="double" />
+  <attribute name="where/start_lat"    type="double" />
+  <attribute name="where/stop_lon"     type="double" />
+  <attribute name="where/stop_lat"     type="double" />
+
+
+  <!--
+   * Table 7
+   * where for vertical profiles
+  -->
+  <!-- XXX: duplicates
+  <attribute name="where/lon"          type="double" />
+  <attribute name="where/lat"          type="double" />
+  <attribute name="where/height"       type="double" />
+  -->
+  <attribute name="where/levels"       type="long" />
+  <attribute name="where/interval"     type="double" />
+  <!-- XXX: duplicates
+  <attribute name="where/minheight"    type="double" />
+  <attribute name="where/maxheight"    type="double" />
+  -->
+
+
+  <!--
+   * Table 8
+   * how attributes for all objects
+  -->
+  <attribute name="how/task"           type="string" />
+  <attribute name="how/startepochs"    type="long" />
+  <attribute name="how/endepochs"      type="long" />
+  <attribute name="how/system"         type="string" />
+  <attribute name="how/software"       type="string" />
+  <attribute name="how/sw_version"     type="string" />
+  <attribute name="how/zr_a"           type="double" />
+  <attribute name="how/zr_b"           type="double" />
+  <attribute name="how/kr_a"           type="double" />
+  <attribute name="how/kr_b"           type="double" />
+  <attribute name="how/simulated"      type="boolean" />
+  <!-- Data from individual radars -->
+  <attribute name="how/beamwidth"      type="double" />
+  <attribute name="how/wavelength"     type="double" />
+  <attribute name="how/rpm"            type="double" />
+  <attribute name="how/pulsewidth"     type="double" />
+  <attribute name="how/lowprf"         type="long" />
+  <attribute name="how/highprf"        type="long" />
+  <!-- Polar data -->
+  <attribute name="how/azmethod"       type="string" />
+  <attribute name="how/binmethod"      type="string" />
+  <attribute name="how/azangles"       type="sequence" />
+  <attribute name="how/elangles"       type="sequence" />
+  <attribute name="how/aztimes"        type="sequence" />
+  <!-- Cartesian images including composites -->
+  <attribute name="how/angles"         type="sequence" />
+  <attribute name="how/arotation"      type="sequence" />
+  <attribute name="how/camethod"       type="string" />
+  <attribute name="how/nodes"          type="sequence" />
+  <attribute name="how/ACCnum"         type="long" />
+  <!-- Vertical profile specific -->
+  <attribute name="how/minrange"       type="double" />
+  <attribute name="how/maxrange"       type="double" />
+  <attribute name="how/NI"             type="double" />
+  <attribute name="how/dealiased"      type="long" />
+  <!-- Quality -->
+  <attribute name="how/pointaccEL"     type="double" />
+  <attribute name="how/pointaccAZ"     type="double" />
+  <attribute name="how/malfunc"        type="boolean" />
+  <attribute name="how/radar_msg"      type="string" />
+  <attribute name="how/radhoriz"       type="double" />
+  <attribute name="how/MDS"            type="double" />
+  <attribute name="how/OUR"            type="double" />
+  <attribute name="how/Dclutter"       type="sequence" />
+  <attribute name="how/comment"        type="string" />
+  <attribute name="how/SQI"            type="double" />
+  <attribute name="how/CSR"            type="double" />
+  <attribute name="how/LOG"            type="double" />
+  <attribute name="how/VPRCorr"        type="boolean" />
+  <attribute name="how/freeze"         type="double" />
+  <attribute name="how/min"            type="double" />
+  <attribute name="how/max"            type="double" />
+  <attribute name="how/step"           type="double" />
+  <attribute name="how/levels"         type="long" />
+  <attribute name="how/peakpwr"        type="double" />
+  <attribute name="how/avgpwr"         type="double" />
+  <attribute name="how/dynrange"       type="double" />
+  <attribute name="how/RAC"            type="double" />
+  <attribute name="how/BBC"            type="boolean" />
+  <attribute name="how/PAC"            type="double" />
+  <attribute name="how/S2N"            type="double" />
+  <attribute name="how/polarization"   type="string" />
+
+
+  <!--
+   * Table 13
+   * what Group for Dataset Objects
+  -->
+  <attribute name="what/product"       type="string" />
+  <!-- XXX: varying type (double or sequence)
+  <attribute name="what/prodpar"       type="sequence" />
+  -->
+  <attribute name="what/quantity"      type="string" />
+  <attribute name="what/startdate"     type="date" />
+  <attribute name="what/starttime"     type="time" />
+  <attribute name="what/enddate"       type="date" />
+  <attribute name="what/endtime"       type="time" />
+  <attribute name="what/gain"          type="double" />
+  <attribute name="what/offset"        type="double" />
+  <attribute name="what/nodata"        type="double" />
+  <attribute name="what/undetect"      type="double" />
+
+
+  <!--
+   * Table 17
+   * Eight-bit Image attributes.
+  -->
+  <attribute name="CLASS"              type="string" />
+  <attribute name="IMAGE_VERSION"      type="string" />
+  
+  
+  <!--
+   * "virtual" attributes
+  -->
+  <attribute name="file:uuid"          type="string" />
+  <attribute name="file:hash"          type="string" />
+  <attribute name="file:stored_date"   type="date" />
+  <attribute name="file:stored_time"   type="time" />
+  <attribute name="what/source:_name"  type="string" />
+  <attribute name="what/source:WMO"    type="string" />
+  <attribute name="what/source:RAD"    type="string" />
+  <attribute name="what/source:ORG"    type="string" />
+  <attribute name="what/source:PLC"    type="string" />
+  <attribute name="what/source:CTY"    type="string" />
+  <attribute name="what/source:CMT"    type="string" />
+</attributes>
