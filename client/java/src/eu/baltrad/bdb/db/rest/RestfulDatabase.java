@@ -244,7 +244,10 @@ public class RestfulDatabase implements Database {
     try {
       return new RestfulResponse(httpClient.execute(request));
     } catch (IOException e) {
-      throw new DatabaseError("http request failed", e);
+      throw new DatabaseError(
+        "HTTP " + request.getMethod() + " to " + request.getURI() + " failed",
+        e
+      );
     }
   }
 }
