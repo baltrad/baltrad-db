@@ -19,7 +19,10 @@ def run():
             conffile = os.path.abspath(value)
         else:
             assert False, "uhandled option: " + opt
-    
+
+    if not conffile:
+        raise SystemExit("configuration file not specified")
+
     try:
         config = Properties.load(conffile)
     except IOError:
