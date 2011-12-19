@@ -191,7 +191,7 @@ class SqlAlchemyBackend(Backend):
         return d
     
     def get_connection(self):
-        return self._engine.connect()
+        return self._engine
     
     def get_source_id(self, source):
         where = sql.literal(False)
