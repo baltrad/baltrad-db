@@ -75,7 +75,7 @@ class SqlAlchemyBackend(Backend):
         :param engine_or_url: sqlalchemy engine or database url
         """
         if isinstance(engine_or_url, basestring):
-            self._engine = engine.create_engine(engine_or_url, echo=True)
+            self._engine = engine.create_engine(engine_or_url, echo=False)
         else:
             self._engine = engine_or_url
         self._hasher = oh5.MetadataHasher()
@@ -289,6 +289,16 @@ class SqlAlchemyBackend(Backend):
         for row in result.fetchall():
             r.append(dict(zip(result.keys(), row)))
         return r
+    
+    def is_operational(self):
+        conn = self.get_connection()
+        required_tables = [table for table in schema.meta.sorted_tables]
+        required_tables.remove(schema.file_data)
+        for table in required_tables:
+            if not table.exists(conn):
+                print table.name, "does not exist"
+                return False
+        return True
  
 def _insert_file(conn, meta, source_id):
     return conn.execute(

@@ -113,6 +113,12 @@ class Backend(object):
         """
         raise NotImplemented()
     
+    @abc.abstractmethod
+    def is_operational(self):
+        """test if the backend is fully operational
+        """
+        raise NotImplemented()
+    
 def create_from_config(config):
     backend_type = config["backend.type"]
     if backend_type == "sqlalchemy":
