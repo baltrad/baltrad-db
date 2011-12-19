@@ -20,48 +20,47 @@ import operator
 
 from sqlalchemy import sql
 
+from baltrad.bdbcommon.expr import Evaluator
+
 from . import schema
 
 class ExprToSql(object):
     def __init__(self):
         self.where_clause = sql.literal(True)
         self.from_clause = schema.files
+        self.evaluator = evaluator = Evaluator()
 
-        self._handlers = {
-            "+":   operator.add,
-            "-":   operator.sub,
-            "*":   operator.mul,
-            "/":   operator.div,
-            
-            "=":   operator.eq,
-            "!=":  operator.ne,
-            "<":   operator.lt,
-            ">":   operator.gt,
-            ">=":  operator.ge,
-            "<=":  operator.le,
+        evaluator.add_procedure("+", operator.add)
+        evaluator.add_procedure("-", operator.sub)
+        evaluator.add_procedure("*", operator.mul)
+        evaluator.add_procedure("/", operator.div)
+
+        evaluator.add_procedure("=",   operator.eq)
+        evaluator.add_procedure("!=",  operator.ne)
+        evaluator.add_procedure("<",   operator.lt)
+        evaluator.add_procedure(">",   operator.gt)
+        evaluator.add_procedure(">=",  operator.ge)
+        evaluator.add_procedure("<=",  operator.le)
     
-            "and": operator.and_,
-            "or":  operator.or_,
-            "not": operator.inv,
-           
-            "like": self.like,
-            "in": lambda lhs, rhs: lhs.in_(rhs),
-            "list": list,
-            "attr": self.get_attr_column,
+        evaluator.add_procedure("and", operator.and_)
+        evaluator.add_procedure("or",  operator.or_)
+        evaluator.add_procedure("not", operator.inv)
 
-            "asc": lambda col: col.asc(),
-            "desc": lambda col: col.desc(),
-            
-            "list": lambda *args: list(args),
-            "date": lambda *args: datetime.date(*args),
-            "time": lambda *args: datetime.time(*args),
-            "datetime": lambda *args: datetime.datetime(*args),
+        evaluator.add_procedure("like", self.like)
+        evaluator.add_procedure("in", lambda lhs, rhs: lhs.in_(rhs))
+        evaluator.add_procedure("attr", self.get_attr_column)
 
-            "count": sql.func.count,
-            "max": sql.func.max,
-            "min": sql.func.min,
-            "sum": sql.func.sum,
-        }
+        evaluator.add_procedure("asc", lambda col: col.asc())
+        evaluator.add_procedure("desc", lambda col: col.desc())
+
+        evaluator.add_procedure("date", lambda *args: datetime.date(*args))
+        evaluator.add_procedure("time", lambda *args: datetime.time(*args))
+        evaluator.add_procedure("datetime", lambda *args: datetime.datetime(*args))
+
+        evaluator.add_procedure("count", sql.func.count)
+        evaluator.add_procedure("max", sql.func.max)
+        evaluator.add_procedure("min", sql.func.min)
+        evaluator.add_procedure("sum", sql.func.sum)
         
         self._mapper = {
             "file:uuid": schema.files.c.uuid,
@@ -145,23 +144,9 @@ class ExprToSql(object):
         tables = sql.util.find_tables(self.from_clause, include_aliases=True)
         return table in tables
 
-    def eval_(self, expr):
-        if not isinstance(expr, list):
-            return expr
-        else:
-            try:
-                proc = self.get_proc(expr[0])
-            except LookupError:
-                raise RuntimeError("no procedure for expression: %r" % expr)
-            expr = [self.eval_(x) for x in expr[1:]]
-            return proc(*expr)
-            
     def __call__(self, expr):
-        return self.eval_(expr)
+        return self.evaluator.evaluate(expr)
     
-    def get_proc(self, op):
-        return self._handlers[op]
-
 def _order_clause(clause):
     if clause.modifier == sql.operators.desc_op:
         return sql.func.max(clause.element).desc()
@@ -184,7 +169,9 @@ def transform_file_query(query):
         order_by_clauses = [_order_clause(clause) for clause in order_by_clauses]
         group_by_clauses.append(schema.files.c.uuid)
     else:
-        stored_timestamp = (schema.files.c.stored_date + schema.files.c.stored_time).label("stored_timestamp")
+        stored_timestamp = (
+            schema.files.c.stored_date + schema.files.c.stored_time
+        ).label("stored_timestamp")
         select_columns.append(stored_timestamp)
         order_by_clauses.append(stored_timestamp.asc())
         distinct = True
@@ -207,6 +194,7 @@ def transform_attribute_query(query):
 
     for key, xpr in query.fetch.iteritems():
         attr_column = evaluator(xpr)
+        print attr_column
         select_columns.append(attr_column.label(key))
 
     where_clause = evaluator(query.filter)

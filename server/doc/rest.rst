@@ -10,6 +10,22 @@ Common Response Headers
 JSON objects
 ------------
 
+Expression representation
+'''''''''''''''''''''''''
+
+Basic expression types retain their presentation in JSON, but a symbol is
+transformed to an array of literal "symbol" and the symbol name:
+
+::
+  `name` => ["symbol", "name"]
+
+Since this doesn't allow to represent some lists unambiguously, lists are
+prefixed with additional "list" literal:
+
+::
+
+  [1, "foo", "bar"] => ["list, 1, "foo", "bar"]
+
 Operations
 ----------
 

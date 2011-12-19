@@ -19,6 +19,8 @@ import httplib
 import shutil
 from tempfile import NamedTemporaryFile
 
+from baltrad.bdbcommon import expr
+
 from .util import (
     HttpConflict,
     HttpNotFound,
@@ -88,7 +90,6 @@ def get_file_metadata(ctx, uuid):
     metadata = ctx.backend.get_file_metadata(uuid)
     if metadata is None:
         raise HttpNotFound()
-
     return JsonResponse({"metadata": metadata.json_repr()})
 
 def remove_file(ctx, uuid):
@@ -142,8 +143,9 @@ def query_file(ctx):
     data = ctx.request.get_json_data()
 
     query = FileQuery()
-    query.filter = data.get("filter", query.filter)
-    query.order = data.get("order", query.order)
+    if "filter" in data:
+        query.filter = expr.unwrap_json(data.get("filter"))
+    query.order = [expr.unwrap_json(xpr) for xpr in data.get("order", [])]
     query.limit = data.get("limit", query.limit)
     query.skip = data.get("skip", query.skip)
 
@@ -164,11 +166,13 @@ def query_attribute(ctx):
     data = ctx.request.get_json_data()
 
     query = AttributeQuery()
-    query.fetch = data.get("fetch", query.fetch)
-    query.filter = data.get("filter", query.filter)
+    for key, value in data.get("fetch", {}).iteritems():
+        query.fetch[key] = expr.unwrap_json(value)
+    if "filter" in data:
+        query.filter = expr.unwrap_json(data.get("filter"))
     query.distinct = data.get("distinct", query.distinct)
-    query.order = data.get("order", query.order)
-    query.group = data.get("group", query.group)
+    query.order = [expr.unwrap_json(xpr) for xpr in data.get("order", [])]
+    query.group = [expr.unwrap_json(xpr) for xpr in data.get("group", [])]
     query.limit = data.get("limit", query.limit)
     query.skip = data.get("skip", query.skip)
 

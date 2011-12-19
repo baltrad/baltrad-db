@@ -17,80 +17,142 @@
 
 import datetime
 
+class Symbol(object):
+    def __init__(self, value):
+        self.value = value
+    
+    def __eq__(self, other):
+        if isinstance(other, Symbol):
+            return self.value == other.value
+        return False
+    
+    def __repr__(self):
+        return "Symbol('" + self.value + "')"
+
+def binary_operator(op, lhs, rhs):
+    return [symbol(op), lhs, rhs]
+
 def add(lhs, rhs):
-    return ["+", lhs, rhs]
+    return binary_operator("+", lhs, rhs)
 
 def sub(lhs, rhs):
-    return ["-", lhs, rhs]
+    return binary_operator("-", lhs, rhs)
 
 def mul(lhs, rhs):
-    return ["*", lhs, rhs]
+    return binary_operator("*", lhs, rhs)
 
 def div(lhs, rhs):
-    return ["/", lhs, rhs]
+    return binary_operator("/", lhs, rhs)
 
 def and_(lhs, rhs):
-    return ["and", lhs, rhs]
+    return binary_operator("and", lhs, rhs)
 
 def or_(lhs, rhs):
-    return ["or", lhs, rhs]
+    return binary_operator("or", lhs, rhs)
 
 def not_(xpr):
-    return ["not", xpr]
+    return [symbol("not"), xpr]
 
 def attribute(name, type_):
-    return ["attr", name, type_]
+    return [symbol("attr"), name, type_]
 
 def literal(lit):
-    if isinstance(lit, list):
-        return ["list"] + lit
-    elif isinstance(lit, datetime.datetime):
-        return ["datetime", lit.year, lit.month, lit.day,
-                            lit.hour, lit.minute, lit.second]
+    if isinstance(lit, datetime.datetime):
+        return [symbol("datetime"),
+                lit.year, lit.month, lit.day,
+                lit.hour, lit.minute, lit.second]
     elif isinstance(lit, datetime.date):
-        return ["date", lit.year, lit.month, lit.day]
+        return [symbol("date"), lit.year, lit.month, lit.day]
     elif isinstance(lit, datetime.time):
-        return ["time", lit.hour, lit.minute, lit.second]
+        return [symbol("time"), lit.hour, lit.minute, lit.second]
     return lit
 
+def symbol(value):
+    return Symbol(value)
+
 def eq(lhs, rhs):
-    return ["=", lhs, rhs]
+    return binary_operator("=", lhs, rhs)
 
 def le(lhs, rhs):
-    return ["<=", lhs, rhs]
+    return binary_operator("<=", lhs, rhs)
 
 def lt(lhs, rhs):
-    return ["<", lhs, rhs]
+    return binary_operator("<", lhs, rhs)
 
 def gt(lhs, rhs):
-    return [">", lhs, rhs]
+    return binary_operator(">", lhs, rhs)
 
 def ge(lhs, rhs):
-    return ["<", lhs, rhs]
+    return binary_operator("<", lhs, rhs)
 
 def between(xpr, low, high):
     return and_(le(low, xpr), le(xpr, high))
 
 def like(xpr, pattern):
-    return ["like", xpr, pattern]
+    return binary_operator("like", xpr, pattern)
 
 def asc(xpr):
-    return ["asc", xpr]
+    return [symbol("asc"), xpr]
 
 def desc(xpr):
-    return ["desc", xpr]
+    return [symbol("desc"), xpr]
 
 def in_(lhs, rhs):
-    return ["in", lhs, rhs]
+    return binary_operator("in", lhs, rhs)
 
 def min(xpr):
-    return ["min", xpr]
+    return [symbol("min"), xpr]
 
 def max(xpr):
-    return ["max", xpr]
+    return [symbol("max"), xpr]
 
 def sum(xpr):
-    return ["sum", xpr]
+    return [symbol("sum"), xpr]
 
 def count(xpr):
-    return ["count", xpr]
+    return [symbol("count"), xpr]
+
+def unwrap_json(xpr):
+    if isinstance(xpr, list):
+        if xpr[0] == "symbol" and len(xpr) == 2:
+            return Symbol(xpr[1])
+        if xpr[0] == "list":
+            return [unwrap_json(child_xpr) for child_xpr in xpr[1:]]
+        else:
+            raise ValueError("unhandled type at xpr[0]: %s" % xpr[0])
+    else:
+        return xpr
+
+class EvaluationError(RuntimeError):
+    pass
+
+class Evaluator(object):
+    def __init__(self):
+        self._procedures = {}
+    
+    def add_procedure(self, name, callback):
+        self._procedures[name] = callback
+    
+    def get_procedure(self, name):
+        return self._procedures[name]
+
+    def evaluate(self, xpr):
+        if isinstance(xpr, Symbol):
+            try:
+                return self.get_procedure(xpr.value)
+            except LookupError:
+                raise EvaluationError("No procedure found: %s" % xpr.value)
+        elif not isinstance(xpr, list):
+            return xpr
+        else:
+            if len(xpr) == 0:
+                return xpr
+            xpr = [self.evaluate(child_xpr) for child_xpr in xpr]
+            if callable(xpr[0]):
+                proc = xpr.pop(0)
+                try:
+                    return proc(*xpr)
+                except TypeError, e:
+                    raise EvaluationError(str(e))
+            else:
+                return xpr

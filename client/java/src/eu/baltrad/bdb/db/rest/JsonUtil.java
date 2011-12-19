@@ -105,7 +105,8 @@ public final class JsonUtil {
       return new Attribute(name, valueNode.getTextValue());
     } else {
       throw new RuntimeException(
-        "unhandled JSON value node: " + valueNode.getClass().getName()
+        "attribute " + name + " unhandled JSON value node: "
+        + valueNode.getClass().getName()
       );
     }
   }
@@ -114,6 +115,7 @@ public final class JsonUtil {
     switch (expr.getType()) {
       case LIST:
         ArrayNode listArray = nodeFactory.arrayNode();
+        listArray.add(nodeFactory.textNode("list"));
         for (Expression childExpr : expr) {
           listArray.add(toJson(childExpr));
         }

@@ -1,6 +1,6 @@
 import httplib
 
-from mock import Mock
+from mock import Mock, patch
 
 from nose.tools import eq_, raises
 
@@ -134,12 +134,13 @@ class TestQueryHandlers(object):
             data=data,
         ).get_request(Request)
     
-    def test_query_file(self):
+    @patch("baltrad.bdbcommon.expr.unwrap_json")
+    def test_query_file(self, unwrap_json):
         self.ctx.request = self.create_request("POST",
             data=(
                 '{'
-                    '"filter": null,'
-                    '"order": [],'
+                    '"filter": "mockfilter",'
+                    '"order": ["mockorder1", "mockorder2"],'
                     '"limit": 2,'
                     '"skip": 1'
                 '}'
@@ -159,16 +160,25 @@ class TestQueryHandlers(object):
             ']}'
         )
         eq_(expected, response.data)
+        eq_(
+            [
+                (("mockfilter",), {}),
+                (("mockorder1",), {}),
+                (("mockorder2",), {}),
+            ],
+            unwrap_json.call_args_list
+        )
     
-    def test_query_attribute(self):
+    @patch("baltrad.bdbcommon.expr.unwrap_json")
+    def test_query_attribute(self, unwrap_json):
         self.ctx.request = self.create_request("POST",
             data=(
                 '{'
-                    '"fetch": {"uuid": ["attr", "file:uuid", "string"]},'
-                    '"filter": null,'
+                    '"fetch": {"fetch1": "mockfetch1", "fetch2": "mockfetch2"},'
+                    '"filter": "mockfilter",'
                     '"distinct": false,'
-                    '"order": [],'
-                    '"group": [],'
+                    '"order": ["mockorder1", "mockorder2"],'
+                    '"group": ["mockgroup1", "mockgroup2"],'
                     '"limit": 2,'
                     '"skip": 1'
                 '}'
@@ -189,3 +199,15 @@ class TestQueryHandlers(object):
             ']}'
         )
         eq_(expected, response.data)
+        eq_(
+            [
+                (("mockfetch2",), {}),
+                (("mockfetch1",), {}),
+                (("mockfilter",), {}),
+                (("mockorder1",), {}),
+                (("mockorder2",), {}),
+                (("mockgroup1",), {}),
+                (("mockgroup2",), {}),
+            ],
+            unwrap_json.call_args_list, 
+        )

@@ -74,13 +74,14 @@ public class JsonUtilTest {
       exprFactory.symbol("bar")
     );
     JsonNode result = classUnderTest.toJson(expr);
-    assertEquals(5, result.size());
-    assertEquals("foo", result.get(0).getTextValue());
-    assertEquals(1, result.get(1).getLongValue());
-    assertEquals(1.1, result.get(2).getDoubleValue(), 0.00000001);
-    assertEquals(true, result.get(3).getBooleanValue());
-    assertEquals(2, result.get(4).size());
-    assertEquals("symbol", result.get(4).get(0).getTextValue());
-    assertEquals("bar", result.get(4).get(1).getTextValue());
+    assertEquals(6, result.size());
+    assertEquals("list", result.get(0).getTextValue());
+    assertEquals("foo", result.get(1).getTextValue());
+    assertEquals(1, result.get(2).getLongValue());
+    assertEquals(1.1, result.get(3).getDoubleValue(), 0.00000001);
+    assertEquals(true, result.get(4).getBooleanValue());
+    assertEquals(2, result.get(5).size());
+    assertEquals("symbol", result.get(5).get(0).getTextValue());
+    assertEquals("bar", result.get(5).get(1).getTextValue());
   }
 }
