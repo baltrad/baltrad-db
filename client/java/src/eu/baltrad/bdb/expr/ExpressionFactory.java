@@ -144,8 +144,8 @@ public final class ExpressionFactory {
     return listCons.extend(exprs).create();
   }
 
-  public Expression list(List<Expression> expressions) {
-    return null;
+  public Expression list(List<Expression> exprs) {
+    return listCons.extend(exprs).create();
   }
 
   public Expression attribute(String name, String type) {

@@ -47,6 +47,52 @@ public class ListExpressionTest {
   }
 
   @Test
+  public void constructFromArray_containingNulls() {
+    try {
+      classUnderTest = new ListExpression(
+        new LongExpression(1),
+        new LongExpression(2),
+        null
+      );
+      fail("expected IllegalArgumentException");
+    } catch (IllegalArgumentException e) { }
+  }
+
+  @Test
+  public void constructFromList() {
+    List<Expression> values = new ArrayList<Expression>();
+    values.add(new LongExpression(1));
+    values.add(new LongExpression(2));
+
+    classUnderTest = new ListExpression(values);
+
+    assertEquals(2, classUnderTest.size());
+    assertEquals(new Long(1), classUnderTest.get(0).toLong());
+    assertEquals(new Long(2), classUnderTest.get(1).toLong());
+  }
+
+  @Test
+  public void constructFromList_containingNulls() {
+    List<Expression> values = new ArrayList<Expression>();
+    values.add(new LongExpression(1));
+    values.add(new LongExpression(2));
+    values.add(null);
+
+    try {
+      classUnderTest = new ListExpression(values);
+      fail("expected IllegalArgumentException");
+    } catch (IllegalArgumentException e) { }
+  }
+
+  @Test
+  public void add_null() {
+    try {
+      classUnderTest.add(null);
+      fail("expected IllegalArgumentException");
+    } catch (IllegalArgumentException e) { }
+  }
+
+  @Test
   public void size() {
     assertEquals(0, classUnderTest.size());
     classUnderTest.add(new LongExpression(1));

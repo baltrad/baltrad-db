@@ -30,18 +30,21 @@ public class ListExpression extends BaseExpression {
     values = new ArrayList<Expression>();
   }
 
-  public ListExpression(Collection<Expression> values) {
-    this.values = new ArrayList<Expression>(values);
+  public ListExpression(List<Expression> values) {
+    this();
+    for (Expression value: values) {
+      add(value);
+    }
   }
 
   public ListExpression(Expression... values) {
-    this.values = Arrays.asList(values);
+    this(Arrays.asList(values));
   }
 
   public ListExpression(ListExpression other) {
     this(other.values);
   }
-  
+
   @Override
   public Type getType() {
     return Type.LIST;
@@ -76,8 +79,17 @@ public class ListExpression extends BaseExpression {
   public Boolean toBoolean() {
     return !values.isEmpty();
   }
-
+  
+  /**
+   * Add a value to this list.
+   *
+   * @throws IllegalArgumentException if value is null
+   */
   public void add(Expression value) {
+    if (value == null)
+      throw new IllegalArgumentException(
+        "ExpressionList can't contain null values"
+      );
     this.values.add(value);
   }
 

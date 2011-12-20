@@ -34,6 +34,33 @@ public class ExpressionFactoryTest {
   }
 
   @Test
+  public void list_fromArray() {
+    Expression[] values = new Expression[]{
+      new LongExpression(1),
+      new LongExpression(2)
+    };
+
+    Expression result = classUnderTest.list(values);
+
+    assertEquals(2, result.size());
+    assertEquals(new Long(1), result.get(0).toLong());
+    assertEquals(new Long(2), result.get(1).toLong());
+  }
+
+  @Test
+  public void list_fromList() {
+    List<Expression> values = new ArrayList<Expression>();
+    values.add(new LongExpression(1));
+    values.add(new LongExpression(2));
+
+    Expression result = classUnderTest.list(values);
+
+    assertEquals(2, result.size());
+    assertEquals(new Long(1), result.get(0).toLong());
+    assertEquals(new Long(2), result.get(1).toLong());
+  }
+
+  @Test
   public void and_ExpressionList() {
     List<Expression> input = new ArrayList<Expression>();
     input.add(classUnderTest.literal(1));

@@ -19,6 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.expr;
 
+import java.util.List;
+
 public class ListCons {
   private ListExpression value;
 
@@ -47,6 +49,13 @@ public class ListCons {
   }
 
   public ListCons extend(Expression... values) {
+    for (Expression value : values) {
+      this.value.add(value);
+    }
+    return this;
+  }
+
+  public ListCons extend(List<Expression> values) {
     for (Expression value : values) {
       this.value.add(value);
     }
