@@ -207,13 +207,15 @@ public final class ExpressionFactory {
   }
 
   public Expression literal(DateTime value) {
+    Date date = value.getDate();
+    Time time = value.getTime();
     return listCons.symbol("datetime")
-                   .literal(value.date().year())
-                   .literal(value.date().month())
-                   .literal(value.date().day())
-                   .literal(value.time().hour())
-                   .literal(value.time().minute())
-                   .literal(value.time().second())
+                   .literal(date.year())
+                   .literal(date.month())
+                   .literal(date.day())
+                   .literal(time.hour())
+                   .literal(time.minute())
+                   .literal(time.second())
                    .create();
   }
 

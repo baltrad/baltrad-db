@@ -63,11 +63,11 @@ public final class DateTime {
     return new DateTime();
   }
 
-  public Date date() {
+  public Date getDate() {
     return new Date(value.toLocalDate());
   }
 
-  public Time time() {
+  public Time getTime() {
     return new Time(value.toLocalTime());
   }
 
