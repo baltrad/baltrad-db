@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
+import contextlib
 import datetime
 import os
 import sqlite3
@@ -92,8 +93,6 @@ class SqlAlchemyBackend(Backend):
         return SqlAlchemyBackend(config["backend.uri"])
         
     def store_file(self, path):
-        conn = self._engine.connect()
-
         meta = oh5.Metadata.from_file(path)
 
         metadata_hash = self._hasher.hash(meta)
@@ -101,8 +100,9 @@ class SqlAlchemyBackend(Backend):
         if not source_id:
             raise LookupError("failed to look up source for " +
                               meta.source().to_string())
-        if _has_file_by_hash_and_source(conn, metadata_hash, source_id):
-            raise DuplicateEntry()
+        with self.get_connection() as conn:
+            if _has_file_by_hash_and_source(conn, metadata_hash, source_id):
+                raise DuplicateEntry()
 
         meta.bdb_uuid = str(uuid.uuid4())
         meta.bdb_file_size = os.stat(path)[stat.ST_SIZE]
@@ -112,48 +112,47 @@ class SqlAlchemyBackend(Backend):
         meta.bdb_stored_time = stored_timestamp.time()
         source = self.get_source_by_id(source_id)
         meta.bdb_source = source.to_string(True)
-
-        trans = conn.begin()
-        try:
-            file_id = _insert_file(conn, meta, source_id)
-            _insert_metadata(conn, meta, file_id)
-            oid = self._file_storage.store(conn, path)
-            conn.execute(
-                schema.files.update().where(schema.files.c.id==file_id),
-                lo_id=oid
-            )
-            trans.commit()
-        except:
-            trans.rollback()
-            raise
+        
+        with self.get_connection() as conn:
+            with conn.begin():
+                file_id = _insert_file(conn, meta, source_id)
+                _insert_metadata(conn, meta, file_id)
+                oid = self._file_storage.store(conn, path)
+                conn.execute(
+                    schema.files.update().where(schema.files.c.id==file_id),
+                    lo_id=oid
+                )
 
         return meta
 
     def get_file(self, uuid):
-        conn = self.get_connection()
         qry = sql.select(
             [schema.files.c.lo_id],
             schema.files.c.uuid==str(uuid)
         )
-        oid = conn.execute(qry).scalar()
-        if not oid:
-            return None
-        return self._file_storage.read(conn, oid);
+
+        with self.get_connection() as conn:
+            oid = conn.execute(qry).scalar()
+            if not oid:
+                return None
+            return self._file_storage.read(conn, oid);
     
     def get_file_metadata(self, uuid):
-        conn = self.get_connection()
-
         qry = sql.select(
             [schema.files],
             schema.files.c.uuid==str(uuid)
         )
-        row = conn.execute(qry).fetchone()
-        if not row:
-            return None
+
+        with self.get_connection() as conn:
+            row = conn.execute(qry).fetchone()
+            if not row:
+                return None
 
         file_id = row[schema.files.c.id]
+        
+        with self.get_connection() as conn:
+            meta = _select_metadata(conn, file_id)
 
-        meta = _select_metadata(conn, file_id)
         meta.bdb_uuid = row[schema.files.c.uuid]
         meta.bdb_file_size = row[schema.files.c.size]
         source_id = row[schema.files.c.source_id]
@@ -164,15 +163,15 @@ class SqlAlchemyBackend(Backend):
         return meta
      
     def remove_file(self, uuid):
-        conn = self.get_connection()
         qry = schema.files.delete(
             schema.files.c.uuid==str(uuid)
         )
-        return bool(conn.execute(qry).rowcount)
+        with self.get_connection() as conn:
+            return bool(conn.execute(qry).rowcount)
     
     def remove_all_files(self):
-        conn = self.get_connection()
-        conn.execute(schema.files.delete())
+        with self.get_connection() as conn:
+            conn.execute(schema.files.delete())
 
     def file_source(self, uuid):
         qry = sql.select(
@@ -181,17 +180,19 @@ class SqlAlchemyBackend(Backend):
         )
         qry = qry.where(schema.files.c.uuid==str(uuid))
 
-        conn = self.get_connection()
-        result = conn.execute(qry).fetchall()
         d = {}
-        for row in result:
-            key = row[schema.source_kvs.key]
-            value = row[schema.source_kvs.value]
-            d[key] = value
+        with self.get_connection() as conn:
+            result = conn.execute(qry).fetchall()
+            for row in result:
+                key = row[schema.source_kvs.key]
+                value = row[schema.source_kvs.value]
+                d[key] = value
         return d
     
     def get_connection(self):
-        return self._engine
+        """get a context managed connection to the database
+        """
+        return contextlib.closing(self._engine.connect())
     
     def get_source_id(self, source):
         where = sql.literal(False)
@@ -210,30 +211,30 @@ class SqlAlchemyBackend(Backend):
             distinct=True
         )
 
-        conn = self.get_connection()
-        return conn.execute(qry).scalar()
+        with self.get_connection() as conn:
+            return conn.execute(qry).scalar()
             
     def get_source_by_id(self, source_id):
-        source = oh5.Source()
-        conn = self.get_connection()
-
-        qry = sql.select(
+        name_qry = sql.select(
             [schema.sources.c.name],
             schema.sources.c.id==source_id
         )
-        source.name = conn.execute(qry).scalar()
 
-        qry = sql.select(
+        kv_qry = sql.select(
             [schema.source_kvs],
             schema.source_kvs.c.source_id==source_id
         )
         
-        for row in conn.execute(qry).fetchall():
-            source[row["key"]] = row["value"]
+        source = oh5.Source()
+
+        with self.get_connection() as conn:
+            source.name = conn.execute(name_qry).scalar()
+            for row in conn.execute(kv_qry).fetchall():
+                source[row["key"]] = row["value"]
+
         return source
     
     def get_sources(self):
-        conn = self.get_connection()
 
         qry = sql.select(
             [schema.sources, schema.source_kvs],
@@ -242,19 +243,19 @@ class SqlAlchemyBackend(Backend):
 
         sources = {}
 
-        for row in conn.execute(qry):
-            name = row["name"]
-            source = sources.setdefault(name, oh5.Source({"_name": name}))
-            source[row["key"]] = row["value"]
+        with self.get_connection() as conn:
+            for row in conn.execute(qry):
+                name = row["name"]
+                source = sources.setdefault(name, oh5.Source({"_name": name}))
+                source[row["key"]] = row["value"]
         return sources.values()
     
     def add_source(self, source):
-        conn = self.get_connection()
-        
-        source_id = conn.execute(
-            schema.sources.insert(),
-            name=source["_name"],
-        ).inserted_primary_key[0]
+        with self.get_connection() as conn:
+            source_id = conn.execute(
+                schema.sources.insert(),
+                name=source["_name"],
+            ).inserted_primary_key[0]
   
         kvs = []
         for k, v in source.iteritems():
@@ -265,39 +266,44 @@ class SqlAlchemyBackend(Backend):
                 "key": k,
                 "value": v,
             })
-  
-        conn.execute(
-            schema.source_kvs.insert(),
-            kvs
-        )
+        
+        with self.get_connection() as conn:
+            conn.execute(
+                schema.source_kvs.insert(),
+                kvs
+            )
         return source_id
     
     def execute_file_query(self, qry):
         stmt = query.transform_file_query(qry)
         conn = self.get_connection()
-        result = conn.execute(stmt).fetchall()
+
         r = []
-        for row in result:
-            r.append({"uuid" : row[schema.files.c.uuid]})
+        with self.get_connection() as conn:
+            result = conn.execute(stmt).fetchall()
+            for row in result:
+                r.append({"uuid" : row[schema.files.c.uuid]})
         return r
     
     def execute_attribute_query(self, qry):
         stmt = query.transform_attribute_query(qry)
-        conn = self.get_connection()
-        result = conn.execute(stmt)
         r = []
-        for row in result.fetchall():
-            r.append(dict(zip(result.keys(), row)))
+        
+        with self.get_connection() as conn:
+            result = conn.execute(stmt)
+            for row in result.fetchall():
+                r.append(dict(zip(result.keys(), row)))
         return r
     
     def is_operational(self):
-        conn = self.get_connection()
         required_tables = [table for table in schema.meta.sorted_tables]
         required_tables.remove(schema.file_data)
-        for table in required_tables:
-            if not table.exists(conn):
-                print table.name, "does not exist"
-                return False
+
+        with self.get_connection() as conn:
+            for table in required_tables:
+                if not table.exists(conn):
+                    print table.name, "does not exist"
+                    return False
         return True
  
 def _insert_file(conn, meta, source_id):
@@ -334,12 +340,14 @@ def _insert_metadata(conn, meta, file_id):
 def _insert_attribute_value(conn, node, node_id):
     value = node.value
     value_int = value_double = value_str = None
-    if isinstance(value, int):
+    if isinstance(value, (long, int)):
         value_int = value
     elif isinstance(value, float):
         value_double = value
     elif isinstance(value, basestring):
         value_str = value
+    else:
+        raise RuntimeError("unhandled attribute value type: %s" % type(value))
 
     conn.execute(
         schema.attribute_values.insert(),

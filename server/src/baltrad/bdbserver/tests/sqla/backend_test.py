@@ -29,12 +29,14 @@ def setup_module():
     global backend
     url = os.environ.get("BDB_TEST_DB", "sqlite:///:memory:")
     backend = SqlAlchemyBackend(url)
-    schema.meta.drop_all(backend.get_connection())
-    schema.meta.create_all(backend.get_connection())
+    with backend.get_connection() as conn:
+        schema.meta.drop_all(conn)
+        schema.meta.create_all(conn)
 
 def teardown_module():
     global backend
-    schema.meta.drop_all(backend.get_connection())
+    with backend.get_connection() as conn:
+        schema.meta.drop_all(conn)
     
 class TestSqlAlchemyBackendItest(object):
     backend = None
@@ -55,10 +57,12 @@ class TestSqlAlchemyBackendItest(object):
     
     @classmethod
     def teardown_class(cls):
-        cls.backend.get_connection().execute(schema.sources.delete())
+        with cls.backend.get_connection() as conn:
+            conn.execute(schema.sources.delete())
 
     def tearDown(self):
-        self.backend.get_connection().execute(schema.files.delete())
+        with self.backend.get_connection() as conn:
+            conn.execute(schema.files.delete())
 
     @staticmethod
     def create_metadata(what_object, what_date, what_time, what_source):
@@ -165,7 +169,9 @@ class TestSqlAlchemyBackendItest(object):
 
         self.backend.remove_all_files()
 
-        eq_(0, self.backend.get_connection().execute(schema.files.count()).scalar())
+        with self.backend.get_connection() as conn:
+            delete_count = conn.execute(schema.files.count()).scalar()
+        eq_(0, delete_count) 
     
     def test_get_sources(self):
         sources = self.backend.get_sources()
@@ -254,7 +260,7 @@ def _insert_test_files(backend):
         _insert_test_file(backend, file_)
     return FILES
 
-def _insert_test_file(conn, file_):
+def _insert_test_file(backend, file_):
     meta = Metadata()
     for k, v in file_.iteritems():
         if hasattr(meta, k):
@@ -262,9 +268,9 @@ def _insert_test_file(conn, file_):
         else:
             _add_attribute(meta, k, v)
     source_id = backend.get_source_id(meta.source())
-    conn = backend.get_connection()
-    file_id =  _insert_file(conn, meta, source_id)
-    _insert_metadata(conn, meta, file_id)
+    with backend.get_connection() as conn:
+        file_id =  _insert_file(conn, meta, source_id)
+        _insert_metadata(conn, meta, file_id)
 
 def _add_attribute(meta, path, value):
     path = path.split("/")
@@ -296,8 +302,9 @@ class TestFileQuery(object):
         
     @classmethod
     def teardown_class(cls):
-        cls.backend.get_connection().execute(schema.files.delete())
-        cls.backend.get_connection().execute(schema.sources.delete())
+        with cls.backend.get_connection() as conn:
+            conn.execute(schema.files.delete())
+            conn.execute(schema.sources.delete())
     
     def setup(self):
         self.query = FileQuery()
@@ -502,8 +509,9 @@ class TestAttributeQuery(object):
         
     @classmethod
     def teardown_class(cls):
-        cls.backend.get_connection().execute(schema.files.delete())
-        cls.backend.get_connection().execute(schema.sources.delete())
+        with cls.backend.get_connection() as conn:
+            conn.execute(schema.files.delete())
+            conn.execute(schema.sources.delete())
     
     def setup(self):
         self.query = AttributeQuery()

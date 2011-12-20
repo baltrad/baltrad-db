@@ -194,7 +194,6 @@ def transform_attribute_query(query):
 
     for key, xpr in query.fetch.iteritems():
         attr_column = evaluator(xpr)
-        print attr_column
         select_columns.append(attr_column.label(key))
 
     where_clause = evaluator(query.filter)
