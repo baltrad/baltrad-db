@@ -17,43 +17,27 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-package eu.baltrad.bdb.util;
+package eu.baltrad.bdb.oh5;
+
+import eu.baltrad.bdb.util.Date;
+import eu.baltrad.bdb.util.Time;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DateTimeTest {
-  private DateTime classUnderTest;
+public class AttributeTest {
+  Attribute classUnderTest;
 
-  @Before
-  public void setUp() {
-    classUnderTest = new DateTime(2011, 12, 13, 14, 15);
+  @Test
+  public void toDate() {
+    classUnderTest = new Attribute("foo", "20111213");
+    assertEquals(new Date(2011, 12, 13), classUnderTest.toDate());
   }
 
   @Test
-  public void equals_sameInstance() {
-    assertTrue(classUnderTest.equals(classUnderTest));
-  }
-
-  @Test
-  public void equals_otherType() {
-    assertFalse(classUnderTest.equals(new Double(1)));
-  }
-
-  @Test
-  public void equals_sameValue() {
-    assertTrue(classUnderTest.equals(new DateTime(2011, 12, 13, 14, 15)));
-  }
-
-  @Test
-  public void equals_differentValue() {
-    assertFalse(classUnderTest.equals(new DateTime(2011, 12, 13, 14, 15, 16)));
-  }
-
-  @Test
-  public void hashCode_sameValue() {
-    DateTime other = new DateTime(2011, 12, 13, 14, 15);
-    assertEquals(classUnderTest.hashCode(), other.hashCode());
+  public void toTime() {
+    classUnderTest = new Attribute("foo", "141516");
+    assertEquals(new Time(14, 15, 16), classUnderTest.toTime());
   }
 }

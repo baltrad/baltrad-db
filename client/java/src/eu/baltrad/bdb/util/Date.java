@@ -21,8 +21,20 @@ package eu.baltrad.bdb.util;
 
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
 
 public class Date {
+  private static DateTimeFormatter isoFormatter;
+
+  static {
+    DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
+    isoFormatter = builder.appendYear(4, 4)
+                          .appendMonthOfYear(2)
+                          .appendDayOfMonth(2)
+                          .toFormatter();
+  }
+
   private final LocalDate value;
   
   /**
@@ -41,7 +53,7 @@ public class Date {
   }
 
   public static Date fromIsoString(String value) {
-    return null;
+    return new Date(isoFormatter.parseLocalDate(value));
   }
 
   public int year() { return value.getYear(); }
@@ -49,6 +61,28 @@ public class Date {
   public int day() { return value.getDayOfMonth(); }
 
   public String toIsoString() {
-    return null;
+    return isoFormatter.print(value);
+  }
+
+  @Override
+  public String toString() {
+    return toIsoString();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other)
+      return true;
+    
+    if (!(other instanceof Date))
+      return false;
+    
+    Date that = (Date)(other);
+    return this.value.equals(that.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return this.value.hashCode();
   }
 }

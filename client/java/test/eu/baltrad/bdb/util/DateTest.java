@@ -23,29 +23,28 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TimeTest {
-  private Time classUnderTest;
+public class DateTest {
+  private Date classUnderTest;
 
   @Before
   public void setUp() {
-    classUnderTest = new Time(12, 13, 14, 15);
+    classUnderTest = new Date(2011, 12, 13);
   }
 
   @Test
   public void toIsoString() {
-    assertEquals("121314", classUnderTest.toIsoString());
+    assertEquals("20111213", classUnderTest.toIsoString());
   }
 
   @Test
   public void fromIsoString() {
-    classUnderTest = Time.fromIsoString("131415");
-    assertEquals(classUnderTest, new Time(13, 14, 15));
+    assertEquals(new Date(2011, 12, 13), Date.fromIsoString("20111213"));
   }
 
   @Test
   public void fromIsoString_invalid() {
     try {
-      classUnderTest = Time.fromIsoString("");
+      classUnderTest = Date.fromIsoString("");
       fail("expected IllegalArgumentException");
     } catch (IllegalArgumentException e) { }
   }
@@ -62,17 +61,17 @@ public class TimeTest {
 
   @Test
   public void equals_sameValue() {
-    assertTrue(classUnderTest.equals(new Time(12, 13, 14, 15)));
+    assertTrue(classUnderTest.equals(new Date(2011, 12, 13)));
   }
 
   @Test
   public void equals_differentValue() {
-    assertFalse(classUnderTest.equals(new Time(12, 13, 14, 16)));
+    assertFalse(classUnderTest.equals(new Date(2011, 12, 14)));
   }
 
   @Test
   public void hashCode_sameValue() {
-    Time other = new Time(12, 13, 14, 15);
+    Date other = new Date(2011, 12, 13);
     assertEquals(classUnderTest.hashCode(), other.hashCode());
   }
 }

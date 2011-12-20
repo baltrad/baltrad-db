@@ -20,6 +20,8 @@ package eu.baltrad.bdb.db;
 
 import eu.baltrad.bdb.oh5.Metadata;
 import eu.baltrad.bdb.oh5.Source;
+import eu.baltrad.bdb.util.Date;
+import eu.baltrad.bdb.util.Time;
 
 import java.io.File;
 import java.io.InputStream;
@@ -35,16 +37,26 @@ public interface FileEntry {
    * Get the unique identifier of this entry.
    */
   UUID getUuid();
-  /*
-  String getHash();
-  long getSize();
-  DateTime getStoredDateTime();
-  */
+    
+  /**
+   * Get the date this entry was stored at.
+   */
+  Date getStoredDate();
+  
+  /**
+   * Get the time this entry was stored at.
+   */
+  Time getStoredTime();
 
   /**
    * Get the associated source (as defined in the database).
    */
   Source getSource();
+
+  /**
+   * Get the size of the content in bytes.
+   */
+  int getContentSize();
 
   /**
    * Get a stream to the file content.
