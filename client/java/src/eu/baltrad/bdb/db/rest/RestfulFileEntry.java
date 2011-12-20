@@ -1,20 +1,24 @@
 package eu.baltrad.bdb.db.rest;
 
+import eu.baltrad.bdb.db.Database;
 import eu.baltrad.bdb.db.FileEntry;
 import eu.baltrad.bdb.oh5.Metadata;
 import eu.baltrad.bdb.oh5.Source;
 import eu.baltrad.bdb.util.Date;
 import eu.baltrad.bdb.util.Time;
 
-import java.io.File;
-import java.io.InputStream;
+import org.apache.commons.io.FileUtils;
+
+import java.io.*;
 import java.util.UUID;
 
 @SuppressWarnings("deprecation")
 public final class RestfulFileEntry implements FileEntry {
+  private final Database database;
   private final Metadata metadata;
 
-  public RestfulFileEntry(Metadata metadata) {
+  public RestfulFileEntry(Database database, Metadata metadata) {
+    this.database = database;
     this.metadata = metadata;
   }
   
@@ -73,11 +77,18 @@ public final class RestfulFileEntry implements FileEntry {
    */
   @Override
   public InputStream getContentStream() {
-    return null;
+    return this.database.getFileContent(getUuid());
   }
 
   @Override
-  public void writeToFile(File file) {
-    
+  public void writeToFile(File destination) {
+    try {
+      FileUtils.copyInputStreamToFile(getContentStream(), destination);
+    } catch (IOException e) {
+      throw new RuntimeException(
+        "couldn't copy file content from stream to " + destination,
+        e
+      );
+    }
   }
 }

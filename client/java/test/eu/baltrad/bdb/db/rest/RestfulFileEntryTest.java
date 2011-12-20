@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.db.rest;
 
+import eu.baltrad.bdb.db.Database;
 import eu.baltrad.bdb.oh5.Attribute;
 import eu.baltrad.bdb.oh5.Group;
 import eu.baltrad.bdb.oh5.Metadata;
@@ -26,20 +27,26 @@ import eu.baltrad.bdb.oh5.Source;
 import eu.baltrad.bdb.util.Date;
 import eu.baltrad.bdb.util.Time;
 
+import static org.easymock.EasyMock.*;
+import org.easymock.EasyMockSupport;
+
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.InputStream;
 import java.util.UUID;
 
-public class RestfulFileEntryTest {
+public class RestfulFileEntryTest extends EasyMockSupport {
+  Database database;
   Metadata metadata;
   RestfulFileEntry classUnderTest;
 
   @Before
   public void setUp() {
+    database = createMock(Database.class);
     metadata = new Metadata();
-    classUnderTest = new RestfulFileEntry(metadata);
+    classUnderTest = new RestfulFileEntry(database, metadata);
   }
 
   @Test
@@ -88,4 +95,19 @@ public class RestfulFileEntryTest {
     assertEquals(new Time(14, 15, 16), classUnderTest.getStoredTime());
   }
 
+  @Test
+  public void getContentStream() {
+    String uuidStr = "00000000-0000-0000-0004-000000000001";
+    metadata.addNode("/", new Group("_bdb"));
+    metadata.addNode("/_bdb", new Attribute("uuid", uuidStr));
+    InputStream mockStream = createMock(InputStream.class);
+    
+    expect(database.getFileContent(UUID.fromString(uuidStr)))
+      .andReturn(mockStream);
+    replayAll();
+
+    InputStream result = classUnderTest.getContentStream();
+    assertSame(mockStream, result);
+    verifyAll();
+  }
 }

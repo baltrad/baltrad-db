@@ -72,7 +72,7 @@ public class RestfulDatabase implements Database {
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_CREATED) {
-        return new RestfulFileEntry(response.getMetadata());
+        return new RestfulFileEntry(this, response.getMetadata());
       } else if (statusCode == HttpStatus.SC_CONFLICT) {
         throw new DuplicateEntry("file already stored");
       } else {
@@ -139,7 +139,7 @@ public class RestfulDatabase implements Database {
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_OK) {
-        return new RestfulFileEntry(response.getMetadata());
+        return new RestfulFileEntry(this, response.getMetadata());
       } else if (statusCode == HttpStatus.SC_NOT_FOUND) {
         return null;
       } else {
