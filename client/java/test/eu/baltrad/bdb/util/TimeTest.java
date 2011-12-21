@@ -37,6 +37,11 @@ public class TimeTest {
   }
 
   @Test
+  public void toExtendedIsoString() {
+    assertEquals("12:13:14", classUnderTest.toExtendedIsoString());
+  }
+
+  @Test
   public void fromIsoString() {
     classUnderTest = Time.fromIsoString("131415");
     assertEquals(classUnderTest, new Time(13, 14, 15));

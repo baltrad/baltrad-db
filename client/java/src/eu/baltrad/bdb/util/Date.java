@@ -26,6 +26,7 @@ import org.joda.time.format.DateTimeFormatterBuilder;
 
 public class Date {
   private static DateTimeFormatter isoFormatter;
+  private static DateTimeFormatter extendedIsoFormatter;
 
   static {
     DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
@@ -33,6 +34,13 @@ public class Date {
                           .appendMonthOfYear(2)
                           .appendDayOfMonth(2)
                           .toFormatter();
+    builder.clear();
+    extendedIsoFormatter = builder.appendYear(4, 4)
+                                  .appendLiteral('-')
+                                  .appendMonthOfYear(2)
+                                  .appendLiteral('-')
+                                  .appendDayOfMonth(2)
+                                  .toFormatter();
   }
 
   private final LocalDate value;
@@ -62,6 +70,10 @@ public class Date {
 
   public String toIsoString() {
     return isoFormatter.print(value);
+  }
+
+  public String toExtendedIsoString() {
+    return extendedIsoFormatter.print(value);
   }
 
   @Override

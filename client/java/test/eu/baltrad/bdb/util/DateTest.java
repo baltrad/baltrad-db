@@ -37,6 +37,11 @@ public class DateTest {
   }
 
   @Test
+  public void toExtendedIsoString() {
+    assertEquals("2011-12-13", classUnderTest.toExtendedIsoString());
+  }
+
+  @Test
   public void fromIsoString() {
     assertEquals(new Date(2011, 12, 13), Date.fromIsoString("20111213"));
   }

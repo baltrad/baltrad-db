@@ -26,6 +26,7 @@ import org.joda.time.format.DateTimeFormatterBuilder;
 
 public final class Time {
   private static DateTimeFormatter isoFormatter;
+  private static DateTimeFormatter extendedIsoFormatter;
 
   static {
     DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
@@ -33,6 +34,13 @@ public final class Time {
                           .appendMinuteOfHour(2)
                           .appendSecondOfMinute(2)
                           .toFormatter();
+    builder.clear();
+    extendedIsoFormatter = builder.appendHourOfDay(2)
+                                  .appendLiteral(':')
+                                  .appendMinuteOfHour(2)
+                                  .appendLiteral(':')
+                                  .appendSecondOfMinute(2)
+                                  .toFormatter();
   }
 
   private final LocalTime value;
@@ -68,6 +76,10 @@ public final class Time {
   
   public String toIsoString() {
     return isoFormatter.print(value);
+  }
+
+  public String toExtendedIsoString() {
+    return extendedIsoFormatter.print(value);
   }
 
   @Override
