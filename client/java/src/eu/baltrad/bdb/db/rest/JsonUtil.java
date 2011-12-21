@@ -161,25 +161,39 @@ public final class JsonUtil {
 
   public JsonNode toJson(AttributeQuery query) {
     ObjectNode result = nodeFactory.objectNode();
+
     ObjectNode fetch = nodeFactory.objectNode();
     for (String key : query.getFetchKeys()) {
       fetch.put(key, toJson(query.getFetchExpression(key)));
     }
     result.put("fetch", fetch);
+
     if (query.getFilter() != null) {
       result.put("filter", toJson(query.getFilter()));
     }
+
     ArrayNode order = nodeFactory.arrayNode();
     for (Expression expr : query.getOrderClause()) {
       order.add(toJson(expr));
     }
-    result.put("order", order);
+    if (order.size() > 0)
+      result.put("order", order);
+
+    ArrayNode group = nodeFactory.arrayNode();
+    for (Expression expr : query.getGroupClause()) {
+      group.add(toJson(expr));
+    }
+    if (group.size() > 0)
+      result.put("group", group);
+
     if (query.getLimit() != null) {
       result.put("limit", query.getLimit());
     }
+
     if (query.getSkip() != null) {
       result.put("skip", query.getSkip());
     }
+
     return result;
   }
 
