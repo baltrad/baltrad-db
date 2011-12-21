@@ -1,8 +1,7 @@
 *.pyc
 .*.swp
-.lock*
-.waf-*
-build/
+client/java/dist
+client/java/build
 client/python/src/baltrad.bdbclient.egg-info/
 common/src/baltrad.bdbcommon.egg-info/
 doc/html
