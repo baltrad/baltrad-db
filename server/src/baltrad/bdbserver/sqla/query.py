@@ -169,11 +169,16 @@ def transform_file_query(query):
         order_by_clauses = [_order_clause(clause) for clause in order_by_clauses]
         group_by_clauses.append(schema.files.c.uuid)
     else:
-        stored_timestamp = (
-            schema.files.c.stored_date + schema.files.c.stored_time
-        ).label("stored_timestamp")
-        select_columns.append(stored_timestamp)
-        order_by_clauses.append(stored_timestamp.asc())
+        #stored_timestamp = (
+        #    schema.files.c.stored_date + schema.files.c.stored_time
+        #).label("stored_timestamp")
+        #select_columns.append(stored_timestamp)
+        #order_by_clauses.append(stored_timestamp.asc())        
+
+        # XXX: since the stored timestamp is only with a second precision,
+        #      use id to order the files.
+        select_columns.append(schema.files.c.id)
+        order_by_clauses.append(schema.files.c.id.asc())
         distinct = True
 
     return sql.select(
