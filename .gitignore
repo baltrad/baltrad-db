@@ -2,10 +2,15 @@
 .*.swp
 *.egg/
 *.egg-info/
-client/java/dist
 client/java/build
+client/java/dist
+client/python/build/
+client/python/dist/
+common/build
+common/dist
 doc/html
 doc/_build
-server/doc/_build
+server/build
+server/dist
 test/reports
 

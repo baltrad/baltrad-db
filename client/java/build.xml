@@ -71,6 +71,14 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   <!-- same as running build and execute.test -->
   <target name="distribution" depends="build, execute.test" />
 
+  <target name="prepare.tests" depends="prepare.test, prepare.itest"/>
+
+  <target name="execute.tests" depends="prepare.tests, execute.test, execute.itest"/>
+
+  <target name="hudson" depends="build, execute.tests"/>
+
+  <target name="hudson-install" depends="hudson,install-files" />
+
   <target name="install" depends="distribution, install-files" />
 
   <target name="install-files">
