@@ -21,6 +21,7 @@ package eu.baltrad.bdb.expr.proc;
 
 import eu.baltrad.bdb.expr.BooleanExpression;
 import eu.baltrad.bdb.expr.DoubleExpression;
+import eu.baltrad.bdb.expr.EvaluationError;
 import eu.baltrad.bdb.expr.Expression;
 import eu.baltrad.bdb.expr.ListExpression;
 import eu.baltrad.bdb.expr.LongExpression;

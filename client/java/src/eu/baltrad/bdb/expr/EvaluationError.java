@@ -16,7 +16,8 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-package eu.baltrad.bdb.expr.proc;
+
+package eu.baltrad.bdb.expr;
 
 public class EvaluationError extends RuntimeException {
   /**

@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.expr.proc;
 
+import eu.baltrad.bdb.expr.EvaluationError;
 import eu.baltrad.bdb.expr.ListExpression;
 import eu.baltrad.bdb.expr.LongExpression;
 import eu.baltrad.bdb.expr.StringExpression;
