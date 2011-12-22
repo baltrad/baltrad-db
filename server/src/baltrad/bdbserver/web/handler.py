@@ -35,10 +35,10 @@ def add_file(ctx):
     """add a file to the database
 
     :param ctx: the request context
-    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
-    :return: :class:`baltrad.bdb.web.util.JsonResponse` with status
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status
              *201 Created* and metadata in body
-    :raise: :class:`baltrad.bdb.web.util.HttpConflict` when file already
+    :raise: :class:`~.util.HttpConflict` when file already
             stored
 
     See :ref:`doc-rest-op-store-file` for details
@@ -63,10 +63,10 @@ def get_file(ctx, uuid):
     """get file content from the database
 
     :param ctx: the request context
-    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
-    :return: :class:`baltrad.bdb.web.util.Response` with status
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.Response` with status
              *200 OK* and file content in body
-    :raise: :class:`baltrad.bdb.web.util.HttpConflict` when file not found
+    :raise: :class:`~.util.HttpConflict` when file not found
 
     See :ref:`doc-rest-op-get-file` for details
     """
@@ -80,10 +80,10 @@ def get_file_metadata(ctx, uuid):
     """get file metadata from the database
 
     :param ctx: the request context
-    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
-    :return: :class:`baltrad.bdb.web.util.JsonResponse` with status
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status
              *200 OK* and metadata in body
-    :raise: :class:`baltrad.bdb.web.util.HttpNotFound` when file not found
+    :raise: :class:`~.util.HttpNotFound` when file not found
 
     See :ref:`doc-rest-op-get-file-metadata` for details
     """
@@ -96,9 +96,9 @@ def remove_file(ctx, uuid):
     """remove the file from the database
 
     :param ctx: the request context
-    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
-    :return: :class:`baltrad.bdb.web.util.NoContentResponse`
-    :raise: :class:`baltrad.bdb.web.util.HttpNotFound` when file not found
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.NoContentResponse`
+    :raise: :class:`~.util.HttpNotFound` when file not found
 
     See :ref:`doc-rest-op-remove-file` for details
     """
@@ -112,8 +112,8 @@ def remove_all_files(ctx):
     """remove all files from the database
 
     :param ctx: the request context
-    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
-    :return: :class:`baltrad.bdb.web.util.NoContentResponse`
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.NoContentResponse`
     """
     ctx.backend.remove_all_files()
     return NoContentResponse()
@@ -122,8 +122,8 @@ def get_sources(ctx):
     """get a list of sources
 
     :param ctx: the request context
-    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
-    :return: :class:`baltrad.bdb.web.util.JsonResponse` with status *200 OK*
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status *200 OK*
 
     See :ref:`doc-rest-op-get-sources` for details
     """
@@ -134,8 +134,8 @@ def query_file(ctx):
     """execute a file query
 
     :param ctx: the request context
-    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
-    :return: :class:`baltrad.bdb.web.util.JsonResponse` with status *200 OK*
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status *200 OK*
 
     See :ref:`doc-rest-op-query-file` for details
     """
@@ -157,8 +157,8 @@ def query_attribute(ctx):
     """execute an attribute query
 
     :param ctx: the request context
-    :type ctx: :class:`baltrad.bdb.web.util.RequestContext`
-    :return: :class:`baltrad.bdb.web.util.JsonResponse` with status *200 OK*
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status *200 OK*
 
     See :ref:`doc-rest-op-query-attribute` for details
     """

@@ -18,6 +18,8 @@
 import datetime
 
 class Symbol(object):
+    """Symbol expression
+    """
     def __init__(self, value):
         self.value = value
     
@@ -113,6 +115,11 @@ def count(xpr):
     return [symbol("count"), xpr]
 
 def unwrap_json(xpr):
+    """unwrap an expression parsed from JSON
+    
+    turn arrays beginning with ["symbol", ...] to :class:`Symbol` objects and
+    arrays beginning with ["list", ...] to :class:`list` objects
+    """
     if isinstance(xpr, list):
         if xpr[0] == "symbol" and len(xpr) == 2:
             return Symbol(xpr[1])
@@ -124,19 +131,42 @@ def unwrap_json(xpr):
         return xpr
 
 class EvaluationError(RuntimeError):
+    """Expression evaluation failure
+    """
     pass
 
 class Evaluator(object):
+    """Expression evaluator
+    """
     def __init__(self):
         self._procedures = {}
     
     def add_procedure(self, name, callback):
+        """add a procedure to this evaluator
+
+        :param name: name of the procedure
+        :param callback: a callable object
+        """
         self._procedures[name] = callback
     
     def get_procedure(self, name):
+        """access a procedure defined in this evaluator
+
+        :param name: procedure name
+        :return: the callable associated with `name`
+        :raise: :class:`LookupError` if procedure is not found by `name`
+        """
         return self._procedures[name]
 
     def evaluate(self, xpr):
+        """evaluate an expression
+
+        :param xpr: the expression to evaluate
+        :return: evaluation result
+        :raise: :class:`EvaluationError` when the evaluation fails
+
+        see :ref:`doc-expr-eval` for the evaluation rules
+        """
         if isinstance(xpr, Symbol):
             try:
                 return self.get_procedure(xpr.value)

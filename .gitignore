@@ -1,10 +1,11 @@
 *.pyc
 .*.swp
+*.egg/
+*.egg-info/
 client/java/dist
 client/java/build
-client/python/src/baltrad.bdbclient.egg-info/
-common/src/baltrad.bdbcommon.egg-info/
 doc/html
-server/src/baltrad.bdbserver.egg-info/
+doc/_build
 server/doc/_build
 test/reports
+

@@ -8,7 +8,9 @@ baltrad-db documentation index
 
 .. toctree::
    :maxdepth: 2
-
+   
+   readme
    api/index
+   expr
    rest
    tool

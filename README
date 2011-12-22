@@ -1,0 +1,90 @@
+README
+======
+
+About
+-----
+
+BDB is part of the Baltrad project, providing storage, retrieval and queries
+for ODIM/H5 compliant files to other parts of the system.
+
+
+Structure
+---------
+
+This project is divided into several subdirectories:
+
+* **common** contains a python library for functionality shared between the
+  python server and client
+* **server** contains the python implementation of the BDB server
+* **client/python** contains the python client
+* **client/java** contains the java client
+* **doc** contains the general documentation, as well as documentation for
+  python packages :py:mod:`baltrad.bdbcommon`, :py:mod:`baltrad.bdbclient`
+  and :py:mod:`baltrad.bdbserver`
+* **misc** contains miscellaneous utilites distributed alongside this library
+
+Setting up a development environment
+------------------------------------
+
+The most convenient way to set up an environment for BDB development is to
+use virtualenv. There is one in misc/virtualenv.
+
+Set up an and activate an environment in ./env ::
+
+ $ ./misc/virtualenv/virtualenv.py --distribute --system-site-packages ./env
+ $ source ./env/bin/activate
+
+See virtualenv documentation for a more thorough reference.
+
+Software written in python makes use of `sphinx <http://sphinx.pocoo.org/>`_
+for documentation and `nose <http://readthedocs.org/docs/nose/>`_ for testing,
+so it would be useful to install these in the enviromnent as well.
+
+It might also be a good idea to include
+`mock <http://code.google.com/p/mock/>`_
+
+::
+
+ $ pip install "nose >= 1.1"
+ $ pip install "sphinx >= 1.1"
+
+ $ pip install "mock >= 0.7"
+
+Generating documentation
+------------------------
+
+::
+ 
+ $ cd doc
+ $ make html
+
+
+Installing the packages
+-----------------------
+
+.. note::
+
+  If you are installing python packages for development you might want
+  to use `develop` command instead of `install`. This will add the source
+  directory to :py:data:`sys.path` instead of copying the files and your
+  changes will be picked up automatically.
+
+common::
+ 
+ $ cd common
+ $ python setup.py install
+
+server::
+
+ $ cd server
+ $ python setup.py install
+
+python client::
+
+ $ cd client/python
+ $ python setup.py install
+
+java client::
+
+ $ cd client/java
+ $ ant install

@@ -17,7 +17,8 @@ Basic expression types retain their presentation in JSON, but a symbol is
 transformed to an array of literal "symbol" and the symbol name:
 
 ::
-  `name` => ["symbol", "name"]
+
+  name => ["symbol", "name"]
 
 Since this doesn't allow to represent some lists unambiguously, lists are
 prefixed with additional "list" literal:
