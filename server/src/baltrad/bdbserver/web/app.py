@@ -51,6 +51,5 @@ def serve(app, config):
 
     host = uri.hostname
     port = uri.port or 80
-    use_reloader = config.get_boolean("use_reloader", False)
 
-    run_simple(host, port, app, use_reloader=use_reloader)
+    run_simple(host, port, app)
