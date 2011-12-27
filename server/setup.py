@@ -20,10 +20,11 @@ setuptools.setup(name="baltrad.bdbserver",
         "SQLAlchemy >= 0.7",
         "werkzeug >= 0.8",
         "python-daemon >= 1.5",
+        "psycopg2",
     ],
     entry_points = {
         "console_scripts" : [
-            "baltrad-db-server = baltrad.bdbserver.main:run",
+            "baltrad-bdb-server = baltrad.bdbserver.main:run",
         ]
     },
     test_suite="nose.collector",

@@ -43,7 +43,7 @@ public class RestfulDatabaseITest {
   RestfulDatabase classUnderTest;
 
   private RestfulDatabase createDatabase() {
-    String dbUri = System.getProperty("itest.restdb.uri");
+    String dbUri = System.getProperty("baltrad.bdb.server.uri");
     if (dbUri != null) {
       return new RestfulDatabase(dbUri);
     } else {
@@ -59,6 +59,7 @@ public class RestfulDatabaseITest {
   @Before
   public void setUp() {
     classUnderTest = createDatabase();
+    assumeNotNull(classUnderTest);
     classUnderTest.removeAllFileEntries();
   }
 

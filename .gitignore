@@ -2,6 +2,7 @@
 .*.swp
 *.egg/
 *.egg-info/
+test-results.xml
 client/java/build
 client/java/dist
 client/python/build/
