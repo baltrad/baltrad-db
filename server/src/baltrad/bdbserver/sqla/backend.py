@@ -305,6 +305,14 @@ class SqlAlchemyBackend(Backend):
                     print table.name, "does not exist"
                     return False
         return True
+    
+    def create(self):
+        with self.get_connection() as conn:
+            schema.meta.create_all(conn)
+    
+    def drop(self):
+        with self.get_connection() as conn:
+            schema.meta.drop_all(conn)
  
 def _insert_file(conn, meta, source_id):
     return conn.execute(

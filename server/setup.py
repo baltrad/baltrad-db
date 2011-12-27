@@ -24,7 +24,9 @@ setuptools.setup(name="baltrad.bdbserver",
     ],
     entry_points = {
         "console_scripts" : [
-            "baltrad-bdb-server = baltrad.bdbserver.main:run",
+            "baltrad-bdb-create = baltrad.bdbserver.main:run_create",
+            "baltrad-bdb-drop = baltrad.bdbserver.main:run_drop",
+            "baltrad-bdb-server = baltrad.bdbserver.main:run_server",
         ]
     },
     test_suite="nose.collector",

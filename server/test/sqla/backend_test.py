@@ -29,14 +29,12 @@ def setup_module():
     global backend
     url = os.environ.get("BDB_TEST_DB", "sqlite:///:memory:")
     backend = SqlAlchemyBackend(url)
-    with backend.get_connection() as conn:
-        schema.meta.drop_all(conn)
-        schema.meta.create_all(conn)
+    backend.drop()
+    backend.create()
 
 def teardown_module():
     global backend
-    with backend.get_connection() as conn:
-        schema.meta.drop_all(conn)
+    backend.drop()
     
 class TestSqlAlchemyBackendItest(object):
     backend = None

@@ -118,6 +118,18 @@ class Backend(object):
         """test if the backend is fully operational
         """
         raise NotImplemented()
+
+    @abc.abstractmethod
+    def create(self):
+        """create resources on the backend
+        """
+        raise NotImplemented()
+
+    @abc.abstractmethod
+    def drop(self):
+        """drop resources on the backend
+        """
+        raise NotImplemented()    
     
 def create_from_config(config):
     backend_type = config["backend.type"]
