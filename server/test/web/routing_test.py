@@ -94,9 +94,9 @@ class TestSourceRoutes(object):
         endpoint, args = self.adapter.match("/source/", "GET")
         eq_("handler.get_sources", endpoint)
     
-    @raises(MethodNotAllowed)
     def test_sourceroot_POST(self):
-        self.adapter.match("/source/", "POST")
+        endpoint, args = self.adapter.match("/source/", "POST")
+        eq_("handler.add_source", endpoint)
 
     @raises(MethodNotAllowed)
     def test_sourceroot_PUT(self):

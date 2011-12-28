@@ -148,6 +148,10 @@ class TestSource(object):
         src["_key3"] = "value3"
         eq_("_key3:value3,key1:value1,key2:value2", src.to_string())
     
+    def test_dict_copy(self):
+        copy = dict(Source("foo", values={"bar": "baz"}))
+        eq_({"bar": "baz"}, copy)
+    
     def test_get(self):
         src = Source()
         eq_(None, src.get("qwe"))

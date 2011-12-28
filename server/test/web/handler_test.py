@@ -106,6 +106,12 @@ class TestSourceHandlers(object):
         self.backend = Mock(spec_set=Backend)
         self.ctx = RequestContext(None, self.backend)
 
+    def create_request(self, method, data):
+        return EnvironBuilder(
+            method=method,
+            data=data,
+        ).get_request(Request)
+
     def test_get_sources(self):
         self.backend.get_sources.return_value = [
             Source.from_string("_name:src1,key1:value1"),
@@ -121,7 +127,20 @@ class TestSourceHandlers(object):
             ']}'
         )
         eq_(expected, response.data)
+    
+    def test_add_source(self):
+        self.ctx.request = self.create_request("POST",
+            data='{"source": {"name": "foo", "values": {"bar": "baz"}}}',
+        )
 
+        response = handler.add_source(self.ctx)
+
+        self.backend.add_source.assert_called_with(Source("foo", values={"bar": "baz"}))
+        eq_(httplib.CREATED, response.status_code)
+        eq_("/source/foo", response.headers["Location"])
+    
+    def test_add_source_duplicate(self):
+        pass
 
 class TestQueryHandlers(object):
     def setup(self):

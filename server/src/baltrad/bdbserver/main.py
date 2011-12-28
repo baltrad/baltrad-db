@@ -103,8 +103,8 @@ def run_server():
     daemon_ctx = daemon.DaemonContext(
         working_directory="/",
         chroot_directory=None,
-        stdout=sys.stdout,
-        stderr=sys.stderr,
+        stdout=sys.stdout if foreground else None,
+        stderr=sys.stderr if foreground else None,
         detach_process=not foreground,
         pidfile=TimeoutPIDLockFile(pidfile, acquire_timeout=0),
     )

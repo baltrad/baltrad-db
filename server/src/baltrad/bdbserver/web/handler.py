@@ -20,6 +20,7 @@ import shutil
 from tempfile import NamedTemporaryFile
 
 from baltrad.bdbcommon import expr
+from baltrad.bdbcommon.oh5 import Source
 
 from .util import (
     HttpConflict,
@@ -129,6 +130,24 @@ def get_sources(ctx):
     """
     sources = ctx.backend.get_sources()
     return JsonResponse({"sources": [dict(src) for src in sources]})
+
+def add_source(ctx):
+    """add a source to the database
+
+    :param ctx: the request context
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status *201 CREATED*
+
+    See :ref:`doc-rest-op-add-source` for details
+    """
+    data = ctx.request.get_json_data()["source"]
+    print data
+
+    source = Source(data["name"], values=data["values"])
+    ctx.backend.add_source(source)
+    response = Response("", status=httplib.CREATED)
+    response.headers["Location"] = ctx.make_url("source/" + source.name)
+    return response
 
 def query_file(ctx):
     """execute a file query

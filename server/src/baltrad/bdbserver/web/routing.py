@@ -62,6 +62,9 @@ URL_MAP = Map(
             Rule("/", methods=["GET"],
                 endpoint="handler.get_sources"
             ),
+            Rule("/", methods=["POST"],
+                endpoint="handler.add_source"
+            ),
         ])
     ],
     converters={

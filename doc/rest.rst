@@ -284,3 +284,40 @@ Get defined sources
         {"name": "source2", "key2": "value"},
       ]
     }
+
+Add source definition
+'''''''''''''''''''''
+
+**Request**
+  :Headers: Content-Length, Content-Type
+  :Synopsis: POST /source/
+  :Body: source object
+  ::
+
+    POST /source/ HTTP/1.1
+    Host: example.com
+    Content-Type: application/json
+    Content-Length: nnn
+
+    {
+      "source": {
+        "name": "source_name",
+        "values": {
+            "key1": "value1",
+            "key2": "value2",
+        }
+      }
+    }
+
+**Response**
+  :Headers: Location
+  :Status:
+    * **201 CREATED** - source was successfully stored, the URI is in the
+      *Location* header
+    * **409 CONFLICT** - source with such name is already stored
+  :Body: extracted metadata
+
+  ::
+
+    HTTP/1.1 201 CREATED
+    Location: http://example.com/source/source_name
