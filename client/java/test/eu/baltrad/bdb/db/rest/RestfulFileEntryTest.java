@@ -60,14 +60,13 @@ public class RestfulFileEntryTest extends EasyMockSupport {
 
   @Test
   public void getSource() {
-    String srcStr = "_name:foo,NOD:bar";
-
     metadata.addNode("/", new Group("_bdb"));
-    metadata.addNode("/_bdb", new Attribute("source", srcStr));
+    metadata.addNode("/_bdb", new Attribute("source", "NOD:bar"));
+    metadata.addNode("/_bdb", new Attribute("source_name", "foo"));
 
     Source result = classUnderTest.getSource();
 
-    assertEquals("foo", result.get("_name"));
+    assertEquals("foo", result.getName());
     assertEquals("bar", result.get("NOD"));
   }
 

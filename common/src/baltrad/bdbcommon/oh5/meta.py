@@ -17,6 +17,7 @@
 
 import collections
 import os.path
+from xml.etree import ElementTree
 
 from . node import Attribute, Group, Dataset, NodeIterator
 from . io import HlHdfMetadataReader
@@ -59,6 +60,7 @@ class Metadata(object):
     bdb_metadata_hash = AttributeProperty("/_bdb/metadata_hash")
     bdb_file_size = AttributeProperty("/_bdb/file_size")
     bdb_source = AttributeProperty("/_bdb/source")
+    bdb_source_name = AttributeProperty("/_bdb/source_name")
     bdb_stored_date = AttributeProperty("/_bdb/stored_date", Attribute.value_date)
     bdb_stored_time = AttributeProperty("/_bdb/stored_time", Attribute.value_time)
 
@@ -119,8 +121,9 @@ class Metadata(object):
         return [node.json_repr() for node in self.iternodes()]
 
 class Source(collections.MutableMapping):
-    def __init__(self, default={}):
-        self._values = dict(default)
+    def __init__(self, name=None, values={}):
+        self.name = name
+        self._values = dict(values)
     
     def __getitem__(self, k):
         return self._values[k]
@@ -139,31 +142,41 @@ class Source(collections.MutableMapping):
 
     def __eq__(self, other):
         if isinstance(other, Source):
-            return self._values == other._values
+            return self.name == other.name and self._values == other._values
         elif isinstance(other, collections.Mapping):
             return self._values == other
         return False
     
-    name = property(
-        lambda self: self._values.get("_name"),
-        lambda self, value: self._values.update({"_name": value})
-    )
-
     def __repr__(self):
-        return "Source(%r)" % self._values
+        return "Source(%r, values=%r)" % (self.name, self._values)
 
-    def to_string(self, include_hidden=False):
-        items = []
-        for k in sorted(self._values.keys()):
-            if k.startswith("_") and not include_hidden:
-                continue
-            items.append(k + ":" + self._values[k])
-        return ",".join(items)
+    def to_string(self):
+        return ",".join([":".join(kv) for kv in sorted(self._values.iteritems())])
     
-    @staticmethod
-    def from_string(value):
+    @classmethod
+    def from_string(cls, value):
         result = Source()
         for item in value.split(","):
             k, v = item.split(":")
             result[k] = v
+        return result
+    
+    @classmethod
+    def _create_from_etree_element(cls, element):
+        result = Source(element.tag)
+        for key, value in element.items():
+            result[key.upper()] = value
+        return result
+
+    
+    @classmethod
+    def from_rave_xml(cls, xml):
+        """read sources from rave configuration
+        """
+        radar_db = ElementTree.XML(xml)
+        result = []
+        for org_def in radar_db:
+            result.append(cls._create_from_etree_element(org_def))
+            for radar_def in org_def:
+                result.append(cls._create_from_etree_element(radar_def))
         return result

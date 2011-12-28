@@ -24,10 +24,24 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 
 public class Source {
+  String name;
   Map<String, String> values;
 
   public Source() {
     this.values = new HashMap<String, String>();
+  }
+
+  public Source(String name) {
+    this();
+    this.name = name;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public String put(String key, String value) {

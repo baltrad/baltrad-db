@@ -61,7 +61,10 @@ public final class RestfulFileEntry implements FileEntry {
   @Override
   public Source getSource() {
     String sourceStr = metadata.getAttribute("/_bdb/source").toString();
-    return Source.fromString(sourceStr);
+    String sourceName = metadata.getAttribute("/_bdb/source_name").toString();
+    Source result = Source.fromString(sourceStr);
+    result.setName(sourceName);
+    return result;
   }
 
   /**

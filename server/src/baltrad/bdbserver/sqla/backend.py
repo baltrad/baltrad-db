@@ -111,7 +111,8 @@ class SqlAlchemyBackend(Backend):
         meta.bdb_stored_date = stored_timestamp.date()
         meta.bdb_stored_time = stored_timestamp.time()
         source = self.get_source_by_id(source_id)
-        meta.bdb_source = source.to_string(True)
+        meta.bdb_source = source.to_string()
+        meta.bdb_source_name = source.name
         
         with self.get_connection() as conn:
             with conn.begin():
@@ -156,7 +157,9 @@ class SqlAlchemyBackend(Backend):
         meta.bdb_uuid = row[schema.files.c.uuid]
         meta.bdb_file_size = row[schema.files.c.size]
         source_id = row[schema.files.c.source_id]
-        meta.bdb_source = self.get_source_by_id(source_id).to_string(True)
+        source = self.get_source_by_id(source_id)
+        meta.bdb_source = source.to_string()
+        meta.bdb_source_name = source.name
         meta.bdb_stored_date = row[schema.files.c.stored_date]
         meta.bdb_stored_time = row[schema.files.c.stored_time]
 
@@ -246,7 +249,7 @@ class SqlAlchemyBackend(Backend):
         with self.get_connection() as conn:
             for row in conn.execute(qry):
                 name = row["name"]
-                source = sources.setdefault(name, oh5.Source({"_name": name}))
+                source = sources.setdefault(name, oh5.Source(name))
                 source[row["key"]] = row["value"]
         return sources.values()
     
@@ -254,13 +257,11 @@ class SqlAlchemyBackend(Backend):
         with self.get_connection() as conn:
             source_id = conn.execute(
                 schema.sources.insert(),
-                name=source["_name"],
+                name=source.name,
             ).inserted_primary_key[0]
   
         kvs = []
         for k, v in source.iteritems():
-            if k.startswith("_"):
-                continue
             kvs.append({
                 "source_id": source_id,
                 "key": k,

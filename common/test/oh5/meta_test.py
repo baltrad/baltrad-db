@@ -104,6 +104,8 @@ class TestMetadataAttributeShortcuts(object):
                 1234, 1234),
         PropDef("bdb_source", "/_bdb/source",
                 "NOD:eesur", "NOD:eesur"),
+        PropDef("bdb_source_name", "/_bdb/source_name",
+                "eesur", "eesur"),
         PropDef("bdb_stored_date", "/_bdb/stored_date",
                 datetime.date(2000, 1, 2), "20000102"),
         PropDef("bdb_stored_time", "/_bdb/stored_time",
@@ -139,33 +141,12 @@ class TestMetadataAttributeShortcuts(object):
             yield self.check_set_property, propdef
 
 class TestSource(object):
-    def test_get_name(self):
-        src = Source()
-        src["_name"] = "qwe"
-        eq_("qwe", src.name)
-    
-    def test_get_name_nx(self):
-        src = Source()
-        eq_(None, src.name)
-    
-    def test_set_name(self):
-        src = Source()
-        src.name = "qwe"
-        eq_("qwe", src["_name"])
-    
     def test_to_string(self):
         src = Source()
         src["key1"] = "value1"
         src["key2"] = "value2"
         src["_key3"] = "value3"
-        eq_("key1:value1,key2:value2", src.to_string())
-    
-    def test_to_string_with_hidden(self):
-        src = Source()
-        src["key1"] = "value1"
-        src["key2"] = "value2"
-        src["_key3"] = "value3"
-        eq_("_key3:value3,key1:value1,key2:value2", src.to_string(True))
+        eq_("_key3:value3,key1:value1,key2:value2", src.to_string())
     
     def test_get(self):
         src = Source()
@@ -173,6 +154,68 @@ class TestSource(object):
         eq_("asd", src.get("qwe", "asd"))
 
     def test_from_string(self):
-        src = Source.from_string("_name:qwe,key:value")
-        eq_("qwe", src["_name"])
+        src = Source.from_string("asd:qwe,key:value")
+        eq_("qwe", src["asd"])
         eq_("value", src["key"])
+    
+    def test_from_rave_xml(self):
+        xml = """<?xml version='1.0' encoding='utf-8'?>
+            <radar-db>
+              <ee CCCC="EEMH" org="231">
+                <eehar nod="eehar" plc="Harku" rad="EE40" wmo="26038"></eehar>
+                <eesur nod="eesur" plc="Sürgavere" rad="EE41" wmo="26232"></eesur>
+              </ee>
+             <fi CCCC="EFKL" org="86">
+                <fivan nod="fivan" plc="Vantaa" rad="FI42" wmo="02975"></fivan>
+              </fi>
+            </radar-db>
+        """
+        result = Source.from_rave_xml(xml)
+        eq_(
+            Source("ee",
+                values={"CCCC": "EEMH", "ORG": "231"}
+            ),
+            result[0]
+        )
+        eq_(
+            Source("eehar",
+                values={
+                    "NOD": "eehar",
+                    "PLC": "Harku",
+                    "RAD": "EE40",
+                    "WMO": "26038"
+                }
+            ),
+            result[1]
+        )
+        eq_(
+            Source("eesur",
+                values={
+                    "NOD": "eesur",
+                    "PLC": u"Sürgavere",
+                    "RAD": "EE41",
+                    "WMO": "26232",
+                }
+            ),
+            result[2]
+        )
+        eq_(
+            Source("fi",
+                values= {
+                    "CCCC": "EFKL",
+                    "ORG": "86",
+            }),
+            result[3]
+        )
+        eq_(
+            Source("fivan",
+                values={
+                    "NOD": "fivan",
+                    "PLC": "Vantaa",
+                    "RAD": "FI42",
+                    "WMO": "02975",
+                },
+            ),
+            result[4]
+        )
+        eq_(5, len(result))

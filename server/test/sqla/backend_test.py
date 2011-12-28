@@ -40,8 +40,8 @@ class TestSqlAlchemyBackendItest(object):
     backend = None
 
     sources = [
-        Source({"_name": "eesur", "NOD": "eesur", "PLC": "Syrgavere"}),
-        Source({"_name": "eehar", "NOD": "eehar", "PLC": "Harku"})
+        Source("eesur", values={"NOD": "eesur", "PLC": "Syrgavere"}),
+        Source("eehar", values={"NOD": "eehar", "PLC": "Harku"})
     ]
 
     source_ids = []
@@ -81,10 +81,7 @@ class TestSqlAlchemyBackendItest(object):
     
     def test_get_source_by_id(self):
         source = self.backend.get_source_by_id(self.source_ids[0])
-        eq_(3, len(source))
-        eq_("eesur", source["NOD"])
-        eq_("eesur", source.name)
-        eq_("Syrgavere", source["PLC"])
+        eq_(self.sources[0], source)
 
     def test_get_source_id(self):
         source = {"NOD": "eesur"}
@@ -100,7 +97,8 @@ class TestSqlAlchemyBackendItest(object):
         ok_(stored_meta.bdb_file_size)
         ok_(stored_meta.bdb_stored_date)
         ok_(stored_meta.bdb_stored_time)
-        eq_("NOD:eesur,PLC:Syrgavere,_name:eesur", stored_meta.bdb_source)
+        eq_("NOD:eesur,PLC:Syrgavere", stored_meta.bdb_source)
+        eq_("eesur", stored_meta.bdb_source_name)
     
     @raises(DuplicateEntry)
     def test_store_file_duplicate(self):
@@ -286,8 +284,8 @@ class TestFileQuery(object):
     backend = None
 
     sources = [
-        Source({"_name": "eesur", "NOD": "eesur", "PLC": "Syrgavere"}),
-        Source({"_name": "eehar", "NOD": "eehar", "PLC": "Harku"})
+        Source("eesur", values={"NOD": "eesur", "PLC": "Syrgavere"}),
+        Source("eehar", values={"NOD": "eehar", "PLC": "Harku"})
     ]
 
     @classmethod
@@ -493,8 +491,8 @@ class TestAttributeQuery(object):
     backend = None
 
     sources = [
-        Source({"_name": "eesur", "NOD": "eesur", "PLC": "Syrgavere"}),
-        Source({"_name": "eehar", "NOD": "eehar", "PLC": "Harku"})
+        Source("eesur", {"NOD": "eesur", "PLC": "Syrgavere"}),
+        Source("eehar", {"NOD": "eehar", "PLC": "Harku"})
     ]
 
     @classmethod
