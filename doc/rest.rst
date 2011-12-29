@@ -280,10 +280,12 @@ Get defined sources
     
     {
       "sources": [
-        {"name": "source1", "key1": "value"},
-        {"name": "source2", "key2": "value"},
+        {"name": "source1", "values": {"key1": "value"}},
+        {"name": "source2", "values:" {"key2": "value"}},
       ]
     }
+
+.. _doc-rest-op-add-source:
 
 Add source definition
 '''''''''''''''''''''

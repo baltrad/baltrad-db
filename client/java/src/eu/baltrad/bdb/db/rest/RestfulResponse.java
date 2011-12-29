@@ -89,7 +89,8 @@ public final class RestfulResponse {
 
   protected Source getSourceFromNode(JsonNode node) {
     Source result = new Source();
-    Iterator<Map.Entry<String, JsonNode>> fieldIterator = node.getFields();
+    result.setName(node.get("name").getTextValue());
+    Iterator<Map.Entry<String, JsonNode>> fieldIterator = node.get("values").getFields();
     while (fieldIterator.hasNext()) {
       Map.Entry<String, JsonNode> field = fieldIterator.next();
       result.put(field.getKey(), field.getValue().getTextValue());

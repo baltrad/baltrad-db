@@ -428,7 +428,10 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     HttpUriRequest request = createMock(HttpUriRequest.class);
     HttpResponse response = createResponse(
       HttpStatus.SC_OK,
-      "{\"sources\" : []}"
+      "{\"sources\" : [" +
+        "{\"name\": \"src1\", \"values\": {\"key1\": \"value1\"}}," +
+        "{\"name\": \"src2\", \"values\": {\"key2\": \"value2\"}}" +
+      "]}"
     );
 
     expect(requestFactory.createGetSourcesRequest())
@@ -438,6 +441,13 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     replayAll();
     
     List<Source> sources = classUnderTest.getSources();
+    assertEquals(2, sources.size());
+    Source src = sources.get(0);
+    assertEquals("src1", src.getName());
+    assertEquals("value1", src.get("key1"));
+    src = sources.get(1);
+    assertEquals("src2", src.getName());
+    assertEquals("value2", src.get("key2"));
     verifyAll();
   }
 

@@ -129,7 +129,9 @@ def get_sources(ctx):
     See :ref:`doc-rest-op-get-sources` for details
     """
     sources = ctx.backend.get_sources()
-    return JsonResponse({"sources": [dict(src) for src in sources]})
+    return JsonResponse({
+        "sources": [{"name": src.name, "values": dict(src)} for src in sources]
+    })
 
 def add_source(ctx):
     """add a source to the database

@@ -25,6 +25,7 @@ import eu.baltrad.bdb.db.FileEntry;
 import eu.baltrad.bdb.db.FileQuery;
 import eu.baltrad.bdb.db.FileResult;
 import eu.baltrad.bdb.oh5.Metadata;
+import eu.baltrad.bdb.oh5.Source;
 
 import org.apache.commons.codec.binary.Hex;
 
@@ -37,6 +38,7 @@ import org.junit.Test;
 import java.io.*;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.util.List;
 import java.util.UUID;
 
 public class RestfulDatabaseITest {
@@ -183,5 +185,22 @@ public class RestfulDatabaseITest {
     FileEntry queriedEntry = result.getFileEntry();
     assertNotNull(queriedEntry);
     assertEquals(storedEntry.getUuid(), queriedEntry.getUuid());
+  }
+
+  @Test
+  public void getSources() throws Exception {
+    List<Source> sources = classUnderTest.getSources();
+    
+    // find seang
+    Source seang = null;
+    for (Source src : sources) {
+      if ("seang".equals(src.getName())) {
+        seang = src;
+        break;
+      }
+    }
+
+    assertNotNull(seang);
+    assertEquals("Ängelholm", seang.get("PLC"));
   }
 }
