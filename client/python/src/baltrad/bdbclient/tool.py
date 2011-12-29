@@ -1,113 +1,146 @@
+# Copyright 2010-2011 Estonian Meteorological and Hydrological Institute
+# 
+# This file is part of baltrad-db.
+# 
+# baltrad-db is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# baltrad-db is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public License
+# along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
+
+import contextlib
 import getopt
-import httplib
-import json
-import pprint
+import os
 import shutil
 import sys
 
-def create_http_connection(server_url):
-    return httplib.HTTPConnection(server_url)
+from baltrad.bdbcommon.oh5 import Source
 
-def http_request(server_url, method, path, data="", headers={}):
-    conn = create_http_connection(server_url)
-    conn.request(method, path, data, headers)
-    return conn.getresponse()
+from .rest import RestfulDatabase
 
-def import_file(server_url, args):
+def import_file(database, args):
     source = args[0]
     
-    data = open(source, "r").read()
-    response = http_request(
-        server_url, "POST", "/file/", data,
-        headers={
-            "Content-Type": "application/x-hdf5",
-        }
-    )
+    with open(source, "r") as data:
+        entry = database.store(data)
     
-    if response.status == httplib.CREATED:
-        print "stored at", response.getheader("Location")
-    else:
-        print "failed to store", source, response.status
+    print "stored with UUID", entry.uuid
 
-def show_file_metadata(server_url, args):
+def show_file_metadata(database, args):
     target_uuid = args[0]
 
-    response = http_request(
-        server_url, "GET", "/file/" + target_uuid + "/metadata"
-    )
+    entry = database.get_file_entry(target_uuid)
 
-    if response.status == httplib.OK:
-        data = json.loads(response.read())
-        pprint.pprint(data["metadata"])
-    elif response.status == httplib.NOT_FOUND:
-        print "file not found"
+    if entry:
+        for node in entry.metadata:
+            print node.get_path()
     else:
-        print "error", response.status
+        print "file not found"
 
-def export_file(server_url, args):
+def export_file(database, args):
     target_uuid = args[0]
     outfile = args[1]
+    
+    content = database.get_file_content(target_uuid)
 
-    response = http_request(
-        server_url, "GET", "/file/" + target_uuid
-    )
-
-    if response.status == httplib.OK:
-        outf = open(outfile, "w")
-        shutil.copyfileobj(response, outf)
-    elif response.status == httplib.NOT_FOUND:
-        print "file not found"
+    if content:
+        with contextlib.closing(content):
+            with open(outfile, "w") as outf:
+                shutil.copyfileobj(content, outf)
     else:
-        print "error", response.status
-        
+        print "file not found"
 
-def remove_file(server_url, args):
+def remove_file(database, args):
     target_uuid = args[0]
 
-    response = http_request(
-        server_url, "DELETE", "/file/" + target_uuid
-    )
-
-    if response.status == httplib.OK:
+    if database.remove_file_entry(target_uuid):
         print target_uuid, "deleted"
-    elif response.status == httplib.NOT_FOUND:
+    else:
         print "file not found"
-    else:
-        print "couldn't delete", target_uuid, response.status
 
-def list_sources(server_url, args):
-    response = http_request(
-        server_url, "GET", "/source/"
-    )
+def list_sources(database, args):
+    for source in database.get_sources():
+        print source.name + "\t" + source.to_string()
 
-    if response.status == httplib.OK:
-        data = json.loads(response.read())
-        pprint.pprint(data["sources"])
-    else:
-        print "error", response.status
+def import_sources(database, args):
+    rave_sources_path = os.path.abspath(args.pop(0))
+
+    print "Reading sources from", rave_sources_path
+
+    with open(rave_sources_path) as f:
+        sources = Source.from_rave_xml(f.read())
+    
+    db_sources = dict([(src.name, src) for src in database.get_sources()])
+
+    for source in sources:
+        db_source = db_sources.pop(source.name, None)
+        if not db_source:
+            database.add_source(source)
+#            print "ADD:\t", source.name, type(source.to_string())
+        elif db_source != source:
+            print "UPDATE:\t", source.name, db_source.to_string(), "->", source.to_string()
+        else:
+            print "OK:\t", source.name, source.to_string()
+    
+    for db_source in db_sources:
+        print "REMOVE:\t", db_source
+
+COMMAND_HANDLERS = {
+    "import": import_file,
+    "export": export_file,
+    "metadata": show_file_metadata,
+    "remove": remove_file,
+    "list_sources": list_sources,
+    "import_sources": import_sources,
+}
+
+USAGE = """
+%(prog)s --url=SERVER_ADDRESS COMMAND [args]
+
+  Available commands:
+    import - import a file to the database
+    export - export a file from the database
+    metadata - print file metadata
+    remove - remove a file from the database
+    list_sources - print sources defined in the database
+    import_sources - update source definitions from Rave config
+"""
+
+def print_usage():
+    print USAGE % {"prog": os.path.basename(sys.argv[0])}
 
 def run():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "", ["url="])
+        opts, args = getopt.getopt(sys.argv[1:], "", ["url=", "help"])
     except getopt.GetoptError, err:
         print >> sys.stderr, str(err)
         raise SystemExit
 
-    server_url = "localhost:8080"
+    server_url = "http://localhost:8080/"
     for opt, value in opts:
         if opt == "--url":
             server_url = value
+        elif opt == "--help":
+            print_usage()
+            raise SystemExit
         else:
-            assert False, "uhandled option: " + opt
+            raise SystemExit("uhandled option: " + opt)
 
-    command = args.pop(0)
-    if command == "import":
-        import_file(server_url, args)
-    elif command == "export":
-        export_file(server_url, args)
-    elif command == "metadata":
-        show_file_metadata(server_url, args)
-    elif command == "remove":
-        remove_file(server_url, args)
-    elif command == "sources":
-        list_sources(server_url, args)
+    try:
+        command = args.pop(0)
+    except IndexError:
+        raise SystemExit("you must specify a command for the tool")
+    
+    try:
+        handler = COMMAND_HANDLERS[command]
+    except KeyError:
+        raise SystemExit("Unkown command: %s" % command)
+    
+    return handler(RestfulDatabase(server_url), args)
