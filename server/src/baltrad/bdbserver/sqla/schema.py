@@ -1,6 +1,9 @@
 from sqlalchemy import (
+    event,
     Column,
+    DDL,
     ForeignKey,
+    Index,
     MetaData,
     PrimaryKeyConstraint,
     Table,
@@ -49,6 +52,16 @@ files = Table("bdb_files", meta,
     UniqueConstraint("hash", "source_id"),
 )
 
+# remove large object when file is deleted in postgresql
+event.listen(
+    files,
+    "after_create",
+    DDL(
+        "CREATE RULE remove_lo AS ON DELETE TO bdb_files "
+            "DO SELECT lo_unlink(OLD.lo_id)"
+    ).execute_if(dialect="postgresql")
+)
+
 file_data = Table("bdb_file_data", meta,
     Column("id", Integer, primary_key=True),
     Column("data", LargeBinary, nullable=False)
@@ -76,3 +89,34 @@ attribute_values = Table("bdb_attribute_values", meta,
     Column("value_date", Date),
     Column("value_time", Time),
 )
+
+
+##
+# INDEXES
+##
+
+Index("bdb_files_what_object_key", files.c.what_object)
+Index("bdb_files_what_date_key", files.c.what_date)
+Index("bdb_files_what_time_key", files.c.what_time)
+
+event.listen(
+    files,
+    "after_create",
+    DDL(
+        "CREATE INDEX bdb_files_combined_datetime_key ON "
+        "bdb_files((what_date + what_time))"
+    ).execute_if(dialect="postgresql")
+)
+
+event.listen(
+    files,
+    "after_create",
+    DDL(
+        "CREATE INDEX bdb_files_stored_datetime_key ON "
+        "bdb_files((stored_date + stored_time))"
+    ).execute_if(dialect="postgresql")
+)
+
+Index("bdb_nodes_id_name_key", nodes.c.id, nodes.c.name)
+Index("bdb_nodes_file_id_name_key", nodes.c.file_id, nodes.c.name)
+Index("bdb_nodes_parent_id_name_key", nodes.c.parent_id, nodes.c.name)
