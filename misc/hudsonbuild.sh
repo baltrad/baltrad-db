@@ -56,15 +56,10 @@ test_python_package() {
 }
 
 test_java_client() {
-  baltrad-bdb-server --conf develop.conf
-  
   property_file="$PROJECT_ROOT/misc/hudsonbuild.properties"
-  pid_file="$PROJECT_ROOT/misc/hudsonbuild-bdbserver.pid"
   
   cd "$PROJECT_ROOT/client/java"
-  baltrad-bdb-server --conf=$property_file --pidfile=$pid_file
   ant hudson -propertyfile $property_file
-  kill `cat $pid_file`
 }
 
 install_java_client() {
@@ -82,7 +77,6 @@ run_tests() {
 
 deploy() {
   install_python_package "$PROJECT_ROOT/common"
-  export BDB_TEST_DB 
   install_python_package "$PROJECT_ROOT/server"
   install_python_package "$PROJECT_ROOT/client/python"
   install_java_client
