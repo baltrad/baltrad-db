@@ -62,9 +62,6 @@ test_java_client() {
   pid_file="$PROJECT_ROOT/misc/hudsonbuild-bdbserver.pid"
   
   cd "$PROJECT_ROOT/client/java"
-  psql bdbtestdb -U baltrad < $PROJECT_ROOT/server/schema/postgresql/drop.sql
-  psql bdbtestdb -U baltrad < $PROJECT_ROOT/server/schema/postgresql/create.sql
-  psql bdbtestdb -U baltrad < $PROJECT_ROOT/server/schema/postgresql/data.sql
   baltrad-bdb-server --conf=$property_file --pidfile=$pid_file
   ant hudson -propertyfile $property_file
   kill `cat $pid_file`
