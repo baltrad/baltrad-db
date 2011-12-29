@@ -17,14 +17,54 @@
 
 import httplib
 import json
+import os
+import socket
 import urlparse
 
-from baltrad.bdbcommon.oh5 import Source
+from baltrad.bdbcommon.oh5 import (
+    Attribute,
+    Dataset,
+    Group,
+    Metadata,
+    Source,
+)
 
-from .db import Database, DatabaseError
+from .db import Database, DatabaseError, FileEntry
+
+class RestfulFileEntry(FileEntry):
+    def __init__(self, metadata):
+        self._metadata = metadata
+    
+    @property
+    def uuid(self):
+        return self._metadata.bdb_uuid
+    
+    @property
+    def metadata(self):
+        return self._metadata
+
+def metadata_from_json_repr(json_repr):
+    metadata = Metadata()
+    for node_repr in json_repr:
+        parent_path, node_name = os.path.split(node_repr["path"])
+        node = node_from_json_repr(node_name, node_repr)
+        metadata.add_node(parent_path, node)
+    return metadata
+
+def node_from_json_repr(name, json_repr):
+    type_ = json_repr["type"]
+    if type_ == "attribute":
+        return Attribute(name, json_repr["value"])
+    elif type_ == "group":
+        return Group(name)
+    elif type_ == "dataset":
+        return Dataset(name)
+    else:
+        raise RuntimeError("unhandled node type: %s" % type_)
 
 class RestfulDatabase(Database):
     def __init__(self, server_url):
+        self._server_url_str = server_url
         self._server_url = urlparse.urlparse(server_url)
     
     def store(self, data):
@@ -36,9 +76,13 @@ class RestfulDatabase(Database):
         )
         
         if response.status == httplib.CREATED:
-            print "stored at", response.getheader("Location")
+            data = json.loads(response.read())
+            metadata = metadata_from_json_repr(data["metadata"])
+            return RestfulFileEntry(metadata)
         else:
-            raise DatabaseError("Unhandled response code: " + response.status)
+            raise DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
     
     def get_file_entry(self, uuid):
         response = self._http_request(
@@ -47,11 +91,14 @@ class RestfulDatabase(Database):
 
         if response.status == httplib.OK:
             data = json.loads(response.read())
-            return data["metadata"] #XXX: turn into metadata
+            metadata = metadata_from_json_repr(data["metadata"])
+            return RestfulFileEntry(metadata)
         elif response.status == httplib.NOT_FOUND:
             return None
         else:
-            raise DatabaseError("Unhandled response code: " + response.status)
+            raise DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
     
     def get_file_content(self, uuid):
         response = self._http_request(
@@ -63,19 +110,23 @@ class RestfulDatabase(Database):
         elif response.status == httplib.NOT_FOUND:
             return None
         else:
-            raise DatabaseError("Unhandled response code: " + response.status)
+            raise DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
     
     def remove_file_entry(self, uuid):
         response = self._http_request(
             "DELETE", "/file/%s" % uuid
         )
     
-        if response.status == httplib.OK:
+        if response.status == httplib.NO_CONTENT:
             return True
         elif response.status == httplib.NOT_FOUND:
             return False
         else:
-            raise DatabaseError("Unhandled response code: " + response.status)
+            raise DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
     
     def get_sources(self):
         response = self._http_request(
@@ -84,9 +135,14 @@ class RestfulDatabase(Database):
 
         if response.status == httplib.OK:
             data = json.loads(response.read())
-            return [Source(default=src) for src in data["sources"]]
+            return [
+                Source(src["name"], values=src["values"])
+                    for src in data["sources"]
+            ]
         else:
-            raise DatabaseError("Unhandled response code: " + response.status)
+            raise DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
     
     def add_source(self, source):
         response = self._http_request(
@@ -103,12 +159,19 @@ class RestfulDatabase(Database):
         elif response.status == httplib.CONFLICT:
             raise DatabaseError("duplicate entry")
         else:
-            raise DatabaseError("Unhandled response code: %s" % response.status)
+            raise DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
 
     def _http_request(self, method, path, data="", headers={}):
         conn = httplib.HTTPConnection(
             self._server_url.hostname,
             self._server_url.port
         )
-        conn.request(method, path, data, headers)
+        try:
+            conn.request(method, path, data, headers)
+        except socket.error:
+            raise DatabaseError(
+                "Could not send request to %s" % self._server_url_str
+            )
         return conn.getresponse()

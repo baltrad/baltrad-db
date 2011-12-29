@@ -84,6 +84,11 @@ class Database(object):
 class FileEntry(object):
     __metaclass__ = abc.ABCMeta
     
+    def get_uuid(self):
+        pass
+    
+    uuid = abc.abstractproperty(get_uuid)
+
     def get_metadata(self):
         pass
     
