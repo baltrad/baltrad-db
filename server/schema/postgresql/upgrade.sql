@@ -78,11 +78,6 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION bdbupgrade_add_bdb_files_indexes() RETURNS VOID AS $$
 BEGIN
-  PERFORM true FROM pg_class WHERE relname = 'bdb_files_stored_at_key';
-  IF NOT FOUND THEN
-    RAISE NOTICE 'adding index bdb_files_stored_at_key';
-    CREATE INDEX bdb_files_stored_at_key ON bdb_files(stored_at);
-  END IF;
   PERFORM true FROM pg_class WHERE relname = 'bdb_files_what_object_key';
   IF NOT FOUND THEN
     RAISE NOTICE 'adding index bdb_files_what_object_key';
@@ -180,6 +175,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION bdbupgrade_split_stored_at() RETURNS VOID AS $$
+BEGIN
+  PERFORM true FROM information_schema.columns
+    WHERE table_name = 'bdb_files' AND column_name = 'stored_at';
+  IF FOUND THEN
+    RAISE NOTICE 'splitting stored_at to stored_date and stored_time';
+    ALTER TABLE bdb_files ADD COLUMN stored_date DATE DEFAULT NULL;
+    ALTER TABLE bdb_files ADD COLUMN stored_time TIME DEFAULT NULL;
+    UPDATE bdb_files
+      SET stored_date = stored_at::date, stored_time = stored_at::time;
+    ALTER TABLE bdb_files DROP COLUMN stored_at;
+    ALTER TABLE bdb_files ALTER COLUMN stored_date DROP DEFAULT;
+    ALTER TABLE bdb_files ALTER COLUMN stored_date DROP NOT NULL;
+    ALTER TABLE bdb_files ALTER COLUMN stored_time DROP DEFAULT;
+    ALTER TABLE bdb_files ALTER COLUMN stored_time DROP NOT NULL;
+    CREATE INDEX bdb_files_stored_datetime_key ON bdb_files((stored_date + stored_time));
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 SELECT bdbupgrade_add_size_to_bdb_file_content();
 SELECT bdbupgrade_del_bdb_nodes_indexes();
 SELECT bdbupgrade_add_bdb_nodes_indexes();
@@ -190,6 +206,7 @@ SELECT bdbupgrade_add_source_dkvir();
 SELECT bdbupgrade_add_sources_nod_key();
 SELECT bdbupgrade_rename_source_eetal_to_eehar();
 SELECT bdbupgrade_update_danish_source_wmo_numbers();
+SELECT bdbupgrade_split_stored_at();
 
 DROP FUNCTION bdbupgrade_add_size_to_bdb_file_content();
 DROP FUNCTION bdbupgrade_del_bdb_nodes_indexes();
@@ -200,5 +217,6 @@ DROP FUNCTION bdbupgrade_add_sources_nod_key();
 DROP FUNCTION bdbupgrade_rename_source_eetal_to_eehar();
 DROP FUNCTION bdbupgrade_update_danish_source_wmo_numbers();
 DROP FUNCTION bdbupgrade_merge_file_content_to_files();
+DROP FUNCTION bdbupgrade_split_stored_at();
 DROP FUNCTION restart_seq_with_max(TEXT, TEXT);
 DROP FUNCTION make_plpgsql();
