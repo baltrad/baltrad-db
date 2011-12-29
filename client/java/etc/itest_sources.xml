@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<radar-db>
+  <se CCCC="ESWI" org="82" cty="643">
+    <sekir nod="sekir" plc="Kiruna" rad="SE40" wmo="02032"></sekir>
+    <selul nod="selul" plc="Luleå" rad="SE41" wmo="02092"></selul>
+    <seosu nod="seosu" plc="Östersund" rad="SE42" wmo="02200"></seosu>
+    <seovi nod="seovi" plc="Örnsköldsvik" rad="SE43" wmo="02262"></seovi>
+    <sehud nod="sehud" plc="Hudiksvall" rad="SE44" wmo="02334"></sehud>
+    <selek nod="selek" plc="Leksand" rad="SE45" wmo="02430"></selek>
+    <searl nod="searl" plc="Arlanda" rad="SE46" wmo="02451"></searl>
+    <sease nod="sease" plc="Ase" rad="SE47" wmo="02588"></sease>
+    <sevil nod="sevil" plc="Vilebo" rad="SE48" wmo="02570"></sevil>
+    <sevar nod="sevar" plc="Vara" rad="SE49" wmo="02600"></sevar>
+    <seang nod="seang" plc="Ängelholm" rad="SE50" wmo="02606"></seang>
+    <sekkr nod="sekkr" plc="Karlskrona" rad="SE51" wmo="02666"></sekkr>
+  </se>
+</radar-db>

@@ -39,7 +39,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   <property file="etc/develop.properties" />
   <property name="prefix" value="/usr/local" />
 
-  <property file="etc/testdb.properties" />
+  <property name="itest.bdbserver.properties" value="${basedir}/etc/itest_bdbserver.properties" />
+  <property file="${itest.bdbserver.properties}"/>
 
   <path id="lib.path">
     <fileset dir="${lib.dir}">
@@ -98,7 +99,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   <target name="compile" depends="prepare">
     <mkdir dir="${build.classes.dir}"/>
     <javac srcdir="${source.dir}"
-           encoding="8859_1"
+           encoding="utf-8"
            deprecation="on"
            debug="${compile.debug}"
            includeAntRuntime="${compile.includeAntRuntime}"
@@ -115,7 +116,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   <target name="compile.test">
     <mkdir dir="${build.test.dir}"/>
     <javac srcdir="${app.root.dir}/test"
-           encoding="8859_1"
+           encoding="utf-8"
            deprecation="on"
            debug="${compile.debug}"
            includeAntRuntime="${compile.includeAntRuntime}"     
@@ -163,7 +164,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   <target name="compile.itest">
     <mkdir dir="${build.itest.dir}"/>
     <javac srcdir="${app.root.dir}/itest"
-           encoding="8859_1"
+           encoding="utf-8"
            deprecation="on"
            debug="${compile.debug}"
            includeAntRuntime="${compile.includeAntRuntime}"     
@@ -186,8 +187,42 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     <mkdir dir="${build.itest.dir}" />
     <mkdir dir="${dist.dir}/junit-reports" />
   </target>
+  
+  <target name="start-baltrad-bdb-server">
+    <!-- find bdb-server executable -->
+    <available file="${baltrad.bdb.bin.path}/baltrad-bdb-server"
+               property="bdbserver.available"/>
+    <fail unless="${bdbserver.available}"
+          message="BDB server executable not found in ${baltrad.bdb.bin.path} !" />
 
-  <target name="execute.itest" depends="prepare.itest,compile.itest">
+    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-drop">
+      <arg value="--conf=${itest.bdbserver.properties}"/>
+    </exec>
+    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-create">
+      <arg value="--conf=${itest.bdbserver.properties}"/>
+    </exec>
+    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-server">
+      <arg value="--conf=${itest.bdbserver.properties}"/>
+      <arg value="--pidfile=${basedir}/baltrad-bdb-server.pid"/>
+    </exec>
+    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-client">
+      <arg value="import_sources"/>
+      <arg value="--url=${baltrad.bdb.server.uri}"/>
+      <arg value="${basedir}/etc/itest_sources.xml"/>
+    </exec>
+  </target>
+
+  <target name="stop-baltrad-bdb-server">
+    <exec executable="cat" outputproperty="baltrad.bdb.server.pid">
+      <arg value="${basedir}/baltrad-bdb-server.pid"/>
+    </exec>
+    <exec executable="kill">
+      <arg value="${baltrad.bdb.server.pid}"/>
+    </exec>
+  </target>
+
+  <target name="execute.itest"
+          depends="prepare.itest,compile.itest,start-baltrad-bdb-server">
     <junit dir="${build.itest.dir}" showoutput="true" forkmode="perBatch" printsummary="no" >
       <jvmarg line="-Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=512m"/>
       <formatter type="xml"/> 
@@ -201,6 +236,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
         <fileset dir="${build.itest.dir}" includes="**/*Test.class" />
       </batchtest>
     </junit>
+    <antcall target="stop-baltrad-bdb-server" />
   </target> 
 
   <!-- clean directories for building -->
