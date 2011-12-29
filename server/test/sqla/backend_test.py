@@ -65,11 +65,11 @@ class TestSqlAlchemyBackendItest(object):
     @staticmethod
     def create_metadata(what_object, what_date, what_time, what_source):
         meta = Metadata()
-        meta.add_group("/what")
-        meta.add_attribute("/what/object", "pvol")
-        meta.add_attribute("/what/date", "20000131")
-        meta.add_attribute("/what/time", "131415")
-        meta.add_attribute("/what/source", "NOD:eesur")
+        meta.add_node("/", Group("what"))
+        meta.add_node("/what", Attribute("object", "pvol"))
+        meta.add_node("/what", Attribute("date", "20000131"))
+        meta.add_node("/what", Attribute("time", "131415"))
+        meta.add_node("/what", Attribute("source", "NOD:eesur"))
         return meta
     
     @staticmethod

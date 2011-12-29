@@ -19,7 +19,7 @@ import collections
 import os.path
 from xml.etree import ElementTree
 
-from . node import Attribute, Group, Dataset, NodeIterator
+from . node import Attribute, Group, NodeIterator
 from . io import HlHdfMetadataReader
 
 class AttributeProperty(object):
@@ -41,15 +41,18 @@ class AttributeProperty(object):
     
     def __set__(self, obj, value):
         #XXX: this could be more generic and efficient
-        grouppath, name = os.path.split(self._path)
-        groupnode = obj.find_node(grouppath)
-        if not groupnode:
-            groupnode = obj.add_group(grouppath)
-        attrnode = obj.find_node(self._path)
-        if not attrnode:
-            obj.add_attribute(self._path, value)
+        group_path, attr_name = os.path.split(self._path)
+
+        group_node = obj.find_node(group_path)
+        if not group_node:
+            parent_path, group_name = os.path.split(group_path)
+            group_node = obj.add_node(parent_path, Group(group_name))
+        
+        attr_node = obj.find_node(self._path)
+        if not attr_node:
+            obj.add_node(group_path, Attribute(attr_name, value))
         else:
-            attrnode.value = value
+            attr_node.value = value
 
 class Metadata(object):
     what_object = AttributeProperty("/what/object")
@@ -66,20 +69,15 @@ class Metadata(object):
 
     def __init__(self):
         self._root = Group("")
-    
-    def add_group(self, path):
-        return self._add_node(path, Group(""))
-    
-    def add_attribute(self, path, value):
-        return self._add_node(path, Attribute("", value))
-    
-    def add_dataset(self, path):
-        return self._add_node(path, Dataset(""))
-    
-    def _add_node(self, path, node):
-        basepath, name = os.path.split(path)
-        node.name = name
-        parent = self.node(basepath)
+        
+    def add_node(self, parent_path, node):
+        """add a node
+
+        :param parent_path: path of the parent node
+        :param node: the node to add
+        :raise: `LookupError` if the parent node is not found
+        """
+        parent = self.node(parent_path)
         return parent.add_child(node)
     
     def root(self):

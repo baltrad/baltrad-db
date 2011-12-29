@@ -6,31 +6,35 @@ import os
 
 from nose.tools import eq_, raises
 
-from baltrad.bdbcommon.oh5 import Metadata, Source
+from baltrad.bdbcommon.oh5 import (
+    Attribute,
+    Group,
+    Metadata,
+    Source,
+)
 
 class TestMetadata(object):
     def setUp(self):
         self.meta = Metadata()
     
-    def test_add_group(self):
-        grp = self.meta.add_group("/group")
+    def test_add_node_group(self):
+        grp = self.meta.add_node("/", Group("group"))
         eq_(grp.name, "group")
         eq_(self.meta.root(), grp.parent)
     
-    def test_add_attribute(self):
-        attr = self.meta.add_attribute("attr", "value")
+    def test_add_node_attribute(self):
+        attr = self.meta.add_node("/", Attribute("attr", "value"))
         eq_(attr.name, "attr")
         eq_(attr.value, "value")
     
     def test_find_node(self):
-        self.meta.add_group("/a")
-        self.meta.add_group("/a/b")
-        self.meta.add_group("/a/b/c")
-        c = self.meta.add_group("/a/b/c")
+        self.meta.add_node("/", Group("a"))
+        self.meta.add_node("/a", Group("b"))
+        c = self.meta.add_node("/a/b", Group("c"))
 
         eq_(c, self.meta.find_node("/a/b/c"))
     
-    def test_node_root(self):
+    def test_find_node_root(self):
         eq_(self.meta.root(), self.meta.find_node("/"))
     
     @raises(LookupError)
@@ -44,18 +48,21 @@ class TestMetadata(object):
         eq_(None, self.meta.find_node("/a/b"))
 
     def test_iterator(self):
-       self.meta.add_group("/a")
-       self.meta.add_group("/b")
-       self.meta.add_group("/a/b")
-       self.meta.add_group("/a/b/c")
+       self.meta.add_node("/", Group("a"))
+       self.meta.add_node("/", Group("b"))
+       self.meta.add_node("/a", Group("b"))
+       self.meta.add_node("/a/b", Group("c"))
 
        expected = ["/", "/a", "/b", "/a/b", "/a/b/c"]
        nodepaths = [node.path() for node in self.meta.iternodes()]
        eq_(expected, nodepaths)
             
     def test_source(self):
-        self.meta.add_group("/what")
-        self.meta.add_attribute("/what/source", "NOD:eesur,PLC:Sürgavere")
+        self.meta.add_node("/", Group("what"))
+        self.meta.add_node(
+            "/what",
+            Attribute("source", "NOD:eesur,PLC:Sürgavere")
+        )
 
         eq_({"NOD": "eesur", "PLC": "Sürgavere"}, self.meta.source())
 
@@ -65,10 +72,10 @@ class TestMetadata(object):
         eq_(expected, self.meta.json_repr())
 
     def test_json_repr(self):
-        self.meta.add_group("/a")
-        self.meta.add_group("/a/b")
-        self.meta.add_attribute("/attr1", 1)
-        self.meta.add_attribute("/a/attr2", 2)
+        self.meta.add_node("/", Group("a"))
+        self.meta.add_node("/a", Group("b"))
+        self.meta.add_node("/", Attribute("attr1", 1))
+        self.meta.add_node("/a", Attribute("attr2", 2))
         
         expected = [
             {"path": "/", "type": "group"},
@@ -116,8 +123,10 @@ class TestMetadataAttributeShortcuts(object):
         self.meta = Metadata()
 
     def check_get_property(self, propdef):
-        self.meta.add_group(os.path.dirname(propdef.oh5attr))
-        self.meta.add_attribute(propdef.oh5attr, propdef.oh5value)
+        group_path, attr_name = os.path.split(propdef.oh5attr)
+        group_parent_path, group_name = os.path.split(group_path)
+        self.meta.add_node(group_parent_path, Group(group_name))
+        self.meta.add_node(group_path, Attribute(attr_name, propdef.oh5value))
 
         eq_(propdef.pyvalue, getattr(self.meta, propdef.attrname))
     
