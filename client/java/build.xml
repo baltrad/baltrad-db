@@ -42,6 +42,9 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   <property name="itest.bdbserver.properties" value="${basedir}/etc/itest_bdbserver.properties" />
   <property file="${itest.bdbserver.properties}"/>
 
+  <echo level="info"
+        message="using ${baltrad.bdb.server.backend.uri} as the backend for test database" />
+
   <path id="lib.path">
     <fileset dir="${lib.dir}">
       <include name="**/*.jar"/>
