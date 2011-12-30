@@ -50,6 +50,9 @@ It might also be a good idea to include
 
  $ pip install "mock >= 0.7"
 
+You should also copy hlhdf.pth from hlhdf package to the site-packages of
+the environment.
+
 Generating documentation
 ------------------------
 
@@ -88,3 +91,21 @@ java client::
 
  $ cd client/java
  $ ant install
+
+
+Running tests
+-------------
+
+python tests can be run from the project directory. You might want to activate
+your virtual python environment to use the dependent packages from there
+(otherwise they will be downloaded and installed to the project directory).
+
+Running python tests::
+
+ $ python setup.py nosetests
+
+Running java tests::
+ 
+ $ ant test
+ $ ant itest
+
