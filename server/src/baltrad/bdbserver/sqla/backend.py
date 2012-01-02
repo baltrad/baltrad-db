@@ -18,7 +18,6 @@
 import contextlib
 import datetime
 import os
-import sqlite3
 import stat
 import uuid
 
@@ -30,6 +29,7 @@ from . import schema, query
 from .. backend import Backend, DuplicateEntry
 
 def force_sqlite_foreign_keys(dbapi_con, con_record):
+    import sqlite3
     if (isinstance(dbapi_con, sqlite3.Connection)):
         dbapi_con.execute("pragma foreign_keys=ON")
 
