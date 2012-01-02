@@ -5,6 +5,7 @@ import uuid
 
 from nose.tools import eq_, ok_, raises
 from nose.plugins.attrib import attr
+from nose.plugins.skip import SkipTest
 
 from baltrad.bdbserver.sqla import schema
 from baltrad.bdbserver.sqla.backend import (
@@ -29,13 +30,17 @@ backend = None
 def setup_module():
     global backend
     url = os.environ.get("BDB_TEST_DB", "sqlite:///:memory:")
-    backend = SqlAlchemyBackend(url)
+    try:
+        backend = SqlAlchemyBackend(url)
+    except:
+        raise SkipTest("could not create backend (%s)" % url)
     backend.drop()
     backend.create()
 
 def teardown_module():
     global backend
-    backend.drop()
+    if backend:
+        backend.drop()
     
 class TestSqlAlchemyBackendItest(object):
     backend = None
