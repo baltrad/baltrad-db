@@ -104,6 +104,14 @@ Running python tests::
 
  $ python setup.py nosetests
 
+Test that require database access are tagged with 'dbtest', they can be disabled
+by supplying `-A 'not dbtest'` to nosetests
+
+Running python tests without database access::
+
+ $ python setup.py nosetests -A 'not dbtest'
+
+
 Running java tests::
  
  $ ant test
