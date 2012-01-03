@@ -158,6 +158,12 @@ class Backend(object):
         """
         raise NotImplementedError()    
     
+    @abc.abstractmethod
+    def upgrade(self):
+        """bring the resources up-to-date on backend
+        """
+        raise NotImplementedError()
+    
 def create_from_config(config):
     backend_type = config["backend.type"]
     if backend_type == "sqlalchemy":

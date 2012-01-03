@@ -1,5 +1,5 @@
-import getopt
 import logging
+import optparse
 import os
 import sys
 
@@ -10,103 +10,90 @@ from .config import Properties
 from .web.app import Application, serve
 from . import backend
 
-def run_create():
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "", ["conf="])
-    except getopt.GetoptError, err:
-        print >> sys.stderr, str(err)
-        raise SystemExit
-    
-    conffile = None
+def create_optparser():
+    optparser = optparse.OptionParser()
+    optparser.set_usage(
+        "%s [--conf=CONFFILE] [ARGS]" % (
+            os.path.basename(sys.argv[0])
+        )
+    )
+    optparser.add_option(
+        "--conf", dest="conffile",
+        default="http://localhost:8080",
+        help="configuration file",
+    )
+    return optparser
 
-    for opt, value in opts:
-        if opt == "--conf":
-            conffile = os.path.abspath(value)
-        else:
-            assert False, "uhandled option: " + opt
-
+def read_config(conffile):
     if not conffile:
         raise SystemExit("configuration file not specified")
-
     try:
-        config = Properties.load(conffile)
+        return Properties.load(conffile)
     except IOError:
         raise SystemExit("failed to read configuration from " + conffile)
+   
+def run_create():
+    optparser = create_optparser()
 
+    opts, args = optparser.parse_args()
+
+    config = read_config(opts.conffile)
     config = config.filter("baltrad.bdb.server.")
 
     be = backend.create_from_config(config)
     be.create()
 
 def run_drop():
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "", ["conf="])
-    except getopt.GetoptError, err:
-        print >> sys.stderr, str(err)
-        raise SystemExit
-    
-    conffile = None
+    optparser = create_optparser()
 
-    for opt, value in opts:
-        if opt == "--conf":
-            conffile = os.path.abspath(value)
-        else:
-            assert False, "uhandled option: " + opt
+    opts, args = optparser.parse_args()
 
-    if not conffile:
-        raise SystemExit("configuration file not specified")
-
-    try:
-        config = Properties.load(conffile)
-    except IOError:
-        raise SystemExit("failed to read configuration from " + conffile)
-
+    config = read_config(opts.conffile)
     config = config.filter("baltrad.bdb.server.")
 
     be = backend.create_from_config(config)
     be.drop()
+
+def run_upgrade():
+    optparser = create_optparser()
+
+    opts, args = optparser.parse_args()
+
+    config = read_config(opts.conffile)
+    config = config.filter("baltrad.bdb.server.")
+
+    be = backend.create_from_config(config)
+    be.upgrade()
     
 def run_server():
     logging.basicConfig()
     logging.getLogger("werkzeug").setLevel(logging.INFO)
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "", ["conf=", "pidfile=", "foreground"])
-    except getopt.GetoptError, err:
-        print >> sys.stderr, str(err)
-        raise SystemExit
-    
-    conffile = None
-    foreground = False
-    pidfile = "/var/run/baltrad-bdb-server.pid"
+    optparser = create_optparser()
+    optparser.add_option(
+        "--foreground", action="store_true",
+        default=False,
+        help="don't detach the process"
+    )
+    optparser.add_option(
+        "--pidfile", action="store",
+        default="/var/run/baltrad-bdb-server.pid",
+        help="location of the pid file"
+    )
 
-    for opt, value in opts:
-        if opt == "--conf":
-            conffile = os.path.abspath(value)
-        elif opt == "--foreground":
-            foreground = True
-        elif opt == "--pidfile":
-            pidfile = os.path.abspath(value)
-        else:
-            assert False, "uhandled option: " + opt
+    opts, args = optparser.parse_args()
 
-    if not conffile:
-        raise SystemExit("configuration file not specified")
 
-    try:
-        config = Properties.load(conffile)
-    except IOError:
-        raise SystemExit("failed to read configuration from " + conffile)
-
+    config = read_config(opts.conffile)
     config = config.filter("baltrad.bdb.server.")
 
     daemon_ctx = daemon.DaemonContext(
         working_directory="/",
         chroot_directory=None,
-        stdout=sys.stdout if foreground else None,
-        stderr=sys.stderr if foreground else None,
-        detach_process=not foreground,
-        pidfile=TimeoutPIDLockFile(pidfile, acquire_timeout=0),
+        stdout=sys.stdout if opts.foreground else None,
+        stderr=sys.stderr if opts.foreground else None,
+        detach_process=not opts.foreground,
+        pidfile=TimeoutPIDLockFile(opts.pidfile, acquire_timeout=0),
     )
 
     with daemon_ctx:
