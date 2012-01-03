@@ -29,6 +29,11 @@ Setting up a development environment
 The most convenient way to set up an environment for BDB development is to
 use virtualenv. There is one in misc/virtualenv.
 
+.. note::
+
+  using virtualenv is by no means mandatory. This is just a recommended way
+  to keep your machine clean.
+
 Set up an and activate an environment in ./env ::
 
  $ ./misc/virtualenv/virtualenv.py --distribute --system-site-packages ./env
