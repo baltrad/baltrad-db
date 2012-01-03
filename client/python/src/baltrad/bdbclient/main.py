@@ -52,6 +52,11 @@ def run():
         default="http://localhost:8080",
         help="BDB server URL",
     )
+    optparser.add_option(
+        "-v", "--verbose", dest="verbose",
+        action="store_true",
+        help="be verbose",
+    )
 
     try:
         command = sys.argv[1]

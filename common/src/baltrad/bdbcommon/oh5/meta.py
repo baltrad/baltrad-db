@@ -147,6 +147,9 @@ class Source(collections.MutableMapping):
     
     def __repr__(self):
         return "Source(%r, values=%r)" % (self.name, self._values)
+    
+    def __str__(self):
+        return self.to_string()
 
     def to_string(self):
         return ",".join([":".join(kv) for kv in sorted(self._values.iteritems())])
@@ -176,5 +179,7 @@ class Source(collections.MutableMapping):
         for org_def in radar_db:
             result.append(cls._create_from_etree_element(org_def))
             for radar_def in org_def:
-                result.append(cls._create_from_etree_element(radar_def))
+                source = cls._create_from_etree_element(radar_def)
+                source["NOD"] = radar_def.tag
+                result.append(source)
         return result

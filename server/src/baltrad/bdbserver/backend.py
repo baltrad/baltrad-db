@@ -21,6 +21,11 @@ class DuplicateEntry(Exception):
     """thrown to indicate that an entry already exists
     """
 
+class IntegrityError(RuntimeError):
+    """thrown to indicate a conflict between resources
+    """
+    pass
+
 class Backend(object):
     """Backend interface
     """
@@ -37,7 +42,7 @@ class Backend(object):
         :rtype: :class:`baltrad.bdb.oh5.meta.Metadata`
         :raise: :class:`baltrad.bdb.backend.DuplicateEntry` if file is already stored
         """
-        raise NotImplemented()
+        raise NotImplementedError()
     
     @abc.abstractmethod
     def get_file(self, uuid):
@@ -48,7 +53,7 @@ class Backend(object):
         :return: file content as a string or `None` if file not found
         :rtype: string
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def get_file_metadata(self, uuid):
@@ -59,7 +64,7 @@ class Backend(object):
         :return: :class:`baltrad.bdb.oh5.meta.Metadata` instance
                  or `None` if file not found
         """
-        raise NotImplemented()
+        raise NotImplementedError()
     
     @abc.abstractmethod
     def remove_file(self, uuid):
@@ -69,13 +74,13 @@ class Backend(object):
         :type uuid: :class:`uuid.UUID`
         :return: `True` if the file was removed or `False` if it didn't exist
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def remove_all_files(self, query):
         """remove all files from the database
         """
-        raise NotImplemented()
+        raise NotImplementedError()
     
     @abc.abstractmethod
     def get_sources(self):
@@ -83,7 +88,7 @@ class Backend(object):
 
         :return: list of :class:`baltrad.bdb.oh5.meta.Source` instances
         """
-        raise NotImplemented()
+        raise NotImplementedError()
     
     @abc.abstractmethod
     def add_source(self, source):
@@ -93,7 +98,29 @@ class Backend(object):
         :type source: :class:`baltrad.bdb.oh5.meta.Source`
         :raise: :class:`DuplicateEntry` if this source is already defined
         """
-        raise NotImplemented()
+        raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def remove_source(self, name):
+        """remove a source definition from the database
+
+        :param name: the name of the source
+        :return: `True` if the source was remove, `False` if not found
+        :raise: :class:`IntegrityError` if the source is associated with files
+        """
+        raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def update_source(self, name, source):
+        """update a source definition in the database
+
+        :param name: the name of the source to modify
+        :param source: the new definiton of the source
+        :raise: :class:`DuplicateEntry` if renaming and a source with such a
+                name already exists
+        :raise: :class:`LookupError` if the source doesn't exist
+        """
+        raise NotImplementedError()
     
     @abc.abstractmethod
     def execute_file_query(self, query):
@@ -102,7 +129,7 @@ class Backend(object):
         :param query: the query to execute
         :type query: :class:`FileQuery` instance
         """
-        raise NotImplemented()
+        raise NotImplementedError()
     
     @abc.abstractmethod
     def execute_attribute_query(self, query):
@@ -111,25 +138,25 @@ class Backend(object):
         :param query: the query to execute
         :type query: :class:`AttributeQuery` instance
         """
-        raise NotImplemented()
+        raise NotImplementedError()
     
     @abc.abstractmethod
     def is_operational(self):
         """test if the backend is fully operational
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def create(self):
         """create resources on the backend
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def drop(self):
         """drop resources on the backend
         """
-        raise NotImplemented()    
+        raise NotImplementedError()    
     
 def create_from_config(config):
     backend_type = config["backend.type"]

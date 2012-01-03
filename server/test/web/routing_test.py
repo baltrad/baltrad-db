@@ -98,13 +98,15 @@ class TestSourceRoutes(object):
         endpoint, args = self.adapter.match("/source/", "POST")
         eq_("handler.add_source", endpoint)
 
-    @raises(MethodNotAllowed)
     def test_sourceroot_PUT(self):
-        self.adapter.match("/source/", "PUT")
+        endpoint, args = self.adapter.match("/source/srcname", "PUT")
+        eq_("handler.update_source", endpoint)
+        eq_("srcname", args["name"])
 
-    @raises(MethodNotAllowed)
     def test_sourceroot_DELETE(self):
-        self.adapter.match("/source/", "DELETE")
+        endpoint, args = self.adapter.match("/source/srcname", "DELETE")
+        eq_("handler.remove_source", endpoint)
+        eq_("srcname", args["name"])
 
 class TestQueryRoutes(object):
     @classmethod

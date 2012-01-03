@@ -25,7 +25,7 @@ prefixed with additional "list" literal:
 
 ::
 
-  [1, "foo", "bar"] => ["list, 1, "foo", "bar"]
+  [1, "foo", "bar"] => ["list", 1, "foo", "bar"]
 
 Operations
 ----------
@@ -294,6 +294,7 @@ Add source definition
   :Headers: Content-Length, Content-Type
   :Synopsis: POST /source/
   :Body: source object
+
   ::
 
     POST /source/ HTTP/1.1
@@ -317,9 +318,70 @@ Add source definition
     * **201 CREATED** - source was successfully stored, the URI is in the
       *Location* header
     * **409 CONFLICT** - source with such name is already stored
-  :Body: extracted metadata
 
   ::
 
     HTTP/1.1 201 CREATED
     Location: http://example.com/source/source_name
+
+.. _doc-rest-op-update-source:
+
+Update source definition
+''''''''''''''''''''''''
+**Request**
+  :Headers: Content-Length, Content-Type
+  :Synopsis: PUT /source/name
+  :Body: source object
+
+  ::
+
+    PUT /source/name HTTP/1.1
+    Host: example.com
+    Content-Type: application/json
+    Content-Length: nnn
+
+    {
+      "source": {
+        "name": "new_name",
+        "values": {
+            "key1": "value1",
+            "key2": "value2",
+        }
+      }
+    }
+
+**Response**
+  :Headers: Location
+  :Status:
+    * **204 NO CONTENT** - the source definition was source was successfully
+      stored, the URI is in the *Location* header
+    * **404 NOT FOUND** - source was not found
+    * **409 CONFLICT** - source with such name is already stored
+
+  ::
+
+    HTTP/1.1 20O OK
+    Location: http://example.com/source/new_name
+
+.. _doc-rest-op-remove-source:
+
+Remove source definition
+''''''''''''''''''''''''
+**Request**
+  :Synopsis: DELETE /source/name
+
+  ::
+
+    DELETE /source/name HTTP/1.1
+    Host: example.com
+
+**Response**
+  :Headers: Location
+  :Status:
+    * **200 OK** - the source was removed
+    * **404 NOT FOUND** - source not found
+    * **409 CONFLICT** - source has files associated and can't be removed
+
+  ::
+
+    HTTP/1.1 20O OK

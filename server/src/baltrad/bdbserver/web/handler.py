@@ -30,7 +30,12 @@ from .util import (
     Response,
 )
 
-from ..backend import AttributeQuery, DuplicateEntry, FileQuery
+from ..backend import (
+    AttributeQuery,
+    DuplicateEntry,
+    FileQuery,
+    IntegrityError,
+)
 
 def add_file(ctx):
     """add a file to the database
@@ -143,12 +148,54 @@ def add_source(ctx):
     See :ref:`doc-rest-op-add-source` for details
     """
     data = ctx.request.get_json_data()["source"]
-    print data
 
     source = Source(data["name"], values=data["values"])
     ctx.backend.add_source(source)
     response = Response("", status=httplib.CREATED)
     response.headers["Location"] = ctx.make_url("source/" + source.name)
+    return response
+
+def update_source(ctx, name):
+    """update a source in the database
+
+    :param ctx: the request context
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status *204 NO CONTENT*
+
+    See :ref:`doc-rest-op-update-source` for details
+    """
+    data = ctx.request.get_json_data()["source"]
+
+    source = Source(data["name"], values=data["values"])
+
+    try:
+        ctx.backend.update_source(name, source)
+        response = NoContentResponse()
+        response.headers["Location"] = ctx.make_url("source/" + name)
+    except LookupError:
+        response = Response("", status=httplib.NOT_FOUND)
+    except DuplicateEntry:
+        response = Response("", status=httplib.CONFLICT)
+
+    return response
+
+def remove_source(ctx, name):
+    """remove a source from the database
+
+    :param ctx: the request context
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status *204 NO CONTENT*
+
+    See :ref:`doc-rest-op-remove-source` for details
+    """
+    try:
+        if ctx.backend.remove_source(name):
+            response = NoContentResponse()
+        else:
+            response = Response("", status=httplib.NOT_FOUND)
+    except IntegrityError:
+        response = Response("", status=httplib.CONFLICT)
+    
     return response
 
 def query_file(ctx):

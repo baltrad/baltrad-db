@@ -11,13 +11,16 @@ from baltrad.bdbserver.sqla import schema
 from baltrad.bdbserver.sqla.backend import (
     _insert_metadata,
     _insert_file,
+    get_source_id,
+    get_source_by_id,
     SqlAlchemyBackend
 )
 
 from baltrad.bdbserver.backend import (
     AttributeQuery,
     DuplicateEntry,
-    FileQuery
+    FileQuery,
+    IntegrityError,
 )
 
 from baltrad.bdbcommon.oh5.meta import Metadata, Source
@@ -42,6 +45,22 @@ def teardown_module():
     if backend:
         backend.drop()
     
+
+def create_metadata(what_object, what_date, what_time, what_source):
+    meta = Metadata()
+    meta.add_node("/", Group("what"))
+    meta.add_node("/what", Attribute("object", what_object))
+    meta.add_node("/what", Attribute("date", what_date))
+    meta.add_node("/what", Attribute("time", what_time))
+    meta.add_node("/what", Attribute("source", what_source))
+    return meta
+
+def write_metadata(meta):
+    h5file = NamedTemporaryFile()
+    writer = HlHdfMetadataWriter()
+    writer.write(meta, h5file.name)
+    return h5file
+
 class TestSqlAlchemyBackendItest(object):
     backend = None
 
@@ -67,38 +86,23 @@ class TestSqlAlchemyBackendItest(object):
     def tearDown(self):
         with self.backend.get_connection() as conn:
             conn.execute(schema.files.delete())
-
-    @staticmethod
-    def create_metadata(what_object, what_date, what_time, what_source):
-        meta = Metadata()
-        meta.add_node("/", Group("what"))
-        meta.add_node("/what", Attribute("object", "pvol"))
-        meta.add_node("/what", Attribute("date", "20000131"))
-        meta.add_node("/what", Attribute("time", "131415"))
-        meta.add_node("/what", Attribute("source", "NOD:eesur"))
-        return meta
-    
-    @staticmethod
-    def write_metadata(meta):
-        h5file = NamedTemporaryFile()
-        writer = HlHdfMetadataWriter()
-        writer.write(meta, h5file.name)
-        return h5file
     
     @attr("dbtest")
     def test_get_source_by_id(self):
-        source = self.backend.get_source_by_id(self.source_ids[0])
-        eq_(self.sources[0], source)
+        with self.backend.get_connection() as conn:
+            source = get_source_by_id(conn, self.source_ids[0])
+            eq_(self.sources[0], source)
 
     @attr("dbtest")
     def test_get_source_id(self):
         source = {"NOD": "eesur"}
-        eq_(self.source_ids[0], self.backend.get_source_id(source))
+        with self.backend.get_connection() as conn:
+            eq_(self.source_ids[0], get_source_id(conn, source))
     
     @attr("dbtest")
     def test_store_file(self):
-        meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = self.write_metadata(meta)
+        meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
+        h5file = write_metadata(meta)
 
         stored_meta = self.backend.store_file(h5file.name)
         ok_(stored_meta.bdb_uuid)
@@ -112,8 +116,8 @@ class TestSqlAlchemyBackendItest(object):
     @attr("dbtest")
     @raises(DuplicateEntry)
     def test_store_file_duplicate(self):
-        meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = self.write_metadata(meta)
+        meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
+        h5file = write_metadata(meta)
 
         self.backend.store_file(h5file.name)
         self.backend.store_file(h5file.name)
@@ -125,8 +129,8 @@ class TestSqlAlchemyBackendItest(object):
     
     @attr("dbtest")
     def test_get_file_metadata(self):
-        meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = self.write_metadata(meta)
+        meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
+        h5file = write_metadata(meta)
 
         meta = self.backend.store_file(h5file.name)
 
@@ -143,8 +147,8 @@ class TestSqlAlchemyBackendItest(object):
     
     @attr("dbtest")
     def test_get_file(self):
-        meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = self.write_metadata(meta)
+        meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
+        h5file = write_metadata(meta)
 
         meta = self.backend.store_file(h5file.name)
         expected = open(h5file.name, "r").read()
@@ -163,8 +167,8 @@ class TestSqlAlchemyBackendItest(object):
     
     @attr("dbtest")
     def test_remove_file(self):
-        meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = self.write_metadata(meta)
+        meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
+        h5file = write_metadata(meta)
 
         stored_meta = self.backend.store_file(h5file.name)
 
@@ -172,11 +176,11 @@ class TestSqlAlchemyBackendItest(object):
     
     @attr("dbtest")
     def test_remove_files(self):        
-        meta = self.create_metadata("pvol", "20000131", "131415", "NOD:eesur")
-        h5file = self.write_metadata(meta)
+        meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
+        h5file = write_metadata(meta)
 
-        meta = self.create_metadata("pvol", "20000131", "131416", "NOD:eesur")
-        h5file = self.write_metadata(meta)
+        meta = create_metadata("pvol", "20000131", "131416", "NOD:eesur")
+        h5file = write_metadata(meta)
 
         self.backend.store_file(h5file.name)
 
@@ -186,12 +190,104 @@ class TestSqlAlchemyBackendItest(object):
             delete_count = conn.execute(schema.files.count()).scalar()
         eq_(0, delete_count) 
     
+class TestSourceManagement(object):
+    @classmethod
+    def setup_class(cls):
+        global backend
+        cls.backend = backend
+    
+    def tearDown(self):
+        with self.backend.get_connection() as conn:
+            conn.execute(schema.files.delete())
+            conn.execute(schema.sources.delete())
+    
+    @attr("dbtest")
+    def test_add_source(self):
+        source = Source("foo", values={"bar": "baz"})
+        self.backend.add_source(source)
+
+        sources = self.backend.get_sources()
+        eq_(1, len(sources))
+        eq_(source, sources[0])
+    
+    @attr("dbtest")
+    @raises(DuplicateEntry)
+    def test_add_source_duplicate(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        source2 = Source("foo", values={"qwe": "asd"})
+
+        self.backend.add_source(source1)
+        self.backend.add_source(source2)
+
+    @attr("dbtest")
+    def test_update_source(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        source2 = Source("qwe", values={"asd": "qaz"})
+        self.backend.add_source(source1)
+
+        self.backend.update_source("foo", source2)
+
+        sources = self.backend.get_sources()
+        eq_(1, len(sources))
+        eq_(source2, sources[0])
+    
+    @attr("dbtest")
+    @raises(LookupError)
+    def test_update_source_not_found(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        self.backend.update_source("qwe", source1)
+    
+    @attr("dbtest")
+    @raises(DuplicateEntry)
+    def test_update_source_name_conflict(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        source2 = Source("qwe", values={"asd": "qaz"})
+        self.backend.add_source(source1)
+        self.backend.add_source(source2)
+
+        self.backend.update_source("foo", source2)
+
+    @attr("dbtest")
+    def test_remove_source(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        source2 = Source("qwe", values={"asd": "qaz"})
+        self.backend.add_source(source1)
+        self.backend.add_source(source2)
+        
+        eq_(True, self.backend.remove_source("foo"))
+
+        sources = self.backend.get_sources()
+        eq_(1, len(sources))
+        eq_(source2, sources[0])
+    
+    @attr("dbtest")
+    def test_remove_source_not_found(self):
+        eq_(False, self.backend.remove_source("foo"))
+
+    @attr("dbtest")
+    @raises(IntegrityError)
+    def test_remove_source_files_attached(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        self.backend.add_source(source1)
+
+        meta = create_metadata("pvol", "20000131", "131415", "bar:baz")
+        h5file = write_metadata(meta)
+
+        self.backend.store_file(h5file.name)
+
+        self.backend.remove_source("foo")
+
     @attr("dbtest")
     def test_get_sources(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        source2 = Source("bar", values={"qwe": "asd"})
+        self.backend.add_source(source1)
+        self.backend.add_source(source2)
+
         sources = self.backend.get_sources()
         eq_(2, len(sources))
-        ok_(self.sources[0] in sources)
-        ok_(self.sources[1] in sources)
+        ok_(source1 in sources)
+        ok_(source2 in sources)
 
 ###
 # src name obj  date       time  xsize ysize
@@ -281,8 +377,8 @@ def _insert_test_file(backend, file_):
             setattr(meta, k, v)
         else:
             _add_attribute(meta, k, v)
-    source_id = backend.get_source_id(meta.source())
     with backend.get_connection() as conn:
+        source_id = get_source_id(conn, meta.source())
         file_id =  _insert_file(conn, meta, source_id)
         _insert_metadata(conn, meta, file_id)
 

@@ -21,12 +21,12 @@ import os
 import stat
 import uuid
 
-from sqlalchemy import engine, event, sql
+from sqlalchemy import engine, event, exc as sqlexc, sql
 
 from baltrad.bdbcommon import oh5
 
 from . import schema, query
-from .. backend import Backend, DuplicateEntry
+from .. backend import Backend, DuplicateEntry, IntegrityError
 
 def force_sqlite_foreign_keys(dbapi_con, con_record):
     import sqlite3
@@ -96,11 +96,11 @@ class SqlAlchemyBackend(Backend):
         meta = oh5.Metadata.from_file(path)
 
         metadata_hash = self._hasher.hash(meta)
-        source_id = self.get_source_id(meta.source())
-        if not source_id:
-            raise LookupError("failed to look up source for " +
-                              meta.source().to_string())
         with self.get_connection() as conn:
+            source_id = get_source_id(conn, meta.source())
+            if not source_id:
+                raise LookupError("failed to look up source for " +
+                                  meta.source().to_string())
             if _has_file_by_hash_and_source(conn, metadata_hash, source_id):
                 raise DuplicateEntry()
 
@@ -110,7 +110,8 @@ class SqlAlchemyBackend(Backend):
         stored_timestamp = datetime.datetime.utcnow()
         meta.bdb_stored_date = stored_timestamp.date()
         meta.bdb_stored_time = stored_timestamp.time()
-        source = self.get_source_by_id(source_id)
+        with self.get_connection() as conn:
+            source = get_source_by_id(conn, source_id)
         meta.bdb_source = source.to_string()
         meta.bdb_source_name = source.name
         
@@ -157,7 +158,8 @@ class SqlAlchemyBackend(Backend):
         meta.bdb_uuid = row[schema.files.c.uuid]
         meta.bdb_file_size = row[schema.files.c.size]
         source_id = row[schema.files.c.source_id]
-        source = self.get_source_by_id(source_id)
+        with self.get_connection() as conn:
+            source = get_source_by_id(conn, source_id)
         meta.bdb_source = source.to_string()
         meta.bdb_source_name = source.name
         meta.bdb_stored_date = row[schema.files.c.stored_date]
@@ -196,49 +198,8 @@ class SqlAlchemyBackend(Backend):
         """get a context managed connection to the database
         """
         return contextlib.closing(self._engine.connect())
-    
-    def get_source_id(self, source):
-        where = sql.literal(False)
-        for key, value in source.iteritems():
-            where = sql.or_(
-                where,
-                sql.and_(
-                    schema.source_kvs.c.key==key,
-                    schema.source_kvs.c.value==value
-                )
-            )
-
-        qry = sql.select(
-            [schema.source_kvs.c.source_id],
-            where,
-            distinct=True
-        )
-
-        with self.get_connection() as conn:
-            return conn.execute(qry).scalar()
-            
-    def get_source_by_id(self, source_id):
-        name_qry = sql.select(
-            [schema.sources.c.name],
-            schema.sources.c.id==source_id
-        )
-
-        kv_qry = sql.select(
-            [schema.source_kvs],
-            schema.source_kvs.c.source_id==source_id
-        )
-        
-        source = oh5.Source()
-
-        with self.get_connection() as conn:
-            source.name = conn.execute(name_qry).scalar()
-            for row in conn.execute(kv_qry).fetchall():
-                source[row["key"]] = row["value"]
-
-        return source
-    
+                    
     def get_sources(self):
-
         qry = sql.select(
             [schema.sources, schema.source_kvs],
             from_obj=schema.source_kvs.join(schema.sources)
@@ -255,25 +216,53 @@ class SqlAlchemyBackend(Backend):
     
     def add_source(self, source):
         with self.get_connection() as conn:
-            source_id = conn.execute(
-                schema.sources.insert(),
-                name=source.name,
-            ).inserted_primary_key[0]
-  
-        kvs = []
-        for k, v in source.iteritems():
-            kvs.append({
-                "source_id": source_id,
-                "key": k,
-                "value": v,
-            })
+            try:
+                source_id = conn.execute(
+                    schema.sources.insert(),
+                    name=source.name,
+                ).inserted_primary_key[0]
+            except sqlexc.IntegrityError:
+                raise DuplicateEntry()
         
-        with self.get_connection() as conn:
-            conn.execute(
-                schema.source_kvs.insert(),
-                kvs
-            )
+            insert_source_values(conn, source_id, source)
         return source_id
+    
+    def update_source(self, name, source):
+        with self.get_connection() as conn:
+            source_id = get_source_id_by_name(conn, name)
+            if not source_id:
+                raise LookupError("source '%s' not found" % name)
+
+            with conn.begin():
+                if name != source.name:
+                    try:
+                        conn.execute(
+                            schema.sources.update()
+                                .where(schema.sources.c.id==source_id),
+                            name=source.name
+                        )
+                    except sqlexc.IntegrityError, e:
+                        raise DuplicateEntry(str(e))
+                
+                conn.execute(
+                    schema.source_kvs.delete(
+                        schema.source_kvs.c.source_id==source_id
+                    )
+                )
+                insert_source_values(conn, source_id, source)
+            
+    def remove_source(self, name):
+        with self.get_connection() as conn:
+            try:
+                affected_rows = conn.execute(
+                    schema.sources.delete(
+                        schema.sources.c.name==name
+                    )
+                ).rowcount
+            except sqlexc.IntegrityError, e:
+                raise IntegrityError(str(e))
+            else:
+                return bool(affected_rows)
     
     def execute_file_query(self, qry):
         stmt = query.transform_file_query(qry)
@@ -422,3 +411,64 @@ def _has_file_by_hash_and_source(conn, hash, source_id):
             )
         )
     ).scalar()
+
+
+def get_source_id(conn, source):
+    where = sql.literal(False)
+    for key, value in source.iteritems():
+        where = sql.or_(
+            where,
+            sql.and_(
+                schema.source_kvs.c.key==key,
+                schema.source_kvs.c.value==value
+            )
+        )
+
+    qry = sql.select(
+        [schema.source_kvs.c.source_id],
+        where,
+        distinct=True
+    )
+
+    return conn.execute(qry).scalar()
+
+def get_source_id_by_name(conn, name):
+    qry = sql.select(
+        [schema.sources.c.id],
+        schema.sources.c.name==name
+    )
+
+    return conn.execute(qry).scalar()
+
+def get_source_by_id(conn, source_id):
+    name_qry = sql.select(
+        [schema.sources.c.name],
+        schema.sources.c.id==source_id
+    )
+
+    kv_qry = sql.select(
+        [schema.source_kvs],
+        schema.source_kvs.c.source_id==source_id
+    )
+    
+    source = oh5.Source()
+
+    source.name = conn.execute(name_qry).scalar()
+    for row in conn.execute(kv_qry).fetchall():
+        source[row["key"]] = row["value"]
+
+    return source
+
+def insert_source_values(conn, source_id, source):
+    kvs = []
+    for k, v in source.iteritems():
+        kvs.append({
+            "source_id": source_id,
+            "key": k,
+            "value": v,
+        })
+    
+    conn.execute(
+         schema.source_kvs.insert(),
+         kvs
+    )

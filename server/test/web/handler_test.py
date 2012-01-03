@@ -6,7 +6,11 @@ from nose.tools import eq_, raises
 
 from werkzeug.test import EnvironBuilder
 
-from baltrad.bdbserver.backend import Backend, DuplicateEntry
+from baltrad.bdbserver.backend import (
+    Backend,
+    DuplicateEntry,
+    IntegrityError
+)
 from baltrad.bdbserver.web import handler
 from baltrad.bdbserver.web.util import (
     HttpConflict,
@@ -141,6 +145,61 @@ class TestSourceHandlers(object):
     
     def test_add_source_duplicate(self):
         pass
+    
+    def test_update_source(self):
+        self.ctx.request = self.create_request("PUT",
+            data='{"source": {"name": "foo", "values": {"bar": "baz"}}}',
+        )
+
+        response = handler.update_source(self.ctx, "qaz")
+        self.backend.update_source.assert_called_with(
+            "qaz", Source("foo", values={"bar": "baz"})
+        )
+        eq_(httplib.NO_CONTENT, response.status_code)
+        eq_("/source/qaz", response.headers["Location"])
+    
+    def test_update_source_not_found(self):
+        self.ctx.request = self.create_request("PUT",
+            data='{"source": {"name": "foo", "values": {"bar": "baz"}}}',
+        )
+        self.backend.update_source.side_effect = LookupError()
+
+        response = handler.update_source(self.ctx, "qaz")
+        eq_(httplib.NOT_FOUND, response.status_code)
+    
+    def test_update_source_duplicate_name(self):
+        self.ctx.request = self.create_request("PUT",
+            data='{"source": {"name": "foo", "values": {"bar": "baz"}}}',
+        )
+        self.backend.update_source.side_effect = DuplicateEntry()
+
+        response = handler.update_source(self.ctx, "qaz")
+        eq_(httplib.CONFLICT, response.status_code)
+    
+    def test_remove_source(self):
+        self.ctx.request = self.create_request("DELETE", data="")
+        self.backend.remove_source.return_value = True
+
+        response = handler.remove_source(self.ctx, "foo")
+        self.backend.remove_source.assert_called_with("foo")
+        eq_(httplib.NO_CONTENT, response.status_code)
+    
+    def test_remove_source_not_found(self):
+        self.ctx.request = self.create_request("DELETE", data="")
+        self.backend.remove_source.return_value = False
+
+        response = handler.remove_source(self.ctx, "foo")
+        self.backend.remove_source.assert_called_with("foo")
+        eq_(httplib.NOT_FOUND, response.status_code)
+    
+    def test_remove_source_associated_files(self):
+        self.ctx.request = self.create_request("DELETE", data="")
+        self.backend.remove_source.side_effect = IntegrityError()
+
+        response = handler.remove_source(self.ctx, "foo")
+        self.backend.remove_source.assert_called_with("foo")
+        eq_(httplib.CONFLICT, response.status_code)
+        
 
 class TestQueryHandlers(object):
     def setup(self):

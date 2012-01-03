@@ -162,6 +162,45 @@ class RestfulDatabase(Database):
             raise DatabaseError(
                 "Unhandled response code: %s" % response.status
             )
+    
+    def update_source(self, name, source):
+        response = self._http_request(
+            "PUT", "/source/%s" % name, json.dumps({
+                "source": {
+                    "name": source.name,
+                    "values": dict(source),
+                }
+            })
+        )
+
+        if response.status == httplib.NO_CONTENT:
+            return
+        elif response.status == httplib.NOT_FOUND:
+            raise LookupError("source '%s' not found" % name)
+        elif response.status == httplib.CONFLICT:
+            raise DatabaseError("source '%s' already exists" % source.name)
+        else:
+            raise DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
+
+    def remove_source(self, name):
+        response = self._http_request(
+            "DELETE", "/source/%s" % name
+        )
+
+        if response.status == httplib.NO_CONTENT:
+            return True
+        elif response.status == httplib.NOT_FOUND:
+            return False
+        elif response.status == httplib.CONFLICT:
+            raise DatabaseError(
+                "couldn't remove source, (it might be associated with files)"
+            )
+        else:
+            raise DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
 
     def _http_request(self, method, path, data="", headers={}):
         conn = httplib.HTTPConnection(

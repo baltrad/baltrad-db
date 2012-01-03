@@ -17,11 +17,14 @@
 
 import abc
 import contextlib
+import logging
 import os
 import shutil
 import sys
 
 from baltrad.bdbcommon.oh5 import Attribute, Source
+
+logger = logging.getLogger("baltrad.bdbclient.cmd")
 
 class ExecutionError(RuntimeError):
     pass
@@ -39,6 +42,13 @@ class Command(object):
     
     def __call__(self, database, opts, args):
         return self.execute(database, opts, args)
+
+class UnknownCommand(Command):
+    def add_options(self, parser):
+        pass
+    
+    def execute(self, database, opts, args):
+        raise SystemExit("Invalid command")
 
 class ImportFile(Command):
     def add_options(self, parser):
@@ -151,30 +161,66 @@ class ImportSources(Command):
                 sys.argv[1]
             )
         )
+        parser.add_option("--ignore", dest="ignore",
+            action="append", default=[],
+            help="ignore a source definition",
+        )
+        parser.add_option("--dry-run", dest="dry_run",
+            action="store_true",
+            help="show what would be done, don't actually modify the source",
+        )
+        parser.add_option("--no-updates", dest="update",
+            default=True,
+            action="store_false",
+            help="don't update changed sources",
+        )
+        parser.add_option("--no-removes", dest="remove",
+            default=True,
+            action="store_false",
+            help="don't remove sources",
+        )
 
     def execute(self, database, opts, args):
         try:
             rave_sources_path = os.path.abspath(args.pop(0))
         except IndexError:
             raise ExecutionError("missing input file")
+        
+        logging.basicConfig(format="%(message)s")
+        if opts.dry_run:
+            logger.setLevel(logging.INFO)
+        if opts.verbose:
+            logger.setLevel(logging.DEBUG)
 
-        print "Reading sources from", rave_sources_path
-
+        logger.debug("Reading sources from %s" % rave_sources_path)
         with open(rave_sources_path) as f:
             sources = Source.from_rave_xml(f.read())
         
         db_sources = dict([(src.name, src) for src in database.get_sources()])
 
         for source in sources:
+            if source.name in opts.ignore:
+                logger.debug("ignoring %s" % source.name)
+                continue
+
             db_source = db_sources.pop(source.name, None)
             if not db_source:
-                database.add_source(source)
-#                print "ADD:\t", source.name, type(source.to_string())
+                if opts.dry_run or opts.verbose:
+                    logger.info("adding %s as %s", source.name, source)
+                else:
+                    database.add_source(source)
             elif db_source != source:
-                print "UPDATE:\t", source.name, db_source.to_string(), "->", source.to_string()
+                if opts.dry_run or opts.verbose:
+                    logger.info("changing %s from %s to %s", source.name, db_source, source)
+                else:
+                    database.update_source(db_source.name, source)
             else:
-                print "OK:\t", source.name, source.to_string()
+                logger.debug("%s is up-to-date", source.name)
         
-        for db_source in db_sources:
-            print "REMOVE:\t", db_source
-
+        if opts.remove:
+            self.remove(database, db_sources.values())
+    
+    def remove(self, database, sources):
+        for source in sources:
+            logger.debug("removing %s", source.name)
+            database.remove_source(source.name)

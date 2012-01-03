@@ -80,6 +80,19 @@ class Database(object):
     def add_source(self):
         """add a source to the database
         """
+        raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def update_source(self, name, source):
+        """update a source in the database
+        """
+        raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def remove_source(self, name):
+        """remove a source from the database
+        """
+        raise NotImplementedError()
 
 class FileEntry(object):
     __metaclass__ = abc.ABCMeta
