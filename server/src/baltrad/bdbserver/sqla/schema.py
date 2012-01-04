@@ -119,4 +119,3 @@ event.listen(
 
 Index("bdb_nodes_id_name_key", nodes.c.id, nodes.c.name)
 Index("bdb_nodes_file_id_name_key", nodes.c.file_id, nodes.c.name)
-Index("bdb_nodes_parent_id_name_key", nodes.c.parent_id, nodes.c.name)
