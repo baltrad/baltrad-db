@@ -146,4 +146,40 @@ public class DefaultRequestFactoryTest {
     assertEquals("GET", req.getMethod());
     assertEquals(URI.create("http://example.com/source/"), req.getURI());
   }
+
+  @Test
+  public void getRequestUri_serverWithoutSlash() {
+    classUnderTest = new DefaultRequestFactory(
+      URI.create("http://example.com:8080")
+    );
+
+    assertEquals(
+      URI.create("http://example.com:8080/bla"),
+      classUnderTest.getRequestUri("bla")
+    );
+  }
+
+  @Test
+  public void getRequestUri_serverWithSlash() {
+    classUnderTest = new DefaultRequestFactory(
+      URI.create("http://example.com:8080/")
+    );
+
+    assertEquals(
+      URI.create("http://example.com:8080/bla"),
+      classUnderTest.getRequestUri("bla")
+    );
+  }
+
+  @Test
+  public void getRequestUri_serverWithPath() {
+      classUnderTest = new DefaultRequestFactory(
+      URI.create("http://example.com:8080/path/")
+    );
+
+    assertEquals(
+      URI.create("http://example.com:8080/path/bla"),
+      classUnderTest.getRequestUri("bla")
+    );
+  }
 }

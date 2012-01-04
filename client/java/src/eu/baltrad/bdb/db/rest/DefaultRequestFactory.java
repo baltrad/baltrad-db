@@ -23,15 +23,16 @@ import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.FileEntry;
 import eu.baltrad.bdb.db.FileQuery;
 
+import org.apache.commons.io.IOUtils;
+
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
-
-import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -43,7 +44,18 @@ public final class DefaultRequestFactory implements RequestFactory {
   private JsonUtil jsonUtil;
   
   public DefaultRequestFactory(URI serverUri) {
-    this.serverUri = serverUri.normalize();
+    try {
+      this.serverUri = URIUtils.createURI(
+        serverUri.getScheme(),
+        serverUri.getHost(),
+        serverUri.getPort(),
+        serverUri.getPath() != null ? serverUri.getPath() : "/",
+        "",
+        ""
+      );
+    } catch (java.net.URISyntaxException e) {
+      throw new IllegalArgumentException("invalid serverUri: " + serverUri);
+    }
     this.jsonUtil = new JsonUtil();
   }
 
@@ -113,7 +125,6 @@ public final class DefaultRequestFactory implements RequestFactory {
       throw new RuntimeException(e);
     }
     return result;
-
   }
 
   @Override
@@ -122,6 +133,6 @@ public final class DefaultRequestFactory implements RequestFactory {
   }
   
   protected URI getRequestUri(String path) {
-    return serverUri.resolve(path);
+    return URIUtils.resolve(serverUri, path);
   }
 }
