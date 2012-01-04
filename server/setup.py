@@ -9,10 +9,12 @@ setuptools.setup(name="baltrad.bdbserver",
     setup_requires=['nose>=1.0'],
     packages=setuptools.find_packages(
         "src",
-        exclude=["*.tests.*", "*.tests"],
     ),
     package_dir={
         "": "src"
+    },
+    package_data={
+        "": ["*.sql"]
     },
     install_requires=[
         "baltrad.bdbcommon",
