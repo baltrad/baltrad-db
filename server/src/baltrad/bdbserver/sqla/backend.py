@@ -31,7 +31,12 @@ from . import schema, query
 from .. backend import Backend, DuplicateEntry, IntegrityError
 
 def force_sqlite_foreign_keys(dbapi_con, con_record):
-    import sqlite3
+    try:
+        import sqlite3
+    except ImportError:
+        # built without sqlite support
+        return
+
     if (isinstance(dbapi_con, sqlite3.Connection)):
         dbapi_con.execute("pragma foreign_keys=ON")
 
