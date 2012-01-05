@@ -15,12 +15,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-import abc
 import contextlib
 import logging
 import os
 import shutil
 import sys
+
+from abc import abstractmethod, ABCMeta
+
+import pkg_resources
 
 from baltrad.bdbcommon.oh5 import Attribute, Source
 
@@ -30,34 +33,48 @@ class ExecutionError(RuntimeError):
     pass
 
 class Command(object):
-    __metaclass__ = abc.ABCMeta
+    """command-line client command interface
+    """
+    __metaclass__ = ABCMeta
 
-    @abc.abstractmethod
-    def add_options(self, parser):
+    @abstractmethod
+    def update_optionparser(self, parser):
         raise NotImplementedError()
     
-    @abc.abstractmethod
+    @abstractmethod
     def execute(self, database, opts, args):
+        """execute this command
+
+        :param database: a database instance to operate on
+        :param opts: options passed from command line
+        :param args: arguments passed from command line
+        """
         raise NotImplementedError()
-    
+
     def __call__(self, database, opts, args):
         return self.execute(database, opts, args)
 
-class UnknownCommand(Command):
-    def add_options(self, parser):
-        pass
-    
-    def execute(self, database, opts, args):
-        raise SystemExit("Invalid command")
+    @classmethod
+    def get_implementation_by_name(cls, name):
+        """get an implementing class by name
+
+        the implementing class is looked up from 'baltrad.bdbclient.commands'
+        entry point. 
+
+        :raise: :class:`LookupError` if not found
+        """
+        try:
+            return pkg_resources.load_entry_point(
+                "baltrad.bdbclient",
+                "baltrad.bdbclient.commands",
+                name
+            )
+        except ImportError:
+            raise LookupError(name)
 
 class ImportFile(Command):
-    def add_options(self, parser):
-        parser.set_usage(
-            "%s %s [OPTIONS] FILE [, FILE]" % (
-                os.path.basename(sys.argv[0]),
-                sys.argv[1]
-            )
-        )
+    def update_optionparser(self, parser):
+        parser.set_usage(parser.get_usage().strip() + " FILE [, FILE]")
 
     def execute(self, database, opts, args):
         for path in args: 
@@ -66,13 +83,8 @@ class ImportFile(Command):
             print path, "stored with UUID", entry.uuid
 
 class ExportFile(Command):
-    def add_options(self, parser):
-        parser.set_usage(
-            "%s %s [OPTIONS] UUID OUTFILE" % (
-                os.path.basename(sys.argv[0]),
-                sys.argv[1]
-            )
-        )
+    def update_optionparser(self, parser):
+        parser.set_usage(parser.get_usage().strip() + " UUID OUTFILE")
 
     def execute(self, database, opts, args):
         try:
@@ -95,14 +107,9 @@ class ExportFile(Command):
             print "file not found by UUID", uuid
 
 class RemoveFile(Command):
-    def add_options(self, parser):
-        parser.set_usage(
-            "%s %s [OPTIONS] UUID [, UUID]" % (
-                os.path.basename(sys.argv[0]),
-                sys.argv[1]
-            )
-        )
-    
+    def update_optionparser(self, parser):
+        parser.set_usage(parser.get_usage().strip() + " UUID [, UUID]")
+
     def execute(self, database, opts, args):
         for uuid in args:
             if database.remove_file_entry(uuid):
@@ -111,14 +118,9 @@ class RemoveFile(Command):
                 print uuid, "not found"
         
 class PrintMetadata(Command):
-    def add_options(self, parser):
-        parser.set_usage(
-            "%s %s [OPTIONS] UUID" % (
-                os.path.basename(sys.argv[0]),
-                sys.argv[1]
-            )
-        )
-    
+    def update_optionparser(self, parser):
+        parser.set_usage(parser.get_usage().strip() + " UUID")
+
     def execute(self, database, opts, args):
         try:
             uuid = args.pop(0)
@@ -135,14 +137,8 @@ class PrintMetadata(Command):
             print "file not found"
 
 class PrintSources(Command):
-    def add_options(self, parser):
-        parser.set_usage(
-            "%s %s [OPTIONS]" % (
-                os.path.basename(sys.argv[0]),
-                sys.argv[1]
-            )
-        )
-    
+    def update_optionparser(self, parser):
+        pass
 
     def execute(self, database, opts, args):
         sources = sorted(
@@ -154,13 +150,8 @@ class PrintSources(Command):
             print source.name + "\t" + source.to_string()
 
 class ImportSources(Command):
-    def add_options(self, parser):
-        parser.set_usage(
-            "%s %s [OPTIONS] FILE" % (
-                os.path.basename(sys.argv[0]),
-                sys.argv[1]
-            )
-        )
+    def update_optionparser(self, parser):
+        parser.set_usage(parser.get_usage().strip() + " [OPTIONS] FILE")
         parser.add_option("--ignore", dest="ignore",
             action="append", default=[],
             help="ignore a source definition",

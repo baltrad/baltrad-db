@@ -19,26 +19,18 @@ import optparse
 import os
 import sys
 
-
-from .cmd import (
-    ExecutionError,
-    ExportFile,
-    ImportFile,
-    ImportSources,
-    PrintMetadata,
-    PrintSources,
-    RemoveFile,
-)
+from .cmd import Command, ExecutionError
 from .rest import RestfulDatabase
 
-COMMAND_HANDLERS = {
-    "import": ImportFile,
-    "export": ExportFile,
-    "metadata": PrintMetadata,
-    "remove": RemoveFile,
-    "list_sources": PrintSources,
-    "import_sources": ImportSources,
-}
+def extract_command(args):
+    command = None
+    result_args = []
+    for arg in args:
+        if not command and not arg.startswith("-"):
+            command = arg
+        else:
+            result_args.append(arg)
+    return command, result_args
 
 def run():
     optparser = optparse.OptionParser()
@@ -58,23 +50,28 @@ def run():
         help="be verbose",
     )
 
-    try:
-        command = sys.argv[1]
-    except IndexError:
+    command_name, args = extract_command(sys.argv[1:])
+
+    if not command_name:
         print >> sys.stderr, "missing command\n"
         optparser.print_usage()
         raise SystemExit(1)
 
     try:
-        command = COMMAND_HANDLERS[command]()
+        command = Command.get_implementation_by_name(command_name)()
     except LookupError:
-        print >> sys.stderr, "'%s' is not a valid command." % command
+        print >> sys.stderr, "'%s' is not a valid command." % command_name
         raise SystemExit(1)
     
-    command.add_options(optparser)
+    optparser.set_usage(
+        "%s %s [--url=SERVER_URL]" % (
+            os.path.basename(sys.argv[0]),
+            command_name
+        )
+    )
+    command.update_optionparser(optparser)
 
-    opts, args = optparser.parse_args()
-    args.pop(0) # remove the command
+    opts, args = optparser.parse_args(args)
 
     database = RestfulDatabase(opts.server_url)
     

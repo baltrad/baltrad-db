@@ -18,6 +18,14 @@ setuptools.setup(name="baltrad.bdbclient",
         "baltrad.bdbcommon",
     ],
     entry_points = {
+        "baltrad.bdbclient.commands": [
+            "import = baltrad.bdbclient.cmd:ImportFile",
+            "export = baltrad.bdbclient.cmd:ExportFile",
+            "metadata = baltrad.bdbclient.cmd:PrintMetadata",
+            "remove = baltrad.bdbclient.cmd:RemoveFile",
+            "list_sources = baltrad.bdbclient.cmd:PrintSources",
+            "import_sources = baltrad.bdbclient.cmd:ImportSources",
+        ],
         "console_scripts" : [
             "baltrad-bdb-client = baltrad.bdbclient.main:run"
         ]
