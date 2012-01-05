@@ -25,6 +25,8 @@ setuptools.setup(name="baltrad.bdbserver",
         "psycopg2",
     ],
     entry_points = {
+        "baltrad.bdbserver.backends":
+            "sqlalchemy = baltrad.bdbserver.sqla.backend:SqlAlchemyBackend",
         "console_scripts" : [
             "baltrad-bdb-create = baltrad.bdbserver.main:run_create",
             "baltrad-bdb-drop = baltrad.bdbserver.main:run_drop",

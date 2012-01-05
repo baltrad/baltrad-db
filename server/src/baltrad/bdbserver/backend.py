@@ -15,7 +15,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-import abc
+from abc import abstractmethod, ABCMeta
+
+import pkg_resources
+
+from baltrad.bdbcommon.util import abstractclassmethod
 
 class DuplicateEntry(Exception):
     """thrown to indicate that an entry already exists
@@ -30,9 +34,9 @@ class Backend(object):
     """Backend interface
     """
 
-    __metaclass__ = abc.ABCMeta
+    __metaclass__ = ABCMeta
 
-    @abc.abstractmethod
+    @abstractmethod
     def store_file(self, path):
         """store a file in the database
 
@@ -44,7 +48,7 @@ class Backend(object):
         """
         raise NotImplementedError()
     
-    @abc.abstractmethod
+    @abstractmethod
     def get_file(self, uuid):
         """get a file from the database
 
@@ -55,7 +59,7 @@ class Backend(object):
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_file_metadata(self, uuid):
         """get file metadata from the database
 
@@ -66,7 +70,7 @@ class Backend(object):
         """
         raise NotImplementedError()
     
-    @abc.abstractmethod
+    @abstractmethod
     def remove_file(self, uuid):
         """remove a file stored in the database
 
@@ -76,13 +80,13 @@ class Backend(object):
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
+    @abstractmethod
     def remove_all_files(self, query):
         """remove all files from the database
         """
         raise NotImplementedError()
     
-    @abc.abstractmethod
+    @abstractmethod
     def get_sources(self):
         """get a list of sources defined in the database
 
@@ -90,7 +94,7 @@ class Backend(object):
         """
         raise NotImplementedError()
     
-    @abc.abstractmethod
+    @abstractmethod
     def add_source(self, source):
         """add a new source definition to the database
 
@@ -100,7 +104,7 @@ class Backend(object):
         """
         raise NotImplementedError()
     
-    @abc.abstractmethod
+    @abstractmethod
     def remove_source(self, name):
         """remove a source definition from the database
 
@@ -110,7 +114,7 @@ class Backend(object):
         """
         raise NotImplementedError()
     
-    @abc.abstractmethod
+    @abstractmethod
     def update_source(self, name, source):
         """update a source definition in the database
 
@@ -122,7 +126,7 @@ class Backend(object):
         """
         raise NotImplementedError()
     
-    @abc.abstractmethod
+    @abstractmethod
     def execute_file_query(self, query):
         """execute a file query
         
@@ -131,7 +135,7 @@ class Backend(object):
         """
         raise NotImplementedError()
     
-    @abc.abstractmethod
+    @abstractmethod
     def execute_attribute_query(self, query):
         """execute an attribute query
         
@@ -140,29 +144,52 @@ class Backend(object):
         """
         raise NotImplementedError()
     
-    @abc.abstractmethod
+    @abstractmethod
     def is_operational(self):
         """test if the backend is fully operational
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
+    @abstractmethod
     def create(self):
         """create resources on the backend
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
+    @abstractmethod
     def drop(self):
         """drop resources on the backend
         """
         raise NotImplementedError()    
     
-    @abc.abstractmethod
+    @abstractmethod
     def upgrade(self):
         """bring the resources up-to-date on backend
         """
         raise NotImplementedError()
+    
+    @abstractclassmethod
+    def create_from_config(cls, config):
+        """create an instance and configure it
+        """
+    
+    @classmethod
+    def get_implementation_by_name(cls, name):
+        """get an implementing class by name
+
+        the implementing class is looked up from 'baltrad.bdbserver.backends'
+        entry point. 
+
+        :raise: :class:`LookupError` if not found
+        """
+        try:
+            return pkg_resources.load_entry_point(
+                "baltrad.bdbserver",
+                "baltrad.bdbserver.backends",
+                name
+            )
+        except ImportError:
+            raise LookupError(name)
     
 def create_from_config(config):
     backend_type = config["backend.type"]

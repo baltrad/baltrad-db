@@ -94,10 +94,10 @@ class SqlAlchemyBackend(Backend):
             self._file_storage = GenericDatabaseFileStorage()
 
         event.listen(self._engine, "connect", force_sqlite_foreign_keys)
-
-    @staticmethod
-    def create_from_config(config):
-        return SqlAlchemyBackend(config["backend.uri"])
+    
+    @classmethod
+    def create_from_config(cls, config):
+        return cls(config["baltrad.bdb.server.backend.uri"])
         
     def store_file(self, path):
         meta = oh5.Metadata.from_file(path)
@@ -328,7 +328,7 @@ class SqlAlchemyBackend(Backend):
         with self.get_connection() as conn:
             with conn.begin():
                 conn.connection.cursor().execute(statements)
- 
+
 def _insert_file(conn, meta, source_id):
     return conn.execute(
         schema.files.insert(),

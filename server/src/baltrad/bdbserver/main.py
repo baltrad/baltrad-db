@@ -10,7 +10,7 @@ from daemon.pidfile import TimeoutPIDLockFile
 
 from .config import Properties
 from .web.app import Application, serve
-from . import backend
+from .backend import Backend
 
 def check_path(option, opt, value):
     return os.path.abspath(value)
@@ -33,6 +33,16 @@ def create_optparser():
     )
     return optparser
 
+def create_backend(config):
+    type_ = config.get("baltrad.bdb.server.backend.type")
+    try:
+        backend_cls = Backend.get_implementation_by_name(type_)
+    except LookupError:
+        raise LookupError(
+            "unknown baltrad.bdb.server.backend.type: %s" % type_
+        )
+    return backend_cls.create_from_config(config)
+
 def read_config(conffile):
     if not conffile:
         raise SystemExit("configuration file not specified")
@@ -47,10 +57,9 @@ def run_create():
     opts, args = optparser.parse_args()
 
     config = read_config(opts.conffile)
-    config = config.filter("baltrad.bdb.server.")
 
-    be = backend.create_from_config(config)
-    be.create()
+    backend = create_backend(config)
+    backend.create()
 
 def run_drop():
     optparser = create_optparser()
@@ -58,10 +67,9 @@ def run_drop():
     opts, args = optparser.parse_args()
 
     config = read_config(opts.conffile)
-    config = config.filter("baltrad.bdb.server.")
 
-    be = backend.create_from_config(config)
-    be.drop()
+    backend = create_backend(config)
+    backend.drop()
 
 def run_upgrade():
     optparser = create_optparser()
@@ -69,10 +77,9 @@ def run_upgrade():
     opts, args = optparser.parse_args()
 
     config = read_config(opts.conffile)
-    config = config.filter("baltrad.bdb.server.")
 
-    be = backend.create_from_config(config)
-    be.upgrade()
+    backend = create_backend(config)
+    backend.upgrade()
 
 def configure_logging(opts):
     logger = logging.getLogger()
@@ -103,7 +110,6 @@ def run_server():
     opts, args = optparser.parse_args()
 
     config = read_config(opts.conffile)
-    config = config.filter("baltrad.bdb.server.")
 
     daemon_ctx = daemon.DaemonContext(
         working_directory="/",
@@ -116,8 +122,8 @@ def run_server():
 
     with daemon_ctx:
         configure_logging(opts)
-        be = backend.create_from_config(config)
-        if not be.is_operational():
+        backend = create_backend(config)
+        if not backend.is_operational():
             raise SystemExit("backend is not operational")
-        app = Application(be)
+        app = Application(backend)
         serve(app, config)

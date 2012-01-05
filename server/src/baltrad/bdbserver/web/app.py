@@ -44,6 +44,7 @@ class Application(object):
         return response(env, start_response)
 
 def serve(app, config):
+    config = config.filter("baltrad.bdb.server.")
     if config["type"] != "werkzeug":
         raise RuntimeError("server type '%s' not supported" % config["type"])
 
