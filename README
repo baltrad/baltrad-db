@@ -129,15 +129,17 @@ First, you should copy and edit server/etc/example.properties to suit your
 needs. The next step is to use `baltrad-bdb-create` to initialize the
 resources on the configured backend (e.g create database tables and whatnot).
 
+Then just start the server.
+
 Next up, you need to populate the sources in the server. You can use
 `baltrad-bdb-client` to import sources from Rave's radar-db.
-
-Then just start the server.
 
 Running the server::
 
  $ baltrad-bdb-create --conf myconf.properties
- $ baltrad-bdb-client \
-   --url http://example.com:8080
-   import_sources /path/to/odim_sources.xml
  $ baltrad-bdb-server --conf myconf.properties --pidfile mypidfile.pid
+ $ baltrad-bdb-client \
+   import_sources \
+   --url http://example.com:8080 \
+   /path/to/odim_sources.xml
+
