@@ -225,7 +225,8 @@ class SqlAlchemyBackend(Backend):
                     result.append(source)
                     source = oh5.Source(row["name"])
                 source[row["key"]] = row["value"]
-        result.append(source)
+        if source:
+            result.append(source)
         return result
     
     def add_source(self, source):

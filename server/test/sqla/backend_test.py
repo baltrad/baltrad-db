@@ -289,6 +289,11 @@ class TestSourceManagement(object):
         # in alphabetical order by name
         eq_(source2, sources[0])
         eq_(source1, sources[1])
+    
+    @attr("dbtest")
+    def test_get_sources_empty(self):
+        sources = self.backend.get_sources()
+        eq_(0, len(sources))
 
 ###
 # src name obj  date       time  xsize ysize
