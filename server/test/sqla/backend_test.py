@@ -286,8 +286,9 @@ class TestSourceManagement(object):
 
         sources = self.backend.get_sources()
         eq_(2, len(sources))
-        ok_(source1 in sources)
-        ok_(source2 in sources)
+        # in alphabetical order by name
+        eq_(source2, sources[0])
+        eq_(source1, sources[1])
 
 ###
 # src name obj  date       time  xsize ysize

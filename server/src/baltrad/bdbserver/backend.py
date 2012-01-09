@@ -90,6 +90,8 @@ class Backend(object):
     def get_sources(self):
         """get a list of sources defined in the database
 
+        the sources are returned in alphabetical order by name.
+
         :return: list of :class:`baltrad.bdb.oh5.meta.Source` instances
         """
         raise NotImplementedError()

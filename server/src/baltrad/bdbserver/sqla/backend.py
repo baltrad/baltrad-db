@@ -209,17 +209,24 @@ class SqlAlchemyBackend(Backend):
     def get_sources(self):
         qry = sql.select(
             [schema.sources, schema.source_kvs],
-            from_obj=schema.source_kvs.join(schema.sources)
+            from_obj=schema.source_kvs.join(schema.sources),
+            order_by=[sql.asc(schema.sources.c.name)]
         )
 
-        sources = {}
+        result = []
+
+        source = None
 
         with self.get_connection() as conn:
             for row in conn.execute(qry):
-                name = row["name"]
-                source = sources.setdefault(name, oh5.Source(name))
+                if not source:
+                    source = oh5.Source(row["name"])
+                if source.name != row["name"]:
+                    result.append(source)
+                    source = oh5.Source(row["name"])
                 source[row["key"]] = row["value"]
-        return sources.values()
+        result.append(source)
+        return result
     
     def add_source(self, source):
         with self.get_connection() as conn:
