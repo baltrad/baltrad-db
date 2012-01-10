@@ -17,7 +17,10 @@
 
 import os
 
-import _pyhl as pyhl
+try:
+    import _pyhl as pyhl
+except ImportError:
+    pyhl = None
 
 from . node import Attribute, Group, Dataset
 
@@ -26,6 +29,8 @@ class HlHdfMetadataReader(object):
         pass
     
     def read(self, filepath):
+        if pyhl is None:
+            raise RuntimeError("pyhl not available")
         nodelist = pyhl.read_nodelist(filepath)
         nodelist.selectMetadata()
         nodelist.fetch()
@@ -58,6 +63,8 @@ class HlHdfMetadataWriter(object):
         pass
     
     def write(self, metadata, filepath):
+        if pyhl is None:
+            raise RuntimeError("pyhl not available")
         hlnodes = pyhl.nodelist()
 
         iterator = metadata.iternodes()
