@@ -15,24 +15,25 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-from nose.tools import eq_, raises
+from nose.tools import eq_, ok_, raises
 
-from baltrad.bdbserver.config import Properties
+from baltrad.bdbserver import config
 
 class TestProperties(object):
     def setup(self):
-        self.properties = Properties({
+        self.properties = config.Properties({
             "foo.bar.baz": 1,
             "foo.bar.qwe": 2,
             "bar.foo.baz": "qwe",
             "qwe": "true",
             "asd": "false",
+            "list": "a, b, c",
         })
     
     def test_get(self):
         eq_(1, self.properties.get("foo.bar.baz"))
     
-    @raises(LookupError)
+    @raises(config.PropertyLookupError)
     def test_get_missing(self):
         self.properties.get("qwe.asd")
     
@@ -42,7 +43,7 @@ class TestProperties(object):
     def test_getitem(self):
         eq_(2, self.properties["foo.bar.qwe"])
     
-    @raises(LookupError)
+    @raises(config.PropertyLookupError)
     def test_getitem_missing(self):
         self.properties["qwe.asd"]
     
@@ -50,11 +51,36 @@ class TestProperties(object):
         eq_(True, self.properties.get_boolean("qwe"))
         eq_(False, self.properties.get_boolean("asd"))
     
-    @raises(ValueError)
+    @raises(config.PropertyValueError)
     def test_getboolean_invalid_value(self):
         self.properties.get_boolean("bar.foo.baz")
 
-    def test_filter_properties(self):
+    def test_get_list(self):
+        eq_(["a", "b", "c"], self.properties.get_list("list", sep=","))
+    
+    def test_get_list_default_list(self):
+        default = [1, 2, 3]
+        eq_(default, self.properties.get_list("nxlist", default=default))
+    
+    def test_get_list_default_str(self):
+        result = self.properties.get_list("nxlist", default="1 2 3")
+        eq_(["1", "2", "3"], result)
+
+    def test_filter(self):
         result = self.properties.filter("foo.bar.")
+        eq_("foo.bar.", result.prefix)
+        eq_("", self.properties.prefix)
         eq_(1, result.get("baz"))
         eq_(2, result.get("qwe"))
+    
+    def test_filter_apply_double(self):
+        result = self.properties.filter("foo.")
+        result = result.filter("bar.")
+        eq_("foo.bar.", result.prefix)
+    
+    def test_get_keys(self):
+        filtered = self.properties.filter("foo.bar.")
+        keys = filtered.get_keys()
+        ok_("baz" in keys)
+        ok_("qwe" in keys)
+        eq_(2, len(keys))
