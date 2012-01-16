@@ -21,7 +21,7 @@ setuptools.setup(name="baltrad.bdbserver",
         "jprops >= 0.1",
         "SQLAlchemy >= 0.7",
         "werkzeug >= 0.8",
-        "python-daemon >= 1.5",
+        "python-daemon >= 1.6",
         "psycopg2",
     ],
     entry_points = {
