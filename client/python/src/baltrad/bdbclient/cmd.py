@@ -196,22 +196,21 @@ class ImportSources(Command):
 
             db_source = db_sources.pop(source.name, None)
             if not db_source:
-                if opts.dry_run or opts.verbose:
-                    logger.info("adding %s as %s", source.name, source)
-                else:
+                logger.info("adding %s as %s", source.name, source)
+                if not opts.dry_run:
                     database.add_source(source)
             elif db_source != source:
-                if opts.dry_run or opts.verbose:
-                    logger.info("changing %s from %s to %s", source.name, db_source, source)
-                else:
+                logger.info("changing %s from %s to %s", source.name, db_source, source)
+                if not opts.dry_run:
                     database.update_source(db_source.name, source)
             else:
                 logger.debug("%s is up-to-date", source.name)
         
         if opts.remove:
-            self.remove(database, db_sources.values())
+            self.remove(database, db_sources.values(), opts.dry_run)
     
-    def remove(self, database, sources):
+    def remove(self, database, sources, dry_run):
         for source in sources:
             logger.debug("removing %s", source.name)
-            database.remove_source(source.name)
+            if not dry_run:
+                database.remove_source(source.name)
