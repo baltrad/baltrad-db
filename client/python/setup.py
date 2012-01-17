@@ -16,6 +16,8 @@ setuptools.setup(name="baltrad.bdbclient",
     },
     install_requires=[
         "baltrad.bdbcommon",
+        "pyasn1",
+        "pycrypto >= 2.4",
         "python-keyczar >= 0.7b",
     ],
     entry_points = {
