@@ -16,6 +16,7 @@ setuptools.setup(name="baltrad.bdbclient",
     },
     install_requires=[
         "baltrad.bdbcommon",
+        "python-keyczar >= 0.7b",
     ],
     entry_points = {
         "baltrad.bdbclient.commands": [

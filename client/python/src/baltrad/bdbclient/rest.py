@@ -15,23 +15,26 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
+import abc
 import httplib
 import json
 import os
 import socket
 import urlparse
 
-from baltrad.bdbcommon.oh5 import (
-    Attribute,
-    Dataset,
-    Group,
-    Metadata,
-    Source,
-)
+from keyczar import keyczar
 
-from .db import Database, DatabaseError, FileEntry
+from baltrad.bdbcommon import oh5
+from baltrad.bdbclient import db
 
-class RestfulFileEntry(FileEntry):
+class Request(object):
+    def __init__(self, method, path, data=None, headers={}):
+        self.method = method
+        self.path = path
+        self.data = data
+        self.headers = headers
+
+class RestfulFileEntry(db.FileEntry):
     def __init__(self, metadata):
         self._metadata = metadata
     
@@ -44,7 +47,7 @@ class RestfulFileEntry(FileEntry):
         return self._metadata
 
 def metadata_from_json_repr(json_repr):
-    metadata = Metadata()
+    metadata = oh5.Metadata()
     for node_repr in json_repr:
         parent_path, node_name = os.path.split(node_repr["path"])
         node = node_from_json_repr(node_name, node_repr)
@@ -54,40 +57,47 @@ def metadata_from_json_repr(json_repr):
 def node_from_json_repr(name, json_repr):
     type_ = json_repr["type"]
     if type_ == "attribute":
-        return Attribute(name, json_repr["value"])
+        return oh5.Attribute(name, json_repr["value"])
     elif type_ == "group":
-        return Group(name)
+        return oh5.Group(name)
     elif type_ == "dataset":
-        return Dataset(name)
+        return oh5.Dataset(name)
     else:
         raise RuntimeError("unhandled node type: %s" % type_)
 
-class RestfulDatabase(Database):
-    def __init__(self, server_url):
+class RestfulDatabase(db.Database):
+    """Access database over the RESTful interface
+    """
+    def __init__(self, server_url, auth):
         self._server_url_str = server_url
         self._server_url = urlparse.urlparse(server_url)
+        self._auth = auth
     
     def store(self, data):
-        response = self._http_request(
+        request = Request(
             "POST", "/file/", data.read(),
             headers={
                 "Content-Type": "application/x-hdf5",
             }
         )
+
+        response = self._execute(request)
         
         if response.status == httplib.CREATED:
             data = json.loads(response.read())
             metadata = metadata_from_json_repr(data["metadata"])
             return RestfulFileEntry(metadata)
         else:
-            raise DatabaseError(
+            raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status
             )
     
     def get_file_entry(self, uuid):
-        response = self._http_request(
+        request = Request(
             "GET", "/file/%s/metadata" % uuid
         )
+
+        response = self._execute(request)
 
         if response.status == httplib.OK:
             data = json.loads(response.read())
@@ -96,56 +106,62 @@ class RestfulDatabase(Database):
         elif response.status == httplib.NOT_FOUND:
             return None
         else:
-            raise DatabaseError(
+            raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status
             )
     
     def get_file_content(self, uuid):
-        response = self._http_request(
+        request = Request(
             "GET", "/file/%s" % uuid
         )
+
+        response = self._execute(request)
     
         if response.status == httplib.OK:
             return response
         elif response.status == httplib.NOT_FOUND:
             return None
         else:
-            raise DatabaseError(
+            raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status
             )
     
     def remove_file_entry(self, uuid):
-        response = self._http_request(
+        request = Request(
             "DELETE", "/file/%s" % uuid
         )
+
+        response = self._execute(request)
     
         if response.status == httplib.NO_CONTENT:
             return True
         elif response.status == httplib.NOT_FOUND:
             return False
         else:
-            raise DatabaseError(
+            raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status
             )
     
     def get_sources(self):
-        response = self._http_request(
+        request = Request(
             "GET", "/source/"
         )
+
+        response = self._execute(request)
 
         if response.status == httplib.OK:
             data = json.loads(response.read())
             return [
-                Source(src["name"], values=src["values"])
+                oh5.Source(src["name"], values=src["values"])
                     for src in data["sources"]
             ]
         else:
-            raise DatabaseError(
+            raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status
             )
     
     def add_source(self, source):
-        response = self._http_request(
+        request = Request(
             "POST", "/source/", json.dumps({
                 "source" : {
                     "name": source.name,
@@ -154,17 +170,19 @@ class RestfulDatabase(Database):
             })
         )
 
+        response = self._execute(request)
+
         if response.status == httplib.CREATED:
             pass
         elif response.status == httplib.CONFLICT:
-            raise DatabaseError("duplicate entry")
+            raise db.DatabaseError("duplicate entry")
         else:
-            raise DatabaseError(
+            raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status
             )
     
     def update_source(self, name, source):
-        response = self._http_request(
+        request = Request(
             "PUT", "/source/%s" % name, json.dumps({
                 "source": {
                     "name": source.name,
@@ -173,44 +191,96 @@ class RestfulDatabase(Database):
             })
         )
 
+        response = self._execute(request)
+
         if response.status == httplib.NO_CONTENT:
             return
         elif response.status == httplib.NOT_FOUND:
             raise LookupError("source '%s' not found" % name)
         elif response.status == httplib.CONFLICT:
-            raise DatabaseError("source '%s' already exists" % source.name)
+            raise db.DatabaseError("source '%s' already exists" % source.name)
         else:
-            raise DatabaseError(
+            raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status
             )
 
     def remove_source(self, name):
-        response = self._http_request(
+        request = Request(
             "DELETE", "/source/%s" % name
         )
+
+        response = self._execute(request)
 
         if response.status == httplib.NO_CONTENT:
             return True
         elif response.status == httplib.NOT_FOUND:
             return False
         elif response.status == httplib.CONFLICT:
-            raise DatabaseError(
+            raise db.DatabaseError(
                 "couldn't remove source, (it might be associated with files)"
             )
         else:
-            raise DatabaseError(
+            raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status
             )
 
-    def _http_request(self, method, path, data="", headers={}):
+    def _execute(self, req):
         conn = httplib.HTTPConnection(
             self._server_url.hostname,
             self._server_url.port
         )
+        self._auth.add_credentials(req)
         try:
-            conn.request(method, path, data, headers)
+            conn.request(req.method, req.path, req.data, req.headers)
         except socket.error:
-            raise DatabaseError(
+            raise db.DatabaseError(
                 "Could not send request to %s" % self._server_url_str
             )
         return conn.getresponse()
+
+class Auth(object):
+    __meta__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def add_credentials(self, req):
+        """add authorization credentials to the request
+
+        :param req: a :class:`Request` to update
+        """
+        raise NotImplementedError()
+
+class NoAuth(Auth):
+    """no authentication
+    """
+    def add_credentials(self, req):
+        pass
+
+class KeyczarAuth(Auth):
+    """authenicate by signing messages with Keyczar
+    """
+    def __init__(self, key_path, key_name=None):
+        self._signer = keyczar.Signer.Read(key_path)
+        if key_name:
+            self._key_name = key_name
+        else:
+            self._key_name = os.path.basename(key_path)
+
+    def add_credentials(self, req):
+        signable = create_signable_string(req)
+        signature = self._signer.Sign(signable)
+        auth = "bdb-keyczar %s:%s" % (self._key_name, signature)
+        req.headers["authorization"] = auth
+
+def create_signable_string(req):
+    """construct a signable string from a :class:`.Request`
+
+    See :ref:`doc-rest-authentication` for details.
+    """
+    fragments = [req.method, req.path]
+    for key in ("content-md5", "content-type", "date"):
+        if req.headers.has_key(key):
+            value = req.headers[key].strip()
+            if value:
+                fragments.append(value)
+
+    return "\n".join(fragments)

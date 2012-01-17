@@ -19,8 +19,7 @@ import optparse
 import os
 import sys
 
-from .cmd import Command, ExecutionError
-from .rest import RestfulDatabase
+from baltrad.bdbclient import cmd, rest
 
 def extract_command(args):
     command = None
@@ -49,6 +48,14 @@ def run():
         action="store_true",
         help="be verbose",
     )
+    optparser.add_option(
+        "-k", "--keyczar-key", dest="keyczar_key",
+        help="path to keyczar key to sign messages with"
+    )
+    optparser.add_option(
+        "-n", "--keyczar-name", dest="keyczar_name",
+        help="the name to use (if it differs from the key path basename)"
+    )
 
     command_name, args = extract_command(sys.argv[1:])
 
@@ -58,7 +65,7 @@ def run():
         raise SystemExit(1)
 
     try:
-        command = Command.get_implementation_by_name(command_name)()
+        command = cmd.Command.get_implementation_by_name(command_name)()
     except LookupError:
         print >> sys.stderr, "'%s' is not a valid command." % command_name
         raise SystemExit(1)
@@ -73,9 +80,14 @@ def run():
 
     opts, args = optparser.parse_args(args)
 
-    database = RestfulDatabase(opts.server_url)
+    if opts.keyczar_key:
+        auth = rest.KeyczarAuth(opts.keyczar_key, opts.keyczar_name)
+    else:
+        auth = rest.NoAuth()
+
+    database = rest.RestfulDatabase(opts.server_url, auth)
     
     try:
         return command.execute(database, opts, args)
-    except ExecutionError, e:
+    except cmd.ExecutionError, e:
         raise SystemExit(e)
