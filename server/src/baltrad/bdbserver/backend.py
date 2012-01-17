@@ -21,6 +21,8 @@ import pkg_resources
 
 from baltrad.bdbcommon.util import abstractclassmethod
 
+from baltrad.bdbserver import config
+
 class DuplicateEntry(Exception):
     """thrown to indicate that an entry already exists
     """
@@ -176,7 +178,7 @@ class Backend(object):
         """
     
     @classmethod
-    def get_implementation_by_name(cls, name):
+    def get_implementation(cls, name):
         """get an implementing class by name
 
         the implementing class is looked up from 'baltrad.bdbserver.backends'
@@ -193,13 +195,13 @@ class Backend(object):
         except ImportError:
             raise LookupError(name)
     
-def create_from_config(config):
-    backend_type = config["backend.type"]
-    if backend_type == "sqlalchemy":
-        from .sqla.backend import SqlAlchemyBackend
-        return SqlAlchemyBackend.create_from_config(config)
-    else:
-        raise ValueError("unsupported backend type: " + backend_type)
+def from_conf(conf):
+    typename = conf["baltrad.bdb.server.backend.type"]
+    try:
+        backend_cls = Backend.get_implementation(typename)
+    except LookupError:
+        raise config.Error("unsupported backend type: %s" % typename)
+    return backend_cls.create_from_config(conf) 
 
 class FileQuery(object):
     def __init__(self):

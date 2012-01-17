@@ -19,14 +19,21 @@ setuptools.setup(name="baltrad.bdbserver",
     install_requires=[
         "baltrad.bdbcommon",
         "jprops >= 0.1",
+        "pyasn1",
+        "python-daemon >= 1.6",
+        "python-keyczar",
+        "psycopg2",
         "SQLAlchemy >= 0.7",
         "werkzeug >= 0.8",
-        "python-daemon >= 1.6",
-        "psycopg2",
     ],
     entry_points = {
-        "baltrad.bdbserver.backends":
+        "baltrad.bdbserver.backends": [
             "sqlalchemy = baltrad.bdbserver.sqla.backend:SqlAlchemyBackend",
+        ],
+        "baltrad.bdbserver.web.auth": [
+            "noauth = baltrad.bdbserver.web.auth:NoAuth",
+            "keyczar = baltrad.bdbserver.web.auth:KeyczarAuth",
+        ],
         "console_scripts" : [
             "baltrad-bdb-create = baltrad.bdbserver.main:run_create",
             "baltrad-bdb-drop = baltrad.bdbserver.main:run_drop",

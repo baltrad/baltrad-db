@@ -1,6 +1,72 @@
 RESTful interface
 =================
 
+.. _doc-rest-authentication:
+
+Authentication
+--------------
+
+Authentication is done through standard HTTP *Authorization* header containing
+a provider name and provider-specific credentials.
+
+Generic format of BDB authorization header is::
+
+  Authorization: bdb-PROVIDER CREDENTIALS
+
+Provider *noauth* can be used to specify that no authentication is to be done
+and is equivalent to omitting the *Authorization* header.
+
+Keyczar authentication provider
+'''''''''''''''''''''''''''''''
+
+*keyczar* provider can be used to sign and verify HTTP messages using
+`Keyczar <http://www.keyczar.org/>`_.
+
+To sign a message using this method, first a signable string is created
+from the HTTP request. This is the concatenation of the method, query path
+and values of *Content-MD5*, *Content-Type* and *Date* headers, separated
+by a newline (*\\n*). The headers are sorted alphabetically, so the value of
+*Content-Type* appears before the value of *Date*.
+
+Given a sample request::
+
+  POST /source/ HTTP/1.1
+  Host: example.com
+  Content-Type: application/json
+  Content-Length: nnn
+
+  {
+    "source": {
+      "name": "source_name",
+      "values": {
+          "key1": "value1",
+          "key2": "value2",
+      }
+    }
+  }
+
+The created signable string would be::
+
+  POST
+  /source/
+  f919609e57df334754cdb410c7847058
+  application/json
+  Tue, 10 Jan 2012 19:03:34 GMT
+
+The format of of the authorization header is::
+
+  Authorization: bdb-keyczar KEYNAME:SIGNATURE
+
+where *KEYNAME* is the name of the key the server will use to look up a key
+for verifying the signature and *SIGNATURE* is the base64-encoded signature
+from :meth:`keyczar.keyczar.Signer.Sign`.
+
+Authorization
+-------------
+
+BDB does no authorization, every request that successfully passes
+authentication is granted access to everything.
+
 Common Request Headers
 ----------------------
 

@@ -8,9 +8,8 @@ from copy import copy
 import daemon
 from daemon.pidfile import TimeoutPIDLockFile
 
-from .config import Properties
-from .web.app import Application, serve
-from .backend import Backend
+from baltrad.bdbserver import backend, config
+from baltrad.bdbserver.web import app
 
 def check_path(option, opt, value):
     return os.path.abspath(value)
@@ -36,7 +35,7 @@ def create_optparser():
 def create_backend(config):
     type_ = config.get("baltrad.bdb.server.backend.type")
     try:
-        backend_cls = Backend.get_implementation_by_name(type_)
+        backend_cls = backend.Backend.get_implementation(type_)
     except LookupError:
         raise LookupError(
             "unknown baltrad.bdb.server.backend.type: %s" % type_
@@ -47,7 +46,7 @@ def read_config(conffile):
     if not conffile:
         raise SystemExit("configuration file not specified")
     try:
-        return Properties.load(conffile)
+        return config.Properties.load(conffile)
     except IOError:
         raise SystemExit("failed to read configuration from " + conffile)
    
@@ -66,9 +65,9 @@ def run_drop():
 
     opts, args = optparser.parse_args()
 
-    config = read_config(opts.conffile)
+    conf = read_config(opts.conffile)
 
-    backend = create_backend(config)
+    backend = create_backend(conf)
     backend.drop()
 
 def run_upgrade():
@@ -76,9 +75,9 @@ def run_upgrade():
 
     opts, args = optparser.parse_args()
 
-    config = read_config(opts.conffile)
+    conf = read_config(opts.conffile)
 
-    backend = create_backend(config)
+    backend = create_backend(conf)
     backend.upgrade()
 
 def configure_logging(opts):
@@ -109,7 +108,7 @@ def run_server():
 
     opts, args = optparser.parse_args()
 
-    config = read_config(opts.conffile)
+    conf = read_config(opts.conffile)
 
     daemon_ctx = daemon.DaemonContext(
         working_directory="/",
@@ -119,11 +118,13 @@ def run_server():
         detach_process=not opts.foreground,
         pidfile=TimeoutPIDLockFile(opts.pidfile, acquire_timeout=0),
     )
+    
+    server_type = conf["baltrad.bdb.server.type"]
+    if server_type != "werkzeug":
+        raise SystemExit("invalid server type in config %s" % server_type)
+    server_uri = conf["baltrad.bdb.server.uri"]
 
     with daemon_ctx:
         configure_logging(opts)
-        backend = create_backend(config)
-        if not backend.is_operational():
-            raise SystemExit("backend is not operational")
-        app = Application(backend)
-        serve(app, config)
+        application = app.from_conf(conf)
+        app.serve(server_uri, application)

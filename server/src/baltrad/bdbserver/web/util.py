@@ -90,3 +90,6 @@ class HttpNotFound(HTTPException):
     
 class HttpConflict(HTTPException):
     code = httplib.CONFLICT
+
+class HttpUnauthorized(HTTPException):
+    code = httplib.UNAUTHORIZED

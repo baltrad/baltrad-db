@@ -17,11 +17,10 @@
 
 import urlparse
 
-from werkzeug.serving import run_simple
-from werkzeug.exceptions import HTTPException
+from werkzeug import serving, exceptions as wzexc
 
-from . import routing
-from .util import Request, RequestContext
+from baltrad.bdbserver import backend
+from baltrad.bdbserver.web import auth, routing, util as webutil
 
 class Application(object):
     def __init__(self, backend):
@@ -30,27 +29,46 @@ class Application(object):
     
     def dispatch_request(self, request):
         adapter = self.url_map.bind_to_environ(request.environ)
-        ctx = RequestContext(request, self.backend)
+        ctx = webutil.RequestContext(request, self.backend)
         try:
             endpoint, values = adapter.match()
             handler = routing.get_handler(endpoint)
             return handler(ctx, **values)
-        except HTTPException, e:
+        except wzexc.HTTPException, e:
             return e
     
     def __call__(self, env, start_response):
-        request = Request(env)
+        request = webutil.Request(env)
         response = self.dispatch_request(request)
         return response(env, start_response)
+    
+    @classmethod
+    def from_conf(cls, backend, conf):
+        """create instance from configuration.
 
-def serve(app, config):
-    config = config.filter("baltrad.bdb.server.")
-    if config["type"] != "werkzeug":
-        raise RuntimeError("server type '%s' not supported" % config["type"])
+        :param conf: a :class:`~.config.Properties` instance to configure
+                     from
+        """
+        return Application(backend)
 
-    uri = urlparse.urlparse(config["uri"])
+def from_conf(conf):
+    """create the entire WSGI application from conf
 
+    this will wrap the application with necessary middleware
+    """
+    be = backend.from_conf(conf)
+    if not be.is_operational():
+        raise SystemExit("backend is not operational")
+    app = Application.from_conf(be, conf)
+    authmw = auth.AuthMiddleware.from_conf(app, conf)
+    return authmw
+ 
+def serve(uri, app):
+    """serve the application using werkzeug
+    """
+
+    uri = urlparse.urlparse(uri)
     host = uri.hostname
     port = uri.port or 80
 
-    run_simple(host, port, app)
+    serving.run_simple(host, port, app) 
