@@ -71,9 +71,20 @@ public class RestfulDatabaseITest {
   }
 
   @Test
-  public void store() throws Exception {
+  public void store_seang_scan() throws Exception {
     FileInputStream input = new FileInputStream(
       getFilePath("fixtures/Z_SCAN_C_ESWI_20101023180000_seang_000000.h5")
+    );
+    FileEntry result = classUnderTest.store(input);
+    assertNotNull(result);
+    assertNotNull(result.getUuid());
+  }
+
+  @Test
+  public void store_minsk_scan() throws Exception {
+    // this file contains ODIM_H5/2.1 attributes with array values
+    FileInputStream input = new FileInputStream(
+      getFilePath("fixtures/minsk_20120118_081300_Elevation9.h5")
     );
     FileEntry result = classUnderTest.store(input);
     assertNotNull(result);

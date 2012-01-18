@@ -206,7 +206,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     </exec>
     <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-server">
       <arg value="--conf=${itest.bdbserver.properties}"/>
-      <arg value="--pidfile=${basedir}/baltrad-bdb-server.pid"/>
+      <arg value="--pidfile=${build.dir}/baltrad-bdb-server.pid"/>
+      <arg value="--logfile=${build.dir}/baltrad-bdb-server.log"/>
     </exec>
     <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-client">
       <arg value="import_sources"/>
@@ -217,7 +218,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
   <target name="stop-baltrad-bdb-server">
     <exec executable="cat" outputproperty="baltrad.bdb.server.pid">
-      <arg value="${basedir}/baltrad-bdb-server.pid"/>
+      <arg value="${build.dir}/baltrad-bdb-server.pid"/>
     </exec>
     <exec executable="kill">
       <arg value="${baltrad.bdb.server.pid}"/>

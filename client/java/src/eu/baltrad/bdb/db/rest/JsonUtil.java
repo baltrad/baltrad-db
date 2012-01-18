@@ -93,7 +93,7 @@ public final class JsonUtil {
     }
   }
 
-  public Node createOh5Attribute(String name, JsonNode jsonNode) {
+  public Attribute createOh5Attribute(String name, JsonNode jsonNode) {
     JsonNode valueNode = jsonNode.get("value");
     if (valueNode == null) {
       throw new RuntimeException("no value associated with attribute");
@@ -103,6 +103,9 @@ public final class JsonUtil {
       return new Attribute(name, valueNode.getLongValue());
     } else if (valueNode.isTextual()) {
       return new Attribute(name, valueNode.getTextValue());
+    } else if (valueNode.isArray()) {
+      // XXX: properly handle arrays!
+      return new Attribute(name, "");
     } else {
       throw new RuntimeException(
         "attribute " + name + " unhandled JSON value node: "

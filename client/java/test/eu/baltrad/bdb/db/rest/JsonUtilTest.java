@@ -22,6 +22,7 @@ package eu.baltrad.bdb.db.rest;
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.expr.Expression;
 import eu.baltrad.bdb.expr.ExpressionFactory;
+import eu.baltrad.bdb.oh5.Node;
 import eu.baltrad.bdb.oh5.Metadata;
 import eu.baltrad.bdb.oh5.Attribute;
 
@@ -63,6 +64,16 @@ public class JsonUtilTest {
     Attribute attr = meta.getAttribute("/what/object");
     assertNotNull(attr);
     assertEquals("PVOL", attr.toString());
+  }
+
+  @Test
+  public void createOh5Attribute_arrayValue() {
+    ObjectNode jsonObj = nodeFactory.objectNode();
+    ArrayNode value = nodeFactory.arrayNode();
+    jsonObj.put("value", value);
+
+    Node result = classUnderTest.createOh5Attribute("attrname", jsonObj);
+    // XXX: just assert it doesn't throw for now
   }
 
   @Test
