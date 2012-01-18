@@ -16,6 +16,7 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import numpy
 
 try:
     import _pyhl as pyhl
@@ -46,9 +47,10 @@ class HlHdfMetadataReader(object):
             node_type = nodes[node_path]
             parent_path, node_name = os.path.split(node_path)
             if node_type == pyhl.ATTRIBUTE_ID:
+                value = self._attribute_value(nodelist.getNode(node_path))
                 metadata.add_node(
                     parent_path,
-                    Attribute(node_name, nodelist.getNode(node_path).data())
+                    Attribute(node_name, value)
                 )
             elif node_type == pyhl.GROUP_ID:
                 metadata.add_node(parent_path, Group(node_name))
@@ -57,6 +59,14 @@ class HlHdfMetadataReader(object):
             else:
                 raise RuntimeError("unhandled hlhdf node type: %s" % node_type)
         return metadata
+
+    def _attribute_value(self, hlnode):
+        data = hlnode.data()
+        if isinstance(data, numpy.ndarray):
+            assert data.ndim == 1, "%s has ndim != 1" % hlnode.name()
+            return data.tolist()
+        else:
+            return data
 
 class HlHdfMetadataWriter(object):
     def __init__(self):

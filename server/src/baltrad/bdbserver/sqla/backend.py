@@ -17,6 +17,7 @@
 
 import contextlib
 import datetime
+import logging
 import os
 import stat
 import uuid
@@ -29,6 +30,8 @@ from baltrad.bdbcommon import oh5
 
 from . import schema, query
 from .. backend import Backend, DuplicateEntry, IntegrityError
+
+logger = logging.getLogger("baltrad.bdbserver.sqla")
 
 def force_sqlite_foreign_keys(dbapi_con, con_record):
     try:
@@ -377,8 +380,14 @@ def _insert_attribute_value(conn, node, node_id):
         value_double = value
     elif isinstance(value, basestring):
         value_str = value
+    elif isinstance(value, list):
+        logger.error(
+            "ignoring array attribute value at %s", node.path()
+        )
     else:
-        raise RuntimeError("unhandled attribute value type: %s" % type(value))
+        raise RuntimeError(
+            "unhandled attribute value type: %s" % type(value)
+        )
 
     conn.execute(
         schema.attribute_values.insert(),
