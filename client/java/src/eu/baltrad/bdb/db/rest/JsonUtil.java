@@ -105,7 +105,9 @@ public final class JsonUtil {
       return new Attribute(name, valueNode.getTextValue());
     } else if (valueNode.isArray()) {
       // XXX: properly handle arrays!
-      return new Attribute(name, "");
+      return new Attribute(name);
+    } else if (valueNode.isNull()) {
+      return new Attribute(name);
     } else {
       throw new RuntimeException(
         "attribute " + name + " unhandled JSON value node: "

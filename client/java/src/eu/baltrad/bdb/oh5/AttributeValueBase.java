@@ -27,6 +27,11 @@ public abstract class AttributeValueBase implements AttributeValue {
   public boolean isDouble() {
     return getType() == Type.DOUBLE;
   }
+
+  @Override
+  public boolean isNull() {
+    return false;
+  }
   
   @Override
   public boolean isLong() {

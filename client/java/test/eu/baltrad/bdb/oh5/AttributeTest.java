@@ -30,6 +30,14 @@ public class AttributeTest {
   Attribute classUnderTest;
 
   @Test
+  public void constructor() {
+    classUnderTest = new Attribute("foo");
+    assertEquals("foo", classUnderTest.getName());
+    assertTrue(classUnderTest.isNull());
+    assertEquals(AttributeValue.Type.NULL, classUnderTest.getType());
+  }
+
+  @Test
   public void toDate() {
     classUnderTest = new Attribute("foo", "20111213");
     assertEquals(new Date(2011, 12, 13), classUnderTest.toDate());

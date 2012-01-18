@@ -26,7 +26,7 @@ public class Attribute extends BaseNode implements AttributeValue {
   private AttributeValue value;
 
   public Attribute(String name) {
-    this(name, "");
+    super(name);
   }
 
   public Attribute(String name, double value) {
@@ -57,7 +57,14 @@ public class Attribute extends BaseNode implements AttributeValue {
   }
 
   @Override
-  public Type getType() { return value.getType(); }
+  public Type getType() {
+    if (value == null)
+      return Type.NULL;
+    return value.getType(); 
+  }
+  
+  @Override
+  public boolean isNull() { return value == null; }
 
   @Override
   public boolean isDouble() { return value.isDouble(); }

@@ -24,13 +24,15 @@ import eu.baltrad.bdb.util.Time;
 
 public interface AttributeValue {
   enum Type {
+    NULL,
     DOUBLE,
     LONG,
     STRING
   }
 
   Type getType();
-
+  
+  boolean isNull();
   boolean isDouble();
   boolean isLong();
   boolean isString();

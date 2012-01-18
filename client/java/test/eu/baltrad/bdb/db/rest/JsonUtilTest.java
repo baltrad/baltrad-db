@@ -72,8 +72,17 @@ public class JsonUtilTest {
     ArrayNode value = nodeFactory.arrayNode();
     jsonObj.put("value", value);
 
-    Node result = classUnderTest.createOh5Attribute("attrname", jsonObj);
-    // XXX: just assert it doesn't throw for now
+    Attribute result = classUnderTest.createOh5Attribute("attrname", jsonObj);
+    assertTrue(result.isNull());
+  }
+
+  @Test
+  public void createOh5Attribute_nullValue() {
+    ObjectNode jsonObj = nodeFactory.objectNode();
+    jsonObj.put("value", nodeFactory.nullNode());
+
+    Attribute result = classUnderTest.createOh5Attribute("attrname", jsonObj);
+    assertTrue(result.isNull());
   }
 
   @Test
