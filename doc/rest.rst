@@ -33,7 +33,9 @@ Given a sample request::
   POST /source/ HTTP/1.1
   Host: example.com
   Content-Type: application/json
+  Content-MD5: f919609e57df334754cdb410c7847058
   Content-Length: nnn
+  Date: Tue, 10 Jan 2012 19:03:34 GMT
 
   {
     "source": {
