@@ -324,22 +324,7 @@ class SqlAlchemyBackend(Backend):
             schema.meta.drop_all(conn)
     
     def upgrade(self):
-        #XXX: sqlalchemy-migrate should probably be used instead
-
-        upgrade_script = "upgrade_%s.sql" % self._engine.name
-        if not pkg_resources.resource_exists(__name__, upgrade_script):
-            raise RuntimeError(
-                "no upgrade script for dialect: %s" % self._engine.name
-            )
-        
-        statements = pkg_resources.resource_string(
-            __name__, upgrade_script
-        )
-
-        # XXX: this is psycopg2 specific
-        with self.get_connection() as conn:
-            with conn.begin():
-                conn.connection.cursor().execute(statements)
+        pass
 
 def _insert_file(conn, meta, source_id):
     return conn.execute(
