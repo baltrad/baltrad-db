@@ -131,3 +131,5 @@ def run_server():
             app.serve(server_uri, application)
     except lockfile.AlreadyLocked:
         raise SystemExit("pidfile already locked: %s" % opts.pidfile)
+    except lockfile.LockFailed:
+        raise SystemExit("failed to lock pidfile: %s" % opts.pidfile)
