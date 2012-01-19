@@ -11,6 +11,12 @@ import lockfile
 from baltrad.bdbserver import backend, config
 from baltrad.bdbserver.web import app
 
+logger = logging.getLogger("baltrad.bdbserver")
+
+def excepthook(*exc_info):
+    logger.error("unhandled exception", exc_info=exc_info)
+    sys.exit(1)
+
 def check_path(option, opt, value):
     return os.path.abspath(value)
 
@@ -90,6 +96,7 @@ def configure_logging(opts):
         logger.addHandler(logging.FileHandler(opts.logfile))
     
 def run_server():
+    sys.excepthook = excepthook
     optparser = create_optparser()
     optparser.add_option(
         "--foreground", action="store_true",
@@ -110,12 +117,15 @@ def run_server():
 
     conf = read_config(opts.conffile)
 
+    pidfile=TimeoutPIDLockFile(opts.pidfile, acquire_timeout=0)
+
     daemon_ctx = daemon.DaemonContext(
         working_directory="/",
         chroot_directory=None,
         stdout=sys.stdout if opts.foreground else None,
         stderr=sys.stderr if opts.foreground else None,
         detach_process=not opts.foreground,
+        pidfile=pidfile
     )
     
     server_type = conf["baltrad.bdb.server.type"]
@@ -123,13 +133,17 @@ def run_server():
         raise SystemExit("invalid server type in config %s" % server_type)
     server_uri = conf["baltrad.bdb.server.uri"]
     
+    # try locking the pidfile to report possible errors to the user
     try:
-        with TimeoutPIDLockFile(opts.pidfile, acquire_timeout=0):
-            with daemon_ctx:
-                configure_logging(opts)
-                application = app.from_conf(conf)
-            app.serve(server_uri, application)
+        with pidfile:
+            pass
     except lockfile.AlreadyLocked:
         raise SystemExit("pidfile already locked: %s" % opts.pidfile)
     except lockfile.LockFailed:
         raise SystemExit("failed to lock pidfile: %s" % opts.pidfile)
+
+    with daemon_ctx:
+        configure_logging(opts)
+        application = app.from_conf(conf)
+    app.serve(server_uri, application)
+
