@@ -20,6 +20,7 @@ import datetime
 import logging
 import os
 import stat
+import time
 import uuid
 
 import pkg_resources
@@ -371,15 +372,42 @@ def _insert_metadata(conn, meta, file_id):
         if isinstance(node, oh5.Attribute):
             _insert_attribute_value(conn, node, node_id)
 
-def _insert_attribute_value(conn, node, node_id):
+def _parse_date(datestr):
+    if len(datestr) != 8 or not datestr.isdigit():
+        return None
+    try:
+        tm = time.strptime(datestr, "%Y%m%d")
+        return datetime.date(tm.tm_year, tm.tm_mon, tm.tm_mday)
+    except ValueError:
+        return None
+
+def _parse_time(timestr):
+    if len(timestr) != 6 or not timestr.isdigit():
+        return None
+    try:
+        tm = time.strptime(timestr, "%H%M%S")
+        return datetime.time(tm.tm_hour, tm.tm_min, tm.tm_sec)
+    except ValueError:
+        return None
+
+def _get_attribute_sql_values(node):
+    """get all possible sql values of an attribute value
+    """
+    values = {}
     value = node.value
     value_int = value_double = value_str = None
     if isinstance(value, (long, int)):
-        value_int = value
+        values["value_int"] = value
     elif isinstance(value, float):
-        value_double = value
+        values["value_double"] = value
     elif isinstance(value, basestring):
-        value_str = value
+        values["value_str"] = value
+        date = _parse_date(value)
+        if date:
+            values["value_date"] = date
+        time = _parse_time(value)
+        if time:
+            values["value_time"] = time
     elif isinstance(value, list):
         logger.error(
             "ignoring array attribute value at %s", node.path()
@@ -388,13 +416,15 @@ def _insert_attribute_value(conn, node, node_id):
         raise RuntimeError(
             "unhandled attribute value type: %s" % type(value)
         )
+    return values
+
+def _insert_attribute_value(conn, node, node_id):
+    values = _get_attribute_sql_values(node)
 
     conn.execute(
         schema.attribute_values.insert(),
         node_id=node_id,
-        value_str=value_str,
-        value_int=value_int,
-        value_double=value_double
+        **values
     )
 
 def _select_metadata(conn, file_id):
