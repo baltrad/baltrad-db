@@ -145,5 +145,5 @@ def run_server():
     with daemon_ctx:
         configure_logging(opts)
         application = app.from_conf(conf)
-    app.serve(server_uri, application)
+        app.serve(server_uri, application)
 
