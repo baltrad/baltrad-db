@@ -67,6 +67,7 @@ class AuthMiddleware(object):
             logger.error("auth provider not available: %s" % provider_key)
             return False
         
+        logger.info("authenticating with %s: %s", provider_key, credentials)
         try:
             return provider.authenticate(req, credentials)
         except AuthError, e:
@@ -195,6 +196,7 @@ class KeyczarAuth(Auth):
         """
         if not os.path.isabs(path):
             path = os.path.join(self._keystore_root, path)
+        logger.info("adding key %s from %s", name, path)
         verifier = keyczar.Verifier.Read(path)
         self._verifiers[name] = verifier
     
