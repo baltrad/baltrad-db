@@ -71,8 +71,8 @@ public final class DefaultRequestFactory implements RequestFactory {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    entity.setContentType("application/x-hdf5");
     result.setEntity(entity);
+    result.addHeader("content-type", "application/x-hdf5");
     return result;
   }
 
@@ -105,8 +105,8 @@ public final class DefaultRequestFactory implements RequestFactory {
     try {
       String queryJson = jsonUtil.jsonToString(jsonUtil.toJson(query));
       StringEntity entity = new StringEntity(queryJson);
-      entity.setContentType("application/json");
       result.setEntity(entity);
+      result.addHeader("content-type", "application/json");
     } catch (java.io.UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }
@@ -119,8 +119,8 @@ public final class DefaultRequestFactory implements RequestFactory {
     try {
       String queryJson = jsonUtil.jsonToString(jsonUtil.toJson(query));
       StringEntity entity = new StringEntity(queryJson);
-      entity.setContentType("application/json");
       result.setEntity(entity);
+      result.addHeader("content-type", "application/json");
     } catch (java.io.UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }

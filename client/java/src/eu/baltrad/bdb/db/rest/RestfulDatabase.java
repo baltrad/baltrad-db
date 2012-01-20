@@ -37,27 +37,42 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 
+ */
 public class RestfulDatabase implements Database {
   private HttpClient httpClient;
   private RequestFactory requestFactory;
+  private Authenticator authenticator;
 
   public RestfulDatabase(String serverUri) {
-    this(URI.create(serverUri));
+    this(serverUri, new NullAuthenticator());
   }
   
   public RestfulDatabase(URI serverUri) {
+    this(serverUri, new NullAuthenticator());
+  }
+
+  public RestfulDatabase(String serverUri, Authenticator authenticator) {
+    this(URI.create(serverUri), authenticator);
+  }
+
+  public RestfulDatabase(URI serverUri, Authenticator authenticator) {
     this(
       new DefaultRequestFactory(serverUri),
       new DefaultHttpClient(
         new ThreadSafeClientConnManager()
-      )
+      ),
+      authenticator
     );
   }
 
   public RestfulDatabase(RequestFactory requestFactory,
-                         HttpClient httpClient) {
+                         HttpClient httpClient,
+                         Authenticator authenticator) {
     this.requestFactory = requestFactory;
     this.httpClient = httpClient;
+    this.authenticator = authenticator;
   }
 
   /**
@@ -241,6 +256,7 @@ public class RestfulDatabase implements Database {
   }
   
   protected RestfulResponse executeRequest(HttpUriRequest request) {
+    authenticator.addCredentials(request);
     try {
       return new RestfulResponse(httpClient.execute(request));
     } catch (IOException e) {

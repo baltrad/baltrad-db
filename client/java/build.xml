@@ -181,7 +181,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     <!-- copy any resources -->
     <copy todir="${build.itest.dir}">
       <fileset dir="${app.root.dir}/itest">
-        <include name="**/*.h5"/>
+        <include name="**/fixtures/**"/>
       </fileset>
     </copy>
   </target>
@@ -198,18 +198,22 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     <fail unless="${bdbserver.available}"
           message="BDB server executable not found in ${baltrad.bdb.bin.path} !" />
 
-    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-drop">
+    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-drop"
+          failonerror="true">
       <arg value="--conf=${itest.bdbserver.properties}"/>
     </exec>
-    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-create">
+    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-create"
+          failonerror="true">
       <arg value="--conf=${itest.bdbserver.properties}"/>
     </exec>
-    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-server">
+    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-server"
+          failonerror="true">
       <arg value="--conf=${itest.bdbserver.properties}"/>
       <arg value="--pidfile=${build.dir}/baltrad-bdb-server.pid"/>
       <arg value="--logfile=${build.dir}/baltrad-bdb-server.log"/>
     </exec>
-    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-client">
+    <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-client"
+          failonerror="true">
       <arg value="import_sources"/>
       <arg value="--url=${baltrad.bdb.server.uri}"/>
       <arg value="${basedir}/etc/itest_sources.xml"/>

@@ -65,12 +65,10 @@ public class DefaultRequestFactoryTest {
   }
 
   protected String getContentType(HttpUriRequest req) {
-    HttpEntity entity = getEntity(req);
-    if (entity != null) {
-      return entity.getContentType().getValue();
-    } else {
-      return null;
-    }
+    Header header = req.getFirstHeader("content-type");
+    if (header != null)
+      return header.getValue();
+    return null;
   }
 
   @Test
@@ -80,7 +78,7 @@ public class DefaultRequestFactoryTest {
     
     assertEquals("POST", req.getMethod());
     assertEquals(URI.create("http://example.com/file/"), req.getURI());
-    assertEquals("application/x-hdf5", getEntity(req).getContentType().getValue());
+    assertEquals("application/x-hdf5", getContentType(req));
   }
 
   @Test

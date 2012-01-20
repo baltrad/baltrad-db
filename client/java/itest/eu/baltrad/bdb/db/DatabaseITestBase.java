@@ -17,13 +17,9 @@ You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 
-package eu.baltrad.bdb.db.rest;
+package eu.baltrad.bdb.db;
 
 import eu.baltrad.bdb.expr.ExpressionFactory;
-import eu.baltrad.bdb.db.DuplicateEntry;
-import eu.baltrad.bdb.db.FileEntry;
-import eu.baltrad.bdb.db.FileQuery;
-import eu.baltrad.bdb.db.FileResult;
 import eu.baltrad.bdb.oh5.Metadata;
 import eu.baltrad.bdb.oh5.Source;
 
@@ -41,20 +37,14 @@ import java.security.MessageDigest;
 import java.util.List;
 import java.util.UUID;
 
-public class RestfulDatabaseITest {
-  RestfulDatabase classUnderTest;
 
-  private RestfulDatabase createDatabase() {
-    String dbUri = System.getProperty("baltrad.bdb.server.uri");
-    if (dbUri != null) {
-      return new RestfulDatabase(dbUri);
-    } else {
-      return null;
-    }
-  }
+public abstract class DatabaseITestBase {
+  protected Database classUnderTest;
+
+  protected abstract Database createDatabase();
 
   private String getFilePath(String resource) throws Exception {
-    File f = new File(this.getClass().getResource(resource).getFile());
+    File f = new File(DatabaseITestBase.class.getResource(resource).getFile());
     return f.getAbsolutePath();
   }
 
@@ -214,4 +204,5 @@ public class RestfulDatabaseITest {
     assertNotNull(seang);
     assertEquals("Ängelholm", seang.get("PLC"));
   }
+
 }

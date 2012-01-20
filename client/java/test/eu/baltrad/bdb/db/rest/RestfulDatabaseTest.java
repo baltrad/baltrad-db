@@ -18,6 +18,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.baltrad.bdb.db.rest;
 
+import eu.baltrad.bdb.db.AttributeQuery;
+import eu.baltrad.bdb.db.AttributeResult;
+import eu.baltrad.bdb.db.DatabaseError;
+import eu.baltrad.bdb.db.DuplicateEntry;
+import eu.baltrad.bdb.db.FileEntry;
+import eu.baltrad.bdb.db.FileQuery;
+import eu.baltrad.bdb.db.FileResult;
+import eu.baltrad.bdb.oh5.Source;
+
+import org.apache.commons.io.IOUtils;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ProtocolVersion;
@@ -33,27 +44,24 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.InputStream;
-import java.util.UUID;
-import java.util.List;
-
-import eu.baltrad.bdb.db.AttributeQuery;
-import eu.baltrad.bdb.db.AttributeResult;
-import eu.baltrad.bdb.db.DatabaseError;
-import eu.baltrad.bdb.db.DuplicateEntry;
-import eu.baltrad.bdb.db.FileEntry;
-import eu.baltrad.bdb.db.FileQuery;
-import eu.baltrad.bdb.db.FileResult;
-import eu.baltrad.bdb.oh5.Source;
+import java.io.*;
+import java.util.*;
 
 public class RestfulDatabaseTest extends EasyMockSupport {
+  private static interface RestfulDatabaseMethods {
+    public RestfulResponse executeRequest(HttpUriRequest request);
+  }
+
   RequestFactory requestFactory;
   HttpClient httpClient;
+  Authenticator authenticator;
+  RestfulDatabaseMethods methods;
   RestfulDatabase classUnderTest;
   
   HttpResponse createResponse(int code) throws Exception {
     return createResponse(code, null);
   }
+
 
   HttpResponse createResponse(int code, String content) throws Exception {
     HttpResponse response =  new BasicHttpResponse(
@@ -65,12 +73,32 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     return response;
   }
 
+  RestfulResponse createRestfulResponse(int code) throws Exception {
+    return createRestfulResponse(code, null);
+  }
+
+  RestfulResponse createRestfulResponse(int code, String content)
+      throws Exception {
+    return new RestfulResponse(createResponse(code, content));
+  }
+
   @Before
   public void setUp() {
     requestFactory = createMock(RequestFactory.class);
     httpClient = createMock(HttpClient.class);
+    authenticator = createMock(Authenticator.class);
+    methods = createMock(RestfulDatabaseMethods.class);
 
-    classUnderTest = new RestfulDatabase(requestFactory, httpClient);
+    classUnderTest = new RestfulDatabase(
+        requestFactory,
+        httpClient,
+        authenticator) {
+      @Override
+      protected RestfulResponse executeRequest(HttpUriRequest request) {
+        return methods.executeRequest(request);
+      }
+    };
+      
     resetAll();
   }
 
@@ -78,7 +106,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void store() throws Exception {
     InputStream fileContent = createMock(InputStream.class);
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(
+    RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_CREATED,
       "{ \"metadata\" : [" +
            "{\"path\": \"/\", \"type\": \"group\"}" +
@@ -87,7 +115,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     
     expect(requestFactory.createStoreFileRequest(fileContent))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
     
@@ -99,11 +127,11 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void store_duplicateEntry() throws Exception {
     InputStream fileContent = createMock(InputStream.class);
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(HttpStatus.SC_CONFLICT);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_CONFLICT);
     
     expect(requestFactory.createStoreFileRequest(fileContent))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
     
@@ -118,13 +146,13 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void store_serverFailure() throws Exception {
     InputStream fileContent = createMock(InputStream.class);
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(
+    RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
     
     expect(requestFactory.createStoreFileRequest(fileContent))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
     
@@ -139,11 +167,11 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void removeFileEntry() throws Exception {
     UUID uuid = UUID.randomUUID();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(HttpStatus.SC_NO_CONTENT);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_NO_CONTENT);
 
     expect(requestFactory.createRemoveFileEntryRequest(uuid))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -155,11 +183,11 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void removeFileEntry_notFound() throws Exception {
     UUID uuid = UUID.randomUUID();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(HttpStatus.SC_NOT_FOUND);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_NOT_FOUND);
 
     expect(requestFactory.createRemoveFileEntryRequest(uuid))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -171,13 +199,13 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void removeFileEntry_serverFailure() throws Exception {
     UUID uuid = UUID.randomUUID();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(
+    RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
 
     expect(requestFactory.createRemoveFileEntryRequest(uuid))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -191,11 +219,11 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void removeAllFileEntries() throws Exception {
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(HttpStatus.SC_NO_CONTENT);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_NO_CONTENT);
 
     expect(requestFactory.createRemoveAllFileEntriesRequest())
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -206,13 +234,13 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void removeAllFileEntries_serverFailure() throws Exception {
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(
+    RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
 
     expect(requestFactory.createRemoveAllFileEntriesRequest())
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -229,7 +257,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void getFileEntry() throws Exception {
     UUID uuid = UUID.randomUUID();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(
+    RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "{ \"metadata\" : [" +
            "{\"path\": \"/\", \"type\": \"group\"}" +
@@ -238,7 +266,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
     expect(requestFactory.createGetFileEntryRequest(uuid))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -251,11 +279,11 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void getFileEntry_notFound() throws Exception {
     UUID uuid = UUID.randomUUID();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(HttpStatus.SC_NOT_FOUND);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_NOT_FOUND);
 
     expect(requestFactory.createGetFileEntryRequest(uuid))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -268,13 +296,13 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void getFileEntry_serverFailure() throws Exception {
     UUID uuid = UUID.randomUUID();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response =
-      createResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR
+    RestfulResponse response = createRestfulResponse(
+      HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
 
     expect(requestFactory.createGetFileEntryRequest(uuid))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -289,14 +317,14 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void getFileContent() throws Exception {
     UUID uuid = UUID.randomUUID();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(
+    RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "filecontent"
     );
 
     expect(requestFactory.createGetFileContentRequest(uuid))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -309,11 +337,11 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void getFileContent_notFound() throws Exception {
     UUID uuid = UUID.randomUUID();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(HttpStatus.SC_NOT_FOUND);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_NOT_FOUND);
 
     expect(requestFactory.createGetFileContentRequest(uuid))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -326,13 +354,13 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void getFileContent_serverFailure() throws Exception {
     UUID uuid = UUID.randomUUID();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response =
-      createResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR
+    RestfulResponse response = createRestfulResponse(
+      HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
 
     expect(requestFactory.createGetFileContentRequest(uuid))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -347,14 +375,14 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void execute_FileQuery() throws Exception {
     FileQuery query = new FileQuery();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(
+    RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "{ \"rows\" : []}"
     );
 
     expect(requestFactory.createQueryFileRequest(query))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -366,13 +394,13 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void execute_FileQuery_serverFailure() throws Exception {
     FileQuery query = new FileQuery();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response =
-      createResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR
+    RestfulResponse response = createRestfulResponse(
+      HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
 
     expect(requestFactory.createQueryFileRequest(query))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -387,14 +415,14 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void execute_AttributeQuery() throws Exception {
     AttributeQuery query = new AttributeQuery();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(
+    RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "{\"rows\" : []}"
     );
 
     expect(requestFactory.createQueryAttributeRequest(query))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -406,13 +434,13 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   public void execute_AttriuteQuery_serverFailure() throws Exception {
     AttributeQuery query = new AttributeQuery();
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response =
-      createResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR
+    RestfulResponse response = createRestfulResponse(
+      HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
 
     expect(requestFactory.createQueryAttributeRequest(query))
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
 
@@ -426,7 +454,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void getSources() throws Exception {
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response = createResponse(
+    RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "{\"sources\" : [" +
         "{\"name\": \"src1\", \"values\": {\"key1\": \"value1\"}}," +
@@ -436,7 +464,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
     expect(requestFactory.createGetSourcesRequest())
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
     
@@ -454,13 +482,13 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void getSources_serverFailure() throws Exception {
     HttpUriRequest request = createMock(HttpUriRequest.class);
-    HttpResponse response =
-      createResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR
+    RestfulResponse response = createRestfulResponse(
+      HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
 
     expect(requestFactory.createGetSourcesRequest())
       .andReturn(request);
-    expect(httpClient.execute(request))
+    expect(methods.executeRequest(request))
       .andReturn(response);
     replayAll();
     
@@ -468,6 +496,59 @@ public class RestfulDatabaseTest extends EasyMockSupport {
       classUnderTest.getSources();
       fail("expected DatabaseError");
     } catch (DatabaseError e) { }
+    verifyAll();
+  }
+
+  @Test
+  public void executeRequest() throws Exception {
+    classUnderTest = new RestfulDatabase(
+      requestFactory,
+      httpClient,
+      authenticator
+    );
+
+    HttpUriRequest httpRequest = createMock(HttpUriRequest.class);
+    HttpResponse httpResponse = createResponse(
+      HttpStatus.SC_OK,
+      "content"
+    );
+
+    authenticator.addCredentials(httpRequest);
+    expect(httpClient.execute(httpRequest))
+      .andReturn(httpResponse);
+    replayAll();
+
+    RestfulResponse response = classUnderTest.executeRequest(httpRequest);
+    assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+    assertEquals("content", IOUtils.toString(response.getContentStream()));
+    verifyAll();
+  }
+
+  @Test
+  public void executeRequest_IOException() throws Exception {
+    classUnderTest = new RestfulDatabase(
+      requestFactory,
+      httpClient,
+      authenticator
+    );
+    HttpUriRequest httpRequest = createMock(HttpUriRequest.class);
+    
+    IOException exception = new IOException();
+    authenticator.addCredentials(httpRequest);
+    expect(httpClient.execute(httpRequest))
+      .andThrow(exception);
+    expect(httpRequest.getMethod())
+      .andReturn("GET");
+    expect(httpRequest.getURI())
+      .andReturn(java.net.URI.create("http://example.com/"));
+    replayAll();
+
+    try {
+      classUnderTest.executeRequest(httpRequest);
+      fail("expected DatabaseError");
+    } catch (DatabaseError e) { 
+      assertEquals(exception, e.getCause());
+    }
     verifyAll();
   }
 }
