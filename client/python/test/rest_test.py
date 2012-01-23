@@ -15,9 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-import httplib
-
-from nose.tools import eq_, ok_, raises
+from nose.tools import eq_
 
 import mock
 
@@ -49,22 +47,20 @@ def test_create_signable_string():
 class TestKeyczarAuth(object):
     @mock.patch("keyczar.keyczar.Signer.Read")
     def test_ctor(self, signer_read):
-        signer = mock.Sentinel()
-        signer_read.return_value = signer
+        signer_read.return_value = mock.sentinel.signer
 
         result = rest.KeyczarAuth("/path/to/key", key_name="keyname")
         eq_("keyname", result._key_name)
-        eq_(signer, result._signer)
+        eq_(mock.sentinel.signer, result._signer)
         signer_read.assert_called_with("/path/to/key")
     
     @mock.patch("keyczar.keyczar.Signer.Read")
     def test_ctor_default_keyname(self, signer_read):
-        signer = mock.Sentinel()
-        signer_read.return_value = signer
+        signer_read.return_value = mock.sentinel.signer
 
         result = rest.KeyczarAuth("/path/to/key")
         eq_("key", result._key_name)
-        eq_(signer, result._signer)
+        eq_(mock.sentinel.signer, result._signer)
         signer_read.assert_called_with("/path/to/key")
     
     @mock.patch("baltrad.bdbclient.rest.create_signable_string")
@@ -98,19 +94,23 @@ class TestRestfulDatabase(object):
     @mock.patch("httplib.HTTPConnection")
     def test__execute(self, conn_ctor):
         req = mock.Mock(spec=rest.Request)
-        req.method = mock.Sentinel()
-        req.path = mock.Sentinel()
-        req.data = mock.Sentinel()
-        req.headers = mock.Sentinel()
-        response = mock.Sentinel()
+        req.method = mock.sentinel.method
+        req.path = mock.sentinel.path
+        req.data = mock.sentinel.data
+        req.headers = mock.sentinel.headers
         #conn = mock.Mock(spec=httplib.HTTPConnection)
         conn = mock.Mock()
-        conn.getresponse.return_value = response
+        conn.getresponse.return_value = mock.sentinel.response
         conn_ctor.return_value = conn
 
-        eq_(response, self.db._execute(req))
+        eq_(mock.sentinel.response, self.db._execute(req))
 
         conn_ctor.assert_called_with("www.example.com", None)
         self.auth.add_credentials.assert_called_with(req)
-        conn.request.assert_called_with(req.method, req.path, req.data, req.headers)
+        conn.request.assert_called_with(
+            mock.sentinel.method,
+            mock.sentinel.path,
+            mock.sentinel.data,
+            mock.sentinel.headers
+        )
         conn.getresponse.assert_called()

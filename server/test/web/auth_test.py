@@ -34,17 +34,16 @@ from ..test_util import called_with, assert_called_once_with, called_once_with
 class TestAuth(object):
     @mock.patch("pkg_resources.load_entry_point")
     def test_get_implementation(self, load_entry_point):
-        mock_cls = mock.Sentinel()
-        load_entry_point.return_value = mock_cls
+        load_entry_point.return_value = mock.sentinel.entry_point
 
-        eq_(mock_cls, auth.Auth.get_implementation("mock"))
+        result = auth.Auth.get_implementation("mock")
 
-        assert_called_once_with(
-            load_entry_point,
+        load_entry_point.assert_called_once_with(
             "baltrad.bdbserver",
             "baltrad.bdbserver.web.auth",
             "mock"
         )
+        eq_(mock.sentinel.entry_point, result)
 
 class TestKeyczarAuth(object):
     def setup(self):
@@ -174,54 +173,48 @@ class TestAuthMiddleware(object):
         ok_(not self.authmw.authenticate(req))
     
     @mock.patch("baltrad.bdbserver.web.util.Request")
-    def test_call(self, request_ctor):
-        start_response = mock.Sentinel()
-        request = mock.Sentinel()
-        request_ctor.return_value = request
-        env = mock.Sentinel()
+    def test_call(self, req_ctor):
+        req_ctor.return_value = mock.sentinel.req
         self.authmw.authenticate = mock.Mock()
         self.authmw.authenticate.return_value = True
 
-        self.authmw(env, start_response)
+        self.authmw(mock.sentinel.env, mock.sentinel.start_response)
         
-        ok_(called_once_with(self.app, env, start_response))
+        self.app.assert_called_once_with(
+            mock.sentinel.env, mock.sentinel.start_response
+        )
         eq_(1, self.authmw.authenticate.call_count)
-        ok_(called_once_with(self.authmw.authenticate, request))
+        self.authmw.authenticate.assert_called_once_with(mock.sentinel.req)
     
     @mock.patch("baltrad.bdbserver.web.util.HttpUnauthorized")
     @mock.patch("baltrad.bdbserver.web.util.Request")
-    def test_call_auth_failure(self, request_ctor, unauthorized_ctor):
-        start_response = mock.Sentinel()
-        request = mock.Sentinel()
-        request_ctor.return_value = request
+    def test_call_auth_failure(self, req_ctor, unauthorized_ctor):
+        req_ctor.return_value = mock.sentinel.req
         unauthorized = mock.Mock(spec=webutil.HttpUnauthorized)
         unauthorized_ctor.return_value = unauthorized
-        env = mock.Sentinel()
         self.authmw.authenticate = mock.Mock()
         self.authmw.authenticate.return_value = False
 
-        self.authmw(env, start_response)
-        ok_(called_once_with(unauthorized, env, start_response))
+        self.authmw(mock.sentinel.env, mock.sentinel.start_response)
+        unauthorized.assert_called_once_with(
+            mock.sentinel.env, mock.sentinel.start_response
+        )
     
     @mock.patch("baltrad.bdbserver.web.auth.Auth.get_implementation")
     def test_add_provider_from_conf(self, get_auth_implementation):
-        provider_cls = mock.Mock()
-        provider = mock.Sentinel()
-        conf = mock.Sentinel()
-        get_auth_implementation.return_value = provider_cls
-        provider_cls.from_conf.return_value = provider
+        provider_cls = get_auth_implementation.return_value
+        provider_cls.from_conf.return_value = mock.sentinel.provider
 
-        self.authmw.add_provider_from_conf("provider", conf)
+        self.authmw.add_provider_from_conf("provider", mock.sentinel.conf)
 
         ok_(called_once_with(get_auth_implementation, "provider"))
-        ok_(called_once_with(provider_cls.from_conf, conf))
-        eq_(provider, self.authmw._providers["provider"])
+        provider_cls.from_conf.assert_called_once_with(mock.sentinel.conf)
+        eq_(mock.sentinel.provider, self.authmw._providers["provider"])
 
     def test_from_conf(self):
         # store original method, we are going to patch the class
         from_conf = auth.AuthMiddleware.from_conf
         self.authmw = mock.Mock(spec=auth.AuthMiddleware)
-        app = mock.Sentinel()
         conf = config.Properties({
             "baltrad.bdb.server.auth.providers": "foo, bar",
         })
@@ -230,8 +223,8 @@ class TestAuthMiddleware(object):
             "baltrad.bdbserver.web.auth.AuthMiddleware"
         ) as ctor:
             ctor.return_value = self.authmw
-            result = from_conf(app, conf)
-            ok_(called_once_with(ctor, app))
+            result = from_conf(mock.sentinel.app, conf)
+            ok_(called_once_with(ctor, mock.sentinel.app))
             ok_(called_with(self.authmw.add_provider_from_conf, "foo", conf))
             ok_(called_with(self.authmw.add_provider_from_conf, "bar", conf))
             eq_(result, self.authmw)
@@ -240,7 +233,6 @@ class TestAuthMiddleware(object):
         # store original method, we are going to patch the class
         from_conf = auth.AuthMiddleware.from_conf
         self.authmw = mock.Mock(spec=auth.AuthMiddleware)
-        app = mock.Sentinel()
         conf = config.Properties({
         })
 
@@ -248,8 +240,8 @@ class TestAuthMiddleware(object):
             "baltrad.bdbserver.web.auth.AuthMiddleware"
         ) as ctor:
             ctor.return_value = self.authmw
-            result = from_conf(app, conf)
-            ok_(called_once_with(ctor, app))
+            result = from_conf(mock.sentinel.app, conf)
+            ok_(called_once_with(ctor, mock.sentinel.app))
             ok_(called_with(self.authmw.add_provider_from_conf, "noauth", conf))
             eq_(result, self.authmw)
         
