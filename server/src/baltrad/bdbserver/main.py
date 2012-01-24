@@ -41,7 +41,7 @@ def create_optparser():
 def create_backend(config):
     type_ = config.get("baltrad.bdb.server.backend.type")
     try:
-        backend_cls = backend.Backend.get_implementation(type_)
+        backend_cls = backend.Backend.get_impl(type_)
     except LookupError:
         raise LookupError(
             "unknown baltrad.bdb.server.backend.type: %s" % type_

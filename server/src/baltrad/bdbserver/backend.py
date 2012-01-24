@@ -178,7 +178,7 @@ class Backend(object):
         """
     
     @classmethod
-    def get_implementation(cls, name):
+    def get_impl(cls, name):
         """get an implementing class by name
 
         the implementing class is looked up from 'baltrad.bdbserver.backends'
@@ -198,7 +198,7 @@ class Backend(object):
 def from_conf(conf):
     typename = conf["baltrad.bdb.server.backend.type"]
     try:
-        backend_cls = Backend.get_implementation(typename)
+        backend_cls = Backend.get_impl(typename)
     except LookupError:
         raise config.Error("unsupported backend type: %s" % typename)
     return backend_cls.from_conf(conf) 

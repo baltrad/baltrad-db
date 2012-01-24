@@ -23,7 +23,7 @@ from baltrad.bdbserver import backend, config
 
 from .test_util import called_once_with
 
-@mock.patch("baltrad.bdbserver.backend.Backend.get_implementation")
+@mock.patch("baltrad.bdbserver.backend.Backend.get_impl")
 def test_from_conf(get_impl):
     impl_cls = get_impl.return_value
     impl_cls.from_conf.return_value = mock.sentinel.backend
@@ -36,9 +36,9 @@ def test_from_conf(get_impl):
     ok_(called_once_with(impl_cls.from_conf, conf))
 
 @raises(config.Error)
-@mock.patch("baltrad.bdbserver.backend.Backend.get_implementation")
-def test_from_conf_invalid_implementation(get_backend_impl):
-    get_backend_impl.side_effect = LookupError
+@mock.patch("baltrad.bdbserver.backend.Backend.get_impl")
+def test_from_conf_invalid_impl(get_impl):
+    get_impl.side_effect = LookupError
     conf = config.Properties({
         "baltrad.bdb.server.backend.type": "mock"
     })
