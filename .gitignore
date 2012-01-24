@@ -13,6 +13,7 @@ common/dist
 doc/html
 doc/_build
 server/build
+server/etc/develop.properties
 server/dist
 test/reports
 

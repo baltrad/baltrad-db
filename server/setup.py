@@ -29,7 +29,7 @@ setuptools.setup(name="baltrad.bdbserver",
     ],
     entry_points = {
         "baltrad.bdbserver.backends": [
-            "sqlalchemy = baltrad.bdbserver.sqla.backend:SqlAlchemyBackend",
+            "sqla = baltrad.bdbserver.sqla.backend:SqlAlchemyBackend",
         ],
         "baltrad.bdbserver.web.auth": [
             "noauth = baltrad.bdbserver.web.auth:NoAuth",

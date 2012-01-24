@@ -99,7 +99,7 @@ class SqlAlchemyBackend(Backend):
     
     @classmethod
     def from_conf(cls, conf):
-        return cls(conf["baltrad.bdb.server.backend.uri"])
+        return cls(conf["baltrad.bdb.server.backend.sqla.uri"])
         
     def store_file(self, path):
         meta = oh5.Metadata.from_file(path)
