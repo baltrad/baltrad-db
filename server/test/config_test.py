@@ -47,13 +47,41 @@ class TestProperties(object):
     def test_getitem_missing(self):
         self.properties["qwe.asd"]
     
-    def test_getboolean(self):
+    def test_get_boolean(self):
         eq_(True, self.properties.get_boolean("qwe"))
         eq_(False, self.properties.get_boolean("asd"))
     
     @raises(config.PropertyValueError)
-    def test_getboolean_invalid_value(self):
+    def test_get_boolean_invalid_value(self):
         self.properties.get_boolean("bar.foo.baz")
+    
+    def test_get_boolean_default_boolean(self):
+        eq_(True, self.properties.get_boolean("nxboolean", True))
+        eq_(False, self.properties.get_boolean("nxboolean", False))
+    
+    def test_get_boolean_default_none(self):
+        eq_(None, self.properties.get_boolean("nxboolean", None))
+        
+    def test_get_boolean_default_str(self):
+        eq_(True, self.properties.get_boolean("nxboolean", "yes"))
+        eq_(False, self.properties.get_boolean("nxboolean", "false"))
+    
+    def test_get_int(self):
+        eq_(1, self.properties.get_int("foo.bar.baz"))
+        eq_(2, self.properties.get_int("foo.bar.qwe"))
+    
+    @raises(config.PropertyValueError)
+    def test_get_int_invalid_value(self):
+        self.properties.get_int("bar.foo.baz")
+    
+    def test_get_int_default_int(self):
+        eq_(10, self.properties.get_int("nxint", 10))
+
+    def test_get_int_default_str(self):
+        eq_(10, self.properties.get_int("nxint", "10"))
+    
+    def test_get_int_default_none(self):
+        eq_(None, self.properties.get_int("nxint", None))
 
     def test_get_list(self):
         eq_(["a", "b", "c"], self.properties.get_list("list", sep=","))
@@ -65,6 +93,9 @@ class TestProperties(object):
     def test_get_list_default_str(self):
         result = self.properties.get_list("nxlist", default="1 2 3")
         eq_(["1", "2", "3"], result)
+
+    def test_get_list_default_none(self):
+        eq_(None, self.properties.get_list("nxlist", None))
 
     def test_filter(self):
         result = self.properties.filter("foo.bar.")

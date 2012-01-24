@@ -45,18 +45,38 @@ class Properties(object):
             else:
                 raise
     
+    def get_int(self, key, default=_undefined):
+        """get int value associated with the key
+
+        :param key: the key for which to look up the value
+        :param default: default value if the key is not found. This can be
+                        any value, but when provided as a `str`, it is parsed
+                        as if read from the configuration, otherwise it is
+                        returned as it is.
+        :param sep: value separator
+        :raise: :class:`PropertyLookupError` if the key is not found
+                and no default value is provided.
+        """
+        value = self.get(key, default)
+        if not isinstance(value, basestring):
+            return value
+        
+        try:
+            return int(value)
+        except ValueError:
+            raise PropertyValueError("invalid int value: %s" % value)
+    
     def get_list(self, key, default=_undefined, sep=" "):
         """get list of values associated with the key
 
         :param key: the key for which to look up the value
         :param default: default value if the key is not found. This can be
-                        provided either as a `str` or a `list`. If `str`, the
-                        value goes through the splitting, otherwise it is
+                        any value, but when provided as a `str`, it is parsed
+                        as if read from the configuration, otherwise it is
                         returned as it is.
         :param sep: value separator
         :raise: :class:`PropertyLookupError` if the key is not found
                 and no default value is provided.
-
         """
         value = self.get(key, default)
         if not isinstance(value, basestring):
@@ -67,11 +87,22 @@ class Properties(object):
     def get_boolean(self, key, default=_undefined):
         """get boolean value associated with the key
 
+        :param key: the key for which to look up the value
+        :param default: default value if the key is not found. This can be
+                        any value, but when provided as a `str`, it is parsed
+                        as if read from the configuration, otherwise it is
+                        returned as it is.
+        :raise: :class:`PropertyLookupError` if the key is not found
+                and no default value is provided.
         """
         value = self.get(key, default)
-        if value in ("True", "true", "yes", "on", "1", True):
+
+        if not isinstance(value, basestring):
+            return value
+
+        if value in ("True", "true", "yes", "on", "1"):
             return True
-        elif value in ("False", "false", "no", "off", "0", False):
+        elif value in ("False", "false", "no", "off", "0"):
             return False
         else:
             raise PropertyValueError("can't parse boolean from: %s" % value)
