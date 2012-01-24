@@ -90,7 +90,7 @@ class AuthMiddleware(object):
         :raise: `LookupError` if an implementation with this name doesn't
                 exist
         """
-        provider_cls = Auth.get_implementation(name)
+        provider_cls = Auth.get_impl(name)
         provider = provider_cls.from_conf(conf)
         self._providers[name] = provider
     
@@ -151,7 +151,7 @@ class Auth(object):
         raise NotImplementedError()
     
     @classmethod
-    def get_implementation(cls, name):
+    def get_impl(cls, name):
         return pkg_resources.load_entry_point(
             "baltrad.bdbserver",
             "baltrad.bdbserver.web.auth",

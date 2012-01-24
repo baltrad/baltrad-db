@@ -33,10 +33,10 @@ from ..test_util import called_with, assert_called_once_with, called_once_with
 
 class TestAuth(object):
     @mock.patch("pkg_resources.load_entry_point")
-    def test_get_implementation(self, load_entry_point):
+    def test_get_impl(self, load_entry_point):
         load_entry_point.return_value = mock.sentinel.entry_point
 
-        result = auth.Auth.get_implementation("mock")
+        result = auth.Auth.get_impl("mock")
 
         load_entry_point.assert_called_once_with(
             "baltrad.bdbserver",
@@ -200,14 +200,14 @@ class TestAuthMiddleware(object):
             mock.sentinel.env, mock.sentinel.start_response
         )
     
-    @mock.patch("baltrad.bdbserver.web.auth.Auth.get_implementation")
-    def test_add_provider_from_conf(self, get_auth_implementation):
-        provider_cls = get_auth_implementation.return_value
+    @mock.patch("baltrad.bdbserver.web.auth.Auth.get_impl")
+    def test_add_provider_from_conf(self, get_auth_impl):
+        provider_cls = get_auth_impl.return_value
         provider_cls.from_conf.return_value = mock.sentinel.provider
 
         self.authmw.add_provider_from_conf("provider", mock.sentinel.conf)
 
-        ok_(called_once_with(get_auth_implementation, "provider"))
+        ok_(called_once_with(get_auth_impl, "provider"))
         provider_cls.from_conf.assert_called_once_with(mock.sentinel.conf)
         eq_(mock.sentinel.provider, self.authmw._providers["provider"])
 
