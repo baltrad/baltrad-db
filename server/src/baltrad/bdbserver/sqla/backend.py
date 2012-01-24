@@ -23,8 +23,6 @@ import stat
 import time
 import uuid
 
-import pkg_resources
-
 from sqlalchemy import engine, event, exc as sqlexc, sql
 
 from baltrad.bdbcommon import oh5
@@ -100,8 +98,8 @@ class SqlAlchemyBackend(Backend):
         event.listen(self._engine, "connect", force_sqlite_foreign_keys)
     
     @classmethod
-    def create_from_config(cls, config):
-        return cls(config["baltrad.bdb.server.backend.uri"])
+    def from_conf(cls, conf):
+        return cls(conf["baltrad.bdb.server.backend.uri"])
         
     def store_file(self, path):
         meta = oh5.Metadata.from_file(path)

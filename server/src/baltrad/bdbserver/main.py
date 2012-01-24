@@ -46,7 +46,7 @@ def create_backend(config):
         raise LookupError(
             "unknown baltrad.bdb.server.backend.type: %s" % type_
         )
-    return backend_cls.create_from_config(config)
+    return backend_cls.from_conf(config)
 
 def read_config(conffile):
     if not conffile:

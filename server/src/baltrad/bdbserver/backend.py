@@ -173,8 +173,8 @@ class Backend(object):
         raise NotImplementedError()
     
     @abstractclassmethod
-    def create_from_config(cls, config):
-        """create an instance and configure it
+    def from_conf(cls, conf):
+        """create an instance from configuration
         """
     
     @classmethod
@@ -201,7 +201,7 @@ def from_conf(conf):
         backend_cls = Backend.get_implementation(typename)
     except LookupError:
         raise config.Error("unsupported backend type: %s" % typename)
-    return backend_cls.create_from_config(conf) 
+    return backend_cls.from_conf(conf) 
 
 class FileQuery(object):
     def __init__(self):

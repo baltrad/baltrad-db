@@ -24,17 +24,16 @@ from baltrad.bdbserver import backend, config
 from .test_util import called_once_with
 
 @mock.patch("baltrad.bdbserver.backend.Backend.get_implementation")
-def test_from_conf(get_backend_impl):
-    backend_cls = mock.Mock()
-    backend_cls.create_from_config.return_value = mock.sentinel.backend
-    get_backend_impl.return_value = backend_cls
+def test_from_conf(get_impl):
+    impl_cls = get_impl.return_value
+    impl_cls.from_conf.return_value = mock.sentinel.backend
     conf = config.Properties({
         "baltrad.bdb.server.backend.type": "mock"
     })
 
     eq_(mock.sentinel.backend, backend.from_conf(conf))
-    ok_(called_once_with(get_backend_impl, "mock"))
-    ok_(called_once_with(backend_cls.create_from_config, conf))
+    ok_(called_once_with(get_impl, "mock"))
+    ok_(called_once_with(impl_cls.from_conf, conf))
 
 @raises(config.Error)
 @mock.patch("baltrad.bdbserver.backend.Backend.get_implementation")
