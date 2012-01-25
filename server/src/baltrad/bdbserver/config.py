@@ -139,6 +139,10 @@ class Properties(object):
                 result.append(key[len(self._prefix):])
         return result
             
+    def get_full_key(self, key):
+        """get a full key corresponding to this 'filtered' key
+        """
+        return self._prefix + key
     
     @classmethod
     def load(cls, path):

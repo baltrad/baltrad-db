@@ -35,6 +35,10 @@ setuptools.setup(name="baltrad.bdbserver",
             "noauth = baltrad.bdbserver.web.auth:NoAuth",
             "keyczar = baltrad.bdbserver.web.auth:KeyczarAuth",
         ],
+        "baltrad.bdbserver.sqla.storage": [
+            "db = baltrad.bdbserver.sqla.storage:DatabaseStorage",
+            "fs = baltrad.bdbserver.sqla.storage:FileSystemStorage",
+        ],
         "console_scripts" : [
             "baltrad-bdb-create = baltrad.bdbserver.main:run_create",
             "baltrad-bdb-drop = baltrad.bdbserver.main:run_drop",

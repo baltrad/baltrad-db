@@ -48,7 +48,7 @@ files = Table("bdb_files", meta,
     Column("what_time", Time, nullable=False),
     Column("source_id", Integer, ForeignKey(sources.c.id), nullable=False),
     Column("size", Integer, nullable=False),
-    Column("lo_id", Integer),
+    Column("lo_id", Integer, key="oid"),
     UniqueConstraint("hash", "source_id"),
 )
 

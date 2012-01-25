@@ -109,6 +109,11 @@ class TestProperties(object):
         result = result.filter("bar.")
         eq_("foo.bar.", result.prefix)
     
+    def test_get_full_key(self):
+        eq_("foo", self.properties.get_full_key("foo"))
+        self.properties = self.properties.filter("foo.")
+        eq_("foo.bar", self.properties.get_full_key("bar"))
+    
     def test_get_keys(self):
         filtered = self.properties.filter("foo.bar.")
         keys = filtered.get_keys()

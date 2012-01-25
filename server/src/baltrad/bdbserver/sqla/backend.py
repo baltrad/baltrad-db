@@ -27,8 +27,8 @@ from sqlalchemy import engine, event, exc as sqlexc, sql
 
 from baltrad.bdbcommon import oh5
 
-from . import schema, query
-from .. backend import Backend, DuplicateEntry, IntegrityError
+from baltrad.bdbserver import backend
+from baltrad.bdbserver.sqla import query, schema, storage
 
 logger = logging.getLogger("baltrad.bdbserver.sqla")
 
@@ -39,114 +39,56 @@ def force_sqlite_foreign_keys(dbapi_con, con_record):
         # built without sqlite support
         return
 
-    if (isinstance(dbapi_con, sqlite3.Connection)):
+    if isinstance(dbapi_con, sqlite3.Connection):
         dbapi_con.execute("pragma foreign_keys=ON")
 
-class GenericDatabaseFileStorage(object):
-    def store(self, conn, path):
-        return conn.execute(
-            schema.file_data.insert(),
-            data=open(path, "r").read()
-        ).inserted_primary_key[0]
-    
-    def read(self, conn, oid):
-        return conn.execute(
-            sql.select(
-                [schema.file_data.c.data],
-                schema.file_data.c.id==oid
-            )
-        ).scalar()
-    
-    def remove(self, conn, oid):
-        conn.execute(
-            schema.file_data.delete().where(schema.file_data.c.id==oid)
-        )
+class SqlAlchemyBackend(backend.Backend):
+    """A backend using sqlalchemy to store metadata in a relational database
+    and physical files either in the filesystem or in the database.
 
-class Psycopg2DatabaseFileStorage(object):
-    def store(self, conn, path):
-        lobj = conn.connection.lobject(new_file=path)
-        return lobj.oid
-
-    def read(self, conn, oid):
-        lobj = conn.connection.lobject(oid=oid, mode="r")
-        return lobj.read()
-    
-    def remove(self, conn, oid):
-        lobj = conn.connection.lobject(oid=oid)
-        lobj.unlink()
-
-class SqlAlchemyBackend(Backend):
-    """A backend using sqlalchemy to store files in a relational database
+    :param engine_or_url: an SqlAlchemy engine or a database url
+    :param storage: a `~.storage.FileStorage` instance to use.
     """
-
-    def __init__(self, engine_or_url):
-        """Constructor
-
-        :param engine_or_url: sqlalchemy engine or database url
-        """
+    def __init__(self, engine_or_url, storage):
         if isinstance(engine_or_url, basestring):
             self._engine = engine.create_engine(engine_or_url, echo=False)
         else:
             self._engine = engine_or_url
         self._hasher = oh5.MetadataHasher()
-
-        if self._engine.driver == "psycopg2":
-            self._file_storage = Psycopg2DatabaseFileStorage()
-        else:
-            self._file_storage = GenericDatabaseFileStorage()
-
-        event.listen(self._engine, "connect", force_sqlite_foreign_keys)
+        self._storage = storage
+        
+        if self._engine.driver == "pysqlite":
+            event.listen(self._engine, "connect", force_sqlite_foreign_keys)
     
+    @property
+    def driver(self):
+        """database driver name
+        """
+        return self._engine.driver
+            
     @classmethod
     def from_conf(cls, conf):
-        return cls(conf["baltrad.bdb.server.backend.sqla.uri"])
-        
+        """create an instance from configuration
+
+        parameters are looked up under *'baltrad.bdb.server.backend.sqla.'*.
+        """
+        fconf = conf.filter("baltrad.bdb.server.backend.sqla.")
+        storage_type = fconf.get("storage.type", default="db")
+        return SqlAlchemyBackend(
+            conf["baltrad.bdb.server.backend.sqla.uri"],
+            storage=storage.FileStorage.impl_from_conf(storage_type, conf)
+        )
+
     def store_file(self, path):
-        meta = oh5.Metadata.from_file(path)
-
-        metadata_hash = self._hasher.hash(meta)
-        with self.get_connection() as conn:
-            source_id = get_source_id(conn, meta.source())
-            if not source_id:
-                raise LookupError("failed to look up source for " +
-                                  meta.source().to_string())
-            if _has_file_by_hash_and_source(conn, metadata_hash, source_id):
-                raise DuplicateEntry()
-
-        meta.bdb_uuid = str(uuid.uuid4())
-        meta.bdb_file_size = os.stat(path)[stat.ST_SIZE]
-        meta.bdb_metadata_hash = metadata_hash
-        stored_timestamp = datetime.datetime.utcnow()
-        meta.bdb_stored_date = stored_timestamp.date()
-        meta.bdb_stored_time = stored_timestamp.time()
-        with self.get_connection() as conn:
-            source = get_source_by_id(conn, source_id)
-        meta.bdb_source = source.to_string()
-        meta.bdb_source_name = source.name
-        
-        with self.get_connection() as conn:
-            with conn.begin():
-                file_id = _insert_file(conn, meta, source_id)
-                _insert_metadata(conn, meta, file_id)
-                oid = self._file_storage.store(conn, path)
-                conn.execute(
-                    schema.files.update().where(schema.files.c.id==file_id),
-                    lo_id=oid
-                )
-
+        meta = self.metadata_from_file(path)
+        self._storage.store(self, meta, path)
         return meta
 
     def get_file(self, uuid):
-        qry = sql.select(
-            [schema.files.c.lo_id],
-            schema.files.c.uuid==str(uuid)
-        )
-
-        with self.get_connection() as conn:
-            oid = conn.execute(qry).scalar()
-            if not oid:
-                return None
-            return self._file_storage.read(conn, oid);
+        try:
+            return self._storage.read(self, uuid);
+        except storage.FileNotFound:
+            return None
     
     def get_file_metadata(self, uuid):
         qry = sql.select(
@@ -177,15 +119,20 @@ class SqlAlchemyBackend(Backend):
         return meta
      
     def remove_file(self, uuid):
-        qry = schema.files.delete(
-            schema.files.c.uuid==str(uuid)
-        )
-        with self.get_connection() as conn:
-            return bool(conn.execute(qry).rowcount)
+        try:
+            self._storage.remove(self, uuid)
+        except storage.FileNotFound:
+            return False
+        else:
+            return True
     
     def remove_all_files(self):
+        qry = sql.select(
+            [schema.files.c.uuid]
+        )
         with self.get_connection() as conn:
-            conn.execute(schema.files.delete())
+            for row in conn.execute(qry):
+                self.remove_file(row[schema.files.c.uuid])
 
     def file_source(self, uuid):
         qry = sql.select(
@@ -207,7 +154,7 @@ class SqlAlchemyBackend(Backend):
         """get a context managed connection to the database
         """
         return contextlib.closing(self._engine.connect())
-                    
+    
     def get_sources(self):
         qry = sql.select(
             [schema.sources, schema.source_kvs],
@@ -239,7 +186,7 @@ class SqlAlchemyBackend(Backend):
                     name=source.name,
                 ).inserted_primary_key[0]
             except sqlexc.IntegrityError:
-                raise DuplicateEntry()
+                raise backend.DuplicateEntry()
         
             insert_source_values(conn, source_id, source)
         return source_id
@@ -259,7 +206,7 @@ class SqlAlchemyBackend(Backend):
                             name=source.name
                         )
                     except sqlexc.IntegrityError, e:
-                        raise DuplicateEntry(str(e))
+                        raise backend.DuplicateEntry(str(e))
                 
                 conn.execute(
                     schema.source_kvs.delete(
@@ -277,7 +224,7 @@ class SqlAlchemyBackend(Backend):
                     )
                 ).rowcount
             except sqlexc.IntegrityError, e:
-                raise IntegrityError(str(e))
+                raise backend.IntegrityError(str(e))
             else:
                 return bool(affected_rows)
     
@@ -324,7 +271,45 @@ class SqlAlchemyBackend(Backend):
     def upgrade(self):
         pass
 
-def _insert_file(conn, meta, source_id):
+    
+    def metadata_from_file(self, path):
+        meta = oh5.Metadata.from_file(path)
+
+        metadata_hash = self._hasher.hash(meta)
+        with self.get_connection() as conn:
+            source_id = get_source_id(conn, meta.source())
+            if not source_id:
+                raise LookupError("failed to look up source for " +
+                                  meta.source().to_string())
+            if _has_file_by_hash_and_source(conn, metadata_hash, source_id):
+                raise backend.DuplicateEntry()
+
+        meta.bdb_uuid = str(uuid.uuid4())
+        meta.bdb_file_size = os.stat(path)[stat.ST_SIZE]
+        meta.bdb_metadata_hash = metadata_hash
+        stored_timestamp = datetime.datetime.utcnow()
+        meta.bdb_stored_date = stored_timestamp.date()
+        meta.bdb_stored_time = stored_timestamp.time()
+        with self.get_connection() as conn:
+            source = get_source_by_id(conn, source_id)
+        meta.bdb_source = source.to_string()
+        meta.bdb_source_name = source.name
+        return meta
+
+    def insert_metadata(self, conn, metadata):
+        # XXX: source_id has actually been fetched before
+        source_id = get_source_id_by_name(conn, metadata.bdb_source_name)
+        file_id = insert_file(conn, metadata, source_id)
+        insert_metadata(conn, metadata, file_id)
+        return file_id 
+    
+    def delete_metadata(self, conn, uuid):
+        qry = schema.files.delete(
+            schema.files.c.uuid==str(uuid)
+        )
+        return bool(conn.execute(qry).rowcount)
+
+def insert_file(conn, meta, source_id):
     return conn.execute(
         schema.files.insert(),
         uuid=meta.bdb_uuid,
@@ -338,7 +323,7 @@ def _insert_file(conn, meta, source_id):
         size=meta.bdb_file_size,
     ).inserted_primary_key[0]
 
-def _insert_metadata(conn, meta, file_id):
+def insert_metadata(conn, meta, file_id):
     node_ids = {}
 
     for node in meta.iternodes():
@@ -353,7 +338,7 @@ def _insert_metadata(conn, meta, file_id):
         ).inserted_primary_key[0]
         node_ids[node] = node_id
         if isinstance(node, oh5.Attribute):
-            _insert_attribute_value(conn, node, node_id)
+            insert_attribute_value(conn, node, node_id)
 
 def _parse_date(datestr):
     if len(datestr) != 8 or not datestr.isdigit():
@@ -378,7 +363,6 @@ def _get_attribute_sql_values(node):
     """
     values = {}
     value = node.value
-    value_int = value_double = value_str = None
     if isinstance(value, (long, int)):
         values["value_int"] = value
     elif isinstance(value, float):
@@ -401,7 +385,7 @@ def _get_attribute_sql_values(node):
         )
     return values
 
-def _insert_attribute_value(conn, node, node_id):
+def insert_attribute_value(conn, node, node_id):
     values = _get_attribute_sql_values(node)
 
     conn.execute(

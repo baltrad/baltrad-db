@@ -7,10 +7,10 @@ from nose.tools import eq_, ok_, raises
 from nose.plugins.attrib import attr
 from nose.plugins.skip import SkipTest
 
-from baltrad.bdbserver.sqla import schema
+from baltrad.bdbserver.sqla import schema, storage
 from baltrad.bdbserver.sqla.backend import (
-    _insert_metadata,
-    _insert_file,
+    insert_metadata,
+    insert_file,
     get_source_id,
     get_source_by_id,
     SqlAlchemyBackend
@@ -34,7 +34,10 @@ def setup_module():
     global backend
     url = os.environ.get("BDB_TEST_DB", "sqlite:///:memory:")
     try:
-        backend = SqlAlchemyBackend(url)
+        backend = SqlAlchemyBackend(
+            url,
+            storage=storage.DatabaseStorage()
+        )
     except:
         raise SkipTest("could not create backend (%s)" % url)
     backend.drop()
@@ -385,8 +388,8 @@ def _insert_test_file(backend, file_):
             _add_attribute(meta, k, v)
     with backend.get_connection() as conn:
         source_id = get_source_id(conn, meta.source())
-        file_id =  _insert_file(conn, meta, source_id)
-        _insert_metadata(conn, meta, file_id)
+        file_id =  insert_file(conn, meta, source_id)
+        insert_metadata(conn, meta, file_id)
 
 def _add_attribute(meta, path, value):
     path = path.split("/")
