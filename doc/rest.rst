@@ -253,8 +253,8 @@ Query for files
     Content-Length: nnn
 
     {
-      "filter": ["eq" ["attribute", "what/object", "string"] "PVOL"],
-      "order": [["desc" ["attribute", "file:uuid", "string"]]],
+      "filter": ["eq", ["attribute", "what/object", "string"], "PVOL"],
+      "order": [["desc", ["attribute", "file:uuid", "string"]]],
       "limit": 10,
       "skip": 20
     }
@@ -297,8 +297,8 @@ Query for metadata attributes
 
     {
       "fetch": {"uuid": ["attribute", "file:uuid", "string"]},
-      "filter": ["eq" ["attribute", "what/object", "string"] "PVOL"],
-      "order": [["desc" ["attribute", "file:uuid", "string"]]],
+      "filter": ["eq", ["attribute", "what/object", "string"], "PVOL"],
+      "order": [["desc", ["attribute", "file:uuid", "string"]]],
       "limit": 10,
       "skip": 20
     }
