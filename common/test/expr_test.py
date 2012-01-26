@@ -45,3 +45,16 @@ def test_unwrap_json():
         ["PVOL", "SCAN"]
     ]
     eq_(expected, expr.unwrap_json(json))
+
+def test_wrap_json():
+    xpr = [
+        expr.symbol("in"),
+        [expr.symbol("attr"), "what/object", "string"],
+        ["PVOL", "SCAN"]
+    ]
+    expected = ["list", 
+        ["symbol", "in"],
+        ["list", ["symbol", "attr"], "what/object", "string"],
+        ["list", "PVOL", "SCAN"]
+    ]
+    eq_(expected, expr.wrap_json(xpr))

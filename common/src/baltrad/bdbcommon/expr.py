@@ -130,6 +130,21 @@ def unwrap_json(xpr):
     else:
         return xpr
 
+def wrap_json(xpr):
+    """wrap an expression to JSON
+
+    turn :class:`Symbol` objects to ["symbol", ...] and lists to ["list", ...]
+    """
+    if isinstance(xpr, Symbol):
+        return ["symbol", xpr.value]
+    elif isinstance(xpr, list):
+        wrapped = ["list"]
+        for child_xpr in xpr:
+            wrapped.append(wrap_json(child_xpr))
+        return wrapped
+    else:
+        return xpr
+
 class EvaluationError(RuntimeError):
     """Expression evaluation failure
     """
