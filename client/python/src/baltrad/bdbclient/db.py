@@ -16,6 +16,9 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 import abc
+import json
+
+from baltrad.bdbcommon import expr
 
 class DatabaseError(RuntimeError):
     """Exception thrown for failed database requests
@@ -67,6 +70,16 @@ class Database(object):
         :raise: :class:`DatabaseError` if an error occurs
         """
         raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def execute_file_query(self, query):
+        """execute a file query
+
+        :param query: a :class:`FileQuery` to execute
+        :return: a `FileResult` instance
+        :raise: :class:`DatabaseError` if an error occurs
+        """
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def get_sources(self):
@@ -106,3 +119,62 @@ class FileEntry(object):
         pass
     
     metadata = abc.abstractproperty(get_metadata)
+
+class FileQuery(object):
+    def __init__(self):
+        self.filter = None
+        self.order = []
+        self.limit = None
+        self.skip = None
+    
+    def to_json(self):
+        json_repr = {}
+        if self.filter:
+            json_repr["filter"] = expr.wrap_json(self.filter)
+        json_repr["order"] = [expr.wrap_json(o) for o in self.order]
+        if self.limit:
+            json_repr["limit"] = self.limit
+        if self.skip:
+            json_repr["skip"] = self.skip
+        return json.dumps(json_repr)
+
+class FileResult(object):
+    """The result of executing a :class:`FileQuery`
+
+    intended usage::
+
+        >>> while result.next():
+        ...     entry = result.get_file_entry()
+    """
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def next(self):
+        """move to next :class:`FileEntry`, return `True` if successful
+        """
+        raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def size(self):
+        """return the size of the result set
+        """
+        raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def get_file_entry(self):
+        """return current :class:`FileEntry`
+
+        :raise: `LookupError` when exhausted
+        """
+        raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def get_uuid(self):
+        """return the UUID of current :class:`FileEntry`
+
+        :raise: `LookupError` when exhausted
+
+        this *might* be more efficiently implemented the getting the whole
+        entry and the uuid from there.
+        """
+        raise NotImplementedError()

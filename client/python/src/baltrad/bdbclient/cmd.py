@@ -19,13 +19,13 @@ import contextlib
 import logging
 import os
 import shutil
-import sys
 
 from abc import abstractmethod, ABCMeta
 
 import pkg_resources
 
-from baltrad.bdbcommon.oh5 import Attribute, Source
+from baltrad.bdbcommon import oh5
+from baltrad.bdbclient import db
 
 logger = logging.getLogger("baltrad.bdbclient.cmd")
 
@@ -131,7 +131,7 @@ class PrintMetadata(Command):
 
         if entry:
             for node in entry.metadata.iternodes():
-                if isinstance(node, Attribute):
+                if isinstance(node, oh5.Attribute):
                     print "%s=%s" % (node.path(), node.value)
         else:
             print "file not found"
@@ -178,14 +178,12 @@ class ImportSources(Command):
             raise ExecutionError("missing input file")
         
         logging.basicConfig(format="%(message)s")
-        if opts.dry_run:
+        if opts.dry_run and not opts.verbose:
             logger.setLevel(logging.INFO)
-        if opts.verbose:
-            logger.setLevel(logging.DEBUG)
 
         logger.debug("Reading sources from %s" % rave_sources_path)
         with open(rave_sources_path) as f:
-            sources = Source.from_rave_xml(f.read())
+            sources = oh5.Source.from_rave_xml(f.read())
         
         db_sources = dict([(src.name, src) for src in database.get_sources()])
 
@@ -214,3 +212,47 @@ class ImportSources(Command):
             logger.debug("removing %s", source.name)
             if not dry_run:
                 database.remove_source(source.name)
+
+class Dump(Command):
+    def update_optionparser(self, parser):
+        parser.set_usage(parser.get_usage().strip() + " [OPTIONS] DUMP_DIR")
+        parser.add_option("--layers", dest="layers",
+            action="store", type="int", default=3,
+            help="number of directory layers in the dump",
+        )
+
+    def execute(self, database, opts, args):
+        if len(args) > 1:
+            raise ExecutionError("too many arguments")
+        elif len(args) == 0:
+            raise ExecutionError("missing dump target directory")
+
+        dump_dir = os.path.abspath(args[0])
+
+        if not opts.verbose:
+            logger.setLevel(logging.INFO)
+
+        result = database.execute_file_query(db.FileQuery())
+        logger.info("dumping %s files to %s in %s layers",
+            result.size(), dump_dir, opts.layers
+        )
+        while result.next():
+            uuid = result.get_uuid()
+            target  = self.get_target_path(dump_dir, opts.layers, uuid)
+            target_dir = os.path.dirname(target)
+            if os.path.exists(target):
+                logger.debug("skipping %s", uuid)
+                continue
+            if not os.path.exists(target_dir):
+                os.makedirs(target_dir)
+            logger.debug("dumping %s to %s", uuid, target)
+            shutil.copyfileobj(database.get_file_content(uuid), open(target, "w"))
+    
+    def get_target_path(self, dump_dir, layer_count, uuid):
+        uuid_str = str(uuid)
+        elements = [dump_dir]
+        for i in range(0, layer_count):
+            elements.append(uuid_str[i])
+        elements.append(uuid_str)
+
+        return os.path.join(*elements)

@@ -28,6 +28,7 @@ setuptools.setup(name="baltrad.bdbclient",
             "remove = baltrad.bdbclient.cmd:RemoveFile",
             "list_sources = baltrad.bdbclient.cmd:PrintSources",
             "import_sources = baltrad.bdbclient.cmd:ImportSources",
+            "dump = baltrad.bdbclient.cmd:Dump",
         ],
         "console_scripts" : [
             "baltrad-bdb-client = baltrad.bdbclient.main:run"

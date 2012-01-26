@@ -81,7 +81,7 @@ class RestfulDatabase(db.Database):
             }
         )
 
-        response = self._execute(request)
+        response = self.execute_request(request)
         
         if response.status == httplib.CREATED:
             data = json.loads(response.read())
@@ -97,7 +97,7 @@ class RestfulDatabase(db.Database):
             "GET", "/file/%s/metadata" % uuid
         )
 
-        response = self._execute(request)
+        response = self.execute_request(request)
 
         if response.status == httplib.OK:
             data = json.loads(response.read())
@@ -115,7 +115,7 @@ class RestfulDatabase(db.Database):
             "GET", "/file/%s" % uuid
         )
 
-        response = self._execute(request)
+        response = self.execute_request(request)
     
         if response.status == httplib.OK:
             return response
@@ -131,7 +131,7 @@ class RestfulDatabase(db.Database):
             "DELETE", "/file/%s" % uuid
         )
 
-        response = self._execute(request)
+        response = self.execute_request(request)
     
         if response.status == httplib.NO_CONTENT:
             return True
@@ -147,7 +147,7 @@ class RestfulDatabase(db.Database):
             "GET", "/source/"
         )
 
-        response = self._execute(request)
+        response = self.execute_request(request)
 
         if response.status == httplib.OK:
             data = json.loads(response.read())
@@ -170,7 +170,7 @@ class RestfulDatabase(db.Database):
             })
         )
 
-        response = self._execute(request)
+        response = self.execute_request(request)
 
         if response.status == httplib.CREATED:
             pass
@@ -191,7 +191,7 @@ class RestfulDatabase(db.Database):
             })
         )
 
-        response = self._execute(request)
+        response = self.execute_request(request)
 
         if response.status == httplib.NO_CONTENT:
             return
@@ -209,7 +209,7 @@ class RestfulDatabase(db.Database):
             "DELETE", "/source/%s" % name
         )
 
-        response = self._execute(request)
+        response = self.execute_request(request)
 
         if response.status == httplib.NO_CONTENT:
             return True
@@ -224,7 +224,28 @@ class RestfulDatabase(db.Database):
                 "Unhandled response code: %s" % response.status
             )
 
-    def _execute(self, req):
+    def execute_file_query(self, query):
+        request = Request(
+            "POST", "/query/file",
+            data=query.to_json(),
+            headers={
+                "content-type": "application/json"
+            }
+        )
+
+        response = self.execute_request(request)
+
+        if response.status == httplib.OK:
+            return RestfulFileResult(
+                self,
+                rows=json.loads(response.read())["rows"]
+            )
+        else:
+            raise db.DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
+    
+    def execute_request(self, req):
         conn = httplib.HTTPConnection(
             self._server_url.hostname,
             self._server_url.port
@@ -237,6 +258,30 @@ class RestfulDatabase(db.Database):
                 "Could not send request to %s" % self._server_url_str
             )
         return conn.getresponse()
+
+class RestfulFileResult(db.FileResult):
+    def __init__(self, db, rows=[]):
+        self._db = db
+        self._rows = rows
+        self._iter = iter(rows)
+        self._row = None
+    
+    def next(self):
+        self._row = next(self._iter, None)
+        return self._row is not None
+
+    def size(self):
+        return len(self._rows)
+    
+    def get_file_entry(self):
+        if not self._row:
+            raise LookupError("RestfulFileResult exhausted")
+        return self._db.get_file_entry(self._row["uuid"])
+    
+    def get_uuid(self):
+        if not self._row:
+            raise LookupError("RestfulFileResult exhausted")
+        return self._row["uuid"]
 
 class Auth(object):
     __meta__ = abc.ABCMeta

@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import optparse
 import os
 import sys
@@ -79,6 +80,10 @@ def run():
     command.update_optionparser(optparser)
 
     opts, args = optparser.parse_args(args)
+
+    logging.basicConfig(format="%(message)s")
+    if opts.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
 
     if opts.keyczar_key:
         auth = rest.KeyczarAuth(opts.keyczar_key, opts.keyczar_name)
