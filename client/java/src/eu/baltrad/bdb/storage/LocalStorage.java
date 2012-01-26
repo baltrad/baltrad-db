@@ -25,11 +25,14 @@ import java.io.File;
 import java.io.InputStream;
 
 /**
- * node-local file entry storage
+ * Client-side physical file storage. The objective of the implementing
+ * classes is to pull the physical files from the server and make them
+ * accessible in the local filesystem.
  */
 public interface LocalStorage {
   /**
-   * write the (local) file to storage
+   * Write the file to this storage, associating it with the entry.
+   *
    * @param entry fileentry the file was associated with
    * @param path absolute path to the file in filesystem
    * @return absolute path to the stored file
@@ -37,14 +40,15 @@ public interface LocalStorage {
   File store(FileEntry entry, InputStream fileContent);
 
   /**
-   * write the file to storage from FileEntry content stream
+   * Write the file to this storage from FileEntry content stream. The
+   * content of the entry is accessible by opening the the returned file.
+   *
    * @return absolute path to the stored file
    */
   File store(FileEntry entry);
   
   /**
-   * remove the file if it exists
-   * @return true if the file is removed (or is not stored here)
+   * Remove the file from this storage if it exists.
    */
   void remove(FileEntry entry);
 }
