@@ -161,10 +161,10 @@ class TestRestfulDatabase(object):
     def test_execute_file_query(self, request_ctor):
         response = mock.Mock()
         response.status = httplib.OK
-        response.read.return_value = ('['
+        response.read.return_value = ('{"rows": ['
             '{"uuid": "00000000-0000-0000-0004-000000000001"},'
             '{"uuid": "00000000-0000-0000-0004-000000000002"}'
-        ']')
+        ']}')
         request_ctor.return_value = mock.sentinel.request
         self.db.execute_request.return_value = response
         query = mock.Mock(spec=db.FileQuery)
