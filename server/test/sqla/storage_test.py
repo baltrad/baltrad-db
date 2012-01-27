@@ -166,13 +166,13 @@ class TestFileSystemStorage(object):
         self.conn = MockConnection()
         self.tx = MockTransaction()
         self.storage = storage.FileSystemStorage("/stor", layers=1)
-        self.storage.ensure_dir_exists = mock.Mock()
 
         self.backend.get_connection.return_value = self.conn
         self.conn.begin.return_value = self.tx
     
     @mock.patch("shutil.copyfile")
     def test_store(self, copyfile):
+        self.storage.ensure_dir_exists = mock.Mock()
         self.storage.store(self.backend, self.metadata, "/infile")
         self.storage.assert_path = mock.Mock()
         
@@ -190,6 +190,7 @@ class TestFileSystemStorage(object):
     
     @mock.patch("shutil.copyfile")
     def test_store_copy_failure(self, copyfile):
+        self.storage.ensure_dir_exists = mock.Mock()
         copyfile.side_effect = Exception()
         
         try:
@@ -274,6 +275,24 @@ class TestFileSystemStorage(object):
         expected = "/stor/a/b/c/abc00000-0000-0000-0004-000000000001"
         result = strg.path_from_uuid("abc00000-0000-0000-0004-000000000001")
         eq_(expected, result)
+    
+    @mock.patch("os.makedirs")
+    @mock.patch("os.path.exists")
+    def test_ensure_dir_exists(self, exists, makedirs):
+        exists.return_value = True 
+
+        self.storage.ensure_dir_exists(mock.sentinel.path)
+        exists.assert_called_once_with(mock.sentinel.path)
+        eq_(0, makedirs.call_count)
+    
+    @mock.patch("os.makedirs")
+    @mock.patch("os.path.exists")
+    def test_ensure_dir_exists_nxdir(self, exists, makedirs):
+        exists.return_value = False
+
+        self.storage.ensure_dir_exists(mock.sentinel.path)
+        exists.assert_called_once_with(mock.sentinel.path)
+        makedirs.assert_called_once_with(mock.sentinel.path)
     
     def test_from_conf(self):
         # store original method, we are going to patch the class

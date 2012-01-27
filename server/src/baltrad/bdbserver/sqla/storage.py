@@ -287,7 +287,8 @@ class FileSystemStorage(FileStorage):
         return os.path.join(*elements)
     
     def ensure_dir_exists(self, target):
-        os.makedirs(target)
+        if not os.path.exists(target):
+            os.makedirs(target)
     
     @classmethod
     def from_conf(cls, conf):
