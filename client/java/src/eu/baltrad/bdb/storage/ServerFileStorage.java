@@ -33,7 +33,7 @@ import java.util.*;
  * the files in the filesystem and that storage is accessible from the
  * client side.
  */
-class ServerFileStorage implements LocalStorage {
+public class ServerFileStorage implements LocalStorage {
   private File path;
   private int layers;
   
