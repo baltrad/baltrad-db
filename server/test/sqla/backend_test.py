@@ -39,6 +39,7 @@ class TestSqlaAlchemyBackend(object):
         self.conn.begin.return_value = self.tx
         self.engine = mock.Mock(spec=engine.base.Engine)
         self.engine.driver = "drivername"
+        self.engine.name = "dialectname"
         self.storage = mock.Mock(spec=storage.FileStorage)
         self.backend = backend.SqlAlchemyBackend(
             self.engine,

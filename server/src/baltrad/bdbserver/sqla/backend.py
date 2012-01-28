@@ -47,9 +47,6 @@ def psql_set_extra_float_digits(dbapi_con, con_record):
     cursor.execute("SET extra_float_digits=2")
     dbapi_con.commit()
 
-#    dbapi_con.execute("SET extra_float_digits to 2")
-    pass
-
 class SqlAlchemyBackend(backend.Backend):
     """A backend using sqlalchemy to store metadata in a relational database
     and physical files either in the filesystem or in the database.
@@ -67,7 +64,7 @@ class SqlAlchemyBackend(backend.Backend):
         
         if self._engine.driver == "pysqlite":
             event.listen(self._engine, "connect", force_sqlite_foreign_keys)
-        if self._engine.dialect.name == "postgresql":
+        if self._engine.name == "postgresql":
             event.listen(self._engine, "connect", psql_set_extra_float_digits)
     
     @property
