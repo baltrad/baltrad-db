@@ -42,6 +42,14 @@ def force_sqlite_foreign_keys(dbapi_con, con_record):
     if isinstance(dbapi_con, sqlite3.Connection):
         dbapi_con.execute("pragma foreign_keys=ON")
 
+def psql_set_extra_float_digits(dbapi_con, con_record):
+    cursor = dbapi_con.cursor()
+    cursor.execute("SET extra_float_digits=2")
+    dbapi_con.commit()
+
+#    dbapi_con.execute("SET extra_float_digits to 2")
+    pass
+
 class SqlAlchemyBackend(backend.Backend):
     """A backend using sqlalchemy to store metadata in a relational database
     and physical files either in the filesystem or in the database.
@@ -59,6 +67,8 @@ class SqlAlchemyBackend(backend.Backend):
         
         if self._engine.driver == "pysqlite":
             event.listen(self._engine, "connect", force_sqlite_foreign_keys)
+        if self._engine.dialect.name == "postgresql":
+            event.listen(self._engine, "connect", psql_set_extra_float_digits)
     
     @property
     def driver(self):

@@ -132,7 +132,9 @@ class TestSqlAlchemyBackendItest(object):
     
     @attr("dbtest")
     def test_get_file_metadata(self):
+        float_max = 1.7976931348623157e+308
         meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
+        meta.add_node("/", Attribute("double", float_max))
         h5file = write_metadata(meta)
 
         meta = self.backend.store_file(h5file.name)
@@ -147,6 +149,7 @@ class TestSqlAlchemyBackendItest(object):
         eq_(meta.bdb_source, stored_meta.bdb_source)
         eq_(meta.bdb_stored_date, stored_meta.bdb_stored_date)
         eq_(meta.bdb_stored_time, stored_meta.bdb_stored_time)
+        eq_(float_max, stored_meta.node("/double").value)
     
     @attr("dbtest")
     def test_get_file(self):

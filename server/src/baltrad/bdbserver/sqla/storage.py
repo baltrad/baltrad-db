@@ -161,7 +161,6 @@ class GenericDatabaseFileImporter(DatabaseFileImporter):
 class Psycopg2DatabaseFileImporter(DatabaseFileImporter):
     def store(self, conn, path):
         lobj = conn.connection.lobject(new_file=path)
-        print dir(lobj)
         return lobj.oid
 
     def read(self, conn, oid):
