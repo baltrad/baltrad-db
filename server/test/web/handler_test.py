@@ -1,7 +1,6 @@
 import httplib
 
-from mock import Mock, patch
-
+import mock
 from nose.tools import eq_, raises
 
 from werkzeug.test import EnvironBuilder
@@ -22,7 +21,7 @@ from baltrad.bdbcommon.oh5 import Metadata, Source
 
 class TestFileHandlers(object):
     def setup(self):
-        self.backend = Mock(spec_set=Backend)
+        self.backend = mock.Mock(spec_set=Backend)
         self.ctx = RequestContext(None, self.backend)
     
     def create_request(self, method, data):
@@ -33,7 +32,7 @@ class TestFileHandlers(object):
 
     def test_add_file(self):
         self.ctx.request = self.create_request("POST", data="filecontent")
-        metadata = Mock(spec_set=Metadata)
+        metadata = mock.Mock(spec_set=Metadata)
         self.backend.get_file_metadata.return_value = metadata
         metadata.json_repr.return_value = {"key": "value"}
         metadata.bdb_uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
@@ -74,7 +73,7 @@ class TestFileHandlers(object):
         handler.get_file(self.ctx, uuid)
     
     def test_get_file_metadata(self):
-        metadata = Mock(spec_set=Metadata)
+        metadata = mock.Mock(spec_set=Metadata)
         self.backend.get_file_metadata.return_value = metadata
         metadata.json_repr.return_value = {"key": "value"}
 
@@ -107,7 +106,7 @@ class TestFileHandlers(object):
 
 class TestSourceHandlers(object):
     def setup(self):
-        self.backend = Mock(spec_set=Backend)
+        self.backend = mock.Mock(spec_set=Backend)
         self.ctx = RequestContext(None, self.backend)
 
     def create_request(self, method, data):
@@ -203,7 +202,7 @@ class TestSourceHandlers(object):
 
 class TestQueryHandlers(object):
     def setup(self):
-        self.backend = Mock(spec_set=Backend)
+        self.backend = mock.Mock(spec_set=Backend)
         self.ctx = RequestContext(None, self.backend)
 
     def create_request(self, method, data):
@@ -212,7 +211,7 @@ class TestQueryHandlers(object):
             data=data,
         ).get_request(Request)
     
-    @patch("baltrad.bdbcommon.expr.unwrap_json")
+    @mock.patch("baltrad.bdbcommon.expr.unwrap_json")
     def test_query_file(self, unwrap_json):
         self.ctx.request = self.create_request("POST",
             data=(
@@ -247,7 +246,7 @@ class TestQueryHandlers(object):
             unwrap_json.call_args_list
         )
     
-    @patch("baltrad.bdbcommon.expr.unwrap_json")
+    @mock.patch("baltrad.bdbcommon.expr.unwrap_json")
     def test_query_attribute(self, unwrap_json):
         self.ctx.request = self.create_request("POST",
             data=(
