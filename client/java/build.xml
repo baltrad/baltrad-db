@@ -39,7 +39,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   <property file="etc/develop.properties" />
   <property name="prefix" value="/usr/local" />
 
-  <property name="itest.bdbserver.properties" value="${basedir}/etc/itest_bdbserver.properties" />
+  <property name="itest.bdbserver.properties" value="${basedir}/etc/develop.properties" />
   <property file="${itest.bdbserver.properties}"/>
 
   <echo level="info"

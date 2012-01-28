@@ -1,0 +1,2 @@
+copy etc/example.develop.properties to etc/develop.properties and modify
+to fit your needs.
