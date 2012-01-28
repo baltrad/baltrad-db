@@ -75,7 +75,7 @@ class JsonResponse(BaseResponse,
                    CommonResponseDescriptorsMixin):
     def __init__(self, response, status=httplib.OK):
         if not isinstance(response, basestring):
-            response = json.dumps(response)
+            response = json.dumps(response, allow_nan=False)
         BaseResponse.__init__(
             self, response,
             content_type="application/json",
