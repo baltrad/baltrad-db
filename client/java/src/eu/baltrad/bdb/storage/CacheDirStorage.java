@@ -22,62 +22,70 @@ package eu.baltrad.bdb.storage;
 import eu.baltrad.bdb.db.FileEntry;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.nio.channels.Channels;
+import java.util.*;
 
 /**
  * store a limited amount of files in a local cache.
  */
-public final class CacheDirStorage implements LocalStorage {
-  private final File storageRoot;
-  private final int fileLimit;
-
+public class CacheDirStorage implements LocalStorage {
   private static final int DEFAULT_LIMIT = 1000;
 
-  CacheDirStorage(File storageRoot) {
+  private final File storageRoot;
+  private final FileCache cache;
+
+  public CacheDirStorage(File storageRoot) {
     this(storageRoot, DEFAULT_LIMIT);
   }
 
-  CacheDirStorage(File storageRoot, int fileLimit) {
+  public CacheDirStorage(File storageRoot, int fileLimit) {
     this.storageRoot = storageRoot;
-    this.fileLimit = fileLimit;
+    this.cache = new FileCache(fileLimit);
+  }
+
+  protected CacheDirStorage(File storageRoot, FileCache cache) {
+    this.storageRoot = storageRoot;
+    this.cache = cache;
   }
 
   @Override
   public File store(FileEntry entry, InputStream fileContent) {
-    File entryPath = pathForEntry(entry);
-    try {
-      FileUtils.copyInputStreamToFile(fileContent, entryPath);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    UUID uuid = entry.getUuid();
+    File entryPath = cache.get(uuid);
+    if (entryPath == null) {
+      entryPath = pathForEntry(entry);
+      copyInputStreamToFile(fileContent, entryPath);
+      cache.put(uuid, entryPath);
     }
     return entryPath;
   }
 
   @Override
   public File store(FileEntry entry) {
-    File entryPath = pathForEntry(entry);
+    InputStream contentStream = entry.getContentStream();
     try {
-      InputStream fileContent = entry.getContentStream();
-      try {
-        FileUtils.copyInputStreamToFile(fileContent, entryPath);
-      } finally {
-        fileContent.close();
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+      return store(entry, contentStream);
+    } finally {
+      IOUtils.closeQuietly(contentStream);
     }
-    return entryPath;
   }
 
   @Override
   public void remove(FileEntry entry) {
-    File entryPath = pathForEntry(entry);
-    entryPath.delete();
+    cache.remove(entry.getUuid());
   }
 
   protected File pathForEntry(FileEntry entry) {
     return new File(storageRoot, entry.getUuid().toString());
+  }
+
+  protected void copyInputStreamToFile(InputStream src, File dst) {
+    try {
+      FileUtils.copyInputStreamToFile(src, dst);
+    } catch (IOException e) {
+      throw new RuntimeException("failed to copy InputStream to " + dst, e);
+    }
   }
 }
