@@ -49,6 +49,16 @@ public class CacheDirStorage implements LocalStorage {
     this.storageRoot = storageRoot;
     this.cache = cache;
   }
+  
+  /**
+   * initialize from filesystem.
+   */
+  public void init() {
+    for (String fileName : listStorageRoot()) {
+      UUID uuid = UUID.fromString(fileName);
+      cache.put(uuid, new File(storageRoot, fileName));
+    }
+  }
 
   @Override
   public File store(FileEntry entry, InputStream fileContent) {
@@ -87,5 +97,9 @@ public class CacheDirStorage implements LocalStorage {
     } catch (IOException e) {
       throw new RuntimeException("failed to copy InputStream to " + dst, e);
     }
+  }
+
+  protected String[] listStorageRoot() {
+    return storageRoot.list();
   }
 }

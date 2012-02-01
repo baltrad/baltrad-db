@@ -34,6 +34,7 @@ import java.util.UUID;
 public class CacheDirStorageTest extends EasyMockSupport {
   private static interface CacheDirStorageMethods {
     public void copyInputStreamToFile(InputStream src, File dst);
+    public String[] listStorageRoot();
     public File store(FileEntry entry, InputStream fileContent);
   }
   
@@ -49,6 +50,11 @@ public class CacheDirStorageTest extends EasyMockSupport {
       @Override
       protected void copyInputStreamToFile(InputStream src, File dst) {
         methods.copyInputStreamToFile(src, dst);
+      }
+
+      @Override
+      protected String[] listStorageRoot() {
+        return methods.listStorageRoot();
       }
     };
   }
@@ -130,4 +136,27 @@ public class CacheDirStorageTest extends EasyMockSupport {
     verifyAll();
   }
 
+  @Test
+  public void init() {
+    UUID uuid1 = UUID.fromString("abcdef00-0000-0000-0004-000000000001");
+    UUID uuid2 = UUID.fromString("abcdef00-0000-0000-0004-000000000002");
+    UUID uuid3 = UUID.fromString("abcdef00-0000-0000-0004-000000000003");
+    String[] files = new String[]{
+      uuid1.toString(),
+      uuid2.toString(),
+      uuid3.toString()
+    };
+    expect(methods.listStorageRoot())
+      .andReturn(files);
+    expect(cache.put(uuid1, new File("/path", uuid1.toString())))
+      .andReturn(null);
+    expect(cache.put(uuid2, new File("/path", uuid2.toString())))
+      .andReturn(null);
+    expect(cache.put(uuid3, new File("/path", uuid3.toString())))
+      .andReturn(null);
+    replayAll();
+
+    classUnderTest.init();
+    verifyAll();
+  }
 }
