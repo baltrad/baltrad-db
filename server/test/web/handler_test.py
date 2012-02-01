@@ -13,6 +13,7 @@ from baltrad.bdbserver.backend import (
 from baltrad.bdbserver.web import handler
 from baltrad.bdbserver.web.util import (
     HttpConflict,
+    HttpForbidden,
     HttpNotFound,
     Request,
     RequestContext,
@@ -101,8 +102,13 @@ class TestFileHandlers(object):
         handler.remove_file(self.ctx, uuid)
     
     def test_remove_all_files(self):
+        self.ctx.enable_remove_all_files = True
         response = handler.remove_all_files(self.ctx)
         eq_(httplib.NO_CONTENT, response.status_code)
+    
+    @raises(HttpForbidden)
+    def test_remove_all_files_not_enabled(self):
+        handler.remove_all_files(self.ctx)
 
 class TestSourceHandlers(object):
     def setup(self):

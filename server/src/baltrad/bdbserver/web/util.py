@@ -50,6 +50,7 @@ class Request(BaseRequest,
 
 class RequestContext(object):
     def __init__(self, request, backend):
+        self.enable_remove_all_files = False
         self.request = request
         self.backend = backend
     
@@ -93,3 +94,6 @@ class HttpConflict(HTTPException):
 
 class HttpUnauthorized(HTTPException):
     code = httplib.UNAUTHORIZED
+
+class HttpForbidden(HTTPException):
+    code = httplib.FORBIDDEN

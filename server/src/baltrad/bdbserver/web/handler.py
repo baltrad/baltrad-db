@@ -24,6 +24,7 @@ from baltrad.bdbcommon.oh5 import Source
 
 from .util import (
     HttpConflict,
+    HttpForbidden,
     HttpNotFound,
     JsonResponse,
     NoContentResponse,
@@ -121,6 +122,8 @@ def remove_all_files(ctx):
     :type ctx: :class:`~.util.RequestContext`
     :return: :class:`~.util.NoContentResponse`
     """
+    if not ctx.enable_remove_all_files:
+        raise HttpForbidden()
     ctx.backend.remove_all_files()
     return NoContentResponse()
 

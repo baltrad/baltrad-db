@@ -30,6 +30,7 @@ class Application(object):
     def dispatch_request(self, request):
         adapter = self.url_map.bind_to_environ(request.environ)
         ctx = webutil.RequestContext(request, self.backend)
+        ctx.enable_remove_all_files = self.enable_remove_all_files
         try:
             endpoint, values = adapter.match()
             handler = routing.get_handler(endpoint)
@@ -49,7 +50,11 @@ class Application(object):
         :param conf: a :class:`~.config.Properties` instance to configure
                      from
         """
-        return Application(backend)
+        result = Application(backend)
+        result.enable_remove_all_files = conf.get_boolean(
+            "baltrad.bdb.server.enable_remove_all_files", False
+        )
+        return result
 
 def from_conf(conf):
     """create the entire WSGI application from conf
