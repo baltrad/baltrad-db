@@ -21,6 +21,10 @@ package eu.baltrad.bdb.util;
 
 import eu.baltrad.bdb.db.FileEntry;
 
+/**
+ * @deprecated replaced by FileEntryNamer
+ */
+@Deprecated
 public interface FileNamer {
   /**
    * generate a name for a fileEntry

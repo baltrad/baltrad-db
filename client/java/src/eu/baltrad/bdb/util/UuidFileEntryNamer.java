@@ -22,13 +22,9 @@ package eu.baltrad.bdb.util;
 import eu.baltrad.bdb.db.FileEntry;
 
 /**
- * @deprecated replaced by UuidFileEntryNamer
+ * Give names to FileEntry instances after their UUID.
  */
-@Deprecated
-public class DefaultFileNamer implements FileNamer {
-  /**
-   * generate a name for a fileEntry
-   */
+public class UuidFileEntryNamer implements FileEntryNamer {
   @Override
   public String name(FileEntry fileEntry) {
     return fileEntry.getUuid().toString() + ".h5";

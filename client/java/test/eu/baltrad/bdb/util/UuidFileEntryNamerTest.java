@@ -21,16 +21,34 @@ package eu.baltrad.bdb.util;
 
 import eu.baltrad.bdb.db.FileEntry;
 
-/**
- * @deprecated replaced by UuidFileEntryNamer
- */
-@Deprecated
-public class DefaultFileNamer implements FileNamer {
-  /**
-   * generate a name for a fileEntry
-   */
-  @Override
-  public String name(FileEntry fileEntry) {
-    return fileEntry.getUuid().toString() + ".h5";
+import static org.easymock.EasyMock.*;
+import org.easymock.EasyMockSupport;
+
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+public class UuidFileEntryNamerTest extends EasyMockSupport {
+  private UuidFileEntryNamer classUnderTest;
+  
+  @Before
+  public void setup() {
+    classUnderTest = new UuidFileEntryNamer();
+  }
+
+  @Test
+  public void name() {
+    UUID uuid = UUID.fromString("abcdef00-0000-0000-0004-000000000001");
+    FileEntry fileEntry = createMock(FileEntry.class);
+
+    expect(fileEntry.getUuid())
+      .andReturn(uuid);
+    replayAll();
+    
+    String result = classUnderTest.name(fileEntry);
+    assertEquals("abcdef00-0000-0000-0004-000000000001.h5", result);
+    verifyAll();
   }
 }
