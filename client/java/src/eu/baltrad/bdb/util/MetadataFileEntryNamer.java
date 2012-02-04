@@ -32,6 +32,14 @@ public class MetadataFileEntryNamer implements FileEntryNamer {
     this.metadataNamer = metadataNamer;
   }
 
+  public void setMetadataNamer(MetadataNamer metadataNamer) {
+    this.metadataNamer = metadataNamer;
+  }
+
+  public MetadataNamer getMetadataNamer() {
+    return metadataNamer;
+  }
+
   @Override
   public String name(FileEntry fileEntry) {
     return metadataNamer.name(fileEntry.getMetadata());

@@ -53,6 +53,10 @@ public class TemplateMetadataNamer implements MetadataNamer {
   public void setTemplate(String tmpl) {
     this.tmpl = tmpl;
   }
+
+  public String getTemplate() {
+    return this.tmpl;
+  }
   
   @Override
   public String name(Metadata metadata) {
