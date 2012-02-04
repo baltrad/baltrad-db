@@ -26,13 +26,9 @@ import eu.baltrad.bdb.oh5.MetadataNamer;
  * Give names to FileEntry instances using a MetadataNamer.
  */
 public class MetadataFileEntryNamer implements FileEntryNamer {
-  private MetadataNamer metadataNamer;
+  private final MetadataNamer metadataNamer;
 
   public MetadataFileEntryNamer(MetadataNamer metadataNamer) {
-    this.metadataNamer = metadataNamer;
-  }
-
-  public void setMetadataNamer(MetadataNamer metadataNamer) {
     this.metadataNamer = metadataNamer;
   }
 
