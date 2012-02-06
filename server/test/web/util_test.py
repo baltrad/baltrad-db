@@ -17,6 +17,10 @@
 
 from nose.tools import eq_, ok_, raises
 
+from werkzeug import (
+    test as wztest,
+)
+
 from baltrad.bdbserver.web import util
 
 class TestJsonRequest(object):
@@ -31,3 +35,18 @@ class TestJsonRequest(object):
     @raises(ValueError)
     def test_float_neginf_in_json(self):
         util.JsonResponse(float("-inf"))
+
+class TestHttpUnauthorized(object):
+    def test_adds_www_authenticate_header(self):
+        err =util.HttpUnauthorized(challenge="bdb-keyczar")
+        env = wztest.EnvironBuilder().get_environ()
+        response = err.get_response(env)
+        expected = ["bdb-keyczar"]
+        eq_(expected, response.headers.get_all("www-authenticate"))
+    
+    def test_add_multiple_www_authenticate_headers(self):
+        err =util.HttpUnauthorized(challenge=["bdb-keyczar", "bdb-noauth"])
+        env = wztest.EnvironBuilder().get_environ()
+        response = err.get_response(env)
+        expected = ["bdb-keyczar", "bdb-noauth"]
+        eq_(expected, response.headers.get_all("www-authenticate"))

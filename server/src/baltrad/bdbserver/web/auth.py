@@ -99,7 +99,8 @@ class AuthMiddleware(object):
         if self.authenticate(req):
             return self.app(env, start_response)
         else:
-            return webutil.HttpUnauthorized()(env, start_response)
+            challenge = ["bdb-" + key for key in self._providers]
+            return webutil.HttpUnauthorized(challenge)(env, start_response)
     
     @classmethod
     def from_conf(cls, app, conf):

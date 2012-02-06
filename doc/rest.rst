@@ -63,6 +63,12 @@ where *KEYNAME* is the name of the key the server will use to look up a key
 for verifying the signature and *SIGNATURE* is the base64-encoded signature
 from :meth:`keyczar.keyczar.Signer.Sign`.
 
+On unsuccesful authentication, a *401 Unauthorized* response will be sent,
+with available authentication providers in *WWW-Authenticate* header, one
+provider per header::
+
+  WWW-Authenticate: bdb-keyczar
+
 Authorization
 -------------
 

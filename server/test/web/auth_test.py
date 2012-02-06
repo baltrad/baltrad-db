@@ -194,8 +194,10 @@ class TestAuthMiddleware(object):
         unauthorized_ctor.return_value = unauthorized
         self.authmw.authenticate = mock.Mock()
         self.authmw.authenticate.return_value = False
+        self.authmw.add_provider("mock", mock.sentinel.auth_provider)
 
         self.authmw(mock.sentinel.env, mock.sentinel.start_response)
+        unauthorized_ctor.assert_called_once_with(["bdb-mock"])
         unauthorized.assert_called_once_with(
             mock.sentinel.env, mock.sentinel.start_response
         )

@@ -93,7 +93,24 @@ class HttpConflict(HTTPException):
     code = httplib.CONFLICT
 
 class HttpUnauthorized(HTTPException):
+    """401 Unauthorized
+
+    :param challenge: a string to reply in *www-authenticate* header. If given
+                      as a sequence of strings, multiple *www-authenticate*
+                      headers will be set in the response.
+    """
     code = httplib.UNAUTHORIZED
+
+    def __init__(self, challenge):
+        if isinstance(challenge, basestring):
+            challenge = [challenge]
+        self._challenges = challenge
+    
+    def get_headers(self, environ):
+        headers = HTTPException.get_headers(self, environ)
+        for challenge in self._challenges:
+            headers.append(("www-authenticate", challenge))
+        return headers
 
 class HttpForbidden(HTTPException):
     code = httplib.FORBIDDEN
