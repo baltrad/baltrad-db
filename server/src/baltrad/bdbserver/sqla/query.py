@@ -66,6 +66,11 @@ class ExprToSql(object):
             "file:uuid": schema.files.c.uuid,
             "file:stored_date": schema.files.c.stored_date,
             "file:stored_time": schema.files.c.stored_time,
+            "_bdb/size": schema.files.c.size,
+            "_bdb/source_name": schema.sources.c.name,
+            "_bdb/stored_date": schema.files.c.stored_date,
+            "_bdb/stored_time": schema.files.c.stored_time,
+            "_bdb/uuid" : schema.files.c.uuid,
             "what/object": schema.files.c.what_object,
             "what/date": schema.files.c.what_date,
             "what/time": schema.files.c.what_time,
@@ -77,9 +82,12 @@ class ExprToSql(object):
         return lhs.like(rhs.replace("*", "%"))
     
     def get_attr_column(self, name, type_):
-        if name.startswith("what/source:"):
+        if name.startswith("what/source:") or name.startswith("_bdb/source:"):
             column = self.get_source_attr_column(name)
         elif (name in self._mapper):
+            # XXX: rewrite this
+            if name == "_bdb/source_name" and not self.from_clause_contains(schema.sources):
+                self.from_clause = self.from_clause.join(schema.sources)
             column = self.get_specialized_attr_column(name)
         else:
             column = self.get_plain_attr_column(name, type_)
