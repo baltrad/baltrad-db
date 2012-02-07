@@ -55,7 +55,12 @@ class ExprToSql(object):
 
         evaluator.add_procedure("date", lambda *args: datetime.date(*args))
         evaluator.add_procedure("time", lambda *args: datetime.time(*args))
-        evaluator.add_procedure("datetime", lambda *args: datetime.datetime(*args))
+        evaluator.add_procedure(
+            "datetime", lambda *args: datetime.datetime(*args)
+        )
+        evaluator.add_procedure(
+            "interval", lambda *args: datetime.timedelta(*args)
+        )
 
         evaluator.add_procedure("count", sql.func.count)
         evaluator.add_procedure("max", sql.func.max)

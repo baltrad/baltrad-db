@@ -15,9 +15,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-from baltrad.bdbcommon import expr
+import datetime
 
 from nose.tools import eq_, ok_, assert_not_equal as ne_
+
+from baltrad.bdbcommon import expr
 
 def test_symbol_ctor():
     result = expr.symbol("foo")
@@ -58,3 +60,20 @@ def test_wrap_json():
         ["list", "PVOL", "SCAN"]
     ]
     eq_(expected, expr.wrap_json(xpr))
+
+def test_literal_date():
+    result = expr.literal(datetime.date(2011, 12, 13))
+    eq_([expr.symbol("date"), 2011, 12, 13], result)
+
+def test_literal_time():
+    result = expr.literal(datetime.time(13, 14, 15))
+    eq_([expr.symbol("time"), 13, 14, 15], result)
+
+def test_literal_datetime():
+    result = expr.literal(datetime.datetime(2011, 12, 13, 14, 15, 16))
+    eq_([expr.symbol("datetime"), 2011, 12, 13, 14, 15, 16], result)
+
+def test_literal_timedelta():
+    result = expr.literal(datetime.timedelta(123, 456))
+    eq_([expr.symbol("interval"), 123, 456], result)
+

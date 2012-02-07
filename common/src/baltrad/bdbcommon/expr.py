@@ -67,6 +67,8 @@ def literal(lit):
         return [symbol("date"), lit.year, lit.month, lit.day]
     elif isinstance(lit, datetime.time):
         return [symbol("time"), lit.hour, lit.minute, lit.second]
+    elif isinstance(lit, datetime.timedelta):
+        return [symbol("interval"), lit.days, lit.seconds]
     return lit
 
 def symbol(value):

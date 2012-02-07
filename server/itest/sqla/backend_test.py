@@ -530,6 +530,29 @@ class TestFileQuery(object):
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+
+    @attr("dbtest")
+    def test_filter_by_stored_and_nominal_datetime_interval(self):
+        # XXX the difference between the stored and nominal time in the
+        # fixtures is a bit big for sanely testing this. They should be
+        # moved closer together.
+        stored_dt_attr = expr.add(
+            expr.attribute("_bdb/stored_date", "date"),
+            expr.attribute("_bdb/stored_time", "time")
+        )
+        nominal_dt_attr = expr.add(
+            expr.attribute("what/date", "date"),
+            expr.attribute("what/time", "time")
+        )
+        self.query.filter = expr.lt(
+            expr.sub(stored_dt_attr, nominal_dt_attr),
+            expr.literal(datetime.timedelta(days=4017, seconds=86342))
+        )
+        result = backend.execute_file_query(self.query)
+        eq_(3, len(result)) 
+        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
     
     @attr("dbtest")
     def test_filter_by_file_size(self):
