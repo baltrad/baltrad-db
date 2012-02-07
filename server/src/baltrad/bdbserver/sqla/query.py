@@ -71,7 +71,7 @@ class ExprToSql(object):
             "file:uuid": schema.files.c.uuid,
             "file:stored_date": schema.files.c.stored_date,
             "file:stored_time": schema.files.c.stored_time,
-            "_bdb/size": schema.files.c.size,
+            "_bdb/file_size": schema.files.c.size,
             "_bdb/source_name": schema.sources.c.name,
             "_bdb/stored_date": schema.files.c.stored_date,
             "_bdb/stored_time": schema.files.c.stored_time,

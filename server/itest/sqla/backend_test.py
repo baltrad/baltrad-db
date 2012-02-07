@@ -557,7 +557,7 @@ class TestFileQuery(object):
     @attr("dbtest")
     def test_filter_by_file_size(self):
         self.query.filter = expr.le(
-            expr.attribute("_bdb/size", "string"),
+            expr.attribute("_bdb/file_size", "string"),
             expr.literal(3000)
         )
 
