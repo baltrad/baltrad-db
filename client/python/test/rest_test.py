@@ -106,7 +106,6 @@ class TestRestfulFileResult(object):
     
     def test_size(self):
         eq_(2, self.result.size())
-
     
     def test_get_file_entry(self):
         self.result.next()
@@ -151,6 +150,47 @@ class TestRestfulFileResult(object):
         self.result.next()
         self.result.get_uuid()
         
+
+class TestRestfulAttributeResult(object):
+    def setup(self):
+        self.result = rest.RestfulAttributeResult(
+            rows=[
+                {"uuid": "00000000-0000-0000-0004-000000000001"},
+                {"uuid": "00000000-0000-0000-0004-000000000002"},
+            ]
+        )
+    
+    def test_next(self):
+        ok_(self.result.next())
+        ok_(self.result.next())
+        ok_(not self.result.next())
+        ok_(not self.result.next())
+    
+    def test_size(self):
+        eq_(2, self.result.size())
+    
+    def test_get(self):
+        self.result.next()
+        eq_("00000000-0000-0000-0004-000000000001", self.result.get("uuid"))
+        self.result.next()
+        eq_("00000000-0000-0000-0004-000000000002", self.result.get("uuid"))
+    
+    @raises(LookupError)
+    def test_get_invalid_key(self):
+        self.result.next()
+        self.result.get("invalid key")
+    
+    @raises(LookupError)
+    def test_get_before_next(self):
+        self.result.get("uuid")
+    
+    @raises(LookupError)
+    def test_get_after_exhaustion(self):
+        self.result.next()
+        self.result.next()
+        self.result.next()
+        self.result.get("uuid")
+
 class TestRestfulDatabase(object):
     def setup(self):
         self.auth = mock.Mock(spec=rest.Auth)
@@ -180,6 +220,31 @@ class TestRestfulDatabase(object):
         )
         self.db.execute_request.assert_called_once_with(mock.sentinel.request)
         ok_(isinstance(result, rest.RestfulFileResult))
+        eq_(2, result.size())
+
+    @mock.patch("baltrad.bdbclient.rest.Request")
+    def test_execute_attribute_query(self, request_ctor):
+        response = mock.Mock()
+        response.status = httplib.OK
+        response.read.return_value = ('{"rows": ['
+            '{"uuid": "00000000-0000-0000-0004-000000000001"},'
+            '{"uuid": "00000000-0000-0000-0004-000000000002"}'
+        ']}')
+        request_ctor.return_value = mock.sentinel.request
+        self.db.execute_request.return_value = response
+        query = mock.Mock(spec=db.AttributeQuery)
+        query.to_json.return_value = mock.sentinel.query_json
+
+        result = self.db.execute_attribute_query(query)
+        request_ctor.assert_called_once_with(
+            "POST", "/query/attribute",
+            data=mock.sentinel.query_json,
+            headers={
+                "content-type": "application/json"
+            }
+        )
+        self.db.execute_request.assert_called_once_with(mock.sentinel.request)
+        ok_(isinstance(result, rest.RestfulAttributeResult))
         eq_(2, result.size())
     
     @mock.patch("httplib.HTTPConnection")

@@ -245,6 +245,27 @@ class RestfulDatabase(db.Database):
                 "Unhandled response code: %s" % response.status
             )
     
+    def execute_attribute_query(self, query):
+        request = Request(
+            "POST", "/query/attribute",
+            data=query.to_json(),
+            headers={
+                "content-type": "application/json"
+            }
+        )
+        
+        response = self.execute_request(request)
+
+        if response.status == httplib.OK:
+            return RestfulAttributeResult(
+                rows=json.loads(response.read())["rows"]
+            )
+        else:
+            raise db.DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
+
+    
     def execute_request(self, req):
         conn = httplib.HTTPConnection(
             self._server_url.hostname,
@@ -283,6 +304,27 @@ class RestfulFileResult(db.FileResult):
             raise LookupError("RestfulFileResult exhausted")
         return self._row["uuid"]
 
+class RestfulAttributeResult(db.AttributeResult):
+    def __init__(self, rows=[]):
+        self._rows = rows
+        self._iter = iter(rows)
+        self._row = None
+
+    def next(self):
+        self._row = next(self._iter, None)
+        return self._row is not None
+
+    def size(self):
+        return len(self._rows)
+    
+    def get(self, key):
+        if not self._row:
+            raise LookupError("RestfulAttributeResult exhausted")
+        return self._row[key]
+    
+    def close(self):
+        pass
+    
 class Auth(object):
     __meta__ = abc.ABCMeta
 

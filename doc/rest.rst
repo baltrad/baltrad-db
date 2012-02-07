@@ -302,12 +302,34 @@ Query for metadata attributes
     Content-Length: nnn
 
     {
-      "fetch": {"uuid": ["attribute", "file:uuid", "string"]},
-      "filter": ["eq", ["attribute", "what/object", "string"], "PVOL"],
-      "order": [["desc", ["attribute", "file:uuid", "string"]]],
+      "fetch": {
+        "uuid": ["list", ["symbol", "attr"],
+                         "file:uuid",
+                         "string"
+        ]
+      },
+      "filter": ["list", ["symbol", "="],
+                         ["list", ["symbol", "attr"],
+                                  "what/object",
+                                  "string"
+                         ],
+                         "PVOL"
+      ],
+      "order": [
+        ["list", ["symbol", "desc"],
+                 ["list", ["symbol", "attr"],
+                          "file:uuid",
+                          "string"
+                 ]
+        ]
+      ],
+      "group": [
+        ["list", ["symbol", "attr"], "file:uuid", "string"]
+      ],
       "limit": 10,
-      "skip": 20
+      "skip": 20,
     }
+
 
 **Response**
   :Headers: Content-Length, Content-Type

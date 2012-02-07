@@ -178,3 +178,84 @@ class FileResult(object):
         entry and the uuid from there.
         """
         raise NotImplementedError()
+
+class AttributeQuery(object):
+    def __init__(self):
+        self.filter = None
+        self.order = []
+        self.group = []
+        self.limit = None
+        self.skip = None
+        self._fetch = {}
+    
+    def fetch(self, key, expression):
+        """fetch an *expression*, labeling it with a *key*
+
+        :param key: the key to label this expression with, the value
+                    can be accessed from the result with this key.
+        :param expression: the expression to fetch
+        """
+        self._fetch[key] = expression
+    
+    def append_filter(self, expression):
+        """append a filter to this query
+
+        :param expression: the expression to append
+        """
+        if self.filter is None:
+            self.filter = expression
+        else:
+            self.filter = expr.and_(self.filter, expression)
+    
+    def to_json(self):
+        json_repr = {}
+        fetch = {}
+        for key, xpr in self._fetch.iteritems():
+            fetch[key] = expr.wrap_json(xpr)
+        json_repr["fetch"] = fetch
+        if self.filter:
+            json_repr["filter"] = expr.wrap_json(self.filter)
+        json_repr["order"] = [expr.wrap_json(o) for o in self.order]
+        json_repr["group"] = [expr.wrap_json(g) for g in self.group]
+        if self.limit:
+            json_repr["limit"] = self.limit
+        if self.skip:
+            json_repr["skip"] = self.skip
+        return json.dumps(json_repr)
+
+    
+class AttributeResult(object):
+    """The result of executing a :class:`AttributeQuery`
+
+    intended usage::
+
+        >>> while result.next():
+        ...     uuid = result.get("uuid")
+    """
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def next(self):
+        """move to next row, return `True` if successful
+        """
+        raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def size(self):
+        """return the size of the result set
+        """
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get(self, key):
+        """get a fetched value identified by `key` in current row
+
+        :raise: `LookupError` when exhausted or key not found
+        """
+        raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def close(self):
+        """explicitly close this result, releasing any resources
+        """
+        raise NotImplementedError()
