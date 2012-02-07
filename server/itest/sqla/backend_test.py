@@ -505,7 +505,7 @@ class TestFileQuery(object):
                 expr.attribute("what/time", "time")
             ),
             expr.literal(datetime.datetime(2000, 1, 1, 12, 1)),
-            expr.literal(datetime.datetime(2001, 1, 1, 12, 0))
+            expr.literal(datetime.datetime(2001, 1, 1, 12, 1))
         )
 
         result = backend.execute_file_query(self.query)
@@ -522,7 +522,7 @@ class TestFileQuery(object):
                 expr.attribute("_bdb/stored_time", "time")
             ),
             expr.literal(datetime.datetime(2011, 1, 1, 12, 0, 2)),
-            expr.literal(datetime.datetime(2011, 1, 1, 12, 0, 4))
+            expr.literal(datetime.datetime(2011, 1, 1, 12, 0, 5))
         )
 
         result = backend.execute_file_query(self.query)
@@ -777,7 +777,7 @@ class TestAttributeQuery(object):
                 expr.attribute("what/time", "time")
             ),
             expr.literal(datetime.datetime(2000, 1, 1, 12, 1)),
-            expr.literal(datetime.datetime(2001, 1, 1, 12, 0))
+            expr.literal(datetime.datetime(2001, 1, 1, 12, 1))
         )
 
         result = self.query.execute(self.backend)

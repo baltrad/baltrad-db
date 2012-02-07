@@ -88,7 +88,7 @@ def ge(lhs, rhs):
     return binary_operator("<", lhs, rhs)
 
 def between(xpr, low, high):
-    return and_(le(low, xpr), le(xpr, high))
+    return and_(le(low, xpr), lt(xpr, high))
 
 def like(xpr, pattern):
     return binary_operator("like", xpr, pattern)
