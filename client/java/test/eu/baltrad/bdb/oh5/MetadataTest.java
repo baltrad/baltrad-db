@@ -106,4 +106,42 @@ public class MetadataTest extends EasyMockSupport {
   public void getNode_root() {
     assertSame(root, classUnderTest.getNode("/"));
   }
+
+  @Test
+  public void getSource() {
+    classUnderTest = new Metadata();
+    classUnderTest.addNode("/", new Group("what"));
+    classUnderTest.addNode("/what", new Attribute("source", "WMO:12345"));
+
+    Source source = classUnderTest.getSource();
+    assertNotNull(source);
+    assertEquals("12345", source.get("WMO"));
+  }
+
+  @Test
+  public void getSource_noAttribute() {
+    classUnderTest = new Metadata();
+    assertNull(classUnderTest.getSource());
+  }
+
+  @Test
+  public void getBdbSource_noAttribute() {
+    classUnderTest = new Metadata();
+    assertNull(classUnderTest.getBdbSource());
+  }
+
+  @Test
+  public void getWhatSource() {
+    classUnderTest = new Metadata();
+    classUnderTest.addNode("/", new Group("what"));
+    classUnderTest.addNode("/what", new Attribute("source", "WMO:12345"));    
+
+    assertEquals("WMO:12345", classUnderTest.getWhatSource());
+  }
+
+  @Test
+  public void getWhatSource_noAttribute() {
+    classUnderTest = new Metadata();
+    assertNull(classUnderTest.getWhatSource());
+  }
 }

@@ -81,16 +81,17 @@ public final class FindOh5Attribute implements Procedure {
     AttributeType attrType = AttributeType.valueOf(attrTypeString.toUpperCase());
 
     if (attrPath.startsWith("what/source:")) {
-      return findSource(attrPath);
+      return findSource(attrPath, metadata.getSource());
+    } else if (attrPath.startsWith("_bdb/source:")) {
+      return findSource(attrPath, metadata.getBdbSource());
     } else {
       return findPlain(attrPath, attrType);
     }
   }
 
-  protected ListExpression findSource(String attrPath) {
+  protected ListExpression findSource(String attrPath, Source source) {
     ListExpression result = new ListExpression();
     String sourceKey = attrPath.substring(attrPath.lastIndexOf(':') + 1);
-    Source source = metadata.getSource();
     if (source.has(sourceKey)) {
       result.add(new StringExpression(source.get(sourceKey)));
     }

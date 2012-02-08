@@ -45,6 +45,8 @@ public class FindOh5AttributeTest {
     metadata.addNode("/dataset1", new Group("where"));
     metadata.addNode("/dataset1/where", new Attribute("xsize", 3));
     metadata.addNode("/dataset1/where", new Attribute("ysize", 4));
+    metadata.addNode("/", new Group("_bdb"));
+    metadata.addNode("/_bdb", new Attribute("source", "WMO:54321"));
   }
 
   @Before
@@ -85,6 +87,19 @@ public class FindOh5AttributeTest {
   @Test
   public void findAll_what_sourceNOD() {
     ListExpression result = classUnderTest.findAll("what/source:NOD", "string");
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void findAll_bdb_sourceWMO() {
+    ListExpression result = classUnderTest.findAll("_bdb/source:WMO", "string");
+    assertEquals(1, result.size());
+    assertEquals("54321", result.get(0).toString());
+  }
+
+  @Test
+  public void findAll_bdb_sourceNOD() {
+    ListExpression result = classUnderTest.findAll("_bdb/source:NOD", "string");
     assertEquals(0, result.size());
   }
 

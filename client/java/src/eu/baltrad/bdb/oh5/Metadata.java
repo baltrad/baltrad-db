@@ -80,16 +80,38 @@ public class Metadata implements Iterable<Node> {
 
   /**
    * parse a Source instance from /what/source
+   *
+   * @return the parsed source or null if /what/source is not in the metadata
    */
   public Source getSource() {
-    return Source.fromString(getWhatSource());
+    String sourceStr = getWhatSource();
+    if (sourceStr != null)
+      return Source.fromString(sourceStr);
+    return null;
+  }
+
+  /**
+   * parse a Source instance from /_bdb/source
+   *
+   * @return the parsed source or null if /what/source is not in the metadata
+   */
+  public Source getBdbSource() {
+    Attribute srcAttr = getAttribute("/_bdb/source");
+    if (srcAttr == null)
+      return null;
+    return Source.fromString(srcAttr.toString());
   }
   
   /**
    * access the string stored in /what/source
+   *
+   * @return the string or null if the attribute doesn't exist
    */
   public String getWhatSource() {
-    return getAttribute("/what/source").toString();
+    Attribute attr = getAttribute("/what/source");
+    if (attr == null)
+      return null;
+    return attr.toString();
   }
   
   /**
