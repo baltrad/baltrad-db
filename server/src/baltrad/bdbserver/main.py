@@ -96,7 +96,6 @@ def configure_logging(opts):
         logger.addHandler(logging.FileHandler(opts.logfile))
     
 def run_server():
-    sys.excepthook = excepthook
     optparser = create_optparser()
     optparser.add_option(
         "--foreground", action="store_true",
@@ -144,6 +143,7 @@ def run_server():
 
     with daemon_ctx:
         configure_logging(opts)
+        sys.excepthook = excepthook
         application = app.from_conf(conf)
         app.serve(server_uri, application)
 
