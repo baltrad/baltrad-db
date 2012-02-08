@@ -1,6 +1,4 @@
-from copy import copy
 import logging
-import optparse
 import os
 import sys
 
@@ -8,6 +6,7 @@ import daemon
 from daemon.pidfile import TimeoutPIDLockFile
 import lockfile
 
+from baltrad.bdbcommon import optparse
 from baltrad.bdbserver import backend, config
 from baltrad.bdbserver.web import app
 
@@ -17,16 +16,8 @@ def excepthook(*exc_info):
     logger.error("unhandled exception", exc_info=exc_info)
     sys.exit(1)
 
-def check_path(option, opt, value):
-    return os.path.abspath(value)
-
-class Option(optparse.Option):
-    TYPES = optparse.Option.TYPES + ("path",)
-    TYPE_CHECKER = copy(optparse.Option.TYPE_CHECKER)
-    TYPE_CHECKER["path"] = check_path
-
 def create_optparser():
-    optparser = optparse.OptionParser(option_class=Option)
+    optparser = optparse.create_parser()
     optparser.set_usage(
         "%s [--conf=CONFFILE] [ARGS]" % (
             os.path.basename(sys.argv[0])
@@ -60,7 +51,6 @@ def run_create():
     optparser = create_optparser()
 
     opts, args = optparser.parse_args()
-
     config = read_config(opts.conffile)
 
     backend = create_backend(config)
@@ -113,7 +103,6 @@ def run_server():
     )
 
     opts, args = optparser.parse_args()
-
     conf = read_config(opts.conffile)
 
     pidfile=TimeoutPIDLockFile(opts.pidfile, acquire_timeout=0)

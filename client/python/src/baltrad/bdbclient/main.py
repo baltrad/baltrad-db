@@ -15,31 +15,12 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
 import logging
-import optparse
 import os
 import sys
-import copy
 
+from baltrad.bdbcommon import optparse
 from baltrad.bdbclient import cmd, rest
-
-def check_iso8601_datetime(option, opt, value):
-    try:
-        return datetime.datetime.strptime(value, "%Y%m%dT%H%M%SZ")
-    except ValueError:
-        raise optparse.OptionValueError(
-            "invalid ISO8601 datetime in %s: %s" % (option, value)
-        )
-
-def check_list(option, opt, value):
-    return value.split(",")
-
-class Option(optparse.Option):
-    TYPES = optparse.Option.TYPES + ("iso8601_datetime", "list",)
-    TYPE_CHECKER = copy.copy(optparse.Option.TYPE_CHECKER)
-    TYPE_CHECKER["iso8601_datetime"] = check_iso8601_datetime
-    TYPE_CHECKER["list"] = check_list
 
 def extract_command(args):
     command = None
@@ -52,7 +33,7 @@ def extract_command(args):
     return command, result_args
 
 def run():
-    optparser = optparse.OptionParser(option_class=Option)
+    optparser = optparse.create_parser()
     optparser.set_usage(
         "%s COMMAND [--url=SERVER_URL] [ARGS]" % (
             os.path.basename(sys.argv[0])
