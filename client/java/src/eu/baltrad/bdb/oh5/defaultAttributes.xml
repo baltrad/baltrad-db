@@ -199,6 +199,7 @@
   <attribute name="file:hash"          type="string" />
   <attribute name="file:stored_date"   type="date" />
   <attribute name="file:stored_time"   type="time" />
+
   <attribute name="what/source:_name"  type="string" />
   <attribute name="what/source:WMO"    type="string" />
   <attribute name="what/source:RAD"    type="string" />
@@ -206,4 +207,18 @@
   <attribute name="what/source:PLC"    type="string" />
   <attribute name="what/source:CTY"    type="string" />
   <attribute name="what/source:CMT"    type="string" />
+
+  <attribute name="_bdb/file_size"     type="long" />
+  <attribute name="_bdb/hash"          type="string" />
+  <attribute name="_bdb/stored_date"   type="date" />
+  <attribute name="_bdb/stored_time"   type="time" />
+  <attribute name="_bdb/uuid"          type="string" />
+
+  <attribute name="_bdb/source_name"   type="string" />
+  <attribute name="_bdb/source:WMO"    type="string" />
+  <attribute name="_bdb/source:RAD"    type="string" />
+  <attribute name="_bdb/source:ORG"    type="string" />
+  <attribute name="_bdb/source:PLC"    type="string" />
+  <attribute name="_bdb/source:CTY"    type="string" />
+  <attribute name="_bdb/source:CMT"    type="string" />
 </attributes>
