@@ -379,11 +379,11 @@ def _get_attribute_sql_values(node):
     values = {}
     value = node.value
     if isinstance(value, (long, int)):
-        values["value_int"] = value
+        values["value_long"] = value
     elif isinstance(value, float):
         values["value_double"] = value
     elif isinstance(value, basestring):
-        values["value_str"] = value
+        values["value_string"] = value
         date = _parse_date(value)
         if date:
             values["value_date"] = date
@@ -392,7 +392,7 @@ def _get_attribute_sql_values(node):
             values["value_time"] = time
         boolean = _parse_boolean(value)
         if boolean is not None:
-            values["value_bool"] = boolean
+            values["value_boolean"] = boolean
     elif isinstance(value, list):
         logger.error(
             "ignoring array attribute value at %s", node.path()
@@ -445,9 +445,9 @@ def _create_node_from_row(row):
     name = row[schema.nodes.c.name]
     if type_ == oh5.Attribute.type_id:
         node = oh5.Attribute(name, None)
-        node.value = row[schema.attribute_values.c.value_str]
+        node.value = row[schema.attribute_values.c.value_string]
         if node.value is None:
-            node.value = row[schema.attribute_values.c.value_int]
+            node.value = row[schema.attribute_values.c.value_long]
         if node.value is None:
             node.value = row[schema.attribute_values.c.value_double]
         return node

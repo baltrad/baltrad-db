@@ -469,7 +469,7 @@ class TestFileQuery(object):
     @attr("dbtest")
     def test_filter_by_xsize(self):
         self.query.filter = expr.eq(
-            expr.attribute("where/xsize", "int"),
+            expr.attribute("where/xsize", "long"),
             expr.literal(2)
         )
 
@@ -482,11 +482,11 @@ class TestFileQuery(object):
     def test_file_by_xsize_or_ysize(self):
         self.query.filter = expr.or_(
             expr.eq(
-                expr.attribute("where/xsize", "int"),
+                expr.attribute("where/xsize", "long"),
                 expr.literal(1)
             ),
             expr.eq(
-                expr.attribute("where/ysize", "int"),
+                expr.attribute("where/ysize", "long"),
                 expr.literal(2)
             )
         )
@@ -557,7 +557,7 @@ class TestFileQuery(object):
     @attr("dbtest")
     def test_filter_by_file_size(self):
         self.query.filter = expr.le(
-            expr.attribute("_bdb/file_size", "string"),
+            expr.attribute("_bdb/file_size", "long"),
             expr.literal(3000)
         )
 
@@ -629,7 +629,7 @@ class TestFileQuery(object):
     def test_filter_by_ysize_not_in(self):
         self.query.filter = expr.not_(
             expr.in_(
-                expr.attribute("where/ysize", "int"),
+                expr.attribute("where/ysize", "long"),
                 expr.literal([2, 4])
             )
         )
@@ -642,7 +642,7 @@ class TestFileQuery(object):
     @attr("dbtest")
     def test_order_by(self):
         self.query.order = [
-            expr.desc(expr.attribute("where/xsize", "int"))
+            expr.desc(expr.attribute("where/xsize", "long"))
         ]
 
         result = backend.execute_file_query(self.query)
@@ -740,10 +740,10 @@ class TestAttributeQuery(object):
     @attr("dbtest")
     def test_fetch_xsize_filter_by_xsize(self):
         self.query.fetch = {
-            "xsize": expr.attribute("where/xsize", "int")
+            "xsize": expr.attribute("where/xsize", "long")
         }
         self.query.filter = expr.eq(
-            expr.attribute("where/xsize", "int"),
+            expr.attribute("where/xsize", "long"),
             expr.literal(2)
         )
 
@@ -759,11 +759,11 @@ class TestAttributeQuery(object):
         }
         self.query.filter = expr.or_(
             expr.eq(
-                expr.attribute("where/xsize", "int"),
+                expr.attribute("where/xsize", "long"),
                 expr.literal(1)
             ),
             expr.eq(
-                expr.attribute("where/ysize", "int"),
+                expr.attribute("where/ysize", "long"),
                 expr.literal(2)
             )
         )
@@ -781,7 +781,7 @@ class TestAttributeQuery(object):
         }
         self.query.distinct = True
         self.query.filter = expr.eq(
-            expr.attribute("where/xsize", "int"),
+            expr.attribute("where/xsize", "long"),
             expr.literal(3)
         )
 
@@ -885,7 +885,7 @@ class TestAttributeQuery(object):
     @attr("dbtest")
     def test_order_by(self):
         self.query.fetch = {
-            "uuid": expr.attribute("_bdb/uuid", "int")
+            "uuid": expr.attribute("_bdb/uuid", "long")
         }
         self.query.order = [
             expr.desc(
@@ -927,7 +927,7 @@ class TestAttributeQuery(object):
     @attr("dbtest")
     def test_fetch_max_xsize(self):
         self.query.fetch = {
-            "max_xsize": expr.max(expr.attribute("where/xsize", "int"))
+            "max_xsize": expr.max(expr.attribute("where/xsize", "long"))
         }
 
         result = self.query.execute(self.backend)
@@ -937,7 +937,7 @@ class TestAttributeQuery(object):
     @attr("dbtest")
     def test_fetch_count_ysize(self):
         self.query.fetch = {
-            "count_ysize" : expr.count(expr.attribute("where/ysize", "int"))
+            "count_ysize" : expr.count(expr.attribute("where/ysize", "long"))
         }
 
         result = self.query.execute(self.backend)
@@ -947,7 +947,7 @@ class TestAttributeQuery(object):
     @attr("dbtest")
     def test_fetch_min_ysize_filter_by_what_object(self):
         self.query.fetch = {
-            "min_ysize" : expr.min(expr.attribute("where/ysize", "int"))
+            "min_ysize" : expr.min(expr.attribute("where/ysize", "long"))
         }
         self.query.filter = expr.eq(
             expr.attribute("what/object", "string"),
@@ -962,7 +962,7 @@ class TestAttributeQuery(object):
     def test_fetch_sum_xsize_group_by_source_name(self):
         self.query.fetch = {
             "source": expr.attribute("_bdb/source_name", "string"),
-            "sum_xsize": expr.sum(expr.attribute("where/xsize", "int"))
+            "sum_xsize": expr.sum(expr.attribute("where/xsize", "long"))
         }
         self.query.group = [
             expr.attribute("_bdb/source_name", "string")
@@ -977,7 +977,7 @@ class TestAttributeQuery(object):
     def test_fetch_sum_xsize_group_by_source_name_filter_by_date(self):
         self.query.fetch = {
             "source": expr.attribute("_bdb/source_name", "string"),
-            "sum_xsize": expr.sum(expr.attribute("where/xsize", "int"))
+            "sum_xsize": expr.sum(expr.attribute("where/xsize", "long"))
         }
         self.query.group = [
             expr.attribute("_bdb/source_name", "string")
@@ -996,7 +996,7 @@ class TestAttributeQuery(object):
     def test_fetch_max_xsize_group_by_source_name(self):
         self.query.fetch = {
             "source": expr.attribute("_bdb/source_name", "string"),
-            "max_xsize": expr.max(expr.attribute("where/xsize", "int"))
+            "max_xsize": expr.max(expr.attribute("where/xsize", "long"))
         }
         self.query.group = [
             expr.attribute("_bdb/source_name", "string")
@@ -1011,8 +1011,8 @@ class TestAttributeQuery(object):
     def test_fetch_max_xsize_min_ysize_group_by_source_name(self):
         self.query.fetch = {
             "source": expr.attribute("_bdb/source_name", "string"),
-            "max_xsize": expr.max(expr.attribute("where/xsize", "int")),
-            "min_ysize": expr.min(expr.attribute("where/ysize", "int"))
+            "max_xsize": expr.max(expr.attribute("where/xsize", "long")),
+            "min_ysize": expr.min(expr.attribute("where/ysize", "long"))
         }
         self.query.group = [
             expr.attribute("_bdb/source_name", "string")
@@ -1060,7 +1060,7 @@ class TestAttributeQuery(object):
         }
         self.query.filter = expr.not_(
             expr.in_(
-                expr.attribute("where/xsize", "int"),
+                expr.attribute("where/xsize", "long"),
                 expr.literal([2, 3])
             )
         )

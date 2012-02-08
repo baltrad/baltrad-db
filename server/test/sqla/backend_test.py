@@ -194,7 +194,7 @@ def test_attribute_sql_values_str():
     attr = oh5.Attribute("name", "strval")
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_str": "strval"
+        "value_string": "strval"
     }
     eq_(expected, result)
 
@@ -202,7 +202,7 @@ def test_attribute_sql_values_int():
     attr = oh5.Attribute("name", 123)
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_int": 123
+        "value_long": 123
     }
     eq_(expected, result)
 
@@ -210,7 +210,7 @@ def test_attribute_sql_values_long():
     attr = oh5.Attribute("name", 123L)
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_int": 123L
+        "value_long": 123L
     }
     eq_(expected, result)
 
@@ -226,7 +226,7 @@ def test_attribute_sql_values_date():
     attr = oh5.Attribute("name", "20111213")
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_str": "20111213",
+        "value_string": "20111213",
         "value_date": datetime.date(2011, 12, 13)
     }
     eq_(expected, result)
@@ -235,7 +235,7 @@ def test_attribute_sql_values_invalid_date():
     attr = oh5.Attribute("name", "20111313")
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_str": "20111313",
+        "value_string": "20111313",
     }
     eq_(expected, result)
 
@@ -243,7 +243,7 @@ def test_attribute_sql_values_time():
     attr = oh5.Attribute("name", "131415")
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_str": "131415",
+        "value_string": "131415",
         "value_time": datetime.time(13, 14, 15)
     }
     eq_(expected, result)
@@ -252,7 +252,7 @@ def test_attribute_sql_values_invalid_time():
     attr = oh5.Attribute("name", "241415")
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_str": "241415",
+        "value_string": "241415",
     }
     eq_(expected, result)
 
@@ -260,8 +260,8 @@ def test_attribute_sql_values_bool_true():
     attr = oh5.Attribute("name", "True")
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_str": "True",
-        "value_bool": True,
+        "value_string": "True",
+        "value_boolean": True,
     }
     eq_(expected, result)
 
@@ -269,8 +269,8 @@ def test_attribute_sql_values_bool_false():
     attr = oh5.Attribute("name", "False")
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_str": "False",
-        "value_bool": False,
+        "value_string": "False",
+        "value_boolean": False,
     }
     eq_(expected, result)
 
@@ -278,6 +278,6 @@ def test_attribute_sql_values_bool_invalid():
     attr = oh5.Attribute("name", "not_a_bool")
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_str": "not_a_bool",
+        "value_string": "not_a_bool",
     }
     eq_(expected, result)
