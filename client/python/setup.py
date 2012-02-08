@@ -29,6 +29,7 @@ setuptools.setup(name="baltrad.bdbclient",
             "list_sources = baltrad.bdbclient.cmd:PrintSources",
             "import_sources = baltrad.bdbclient.cmd:ImportSources",
             "dump = baltrad.bdbclient.cmd:Dump",
+            "da_stats = baltrad.bdbclient.cmd:DataAvailabilityStatistics",
         ],
         "console_scripts" : [
             "baltrad-bdb-client = baltrad.bdbclient.main:run"

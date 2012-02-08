@@ -16,15 +16,17 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 import contextlib
+import datetime
 import logging
 import os
 import shutil
+import itertools
 
 from abc import abstractmethod, ABCMeta
 
 import pkg_resources
 
-from baltrad.bdbcommon import oh5
+from baltrad.bdbcommon import expr, oh5
 from baltrad.bdbclient import db
 
 logger = logging.getLogger("baltrad.bdbclient.cmd")
@@ -256,3 +258,134 @@ class Dump(Command):
         elements.append(uuid_str)
 
         return os.path.join(*elements)
+
+class DataAvailabilityStatistics(Command):
+    nominal_datetime_attr = expr.add(
+        expr.attribute("what/date", "date"),
+        expr.attribute("what/time", "time")
+    )
+    stored_datetime_attr = expr.add(
+        expr.attribute("_bdb/stored_date", "date"),
+        expr.attribute("_bdb/stored_time", "time"),
+    )
+    source_attr = expr.attribute("what/source:_name", "string")
+    object_attr = expr.attribute("what/object", "string")
+    uuid_attr = expr.attribute("what/source:_name", "string")
+
+
+    def update_optionparser(self, parser):
+        parser.set_usage(parser.get_usage().strip() + " [OPTIONS]")
+        parser.add_option("--from", dest="from_date",
+            action="store", type="iso8601_datetime",
+            help="lowest nominal date to select from (inclusive)"
+        )
+        parser.add_option("--to", dest="to_date",
+            action="store", type="iso8601_datetime",
+            help="highest nominal date to select to (exclusive)"
+        )
+        parser.add_option("--source", dest="sources",
+            action="store", type="list", default=[], metavar="LIST",
+            help="comma separated list of filters on BDB source name"
+        )
+        parser.add_option("--object", dest="objects",
+            action="store", type="list", default=[], metavar="LIST",
+            help="comma separated list of filters on /what/object"
+        )
+        parser.add_option("--frequency", dest="frequency",
+            action="store", type="int", metavar="FREQ",
+            help="the frequency the data is expected to arrive (in seconds)"
+        )
+        parser.add_option("--eta", dest="etas",
+            action="store", type="list", default=[], metavar="LIST",
+            help="add availability checkpoint (seconds from nominal time)"
+        )
+
+    def execute(self, database, opts, args):
+        if not opts.from_date:
+            raise ExecutionError("--from must be specified")
+        if not opts.to_date:
+            raise ExecutionError("--to must be specified")
+        if not opts.etas:
+            raise ExecutionError("no --eta specified")
+        if not opts.frequency:
+            raise ExecutionError("--frequency must be specified")
+        if not opts.sources:
+            raise ExecutionError("no --source specified")
+        if not opts.objects:
+            raise ExecutionError("no --object specified")
+        
+        opts.etas = [int(eta) for eta in opts.etas]
+        opts.sources.sort()
+        opts.objects.sort()
+        opts.etas.sort()
+
+        file_counts = self.get_file_counts(database, opts)
+        self.print_results(opts, file_counts)
+
+    def get_file_counts(self, database, opts):
+        result = {}
+        for eta in opts.etas:
+            eta_file_counts = self.query_for_eta(database, opts, eta)
+            for source, obj in itertools.product(opts.sources, opts.objects):
+                src_file_counts = result.setdefault((source, obj), [])
+                src_file_counts.append(eta_file_counts.get((source, obj), 0))
+        return result
+        
+    def print_results(self, opts, file_counts):
+        expected_count = self.get_expected_file_count(opts)
+
+        print "%-8s %-8s" % ("source", "object"),
+        for eta in opts.etas:
+            print "%6d" % eta,
+        print ""
+
+        for source, obj in itertools.product(opts.sources, opts.objects):
+            print "%-8s %-8s" % (source, obj),
+            for count in file_counts[(source, obj)]:
+                print "%5d%%" % (count / float(expected_count) * 100),
+            print ""
+
+    def create_base_query(self, opts):
+        qry = db.AttributeQuery()
+        qry.append_filter(expr.between(
+            self.nominal_datetime_attr,
+            expr.literal(opts.from_date),
+            expr.literal(opts.to_date)
+        ))
+        if opts.sources:
+            qry.append_filter(expr.in_(
+                expr.attribute("what/source:_name", "string"),
+                opts.sources
+            ))
+        if opts.objects:
+            qry.append_filter(expr.in_(
+                expr.attribute("what/object", "string"),
+                opts.objects
+            ))
+        qry.fetch("source", self.source_attr)
+        qry.fetch("object", self.object_attr)
+        qry.fetch("filecount", expr.count(self.uuid_attr))
+        qry.group = [self.source_attr, self.object_attr]
+        return qry
+        
+    def filter_query_for_eta(self, qry, eta):
+        qry.append_filter(expr.le(
+            expr.sub(self.stored_datetime_attr, self.nominal_datetime_attr),
+            expr.literal(datetime.timedelta(seconds=eta))
+        ))
+        return qry
+
+    def query_for_eta(self, database, opts, eta):
+        qry = self.create_base_query(opts)
+        qry = self.filter_query_for_eta(qry, eta)
+        qresult = database.execute_attribute_query(qry)
+        result = {}
+        while qresult.next():
+            key = (qresult.get("source"), qresult.get("object"))
+            result[key] = qresult.get("filecount")
+        return result
+
+    def get_expected_file_count(self, opts):
+        delta = opts.to_date - opts.from_date
+        delta_seconds = delta.days * 86400 + delta.seconds
+        return delta_seconds / opts.frequency
