@@ -365,6 +365,14 @@ def _parse_time(timestr):
     except ValueError:
         return None
 
+def _parse_boolean(boolstr):
+    if boolstr == "True":
+        return True
+    elif boolstr == "False":
+        return False
+    else:
+        return None
+
 def _get_attribute_sql_values(node):
     """get all possible sql values of an attribute value
     """
@@ -382,6 +390,9 @@ def _get_attribute_sql_values(node):
         time = _parse_time(value)
         if time:
             values["value_time"] = time
+        boolean = _parse_boolean(value)
+        if boolean is not None:
+            values["value_bool"] = boolean
     elif isinstance(value, list):
         logger.error(
             "ignoring array attribute value at %s", node.path()

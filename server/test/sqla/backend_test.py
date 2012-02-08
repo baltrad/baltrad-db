@@ -255,3 +255,29 @@ def test_attribute_sql_values_invalid_time():
         "value_str": "241415",
     }
     eq_(expected, result)
+
+def test_attribute_sql_values_bool_true():
+    attr = oh5.Attribute("name", "True")
+    result = backend._get_attribute_sql_values(attr)
+    expected = {
+        "value_str": "True",
+        "value_bool": True,
+    }
+    eq_(expected, result)
+
+def test_attribute_sql_values_bool_false():
+    attr = oh5.Attribute("name", "False")
+    result = backend._get_attribute_sql_values(attr)
+    expected = {
+        "value_str": "False",
+        "value_bool": False,
+    }
+    eq_(expected, result)
+
+def test_attribute_sql_values_bool_invalid():
+    attr = oh5.Attribute("name", "not_a_bool")
+    result = backend._get_attribute_sql_values(attr)
+    expected = {
+        "value_str": "not_a_bool",
+    }
+    eq_(expected, result)
