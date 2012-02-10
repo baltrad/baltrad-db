@@ -1,6 +1,6 @@
 import datetime
 import os
-from tempfile import NamedTemporaryFile
+import tempfile
 import uuid
 
 from nose.tools import eq_, ok_, raises
@@ -29,10 +29,11 @@ from baltrad.bdbcommon.oh5.node import Attribute, Group
 from baltrad.bdbcommon import expr
 
 backend = None
+sqlite_file = tempfile.NamedTemporaryFile(suffix=".sqlite")
 
 def setup_module():
     global backend
-    url = os.environ.get("BDB_TEST_DB", "sqlite:///:memory:")
+    url = os.environ.get("BDB_TEST_DB", "sqlite:///%s" % sqlite_file.name)
     try:
         backend = SqlAlchemyBackend(
             url,
@@ -59,7 +60,7 @@ def create_metadata(what_object, what_date, what_time, what_source):
     return meta
 
 def write_metadata(meta):
-    h5file = NamedTemporaryFile()
+    h5file = tempfile.NamedTemporaryFile()
     writer = HlHdfMetadataWriter()
     writer.write(meta, h5file.name)
     return h5file

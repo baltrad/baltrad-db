@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 import contextlib
 import datetime
 import logging
@@ -23,14 +25,18 @@ import stat
 import time
 import uuid
 
+import migrate.versioning.api
+import migrate.versioning.repository
+from migrate import exceptions as migrateexc
 from sqlalchemy import engine, event, exc as sqlexc, sql
 
 from baltrad.bdbcommon import oh5
-
 from baltrad.bdbserver import backend
 from baltrad.bdbserver.sqla import query, schema, storage
 
 logger = logging.getLogger("baltrad.bdbserver.sqla")
+
+MIGRATION_REPO_PATH = os.path.join(os.path.dirname(__file__), "migrate")
 
 def force_sqlite_foreign_keys(dbapi_con, con_record):
     try:
@@ -268,16 +274,29 @@ class SqlAlchemyBackend(backend.Backend):
         return True
     
     def create(self):
-        with self.get_connection() as conn:
-            schema.meta.create_all(conn)
+        repo = migrate.versioning.repository.Repository(MIGRATION_REPO_PATH)
+        migrate.versioning.api.version_control(self._engine, repo)
+        migrate.versioning.api.upgrade(self._engine, repo)
     
     def drop(self):
-        with self.get_connection() as conn:
-            schema.meta.drop_all(conn)
+        repo = migrate.versioning.repository.Repository(MIGRATION_REPO_PATH)
+        try:
+            migrate.versioning.api.downgrade(self._engine, repo, 0)
+            migrate.versioning.api.drop_version_control(self._engine, repo)
+        except migrateexc.DatabaseNotControlledError:
+            pass
     
     def upgrade(self):
-        pass
+        repo = migrate.versioning.repository.Repository(MIGRATION_REPO_PATH)
 
+        # try setting up version control for the databases created before
+        # we started using sqlalchemy-migrate
+        try:
+            migrate.versioning.api.version_control(self._engine, repo, version=1)
+        except migrateexc.DatabaseAlreadyControlledError:
+            pass
+
+        migrate.versioning.api.upgrade(self._engine, repo)
     
     def metadata_from_file(self, path):
         meta = oh5.Metadata.from_file(path)
