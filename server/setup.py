@@ -25,6 +25,7 @@ setuptools.setup(name="baltrad.bdbserver",
         "python-daemon >= 1.6",
         "python-keyczar >= 0.7b",
         "SQLAlchemy >= 0.7",
+        "sqlalchemy-migrate >= 0.7.2",
         "werkzeug >= 0.8",
     ],
     entry_points = {
