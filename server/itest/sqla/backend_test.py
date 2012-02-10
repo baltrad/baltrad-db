@@ -29,20 +29,21 @@ from baltrad.bdbcommon.oh5.node import Attribute, Group
 from baltrad.bdbcommon import expr
 
 backend = None
-sqlite_file = tempfile.NamedTemporaryFile(suffix=".sqlite")
 
 def setup_module():
     global backend
-    url = os.environ.get("BDB_TEST_DB", "sqlite:///%s" % sqlite_file.name)
+    url = os.environ.get("BDB_TEST_DB", "")
     try:
         backend = SqlAlchemyBackend(
             url,
             storage=storage.DatabaseStorage()
         )
     except:
-        raise SkipTest("could not create backend (%s)" % url)
-    backend.drop()
-    backend.create()
+        pass
+
+    if backend:
+        backend.drop()
+        backend.create()
 
 def teardown_module():
     global backend
@@ -79,13 +80,23 @@ class TestSqlAlchemyBackendItest(object):
     def setup_class(cls):
         global backend
         cls.backend = backend
+        if not cls.backend:
+            return
+
         for src in cls.sources:
             cls.source_ids.append(cls.backend.add_source(src))
     
     @classmethod
     def teardown_class(cls):
+        if not cls.backend:
+            return
+
         with cls.backend.get_connection() as conn:
             conn.execute(schema.sources.delete())
+    
+    def setup(self):
+        if not self.backend:
+            raise SkipTest("no backend defined")
 
     def tearDown(self):
         with self.backend.get_connection() as conn:
@@ -202,6 +213,10 @@ class TestSourceManagement(object):
     def setup_class(cls):
         global backend
         cls.backend = backend
+
+    def setup(self):
+        if not self.backend:
+            raise SkipTest("no backend defined")
     
     def tearDown(self):
         with self.backend.get_connection() as conn:
@@ -419,17 +434,26 @@ class TestFileQuery(object):
     def setup_class(cls):
         global backend
         cls.backend = backend
+        if not cls.backend:
+            return
+
         for src in cls.sources:
             cls.backend.add_source(src)
         cls.files = _insert_test_files(cls.backend)
-        
+    
     @classmethod
     def teardown_class(cls):
+        if not cls.backend:
+            return
+
         with cls.backend.get_connection() as conn:
             conn.execute(schema.files.delete())
             conn.execute(schema.sources.delete())
     
     def setup(self):
+        if not self.backend:
+            raise SkipTest("no backend defined")
+
         self.query = FileQuery()
     
     @attr("dbtest")
@@ -695,17 +719,26 @@ class TestAttributeQuery(object):
     def setup_class(cls):
         global backend
         cls.backend = backend
+        if not cls.backend:
+            return
+
         for src in cls.sources:
             cls.backend.add_source(src)
         cls.files = _insert_test_files(cls.backend)
         
     @classmethod
     def teardown_class(cls):
+        if not cls.backend:
+            return
+
         with cls.backend.get_connection() as conn:
             conn.execute(schema.files.delete())
             conn.execute(schema.sources.delete())
     
     def setup(self):
+        if not self.backend:
+            raise SkipTest("no backend defined")
+
         self.query = AttributeQuery()
     
     @attr("dbtest")
