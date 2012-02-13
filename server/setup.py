@@ -19,6 +19,7 @@ setuptools.setup(name="baltrad.bdbserver",
     install_requires=[
         "baltrad.bdbcommon",
         "jprops >= 0.1",
+        "progressbar >= 2.0",
         "psycopg2",
         "pyasn1",
         "pycrypto >= 2.4",

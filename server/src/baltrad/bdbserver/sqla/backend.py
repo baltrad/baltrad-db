@@ -358,6 +358,7 @@ def insert_metadata(conn, meta, file_id):
         node_id = conn.execute(
             schema.nodes.insert(),
             file_id=file_id,
+            path=node.parent and node.parent.path() or "/",
             parent_id=node_ids.get(node.parent, None),
             name=node.name,
             type=node.type_id,
