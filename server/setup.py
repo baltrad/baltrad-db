@@ -14,7 +14,7 @@ setuptools.setup(name="baltrad.bdbserver",
         "": "src"
     },
     package_data={
-        "": ["*.sql"]
+        "": ["*.sql", "*.cfg"]
     },
     install_requires=[
         "baltrad.bdbcommon",
