@@ -17,10 +17,12 @@
 
 import os
 import numpy
+import warnings
 
 try:
     import _pyhl as pyhl
-except ImportError:
+except ImportError, e:
+    warnings.warn("couldn't import pyhl, hdf5 IO disabled: %s" % e)
     pyhl = None
 
 from . node import Attribute, Group, Dataset
