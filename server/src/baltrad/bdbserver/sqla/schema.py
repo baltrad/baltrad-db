@@ -34,6 +34,13 @@ source_kvs = Table("bdb_source_kvs", meta,
     PrimaryKeyConstraint("source_id", "key"),
 )
 
+what_source_kvs = Table("bdb_what_source_kvs", meta,
+    Column("id", Integer, primary_key=True),
+    Column("key", Text, nullable=False),
+    Column("value", Text, nullable=False),
+    UniqueConstraint("key", "value"),
+)
+
 files = Table("bdb_files", meta,
     Column("id", Integer, primary_key=True),
     Column("uuid", Text, unique=True, nullable=False),
@@ -52,6 +59,15 @@ files = Table("bdb_files", meta,
 file_data = Table("bdb_file_data", meta,
     Column("id", Integer, primary_key=True),
     Column("data", LargeBinary, nullable=False)
+)
+
+file_what_source = Table("bdb_file_what_source", meta,
+    Column("file_id", Integer,
+        ForeignKey(files.c.id, ondelete="CASCADE"),
+        nullable=False),
+    Column("source_kv_id", Integer, ForeignKey(what_source_kvs.c.id),
+        nullable=False),
+    PrimaryKeyConstraint("file_id", "source_kv_id"),
 )
 
 nodes = Table("bdb_nodes", meta,

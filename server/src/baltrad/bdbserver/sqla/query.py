@@ -87,8 +87,10 @@ class ExprToSql(object):
         return lhs.like(rhs.replace("*", "%"))
     
     def get_attr_column(self, name, type_):
-        if name.startswith("what/source:") or name.startswith("_bdb/source:"):
-            column = self.get_source_attr_column(name)
+        if name.startswith("what/source:"):
+            column = self.get_what_source_attr_column(name)
+        elif name.startswith("_bdb/source:"):
+            column = self.get_bdb_source_attr_column(name)
         elif (name in self._mapper):
             # XXX: rewrite this
             if name == "_bdb/source_name" and not self.from_clause_contains(schema.sources):
@@ -98,7 +100,23 @@ class ExprToSql(object):
             column = self.get_plain_attr_column(name, type_)
         return column
     
-    def get_source_attr_column(self, name):
+    def get_what_source_attr_column(self, name):
+        key = name.rsplit(":", 1)[-1]
+        if not self.from_clause_contains(schema.file_what_source):
+            self.from_clause = self.from_clause.join(schema.file_what_source)
+        
+        alias_t = schema.what_source_kvs.alias("what_source_" + key)
+        if not self.from_clause_contains(alias_t):
+            self.from_clause = self.from_clause.outerjoin(
+                alias_t,
+                onclause=sql.and_(
+                    alias_t.c.id==schema.file_what_source.c.source_kv_id,
+                    alias_t.c.key==key
+                )
+            )
+        return alias_t.c.value
+    
+    def get_bdb_source_attr_column(self, name):
         key = name.rsplit(":", 1)[-1]
         if not self.from_clause_contains(schema.sources):
             self.from_clause = self.from_clause.join(schema.sources)
@@ -108,7 +126,7 @@ class ExprToSql(object):
         else:
             alias_t = schema.source_kvs.alias("src_" + key)
             if not self.from_clause_contains(alias_t):
-                self.from_clause = self.from_clause.outerjoin(
+                self.from_clause = self.from_clause.join(
                     alias_t,
                     onclause=sql.and_(
                         alias_t.c.source_id==schema.sources.c.id,

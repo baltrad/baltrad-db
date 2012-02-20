@@ -326,6 +326,7 @@ class SqlAlchemyBackend(backend.Backend):
         # XXX: source_id has actually been fetched before
         source_id = get_source_id_by_name(conn, metadata.bdb_source_name)
         file_id = insert_file(conn, metadata, source_id)
+        associate_what_source(conn, file_id, metadata.source())
         insert_metadata(conn, metadata, file_id)
         return file_id 
     
@@ -549,3 +550,27 @@ def insert_source_values(conn, source_id, source):
          schema.source_kvs.insert(),
          kvs
     )
+
+def associate_what_source(conn, file_id, source):
+    for key, value in source.iteritems():
+        kv_id = insert_what_source_kv(conn, key, value)
+        conn.execute(
+            schema.file_what_source.insert(),
+            file_id=file_id, source_kv_id=kv_id
+        )
+
+def insert_what_source_kv(conn, key, value):
+    kv_qry = sql.select(
+        [schema.what_source_kvs.c.id],
+        sql.and_(
+            schema.what_source_kvs.c.key==key,
+            schema.what_source_kvs.c.value==value
+        )
+    )
+    kv_id = conn.execute(kv_qry).scalar()
+    if not kv_id:
+        kv_id = conn.execute(
+            schema.what_source_kvs.insert(),
+            key=key, value=value
+        ).inserted_primary_key[0]
+    return kv_id

@@ -11,6 +11,7 @@ from baltrad.bdbserver.sqla import schema, storage
 from baltrad.bdbserver.sqla.backend import (
     insert_metadata,
     insert_file,
+    associate_what_source,
     get_source_id,
     get_source_by_id,
     SqlAlchemyBackend
@@ -331,7 +332,7 @@ FILES = [{
     "what_object": "PVOL",
     "what_date": datetime.date(2000, 1, 1),
     "what_time": datetime.time(12, 0),
-    "what_source": "NOD:eesur",
+    "what_source": "NOD:eesur,CMT:file1",
     "bdb_uuid": "00000000-0000-0000-0004-000000000001",
     "bdb_metadata_hash": "hash1",
     "bdb_stored_date": datetime.date(2011, 1, 1),
@@ -343,7 +344,7 @@ FILES = [{
     "what_object": "PVOL",
     "what_date": datetime.date(2000, 1, 1),
     "what_time": datetime.time(12, 1),
-    "what_source": "NOD:eehar",
+    "what_source": "NOD:eehar,CMT:file2",
     "bdb_uuid": "00000000-0000-0000-0004-000000000002",
     "bdb_metadata_hash": "hash2",
     "bdb_stored_date": datetime.date(2011, 1, 1),
@@ -355,7 +356,7 @@ FILES = [{
     "what_object": "PVOL",
     "what_date": datetime.date(2000, 1, 1),
     "what_time": datetime.time(12, 2),
-    "what_source": "NOD:eesur",
+    "what_source": "NOD:eesur,CMT:file3",
     "bdb_uuid": "00000000-0000-0000-0004-000000000003",
     "bdb_metadata_hash": "hash3",
     "bdb_stored_date": datetime.date(2011, 1, 1),
@@ -367,7 +368,7 @@ FILES = [{
     "what_object": "CVOL",
     "what_date": datetime.date(2001, 1, 1),
     "what_time": datetime.time(12, 0),
-    "what_source": "NOD:eehar",
+    "what_source": "NOD:eehar,CMT:file4",
     "bdb_uuid": "00000000-0000-0000-0004-000000000004",
     "bdb_metadata_hash": "hash4",
     "bdb_stored_date": datetime.date(2011, 1, 1),
@@ -380,7 +381,7 @@ FILES = [{
     "what_object": "SCAN",
     "what_date": datetime.date(2002, 2, 1),
     "what_time": datetime.time(12, 0),
-    "what_source": "NOD:eesur",
+    "what_source": "NOD:eesur,CMT:file5",
     "bdb_uuid": "00000000-0000-0000-0004-000000000005",
     "bdb_metadata_hash": "hash5",
     "bdb_stored_date": datetime.date(2011, 1, 1),
@@ -408,6 +409,7 @@ def _insert_test_file(backend, file_):
     with backend.get_connection() as conn:
         source_id = get_source_id(conn, meta.source())
         file_id =  insert_file(conn, meta, source_id)
+        associate_what_source(conn, file_id, meta.source())
         insert_metadata(conn, meta, file_id)
 
 def _add_attribute(meta, path, value):
@@ -594,7 +596,7 @@ class TestFileQuery(object):
 
  
     @attr("dbtest")
-    def test_filter_by_source_PLC(self):
+    def test_filter_by_bdb_source_PLC(self):
         self.query.filter = expr.eq(
             expr.attribute("_bdb/source:PLC", "string"),
             expr.literal("Harku")
@@ -606,7 +608,7 @@ class TestFileQuery(object):
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
     
     @attr("dbtest")
-    def test_filter_by_source_name_or_source_NOD(self):
+    def test_filter_by_bdb_source_name_or_source_NOD(self):
         self.query.filter = expr.or_(
             expr.eq(
                 expr.attribute("_bdb/source_name", "string"),
@@ -624,7 +626,7 @@ class TestFileQuery(object):
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
     
     @attr("dbtest")
-    def test_filter_by_source_name_like(self):
+    def test_filter_by_bdb_source_name_like(self):
         self.query.filter = expr.like(
             expr.attribute("_bdb/source_name", "string"),
             "ee*"
@@ -638,6 +640,32 @@ class TestFileQuery(object):
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
     
+    @attr("dbtest")
+    def test_filter_by_what_source_CMT(self):
+        self.query.filter = expr.eq(
+            expr.attribute("what/source:CMT", "string"),
+            expr.literal("file3")
+        )
+        result = backend.execute_file_query(self.query)
+        eq_(1, len(result))
+        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+
+    @attr("dbtest")
+    def test_filter_by_what_source_CMT_or_NOD(self):
+        self.query.filter = expr.or_(
+            expr.eq(
+                expr.attribute("what/source:CMT", "string"),
+                expr.literal("file3")
+            ),
+            expr.eq(
+                expr.attribute("what/source:NOD", "string"),
+                expr.literal("eehar")
+            )
+        )
+        result = backend.execute_file_query(self.query)
+        eq_(3, len(result))
+        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+
     @attr("dbtest")
     def test_filter_by_object_in(self):
         self.query.filter = expr.in_(
