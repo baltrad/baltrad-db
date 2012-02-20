@@ -176,7 +176,7 @@ public abstract class DatabaseITestBase {
         ),
         xpr.eq(
           xpr.literal("seang"),
-          xpr.attribute("what/source:NOD", "string")
+          xpr.attribute("_bdb/source:NOD", "string")
         )
       )
     );
