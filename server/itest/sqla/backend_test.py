@@ -30,28 +30,7 @@ from baltrad.bdbcommon.oh5.io import HlHdfMetadataWriter
 from baltrad.bdbcommon.oh5.node import Attribute, Group
 from baltrad.bdbcommon import expr
 
-backend = None
-
-def setup_module():
-    global backend
-    url = os.environ.get("BDB_TEST_DB", "")
-    try:
-        backend = SqlAlchemyBackend(
-            url,
-            storage=storage.DatabaseStorage()
-        )
-    except:
-        pass
-
-    if backend:
-        backend.drop()
-        backend.create()
-
-def teardown_module():
-    global backend
-    if backend:
-        backend.drop()
-    
+from . import get_backend
 
 def create_metadata(what_object, what_date, what_time, what_source):
     meta = Metadata()
@@ -80,8 +59,7 @@ class TestSqlAlchemyBackendItest(object):
 
     @classmethod
     def setup_class(cls):
-        global backend
-        cls.backend = backend
+        cls.backend = get_backend()
         if not cls.backend:
             return
 
@@ -213,10 +191,11 @@ class TestSqlAlchemyBackendItest(object):
         eq_(0, delete_count) 
     
 class TestSqlAlchemySourceManager(object):
+    backend = None
+
     @classmethod
     def setup_class(cls):
-        global backend
-        cls.backend = backend
+        cls.backend = get_backend()
 
     def setup(self):
         if not self.backend:
@@ -438,8 +417,7 @@ class TestFileQuery(object):
 
     @classmethod
     def setup_class(cls):
-        global backend
-        cls.backend = backend
+        cls.backend = get_backend()
         if not cls.backend:
             return
 
@@ -464,7 +442,7 @@ class TestFileQuery(object):
     
     @attr("dbtest")
     def test_all_files(self):
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(5, len(result))
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
@@ -480,7 +458,7 @@ class TestFileQuery(object):
             expr.literal(uuid)
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(1, len(result))
         ok_({"uuid": uuid} in result)
     
@@ -491,7 +469,7 @@ class TestFileQuery(object):
             expr.literal("PVOL")
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(3, len(result))
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
@@ -504,7 +482,7 @@ class TestFileQuery(object):
             expr.literal(2)
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(2, len(result))
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
@@ -522,7 +500,7 @@ class TestFileQuery(object):
             )
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(3, len(result))
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
@@ -539,7 +517,7 @@ class TestFileQuery(object):
             expr.literal(datetime.datetime(2001, 1, 1, 12, 1))
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(3, len(result)) 
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
@@ -556,7 +534,7 @@ class TestFileQuery(object):
             expr.literal(datetime.datetime(2011, 1, 1, 12, 0, 5))
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(3, len(result)) 
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
@@ -579,7 +557,7 @@ class TestFileQuery(object):
             expr.sub(stored_dt_attr, nominal_dt_attr),
             expr.literal(datetime.timedelta(days=4017, seconds=86342))
         )
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(3, len(result)) 
         ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
@@ -592,7 +570,7 @@ class TestFileQuery(object):
             expr.literal(3000)
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(3, len(result)) 
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
@@ -606,7 +584,7 @@ class TestFileQuery(object):
             expr.literal("Harku")
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(2, len(result)) 
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
@@ -624,7 +602,7 @@ class TestFileQuery(object):
             )
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(2, len(result)) 
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
@@ -636,7 +614,7 @@ class TestFileQuery(object):
             "ee*"
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(5, len(result))
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
@@ -650,7 +628,7 @@ class TestFileQuery(object):
             expr.attribute("what/source:CMT", "string"),
             expr.literal("file3")
         )
-        result = backend.execute_file_query(self.query)
+        result =  self.backend.execute_file_query(self.query)
         eq_(1, len(result))
         ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
 
@@ -666,7 +644,7 @@ class TestFileQuery(object):
                 expr.literal("eehar")
             )
         )
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(3, len(result))
         ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
 
@@ -677,7 +655,7 @@ class TestFileQuery(object):
             expr.literal(["CVOL", "SCAN"])
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(2, len(result))
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
@@ -691,7 +669,7 @@ class TestFileQuery(object):
             )
         )
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(2, len(result))
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
@@ -702,7 +680,7 @@ class TestFileQuery(object):
             expr.desc(expr.attribute("where/xsize", "long"))
         ]
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(5, len(result))
         eq_(self.files[3]["bdb_uuid"], result[0]["uuid"])
         eq_(self.files[4]["bdb_uuid"], result[1]["uuid"])
@@ -714,7 +692,7 @@ class TestFileQuery(object):
     def test_limit(self):
         self.query.limit = 2
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(2, len(result))
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
@@ -723,7 +701,7 @@ class TestFileQuery(object):
     def test_skip(self):
         self.query.skip = 3
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(2, len(result))
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
@@ -733,7 +711,7 @@ class TestFileQuery(object):
         self.query.skip = 2
         self.query.limit = 2
 
-        result = backend.execute_file_query(self.query)
+        result = self.backend.execute_file_query(self.query)
         eq_(2, len(result))
         ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
@@ -749,8 +727,7 @@ class TestAttributeQuery(object):
 
     @classmethod
     def setup_class(cls):
-        global backend
-        cls.backend = backend
+        cls.backend = get_backend()
         if not cls.backend:
             return
 
