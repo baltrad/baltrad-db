@@ -268,9 +268,9 @@ class DataAvailabilityStatistics(Command):
         expr.attribute("_bdb/stored_date", "date"),
         expr.attribute("_bdb/stored_time", "time"),
     )
-    source_attr = expr.attribute("what/source:_name", "string")
+    source_attr = expr.attribute("_bdb/source_name", "string")
     object_attr = expr.attribute("what/object", "string")
-    uuid_attr = expr.attribute("what/source:_name", "string")
+    uuid_attr = expr.attribute("_bdb/uuid", "string")
 
 
     def update_optionparser(self, parser):
@@ -299,6 +299,10 @@ class DataAvailabilityStatistics(Command):
             action="store", type="list", default=[], metavar="LIST",
             help="add availability checkpoint (seconds from nominal time)"
         )
+        parser.add_option("--source-attr", dest="source_attr",
+            action="store",
+            help="attribute to use for source lookups"
+        )
 
     def execute(self, database, opts, args):
         if not opts.from_date:
@@ -313,6 +317,8 @@ class DataAvailabilityStatistics(Command):
             raise ExecutionError("no --source specified")
         if not opts.objects:
             raise ExecutionError("no --object specified")
+        if opts.source_attr:
+            self.source_attr = expr.attribute(opts.source_attr, "string")
         
         opts.etas = [int(eta) for eta in opts.etas]
         opts.sources.sort()
@@ -334,13 +340,19 @@ class DataAvailabilityStatistics(Command):
     def print_results(self, opts, file_counts):
         expected_count = self.get_expected_file_count(opts)
 
-        print "%-8s %-8s" % ("source", "object"),
+        max_source_len = max([len(src) for src in opts.sources])
+        max_source_len = max(max_source_len, 6)
+        max_object_len = max([len(obj) for obj in opts.objects])
+        max_object_len = max(max_object_len, 6)
+        
+        head_tmpl = "%%-%ds %%-%ds" % (max_source_len, max_object_len)
+        print head_tmpl % ("source", "object"),
         for eta in opts.etas:
             print "%6d" % eta,
         print ""
 
         for source, obj in itertools.product(opts.sources, opts.objects):
-            print "%-8s %-8s" % (source, obj),
+            print head_tmpl % (source, obj),
             for count in file_counts[(source, obj)]:
                 print "%5d%%" % (count / float(expected_count) * 100),
             print ""
@@ -354,12 +366,12 @@ class DataAvailabilityStatistics(Command):
         ))
         if opts.sources:
             qry.append_filter(expr.in_(
-                expr.attribute("what/source:_name", "string"),
+                self.source_attr,
                 opts.sources
             ))
         if opts.objects:
             qry.append_filter(expr.in_(
-                expr.attribute("what/object", "string"),
+                self.object_attr,
                 opts.objects
             ))
         qry.fetch("source", self.source_attr)
