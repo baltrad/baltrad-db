@@ -105,7 +105,11 @@ class ExprToSql(object):
         if not self.from_clause_contains(schema.file_what_source):
             self.from_clause = self.from_clause.join(schema.file_what_source)
         
-        alias_t = schema.what_source_kvs.alias("what_source_" + key)
+        alias_name = "what_source_" + key
+        alias_t = self._value_tables.setdefault(
+            alias_name,
+            schema.what_source_kvs.alias(alias_name)
+        )
         if not self.from_clause_contains(alias_t):
             self.from_clause = self.from_clause.outerjoin(
                 alias_t,
@@ -124,7 +128,11 @@ class ExprToSql(object):
         if key == "_name":
             return schema.sources.c.name
         else:
-            alias_t = schema.source_kvs.alias("src_" + key)
+            alias_name = "bdb_source_" + key
+            alias_t = self._value_tables.setdefault(
+                alias_name,
+                schema.source_kvs.alias(alias_name)
+            )
             if not self.from_clause_contains(alias_t):
                 self.from_clause = self.from_clause.join(
                     alias_t,
