@@ -72,6 +72,8 @@ class SqlAlchemyBackend(backend.Backend):
             event.listen(self._engine, "connect", force_sqlite_foreign_keys)
         if self._engine.name == "postgresql":
             event.listen(self._engine, "connect", psql_set_extra_float_digits)
+        
+        self._source_manager = SqlAlchemySourceManager(self)
     
     @property
     def driver(self):
@@ -168,79 +170,9 @@ class SqlAlchemyBackend(backend.Backend):
         """
         return contextlib.closing(self._engine.connect())
     
-    def get_sources(self):
-        qry = sql.select(
-            [schema.sources, schema.source_kvs],
-            from_obj=schema.source_kvs.join(schema.sources),
-            order_by=[sql.asc(schema.sources.c.name)]
-        )
+    def get_source_manager(self):
+        return self._source_manager
 
-        result = []
-
-        source = None
-
-        with self.get_connection() as conn:
-            for row in conn.execute(qry):
-                if not source:
-                    source = oh5.Source(row["name"])
-                if source.name != row["name"]:
-                    result.append(source)
-                    source = oh5.Source(row["name"])
-                source[row["key"]] = row["value"]
-        if source:
-            result.append(source)
-        return result
-    
-    def add_source(self, source):
-        with self.get_connection() as conn:
-            try:
-                source_id = conn.execute(
-                    schema.sources.insert(),
-                    name=source.name,
-                ).inserted_primary_key[0]
-            except sqlexc.IntegrityError:
-                raise backend.DuplicateEntry()
-        
-            insert_source_values(conn, source_id, source)
-        return source_id
-    
-    def update_source(self, name, source):
-        with self.get_connection() as conn:
-            source_id = get_source_id_by_name(conn, name)
-            if not source_id:
-                raise LookupError("source '%s' not found" % name)
-
-            with conn.begin():
-                if name != source.name:
-                    try:
-                        conn.execute(
-                            schema.sources.update()
-                                .where(schema.sources.c.id==source_id),
-                            name=source.name
-                        )
-                    except sqlexc.IntegrityError, e:
-                        raise backend.DuplicateEntry(str(e))
-                
-                conn.execute(
-                    schema.source_kvs.delete(
-                        schema.source_kvs.c.source_id==source_id
-                    )
-                )
-                insert_source_values(conn, source_id, source)
-            
-    def remove_source(self, name):
-        with self.get_connection() as conn:
-            try:
-                affected_rows = conn.execute(
-                    schema.sources.delete(
-                        schema.sources.c.name==name
-                    )
-                ).rowcount
-            except sqlexc.IntegrityError, e:
-                raise backend.IntegrityError(str(e))
-            else:
-                return bool(affected_rows)
-    
     def execute_file_query(self, qry):
         stmt = query.transform_file_query(qry)
         conn = self.get_connection()
@@ -335,6 +267,86 @@ class SqlAlchemyBackend(backend.Backend):
             schema.files.c.uuid==str(uuid)
         )
         return bool(conn.execute(qry).rowcount)
+
+class SqlAlchemySourceManager(backend.SourceManager):
+    def __init__(self, backend):
+        self._backend = backend
+
+    def get_sources(self):
+        qry = sql.select(
+            [schema.sources, schema.source_kvs],
+            from_obj=schema.source_kvs.join(schema.sources),
+            order_by=[sql.asc(schema.sources.c.name)]
+        )
+
+        result = []
+
+        source = None
+
+        with self.get_connection() as conn:
+            for row in conn.execute(qry):
+                if not source:
+                    source = oh5.Source(row["name"])
+                if source.name != row["name"]:
+                    result.append(source)
+                    source = oh5.Source(row["name"])
+                source[row["key"]] = row["value"]
+        if source:
+            result.append(source)
+        return result
+    
+    def add_source(self, source):
+        with self.get_connection() as conn:
+            try:
+                source_id = conn.execute(
+                    schema.sources.insert(),
+                    name=source.name,
+                ).inserted_primary_key[0]
+            except sqlexc.IntegrityError:
+                raise backend.DuplicateEntry()
+        
+            insert_source_values(conn, source_id, source)
+        return source_id
+    
+    def update_source(self, name, source):
+        with self.get_connection() as conn:
+            source_id = get_source_id_by_name(conn, name)
+            if not source_id:
+                raise LookupError("source '%s' not found" % name)
+
+            with conn.begin():
+                if name != source.name:
+                    try:
+                        conn.execute(
+                            schema.sources.update()
+                                .where(schema.sources.c.id==source_id),
+                            name=source.name
+                        )
+                    except sqlexc.IntegrityError, e:
+                        raise backend.DuplicateEntry(str(e))
+                
+                conn.execute(
+                    schema.source_kvs.delete(
+                        schema.source_kvs.c.source_id==source_id
+                    )
+                )
+                insert_source_values(conn, source_id, source)
+            
+    def remove_source(self, name):
+        with self.get_connection() as conn:
+            try:
+                affected_rows = conn.execute(
+                    schema.sources.delete(
+                        schema.sources.c.name==name
+                    )
+                ).rowcount
+            except sqlexc.IntegrityError, e:
+                raise backend.IntegrityError(str(e))
+            else:
+                return bool(affected_rows)
+    
+    def get_connection(self):
+        return self._backend.get_connection()
 
 def insert_file(conn, meta, source_id):
     return conn.execute(

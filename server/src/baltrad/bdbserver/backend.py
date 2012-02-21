@@ -89,47 +89,10 @@ class Backend(object):
         raise NotImplementedError()
     
     @abstractmethod
-    def get_sources(self):
-        """get a list of sources defined in the database
-
-        the sources are returned in alphabetical order by name.
-
-        :return: list of :class:`baltrad.bdb.oh5.meta.Source` instances
+    def get_source_manager(self):
+        """return a :class:`SourceManager` instance
         """
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def add_source(self, source):
-        """add a new source definition to the database
-
-        :param source: the source definition to add
-        :type source: :class:`baltrad.bdb.oh5.meta.Source`
-        :raise: :class:`DuplicateEntry` if this source is already defined
-        """
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def remove_source(self, name):
-        """remove a source definition from the database
-
-        :param name: the name of the source
-        :return: `True` if the source was remove, `False` if not found
-        :raise: :class:`IntegrityError` if the source is associated with files
-        """
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def update_source(self, name, source):
-        """update a source definition in the database
-
-        :param name: the name of the source to modify
-        :param source: the new definiton of the source
-        :raise: :class:`DuplicateEntry` if renaming and a source with such a
-                name already exists
-        :raise: :class:`LookupError` if the source doesn't exist
-        """
-        raise NotImplementedError()
-    
+        
     @abstractmethod
     def execute_file_query(self, query):
         """execute a file query
@@ -176,6 +139,7 @@ class Backend(object):
     def from_conf(cls, conf):
         """create an instance from configuration
         """
+        raise NotImplementedError()
     
     @classmethod
     def get_impl(cls, name):
@@ -195,6 +159,54 @@ class Backend(object):
         except ImportError:
             raise LookupError(name)
     
+class SourceManager(object):
+    """Interface for managing source definitions in the database
+    """
+
+    __meta__ = ABCMeta
+
+    @abstractmethod
+    def get_sources(self):
+        """get a list of sources defined in the database
+
+        the sources are returned in alphabetical order by name.
+
+        :return: list of :class:`baltrad.bdb.oh5.meta.Source` instances
+        """
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def add_source(self, source):
+        """add a new source definition to the database
+
+        :param source: the source definition to add
+        :type source: :class:`baltrad.bdb.oh5.meta.Source`
+        :raise: :class:`DuplicateEntry` if this source is already defined
+        """
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def remove_source(self, name):
+        """remove a source definition from the database
+
+        :param name: the name of the source
+        :return: `True` if the source was remove, `False` if not found
+        :raise: :class:`IntegrityError` if the source is associated with files
+        """
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def update_source(self, name, source):
+        """update a source definition in the database
+
+        :param name: the name of the source to modify
+        :param source: the new definiton of the source
+        :raise: :class:`DuplicateEntry` if renaming and a source with such a
+                name already exists
+        :raise: :class:`LookupError` if the source doesn't exist
+        """
+        raise NotImplementedError()
+
 def from_conf(conf):
     typename = conf["baltrad.bdb.server.backend.type"]
     try:

@@ -7,6 +7,7 @@ from werkzeug.test import EnvironBuilder
 
 from baltrad.bdbserver.backend import (
     Backend,
+    SourceManager,
     DuplicateEntry,
     IntegrityError
 )
@@ -113,6 +114,8 @@ class TestFileHandlers(object):
 class TestSourceHandlers(object):
     def setup(self):
         self.backend = mock.Mock(spec_set=Backend)
+        self.source_manager = mock.Mock(spec_set=SourceManager)
+        self.backend.get_source_manager.return_value = self.source_manager
         self.ctx = RequestContext(None, self.backend)
 
     def create_request(self, method, data):
@@ -122,7 +125,7 @@ class TestSourceHandlers(object):
         ).get_request(Request)
 
     def test_get_sources(self):
-        self.backend.get_sources.return_value = [
+        self.source_manager.get_sources.return_value = [
             Source("src1", {"key1": "value1"}),
             Source("src2", {"key2": "value2"}),
         ]
@@ -144,7 +147,9 @@ class TestSourceHandlers(object):
 
         response = handler.add_source(self.ctx)
 
-        self.backend.add_source.assert_called_with(Source("foo", values={"bar": "baz"}))
+        self.source_manager.add_source.assert_called_with(
+            Source("foo", values={"bar": "baz"})
+        )
         eq_(httplib.CREATED, response.status_code)
         eq_("/source/foo", response.headers["Location"])
     
@@ -157,7 +162,7 @@ class TestSourceHandlers(object):
         )
 
         response = handler.update_source(self.ctx, "qaz")
-        self.backend.update_source.assert_called_with(
+        self.source_manager.update_source.assert_called_with(
             "qaz", Source("foo", values={"bar": "baz"})
         )
         eq_(httplib.NO_CONTENT, response.status_code)
@@ -167,7 +172,7 @@ class TestSourceHandlers(object):
         self.ctx.request = self.create_request("PUT",
             data='{"source": {"name": "foo", "values": {"bar": "baz"}}}',
         )
-        self.backend.update_source.side_effect = LookupError()
+        self.source_manager.update_source.side_effect = LookupError()
 
         response = handler.update_source(self.ctx, "qaz")
         eq_(httplib.NOT_FOUND, response.status_code)
@@ -176,33 +181,33 @@ class TestSourceHandlers(object):
         self.ctx.request = self.create_request("PUT",
             data='{"source": {"name": "foo", "values": {"bar": "baz"}}}',
         )
-        self.backend.update_source.side_effect = DuplicateEntry()
+        self.source_manager.update_source.side_effect = DuplicateEntry()
 
         response = handler.update_source(self.ctx, "qaz")
         eq_(httplib.CONFLICT, response.status_code)
     
     def test_remove_source(self):
         self.ctx.request = self.create_request("DELETE", data="")
-        self.backend.remove_source.return_value = True
+        self.source_manager.remove_source.return_value = True
 
         response = handler.remove_source(self.ctx, "foo")
-        self.backend.remove_source.assert_called_with("foo")
+        self.source_manager.remove_source.assert_called_with("foo")
         eq_(httplib.NO_CONTENT, response.status_code)
     
     def test_remove_source_not_found(self):
         self.ctx.request = self.create_request("DELETE", data="")
-        self.backend.remove_source.return_value = False
+        self.source_manager.remove_source.return_value = False
 
         response = handler.remove_source(self.ctx, "foo")
-        self.backend.remove_source.assert_called_with("foo")
+        self.source_manager.remove_source.assert_called_with("foo")
         eq_(httplib.NOT_FOUND, response.status_code)
     
     def test_remove_source_associated_files(self):
         self.ctx.request = self.create_request("DELETE", data="")
-        self.backend.remove_source.side_effect = IntegrityError()
+        self.source_manager.remove_source.side_effect = IntegrityError()
 
         response = handler.remove_source(self.ctx, "foo")
-        self.backend.remove_source.assert_called_with("foo")
+        self.source_manager.remove_source.assert_called_with("foo")
         eq_(httplib.CONFLICT, response.status_code)
         
 

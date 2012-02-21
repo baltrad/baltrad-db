@@ -14,7 +14,8 @@ from baltrad.bdbserver.sqla.backend import (
     associate_what_source,
     get_source_id,
     get_source_by_id,
-    SqlAlchemyBackend
+    SqlAlchemyBackend,
+    SqlAlchemySourceManager,
 )
 
 from baltrad.bdbserver.backend import (
@@ -85,7 +86,9 @@ class TestSqlAlchemyBackendItest(object):
             return
 
         for src in cls.sources:
-            cls.source_ids.append(cls.backend.add_source(src))
+            cls.source_ids.append(
+                cls.backend.get_source_manager().add_source(src)
+            )
     
     @classmethod
     def teardown_class(cls):
@@ -209,7 +212,7 @@ class TestSqlAlchemyBackendItest(object):
             delete_count = conn.execute(schema.files.count()).scalar()
         eq_(0, delete_count) 
     
-class TestSourceManagement(object):
+class TestSqlAlchemySourceManager(object):
     @classmethod
     def setup_class(cls):
         global backend
@@ -218,6 +221,7 @@ class TestSourceManagement(object):
     def setup(self):
         if not self.backend:
             raise SkipTest("no backend defined")
+        self.source_manager = SqlAlchemySourceManager(self.backend)
     
     def tearDown(self):
         with self.backend.get_connection() as conn:
@@ -227,9 +231,9 @@ class TestSourceManagement(object):
     @attr("dbtest")
     def test_add_source(self):
         source = Source("foo", values={"bar": "baz"})
-        self.backend.add_source(source)
+        self.source_manager.add_source(source)
 
-        sources = self.backend.get_sources()
+        sources = self.source_manager.get_sources()
         eq_(1, len(sources))
         eq_(source, sources[0])
     
@@ -239,18 +243,18 @@ class TestSourceManagement(object):
         source1 = Source("foo", values={"bar": "baz"})
         source2 = Source("foo", values={"qwe": "asd"})
 
-        self.backend.add_source(source1)
-        self.backend.add_source(source2)
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
 
     @attr("dbtest")
     def test_update_source(self):
         source1 = Source("foo", values={"bar": "baz"})
         source2 = Source("qwe", values={"asd": "qaz"})
-        self.backend.add_source(source1)
+        self.source_manager.add_source(source1)
 
-        self.backend.update_source("foo", source2)
+        self.source_manager.update_source("foo", source2)
 
-        sources = self.backend.get_sources()
+        sources = self.source_manager.get_sources()
         eq_(1, len(sources))
         eq_(source2, sources[0])
     
@@ -258,56 +262,56 @@ class TestSourceManagement(object):
     @raises(LookupError)
     def test_update_source_not_found(self):
         source1 = Source("foo", values={"bar": "baz"})
-        self.backend.update_source("qwe", source1)
+        self.source_manager.update_source("qwe", source1)
     
     @attr("dbtest")
     @raises(DuplicateEntry)
     def test_update_source_name_conflict(self):
         source1 = Source("foo", values={"bar": "baz"})
         source2 = Source("qwe", values={"asd": "qaz"})
-        self.backend.add_source(source1)
-        self.backend.add_source(source2)
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
 
-        self.backend.update_source("foo", source2)
+        self.source_manager.update_source("foo", source2)
 
     @attr("dbtest")
     def test_remove_source(self):
         source1 = Source("foo", values={"bar": "baz"})
         source2 = Source("qwe", values={"asd": "qaz"})
-        self.backend.add_source(source1)
-        self.backend.add_source(source2)
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
         
-        eq_(True, self.backend.remove_source("foo"))
+        eq_(True, self.source_manager.remove_source("foo"))
 
-        sources = self.backend.get_sources()
+        sources = self.source_manager.get_sources()
         eq_(1, len(sources))
         eq_(source2, sources[0])
     
     @attr("dbtest")
     def test_remove_source_not_found(self):
-        eq_(False, self.backend.remove_source("foo"))
+        eq_(False, self.source_manager.remove_source("foo"))
 
     @attr("dbtest")
     @raises(IntegrityError)
     def test_remove_source_files_attached(self):
         source1 = Source("foo", values={"bar": "baz"})
-        self.backend.add_source(source1)
+        self.source_manager.add_source(source1)
 
         meta = create_metadata("pvol", "20000131", "131415", "bar:baz")
         h5file = write_metadata(meta)
 
         self.backend.store_file(h5file.name)
 
-        self.backend.remove_source("foo")
+        self.source_manager.remove_source("foo")
 
     @attr("dbtest")
     def test_get_sources(self):
         source1 = Source("foo", values={"bar": "baz"})
         source2 = Source("bar", values={"qwe": "asd"})
-        self.backend.add_source(source1)
-        self.backend.add_source(source2)
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
 
-        sources = self.backend.get_sources()
+        sources = self.source_manager.get_sources()
         eq_(2, len(sources))
         # in alphabetical order by name
         eq_(source2, sources[0])
@@ -315,7 +319,7 @@ class TestSourceManagement(object):
     
     @attr("dbtest")
     def test_get_sources_empty(self):
-        sources = self.backend.get_sources()
+        sources = self.source_manager.get_sources()
         eq_(0, len(sources))
 
 ###
@@ -440,7 +444,7 @@ class TestFileQuery(object):
             return
 
         for src in cls.sources:
-            cls.backend.add_source(src)
+            cls.backend.get_source_manager().add_source(src)
         cls.files = _insert_test_files(cls.backend)
     
     @classmethod
@@ -751,7 +755,7 @@ class TestAttributeQuery(object):
             return
 
         for src in cls.sources:
-            cls.backend.add_source(src)
+            cls.backend.get_source_manager().add_source(src)
         cls.files = _insert_test_files(cls.backend)
         
     @classmethod

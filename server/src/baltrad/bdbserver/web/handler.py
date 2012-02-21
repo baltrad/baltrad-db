@@ -136,7 +136,7 @@ def get_sources(ctx):
 
     See :ref:`doc-rest-op-get-sources` for details
     """
-    sources = ctx.backend.get_sources()
+    sources = ctx.backend.get_source_manager().get_sources()
     return JsonResponse({
         "sources": [{"name": src.name, "values": dict(src)} for src in sources]
     })
@@ -153,7 +153,7 @@ def add_source(ctx):
     data = ctx.request.get_json_data()["source"]
 
     source = Source(data["name"], values=data["values"])
-    ctx.backend.add_source(source)
+    ctx.backend.get_source_manager().add_source(source)
     response = Response("", status=httplib.CREATED)
     response.headers["Location"] = ctx.make_url("source/" + source.name)
     return response
@@ -172,7 +172,7 @@ def update_source(ctx, name):
     source = Source(data["name"], values=data["values"])
 
     try:
-        ctx.backend.update_source(name, source)
+        ctx.backend.get_source_manager().update_source(name, source)
         response = NoContentResponse()
         response.headers["Location"] = ctx.make_url("source/" + name)
     except LookupError:
@@ -192,7 +192,7 @@ def remove_source(ctx, name):
     See :ref:`doc-rest-op-remove-source` for details
     """
     try:
-        if ctx.backend.remove_source(name):
+        if ctx.backend.get_source_manager().remove_source(name):
             response = NoContentResponse()
         else:
             response = Response("", status=httplib.NOT_FOUND)
