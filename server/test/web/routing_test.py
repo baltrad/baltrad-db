@@ -98,15 +98,43 @@ class TestSourceRoutes(object):
         endpoint, args = self.adapter.match("/source/", "POST")
         eq_("handler.add_source", endpoint)
 
-    def test_sourceroot_PUT(self):
+    def test_source_PUT(self):
         endpoint, args = self.adapter.match("/source/srcname", "PUT")
         eq_("handler.update_source", endpoint)
         eq_("srcname", args["name"])
 
-    def test_sourceroot_DELETE(self):
+    def test_source_DELETE(self):
         endpoint, args = self.adapter.match("/source/srcname", "DELETE")
         eq_("handler.remove_source", endpoint)
         eq_("srcname", args["name"])
+
+class TestFilterRoutes(object):
+    @classmethod
+    def setup_class(cls):
+        cls.adapter = URL_MAP.bind("/")
+
+    def test_filterroot_GET(self):
+        endpoint, args = self.adapter.match("/filter/", "GET")
+        eq_("handler.get_filters", endpoint)
+    
+    def test_filterroot_POST(self):
+        endpoint, args = self.adapter.match("/filter/", "POST")
+        eq_("handler.add_filter", endpoint)
+    
+    def test_filter_GET(self):
+        endpoint, args = self.adapter.match("/filter/FOO", "GET")
+        eq_("handler.get_filter", endpoint)
+        eq_("FOO", args["name"])
+
+    def test_filter_PUT(self):
+        endpoint, args = self.adapter.match("/filter/FOO", "PUT")
+        eq_("handler.update_filter", endpoint)
+        eq_("FOO", args["name"])
+    
+    def test_filter_DELETE(self):
+        endpoint, args = self.adapter.match("/filter/FOO", "DELETE")
+        eq_("handler.remove_filter", endpoint)
+        eq_("FOO", args["name"])
 
 class TestQueryRoutes(object):
     @classmethod

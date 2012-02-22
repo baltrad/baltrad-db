@@ -93,3 +93,9 @@ attribute_values = Table("bdb_attribute_values", meta,
     Column("value_date", Date),
     Column("value_time", Time),
 )
+
+filters = Table("bdb_filters", meta,
+    Column("id", Integer, primary_key=True),
+    Column("name", Text, nullable=False),
+    Column("expression", Text, nullable=False),
+)

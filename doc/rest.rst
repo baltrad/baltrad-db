@@ -366,7 +366,7 @@ Get defined sources
   :Headers: Content-Length, Content-Type
   :Status:
     * **200 OK**
-  :Body: extracted metadata
+  :Body: a list of sources defined in the database
 
   ::
 
@@ -449,14 +449,14 @@ Update source definition
 **Response**
   :Headers: Location
   :Status:
-    * **204 NO CONTENT** - the source definition was source was successfully
+    * **204 NO CONTENT** - the source definition was successfully
       stored, the URI is in the *Location* header
     * **404 NOT FOUND** - source was not found
     * **409 CONFLICT** - source with such name is already stored
 
   ::
 
-    HTTP/1.1 20O OK
+    HTTP/1.1 204 NO CONTENT
     Location: http://example.com/source/new_name
 
 .. _doc-rest-op-remove-source:
@@ -474,10 +474,187 @@ Remove source definition
 **Response**
   :Headers: Location
   :Status:
-    * **200 OK** - the source was removed
+    * **204 NO CONTENT** - the source was removed
     * **404 NOT FOUND** - source not found
     * **409 CONFLICT** - source has files associated and can't be removed
 
   ::
 
     HTTP/1.1 20O OK
+
+.. _doc-rest-op-get-filters:
+
+Get defined filters
+'''''''''''''''''''
+**Request**
+  :Synopsis: GET /filter/
+
+  ::
+
+    GET /filter/ HTTP/1.1
+    Host: example.com
+
+**Response**
+  :Headers: Content-Length, Content-Type
+  :Status:
+    * **200 OK**
+  :Body: list of filters defined in the database.
+  ::
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Content-Length: nnn
+    
+    {
+      "filters": {
+        "name1": {},
+        "name2": {}
+      }
+    }
+
+.. _doc-rest-op-get-filter:
+
+Get a filter definition
+'''''''''''''''''''''''
+**Request**
+  :Synopsis: GET /filter/name
+
+  ::
+
+    GET /filter/FOO HTTP/1.1
+    Host: example.com
+
+**Response**
+  :Headers: Content-Length, Content-Type
+  :Status:
+    * **200 OK**
+    * **404 NOT FOUND** - filter not found
+  :Body: list of filters defined in the database. The keys in the
+    "filters" mapping are the filter names, the values of that mapping
+    are left as empty mappings, a future version might include some
+    interesting metadata in that.
+
+  ::
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Content-Length: nnn
+    
+    {
+      "filter": {
+        "name": "FOO",
+        "expression": [
+            "list", ["symbol", "="],
+                    ["list", ["symbol", "attr"],
+                             "what/object",
+                             "string"
+                    ],
+                    "PVOL"
+        ]
+      }
+    }
+
+.. _doc-rest-op-add-filter:
+
+Add a filter definition
+'''''''''''''''''''''''
+**Request**
+  :Headers: Content-Length, Content-Type
+  :Synopsis: POST /filter/
+  :Body: the filter object to create
+
+  ::
+
+    POST /filter/ HTTP/1.1
+    Host: example.com
+    Content-Type: application/json
+    Content-Length: nnn
+    
+    {
+      "filter": {
+        "name": "FOO",
+        "expression": [
+            "list", ["symbol", "="],
+                    ["list", ["symbol", "attr"],
+                             "what/object",
+                             "string"
+                    ],
+                    "PVOL"
+        ]
+      }
+    }
+
+**Response**
+  :Headers: Location
+  :Status:
+    * **201 CREATED** - filter was successfully created, the URI is in the
+      *Location* header
+    * **409 CONFLICT** - a filter with such a name is already stored
+
+  ::
+
+    HTTP/1.1 201 CREATED
+    Location: http://example.com/filter/FOO
+
+.. _doc-rest-op-remove-filter:
+
+Remove a filter definition
+''''''''''''''''''''''''''
+**Request**
+  :Synopsis: DELETE /source/name
+
+  ::
+
+    DELETE /filter/FOO HTTP/1.1
+    Host: example.com
+
+**Response**
+  :Headers: Location
+  :Status:
+    * **204 NO CONTENT** - the filter was removed
+    * **404 NOT FOUND** - the filter was not found
+
+  ::
+
+    HTTP/1.1 20O OK
+
+.. _doc-rest-op-update-filter:
+
+Update a filter definition
+''''''''''''''''''''''''''
+**Request**
+  :Headers: Content-Length, Content-Type
+  :Synopsis: PUT /filter/name
+  :Body: filter object. Note that the name in the address is used, not the
+         name in the filter object in the body to determine which filter
+         should be updated.
+
+  ::
+
+    PUT /filter/FOO HTTP/1.1
+    Host: example.com
+    Content-Type: application/json
+    Content-Length: nnn
+
+    {
+      "filter": {
+        "name": "FOO",
+        "expression": [
+            "list", ["symbol", "="],
+                    ["list", ["symbol", "attr"],
+                             "what/object",
+                             "string"
+                    ],
+                    "PVOL"
+        ]
+      }
+    }
+
+**Response**
+  :Status:
+    * **204 NO CONTENT** - the filter definition was successfully stored
+
+  ::
+
+    HTTP/1.1 204 NO CONTENT
+    Location: http://example.com/source/new_name

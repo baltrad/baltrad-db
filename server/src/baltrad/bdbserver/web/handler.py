@@ -19,7 +19,7 @@ import httplib
 import shutil
 from tempfile import NamedTemporaryFile
 
-from baltrad.bdbcommon import expr
+from baltrad.bdbcommon import expr, filter
 from baltrad.bdbcommon.oh5 import Source
 
 from .util import (
@@ -200,6 +200,89 @@ def remove_source(ctx, name):
         response = Response("", status=httplib.CONFLICT)
     
     return response
+
+def get_filters(ctx):
+    """get a list of filters
+
+    :param ctx: the request context
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status *200 OK*
+
+    See :ref:`doc-rest-op-get-filters` for details
+    """
+    filter_names = ctx.backend.get_filter_manager().get_filter_names()
+    return JsonResponse({
+        "filters": filter_names
+    })
+
+def get_filter(ctx, name):
+    """get a filter identified by `name`
+
+    See :ref:`doc-rest-op-get-filter` for details
+
+    :param ctx: the :class:`~.util.RequestContext`
+    :param name: the name of the filter to fetch
+    :return: :class:`~.util.JsonResponse` with status *200 OK*
+    """
+    flt = ctx.backend.get_filter_manager().get_filter(name)
+    return JsonResponse({
+        "filter": {
+            "name": flt.name,
+            "expression": expr.wrap_json(flt.expression)
+        }
+    })
+
+def add_filter(ctx):
+    """add a filter
+
+    See :ref:`doc-rest-op-add-filter` for details
+
+    :param ctx: the :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status *201 CREATED*
+    """
+    data = ctx.request.get_json_data().get("filter")
+    flt = filter.Filter(
+        data.get("name"),
+        expr.unwrap_json(data.get("expression")),
+    )
+    ctx.backend.get_filter_manager().add_filter(flt)
+    response = JsonResponse("", status=httplib.CREATED)
+    response.headers["Location"] = ctx.make_url("filter/%s" % flt.name)
+    return response
+
+def update_filter(ctx, name):
+    """update a filter
+
+    See :ref:`doc-rest-op-update-filter` for details
+
+    :param ctx: the :class:`~.util.RequestContext`
+    :param name: name of the filter to update
+    :return: :class:`~.util.NoContentResponse`
+    """
+    data = ctx.request.get_json_data().get("filter")
+    flt = filter.Filter(
+        name,
+        expr.unwrap_json(data.get("expression")),
+    )
+    try:
+        ctx.backend.get_filter_manager().update_filter(flt)
+    except LookupError:
+        raise HttpNotFound()
+    return NoContentResponse()
+
+def remove_filter(ctx, name):
+    """remove a filter
+
+    See :ref:`doc-rest-op-remove-filter` for details
+
+    :param ctx: the :class:`~.util.RequestContext`
+    :param name: name of the filter to update
+    :return: :class:`~.util.NoContentResponse`
+    :raise: :class:`~.util.HttpNotFound` if filter didn't exist
+    """
+    if not ctx.backend.get_filter_manager().remove_filter(name):
+        raise HttpNotFound()
+    return NoContentResponse()
 
 def query_file(ctx):
     """execute a file query

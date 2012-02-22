@@ -8,6 +8,7 @@ from werkzeug.test import EnvironBuilder
 from baltrad.bdbserver.backend import (
     Backend,
     SourceManager,
+    FilterManager,
     DuplicateEntry,
     IntegrityError
 )
@@ -19,6 +20,7 @@ from baltrad.bdbserver.web.util import (
     Request,
     RequestContext,
 )
+from baltrad.bdbcommon import expr, filter
 from baltrad.bdbcommon.oh5 import Metadata, Source
 
 class TestFileHandlers(object):
@@ -210,7 +212,102 @@ class TestSourceHandlers(object):
         self.source_manager.remove_source.assert_called_with("foo")
         eq_(httplib.CONFLICT, response.status_code)
         
+class TestFilterHandlers(object):
+    def setup(self):
+        self.backend = mock.Mock(spec_set=Backend)
+        self.ctx = RequestContext(None, self.backend)
+        self.filter_manager = mock.Mock(spec_set=FilterManager)
+        self.backend.get_filter_manager.return_value = self.filter_manager
+        self.filter1 = filter.Filter(
+            "filter1",
+            expr.eq(
+                expr.attribute("what/object", "string"),
+                expr.literal("PVOL")
+            )
+        )
+        self.filter1_repr = (
+            '{"filter": {'
+                '"expression": ['
+                    '"list", ["symbol", "="], '
+                            '["list", ["symbol", "attr"], '
+                                     '"what/object", '
+                                     '"string"'
+                            '], '
+                            '"PVOL"'
+                '], '
+                '"name": "filter1"'
+            '}}'
+        )
 
+    def create_request(self, method, data):
+        return EnvironBuilder(
+            method=method,
+            data=data,
+        ).get_request(Request)
+    
+    def test_get_filters(self):
+        self.ctx.request = self.create_request("GET", data="")
+        self.filter_manager.get_filter_names.return_value = [
+            "filter1", "filter2"
+        ]
+
+        response = handler.get_filters(self.ctx)
+        eq_(httplib.OK, response.status_code)
+        expected = '{"filters": ["filter1", "filter2"]}'
+        eq_(expected, response.data)
+    
+    def test_get_filter(self):
+        self.ctx.request = self.create_request("GET", data="")
+        self.filter_manager.get_filter.return_value = self.filter1
+
+        response = handler.get_filter(self.ctx, "filter1")
+        eq_(httplib.OK, response.status_code)
+        self.filter_manager.get_filter.assert_called_once_with("filter1")
+        eq_(self.filter1_repr, response.data)
+    
+    def test_add_filter(self):
+        self.ctx.request = self.create_request("POST", data=self.filter1_repr)
+        
+        response = handler.add_filter(self.ctx)
+        eq_(httplib.CREATED, response.status_code)
+        eq_("/filter/filter1", response.headers["Location"])
+        self.filter_manager.add_filter.assert_called_once_with(self.filter1)
+    
+    def test_update_filter(self):
+        self.ctx.request = self.create_request("PUT", data=self.filter1_repr)
+
+        filter2 = filter.Filter(
+            "filter2",
+            self.filter1.expression,
+        )
+
+        response = handler.update_filter(self.ctx, "filter2")
+        eq_(httplib.NO_CONTENT, response.status_code)
+        self.filter_manager.update_filter.assert_called_once_with(filter2)
+     
+    @raises(HttpNotFound)
+    def test_update_filter_not_found(self):
+        self.ctx.request = self.create_request("PUT", data=self.filter1_repr)
+        self.filter_manager.update_filter.side_effect = LookupError()
+
+        handler.update_filter(self.ctx, "filter2")
+    
+    def test_remove_filter(self):
+        self.ctx.request = self.create_request("DELETE", data="")
+        self.filter_manager.remove_filter.return_value = True
+
+        response = handler.remove_filter(self.ctx, "filter1")
+        eq_(httplib.NO_CONTENT, response.status_code)
+        self.filter_manager.remove_filter.assert_called_once_with("filter1")
+    
+    @raises(HttpNotFound)
+    def test_remove_filter_not_found(self):
+        self.ctx.request = self.create_request("DELETE", data="")
+        self.filter_manager.remove_filter.return_value = False
+
+        handler.remove_filter(self.ctx, "filter1")
+
+    
 class TestQueryHandlers(object):
     def setup(self):
         self.backend = mock.Mock(spec_set=Backend)

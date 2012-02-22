@@ -71,6 +71,23 @@ URL_MAP = Map(
             Rule("/<string:name>", methods=["DELETE"],
                 endpoint="handler.remove_source"
             ),
+        ]),
+        Submount("/filter", [
+            Rule("/", methods=["GET"],
+                endpoint="handler.get_filters"
+            ),
+            Rule("/", methods=["POST"],
+                endpoint="handler.add_filter"
+            ),
+            Rule("/<string:name>", methods=["GET"],
+                endpoint="handler.get_filter"
+            ),
+            Rule("/<string:name>", methods=["PUT"],
+                endpoint="handler.update_filter"
+            ),
+            Rule("/<string:name>", methods=["DELETE"],
+                endpoint="handler.remove_filter"
+            ),
         ])
     ],
     converters={

@@ -92,6 +92,13 @@ class Backend(object):
     def get_source_manager(self):
         """return a :class:`SourceManager` instance
         """
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def get_filter_manager(self):
+        """return a :class:`FilterManager` instance
+        """
+        raise NotImplementedError()
         
     @abstractmethod
     def execute_file_query(self, query):
@@ -204,6 +211,51 @@ class SourceManager(object):
         :raise: :class:`DuplicateEntry` if renaming and a source with such a
                 name already exists
         :raise: :class:`LookupError` if the source doesn't exist
+        """
+        raise NotImplementedError()
+
+class Filter(object):
+    def __init__(self, name, expression):
+        self.name = name
+        self.expression = expression
+
+class FilterManager(object):
+    """Interface for managing filter definitions in the database
+    """
+    @abstractmethod
+    def get_filter_names(self):
+        """get the names of all filters defined in the database
+        """
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def get_filter(self, name):
+        """get the filter identified by `name`
+        """
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def add_filter(self, filter):
+        """add a filter definition
+
+        :param filter: the :class:`Filter` to add
+        """
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def remove_filter(self, name):
+        """remove the filter identified by `name`
+
+        :return: True if the filter was found and removed
+        """
+        raise NotImplementedError()
+        
+    @abstractmethod
+    def update_filter(self, filter):
+        """update the filter definition identified by `name`
+
+        :param filter: the :class:`Filter` to add
+        :raise: :class:`LookupError` if the filter was not found
         """
         raise NotImplementedError()
 

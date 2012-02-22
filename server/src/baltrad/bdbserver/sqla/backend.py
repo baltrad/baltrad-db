@@ -32,7 +32,7 @@ from sqlalchemy import engine, event, exc as sqlexc, sql
 
 from baltrad.bdbcommon import oh5
 from baltrad.bdbserver import backend
-from baltrad.bdbserver.sqla import query, schema, storage
+from baltrad.bdbserver.sqla import filter, query, schema, storage
 
 logger = logging.getLogger("baltrad.bdbserver.sqla")
 
@@ -74,6 +74,7 @@ class SqlAlchemyBackend(backend.Backend):
             event.listen(self._engine, "connect", psql_set_extra_float_digits)
         
         self._source_manager = SqlAlchemySourceManager(self)
+        self._filter_manager = filter.SqlAlchemyFilterManager(self)
     
     @property
     def driver(self):
@@ -172,6 +173,9 @@ class SqlAlchemyBackend(backend.Backend):
     
     def get_source_manager(self):
         return self._source_manager
+    
+    def get_filter_manager(self):
+        return self._filter_manager
 
     def execute_file_query(self, qry):
         stmt = query.transform_file_query(qry)
