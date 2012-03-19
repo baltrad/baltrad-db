@@ -1,5 +1,5 @@
 /*
-Copyright 2010-2011 Estonian Meteorological and Hydrological Institute
+Copyright (C) 2009-2012 Swedish Meteorological and Hydrological Institute, SMHI,
 
 This file is part of baltrad-db.
 
@@ -16,118 +16,75 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
-
 package eu.baltrad.bdb.storage;
 
 import static org.easymock.EasyMock.*;
-import org.easymock.EasyMockSupport;
 
-import static org.junit.Assert.*;
+import java.io.File;
+import java.util.UUID;
+
+import org.easymock.EasyMockSupport;
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
-import java.util.*;
-
-public class FileCacheTest extends EasyMockSupport {
-  private static interface FileCacheMethods {
-    public void deleteFile(File path);
-  }
+public class FileCacheTest extends EasyMockSupport  {
+  private LinkedFileCache linkedCache = null;
+  private FileCache classUnderTest = null;
   
-  FileCacheMethods methods;
-  FileCache classUnderTest;
-
   @Before
   public void setup() {
-    methods = createMock(FileCacheMethods.class);
-    classUnderTest = new FileCache(3) {
-      @Override
-      protected void deleteFile(File path) {
-        methods.deleteFile(path);
-      }
-    };
+    linkedCache = createMock(LinkedFileCache.class);
+    classUnderTest = new FileCache(linkedCache);
   }
-
-  @Test
-  public void put_overflow() {
-    UUID uuid1 = UUID.randomUUID();
-    UUID uuid2 = UUID.randomUUID();
-    UUID uuid3 = UUID.randomUUID();
-    UUID uuid4 = UUID.randomUUID();
-    UUID uuid5 = UUID.randomUUID();
-
-    methods.deleteFile(new File(uuid1.toString()));
-    methods.deleteFile(new File(uuid2.toString()));
-    replayAll();
-
-    classUnderTest.put(uuid1, new File(uuid1.toString()));
-    classUnderTest.put(uuid2, new File(uuid2.toString()));
-    classUnderTest.put(uuid3, new File(uuid3.toString()));
-    classUnderTest.put(uuid4, new File(uuid4.toString()));
-    classUnderTest.put(uuid5, new File(uuid5.toString()));
-
-    verifyAll();
-  }
-
-  @Test
-  public void put_getChangesOrder() {
-    UUID uuid1 = UUID.randomUUID();
-    UUID uuid2 = UUID.randomUUID();
-    UUID uuid3 = UUID.randomUUID();
-    UUID uuid4 = UUID.randomUUID();
-    UUID uuid5 = UUID.randomUUID();
-
-    methods.deleteFile(new File(uuid2.toString()));
-    methods.deleteFile(new File(uuid3.toString()));
-    replayAll();
   
-    classUnderTest.put(uuid1, new File(uuid1.toString()));
-    classUnderTest.put(uuid2, new File(uuid2.toString()));
-    classUnderTest.put(uuid3, new File(uuid3.toString()));
-    classUnderTest.get(uuid1);
-    classUnderTest.put(uuid4, new File(uuid4.toString()));
-    classUnderTest.put(uuid5, new File(uuid5.toString()));
-    verifyAll();    
+  @After
+  public void tearDown() {
+    linkedCache = null;
+    classUnderTest = null;
   }
-
-  @Test
-  public void put_putChangesOrder() {
-    UUID uuid1 = UUID.randomUUID();
-    UUID uuid2 = UUID.randomUUID();
-    UUID uuid3 = UUID.randomUUID();
-    UUID uuid4 = UUID.randomUUID();
-    UUID uuid5 = UUID.randomUUID();
-
-    methods.deleteFile(new File(uuid2.toString()));
-    methods.deleteFile(new File(uuid3.toString()));
-    replayAll();
   
-    classUnderTest.put(uuid1, new File(uuid1.toString()));
-    classUnderTest.put(uuid2, new File(uuid2.toString()));
-    classUnderTest.put(uuid3, new File(uuid3.toString()));
-    classUnderTest.put(uuid1, new File(uuid1.toString()));
-    classUnderTest.put(uuid4, new File(uuid4.toString()));
-    classUnderTest.put(uuid5, new File(uuid5.toString()));
-    verifyAll();    
-  }
-
   @Test
-  public void remove() {
-    UUID uuid = UUID.randomUUID();
+  public void testPut() throws Exception {
+    UUID uuid1 = UUID.randomUUID();
+    File f = new File(uuid1.toString());
     
-    methods.deleteFile(new File(uuid.toString()));
+    expect(linkedCache.put(uuid1, f)).andReturn(null);
+    
     replayAll();
     
-    classUnderTest.put(uuid, new File(uuid.toString()));
-    classUnderTest.remove(uuid);
+    classUnderTest.put(uuid1, f);
+    
     verifyAll();
   }
-
+  
   @Test
-  public void remove_nx() {
+  public void testGet() throws Exception {
+    UUID uuid1 = UUID.randomUUID();
+    File f = new File(uuid1.toString());
+    
+    expect(linkedCache.get(uuid1)).andReturn(f);
+    
+    replayAll();
+    
+    File result = classUnderTest.get(uuid1);
+    
+    verifyAll();
+    Assert.assertTrue(f == result);
+  }
+  
+  @Test
+  public void testRemove() throws Exception {
+    UUID uuid1 = UUID.randomUUID();
+    File f = new File(uuid1.toString());
+
+    expect(linkedCache.remove(uuid1)).andReturn(f);
+
     replayAll();
 
-    classUnderTest.remove(UUID.randomUUID());
+    classUnderTest.remove(uuid1);
+    
     verifyAll();
   }
 }

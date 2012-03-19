@@ -1,5 +1,5 @@
-/*
-Copyright 2010-2011 Estonian Meteorological and Hydrological Institute
+/* --------------------------------------------------------------------
+Copyright (C) 2009-2012 Swedish Meteorological and Hydrological Institute, SMHI,
 
 This file is part of baltrad-db.
 
@@ -15,40 +15,61 @@ GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
-*/
-
+------------------------------------------------------------------------*/
 package eu.baltrad.bdb.storage;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.UUID;
 
-class FileCache extends LinkedHashMap<UUID, File> {
-  private static final long serialVersionUID = 1L;
-
-  private final int fileLimit;
-
+/**
+ * Thread safe file cache.
+ * @author anders
+ */
+class FileCache {
+  /**
+   * The linked file cache.
+   */
+  private LinkedFileCache cache = null;
+  
+  /**
+   * Constructor
+   * @param fileLimit number of files in cache
+   */
   public FileCache(int fileLimit) {
-    super(fileLimit, 1, true);
-    this.fileLimit = fileLimit;
+    cache = new LinkedFileCache(fileLimit);
   }
 
-  @Override
-  public File remove(Object key) {
-    File path = super.remove(key);
-    if (path != null)
-      deleteFile(path);
-    return path;
+  /**
+   * Constructor for allowing testing
+   * @param cache the cache
+   */
+  public FileCache(LinkedFileCache cache) {
+    this.cache = cache;
   }
   
-  @Override
-  protected boolean removeEldestEntry(Map.Entry<UUID, File> eldest) {
-    boolean remove = size() > fileLimit;
-    if (remove)
-      deleteFile(eldest.getValue());
-    return remove;
+  /**
+   * Puts a file into the cache
+   * @param uuid the uuid
+   * @param file the file
+   */
+  public synchronized void put(UUID uuid, File file) {
+    cache.put(uuid, file);
   }
-
-  protected void deleteFile(File path) {
-    path.delete();
+  
+  /**
+   * Returns the file with specified uuid
+   * @param uuid the uuid
+   * @return the file
+   */
+  public File get(UUID uuid) {
+    return cache.get(uuid);
   }
-};
+  
+  /**
+   * Removes the file with uuid
+   * @param uuid the uuid
+   */
+  public void remove(UUID uuid) {
+    cache.remove(uuid);
+  }
+}

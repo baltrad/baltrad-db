@@ -71,8 +71,7 @@ public class CacheDirStorageTest extends EasyMockSupport {
     expect(cache.get(uuid))
       .andReturn(null);
     methods.copyInputStreamToFile(stream, dst);
-    expect(cache.put(uuid, dst))
-      .andReturn(null);
+    cache.put(uuid, dst);
     replayAll();
 
     assertEquals(dst, classUnderTest.store(entry, stream));
@@ -128,8 +127,7 @@ public class CacheDirStorageTest extends EasyMockSupport {
 
     expect(entry.getUuid())
       .andReturn(uuid);
-    expect(cache.remove(uuid))
-      .andReturn(null);
+    cache.remove(uuid);
     replayAll();
     
     classUnderTest.remove(entry);
@@ -148,12 +146,9 @@ public class CacheDirStorageTest extends EasyMockSupport {
     };
     expect(methods.listStorageRoot())
       .andReturn(files);
-    expect(cache.put(uuid1, new File("/path", uuid1.toString())))
-      .andReturn(null);
-    expect(cache.put(uuid2, new File("/path", uuid2.toString())))
-      .andReturn(null);
-    expect(cache.put(uuid3, new File("/path", uuid3.toString())))
-      .andReturn(null);
+    cache.put(uuid1, new File("/path", uuid1.toString()));
+    cache.put(uuid2, new File("/path", uuid2.toString()));
+    cache.put(uuid3, new File("/path", uuid3.toString()));
     replayAll();
 
     classUnderTest.init();
