@@ -198,6 +198,10 @@ public final class JsonUtil {
     if (query.getSkip() != null) {
       result.put("skip", query.getSkip());
     }
+    
+    if (query.getDistinct() != null) {
+      result.put("distinct", query.getDistinct());
+    }
 
     return result;
   }

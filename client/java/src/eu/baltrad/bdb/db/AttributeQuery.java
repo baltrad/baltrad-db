@@ -11,7 +11,8 @@ public class AttributeQuery {
   private List<Expression> group;
   private Integer limit;
   private Integer skip;
-
+  private Boolean distinct;
+  
   public AttributeQuery() {
     fetchMap = new HashMap<String, Expression>();
     filter = null;
@@ -71,5 +72,13 @@ public class AttributeQuery {
 
   public List<Expression> getGroupClause() {
     return group;
+  }
+
+  public void setDistinct(Boolean distinct) {
+	this.distinct = distinct;
+  }
+
+  public Boolean getDistinct() {
+	return distinct;
   }
 }

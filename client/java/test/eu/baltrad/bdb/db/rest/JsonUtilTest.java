@@ -133,6 +133,17 @@ public class JsonUtilTest {
   }
 
   @Test
+  public void toJson_AttributeQuery_withDistinct() {
+    AttributeQuery query = new AttributeQuery();
+    
+    JsonNode result = classUnderTest.toJson(query);
+    assertFalse(result.has("distinct"));
+    query.setDistinct(true);
+    result = classUnderTest.toJson(query);
+    assertTrue(result.has("distinct"));
+  }
+  
+  @Test
   public void toJson_AttributeQuery_empty() {
     AttributeQuery query = new AttributeQuery();
 
