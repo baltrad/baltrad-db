@@ -19,7 +19,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.db.rest;
 
-import eu.baltrad.bdb.db.Database;
 import eu.baltrad.bdb.db.DatabaseITestBase;
 
 public abstract class RestfulDatabaseITestBase extends DatabaseITestBase {

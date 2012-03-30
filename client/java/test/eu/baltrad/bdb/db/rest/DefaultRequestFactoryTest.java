@@ -123,7 +123,7 @@ public class DefaultRequestFactoryTest {
     
     assertEquals("POST", req.getMethod());
     assertEquals(URI.create("http://example.com/query/file"), req.getURI());
-    assertEquals("application/json", getContentType(req));
+    assertEquals("application/json; charset=utf-8", getContentType(req));
   }
 
   @Test
@@ -133,7 +133,7 @@ public class DefaultRequestFactoryTest {
     
     assertEquals("POST", req.getMethod());
     assertEquals(URI.create("http://example.com/query/attribute"), req.getURI());
-    assertEquals("application/json", getContentType(req));
+    assertEquals("application/json; charset=utf-8", getContentType(req));
   }
 
 

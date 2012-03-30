@@ -19,23 +19,29 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.db;
 
-import eu.baltrad.bdb.expr.ExpressionFactory;
-import eu.baltrad.bdb.oh5.Metadata;
-import eu.baltrad.bdb.oh5.Source;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeNotNull;
 
-import org.apache.commons.codec.binary.Hex;
-
-import static org.junit.Assert.*;
-import static org.junit.Assume.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.List;
 import java.util.UUID;
+
+import org.apache.commons.codec.binary.Hex;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import eu.baltrad.bdb.expr.ExpressionFactory;
+import eu.baltrad.bdb.oh5.Source;
 
 
 public abstract class DatabaseITestBase {
@@ -203,6 +209,20 @@ public abstract class DatabaseITestBase {
 
     assertNotNull(seang);
     assertEquals("Ängelholm", seang.get("PLC"));
+  }
+  
+  @Test
+  public void findByDiadristicName() throws Exception {
+    FileInputStream input = new FileInputStream(
+        getFilePath("fixtures/gdansk.h5")
+      );
+    classUnderTest.store(input);
+    AttributeQuery q = new AttributeQuery();
+    ExpressionFactory xpr = new ExpressionFactory();
+    q.fetch("what_source", xpr.attribute("_bdb/source:WMO"));
+    q.setFilter(xpr.eq(xpr.attribute("_bdb/source:PLC"),xpr.literal("Gdańsk")));
+    AttributeResult rs = classUnderTest.execute(q);
+    assertEquals(1, rs.size());
   }
 
 }

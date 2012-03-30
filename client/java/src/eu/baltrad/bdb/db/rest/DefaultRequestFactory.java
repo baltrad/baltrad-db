@@ -104,9 +104,9 @@ public final class DefaultRequestFactory implements RequestFactory {
     HttpPost result = new HttpPost(getRequestUri("query/file"));
     try {
       String queryJson = jsonUtil.jsonToString(jsonUtil.toJson(query));
-      StringEntity entity = new StringEntity(queryJson);
+      StringEntity entity = new StringEntity(queryJson, "utf-8");
       result.setEntity(entity);
-      result.addHeader("content-type", "application/json");
+      result.addHeader("content-type", "application/json; charset=utf-8");
     } catch (java.io.UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }
@@ -118,9 +118,9 @@ public final class DefaultRequestFactory implements RequestFactory {
     HttpPost result = new HttpPost(getRequestUri("query/attribute"));
     try {
       String queryJson = jsonUtil.jsonToString(jsonUtil.toJson(query));
-      StringEntity entity = new StringEntity(queryJson);
+      StringEntity entity = new StringEntity(queryJson, "utf-8");
       result.setEntity(entity);
-      result.addHeader("content-type", "application/json");
+      result.addHeader("content-type", "application/json; charset=utf-8");
     } catch (java.io.UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }

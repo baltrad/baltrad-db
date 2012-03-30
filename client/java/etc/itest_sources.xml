@@ -17,4 +17,14 @@
     <seang nod="seang" plc="Ängelholm" rad="SE50" wmo="02606"></seang>
     <sekkr nod="sekkr" plc="Karlskrona" rad="SE51" wmo="02666"></sekkr>
   </se>
+  <pl CCCC="SOWR" org="220">
+    <plleg plc="Legionowo" rad="PL41" wmo="12374"></plleg>
+    <plram plc="Ramza" rad="PL42" wmo="12514"></plram>
+    <plpas plc="Pastewnik" rad="PL43" wmo="12544"></plpas>
+    <plrze plc="Rzeszów" rad="PL44" wmo="12579"></plrze>
+    <plpoz plc="Poznań" rad="PL45" wmo="12331"></plpoz>
+    <plswi plc="Świdwin" rad="PL46" wmo="12220"></plswi>
+    <plgda plc="Gdańsk" rad="PL47" wmo="12151"></plgda>
+    <plbrz plc="Brzuchania" rad="PL48" wmo="12568"></plbrz>
+  </pl>  
 </radar-db>
