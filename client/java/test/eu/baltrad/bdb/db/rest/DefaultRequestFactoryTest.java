@@ -21,6 +21,7 @@ package eu.baltrad.bdb.db.rest;
 
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.FileQuery;
+import eu.baltrad.bdb.oh5.Source;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -136,7 +137,6 @@ public class DefaultRequestFactoryTest {
     assertEquals("application/json; charset=utf-8", getContentType(req));
   }
 
-
   @Test
   public void createGetSourcesRequest() {
     HttpUriRequest req = classUnderTest.createGetSourcesRequest();
@@ -145,6 +145,38 @@ public class DefaultRequestFactoryTest {
     assertEquals(URI.create("http://example.com/source/"), req.getURI());
   }
 
+  @Test
+  public void createAddSourceRequest() {
+    Source source = new Source("mysource");
+    source.put("oh", "ohvalue");
+    source.put("ah", "ahvalue");
+    
+    HttpUriRequest req = classUnderTest.createAddSourceRequest(source);
+    assertEquals("POST", req.getMethod());
+    assertEquals(URI.create("http://example.com/source"), req.getURI());
+    assertEquals("application/json; charset=utf-8", getContentType(req));
+  }
+  
+  @Test
+  public void createUpdateSourceRequest() {
+    Source source = new Source("mysource");
+    source.put("oh", "ohvalue");
+    source.put("ah", "ahvalue");
+    
+    HttpUriRequest req = classUnderTest.createUpdateSourceRequest(source);
+    assertEquals("PUT", req.getMethod());
+    assertEquals(URI.create("http://example.com/source"), req.getURI());
+    assertEquals("application/json; charset=utf-8", getContentType(req));
+  }
+  
+  @Test
+  public void createDeleteSourceRequest() {
+    HttpUriRequest req = classUnderTest.createDeleteSourceRequest("nisse");
+    assertEquals("DELETE", req.getMethod());
+    assertEquals(URI.create("http://example.com/source/nisse"), req.getURI());
+    assertEquals("application/json; charset=utf-8", getContentType(req));
+  }
+  
   @Test
   public void getRequestUri_serverWithoutSlash() {
     classUnderTest = new DefaultRequestFactory(

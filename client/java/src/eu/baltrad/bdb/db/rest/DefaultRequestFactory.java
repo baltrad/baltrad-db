@@ -19,25 +19,24 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.db.rest;
 
-import eu.baltrad.bdb.db.AttributeQuery;
-import eu.baltrad.bdb.db.FileEntry;
-import eu.baltrad.bdb.db.FileQuery;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
-
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIUtils;
-import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.util.UUID;
+import eu.baltrad.bdb.db.AttributeQuery;
+import eu.baltrad.bdb.db.FileQuery;
+import eu.baltrad.bdb.oh5.Source;
 
 public final class DefaultRequestFactory implements RequestFactory {
   private final URI serverUri;
@@ -130,6 +129,41 @@ public final class DefaultRequestFactory implements RequestFactory {
   @Override
   public HttpUriRequest createGetSourcesRequest() {
     return new HttpGet(getRequestUri("source/"));
+  }
+  
+  @Override
+  public HttpUriRequest createAddSourceRequest(Source source) {
+    HttpPost result = new HttpPost(getRequestUri("source"));
+    try {
+      String jsonSource = jsonUtil.jsonToString(jsonUtil.toJson(source));
+      StringEntity entity = new StringEntity(jsonSource, "utf-8");
+      result.setEntity(entity);
+      result.addHeader("content-type", "application/json; charset=utf-8");
+    } catch (java.io.UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
+    return result;
+  }
+  
+  @Override
+  public HttpUriRequest createUpdateSourceRequest(Source source) {
+    HttpPut result = new HttpPut(getRequestUri("source"));
+    try {
+      String jsonSource = jsonUtil.jsonToString(jsonUtil.toJson(source));
+      StringEntity entity = new StringEntity(jsonSource, "utf-8");
+      result.setEntity(entity);
+      result.addHeader("content-type", "application/json; charset=utf-8");
+    } catch (java.io.UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
+    return result;
+  }
+  
+  @Override
+  public HttpUriRequest createDeleteSourceRequest(String source) {
+    HttpDelete result = new HttpDelete(getRequestUri("source/"+source));
+    result.addHeader("content-type", "application/json; charset=utf-8");
+    return result;
   }
   
   protected URI getRequestUri(String path) {

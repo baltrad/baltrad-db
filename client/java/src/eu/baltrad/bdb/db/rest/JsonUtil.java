@@ -27,6 +27,7 @@ import eu.baltrad.bdb.oh5.Node;
 import eu.baltrad.bdb.oh5.Attribute;
 import eu.baltrad.bdb.oh5.Group;
 import eu.baltrad.bdb.oh5.Dataset;
+import eu.baltrad.bdb.oh5.Source;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -42,6 +43,7 @@ import org.codehaus.jackson.node.TextNode;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.Collection;
 
 public final class JsonUtil {
   private JsonNodeFactory nodeFactory;
@@ -206,6 +208,24 @@ public final class JsonUtil {
     return result;
   }
 
+  public JsonNode toJson(Source source) {
+    ObjectNode result = nodeFactory.objectNode();
+    ObjectNode src = nodeFactory.objectNode();
+    ObjectNode values = nodeFactory.objectNode();
+    
+    Collection<String> keys = source.getKeys();
+    for (String key : keys) {
+      values.put(key, source.get(key));
+    }
+    
+    src.put("name", source.getName());
+    src.put("values", values);
+    
+    result.put("source", src);
+    
+    return result;
+  }
+  
   public String jsonToString(JsonNode node) {
     try {
       return jsonMapper.writeValueAsString(node);

@@ -18,17 +18,21 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.baltrad.bdb.db.rest;
 
-import eu.baltrad.bdb.db.AttributeQuery;
-import eu.baltrad.bdb.db.AttributeResult;
-import eu.baltrad.bdb.db.DatabaseError;
-import eu.baltrad.bdb.db.DuplicateEntry;
-import eu.baltrad.bdb.db.FileEntry;
-import eu.baltrad.bdb.db.FileQuery;
-import eu.baltrad.bdb.db.FileResult;
-import eu.baltrad.bdb.oh5.Source;
+import static org.easymock.EasyMock.expect;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ProtocolVersion;
@@ -36,16 +40,19 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHttpResponse;
-
-import static org.easymock.EasyMock.*;
 import org.easymock.EasyMockSupport;
-
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
-import java.util.*;
+import eu.baltrad.bdb.db.AttributeQuery;
+import eu.baltrad.bdb.db.AttributeResult;
+import eu.baltrad.bdb.db.DatabaseError;
+import eu.baltrad.bdb.db.DuplicateEntry;
+import eu.baltrad.bdb.db.FileEntry;
+import eu.baltrad.bdb.db.FileQuery;
+import eu.baltrad.bdb.db.FileResult;
+import eu.baltrad.bdb.db.SourceManager;
+import eu.baltrad.bdb.oh5.Source;
 
 public class RestfulDatabaseTest extends EasyMockSupport {
   private static interface RestfulDatabaseMethods {
@@ -427,6 +434,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     replayAll();
 
     AttributeResult result = classUnderTest.execute(query);
+    
     verifyAll();
   }
 
@@ -451,6 +459,12 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     verifyAll();
   }
 
+  @Test
+  public void getSourceManager() throws Exception {
+    SourceManager result = classUnderTest.getSourceManager();
+    assertSame(classUnderTest, result);
+  }
+  
   @Test
   public void getSources() throws Exception {
     HttpUriRequest request = createMock(HttpUriRequest.class);
@@ -499,6 +513,165 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     verifyAll();
   }
 
+  @Test
+  public void add() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_CREATED);
+    Source source = new Source("foo");
+    source.put("smo", "ba");
+    source.put("smi", "bo");
+    
+    expect(requestFactory.createAddSourceRequest(source)).andReturn(request);
+    expect(methods.executeRequest(request)).andReturn(response);
+    
+    replayAll();
+    
+    classUnderTest.add(source);
+    
+    verifyAll();
+  }
+
+  @Test
+  public void add_duplicate() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_CONFLICT);
+    Source source = new Source("foo");
+    source.put("smo", "ba");
+    source.put("smi", "bo");
+    
+    expect(requestFactory.createAddSourceRequest(source)).andReturn(request);
+    expect(methods.executeRequest(request)).andReturn(response);
+    
+    replayAll();
+    
+    try {
+      classUnderTest.add(source);
+      fail("Expected DuplicateEntry");
+    } catch (DuplicateEntry e) {
+      // pass
+    }
+    
+    verifyAll();
+  }
+  
+  @Test
+  public void add_unknown() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    Source source = new Source("foo");
+    source.put("smo", "ba");
+    source.put("smi", "bo");
+    
+    expect(requestFactory.createAddSourceRequest(source)).andReturn(request);
+    expect(methods.executeRequest(request)).andReturn(response);
+    
+    replayAll();
+    
+    try {
+      classUnderTest.add(source);
+      fail("Expected DatabaseError");
+    } catch (DatabaseError e) {
+      // pass
+    }
+    
+    verifyAll();
+  }
+  
+  @Test
+  public void update() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_NO_CONTENT);
+
+    Source source = new Source("foo");
+    source.put("smo", "ba");
+    source.put("smi", "bo");
+
+    expect(requestFactory.createUpdateSourceRequest(source)).andReturn(request);
+    expect(methods.executeRequest(request)).andReturn(response);
+    
+    replayAll();
+    
+    classUnderTest.update(source);
+    
+    verifyAll();
+  }
+  
+  @Test
+  public void update_notFound() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_NOT_FOUND);
+
+    Source source = new Source("foo");
+    source.put("smo", "ba");
+    source.put("smi", "bo");
+
+    expect(requestFactory.createUpdateSourceRequest(source)).andReturn(request);
+    expect(methods.executeRequest(request)).andReturn(response);
+    
+    replayAll();
+    
+    try {
+      classUnderTest.update(source);
+      fail("Expected DatabaseError");
+    } catch (DatabaseError e) {
+      // pass
+    }
+    
+    verifyAll();
+  }
+  
+  @Test
+  public void remove() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_NO_CONTENT);
+
+    expect(requestFactory.createDeleteSourceRequest("nisse")).andReturn(request);
+    expect(methods.executeRequest(request)).andReturn(response);
+    
+    replayAll();
+    
+    boolean result = classUnderTest.remove("nisse");
+    
+    verifyAll();
+    assertEquals(true, result);
+  }
+
+  @Test
+  public void remove_noSuchFile() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_NOT_FOUND);
+
+    expect(requestFactory.createDeleteSourceRequest("nisse")).andReturn(request);
+    expect(methods.executeRequest(request)).andReturn(response);
+    
+    replayAll();
+    
+    boolean result = classUnderTest.remove("nisse");
+    
+    verifyAll();
+    assertEquals(false, result);
+  }
+
+  @Test
+  public void remove_otherError() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_OK);
+
+    expect(requestFactory.createDeleteSourceRequest("nisse")).andReturn(request);
+    expect(methods.executeRequest(request)).andReturn(response);
+    
+    replayAll();
+    
+    try {
+      classUnderTest.remove("nisse");
+      fail("Expected DatabaseError");
+    } catch (DatabaseError e) {
+      // pass
+    }
+    
+    verifyAll();
+  }
+  
   @Test
   public void executeRequest() throws Exception {
     classUnderTest = new RestfulDatabase(

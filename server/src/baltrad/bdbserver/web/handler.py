@@ -158,7 +158,7 @@ def add_source(ctx):
     response.headers["Location"] = ctx.make_url("source/" + source.name)
     return response
 
-def update_source(ctx, name):
+def update_source(ctx):
     """update a source in the database
 
     :param ctx: the request context
@@ -172,13 +172,11 @@ def update_source(ctx, name):
     source = Source(data["name"], values=data["values"])
 
     try:
-        ctx.backend.get_source_manager().update_source(name, source)
+        ctx.backend.get_source_manager().update_source(source)
         response = NoContentResponse()
-        response.headers["Location"] = ctx.make_url("source/" + name)
+        response.headers["Location"] = ctx.make_url("source/" + source.name)
     except LookupError:
         response = Response("", status=httplib.NOT_FOUND)
-    except DuplicateEntry:
-        response = Response("", status=httplib.CONFLICT)
 
     return response
 

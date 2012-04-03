@@ -19,21 +19,24 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.db.rest;
 
-import eu.baltrad.bdb.db.AttributeQuery;
-import eu.baltrad.bdb.expr.Expression;
-import eu.baltrad.bdb.expr.ExpressionFactory;
-import eu.baltrad.bdb.oh5.Node;
-import eu.baltrad.bdb.oh5.Metadata;
-import eu.baltrad.bdb.oh5.Attribute;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
-
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import eu.baltrad.bdb.db.AttributeQuery;
+import eu.baltrad.bdb.expr.Expression;
+import eu.baltrad.bdb.expr.ExpressionFactory;
+import eu.baltrad.bdb.oh5.Attribute;
+import eu.baltrad.bdb.oh5.Metadata;
+import eu.baltrad.bdb.oh5.Source;
 
 public class JsonUtilTest {
   JsonNodeFactory nodeFactory;
@@ -150,5 +153,20 @@ public class JsonUtilTest {
     JsonNode result = classUnderTest.toJson(query);
     assertTrue(result.has("fetch"));
     assertEquals(1, result.size());
+  }
+  
+  @Test
+  public void toJson_Source() {
+    Source source = new Source("nisse");
+    source.put("ah", "ahvalue");
+    source.put("oh", "ohvalue");
+    
+    JsonNode result = classUnderTest.toJson(source);
+    JsonNode srcnode = result.get("source");
+    assertEquals("nisse", srcnode.get("name").getTextValue());
+    
+    JsonNode values = srcnode.get("values");
+    assertEquals("ahvalue", values.get("ah").getTextValue());
+    assertEquals("ohvalue", values.get("oh").getTextValue());
   }
 }

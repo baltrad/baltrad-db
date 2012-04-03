@@ -203,13 +203,10 @@ class SourceManager(object):
         raise NotImplementedError()
     
     @abstractmethod
-    def update_source(self, name, source):
+    def update_source(self, source):
         """update a source definition in the database
 
-        :param name: the name of the source to modify
         :param source: the new definiton of the source
-        :raise: :class:`DuplicateEntry` if renaming and a source with such a
-                name already exists
         :raise: :class:`LookupError` if the source doesn't exist
         """
         raise NotImplementedError()

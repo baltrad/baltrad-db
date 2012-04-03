@@ -312,23 +312,13 @@ class SqlAlchemySourceManager(backend.SourceManager):
             insert_source_values(conn, source_id, source)
         return source_id
     
-    def update_source(self, name, source):
+    def update_source(self, source):
         with self.get_connection() as conn:
-            source_id = get_source_id_by_name(conn, name)
+            source_id = get_source_id_by_name(conn, source.name)
             if not source_id:
-                raise LookupError("source '%s' not found" % name)
+                raise LookupError("source '%s' not found" % source.name)
 
             with conn.begin():
-                if name != source.name:
-                    try:
-                        conn.execute(
-                            schema.sources.update()
-                                .where(schema.sources.c.id==source_id),
-                            name=source.name
-                        )
-                    except sqlexc.IntegrityError, e:
-                        raise backend.DuplicateEntry(str(e))
-                
                 conn.execute(
                     schema.source_kvs.delete(
                         schema.source_kvs.c.source_id==source_id

@@ -84,20 +84,11 @@ public interface Database {
   /**
    * list sources defined in the database
    */
+  @Deprecated
   List<Source> getSources();
   
   /**
-   * add a source definition to this database
+   * @return the source manager
    */
-//  void addSource(Source source);
-
-  /**
-   * update a source definition in this database
-   */
-//  void updateSource(Source source);
-  
-  /**
-   * remove a source definition from this database
-   */
-//  void removeSource(Source source);
+  SourceManager getSourceManager();
 }

@@ -22,6 +22,9 @@ from werkzeug import serving, exceptions as wzexc
 from baltrad.bdbserver import backend
 from baltrad.bdbserver.web import auth, routing, util as webutil
 
+import logging
+logger = logging.getLogger("baltard.bdbserver.app")
+
 class Application(object):
     def __init__(self, backend):
         self.backend = backend

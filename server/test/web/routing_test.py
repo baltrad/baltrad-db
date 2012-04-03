@@ -99,9 +99,8 @@ class TestSourceRoutes(object):
         eq_("handler.add_source", endpoint)
 
     def test_source_PUT(self):
-        endpoint, args = self.adapter.match("/source/srcname", "PUT")
+        endpoint, args = self.adapter.match("/source/", "PUT")
         eq_("handler.update_source", endpoint)
-        eq_("srcname", args["name"])
 
     def test_source_DELETE(self):
         endpoint, args = self.adapter.match("/source/srcname", "DELETE")

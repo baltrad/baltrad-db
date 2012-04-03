@@ -219,10 +219,10 @@ class TestSqlAlchemySourceManager(object):
     @attr("dbtest")
     def test_update_source(self):
         source1 = Source("foo", values={"bar": "baz"})
-        source2 = Source("qwe", values={"asd": "qaz"})
+        source2 = Source("foo", values={"asd": "qaz"})
         self.source_manager.add_source(source1)
 
-        self.source_manager.update_source("foo", source2)
+        self.source_manager.update_source(source2)
 
         sources = self.source_manager.get_sources()
         eq_(1, len(sources))
@@ -231,19 +231,9 @@ class TestSqlAlchemySourceManager(object):
     @attr("dbtest")
     @raises(LookupError)
     def test_update_source_not_found(self):
-        source1 = Source("foo", values={"bar": "baz"})
-        self.source_manager.update_source("qwe", source1)
+        source1 = Source("qwe", values={"bar": "baz"})
+        self.source_manager.update_source(source1)
     
-    @attr("dbtest")
-    @raises(DuplicateEntry)
-    def test_update_source_name_conflict(self):
-        source1 = Source("foo", values={"bar": "baz"})
-        source2 = Source("qwe", values={"asd": "qaz"})
-        self.source_manager.add_source(source1)
-        self.source_manager.add_source(source2)
-
-        self.source_manager.update_source("foo", source2)
-
     @attr("dbtest")
     def test_remove_source(self):
         source1 = Source("foo", values={"bar": "baz"})

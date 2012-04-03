@@ -24,6 +24,7 @@ import eu.baltrad.bdb.db.DatabaseError;
 import eu.baltrad.bdb.db.DuplicateEntry;
 import eu.baltrad.bdb.db.FileEntry;
 import eu.baltrad.bdb.db.FileQuery;
+import eu.baltrad.bdb.db.SourceManager;
 import eu.baltrad.bdb.oh5.Source;
 
 import org.apache.http.HttpStatus;
@@ -40,7 +41,7 @@ import java.util.UUID;
 /**
  * 
  */
-public class RestfulDatabase implements Database {
+public class RestfulDatabase implements Database, SourceManager {
   private HttpClient httpClient;
   private RequestFactory requestFactory;
   private Authenticator authenticator;
@@ -230,9 +231,24 @@ public class RestfulDatabase implements Database {
   }
 
   /**
-   * @see eu.baltrad.bdb.db.Database#getSources()
+   * @see eu.baltrad.bdb.db.Database#close()
    */
   @Override
+  public void close() {
+    httpClient.getConnectionManager().shutdown();
+  }
+
+  /**
+   * @see eu.baltrad.bdb.db.Database#getSourceManager()
+   */
+  public SourceManager getSourceManager() {
+    return this;
+  }
+  
+  /**
+   * @see eu.baltrad.bdb.db.SourceManager#getSources()
+   */
+  @Override  
   public List<Source> getSources() {
     HttpUriRequest request = requestFactory.createGetSourcesRequest();
     RestfulResponse response = executeRequest(request);
@@ -250,11 +266,68 @@ public class RestfulDatabase implements Database {
     }
   }
 
+  /**
+   * @see eu.baltrad.bdb.db.SourceManager#add(Source)
+   */
   @Override
-  public void close() {
-    httpClient.getConnectionManager().shutdown();
+  public void add(Source src) {
+    HttpUriRequest request = requestFactory.createAddSourceRequest(src);
+    RestfulResponse response = executeRequest(request);
+    
+    try {
+      int statusCode = response.getStatusCode();
+      if (statusCode == HttpStatus.SC_CREATED) {
+        // no op
+      } else if (statusCode == HttpStatus.SC_CONFLICT) {
+        throw new DuplicateEntry("Source already exists");
+      } else {
+        throw new DatabaseError("Could not add source, response code: " + Integer.toString(statusCode));
+      }
+    } finally {
+      response.close();
+    }
   }
-  
+
+  /**
+   * @see eu.baltrad.bdb.db.SourceManager#update(Source)
+   */
+  @Override
+  public void update(Source src) {
+    HttpUriRequest request = requestFactory.createUpdateSourceRequest(src);
+    RestfulResponse response = executeRequest(request);
+    try {
+      int statusCode = response.getStatusCode();
+      if (statusCode != HttpStatus.SC_NO_CONTENT) {
+        throw new DatabaseError("Could not update source, response code: " + Integer.toString(statusCode));
+      }
+    } finally {
+      response.close();
+    }
+  }
+
+  /**
+   * @see eu.baltrad.bdb.db.SourceManager#remove(Source)
+   */
+  @Override
+  public boolean remove(String src) {
+    HttpUriRequest request = requestFactory.createDeleteSourceRequest(src);
+    RestfulResponse response = executeRequest(request);
+    boolean result = false;
+    try {
+      int statusCode = response.getStatusCode();
+      if (statusCode == HttpStatus.SC_NO_CONTENT) {
+        result = true;
+      } else if (statusCode == HttpStatus.SC_NOT_FOUND) {
+        result = false;
+      } else {
+        throw new DatabaseError("Could not remove source, response code: " + Integer.toString(statusCode));
+      }
+    } finally {
+      response.close();
+    }
+    return result;
+  }
+
   protected RestfulResponse executeRequest(HttpUriRequest request) {
     authenticator.addCredentials(request);
     try {

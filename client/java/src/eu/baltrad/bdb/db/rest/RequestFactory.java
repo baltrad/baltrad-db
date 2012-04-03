@@ -21,6 +21,7 @@ package eu.baltrad.bdb.db.rest;
 
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.FileQuery;
+import eu.baltrad.bdb.oh5.Source;
 
 import org.apache.http.client.methods.HttpUriRequest;
 
@@ -43,4 +44,10 @@ public interface RequestFactory {
   HttpUriRequest createQueryAttributeRequest(AttributeQuery query);
 
   HttpUriRequest createGetSourcesRequest();
+  
+  HttpUriRequest createAddSourceRequest(Source source);
+  
+  HttpUriRequest createUpdateSourceRequest(Source source);
+  
+  HttpUriRequest createDeleteSourceRequest(String source);
 }

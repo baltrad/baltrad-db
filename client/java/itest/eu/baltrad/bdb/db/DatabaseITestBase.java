@@ -59,11 +59,15 @@ public abstract class DatabaseITestBase {
     classUnderTest = createDatabase();
     assumeNotNull(classUnderTest);
     classUnderTest.removeAllFileEntries();
+    try {
+      classUnderTest.getSourceManager().remove("newsourcename");
+    } catch (Exception e) {
+      
+    }
   }
 
   @After
   public void tearDown() {
-
   }
 
   @Test
@@ -206,10 +210,126 @@ public abstract class DatabaseITestBase {
         break;
       }
     }
+  }
 
+  @Test
+  public void SourceManager_getSources() throws Exception {
+    List<Source> sources = classUnderTest.getSourceManager().getSources();
+    // find seang
+    Source seang = null;
+    for (Source src : sources) {
+      if ("seang".equals(src.getName())) {
+        seang = src;
+        break;
+      }
+    }
+    
     assertNotNull(seang);
     assertEquals("Ängelholm", seang.get("PLC"));
   }
+  
+  @Test
+  public void SourceManager_add() throws Exception {
+    Source newsource = new Source("newsourcename");
+    newsource.put("PLC", "New source town");
+    newsource.put("CMT", "New comment field");
+    
+    classUnderTest.getSourceManager().add(newsource);
+    
+    List<Source> sources = classUnderTest.getSourceManager().getSources();
+
+    // find source and place
+    Source found = null;
+    for (Source src : sources) {
+      if ("newsourcename".equals(src.getName())) {
+        found = src;
+        break;
+      }
+    }
+    
+    assertNotNull(found);
+    assertEquals("New source town", found.get("PLC"));
+    assertEquals("New comment field", found.get("CMT"));
+  }
+
+  @Test
+  public void SourceManager_update() throws Exception {
+    Source newsource = new Source("newsourcename");
+    newsource.put("PLC", "New source town");
+    newsource.put("CMT", "New comment field");
+    
+    classUnderTest.getSourceManager().add(newsource);
+    
+    newsource.put("PLC", "Changed source town");
+    
+    classUnderTest.getSourceManager().update(newsource);
+    
+    List<Source> sources = classUnderTest.getSourceManager().getSources();
+
+    // find source and place
+    Source found = null;
+    for (Source src : sources) {
+      if ("newsourcename".equals(src.getName())) {
+        found = src;
+        break;
+      }
+    }
+    
+    assertNotNull(found);
+    assertEquals("Changed source town", found.get("PLC"));
+    assertEquals("New comment field", found.get("CMT"));
+  }
+  
+  @Test
+  public void SourceManager_updateNotExisting() throws Exception {
+    Source newsource = new Source("newsourcename");
+    newsource.put("PLC", "New source town");
+    newsource.put("CMT", "New comment field");
+    
+    try {
+      classUnderTest.getSourceManager().update(newsource);
+      fail("Expected DatabaseError");
+    } catch (DatabaseError e) {
+      // pass
+    }
+    
+    List<Source> sources = classUnderTest.getSourceManager().getSources();
+
+    // find source and place
+    Source found = null;
+    for (Source src : sources) {
+      if ("newsourcename".equals(src.getName())) {
+        found = src;
+        break;
+      }
+    }
+    
+    assertNull(found);
+  }
+  
+  @Test
+  public void SourceManager_remove() throws Exception {
+    Source newsource = new Source("newsourcename");
+    newsource.put("PLC", "New source town");
+    newsource.put("CMT", "New comment field");
+
+    classUnderTest.getSourceManager().add(newsource);
+    classUnderTest.getSourceManager().remove("newsourcename");
+    
+    List<Source> sources = classUnderTest.getSourceManager().getSources();
+
+    // find source and place
+    Source found = null;
+    for (Source src : sources) {
+      if ("newsourcename".equals(src.getName())) {
+        found = src;
+        break;
+      }
+    }
+    
+    assertNull(found);
+  }
+
   
   @Test
   public void findByDiadristicName() throws Exception {

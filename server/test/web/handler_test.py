@@ -163,12 +163,12 @@ class TestSourceHandlers(object):
             data='{"source": {"name": "foo", "values": {"bar": "baz"}}}',
         )
 
-        response = handler.update_source(self.ctx, "qaz")
+        response = handler.update_source(self.ctx)
         self.source_manager.update_source.assert_called_with(
-            "qaz", Source("foo", values={"bar": "baz"})
+            Source("foo", values={"bar": "baz"})
         )
         eq_(httplib.NO_CONTENT, response.status_code)
-        eq_("/source/qaz", response.headers["Location"])
+        eq_("/source/foo", response.headers["Location"])
     
     def test_update_source_not_found(self):
         self.ctx.request = self.create_request("PUT",
@@ -176,17 +176,8 @@ class TestSourceHandlers(object):
         )
         self.source_manager.update_source.side_effect = LookupError()
 
-        response = handler.update_source(self.ctx, "qaz")
+        response = handler.update_source(self.ctx)
         eq_(httplib.NOT_FOUND, response.status_code)
-    
-    def test_update_source_duplicate_name(self):
-        self.ctx.request = self.create_request("PUT",
-            data='{"source": {"name": "foo", "values": {"bar": "baz"}}}',
-        )
-        self.source_manager.update_source.side_effect = DuplicateEntry()
-
-        response = handler.update_source(self.ctx, "qaz")
-        eq_(httplib.CONFLICT, response.status_code)
     
     def test_remove_source(self):
         self.ctx.request = self.create_request("DELETE", data="")
