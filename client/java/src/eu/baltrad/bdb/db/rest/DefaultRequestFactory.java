@@ -133,7 +133,7 @@ public final class DefaultRequestFactory implements RequestFactory {
   
   @Override
   public HttpUriRequest createAddSourceRequest(Source source) {
-    HttpPost result = new HttpPost(getRequestUri("source"));
+    HttpPost result = new HttpPost(getRequestUri("source/"));
     try {
       String jsonSource = jsonUtil.jsonToString(jsonUtil.toJson(source));
       StringEntity entity = new StringEntity(jsonSource, "utf-8");
@@ -147,7 +147,7 @@ public final class DefaultRequestFactory implements RequestFactory {
   
   @Override
   public HttpUriRequest createUpdateSourceRequest(Source source) {
-    HttpPut result = new HttpPut(getRequestUri("source"));
+    HttpPut result = new HttpPut(getRequestUri("source/"));
     try {
       String jsonSource = jsonUtil.jsonToString(jsonUtil.toJson(source));
       StringEntity entity = new StringEntity(jsonSource, "utf-8");

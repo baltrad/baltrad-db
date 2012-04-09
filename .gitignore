@@ -17,3 +17,4 @@ server/etc/develop.properties
 server/dist
 test/reports
 
+*~

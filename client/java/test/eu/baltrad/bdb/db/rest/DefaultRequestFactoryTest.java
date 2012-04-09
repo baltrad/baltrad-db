@@ -153,7 +153,7 @@ public class DefaultRequestFactoryTest {
     
     HttpUriRequest req = classUnderTest.createAddSourceRequest(source);
     assertEquals("POST", req.getMethod());
-    assertEquals(URI.create("http://example.com/source"), req.getURI());
+    assertEquals(URI.create("http://example.com/source/"), req.getURI());
     assertEquals("application/json; charset=utf-8", getContentType(req));
   }
   
@@ -165,7 +165,7 @@ public class DefaultRequestFactoryTest {
     
     HttpUriRequest req = classUnderTest.createUpdateSourceRequest(source);
     assertEquals("PUT", req.getMethod());
-    assertEquals(URI.create("http://example.com/source"), req.getURI());
+    assertEquals(URI.create("http://example.com/source/"), req.getURI());
     assertEquals("application/json; charset=utf-8", getContentType(req));
   }
   
