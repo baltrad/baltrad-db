@@ -38,5 +38,6 @@ setuptools.setup(name="baltrad.bdbclient",
     test_suite="nose.collector",
     tests_require=[
         "mock >= 0.7",
+        "jprops >= 0.1"
     ],
 )

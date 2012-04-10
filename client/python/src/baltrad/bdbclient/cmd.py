@@ -149,7 +149,9 @@ class PrintSources(Command):
         )
 
         for source in sources:
-            print source.name + "\t" + source.to_string()
+            str = source.name + "\t" + source.to_string()
+            print unicode(str).encode('utf-8') #To get strings pipeable...
+            #print source.name + "\t" + source.to_string()
 
 class ImportSources(Command):
     def update_optionparser(self, parser):

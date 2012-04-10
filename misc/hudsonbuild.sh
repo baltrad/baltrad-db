@@ -71,6 +71,9 @@ run_tests() {
   test_python_package "$PROJECT_ROOT/common"
   export BDB_TEST_DB 
   test_python_package "$PROJECT_ROOT/server"
+  # Important that client api is tested after server since we need to start server for
+  # integration tests
+  export BDB_PYCLIENT_ITEST_PROPERTYFILE="$PROJECT_ROOT/misc/hudsonbuild.properties"
   test_python_package "$PROJECT_ROOT/client/python"
   test_java_client
 }

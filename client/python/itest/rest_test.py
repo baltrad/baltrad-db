@@ -22,6 +22,9 @@ from keyczar import errors as kzerrors
 from nose.tools import eq_, ok_, raises
 
 from baltrad.bdbclient import rest
+from baltrad.bdbcommon import oh5
+
+from . import get_database
 
 class TestKeyczarAuth(object):
     @raises(kzerrors.KeyczarError)
@@ -59,3 +62,61 @@ class TestKeyczarAuth(object):
         auth.add_credentials(req)
         credentials = req.headers["authorization"]
         ok_(credentials.startswith("bdb-keyczar testkey:AH"))
+
+class TestRestfulDatabase(object):
+    def setup(self):
+        self.database = get_database()
+    
+    def teardown(self):
+        self.database.remove_source('nisse')
+        self.database = None
+    
+    def get_source_from_sources(self, sources, name):
+        for s in sources:
+            if s.name == name:
+                return s
+        return None
+    
+    def get_source(self, name):
+        sources = self.database.get_sources()
+        return self.get_source_from_sources(sources, name)
+    
+    def test_get_sources(self):
+        sources = self.database.get_sources()
+        source = self.get_source_from_sources(sources, 'sevil')
+        #NOD:sevil,PLC:Vilebo,RAD:SE48,WMO:02570
+        eq_('sevil', source['NOD'])
+        eq_('Vilebo', source['PLC'])
+        eq_('SE48', source['RAD'])
+        eq_('02570', source['WMO'])
+
+    def test_add_source(self):
+        values = {'NOD':'nisse', 'PLC':'Nisse town'}
+        source = oh5.Source('nisse', values=values)
+        self.database.add_source(source)
+        
+        result = self.get_source('nisse')
+        eq_('nisse', source['NOD'])
+        eq_('Nisse town', source['PLC'])
+        
+    def test_update_source(self):
+        values = {'NOD':'nisse', 'PLC':'Nisse town'}
+        source = oh5.Source('nisse', values=values)
+        self.database.add_source(source)
+
+        source['PLC'] = 'Nisses super town'
+        self.database.update_source(source)
+
+        result = self.get_source('nisse')
+        eq_('nisse', source['NOD'])
+        eq_('Nisses super town', source['PLC'])
+
+    def test_remove_source(self):
+        values = {'NOD':'nisse', 'PLC':'Nisse town'}
+        source = oh5.Source('nisse', values=values)
+        self.database.add_source(source)
+
+        self.database.remove_source('nisse')
+        result = self.get_source('nisse')
+        eq_(None, result)
+

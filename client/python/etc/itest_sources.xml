@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<radar-db>
+  <by CCCC="UMMS" org="226">
+    <bymin plc="Minsk" rad="BY40" wmo="26850"></bymin>
+  </by>
+  <se CCCC="ESWI" org="82" cty="643">
+    <sekir nod="sekir" plc="Kiruna" rad="SE40" wmo="02032"></sekir>
+    <selul nod="selul" plc="Luleå" rad="SE41" wmo="02092"></selul>
+    <seosu nod="seosu" plc="Östersund" rad="SE42" wmo="02200"></seosu>
+    <seovi nod="seovi" plc="Örnsköldsvik" rad="SE43" wmo="02262"></seovi>
+    <sehud nod="sehud" plc="Hudiksvall" rad="SE44" wmo="02334"></sehud>
+    <selek nod="selek" plc="Leksand" rad="SE45" wmo="02430"></selek>
+    <searl nod="searl" plc="Arlanda" rad="SE46" wmo="02451"></searl>
+    <sease nod="sease" plc="Ase" rad="SE47" wmo="02588"></sease>
+    <sevil nod="sevil" plc="Vilebo" rad="SE48" wmo="02570"></sevil>
+    <sevar nod="sevar" plc="Vara" rad="SE49" wmo="02600"></sevar>
+    <seang nod="seang" plc="Ängelholm" rad="SE50" wmo="02606"></seang>
+    <sekkr nod="sekkr" plc="Karlskrona" rad="SE51" wmo="02666"></sekkr>
+  </se>
+  <pl CCCC="SOWR" org="220">
+    <plleg plc="Legionowo" rad="PL41" wmo="12374"></plleg>
+    <plram plc="Ramza" rad="PL42" wmo="12514"></plram>
+    <plpas plc="Pastewnik" rad="PL43" wmo="12544"></plpas>
+    <plrze plc="Rzeszów" rad="PL44" wmo="12579"></plrze>
+    <plpoz plc="Poznań" rad="PL45" wmo="12331"></plpoz>
+    <plswi plc="Świdwin" rad="PL46" wmo="12220"></plswi>
+    <plgda plc="Gdańsk" rad="PL47" wmo="12151"></plgda>
+    <plbrz plc="Brzuchania" rad="PL48" wmo="12568"></plbrz>
+  </pl>  
+</radar-db>
