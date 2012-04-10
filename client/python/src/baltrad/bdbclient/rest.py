@@ -181,9 +181,9 @@ class RestfulDatabase(db.Database):
                 "Unhandled response code: %s" % response.status
             )
     
-    def update_source(self, name, source):
+    def update_source(self, source):
         request = Request(
-            "PUT", "/source/%s" % name, json.dumps({
+            "PUT", "/source/", json.dumps({
                 "source": {
                     "name": source.name,
                     "values": dict(source),
@@ -195,10 +195,6 @@ class RestfulDatabase(db.Database):
 
         if response.status == httplib.NO_CONTENT:
             return
-        elif response.status == httplib.NOT_FOUND:
-            raise LookupError("source '%s' not found" % name)
-        elif response.status == httplib.CONFLICT:
-            raise db.DatabaseError("source '%s' already exists" % source.name)
         else:
             raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status

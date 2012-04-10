@@ -202,7 +202,7 @@ class ImportSources(Command):
             elif db_source != source:
                 logger.info("changing %s from %s to %s", source.name, db_source, source)
                 if not opts.dry_run:
-                    database.update_source(db_source.name, source)
+                    database.update_source(source)
             else:
                 logger.debug("%s is up-to-date", source.name)
         

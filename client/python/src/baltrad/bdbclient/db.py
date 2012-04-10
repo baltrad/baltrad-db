@@ -96,7 +96,7 @@ class Database(object):
         raise NotImplementedError()
     
     @abc.abstractmethod
-    def update_source(self, name, source):
+    def update_source(self, source):
         """update a source in the database
         """
         raise NotImplementedError()
