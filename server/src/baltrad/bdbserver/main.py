@@ -76,9 +76,24 @@ def run_upgrade():
     backend = create_backend(conf)
     backend.upgrade()
 
-def configure_logging(opts):
+def get_logging_level(conf):
+    v = conf.get("baltrad.bdb.server.log.level", "INFO")
+    if v == "DEBUG":
+        return logging.DEBUG
+    elif v == "INFO":
+        return logging.INFO
+    elif v == "WARN":
+        return logging.WARN
+    elif v == "WARNING":
+        return logging.WARNING
+    elif v == "ERROR":
+        return logging.ERROR
+    else:
+        return logging.INFO
+
+def configure_logging(opts, level=logging.INFO):
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    logger.setLevel(level)
 
     if opts.foreground:
         logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -131,7 +146,7 @@ def run_server():
         raise SystemExit("failed to lock pidfile: %s" % opts.pidfile)
 
     with daemon_ctx:
-        configure_logging(opts)
+        configure_logging(opts, get_logging_level(conf))
         sys.excepthook = excepthook
         application = app.from_conf(conf)
         app.serve(server_uri, application)
