@@ -91,6 +91,7 @@ FILES = [{
     "/dataset1/data2/what/nodata":254.0,
     "/dataset2/data1/what/nodata":253.0,
     "/dataset2/data2/what/nodata":252.0,
+    "/dataset2/data2/where/nodata":252.0,
 }]
 
 def _insert_test_files(backend):
@@ -930,3 +931,17 @@ class TestAttributeQuery(object):
         result = self.query.execute(self.backend)
         eq_(4, len(result))
 
+    @attr("dbtest")
+    def test_fetch_nodata_by_what_object_and_dataset_relative_many_match(self):
+        self.query.fetch = {
+            "nodata": expr.attribute("what/nodata", "double")
+        }
+        self.query.filter = expr.and_(
+            expr.eq(expr.attribute("what/nodata", "double"),
+                    expr.literal(252.0)),
+            expr.eq(expr.attribute("what/object", "string"),
+                    expr.literal("SCAN"))
+        )
+
+        result = self.query.execute(self.backend)
+        eq_(1, len(result))

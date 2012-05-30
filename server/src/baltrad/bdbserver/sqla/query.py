@@ -146,7 +146,7 @@ class ExprToSql(object):
         
     def get_specialized_attr_column(self, name):
         return self._mapper[name]
-    
+
     def get_plain_attr_column(self, name, type_):
         elems = name.split("/")
         attrname = elems.pop()
@@ -166,16 +166,16 @@ class ExprToSql(object):
                 l0_node_alias.c.file_id==schema.files.c.id,
                 l0_node_alias.c.name==attrname
             )
-                       
-            if nelems > 1 and elems[0] == "":  #Formulated as /x/y/z, use absolute path
+
+            if nelems > 0 and elems[0] == "":  #Formulated as /x/y/z, use absolute path
                 onclause_l0 = sql.and_(
                     onclause_l0,
                     l0_node_alias.c.path == groupname
                 )
-            elif nelems > 1 and elems[0] != "": # Formulated as x/y/z, use like filter
+            elif nelems > 0 and elems[0] != "": # Formulated as x/y/z, use like filter (but not x/y)
                 onclause_l0 = sql.and_(
                     onclause_l0,
-                    l0_node_alias.c.path.like("%"+groupname)
+                    l0_node_alias.c.path.like("%/"+groupname)
                 )
                 
             self.from_clause = self.from_clause.outerjoin(
