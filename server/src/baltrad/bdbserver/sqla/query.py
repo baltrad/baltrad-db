@@ -17,6 +17,7 @@
 
 import datetime
 import operator
+import string, sys
 
 from sqlalchemy import sql
 
@@ -149,30 +150,39 @@ class ExprToSql(object):
     def get_plain_attr_column(self, name, type_):
         elems = name.split("/")
         attrname = elems.pop()
-        
         name = name.replace("/", "_")
+        nelems = len(elems)
+        groupname = string.join(elems, "/")
+        
         value_alias_t = self._value_tables.setdefault(
             name + "_values",
             schema.attribute_values.alias(name + "_values")
         )
-
+        
         if not self.from_clause_contains(value_alias_t):
             l0_node_alias = schema.nodes.alias(name + "_l0")
+            
+            onclause_l0 = sql.and_(
+                l0_node_alias.c.file_id==schema.files.c.id,
+                l0_node_alias.c.name==attrname
+            )
+                       
+            if nelems > 1 and elems[0] == "":  #Formulated as /x/y/z, use absolute path
+                onclause_l0 = sql.and_(
+                    onclause_l0,
+                    l0_node_alias.c.path == groupname
+                )
+            elif nelems > 1 and elems[0] != "": # Formulated as x/y/z, use like filter
+                onclause_l0 = sql.and_(
+                    onclause_l0,
+                    l0_node_alias.c.path.like("%"+groupname)
+                )
+                
             self.from_clause = self.from_clause.outerjoin(
                 l0_node_alias,
-                onclause=sql.and_(
-                    l0_node_alias.c.file_id==schema.files.c.id,
-                    l0_node_alias.c.name==attrname
-                )
+                onclause=onclause_l0
             )
-            l1_node_alias = schema.nodes.alias(name + "_l1")
-            self.from_clause = self.from_clause.outerjoin(
-                l1_node_alias,
-                onclause=sql.and_(
-                    l1_node_alias.c.id==l0_node_alias.c.parent_id,
-                    l1_node_alias.c.name==elems[-1]
-                )
-            )
+
             self.from_clause = self.from_clause.outerjoin(
                 value_alias_t,
                 onclause=value_alias_t.c.node_id==l0_node_alias.c.id

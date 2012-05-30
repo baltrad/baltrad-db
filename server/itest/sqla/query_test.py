@@ -87,6 +87,10 @@ FILES = [{
     "/dataset1/where/ysize": 2,
     "/dataset2/where/xsize": 2,
     "/dataset2/where/ysize": 5,
+    "/dataset1/data1/what/nodata":255.0,
+    "/dataset1/data2/what/nodata":254.0,
+    "/dataset2/data1/what/nodata":253.0,
+    "/dataset2/data2/what/nodata":252.0,
 }]
 
 def _insert_test_files(backend):
@@ -826,4 +830,103 @@ class TestAttributeQuery(object):
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+
+    @attr("dbtest")
+    def test_fetch_xsize_by_what_object_and_dataset_absolute(self):
+        self.query.fetch = {
+            "xsize": expr.attribute("/dataset1/where/xsize", "long")
+        }
+        self.query.filter = expr.and_(
+            expr.eq(expr.attribute("/dataset1/where/ysize", "long"),
+                    expr.literal(2)),
+            expr.eq(expr.attribute("what/object", "string"),
+                    expr.literal("SCAN"))
+        )
+
+        result = self.query.execute(self.backend)
+        #import sys
+        #sys.stderr.write("%s\n"%`result`)
+        eq_(1, len(result))
+        eq_(5, result[0]['xsize'])
+
+    @attr("dbtest")
+    def test_fetch_xsize_by_what_object_and_dataset_absolute_fetch(self):
+        self.query.fetch = {
+            "xsize": expr.attribute("/dataset1/where/xsize", "long")
+        }
+        self.query.filter = expr.and_(
+            expr.eq(expr.attribute("where/ysize", "long"),
+                    expr.literal(2)),
+            expr.eq(expr.attribute("what/object", "string"),
+                    expr.literal("SCAN"))
+        )
+
+        result = self.query.execute(self.backend)
+        eq_(1, len(result))
+        eq_(5, result[0]['xsize'])
+
+    @attr("dbtest")
+    def test_fetch_xsize_by_what_object_and_dataset_relative_fetch_and_filter(self):
+        self.query.fetch = {
+            "xsize": expr.attribute("where/xsize", "long")
+        }
+        self.query.filter = expr.and_(
+            expr.eq(expr.attribute("where/ysize", "long"),
+                    expr.literal(2)),
+            expr.eq(expr.attribute("what/object", "string"),
+                    expr.literal("SCAN"))
+        )
+
+        result = self.query.execute(self.backend)
+        #import sys
+        #sys.stderr.write("%s\n"%`result`)
+        eq_(2, len(result))
+        eq_(True, ((result[0]['xsize'] == 2 and result[1]['xsize'] == 5) or
+                   (result[0]['xsize'] == 5 and result[1]['xsize'] == 2)))
+        
+    @attr("dbtest")
+    def test_fetch_nodata_by_what_object_and_dataset_relative_fetch_and_filter(self):
+        self.query.fetch = {
+            "nodata": expr.attribute("data1/what/nodata", "double")
+        }
+        self.query.filter = expr.and_(
+            expr.eq(expr.attribute("data1/what/nodata", "double"),
+                    expr.literal(255)),
+            expr.eq(expr.attribute("what/object", "string"),
+                    expr.literal("SCAN"))
+        )
+
+        result = self.query.execute(self.backend)
+        eq_(1, len(result))
+        eq_(255.0, result[0]['nodata'])
+
+    @attr("dbtest")
+    def test_fetch_nodata_by_what_object_and_dataset_absolue_fetch_nomatch(self):
+        self.query.fetch = {
+            "nodata": expr.attribute("data1/what/nodata", "double")
+        }
+        self.query.filter = expr.and_(
+            expr.eq(expr.attribute("/data1/what/nodata", "double"),
+                    expr.literal(255)),
+            expr.eq(expr.attribute("what/object", "string"),
+                    expr.literal("SCAN"))
+        )
+
+        result = self.query.execute(self.backend)
+        eq_(0, len(result))
+
+    @attr("dbtest")
+    def test_fetch_nodata_by_what_object_and_dataset_relative_many_match(self):
+        self.query.fetch = {
+            "nodata": expr.attribute("what/nodata", "double")
+        }
+        self.query.filter = expr.and_(
+            expr.gt(expr.attribute("what/nodata", "double"),
+                    expr.literal(200)),
+            expr.eq(expr.attribute("what/object", "string"),
+                    expr.literal("SCAN"))
+        )
+
+        result = self.query.execute(self.backend)
+        eq_(4, len(result))
 
