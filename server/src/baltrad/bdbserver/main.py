@@ -132,8 +132,9 @@ def run_server():
     )
     
     server_type = conf["baltrad.bdb.server.type"]
-    if server_type != "werkzeug":
+    if server_type not in ["cherrypy", "werkzeug"]:
         raise SystemExit("invalid server type in config %s" % server_type)
+    
     server_uri = conf["baltrad.bdb.server.uri"]
     
     # try locking the pidfile to report possible errors to the user
@@ -149,5 +150,20 @@ def run_server():
         configure_logging(opts, get_logging_level(conf))
         sys.excepthook = excepthook
         application = app.from_conf(conf)
-        app.serve(server_uri, application)
+        if server_type == "werkzeug":
+            app.serve(server_uri, application)
+        elif server_type == "cherrypy":
+            from cherrypy import wsgiserver
+            import urlparse
+            parsedurl = urlparse.urlsplit(server_uri)
+            cherryconf = conf.filter("baltrad.bdb.server.cherrypy.")
+            nthreads = cherryconf.get_int("threads", 10)
+            nbacklog = cherryconf.get_int("backlog", 5)
+            ntimeout = cherryconf.get_int("timeout", 10)            
+            server = wsgiserver.CherryPyWSGIServer((parsedurl.hostname, parsedurl.port), application,
+                numthreads=nthreads, request_queue_size=nbacklog, timeout=ntimeout)
+            try:
+                server.start()
+            finally:
+                server.stop()
 
