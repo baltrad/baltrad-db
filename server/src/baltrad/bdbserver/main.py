@@ -99,6 +99,13 @@ def configure_logging(opts, level=logging.INFO):
         logger.addHandler(logging.StreamHandler(sys.stdout))
     if opts.logfile:
         logger.addHandler(logging.FileHandler(opts.logfile))
+
+## Checks if the process with provided pid is running
+# by checking the /proc directory.
+# @param pid - the pid to check for
+# @return True if a process with provided pid is running, otherwise False
+def isprocessrunning(pid):
+    return os.path.exists("/proc/%d"%pid)
     
 def run_server():
     optparser = create_optparser()
@@ -138,14 +145,33 @@ def run_server():
     server_uri = conf["baltrad.bdb.server.uri"]
     
     # try locking the pidfile to report possible errors to the user
+    tryagain = False
     try:
         with pidfile:
             pass
     except lockfile.AlreadyLocked:
-        raise SystemExit("pidfile already locked: %s" % opts.pidfile)
+        tryagain = True
     except lockfile.LockFailed:
-        raise SystemExit("failed to lock pidfile: %s" % opts.pidfile)
+        tryagain = True
 
+    if tryagain:
+        pid = lockfile.pidlockfile.read_pid_from_pidfile(opts.pidfile)
+        if pid != None and not isprocessrunning(pid):
+            try:
+                message = "pidfile exists but it seems like process is not running, probably due to an uncontrolled shutdown. Resetting.\n"
+                sys.stderr.write(message)
+                os.remove(opts.pidfile)
+            except:
+                pass
+    
+        try:
+            with pidfile:
+                pass
+        except lockfile.AlreadyLocked:
+            raise SystemExit("pidfile already locked: %s" % opts.pidfile)
+        except lockfile.LockFailed:
+            raise SystemExit("failed to lock pidfile: %s" % opts.pidfile)
+    
     with daemon_ctx:
         configure_logging(opts, get_logging_level(conf))
         sys.excepthook = excepthook
