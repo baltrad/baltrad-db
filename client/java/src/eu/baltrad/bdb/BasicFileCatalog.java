@@ -21,8 +21,6 @@ package eu.baltrad.bdb;
 
 import eu.baltrad.bdb.db.FileEntry;
 import eu.baltrad.bdb.db.Database;
-import eu.baltrad.bdb.db.DatabaseError;
-import eu.baltrad.bdb.db.DuplicateEntry;
 import eu.baltrad.bdb.storage.LocalStorage;
 import eu.baltrad.bdb.storage.NullStorage;
 
@@ -74,15 +72,23 @@ public final class BasicFileCatalog implements FileCatalog {
       throw new RuntimeException("failed to read fileContent stream", e);
     }
 
-    InputStream fileContentByteStream =
-      new ByteArrayInputStream(fileContentBytes);
-    FileEntry fileEntry = database.store(fileContentByteStream);
+    InputStream fileContentByteStream = null;
+    FileEntry fileEntry = null;
+        
+    try {
+      fileContentByteStream = new ByteArrayInputStream(fileContentBytes);
+      fileEntry = database.store(fileContentByteStream);
+    } finally {
+      IOUtils.closeQuietly(fileContentByteStream);
+    }
 
     fileContentByteStream = new ByteArrayInputStream(fileContentBytes);
     try {
       localStorage.store(fileEntry, fileContentByteStream);
     } catch (Exception e) {
       logger.warn("Ignored exception thrown in LocalStorage::prestore", e);
+    } finally {
+      IOUtils.closeQuietly(fileContentByteStream);
     }
     return fileEntry;
   }

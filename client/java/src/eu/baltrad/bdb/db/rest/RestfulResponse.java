@@ -3,6 +3,7 @@ package eu.baltrad.bdb.db.rest;
 import eu.baltrad.bdb.oh5.Metadata;
 import eu.baltrad.bdb.oh5.Source;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -37,7 +38,12 @@ public final class RestfulResponse {
    * get the root json node of the response body
    */
   public JsonNode getJsonContent() {
-    return jsonUtil.jsonFromStream(getContentStream());
+    InputStream is = getContentStream();
+    try {
+      return jsonUtil.jsonFromStream(is);
+    } finally {
+      IOUtils.closeQuietly(is);
+    }
 
   }
   

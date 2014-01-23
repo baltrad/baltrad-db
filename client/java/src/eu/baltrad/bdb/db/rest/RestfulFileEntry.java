@@ -8,6 +8,7 @@ import eu.baltrad.bdb.util.Date;
 import eu.baltrad.bdb.util.Time;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.util.UUID;
@@ -85,13 +86,17 @@ public final class RestfulFileEntry implements FileEntry {
 
   @Override
   public void writeToFile(File destination) {
+    InputStream is = null;
     try {
-      FileUtils.copyInputStreamToFile(getContentStream(), destination);
+      is = getContentStream();
+      FileUtils.copyInputStreamToFile(is, destination);
     } catch (IOException e) {
       throw new RuntimeException(
         "couldn't copy file content from stream to " + destination,
         e
       );
+    } finally {
+      IOUtils.closeQuietly(is);
     }
   }
 }
