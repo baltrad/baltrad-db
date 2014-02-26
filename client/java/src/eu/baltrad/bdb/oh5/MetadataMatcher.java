@@ -30,7 +30,6 @@ import eu.baltrad.bdb.expr.proc.FindOh5Attribute;
 import eu.baltrad.bdb.expr.proc.MakeSymbol;
 import eu.baltrad.bdb.expr.proc.OperatorAdd;
 import eu.baltrad.bdb.expr.proc.OperatorDiv;
-import eu.baltrad.bdb.expr.proc.OperatorIn;
 import eu.baltrad.bdb.expr.proc.OperatorLogicalAnd;
 import eu.baltrad.bdb.expr.proc.OperatorLogicalOr;
 import eu.baltrad.bdb.expr.proc.OperatorLogicalNot;
@@ -87,7 +86,7 @@ public class MetadataMatcher {
    * Test if metadata matches expr.
    * @return true if expr evaluates to true on file
    */
-  public boolean match(Metadata metadata, Expression expr) {
+  public synchronized boolean match(Metadata metadata, Expression expr) {
     procedures.put("attr", new FindOh5Attribute(metadata));
     try {
       Expression result = eval(expr);
@@ -97,7 +96,7 @@ public class MetadataMatcher {
     }
   }
 
-  public Expression evalList(Expression args) {
+  public synchronized Expression evalList(Expression args) {
     ListExpression result = new ListExpression();
     for (Expression arg : args) {
       result.add(eval(arg));
@@ -105,7 +104,7 @@ public class MetadataMatcher {
     return result;
   }
 
-  public Expression evalProcedure(Expression expr) {
+  public synchronized Expression evalProcedure(Expression expr) {
     String procString = expr.popFirst().toString();
     Procedure procedure = procedures.get(procString);
     if (procedure == null) {
@@ -115,7 +114,7 @@ public class MetadataMatcher {
     return procedure.execute(args);
   }
 
-  public Expression eval(Expression expr) {
+  public synchronized Expression eval(Expression expr) {
     if (expr.isList()) {
       if (expr.size() > 0 && expr.get(0).isSymbol()) {
         return evalProcedure(expr);

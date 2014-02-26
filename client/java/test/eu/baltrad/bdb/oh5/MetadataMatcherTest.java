@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.oh5;
 
+import eu.baltrad.bdb.expr.EvaluationError;
 import eu.baltrad.bdb.expr.Expression;
 import eu.baltrad.bdb.expr.ExpressionFactory;
 
@@ -169,5 +170,71 @@ public class MetadataMatcherTest {
       )
     );
     assertFalse(classUnderTest.match(metadata, expr));
+  }
+  
+  public static class MetadataMatcherThread extends Thread {
+    private MetadataMatcher matcher;
+    private Metadata metadata;
+    private ExpressionFactory xpr;
+    private boolean evaluationError = false;
+    private boolean otherError = false;
+    
+    public MetadataMatcherThread(MetadataMatcher matcher, ExpressionFactory xpr, Metadata metadata) {
+      this.matcher = matcher;
+      this.xpr = xpr;
+      this.metadata = metadata;
+    }
+    
+    @Override
+    public void run() {
+      try {
+        for (int i = 0; i < 100; i++) {
+          Expression expr = xpr.eq(
+              xpr.attribute("what/source:WMO", "string"),
+              xpr.literal("012345")
+            );
+          matcher.match(this.metadata, expr);
+        }
+      } catch (EvaluationError e) {
+        e.printStackTrace();
+        evaluationError = true;
+      } catch (Exception e) {
+        e.printStackTrace();
+        otherError = true;
+      }
+      synchronized (this) {
+        notifyAll();
+      }
+    }
+    
+    public boolean isEvaluationError() {
+      return evaluationError;
+    }
+    
+    public boolean isOtherError() {
+      return otherError;
+    }
+  };
+  
+  @Test
+  public void match_several_threads() {
+    MetadataMatcherThread[] threads = new MetadataMatcherThread[20];
+    for (int i = 0; i < threads.length; i++) {
+      threads[i] = new MetadataMatcherThread(classUnderTest, xpr, metadata);
+      threads[i].start();
+    }
+    
+    for (int i = 0; i < threads.length; i++) {
+      try {
+        threads[i].join(60000);
+      } catch (InterruptedException e) {
+        // pass
+      }
+    }
+    
+    for (int i = 0; i < threads.length; i++) {
+      assertEquals(false, threads[i].isEvaluationError());
+      assertEquals(false, threads[i].isOtherError());
+    }
   }
 }

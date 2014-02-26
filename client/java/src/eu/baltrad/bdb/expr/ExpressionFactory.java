@@ -43,7 +43,9 @@ public final class ExpressionFactory {
   public Expression binaryOperator(String op,
                                    Expression lhs,
                                    Expression rhs) {
-    return listCons.symbol(op).append(lhs).append(rhs).create();
+    synchronized (listCons) {
+      return listCons.symbol(op).append(lhs).append(rhs).create();
+    }
   }
 
   public Expression add(Expression lhs, Expression rhs) {
@@ -129,27 +131,39 @@ public final class ExpressionFactory {
   }
 
   public Expression not(Expression expr) {
-    return listCons.symbol("not").append(expr).create();
+    synchronized (listCons) {
+      return listCons.symbol("not").append(expr).create();
+    }
   }
 
   public Expression like(Expression lhs, Expression rhs) {
-    return listCons.symbol("like").append(lhs).append(rhs).create();
+    synchronized (listCons) {
+      return listCons.symbol("like").append(lhs).append(rhs).create();
+    }
   }
 
   public Expression in(Expression lhs, Expression rhs) {
-    return listCons.symbol("in").append(lhs).append(rhs).create();
+    synchronized (listCons) {
+      return listCons.symbol("in").append(lhs).append(rhs).create();
+    }
   }
 
   public Expression list(Expression... exprs) {
-    return listCons.extend(exprs).create();
+    synchronized (listCons) {
+      return listCons.extend(exprs).create();
+    }
   }
 
   public Expression list(List<Expression> exprs) {
-    return listCons.extend(exprs).create();
+    synchronized (listCons) {
+      return listCons.extend(exprs).create();
+    }
   }
 
   public Expression attribute(String name, String type) {
-    return listCons.symbol("attr").string(name).string(type).create();
+    synchronized (listCons) {
+      return listCons.symbol("attr").string(name).string(type).create();
+    }
   }
   
   /**
@@ -167,11 +181,15 @@ public final class ExpressionFactory {
   }
 
   public Expression asc(Expression expr) {
-    return listCons.symbol("asc").append(expr).create();
+    synchronized (listCons) {
+      return listCons.symbol("asc").append(expr).create();
+    }
   }
 
   public Expression desc(Expression expr) {
-    return listCons.symbol("desc").append(expr).create();
+    synchronized (listCons) {
+      return listCons.symbol("desc").append(expr).create();
+    }
   }
 
   public Expression literal(long value) {
@@ -191,32 +209,38 @@ public final class ExpressionFactory {
   }
 
   public Expression literal(Date value) {
-    return listCons.symbol("date")
-                   .literal(value.year())
-                   .literal(value.month())
-                   .literal(value.day())
-                   .create();
+    synchronized (listCons) {
+      return listCons.symbol("date")
+          .literal(value.year())
+          .literal(value.month())
+          .literal(value.day())
+          .create();
+    }
   }
 
   public Expression literal(Time value) {
-    return listCons.symbol("time")
-                   .literal(value.hour())
-                   .literal(value.minute())
-                   .literal(value.second())
-                   .create();
+    synchronized (listCons) {
+      return listCons.symbol("time")
+          .literal(value.hour())
+          .literal(value.minute())
+          .literal(value.second())
+          .create();
+    }
   }
 
   public Expression literal(DateTime value) {
     Date date = value.getDate();
     Time time = value.getTime();
-    return listCons.symbol("datetime")
-                   .literal(date.year())
-                   .literal(date.month())
-                   .literal(date.day())
-                   .literal(time.hour())
-                   .literal(time.minute())
-                   .literal(time.second())
-                   .create();
+    synchronized (listCons) {
+      return listCons.symbol("datetime")
+          .literal(date.year())
+          .literal(date.month())
+          .literal(date.day())
+          .literal(time.hour())
+          .literal(time.minute())
+          .literal(time.second())
+          .create();
+    }
   }
 
   public Expression symbol(String value) {
@@ -224,19 +248,27 @@ public final class ExpressionFactory {
   }
 
   public Expression count(Expression expr) {
-    return listCons.symbol("count").append(expr).create();
+    synchronized (listCons) {
+      return listCons.symbol("count").append(expr).create();
+    }
   }
 
   public Expression sum(Expression expr) {
-    return listCons.symbol("sum").append(expr).create();
+    synchronized (listCons) {
+      return listCons.symbol("sum").append(expr).create();
+    }
   }
 
   public Expression min(Expression expr) {
-    return listCons.symbol("min").append(expr).create();
+    synchronized (listCons) {
+      return listCons.symbol("min").append(expr).create();
+    }
   }
 
   public Expression max(Expression expr) {
-    return listCons.symbol("max").append(expr).create();
+    synchronized (listCons) {
+      return listCons.symbol("max").append(expr).create();
+    }
   }
 
   public Expression combinedDateTime(String dateAttr, String timeAttr) {
