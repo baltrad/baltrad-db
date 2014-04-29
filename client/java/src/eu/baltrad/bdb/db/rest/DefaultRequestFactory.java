@@ -93,6 +93,11 @@ public final class DefaultRequestFactory implements RequestFactory {
   }
 
   @Override
+  public HttpUriRequest createGetFileCountRequest() {
+    return new HttpGet(getRequestUri("file/count"));
+  }
+  
+  @Override
   public HttpUriRequest createGetFileContentRequest(UUID uuid) {
     String uuidString = uuid.toString();
     return new HttpGet(getRequestUri("file/" + uuidString));

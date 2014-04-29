@@ -37,6 +37,8 @@ public interface RequestFactory {
 
   HttpUriRequest createGetFileEntryRequest(UUID uuid);
 
+  HttpUriRequest createGetFileCountRequest();
+  
   HttpUriRequest createGetFileContentRequest(UUID uuid);
 
   HttpUriRequest createQueryFileRequest(FileQuery query);

@@ -118,6 +118,16 @@ public abstract class DatabaseITestBase {
   }
 
   @Test
+  public void getFileCount() throws Exception {
+    assertEquals(0, classUnderTest.getFileCount());
+    FileInputStream input = new FileInputStream(
+      getFilePath("fixtures/Z_SCAN_C_ESWI_20101023180000_seang_000000.h5")
+    );
+    classUnderTest.store(input);
+    assertEquals(1, classUnderTest.getFileCount());
+  }
+
+  @Test
   public void getFileEntry_missing() throws Exception {
     UUID uuid = UUID.fromString("00000000-0000-0000-0004-000000000001");
     FileEntry result = classUnderTest.getFileEntry(uuid);

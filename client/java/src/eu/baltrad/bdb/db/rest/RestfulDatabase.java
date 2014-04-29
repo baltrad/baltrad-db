@@ -168,6 +168,26 @@ public class RestfulDatabase implements Database, SourceManager {
   }
 
   /**
+   * @see eu.baltrad.bdb.db.Database#getFileCount()
+   */
+  @Override
+  public long getFileCount() {
+    HttpUriRequest request = requestFactory.createGetFileCountRequest();
+    RestfulResponse response = executeRequest(request);
+    try {
+      int statusCode = response.getStatusCode();
+      if (statusCode == HttpStatus.SC_OK) {
+        return response.getJsonContent().get("numberOfFiles").getValueAsLong();
+      } else {
+        throw new DatabaseError("unhandled response code: " +
+            Integer.toString(statusCode));
+      }
+    } finally {
+      response.close();
+    }
+  }
+  
+  /**
    * @see eu.baltrad.bdb.db.Database#getFileContent(UUID)
    */
   @Override

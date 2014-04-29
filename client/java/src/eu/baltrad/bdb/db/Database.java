@@ -60,6 +60,12 @@ public interface Database {
   FileEntry getFileEntry(UUID uuid);
   
   /**
+   * @return the number of files stored in the database
+   * @throws DatabaseError if a database error occurs
+   */
+  long getFileCount();
+  
+  /**
    * get File content from the database
    * @param uuid the UUID of of the entry
    * @return stream to the file content or null if not found

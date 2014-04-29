@@ -155,7 +155,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     <classpath location="${build.classes.dir}"/>
     <classpath refid="lib.path"/>
     <classpath location="${build.test.dir}" />
-    <batchtest fork="yes" todir="${dist.dir}/junit-reports">
+    <batchtest fork="no" todir="${dist.dir}/junit-reports">
       <fileset dir="${build.test.dir}" includes="**/*Test.class" />
     </batchtest>
   </junit>
@@ -202,16 +202,21 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
           failonerror="true">
       <arg value="--conf=${itest.bdbserver.properties}"/>
     </exec>
+
     <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-create"
           failonerror="true">
       <arg value="--conf=${itest.bdbserver.properties}"/>
     </exec>
+
     <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-server"
           failonerror="true">
       <arg value="--conf=${itest.bdbserver.properties}"/>
       <arg value="--pidfile=${build.dir}/baltrad-bdb-server.pid"/>
       <arg value="--logfile=${build.dir}/baltrad-bdb-server.log"/>
     </exec>
+  	
+  	<sleep seconds="2" /> <!-- Dont import sources immediately, let server start -->
+  	
     <exec executable="${baltrad.bdb.bin.path}/baltrad-bdb-client"
           failonerror="true">
       <arg value="import_sources"/>

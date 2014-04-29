@@ -49,7 +49,7 @@ class Backend(object):
         :raise: :class:`baltrad.bdb.backend.DuplicateEntry` if file is already stored
         """
         raise NotImplementedError()
-    
+
     @abstractmethod
     def get_file(self, uuid):
         """get a file from the database
@@ -58,6 +58,15 @@ class Backend(object):
         :type uuid: :class:`uuid.UUID`
         :return: file content as a string or `None` if file not found
         :rtype: string
+        """
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def file_count(self):
+        """get the number of files in the database
+
+        :return: number of files as a integer
+        :rtype: integer
         """
         raise NotImplementedError()
 

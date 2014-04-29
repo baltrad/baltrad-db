@@ -147,6 +147,18 @@ class TestSqlAlchemyBackendItest(object):
             "file content mismatch")
     
     @attr("dbtest")
+    def test_file_count(self):
+        meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
+        h5file = write_metadata(meta)
+        meta2 = create_metadata("pvol", "20000131", "131430", "NOD:eesur")
+        h5file2 = write_metadata(meta2)
+        
+        meta = self.backend.store_file(h5file.name)
+        meta2 = self.backend.store_file(h5file2.name)
+
+        eq_(2, self.backend.file_count())
+    
+    @attr("dbtest")
     def test_get_file_nx(self):
         uuid_ = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
         eq_(None, self.backend.get_file(uuid_))

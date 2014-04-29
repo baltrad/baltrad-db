@@ -40,6 +40,9 @@ URL_MAP = Map(
             Rule("/", methods=["DELETE"],
                 endpoint="handler.remove_all_files"
             ),
+            Rule("/count", methods=["GET"],
+                 endpoint="handler.file_count"
+            ),
             Rule("/<uuid:uuid>", methods=["GET"],
                 endpoint="handler.get_file"
             ),

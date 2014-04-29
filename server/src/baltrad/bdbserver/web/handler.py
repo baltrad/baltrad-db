@@ -38,6 +38,9 @@ from ..backend import (
     IntegrityError,
 )
 
+import logging
+logger = logging.getLogger("baltard.bdbserver.handler")
+
 def add_file(ctx):
     """add a file to the database
 
@@ -82,6 +85,16 @@ def get_file(ctx, uuid):
         raise HttpNotFound()
 
     return Response(data, content_type="application/x-hdf5")
+
+def file_count(ctx):
+    """get number of files in database
+    
+    :param ctx: the request context
+    :return: :class:`~.util.Response` with status *200 OK* and number of files in body
+    """
+    nrentries = ctx.backend.file_count()
+    
+    return JsonResponse({"numberOfFiles": nrentries })
 
 def get_file_metadata(ctx, uuid):
     """get file metadata from the database

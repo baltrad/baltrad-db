@@ -33,6 +33,7 @@ from sqlalchemy import engine, event, exc as sqlexc, sql
 from baltrad.bdbcommon import oh5
 from baltrad.bdbserver import backend
 from baltrad.bdbserver.sqla import filter, query, schema, storage
+from sqlalchemy.sql.functions import GenericFunction as func
 
 logger = logging.getLogger("baltrad.bdbserver.sqla")
 
@@ -105,6 +106,11 @@ class SqlAlchemyBackend(backend.Backend):
             return self._storage.read(self, uuid);
         except storage.FileNotFound:
             return None
+    
+    def file_count(self):
+        qry = sql.select([sql.func.count(schema.files.c.id)])
+        with self.get_connection() as conn:
+            return conn.execute(qry).scalar()
     
     def get_file_metadata(self, uuid):
         qry = sql.select(
