@@ -135,6 +135,110 @@ class TestSqlAlchemyBackendItest(object):
         eq_(meta.bdb_stored_date, stored_meta.bdb_stored_date)
         eq_(meta.bdb_stored_time, stored_meta.bdb_stored_time)
         eq_(float_max, stored_meta.node("/double").value)
+
+    @attr("dbtest")
+    def test_remove_files_by_count_1(self):
+        h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
+        h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
+        h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
+        h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
+
+        self.backend.store_file(h5file1.name)
+        self.backend.store_file(h5file2.name)
+        self.backend.store_file(h5file3.name)
+        self.backend.store_file(h5file4.name)
+
+        eq_(4, self.backend.file_count())
+    
+        result = self.backend.remove_files_by_count(3,2)
+        eq_(1, result)
+        eq_(3, self.backend.file_count())
+
+    @attr("dbtest")
+    def test_remove_files_by_count_2(self):
+        h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
+        h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
+        h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
+        h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
+
+        self.backend.store_file(h5file1.name)
+        self.backend.store_file(h5file2.name)
+        self.backend.store_file(h5file3.name)
+        self.backend.store_file(h5file4.name)
+
+        eq_(4, self.backend.file_count())
+    
+        result = self.backend.remove_files_by_count(4,2)
+        eq_(0, result)
+        eq_(4, self.backend.file_count())
+
+    @attr("dbtest")
+    def test_remove_files_by_count_3(self):
+        h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
+        h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
+        h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
+        h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
+
+        self.backend.store_file(h5file1.name)
+        self.backend.store_file(h5file2.name)
+        self.backend.store_file(h5file3.name)
+        self.backend.store_file(h5file4.name)
+
+        eq_(4, self.backend.file_count())
+    
+        result = self.backend.remove_files_by_count(1,2)
+        eq_(2, result)
+        eq_(2, self.backend.file_count())
+    
+    @attr("dbtest")
+    def test_remove_files_by_count_4(self):
+        h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
+        h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
+        h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
+        h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
+        h5file5 = write_metadata(create_metadata("pvol", "20000131", "131515", "NOD:eesur"))
+        h5file6 = write_metadata(create_metadata("pvol", "20000131", "131530", "NOD:eesur"))
+        h5file7 = write_metadata(create_metadata("pvol", "20000131", "131545", "NOD:eesur"))
+        h5file8 = write_metadata(create_metadata("pvol", "20000131", "131600", "NOD:eesur"))
+        h5file9 = write_metadata(create_metadata("pvol", "20000131", "131615", "NOD:eesur"))
+        h5file10 = write_metadata(create_metadata("pvol", "20000131", "131630", "NOD:eesur"))
+
+        self.backend.store_file(h5file1.name)
+        self.backend.store_file(h5file2.name)
+        self.backend.store_file(h5file3.name)
+        self.backend.store_file(h5file4.name)
+        self.backend.store_file(h5file5.name)
+        self.backend.store_file(h5file6.name)
+        self.backend.store_file(h5file7.name)
+        self.backend.store_file(h5file8.name)
+        self.backend.store_file(h5file9.name)
+        self.backend.store_file(h5file10.name)
+
+        eq_(10, self.backend.file_count())
+        
+        result = self.backend.remove_files_by_count(10,2)
+        eq_(0, result)
+        eq_(10, self.backend.file_count())
+    
+        result = self.backend.remove_files_by_count(8,10)
+        eq_(2, result)
+        eq_(8, self.backend.file_count())
+
+        result = self.backend.remove_files_by_count(6,1)
+        eq_(1, result)
+        eq_(7, self.backend.file_count())
+
+        result = self.backend.remove_files_by_count(6,1)
+        eq_(1, result)
+        eq_(6, self.backend.file_count())
+
+        result = self.backend.remove_files_by_count(6,1)
+        eq_(0, result)
+        eq_(6, self.backend.file_count())
+
+        result = self.backend.remove_files_by_count(0,1000)
+        eq_(6, result)
+        eq_(0, self.backend.file_count())
     
     @attr("dbtest")
     def test_get_file(self):
@@ -145,6 +249,7 @@ class TestSqlAlchemyBackendItest(object):
         expected = open(h5file.name, "r").read()
         eq_(expected, self.backend.get_file(meta.bdb_uuid),
             "file content mismatch")
+
     
     @attr("dbtest")
     def test_file_count(self):

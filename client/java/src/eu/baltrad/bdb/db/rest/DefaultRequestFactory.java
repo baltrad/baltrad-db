@@ -93,6 +93,12 @@ public final class DefaultRequestFactory implements RequestFactory {
   }
 
   @Override
+  public HttpUriRequest createRemoveFilesByCountRequest(int limit, int nritems)
+  {
+    return new HttpDelete(getRequestUri("file/count/"+limit+"/"+nritems));
+  }
+  
+  @Override
   public HttpUriRequest createGetFileCountRequest() {
     return new HttpGet(getRequestUri("file/count"));
   }

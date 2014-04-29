@@ -107,6 +107,15 @@ class SqlAlchemyBackend(backend.Backend):
         except storage.FileNotFound:
             return None
     
+    def remove_files_by_count(self, limit, nritems):
+        sqry = sql.select([schema.files.c.id]).order_by(schema.files.c.id.desc()).offset(limit).alias("sqry")
+        qry = sql.select([sqry.c.id]).order_by(sqry.c.id).limit(nritems)
+        dqry = sql.delete(schema.files).where(schema.files.c.id.in_(qry))
+        
+        with self.get_connection() as conn:
+            result = conn.execute(dqry)
+            return result.rowcount
+    
     def file_count(self):
         qry = sql.select([sql.func.count(schema.files.c.id)])
         with self.get_connection() as conn:

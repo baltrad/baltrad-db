@@ -168,6 +168,27 @@ public class RestfulDatabase implements Database, SourceManager {
   }
 
   /**
+   * @see eu.baltrad.bdb.db.Database#removeFilesByCount(int, int)
+   */
+  @Override
+  public int removeFilesByCount(int limit, int nritems) {
+    HttpUriRequest request = requestFactory.createRemoveFilesByCountRequest(limit, nritems);
+    RestfulResponse response = executeRequest(request);
+    try {
+      int statusCode = response.getStatusCode();
+      if (statusCode == HttpStatus.SC_OK) {
+        return response.getJsonContent().get("numberOfFilesRemoved").getValueAsInt();
+      } else {
+        throw new DatabaseError("unhandled response code: " +
+            Integer.toString(statusCode));
+      }
+    } finally {
+      response.close();
+    }
+    
+  }
+  
+  /**
    * @see eu.baltrad.bdb.db.Database#getFileCount()
    */
   @Override

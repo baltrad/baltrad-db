@@ -40,6 +40,10 @@ URL_MAP = Map(
             Rule("/", methods=["DELETE"],
                 endpoint="handler.remove_all_files"
             ),
+            Rule("/count/<int:limit>/<int:nritems>", 
+                 methods=["DELETE"], 
+                 endpoint="handler.remove_files_by_count"
+            ),                           
             Rule("/count", methods=["GET"],
                  endpoint="handler.file_count"
             ),

@@ -86,6 +86,24 @@ def get_file(ctx, uuid):
 
     return Response(data, content_type="application/x-hdf5")
 
+def remove_files_by_count(ctx, limit, nritems):
+    """Remove a number of files by count. limit is the number of files to
+    be left in the database. nritems is the number of files to be removed.
+    I.e. if there are 200 items in the database, limit is 150 and nritems is 100, then
+    then only 50 files will be removed (200 - 150)
+
+    :param ctx: the request context
+    :type ctx: :class:`~.util.RequestContext`
+    :param limit: the number of files that should be kept in the database
+    :param nritems: the maximum number of files to remove this time
+    :return: :class:`~.util.Response` with status *200 OK* and number of files removed in body
+    :raise: :class:`~.util.HttpConflict` when file not found
+
+    See :ref:`doc-rest-op-get-file` for details
+    """
+    nrentries = ctx.backend.remove_files_by_count(limit, nritems)
+    return JsonResponse({"numberOfFilesRemoved": nrentries})
+
 def file_count(ctx):
     """get number of files in database
     

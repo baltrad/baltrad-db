@@ -62,6 +62,19 @@ class Backend(object):
         raise NotImplementedError()
     
     @abstractmethod
+    def remove_files_by_count(self, limit, nritems):
+        """Removes a number of files from the database. limit is the lower limit and nritems
+        is the number of files we want to remove. For example, if there are 200 files, limit is set to 150
+        and nritems is 200. Then the result will be that 150 is left in the database and 50 is removed.
+        
+        :param limit: the minimum number of files in the database
+        :param nritems: the maximum number of files to remove this time
+        :return: number of files as a integer
+        :rtype: integer
+        """
+        raise NotImplementedError()
+    
+    @abstractmethod
     def file_count(self):
         """get the number of files in the database
 

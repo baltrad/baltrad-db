@@ -60,6 +60,17 @@ public interface Database {
   FileEntry getFileEntry(UUID uuid);
   
   /**
+   * Removes a number of files from the database. limit defines the minimum number of files in the database
+   * and nritems is the maximum number of items to be removed. This means that the number of files removed will
+   * be either nritems or (number of files in db) - limit depending on which is the smallest.
+   * 
+   * @param limit minimum number of files in database
+   * @param nritems maximum number of files to remove
+   * @return the number of files removed
+   */
+  int removeFilesByCount(int limit, int nritems);
+  
+  /**
    * @return the number of files stored in the database
    * @throws DatabaseError if a database error occurs
    */

@@ -118,6 +118,32 @@ public abstract class DatabaseITestBase {
   }
 
   @Test
+  public void removeFilesByCount() throws Exception {
+    FileEntry storedEntry1 = classUnderTest.store(new FileInputStream(
+        getFilePath("fixtures/Z_SCAN_C_ESWI_20101016080000_searl_000000.h5")));
+    FileEntry storedEntry2 = classUnderTest.store(new FileInputStream(
+        getFilePath("fixtures/Z_SCAN_C_ESWI_20101016080000_sease_000000.h5")));
+    FileEntry storedEntry3 = classUnderTest.store(new FileInputStream(
+        getFilePath("fixtures/Z_SCAN_C_ESWI_20101016080500_seang_000000.h5")));
+    FileEntry storedEntry4 = classUnderTest.store(new FileInputStream(
+        getFilePath("fixtures/Z_SCAN_C_ESWI_20101023180000_seang_000000.h5")));
+    
+    assertEquals(4, classUnderTest.getFileCount());
+    
+    int result = classUnderTest.removeFilesByCount(3,2);
+    assertEquals(1, result);
+    assertEquals(3, classUnderTest.getFileCount());
+
+    result = classUnderTest.removeFilesByCount(1,2);
+    assertEquals(2, result);
+    assertEquals(1, classUnderTest.getFileCount());
+
+    result = classUnderTest.removeFilesByCount(0,100);
+    assertEquals(1, result);
+    assertEquals(0, classUnderTest.getFileCount());
+  }
+  
+  @Test
   public void getFileCount() throws Exception {
     assertEquals(0, classUnderTest.getFileCount());
     FileInputStream input = new FileInputStream(
