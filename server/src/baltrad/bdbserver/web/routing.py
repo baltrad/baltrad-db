@@ -19,6 +19,7 @@ import uuid
 
 from werkzeug.routing import BaseConverter, Map, Rule, Submount
 from werkzeug.utils import import_string
+import datetime
 
 class UuidConverter(BaseConverter):
     def __init__(self, url_map):
@@ -30,6 +31,19 @@ class UuidConverter(BaseConverter):
     
     def from_python(self, value):
         return value.get_hex()
+
+class DatetimeConverter(BaseConverter):
+    def __init__(self, url_map):
+        self.url_map = url_map
+        self.regex = "[0-9]{14,14}"
+    
+    def to_python(self, value):
+        a = value
+        return datetime.datetime(int(a[:4]),int(a[4:6]),int(a[6:8]),int(a[8:10]),int(a[10:12]),int(a[12:])) 
+    
+    def from_python(self, value):
+        return value.strftime("%Y%m%d%H%M%S")
+    
 
 URL_MAP = Map(
     rules=[
@@ -43,6 +57,10 @@ URL_MAP = Map(
             Rule("/count/<int:limit>/<int:nritems>", 
                  methods=["DELETE"], 
                  endpoint="handler.remove_files_by_count"
+            ),
+            Rule("/age/<datetime:dt>/<int:nritems>",
+                 methods=["DELETE"],
+                 endpoint="handler.remove_files_by_age"
             ),                           
             Rule("/count", methods=["GET"],
                  endpoint="handler.file_count"
@@ -98,7 +116,8 @@ URL_MAP = Map(
         ])
     ],
     converters={
-        "uuid": UuidConverter
+        "uuid": UuidConverter,
+        "datetime":DatetimeConverter
     }
 )
 

@@ -26,6 +26,7 @@ import eu.baltrad.bdb.db.FileEntry;
 import eu.baltrad.bdb.db.FileQuery;
 import eu.baltrad.bdb.db.SourceManager;
 import eu.baltrad.bdb.oh5.Source;
+import eu.baltrad.bdb.util.DateTime;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
@@ -185,7 +186,22 @@ public class RestfulDatabase implements Database, SourceManager {
     } finally {
       response.close();
     }
-    
+  }
+
+  public int removeFilesByAge(DateTime age, int nritems) {
+    HttpUriRequest request = requestFactory.createRemoveFilesByAgeRequest(age, nritems);
+    RestfulResponse response = executeRequest(request);
+    try {
+      int statusCode = response.getStatusCode();
+      if (statusCode == HttpStatus.SC_OK) {
+        return response.getJsonContent().get("numberOfFilesRemoved").getValueAsInt();
+      } else {
+        throw new DatabaseError("unhandled response code: " +
+            Integer.toString(statusCode));
+      }
+    } finally {
+      response.close();
+    }
   }
   
   /**

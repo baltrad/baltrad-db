@@ -73,6 +73,18 @@ class Backend(object):
         :rtype: integer
         """
         raise NotImplementedError()
+ 
+    @abstractmethod
+    def remove_files_by_age(self, age, nritems):
+        """Removes a number of files from the database. age is the oldest file to be left in the database
+        nritems is the number of files that we at most want to remove. 
+        
+        :param age: the oldest file to be left in the database
+        :param nritems: the maximum number of files to remove this time
+        :return: number of files as a integer
+        :rtype: integer
+        """
+        raise NotImplementedError()
     
     @abstractmethod
     def file_count(self):

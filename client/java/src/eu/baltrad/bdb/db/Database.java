@@ -19,6 +19,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 package eu.baltrad.bdb.db;
 
 import eu.baltrad.bdb.oh5.Source;
+import eu.baltrad.bdb.util.DateTime;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -69,6 +70,15 @@ public interface Database {
    * @return the number of files removed
    */
   int removeFilesByCount(int limit, int nritems);
+
+  /**
+   * Removes files older than age or up to number of items
+   * 
+   * @param age age limit
+   * @param nritems maximum number of files to remove
+   * @return the number of files removed
+   */
+  int removeFilesByAge(DateTime age, int nritems);
   
   /**
    * @return the number of files stored in the database

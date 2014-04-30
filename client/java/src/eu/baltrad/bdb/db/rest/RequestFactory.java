@@ -22,6 +22,7 @@ package eu.baltrad.bdb.db.rest;
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.FileQuery;
 import eu.baltrad.bdb.oh5.Source;
+import eu.baltrad.bdb.util.DateTime;
 
 import org.apache.http.client.methods.HttpUriRequest;
 
@@ -38,6 +39,8 @@ public interface RequestFactory {
   HttpUriRequest createGetFileEntryRequest(UUID uuid);
 
   HttpUriRequest createRemoveFilesByCountRequest(int limit, int nritems);
+  
+  HttpUriRequest createRemoveFilesByAgeRequest(DateTime age, int nritems);
   
   HttpUriRequest createGetFileCountRequest();
   

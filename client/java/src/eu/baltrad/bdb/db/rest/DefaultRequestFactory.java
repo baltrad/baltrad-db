@@ -37,6 +37,7 @@ import org.apache.http.entity.StringEntity;
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.FileQuery;
 import eu.baltrad.bdb.oh5.Source;
+import eu.baltrad.bdb.util.DateTime;
 
 public final class DefaultRequestFactory implements RequestFactory {
   private final URI serverUri;
@@ -93,9 +94,14 @@ public final class DefaultRequestFactory implements RequestFactory {
   }
 
   @Override
-  public HttpUriRequest createRemoveFilesByCountRequest(int limit, int nritems)
-  {
+  public HttpUriRequest createRemoveFilesByCountRequest(int limit, int nritems) {
     return new HttpDelete(getRequestUri("file/count/"+limit+"/"+nritems));
+  }
+  
+  @Override
+  public HttpUriRequest createRemoveFilesByAgeRequest(DateTime age, int nritems) {
+    String dstr = age.getDate().toIsoString() + age.getTime().toIsoString();
+    return new HttpDelete(getRequestUri("file/age/"+dstr+"/"+nritems));
   }
   
   @Override

@@ -104,6 +104,22 @@ def remove_files_by_count(ctx, limit, nritems):
     nrentries = ctx.backend.remove_files_by_count(limit, nritems)
     return JsonResponse({"numberOfFilesRemoved": nrentries})
 
+def remove_files_by_age(ctx, dt, nritems):
+    """Remove a number of files by age. age is the datetime of the oldest
+    file to be left in the database. nritems is the number of files to be removed.
+
+    :param ctx: the request context
+    :type ctx: :class:`~.util.RequestContext`
+    :param dt: the max age
+    :param nritems: the maximum number of files to remove this time
+    :return: :class:`~.util.Response` with status *200 OK* and number of files removed in body
+    :raise: :class:`~.util.HttpConflict` when file not found
+
+    See :ref:`doc-rest-op-get-file` for details
+    """
+    nrentries = ctx.backend.remove_files_by_age(dt, nritems)
+    return JsonResponse({"numberOfFilesRemoved": nrentries})
+
 def file_count(ctx):
     """get number of files in database
     

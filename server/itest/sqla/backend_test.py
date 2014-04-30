@@ -1,5 +1,6 @@
 import tempfile
 import uuid
+import datetime
 
 from nose.tools import eq_, ok_, raises
 from nose.plugins.attrib import attr
@@ -238,6 +239,86 @@ class TestSqlAlchemyBackendItest(object):
 
         result = self.backend.remove_files_by_count(0,1000)
         eq_(6, result)
+        eq_(0, self.backend.file_count())
+    
+    @attr("dbtest")
+    def test_remove_files_by_age_1(self):
+        h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
+        h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
+        h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
+        h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
+
+        self.backend.store_file(h5file1.name)
+        self.backend.store_file(h5file2.name)
+        self.backend.store_file(h5file3.name)
+        self.backend.store_file(h5file4.name)
+
+        eq_(4, self.backend.file_count())
+    
+        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,30,0),2)
+        eq_(1, result)
+        eq_(3, self.backend.file_count())
+
+    @attr("dbtest")
+    def test_remove_files_by_age_2(self):
+        h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
+        h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
+        h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
+        h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
+
+        self.backend.store_file(h5file1.name)
+        self.backend.store_file(h5file2.name)
+        self.backend.store_file(h5file3.name)
+        self.backend.store_file(h5file4.name)
+
+        eq_(4, self.backend.file_count())
+    
+        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,0,0),2)
+        eq_(0, result)
+        eq_(4, self.backend.file_count())
+
+    @attr("dbtest")
+    def test_remove_files_by_age_3(self):
+        h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
+        h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
+        h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
+        h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
+
+        self.backend.store_file(h5file1.name)
+        self.backend.store_file(h5file2.name)
+        self.backend.store_file(h5file3.name)
+        self.backend.store_file(h5file4.name)
+
+        eq_(4, self.backend.file_count())
+    
+        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,45,0),2)
+        eq_(2, result)
+        eq_(2, self.backend.file_count())
+
+    @attr("dbtest")
+    def test_remove_files_by_age_4(self):
+        h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
+        h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
+        h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
+        h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
+
+        self.backend.store_file(h5file1.name)
+        self.backend.store_file(h5file2.name)
+        self.backend.store_file(h5file3.name)
+        self.backend.store_file(h5file4.name)
+
+        eq_(4, self.backend.file_count())
+    
+        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,30,0),2)
+        eq_(1, result)
+        eq_(3, self.backend.file_count())
+
+        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,15,00,0),2)
+        eq_(2, result)
+        eq_(1, self.backend.file_count())
+
+        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,16,00,0),2)
+        eq_(1, result)
         eq_(0, self.backend.file_count())
     
     @attr("dbtest")

@@ -42,6 +42,7 @@ import org.junit.Test;
 
 import eu.baltrad.bdb.expr.ExpressionFactory;
 import eu.baltrad.bdb.oh5.Source;
+import eu.baltrad.bdb.util.DateTime;
 
 
 public abstract class DatabaseITestBase {
@@ -142,7 +143,41 @@ public abstract class DatabaseITestBase {
     assertEquals(1, result);
     assertEquals(0, classUnderTest.getFileCount());
   }
-  
+
+  @Test
+  public void removeFilesByAge() throws Exception {
+    FileEntry storedEntry1 = classUnderTest.store(new FileInputStream(
+        getFilePath("fixtures/Z_SCAN_C_ESWI_20101016080000_searl_000000.h5")));
+    FileEntry storedEntry2 = classUnderTest.store(new FileInputStream(
+        getFilePath("fixtures/Z_SCAN_C_ESWI_20101016080000_sease_000000.h5")));
+    FileEntry storedEntry3 = classUnderTest.store(new FileInputStream(
+        getFilePath("fixtures/Z_SCAN_C_ESWI_20101016080500_seang_000000.h5")));
+    FileEntry storedEntry4 = classUnderTest.store(new FileInputStream(
+        getFilePath("fixtures/Z_SCAN_C_ESWI_20101023180000_seang_000000.h5")));
+    
+    assertEquals(4, classUnderTest.getFileCount());
+    
+    int result = classUnderTest.removeFilesByAge(new DateTime(2010,10,16,8,5,0),2);
+    assertEquals(2, result);
+    assertEquals(2, classUnderTest.getFileCount());
+
+    result = classUnderTest.removeFilesByAge(new DateTime(2010,10,17,0,0,0),2);
+    assertEquals(1, result);
+    assertEquals(1, classUnderTest.getFileCount());
+
+    result = classUnderTest.removeFilesByAge(new DateTime(2010,10,23,17,59,59),2);
+    assertEquals(0, result);
+    assertEquals(1, classUnderTest.getFileCount());
+
+    result = classUnderTest.removeFilesByAge(new DateTime(2010,10,23,18,0,0),2);
+    assertEquals(0, result);
+    assertEquals(1, classUnderTest.getFileCount());
+
+    result = classUnderTest.removeFilesByAge(new DateTime(2010,10,23,18,0,1),2);
+    assertEquals(1, result);
+    assertEquals(0, classUnderTest.getFileCount());
+  }
+
   @Test
   public void getFileCount() throws Exception {
     assertEquals(0, classUnderTest.getFileCount());

@@ -108,13 +108,26 @@ class SqlAlchemyBackend(backend.Backend):
             return None
     
     def remove_files_by_count(self, limit, nritems):
-        sqry = sql.select([schema.files.c.id]).order_by(schema.files.c.id.desc()).offset(limit).alias("sqry")
-        qry = sql.select([sqry.c.id]).order_by(sqry.c.id).limit(nritems)
-        dqry = sql.delete(schema.files).where(schema.files.c.id.in_(qry))
-        
+        sqry = sql.select([schema.files.c.id,schema.files.c.uuid]).order_by(schema.files.c.id.desc()).offset(limit).alias("sqry")
+        qry = sql.select([sqry.c.uuid]).order_by(sqry.c.id).limit(nritems)
+        result = 0
         with self.get_connection() as conn:
-            result = conn.execute(dqry)
-            return result.rowcount
+            for row in conn.execute(qry):
+                if self.remove_file(row[schema.files.c.uuid]):
+                    result = result + 1
+        return result
+ 
+    def remove_files_by_age(self, age, nritems):
+        sqry = sql.select([schema.files.c.id,schema.files.c.uuid])
+        sqry = sqry.where((schema.files.c.what_date+schema.files.c.what_time) < age)
+        sqry = sqry.order_by(schema.files.c.what_date+schema.files.c.what_time).limit(nritems)
+        
+        result = 0
+        with self.get_connection() as conn:
+            for row in conn.execute(sqry):
+                if self.remove_file(row[schema.files.c.uuid]):
+                    result = result + 1
+        return result
     
     def file_count(self):
         qry = sql.select([sql.func.count(schema.files.c.id)])
