@@ -50,13 +50,25 @@ public class RestfulDatabase implements Database, SourceManager {
   public RestfulDatabase(String serverUri) {
     this(serverUri, new NullAuthenticator());
   }
-  
+
+  public RestfulDatabase(String serverUri, int maxconnections) {
+    this(serverUri, new NullAuthenticator(), maxconnections);
+  }
+
   public RestfulDatabase(URI serverUri) {
     this(serverUri, new NullAuthenticator());
   }
 
+  public RestfulDatabase(URI serverUri, int maxconnections) {
+    this(serverUri, new NullAuthenticator(), maxconnections);
+  }
+
   public RestfulDatabase(String serverUri, Authenticator authenticator) {
     this(URI.create(serverUri), authenticator);
+  }
+
+  public RestfulDatabase(String serverUri, Authenticator authenticator, int maxconnections) {
+    this(URI.create(serverUri), authenticator, maxconnections);
   }
 
   public RestfulDatabase(URI serverUri, Authenticator authenticator) {
@@ -67,6 +79,15 @@ public class RestfulDatabase implements Database, SourceManager {
       ),
       authenticator
     );
+  }
+
+  public RestfulDatabase(URI serverUri, Authenticator authenticator, int maxconnections) {
+    this.requestFactory = new DefaultRequestFactory(serverUri);
+    ThreadSafeClientConnManager tsccm = new ThreadSafeClientConnManager();
+    tsccm.setDefaultMaxPerRoute(maxconnections);
+    tsccm.setMaxTotal(maxconnections);
+    this.httpClient = new DefaultHttpClient(tsccm);
+    this.authenticator = authenticator;
   }
 
   public RestfulDatabase(RequestFactory requestFactory,
