@@ -156,7 +156,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
     <classpath refid="lib.path"/>
     <classpath location="${build.test.dir}" />
     <batchtest fork="no" todir="${dist.dir}/junit-reports">
-      <fileset dir="${build.test.dir}" includes="**/*Test.class" />
+    	<fileset dir="${build.test.dir}" includes="**/*Test.class" />
+<!--
+        <fileset dir="${build.test.dir}" includes="**/TemplateMetadataNamerTest.class" />
+-->    	
     </batchtest>
   </junit>
   </target>

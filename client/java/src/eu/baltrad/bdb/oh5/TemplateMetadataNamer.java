@@ -23,6 +23,9 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 /**
  * Give names to Metadata instances according to a template.
  *
@@ -40,12 +43,14 @@ public class TemplateMetadataNamer implements MetadataNamer {
     pattern = Pattern.compile(
       "\\$(?:" +
         "(\\$)|" + // group 1 matches escaped delimiter ($$)
-        "\\{([_/a-z][_/a-z0-9]*)\\}" + // group 2 matches the placeholder
+        "\\{([_/a-z][_:/a-z0-9]*)\\}" + // group 2 matches the placeholder
       ")",
       Pattern.CASE_INSENSITIVE
     );
   }
 
+  private static Logger logger = LogManager.getLogger(TemplateMetadataNamer.class);
+  
   public TemplateMetadataNamer(String tmpl) {
     this.tmpl = tmpl;
   }
@@ -65,7 +70,18 @@ public class TemplateMetadataNamer implements MetadataNamer {
     while (m.find()) {
       String placeholder = m.group(2);
       if (placeholder != null) {
-        m.appendReplacement(result, getAttributeValue(metadata, placeholder));
+        if (placeholder.toLowerCase().startsWith("_bdb/source:")) {
+          String r = getSourceItem("_bdb/source", placeholder.substring(12), metadata);
+          m.appendReplacement(result, r);
+        } else if (placeholder.toLowerCase().startsWith("what/source:")) {
+          String r = getSourceItem("what/source", placeholder.substring(12), metadata);
+          m.appendReplacement(result, r);
+        } else if (placeholder.toLowerCase().startsWith("/what/source:")) {
+          String r = getSourceItem("what/source", placeholder.substring(13), metadata);
+          m.appendReplacement(result, r);
+        } else {
+          m.appendReplacement(result, getAttributeValue(metadata, placeholder));
+        }
       }
     }
     m.appendTail(result);
@@ -77,6 +93,20 @@ public class TemplateMetadataNamer implements MetadataNamer {
     Attribute attr = metadata.getAttribute(attrPath);
     if (attr != null) {
       return attr.toString();
+    }
+    return "null";
+  }
+  
+  protected String getSourceItem(String path, String tok, Metadata metadata) {
+    String nxt = getAttributeValue(metadata, path.toLowerCase());
+    if (nxt != null) {
+      StringTokenizer t = new StringTokenizer(nxt,",");
+      while (t.hasMoreElements()) {
+        String n = t.nextToken();
+        if (n.toLowerCase().startsWith(tok.toLowerCase())) {
+          return n.substring(4);
+        }
+      }
     }
     return "null";
   }

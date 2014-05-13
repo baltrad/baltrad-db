@@ -282,6 +282,13 @@ class SqlAlchemyBackend(backend.Backend):
         meta.bdb_stored_time = stored_timestamp.time()
         with self.get_connection() as conn:
             source = get_source_by_id(conn, source_id)
+            
+        # We must add file information to the metadata
+        msources = meta.source()
+        for k in msources.keys():
+            if not source.has_key(k):
+                source[k] = msources[k]
+
         meta.bdb_source = source.to_string()
         meta.bdb_source_name = source.name
         return meta

@@ -138,6 +138,9 @@ class Source(collections.MutableMapping):
     def __iter__(self):
         return iter(self._values)
 
+    def has_key(self, k):
+        return self._values.has_key(k)
+
     def __eq__(self, other):
         if isinstance(other, Source):
             return self.name == other.name and self._values == other._values

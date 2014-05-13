@@ -84,4 +84,66 @@ public class TemplateMetadataNamerTest {
     assertEquals("null", classUnderTest.name(metadata));
   }
 
+  @Test
+  public void name_sourceCMT() {
+    classUnderTest = new TemplateMetadataNamer("${_bdb/source:CMT}");
+    
+    metadata.addNode("/", new Group("_bdb"));
+    metadata.addNode("/_bdb", new Attribute("source", "NOD:abc,CMT:ick"));
+    assertEquals("ick", classUnderTest.name(metadata));
+  }
+
+  @Test
+  public void name_sourceNOD() {
+    classUnderTest = new TemplateMetadataNamer("${_bdb/source:NOD}");
+    
+    metadata.addNode("/", new Group("_bdb"));
+    metadata.addNode("/_bdb", new Attribute("source", "NOD:abc,CMT:ick"));
+    assertEquals("abc", classUnderTest.name(metadata));
+  }
+
+  @Test
+  public void name_sourceORG_null() {
+    classUnderTest = new TemplateMetadataNamer("${_bdb/source:ORG}");
+    
+    metadata.addNode("/", new Group("_bdb"));
+    metadata.addNode("/_bdb", new Attribute("source", "NOD:abc,CMT:ick"));
+    assertEquals("null", classUnderTest.name(metadata));
+  }
+
+  @Test
+  public void name_whatCMT() {
+    classUnderTest = new TemplateMetadataNamer("${what/source:CMT}");
+    
+    metadata.addNode("/", new Group("what"));
+    metadata.addNode("/what", new Attribute("source", "NOD:abc,CMT:ick"));
+    assertEquals("ick", classUnderTest.name(metadata));
+  }
+
+  @Test
+  public void name_whatNOD() {
+    classUnderTest = new TemplateMetadataNamer("${what/source:NOD}");
+    
+    metadata.addNode("/", new Group("what"));
+    metadata.addNode("/what", new Attribute("source", "NOD:abc,CMT:ick"));
+    assertEquals("abc", classUnderTest.name(metadata));
+  }
+
+  @Test
+  public void name_whatSlashNOD() {
+    classUnderTest = new TemplateMetadataNamer("${/what/source:NOD}");
+    
+    metadata.addNode("/", new Group("what"));
+    metadata.addNode("/what", new Attribute("source", "NOD:abc,CMT:ick"));
+    assertEquals("abc", classUnderTest.name(metadata));
+  }
+
+  @Test
+  public void name_whatORG_null() {
+    classUnderTest = new TemplateMetadataNamer("${what/source:ORG}");
+    
+    metadata.addNode("/", new Group("what"));
+    metadata.addNode("/what", new Attribute("source", "NOD:abc,CMT:ick"));
+    assertEquals("null", classUnderTest.name(metadata));
+  }
 }
