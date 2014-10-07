@@ -87,4 +87,52 @@ public class FileCacheTest extends EasyMockSupport  {
     
     verifyAll();
   }
+
+  class FCThread extends Thread {
+    private FileCache fc = null;
+    private boolean doRemove = false;
+    public FCThread(FileCache fc) {
+      this.fc = fc;
+    }
+    public FCThread(FileCache fc, boolean remove) {
+      this.fc = fc;
+      this.doRemove = remove;
+    }
+    public void run() {
+      for (int i = 0; i < 100; i++) {
+        UUID uuid = UUID.randomUUID();
+        fc.put(uuid, new File(uuid.toString()));
+        if (doRemove) {
+          fc.remove(uuid);
+        }
+      }
+    }
+  }
+
+  class CountingLinkedFileCache extends LinkedFileCache {
+    private static final long serialVersionUID = 1L;
+    int nrDeletes = 0;
+    CountingLinkedFileCache(int fileLimit){
+      super(fileLimit);
+    }
+    @Override
+    protected void deleteFile(File path) {
+      nrDeletes++;
+    }
+  };
+  
+  @Test
+  public void testRunit() throws Exception {
+    CountingLinkedFileCache flfc = new CountingLinkedFileCache(20);
+    final FileCache fc = new FileCache(flfc);
+    Thread[] threads = new Thread[]{new FCThread(fc), new FCThread(fc), new FCThread(fc), new FCThread(fc, true), new FCThread(fc, true)};
+    for (Thread t : threads) {
+      t.start();
+    }
+    for (Thread t : threads) {
+      t.join();
+    }
+    Assert.assertEquals(flfc.size(), threads.length * 100 - flfc.nrDeletes);
+    //System.out.println("Nr updates = " + threads.length*100 + ", nrDeletes = " + flfc.nrDeletes + ", nrItems = " + flfc.size());
+  }
 }

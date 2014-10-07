@@ -69,7 +69,7 @@ class FileCache {
    * Removes the file with uuid
    * @param uuid the uuid
    */
-  public void remove(UUID uuid) {
+  public synchronized void remove(UUID uuid) {
     cache.remove(uuid);
   }
 }
