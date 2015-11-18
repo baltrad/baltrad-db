@@ -288,7 +288,6 @@ class SqlAlchemyBackend(backend.Backend):
         for k in msources.keys():
             if not source.has_key(k):
                 source[k] = msources[k]
-
         meta.bdb_source = source.to_string()
         meta.bdb_source_name = source.name
         return meta
@@ -534,7 +533,15 @@ def _has_file_by_hash_and_source(conn, hash, source_id):
 
 def get_source_id(conn, source):
     where = sql.literal(False)
+    keys = source.keys()
+    ignoreORG=False
+    if "ORG" in keys:
+        if "WMO" in keys or "NOD" in keys or "RAD" in keys or "PLC" in keys:
+            ignoreORG=True
+
     for key, value in source.iteritems():
+        if ignoreORG and key == "ORG":
+            continue
         where = sql.or_(
             where,
             sql.and_(
