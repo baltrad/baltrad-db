@@ -142,7 +142,7 @@ class RestfulDatabase(db.Database):
                 "Unhandled response code: %s" % response.status
             )
     
-    def get_sources(self):
+    def get_sources(self, parent=None):
         request = Request(
             "GET", "/source/"
         )
@@ -151,10 +151,13 @@ class RestfulDatabase(db.Database):
 
         if response.status == httplib.OK:
             data = json.loads(response.read())
-            return [
-                oh5.Source(src["name"], values=src["values"])
-                    for src in data["sources"]
-            ]
+            result = []
+            for src in data["sources"]:
+                parent = None
+                if src.has_key("parent"):
+                    parent = src["parent"]
+                result.append(oh5.Source(src["name"], values=src["values"], parent=parent))
+            return result
         else:
             raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status
@@ -166,6 +169,7 @@ class RestfulDatabase(db.Database):
                 "source" : {
                     "name": source.name,
                     "values": dict(source),
+                    "parent": source.parent
                 }
             })
         )
@@ -187,6 +191,7 @@ class RestfulDatabase(db.Database):
                 "source": {
                     "name": source.name,
                     "values": dict(source),
+                    "parent": source.parent
                 }
             })
         )
@@ -220,6 +225,48 @@ class RestfulDatabase(db.Database):
                 "Unhandled response code: %s" % response.status
             )
 
+    def get_parent_sources(self):
+        request = Request(
+            "GET", "/source/parents"
+        )
+
+        response = self.execute_request(request)
+
+        if response.status == httplib.OK:
+            data = json.loads(response.read())
+            result = []
+            for src in data["sources"]:
+                parent = None
+                if src.has_key("parent"):
+                    parent = src["parent"]
+                result.append(oh5.Source(src["name"], values=src["values"], parent=parent))
+            return result
+        else:
+            raise db.DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
+
+    def get_sources_with_parent(self, parent):
+        request = Request(
+            "GET", "/source/with_parent/%s"%parent
+        )
+
+        response = self.execute_request(request)
+
+        if response.status == httplib.OK:
+            data = json.loads(response.read())
+            result = []
+            for src in data["sources"]:
+                parent = None
+                if src.has_key("parent"):
+                    parent = src["parent"]
+                result.append(oh5.Source(src["name"], values=src["values"], parent=parent))
+            return result
+        else:
+            raise db.DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
+    
     def execute_file_query(self, query):
         request = Request(
             "POST", "/query/file",

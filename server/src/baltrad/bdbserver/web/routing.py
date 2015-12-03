@@ -96,6 +96,12 @@ URL_MAP = Map(
             Rule("/<string:name>", methods=["DELETE"],
                 endpoint="handler.remove_source"
             ),
+            Rule("/parents", methods=["GET"],
+                endpoint="handler.get_parent_sources"
+            ),
+            Rule("/with_parent/<string:parent>", methods=["GET"],
+                 endpoint="handler.get_sources_with_parent"
+            )
         ]),
         Submount("/filter", [
             Rule("/", methods=["GET"],

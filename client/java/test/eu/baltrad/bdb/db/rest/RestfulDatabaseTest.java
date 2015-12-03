@@ -472,7 +472,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
       HttpStatus.SC_OK,
       "{\"sources\" : [" +
         "{\"name\": \"src1\", \"values\": {\"key1\": \"value1\"}}," +
-        "{\"name\": \"src2\", \"values\": {\"key2\": \"value2\"}}" +
+        "{\"name\": \"src2\", \"values\": {\"key2\": \"value2\"}, \"parent\": \"src1\"}" +
       "]}"
     );
 
@@ -669,6 +669,58 @@ public class RestfulDatabaseTest extends EasyMockSupport {
       // pass
     }
     
+    verifyAll();
+  }
+  
+  @Test
+  public void getParentSources() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_OK,
+        "{\"sources\" : [" + 
+          "{\"name\": \"src1\", \"values\": {\"key1\": \"value1\"}, \"parent\": null}," + 
+          "{\"name\": \"src2\", \"values\": {\"key2\": \"value2\"}}" + 
+        "]}");
+
+    expect(requestFactory.createGetParentSourcesRequest()).andReturn(request);
+    expect(methods.executeRequest(request)).andReturn(response);
+    replayAll();
+
+    List<Source> sources = classUnderTest.getParentSources();
+    assertEquals(2, sources.size());
+    Source src = sources.get(0);
+    assertEquals("src1", src.getName());
+    assertEquals("value1", src.get("key1"));
+    assertNull(src.getParent());
+    src = sources.get(1);
+    assertEquals("src2", src.getName());
+    assertEquals("value2", src.get("key2"));
+    assertNull(src.getParent());
+    verifyAll();
+  }
+
+  @Test
+  public void getSourcesWithParent() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(HttpStatus.SC_OK,
+        "{\"sources\" : [" + 
+          "{\"name\": \"src1\", \"values\": {\"key1\": \"value1\"}, \"parent\": \"by\"}," +
+          "{\"name\": \"src2\", \"values\": {\"key2\": \"value2\"}, \"parent\": \"by\"}" + 
+        "]}");
+
+    expect(requestFactory.createGetSourcesWithParent("by")).andReturn(request);
+    expect(methods.executeRequest(request)).andReturn(response);
+    replayAll();
+
+    List<Source> sources = classUnderTest.getSourcesWithParent("by");
+    assertEquals(2, sources.size());
+    Source src = sources.get(0);
+    assertEquals("src1", src.getName());
+    assertEquals("value1", src.get("key1"));
+    assertEquals("by", src.getParent());
+    src = sources.get(1);
+    assertEquals("src2", src.getName());
+    assertEquals("value2", src.get("key2"));
+    assertEquals("by", src.getParent());
     verifyAll();
   }
   

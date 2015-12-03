@@ -84,7 +84,6 @@ class TestRestfulDatabase(object):
     def test_get_sources(self):
         sources = self.database.get_sources()
         source = self.get_source_from_sources(sources, 'sevil')
-        #NOD:sevil,PLC:Vilebo,RAD:SE48,WMO:02570
         eq_('sevil', source['NOD'])
         eq_('Vilebo', source['PLC'])
         eq_('SE48', source['RAD'])
@@ -120,3 +119,42 @@ class TestRestfulDatabase(object):
         result = self.get_source('nisse')
         eq_(None, result)
 
+
+    def test_get_parent_sources(self):
+        parent_sources = self.database.get_parent_sources()
+        eq_(3, len(parent_sources))
+        source = self.get_source_from_sources(parent_sources, 'by')
+        eq_("by", source.name)
+        eq_(None, source.parent)
+        eq_('226', source['ORG'])
+        eq_('UMMS', source['CCCC'])
+        
+        source = self.get_source_from_sources(parent_sources, 'se')
+        eq_("se", source.name)
+        eq_(None, source.parent)
+        eq_('82', source['ORG'])
+        eq_('ESWI', source['CCCC'])
+
+        source = self.get_source_from_sources(parent_sources, 'pl')
+        eq_("pl", source.name)
+        eq_(None, source.parent)
+        eq_('220', source['ORG'])
+        eq_('SOWR', source['CCCC'])
+        
+    def test_get_sources_with_parent(self):
+        sources = self.database.get_sources_with_parent("se")
+        eq_(12, len(sources))
+        source = self.get_source_from_sources(sources, 'sekir')
+        eq_("sekir", source.name)
+        eq_("se", source.parent)
+        eq_("Kiruna", source["PLC"])
+        eq_("SE40", source["RAD"])
+        eq_("02032", source["WMO"])
+        source = self.get_source_from_sources(sources, 'searl')
+        eq_("searl", source.name)
+        eq_("se", source.parent)
+        eq_("Arlanda", source["PLC"])
+        eq_("SE46", source["RAD"])
+        eq_("02451", source["WMO"])
+        
+ 

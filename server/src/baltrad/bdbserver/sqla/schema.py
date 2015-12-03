@@ -17,12 +17,14 @@ from sqlalchemy.types import (
     Text,
     Time,
 )
+from sqlalchemy.schema import ForeignKey
 
 meta = MetaData()
 
 sources = Table("bdb_sources", meta,
     Column("id", Integer, primary_key=True),
     Column("name", Text, unique=True, nullable=False),
+    Column("parent", Text)
 )
 
 source_kvs = Table("bdb_source_kvs", meta,

@@ -401,6 +401,67 @@ public abstract class DatabaseITestBase {
     assertNull(found);
   }
 
+  @Test
+  public void SourceManager_getParentSources() throws Exception {
+    List<Source> sources = classUnderTest.getSourceManager().getParentSources();
+    Source by = null;
+    Source se = null;
+    Source pl = null;
+    
+    for (Source src : sources) {
+      if ("by".equals(src.getName())) {
+        by = src;
+      } else if("se".equals(src.getName())) {
+        se = src;
+      } else if("pl".equals(src.getName())) {
+        pl = src;
+      }
+    }
+    assertEquals(3, sources.size());
+    assertNotNull(by);
+    assertNotNull(se);
+    assertNotNull(pl);
+    assertEquals("UMMS", by.get("CCCC"));
+    assertEquals("226", by.get("ORG"));
+    assertNull(by.getParent());
+    assertEquals("ESWI", se.get("CCCC"));
+    assertEquals("82", se.get("ORG"));
+    assertEquals("643", se.get("CTY"));
+    assertNull(se.getParent());
+    assertEquals("SOWR", pl.get("CCCC"));
+    assertEquals("220", pl.get("ORG"));
+    assertNull(pl.getParent());
+  }
+
+  @Test
+  public void SourceManager_getSourcesWithParent() throws Exception {
+    List<Source> sources = classUnderTest.getSourceManager().getSourcesWithParent("se");
+    Source selul = null;
+    Source searl = null;
+    
+    for (Source src : sources) {
+      if ("selul".equals(src.getName())) {
+        selul = src;
+      } else if("searl".equals(src.getName())) {
+        searl = src;
+      }
+    }
+    assertEquals(12, sources.size());
+    assertNotNull(selul);
+    assertNotNull(searl);
+    //<selul nod="selul" plc="Luleå" rad="SE41" wmo="02092"></selul>
+    assertEquals("selul", selul.get("NOD"));
+    assertEquals("Luleå", selul.get("PLC"));
+    assertEquals("SE41", selul.get("RAD"));
+    assertEquals("02092", selul.get("WMO"));
+    assertEquals("se", selul.getParent());
+    //<searl nod="searl" plc="Arlanda" rad="SE46" wmo="02451"></searl>
+    assertEquals("searl", searl.get("NOD"));
+    assertEquals("Arlanda", searl.get("PLC"));
+    assertEquals("SE46", searl.get("RAD"));
+    assertEquals("02451", searl.get("WMO"));
+    assertEquals("se", searl.getParent());
+  }
   
   @Test
   public void findByDiadristicName() throws Exception {

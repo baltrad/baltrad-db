@@ -183,6 +183,16 @@ public final class DefaultRequestFactory implements RequestFactory {
     return result;
   }
   
+  @Override
+  public HttpUriRequest createGetParentSourcesRequest() {
+	return new HttpGet(getRequestUri("source/parents"));
+  }
+
+  @Override
+  public HttpUriRequest createGetSourcesWithParent(String parent) {
+	return new HttpGet(getRequestUri("source/with_parent/"+parent));
+  }
+  
   protected URI getRequestUri(String path) {
     return URIUtils.resolve(serverUri, path);
   }

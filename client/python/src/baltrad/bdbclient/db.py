@@ -107,6 +107,22 @@ class Database(object):
         """
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def get_parent_sources(self):
+        """returns all sources that are acting as parent.
+
+        :return: list of :class:`bdbcommon.oh5.meta.Source` instances
+        """
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_sources_with_parent(self, parent):
+        """returns all sources that have got a parent with specified name.
+
+        :return: list of :class:`bdbcommon.oh5.meta.Source` instances
+        """
+        raise NotImplementedError()        
+
 class FileEntry(object):
     __metaclass__ = abc.ABCMeta
     

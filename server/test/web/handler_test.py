@@ -129,15 +129,15 @@ class TestSourceHandlers(object):
     def test_get_sources(self):
         self.source_manager.get_sources.return_value = [
             Source("src1", {"key1": "value1"}),
-            Source("src2", {"key2": "value2"}),
+            Source("src2", {"key2": "value2"}, "src1"),
         ]
         
         response = handler.get_sources(self.ctx)
         eq_(httplib.OK, response.status_code) 
         expected = (
             '{"sources": ['
-                '{"values": {"key1": "value1"}, "name": "src1"}, '
-                '{"values": {"key2": "value2"}, "name": "src2"}'
+                '{"values": {"key1": "value1"}, "name": "src1", "parent": null}, '
+                '{"values": {"key2": "value2"}, "name": "src2", "parent": "src1"}'
             ']}'
         )
         eq_(expected, response.data)

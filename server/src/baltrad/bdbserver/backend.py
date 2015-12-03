@@ -245,6 +245,23 @@ class SourceManager(object):
         """
         raise NotImplementedError()
 
+    @abstractmethod
+    def get_parent_sources(self):
+        """returns all sources that are acting as parent.
+
+        :return: list of :class:`baltrad.bdb.oh5.meta.Source` instances
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_sources_with_parent(self, parent):
+        """returns all sources with specified parent.
+
+        :param parent: the name of the parent
+        :return: list of :class:`baltrad.bdb.oh5.meta.Source` instances
+        """
+        raise NotImplementedError()
+
 class Filter(object):
     def __init__(self, name, expression):
         self.name = name

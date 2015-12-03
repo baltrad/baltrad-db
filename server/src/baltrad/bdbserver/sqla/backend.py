@@ -329,6 +329,7 @@ class SqlAlchemySourceManager(backend.SourceManager):
                     result.append(source)
                     source = oh5.Source(row["name"])
                 source[row["key"]] = row["value"]
+                source.parent = row["parent"]
         if source:
             result.append(source)
         return result
@@ -339,6 +340,7 @@ class SqlAlchemySourceManager(backend.SourceManager):
                 source_id = conn.execute(
                     schema.sources.insert(),
                     name=source.name,
+                    parent=source.parent
                 ).inserted_primary_key[0]
             except sqlexc.IntegrityError:
                 raise backend.DuplicateEntry()
@@ -373,6 +375,55 @@ class SqlAlchemySourceManager(backend.SourceManager):
             else:
                 return bool(affected_rows)
     
+    def get_parent_sources(self):
+        qry = sql.select(
+            [schema.sources, schema.source_kvs],
+            from_obj=schema.source_kvs.join(schema.sources),
+            order_by=[sql.asc(schema.sources.c.name)]
+        )
+        qry = qry.where(schema.sources.c.parent==None)
+
+        result = []
+
+        source = None
+
+        with self.get_connection() as conn:
+            for row in conn.execute(qry):
+                if not source:
+                    source = oh5.Source(row["name"])
+                if source.name != row["name"]:
+                    result.append(source)
+                    source = oh5.Source(row["name"])
+                source[row["key"]] = row["value"]
+        if source:
+            result.append(source)
+        return result  
+          
+    def get_sources_with_parent(self, parent):
+        qry = sql.select(
+            [schema.sources, schema.source_kvs],
+            from_obj=schema.source_kvs.join(schema.sources),
+            order_by=[sql.asc(schema.sources.c.name)]
+        )
+        qry = qry.where(schema.sources.c.parent==parent)
+
+        result = []
+
+        source = None
+
+        with self.get_connection() as conn:
+            for row in conn.execute(qry):
+                if not source:
+                    source = oh5.Source(row["name"])
+                if source.name != row["name"]:
+                    result.append(source)
+                    source = oh5.Source(row["name"])
+                source[row["key"]] = row["value"]
+                source.parent = row["parent"]
+        if source:
+            result.append(source)
+        return result
+
     def get_connection(self):
         return self._backend.get_connection()
 

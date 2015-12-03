@@ -48,4 +48,16 @@ public interface SourceManager {
    * @return true if file was removed, false if file did not exist
    */
   boolean remove(String src);
+  
+  /**
+   * @return a list of sources that are parents
+   */
+  List<Source> getParentSources();
+  
+  /**
+   * Return a list of sources with specified parent 
+   * @param parent the parent to look for
+   * @return a list
+   */
+  List<Source> getSourcesWithParent(String parent);
 }

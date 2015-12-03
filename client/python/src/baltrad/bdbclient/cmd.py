@@ -188,7 +188,7 @@ class ImportSources(Command):
         logger.debug("Reading sources from %s" % rave_sources_path)
         with open(rave_sources_path) as f:
             sources = oh5.Source.from_rave_xml(f.read())
-        
+
         db_sources = dict([(src.name, src) for src in database.get_sources()])
 
         for source in sources:

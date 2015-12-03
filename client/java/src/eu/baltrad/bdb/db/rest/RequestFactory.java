@@ -57,4 +57,8 @@ public interface RequestFactory {
   HttpUriRequest createUpdateSourceRequest(Source source);
   
   HttpUriRequest createDeleteSourceRequest(String source);
+  
+  HttpUriRequest createGetParentSourcesRequest();
+
+  HttpUriRequest createGetSourcesWithParent(String parent);
 }

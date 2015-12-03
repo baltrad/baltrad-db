@@ -406,6 +406,40 @@ public class RestfulDatabase implements Database, SourceManager {
     return result;
   }
 
+  @Override
+  public List<Source> getParentSources() {
+    HttpUriRequest request = requestFactory.createGetParentSourcesRequest();
+    RestfulResponse response = executeRequest(request);
+
+    try {
+      int statusCode = response.getStatusCode();
+      if (statusCode == HttpStatus.SC_OK) {
+        return response.getSources();
+      } else {
+        throw new DatabaseError("source listing failed, response code: " + Integer.toString(statusCode));
+      }
+    } finally {
+      response.close();
+    }
+  }
+
+  @Override
+  public List<Source> getSourcesWithParent(String parent) {
+    HttpUriRequest request = requestFactory.createGetSourcesWithParent(parent);
+    RestfulResponse response = executeRequest(request);
+
+    try {
+      int statusCode = response.getStatusCode();
+      if (statusCode == HttpStatus.SC_OK) {
+        return response.getSources();
+      } else {
+        throw new DatabaseError("source listing failed, response code: " + Integer.toString(statusCode));
+      }
+    } finally {
+      response.close();
+    }
+  }
+
   protected RestfulResponse executeRequest(HttpUriRequest request) {
     authenticator.addCredentials(request);
     try {
@@ -417,4 +451,5 @@ public class RestfulDatabase implements Database, SourceManager {
       );
     }
   }
+
 }

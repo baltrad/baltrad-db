@@ -186,7 +186,7 @@ class TestSource(object):
         result = Source.from_rave_xml(xml)
         eq_(
             Source("ee",
-                values={"CCCC": "EEMH", "ORG": "231"}
+                values={"CCCC": "EEMH", "ORG": "231"},
             ),
             result[0]
         )
@@ -197,7 +197,8 @@ class TestSource(object):
                     "PLC": "Harku",
                     "RAD": "EE40",
                     "WMO": "26038"
-                }
+                },
+                parent = "ee"
             ),
             result[1]
         )
@@ -208,7 +209,8 @@ class TestSource(object):
                     "PLC": u"Sürgavere",
                     "RAD": "EE41",
                     "WMO": "26232",
-                }
+                },
+                parent = "ee"
             ),
             result[2]
         )
@@ -228,6 +230,7 @@ class TestSource(object):
                     "RAD": "FI42",
                     "WMO": "02975",
                 },
+                parent = "fi"
             ),
             result[4]
         )

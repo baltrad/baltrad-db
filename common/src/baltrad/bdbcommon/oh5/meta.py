@@ -18,9 +18,12 @@
 import collections
 import os.path
 from xml.etree import ElementTree
+import logging
 
 from . node import Attribute, Group, NodeIterator
 from . io import HlHdfMetadataReader
+
+logger = logging.getLogger("baltrad.bdbcommon")
 
 class AttributeProperty(object):
     def __init__(self, path, fget=None):
@@ -119,10 +122,11 @@ class Metadata(object):
         return [node.json_repr() for node in self.iternodes()]
 
 class Source(collections.MutableMapping):
-    def __init__(self, name=None, values={}):
+    def __init__(self, name=None, values={}, parent=None):
         self.name = name
         self._values = dict(values)
-    
+        self.parent = parent
+
     def __getitem__(self, k):
         return self._values[k]
     
@@ -143,13 +147,13 @@ class Source(collections.MutableMapping):
 
     def __eq__(self, other):
         if isinstance(other, Source):
-            return self.name == other.name and self._values == other._values
+            return self.name == other.name and self._values == other._values and self.parent == other.parent
         elif isinstance(other, collections.Mapping):
             return self._values == other
         return False
     
     def __repr__(self):
-        return "Source(%r, values=%r)" % (self.name, self._values)
+        return "Source(%r, parent=%r, values=%r)" % (self.name, self.parent, self._values)
     
     def __str__(self):
         return self.to_string()
@@ -180,9 +184,11 @@ class Source(collections.MutableMapping):
         radar_db = ElementTree.XML(xml)
         result = []
         for org_def in radar_db:
-            result.append(cls._create_from_etree_element(org_def))
+            org_source = cls._create_from_etree_element(org_def)
+            result.append(org_source)
             for radar_def in org_def:
                 source = cls._create_from_etree_element(radar_def)
                 source["NOD"] = radar_def.tag
+                source.parent = org_source.name
                 result.append(source)
         return result

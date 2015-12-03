@@ -26,7 +26,8 @@ import java.util.*;
 public class Source {
   String name;
   Map<String, String> values;
-
+  String parent;
+  
   public Source() {
     this.values = new HashMap<String, String>();
   }
@@ -34,6 +35,13 @@ public class Source {
   public Source(String name) {
     this();
     this.name = name;
+    this.parent = null;
+  }
+  
+  public Source(String name, String parent) {
+	this();
+	this.name = name;
+	this.parent = parent;
   }
 
   public String getName() {
@@ -42,6 +50,14 @@ public class Source {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getParent() {
+	return parent;
+  }
+
+  public void setParent(String parent) {
+	this.parent = parent;
   }
 
   public String put(String key, String value) {

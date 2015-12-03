@@ -96,6 +96,9 @@ public final class RestfulResponse {
   protected Source getSourceFromNode(JsonNode node) {
     Source result = new Source();
     result.setName(node.get("name").getTextValue());
+    if (node.has("parent")) {
+      result.setParent(node.get("parent").getTextValue());
+    }
     Iterator<Map.Entry<String, JsonNode>> fieldIterator = node.get("values").getFields();
     while (fieldIterator.hasNext()) {
       Map.Entry<String, JsonNode> field = fieldIterator.next();

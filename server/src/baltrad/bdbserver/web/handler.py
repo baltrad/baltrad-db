@@ -185,7 +185,7 @@ def get_sources(ctx):
     """
     sources = ctx.backend.get_source_manager().get_sources()
     return JsonResponse({
-        "sources": [{"name": src.name, "values": dict(src)} for src in sources]
+        "sources": [{"name": src.name, "values": dict(src), "parent": src.parent} for src in sources]
     })
 
 def add_source(ctx):
@@ -199,7 +199,10 @@ def add_source(ctx):
     """
     data = ctx.request.get_json_data()["source"]
 
-    source = Source(data["name"], values=data["values"])
+    parent = None
+    if data.has_key("parent"):
+        parent = data["parent"]
+    source = Source(data["name"], values=data["values"], parent=parent)
     ctx.backend.get_source_manager().add_source(source)
     response = Response("", status=httplib.CREATED)
     response.headers["Location"] = ctx.make_url("source/" + source.name)
@@ -245,6 +248,34 @@ def remove_source(ctx, name):
         response = Response("", status=httplib.CONFLICT)
     
     return response
+
+def get_parent_sources(ctx):
+    """returns all sources that are acting as parent.
+
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status *200 OK*
+
+    See :ref:`doc-rest-op-get-sources` for details
+    """
+    parent_sources = ctx.backend.get_source_manager().get_parent_sources()
+    return JsonResponse({
+        "sources": [{"name": src.name, "values": dict(src)} for src in parent_sources]
+    })
+
+def get_sources_with_parent(ctx, parent):
+    """returns all sources that are have specified parent.
+
+    :type ctx: :class:`~.util.RequestContext`
+    :param parent: the name of the parent for the sources to fetch
+    :return: :class:`~.util.JsonResponse` with status *200 OK*
+
+    See :ref:`doc-rest-op-get-sources` for details
+    """
+    sources = ctx.backend.get_source_manager().get_sources_with_parent(parent)
+    return JsonResponse({
+        "sources": [{"name": src.name, "values": dict(src), "parent": src.parent} for src in sources]
+    })
+    
 
 def get_filters(ctx):
     """get a list of filters
