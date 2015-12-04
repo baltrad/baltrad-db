@@ -215,7 +215,18 @@ class SourceManager(object):
         :return: list of :class:`baltrad.bdb.oh5.meta.Source` instances
         """
         raise NotImplementedError()
-    
+
+    @abstractmethod
+    def get_source(self, name):
+        """get a source with specified name
+
+        the sources are returned in alphabetical order by name.
+
+        :param name: the name of the source
+        :return: list of :class:`baltrad.bdb.oh5.meta.Source` instances
+        """
+        raise NotImplementedError()
+        
     @abstractmethod
     def add_source(self, source):
         """add a new source definition to the database

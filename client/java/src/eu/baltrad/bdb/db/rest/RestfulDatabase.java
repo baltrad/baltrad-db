@@ -344,6 +344,24 @@ public class RestfulDatabase implements Database, SourceManager {
     }
   }
 
+  @Override
+  public Source getSource(String name) {
+    HttpUriRequest request = requestFactory.createGetSourceRequest(name);
+    RestfulResponse response = executeRequest(request);
+    
+    try {
+      int statusCode = response.getStatusCode();
+      if (statusCode == HttpStatus.SC_OK) {
+        return response.getSource();
+      } else {
+        throw new DatabaseError("source retrival, response code: " +
+                                Integer.toString(statusCode));
+      }
+    } finally {
+      response.close();
+    }
+  }
+
   /**
    * @see eu.baltrad.bdb.db.SourceManager#add(Source)
    */
@@ -451,5 +469,4 @@ public class RestfulDatabase implements Database, SourceManager {
       );
     }
   }
-
 }

@@ -34,6 +34,12 @@ public interface SourceManager {
   List<Source> getSources();
 
   /**
+   * @param name the name of the source to retrieve
+   * @return the source
+   */
+  Source getSource(String name);
+  
+  /**
    * @param src the source to add
    */
   void add(Source src);

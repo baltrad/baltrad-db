@@ -474,6 +474,39 @@ class TestSqlAlchemySourceManager(object):
         # in alphabetical order by name
         eq_(source2, sources[0])
         eq_(source1, sources[1])
+        
+    @attr("dbtest")
+    def test_get_source(self):
+        source1 = Source("se", values={"bar": "baz"})
+        source2 = Source("sekir", values={"qwe": "asd"}, parent="se")
+        source3 = Source("pl", values={"bar": "boo"})
+        source4 = Source("plika", values={"qwe": "moha"}, parent="pl")
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
+        self.source_manager.add_source(source3)
+        self.source_manager.add_source(source4)
+
+        eq_(source1, self.source_manager.get_source("se"))
+        eq_(source2, self.source_manager.get_source("sekir"))
+        eq_(source3, self.source_manager.get_source("pl"))
+        eq_(source4, self.source_manager.get_source("plika"))
+
+    @attr("dbtest")
+    def test_get_source_not_found(self):
+        source1 = Source("se", values={"bar": "baz"})
+        source2 = Source("sekir", values={"qwe": "asd"}, parent="se")
+        source3 = Source("pl", values={"bar": "boo"})
+        source4 = Source("plika", values={"qwe": "moha"}, parent="pl")
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
+        self.source_manager.add_source(source3)
+        self.source_manager.add_source(source4)
+
+        try:
+            self.source_manager.get_source("sse")
+            self.fail("Expected LookupError")
+        except LookupError, e:
+            eq_("Could not find source with name: sse", e.__str__())
     
     @attr("dbtest")
     def test_get_sources_empty(self):

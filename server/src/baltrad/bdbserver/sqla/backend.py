@@ -334,6 +334,38 @@ class SqlAlchemySourceManager(backend.SourceManager):
             result.append(source)
         return result
     
+    def get_source(self, name):
+        if not name:
+            raise ValueError("name must not be None")
+
+        qry = sql.select(
+            [schema.sources, schema.source_kvs],
+            from_obj=schema.source_kvs.join(schema.sources),
+            order_by=[sql.asc(schema.sources.c.name)]
+        )
+        qry = qry.where(schema.sources.c.name==name)
+
+        result = []
+
+        source = None
+
+        with self.get_connection() as conn:
+            for row in conn.execute(qry):
+                if not source:
+                    source = oh5.Source(row["name"])
+                if source.name != row["name"]:
+                    result.append(source)
+                    source = oh5.Source(row["name"])
+                source[row["key"]] = row["value"]
+                source.parent = row["parent"]
+        if source:
+            result.append(source)
+
+        if len(result) == 0:
+            raise LookupError("Could not find source with name: %s"%name)
+        
+        return result[0]
+    
     def add_source(self, source):
         with self.get_connection() as conn:
             try:

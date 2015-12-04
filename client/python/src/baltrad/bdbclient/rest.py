@@ -142,7 +142,7 @@ class RestfulDatabase(db.Database):
                 "Unhandled response code: %s" % response.status
             )
     
-    def get_sources(self, parent=None):
+    def get_sources(self):
         request = Request(
             "GET", "/source/"
         )
@@ -157,6 +157,25 @@ class RestfulDatabase(db.Database):
                 if src.has_key("parent"):
                     parent = src["parent"]
                 result.append(oh5.Source(src["name"], values=src["values"], parent=parent))
+            return result
+        else:
+            raise db.DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
+            
+    def get_source(self, name):
+        request = Request(
+            "GET", "/source/by_name/%s"%name
+        )
+
+        response = self.execute_request(request)
+
+        if response.status == httplib.OK:
+            data = json.loads(response.read())
+            src = data["source"]
+            if src.has_key("parent"):
+                parent = src["parent"]
+            result = oh5.Source(src["name"], values=src["values"], parent=parent)
             return result
         else:
             raise db.DatabaseError(

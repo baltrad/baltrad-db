@@ -147,6 +147,11 @@ public final class DefaultRequestFactory implements RequestFactory {
   public HttpUriRequest createGetSourcesRequest() {
     return new HttpGet(getRequestUri("source/"));
   }
+
+  @Override
+  public HttpUriRequest createGetSourceRequest(String name) {
+    return new HttpGet(getRequestUri("source/by_name/"+name));
+  }
   
   @Override
   public HttpUriRequest createAddSourceRequest(Source source) {

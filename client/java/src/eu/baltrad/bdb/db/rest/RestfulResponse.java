@@ -93,6 +93,11 @@ public final class RestfulResponse {
     return result;
   }
 
+  public Source getSource() {
+    JsonNode sourceNode = getJsonContent().get("source");
+    return getSourceFromNode(sourceNode);
+  }
+
   protected Source getSourceFromNode(JsonNode node) {
     Source result = new Source();
     result.setName(node.get("name").getTextValue());

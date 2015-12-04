@@ -105,7 +105,6 @@ public class RestfulDatabaseTest extends EasyMockSupport {
         return methods.executeRequest(request);
       }
     };
-      
     resetAll();
   }
 
@@ -512,7 +511,28 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     } catch (DatabaseError e) { }
     verifyAll();
   }
+  
+  @Test
+  public void getSource() throws Exception {
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulResponse response = createRestfulResponse(
+      HttpStatus.SC_OK,
+      "{\"source\" : {\"name\": \"src1\", \"values\": {\"key1\": \"value1\"}, \"parent\": \"se\"}}"
+    );
 
+    expect(requestFactory.createGetSourceRequest("se"))
+      .andReturn(request);
+    expect(methods.executeRequest(request))
+      .andReturn(response);
+    
+    replayAll();
+    Source source = classUnderTest.getSource("se");
+    verifyAll();
+    
+    assertEquals("src1", source.getName());
+    assertEquals("value1", source.get("key1"));
+    assertEquals("se", source.getParent());
+  }
   @Test
   public void add() throws Exception {
     HttpUriRequest request = createMock(HttpUriRequest.class);

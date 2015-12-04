@@ -89,6 +89,21 @@ class TestRestfulDatabase(object):
         eq_('SE48', source['RAD'])
         eq_('02570', source['WMO'])
 
+    def test_get_source(self):
+        #<se CCCC="ESWI" org="82" cty="643">
+        source = self.database.get_source("se")
+        print `source`
+        eq_('se', source.name)
+        eq_('ESWI', source['CCCC'])
+        eq_('82', source['ORG'])
+        eq_('643', source['CTY'])
+
+        source = self.database.get_source("sevil")
+        eq_('sevil', source['NOD'])
+        eq_('Vilebo', source['PLC'])
+        eq_('SE48', source['RAD'])
+        eq_('02570', source['WMO'])
+
     def test_add_source(self):
         values = {'NOD':'nisse', 'PLC':'Nisse town'}
         source = oh5.Source('nisse', values=values)

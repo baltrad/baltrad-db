@@ -51,6 +51,8 @@ public interface RequestFactory {
   HttpUriRequest createQueryAttributeRequest(AttributeQuery query);
 
   HttpUriRequest createGetSourcesRequest();
+
+  HttpUriRequest createGetSourceRequest(String name);
   
   HttpUriRequest createAddSourceRequest(Source source);
   

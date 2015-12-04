@@ -144,7 +144,14 @@ public class DefaultRequestFactoryTest {
     assertEquals("GET", req.getMethod());
     assertEquals(URI.create("http://example.com/source/"), req.getURI());
   }
-
+  
+  @Test
+  public void createGetSourceRequest() {
+    HttpUriRequest req = classUnderTest.createGetSourceRequest("se");
+    assertEquals("GET", req.getMethod());
+    assertEquals(URI.create("http://example.com/source/by_name/se"), req.getURI());
+  }
+  
   @Test
   public void createAddSourceRequest() {
     Source source = new Source("mysource");

@@ -298,7 +298,30 @@ public abstract class DatabaseITestBase {
     assertNotNull(seang);
     assertEquals("Ängelholm", seang.get("PLC"));
   }
-  
+
+  @Test
+  public void SourceManager_getSource_seang() throws Exception {
+    Source seang = classUnderTest.getSourceManager().getSource("seang");
+    assertNotNull(seang);
+    assertEquals("seang", seang.getName());
+    assertEquals("Ängelholm", seang.get("PLC"));
+    assertEquals("SE50", seang.get("RAD"));
+    assertEquals("02606", seang.get("WMO"));
+    assertEquals("seang", seang.get("NOD"));
+    assertEquals("se", seang.getParent());
+  }
+
+  @Test
+  public void SourceManager_getSource_se() throws Exception {
+    Source se = classUnderTest.getSourceManager().getSource("se");
+    assertNotNull(se);
+    assertEquals("se", se.getName());
+    assertEquals("ESWI", se.get("CCCC"));
+    assertEquals("82", se.get("ORG"));
+    assertEquals("643", se.get("CTY"));
+    assertEquals(null, se.getParent());
+  }
+
   @Test
   public void SourceManager_add() throws Exception {
     Source newsource = new Source("newsourcename");

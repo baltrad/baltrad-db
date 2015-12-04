@@ -188,6 +188,21 @@ def get_sources(ctx):
         "sources": [{"name": src.name, "values": dict(src), "parent": src.parent} for src in sources]
     })
 
+def get_source(ctx, name):
+    """get a source with specified name
+
+    :param ctx: the request context
+    :param name: the name of the source to fetch
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status *200 OK*
+
+    See :ref:`doc-rest-op-get-sources` for details
+    """
+    src = ctx.backend.get_source_manager().get_source(name)
+    return JsonResponse({
+        "source": {"name": src.name, "values": dict(src), "parent": src.parent}
+    })
+
 def add_source(ctx):
     """add a source to the database
 

@@ -87,6 +87,9 @@ URL_MAP = Map(
             Rule("/", methods=["GET"],
                 endpoint="handler.get_sources"
             ),
+            Rule("/by_name/<string:name>", methods=["GET"],
+                endpoint="handler.get_source"
+            ),
             Rule("/", methods=["POST"],
                 endpoint="handler.add_source"
             ),
