@@ -127,7 +127,7 @@ def run_server():
     opts, args = optparser.parse_args()
     conf = read_config(opts.conffile)
 
-    pidfile=TimeoutPIDLockFile(opts.pidfile, acquire_timeout=0)
+    pidfile=TimeoutPIDLockFile(opts.pidfile, acquire_timeout=1.0)
 
     daemon_ctx = daemon.DaemonContext(
         working_directory="/",
@@ -153,6 +153,8 @@ def run_server():
         tryagain = True
     except lockfile.LockFailed:
         tryagain = True
+    except lockfile.LockTimeout:
+        tryagain = True
 
     if tryagain:
         pid = lockfile.pidlockfile.read_pid_from_pidfile(opts.pidfile)
@@ -171,7 +173,9 @@ def run_server():
             raise SystemExit("pidfile already locked: %s" % opts.pidfile)
         except lockfile.LockFailed:
             raise SystemExit("failed to lock pidfile: %s" % opts.pidfile)
-    
+        except lockfile.LockTimeout:
+            raise SystemExit("lock timeout on pidfile: %s" % opts.pidfile)
+            
     with daemon_ctx:
         configure_logging(opts, get_logging_level(conf))
         sys.excepthook = excepthook
