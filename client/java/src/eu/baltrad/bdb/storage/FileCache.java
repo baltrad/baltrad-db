@@ -61,7 +61,7 @@ class FileCache {
    * @param uuid the uuid
    * @return the file
    */
-  public File get(UUID uuid) {
+  public synchronized File get(UUID uuid) {
     return cache.get(uuid);
   }
   
@@ -71,5 +71,9 @@ class FileCache {
    */
   public synchronized void remove(UUID uuid) {
     cache.remove(uuid);
+  }
+  
+  public int size() {
+    return cache.size();
   }
 }

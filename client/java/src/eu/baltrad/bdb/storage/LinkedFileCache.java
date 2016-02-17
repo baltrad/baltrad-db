@@ -53,6 +53,8 @@ class LinkedFileCache extends LinkedHashMap<UUID, File> {
   }
 
   protected void deleteFile(File path) {
-    path.delete();
+    if (path != null) {
+      path.delete();
+    }
   }
 };
