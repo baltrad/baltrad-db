@@ -35,6 +35,7 @@ import eu.baltrad.bdb.expr.proc.OperatorLogicalOr;
 import eu.baltrad.bdb.expr.proc.OperatorLogicalNot;
 import eu.baltrad.bdb.expr.proc.OperatorMul;
 import eu.baltrad.bdb.expr.proc.OperatorSub;
+import eu.baltrad.bdb.expr.proc.OperatorLike;
 import eu.baltrad.bdb.expr.proc.Procedure;
 
 import java.util.Map;
@@ -78,6 +79,8 @@ public class MetadataMatcher {
     procedures.put("not", new OperatorLogicalNot());
 
     procedures.put("in", new BinaryListIn());
+
+    procedures.put("like", new BinaryListFilter(new OperatorLike()));
 
     procedures.put("symbol", new MakeSymbol());
   }

@@ -50,6 +50,9 @@ public class MetadataMatcherTest {
     metadata.addNode("/dataset2/data1", new Group("where"));
     metadata.addNode("/dataset2/data1/where", new Attribute("xsize", 5));
     metadata.addNode("/dataset2/data1/where", new Attribute("usize", 6));
+    metadata.addNode("/", new Group("how"));
+    metadata.addNode("/how", new Attribute("task", "xx_hdr"));
+    metadata.addNode("/how", new Attribute("task2", "xxy_hdr"));
   }
   
   @Before
@@ -171,6 +174,35 @@ public class MetadataMatcherTest {
     );
     assertFalse(classUnderTest.match(metadata, expr));
   }
+  
+  @Test
+  public void match_like() {
+    Expression expr = xpr.like(xpr.attribute("how/task", "string"), xpr.literal("*_hdr"));
+    assertTrue(classUnderTest.match(metadata,  expr));
+  }
+
+  @Test
+  public void match_like_not_matching() {
+    Expression expr = xpr.like(xpr.attribute("how/task", "string"), xpr.literal("*_hdrs"));
+    assertFalse(classUnderTest.match(metadata,  expr));
+  }
+
+  @Test
+  public void match_like_with_question_marks() {
+    Expression expr = xpr.like(xpr.attribute("how/task", "string"), xpr.literal("??_hdr"));
+    Expression expr2 = xpr.like(xpr.attribute("how/task", "string"), xpr.literal("???_hdr"));
+    assertTrue(classUnderTest.match(metadata,  expr));
+    assertFalse(classUnderTest.match(metadata,  expr2));
+  }
+
+  @Test
+  public void match_like_with_question_marks_2() {
+    Expression expr = xpr.like(xpr.attribute("how/task2", "string"), xpr.literal("??_hdr"));
+    Expression expr2 = xpr.like(xpr.attribute("how/task2", "string"), xpr.literal("???_hdr"));
+    assertFalse(classUnderTest.match(metadata,  expr));
+    assertTrue(classUnderTest.match(metadata,  expr2));
+  }
+
   
   public static class MetadataMatcherThread extends Thread {
     private MetadataMatcher matcher;
