@@ -31,7 +31,9 @@ import java.util.UUID;
 
 public interface RequestFactory {
   HttpUriRequest createStoreFileRequest(InputStream fileContent);
-
+  
+  HttpUriRequest createQueryFileMetadata(InputStream fileContent);  
+  
   HttpUriRequest createRemoveFileEntryRequest(UUID uuid);
 
   HttpUriRequest createRemoveAllFileEntriesRequest();

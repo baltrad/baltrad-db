@@ -100,7 +100,10 @@ class SqlAlchemyBackend(backend.Backend):
         meta = self.metadata_from_file(path)
         self._storage.store(self, meta, path)
         return meta
-
+    
+    def query_file_metadata(self, path):
+        return self.metadata_from_file(path, ignore_duplicate=True)
+        
     def get_file(self, uuid):
         try:
             return self._storage.read(self, uuid);
@@ -262,16 +265,18 @@ class SqlAlchemyBackend(backend.Backend):
 
         migrate.versioning.api.upgrade(self._engine, repo)
     
-    def metadata_from_file(self, path):
+    def metadata_from_file(self, path, ignore_duplicate=False):
         meta = oh5.Metadata.from_file(path)
 
         metadata_hash = self._hasher.hash(meta)
         with self.get_connection() as conn:
+            if meta.what_source == None:
+                raise LookupError("no source in metadata")
             source_id = get_source_id(conn, meta.source())
             if not source_id:
                 raise LookupError("failed to look up source for " +
                                   meta.source().to_string())
-            if _has_file_by_hash_and_source(conn, metadata_hash, source_id):
+            if _has_file_by_hash_and_source(conn, metadata_hash, source_id) and ignore_duplicate == False:
                 raise backend.DuplicateEntry()
 
         meta.bdb_uuid = str(uuid.uuid4())

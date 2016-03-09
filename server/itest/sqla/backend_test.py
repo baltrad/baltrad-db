@@ -138,6 +138,22 @@ class TestSqlAlchemyBackendItest(object):
         eq_(float_max, stored_meta.node("/double").value)
 
     @attr("dbtest")
+    def test_query_file_metadata(self):
+        meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
+        h5file = write_metadata(meta)
+
+        filemeta = self.backend.query_file_metadata(h5file.name)
+        ok_(filemeta.bdb_uuid)
+        ok_(filemeta.bdb_metadata_hash)
+        ok_(filemeta.bdb_file_size)
+        ok_(filemeta.bdb_stored_date)
+        ok_(filemeta.bdb_stored_time)
+        eq_("NOD:eesur,PLC:Syrgavere", filemeta.bdb_source)
+        eq_("eesur", filemeta.bdb_source_name)
+
+        eq_(0, self.backend.file_count())
+
+    @attr("dbtest")
     def test_remove_files_by_count_1(self):
         h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
         h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))

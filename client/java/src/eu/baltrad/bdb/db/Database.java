@@ -18,6 +18,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.baltrad.bdb.db;
 
+import eu.baltrad.bdb.oh5.Metadata;
 import eu.baltrad.bdb.oh5.Source;
 import eu.baltrad.bdb.util.DateTime;
 
@@ -38,6 +39,15 @@ public interface Database {
    */
   FileEntry store(InputStream fileContent);
 
+  /**
+   * Queries a file for its metadata without storing it in database
+   *
+   * @param fileContent file content stream
+   * @return a FileEntry instance for the saved file
+   * @throws DatabaseError if a database error occurs
+   */
+  Metadata queryFileMetadata(InputStream fileContent);
+  
   /**
    * Remove file entry from the database.
    *

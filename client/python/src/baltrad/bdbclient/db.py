@@ -40,6 +40,15 @@ class Database(object):
         :raise: :class:`DatabaseError` if an error occurs
         """
         raise NotImplementedError()
+
+    @abc.abstractmethod
+    def query_file_metadata(self, data):
+        """queries a file for its metadata without storing it in database
+
+        :param data: a file-like object providing access to the file data
+        :return: a metadata object
+        """
+        raise NotImplementedError()
     
     @abc.abstractmethod
     def get_file_entry(self, uuid):

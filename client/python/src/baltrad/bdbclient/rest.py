@@ -91,7 +91,26 @@ class RestfulDatabase(db.Database):
             raise db.DatabaseError(
                 "Unhandled response code: %s" % response.status
             )
-    
+
+    def query_file_metadata(self, data):
+        request = Request(
+            "POST", "/file/metadata", data.read(),
+            headers={
+                "Content-Type": "application/x-hdf5",
+            }
+        )
+
+        response = self.execute_request(request)
+        
+        if response.status == httplib.OK:
+            data = json.loads(response.read())
+            return metadata_from_json_repr(data["metadata"])
+        else:
+            raise db.DatabaseError(
+                "Unhandled response code: %s" % response.status
+            )
+
+   
     def get_file_entry(self, uuid):
         request = Request(
             "GET", "/file/%s/metadata" % uuid

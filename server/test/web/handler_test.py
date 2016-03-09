@@ -59,6 +59,19 @@ class TestFileHandlers(object):
         self.backend.store_file.side_effect = DuplicateEntry()
         handler.add_file(self.ctx)
     
+    def test_query_file_metadata(self):
+        self.ctx.request = self.create_request("POST", data="filecontent")
+        metadata = mock.Mock(spec_set=Metadata)
+        self.backend.get_file_metadata.return_value = metadata
+        metadata.json_repr.return_value = {"key": "value"}
+        metadata.bdb_uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+
+        self.backend.query_file_metadata.return_value = metadata
+        response = handler.query_file_metadata(self.ctx)
+        self.backend.query_file_metadata.assert_called_once()
+        eq_(httplib.OK, response.status_code)
+        eq_('{"metadata": {"key": "value"}}', response.data)    
+    
     def test_get_file(self):
         self.backend.get_file.return_value = "filecontent"
         

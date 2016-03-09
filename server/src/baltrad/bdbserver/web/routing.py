@@ -54,6 +54,9 @@ URL_MAP = Map(
             Rule("/", methods=["DELETE"],
                 endpoint="handler.remove_all_files"
             ),
+            Rule("/metadata", methods=["POST"],
+                endpoint="handler.query_file_metadata"
+            ),
             Rule("/count/<int:limit>/<int:nritems>", 
                  methods=["DELETE"], 
                  endpoint="handler.remove_files_by_count"

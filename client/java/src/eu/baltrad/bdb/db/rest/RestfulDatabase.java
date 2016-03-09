@@ -25,6 +25,7 @@ import eu.baltrad.bdb.db.DuplicateEntry;
 import eu.baltrad.bdb.db.FileEntry;
 import eu.baltrad.bdb.db.FileQuery;
 import eu.baltrad.bdb.db.SourceManager;
+import eu.baltrad.bdb.oh5.Metadata;
 import eu.baltrad.bdb.oh5.Source;
 import eu.baltrad.bdb.util.DateTime;
 
@@ -122,6 +123,26 @@ public class RestfulDatabase implements Database, SourceManager {
     }
   }
 
+  @Override
+  public Metadata queryFileMetadata(InputStream fileContent) {
+    HttpUriRequest request =
+        requestFactory.createQueryFileMetadata(fileContent);
+      RestfulResponse response = executeRequest(request);
+
+      try {
+        int statusCode = response.getStatusCode();
+        if (statusCode == HttpStatus.SC_OK) {
+          return response.getMetadata();
+        } else {
+          throw new DatabaseError("Failed to query file for metadata store file, status code: " +
+                                  Integer.toString(statusCode));
+        }
+      } finally {
+        response.close();
+      }
+  }
+
+  
   /**
    * @see eu.baltrad.bdb.db.Database#removeFileEntry(UUID)
    */

@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,6 +42,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import eu.baltrad.bdb.expr.ExpressionFactory;
+import eu.baltrad.bdb.oh5.Metadata;
+import eu.baltrad.bdb.oh5.Node;
 import eu.baltrad.bdb.oh5.Source;
 import eu.baltrad.bdb.util.DateTime;
 
@@ -107,6 +110,17 @@ public abstract class DatabaseITestBase {
     } catch (DuplicateEntry e) { }
   }
 
+  @Test
+  public void query_file_metadata_seang_scan() throws Exception {
+    FileInputStream input = new FileInputStream(
+      getFilePath("fixtures/Z_SCAN_C_ESWI_20101023180000_seang_000000.h5")
+    );
+    Metadata result = classUnderTest.queryFileMetadata(input);
+    assertNotNull(result);
+    assertEquals("seang", result.getSource().get("CMT"));
+    assertEquals(0, classUnderTest.getFileCount());    
+  }
+  
   @Test
   public void getFileEntry() throws Exception {
     FileInputStream input = new FileInputStream(

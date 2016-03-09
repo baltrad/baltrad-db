@@ -51,6 +51,19 @@ class Backend(object):
         raise NotImplementedError()
 
     @abstractmethod
+    def query_file_metadata(self, path):
+        """queries a file for its metadata without storing it
+        
+        :param path: path to the file
+        :type path: string
+        :return: metadata extracted from the file
+        :rtype: :class:`baltrad.bdb.oh5.meta.Metadata`
+        :raise: :class:`baltrad.bdb.backend.DuplicateEntry` if file is already stored
+        """
+        raise NotImplementedError()
+        
+
+    @abstractmethod
     def get_file(self, uuid):
         """get a file from the database
 

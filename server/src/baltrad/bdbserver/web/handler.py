@@ -69,6 +69,23 @@ def add_file(ctx):
 
     return response
 
+def query_file_metadata(ctx):
+    """queries a file for its metadata without storing it in database
+
+    :param ctx: the request context
+    :type ctx: :class:`~.util.RequestContext`
+    :return: :class:`~.util.JsonResponse` with status
+             *200 OK* and metadata in body
+
+    See :ref:`doc-rest-op-query-file-metadata-file` for details
+    """
+    with NamedTemporaryFile() as tmp:
+        shutil.copyfileobj(ctx.request.stream, tmp)
+        tmp.flush()
+        metadata = ctx.backend.query_file_metadata(tmp.name)
+
+    return JsonResponse({"metadata": metadata.json_repr()})
+
 def get_file(ctx, uuid):
     """get file content from the database
 

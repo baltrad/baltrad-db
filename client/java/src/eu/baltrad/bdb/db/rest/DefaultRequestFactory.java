@@ -77,6 +77,23 @@ public final class DefaultRequestFactory implements RequestFactory {
   }
 
   @Override
+  public HttpUriRequest createQueryFileMetadata(InputStream fileContent) {
+    HttpPost result = new HttpPost(getRequestUri("file/metadata"));
+    // XXX: this should be InputStreamEntity, but the server side
+    //      has trouble with chunked encoding ATM.
+    ByteArrayEntity entity = null;
+    try {
+      entity = new ByteArrayEntity(IOUtils.toByteArray(fileContent));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    result.setEntity(entity);
+    result.addHeader("content-type", "application/x-hdf5");
+    return result;
+  }
+
+  
+  @Override
   public HttpUriRequest createRemoveFileEntryRequest(UUID uuid) {
     String uuidString = uuid.toString();
     return new HttpDelete(getRequestUri("file/" + uuidString));
