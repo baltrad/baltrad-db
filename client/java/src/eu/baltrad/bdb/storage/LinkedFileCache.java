@@ -22,10 +22,15 @@ package eu.baltrad.bdb.storage;
 import java.io.*;
 import java.util.*;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 class LinkedFileCache extends LinkedHashMap<UUID, File> {
   private static final long serialVersionUID = 1L;
 
   private final int fileLimit;
+  
+  private static Logger logger = LogManager.getLogger(LinkedFileCache.class);
 
   public LinkedFileCache() {
     this(1000);
@@ -39,16 +44,19 @@ class LinkedFileCache extends LinkedHashMap<UUID, File> {
   @Override
   public File remove(Object key) {
     File path = super.remove(key);
-    if (path != null)
+    if (path != null) {
       deleteFile(path);
+    }
     return path;
   }
   
   @Override
   protected boolean removeEldestEntry(Map.Entry<UUID, File> eldest) {
     boolean remove = size() > fileLimit;
-    if (remove)
+    if (remove) {
+      logger.debug("Cache has reached file limit. Removing eldest entry: " + eldest.getValue().toString());
       deleteFile(eldest.getValue());
+    }
     return remove;
   }
 

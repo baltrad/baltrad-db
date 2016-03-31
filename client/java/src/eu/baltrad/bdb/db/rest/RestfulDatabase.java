@@ -22,7 +22,6 @@ import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.Database;
 import eu.baltrad.bdb.db.DatabaseError;
 import eu.baltrad.bdb.db.DuplicateEntry;
-import eu.baltrad.bdb.db.FileEntry;
 import eu.baltrad.bdb.db.FileQuery;
 import eu.baltrad.bdb.db.SourceManager;
 import eu.baltrad.bdb.oh5.Metadata;

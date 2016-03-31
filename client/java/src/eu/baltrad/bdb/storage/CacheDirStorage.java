@@ -23,6 +23,8 @@ import eu.baltrad.bdb.db.FileEntry;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.util.*;
@@ -35,6 +37,8 @@ public class CacheDirStorage implements LocalStorage {
 
   private final File storageRoot;
   private final FileCache cache;
+  
+  private static Logger logger = LogManager.getLogger(CacheDirStorage.class);
 
   public CacheDirStorage(File storageRoot) {
     this(storageRoot, DEFAULT_LIMIT);
@@ -67,7 +71,8 @@ public class CacheDirStorage implements LocalStorage {
     if (entryPath == null) {
       entryPath = pathForEntry(entry);
       copyInputStreamToFile(fileContent, entryPath);
-      cache.put(uuid, entryPath);
+      cache.put(uuid, entryPath);      
+      logger.debug("Storing file in cache: " + entryPath);
     }
     return entryPath;
   }

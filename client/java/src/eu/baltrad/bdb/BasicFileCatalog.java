@@ -90,6 +90,9 @@ public final class BasicFileCatalog implements FileCatalog {
     } finally {
       IOUtils.closeQuietly(fileContentByteStream);
     }
+    
+    logger.debug("Stored file in database and in local storage. UUID: " + fileEntry.getUuid());
+    
     return fileEntry;
   }
   
@@ -101,6 +104,7 @@ public final class BasicFileCatalog implements FileCatalog {
     } catch (Exception e) {
       logger.warn("Ignored exception thrown in LocalStorage::remove", e);
     }
+    logger.debug("Removed file from database and local storage. UUID: " + fileEntry.getUuid());
   }
   
   @Override
