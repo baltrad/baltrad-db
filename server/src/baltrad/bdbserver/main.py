@@ -96,9 +96,13 @@ def configure_logging(opts, level=logging.INFO):
     logger.setLevel(level)
 
     if opts.foreground:
-        logger.addHandler(logging.StreamHandler(sys.stdout))
+        handler = logging.StreamHandler(sys.stdout)
     if opts.logfile:
-        logger.addHandler(logging.FileHandler(opts.logfile))
+        handler = logging.FileHandler(opts.logfile)
+    
+    formatter = logging.Formatter('%(asctime)-15s %(levelname)-8s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 ## Checks if the process with provided pid is running
 # by checking the /proc directory.
