@@ -20,10 +20,12 @@ import datetime
 import mock
 from nose.tools import eq_, raises
 from sqlalchemy import engine, sql
+from sqlalchemy.exc import IntegrityError
 
 from baltrad.bdbcommon import oh5
 from baltrad.bdbserver import config
 from baltrad.bdbserver.sqla import backend, schema, storage
+import baltrad.bdbserver.backend as bdb_backend
 
 from ..test_util import check_instance, pop_last_call
 
@@ -104,6 +106,25 @@ class TestSqlaAlchemyBackend(object):
         self.backend.metadata_from_file.assert_called_once_with(path)
         self.storage.store.called_once_with(self.backend, metadata, path)
         eq_(metadata, result)
+        
+    def test_store_file_fails(self):
+        metadata = mock.sentinel.metadata
+        path = "/path/to/file"
+        self.backend.metadata_from_file = mock.Mock(return_value=metadata)
+        
+        self.storage.store.side_effect = IntegrityError(None, None, "duplicate key", connection_invalidated=False)
+
+        duplicate_exception_thrown = False;
+        try:
+          self.backend.store_file(path)
+        except bdb_backend.DuplicateEntry:
+          duplicate_exception_thrown = True
+          
+        assert(duplicate_exception_thrown)
+        
+        self.backend.metadata_from_file.assert_called_once_with(path)
+        self.storage.store.called_once_with(self.backend, metadata, path)
+ 
     
     def test_get_file(self):
         uuid = mock.sentinel.uuid

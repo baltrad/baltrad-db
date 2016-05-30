@@ -39,7 +39,7 @@ class Application(object):
             handler = routing.get_handler(endpoint)
             return handler(ctx, **values)
         except wzexc.HTTPException, e:
-            logger.exception("HTTPException occured")
+            logger.warning("HTTPException occured: %s", e)
             return e
         except Exception,e:
             logger.exception("Unknown exception")

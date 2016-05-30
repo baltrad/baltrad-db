@@ -34,6 +34,7 @@ from baltrad.bdbcommon import oh5
 from baltrad.bdbserver import backend
 from baltrad.bdbserver.sqla import filter, query, schema, storage
 from sqlalchemy.sql.functions import GenericFunction as func
+from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger("baltrad.bdbserver.sqla")
 
@@ -98,7 +99,16 @@ class SqlAlchemyBackend(backend.Backend):
 
     def store_file(self, path):
         meta = self.metadata_from_file(path)
-        self._storage.store(self, meta, path)
+        try:
+            self._storage.store(self, meta, path)
+        except IntegrityError as e:
+            message = str(e)
+            if "duplicate key" in message:
+                logger.warn("File already added to database. Exception caught: %s", message.splitlines()[0])
+                raise backend.DuplicateEntry()
+            else:
+              raise e
+
         return meta
     
     def query_file_metadata(self, path):

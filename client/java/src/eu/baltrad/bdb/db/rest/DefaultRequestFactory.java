@@ -218,4 +218,5 @@ public final class DefaultRequestFactory implements RequestFactory {
   protected URI getRequestUri(String path) {
     return URIUtils.resolve(serverUri, path);
   }
+  
 }
