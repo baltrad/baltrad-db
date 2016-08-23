@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from ez_setup import use_setuptools
-use_setuptools()
+use_setuptools(version="24.0.2")
+
 import setuptools
 
 setuptools.setup(name="baltrad.bdbserver",
