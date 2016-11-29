@@ -75,7 +75,7 @@ class TestDatabaseStorage(object):
         self.conn.begin.assert_called_once_with()
         self.storage.get_file_importer.assert_called_once_with(self.backend)
         self.importer.store.assert_called_with(self.conn, "/path/to/file")
-        self.backend.insert_metadata.assert_called_one_with(
+        self.backend.insert_metadata.assert_called_once_with(
             self.conn, self.metadata
         )
         self.conn.execute.assert_called_once_with(
@@ -98,7 +98,7 @@ class TestDatabaseStorage(object):
         self.backend.get_connection.assert_called_once_with()
         self.conn.begin.assert_called_once_with()
         self.importer.store.assert_called_with(self.conn, "/path/to/file")
-        self.backend.insert_metadata.assert_called_one_with(
+        self.backend.insert_metadata.assert_called_once_with(
             self.conn, self.metadata
         )
         eq_(0, self.conn.execute.call_count)
@@ -178,7 +178,7 @@ class TestFileSystemStorage(object):
         
         self.backend.get_connection.assert_called_once_with()
         self.conn.begin.assert_called_once_with()
-        self.backend.insert_metadata.assert_called_one_with(
+        self.backend.insert_metadata.assert_called_once_with(
             self.conn, self.metadata
         )
         self.storage.ensure_dir_exists.called_once_with("/stor/a/")
@@ -202,7 +202,7 @@ class TestFileSystemStorage(object):
         
         self.backend.get_connection.assert_called_once_with()
         self.conn.begin.assert_called_once_with()
-        self.backend.insert_metadata.assert_called_one_with(
+        self.backend.insert_metadata.assert_called_once_with(
             self.conn, self.metadata
         )
         self.storage.ensure_dir_exists.called_once_with("/stor/a/")

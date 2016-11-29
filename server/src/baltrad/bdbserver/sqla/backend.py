@@ -101,10 +101,11 @@ class SqlAlchemyBackend(backend.Backend):
         meta = self.metadata_from_file(path)
         try:
             self._storage.store(self, meta, path)
+            logger.debug("Stored file with uuid: %s. hash: %s", meta.bdb_uuid, meta.bdb_metadata_hash)
         except IntegrityError as e:
             message = str(e)
             if "duplicate key" in message:
-                logger.warn("File already added to database. Exception caught: %s", message.splitlines()[0])
+                logger.warn("File already added to database. uuid: %s, hash: %s. Exception caught: %s", meta.bdb_uuid, meta.bdb_metadata_hash, message.splitlines()[0])
                 raise backend.DuplicateEntry()
             else:
               raise e
@@ -287,6 +288,7 @@ class SqlAlchemyBackend(backend.Backend):
                 raise LookupError("failed to look up source for " +
                                   meta.source().to_string())
             if _has_file_by_hash_and_source(conn, metadata_hash, source_id) and ignore_duplicate == False:
+                logger.warn("File with hash %s and source_id %s already existing in database." % (metadata_hash, source_id))
                 raise backend.DuplicateEntry()
 
         meta.bdb_uuid = str(uuid.uuid4())

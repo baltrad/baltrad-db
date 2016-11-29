@@ -26,7 +26,7 @@ class TestMetadataHasher(object):
         meta.add_node("/what", Attribute("object", "pvol"))
 
         eq_(
-            "0833a94578041a8177afb30ee1e7ac0a660be043",
+            "2fe7e00e5c5fb6fa98c8b07154d1e4d2fcde7811",
             self.hasher.hash(meta)
         )
     
@@ -38,6 +38,6 @@ class TestMetadataHasher(object):
         meta.add_node("/what", Attribute("time", datetime.time(12, 5)))
         meta.add_node("/what", Attribute("object", "pvol"))
         eq_(
-            "91176508177e2acc5638faec441a925a268700ae",
+            "469fa750ff4f575f1c30c794bb80e16a6a99ed2c",
             self.hasher.hash(meta)
         )
