@@ -18,35 +18,23 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.baltrad.bdb.db;
 
-import java.util.List;
+import java.util.UUID;
 
-public interface FileResult {
-  /**
-   * Move to next row
-   * @return true if there was another result
-   */
-  boolean next();
-  
-  int size();
+public interface FileResultEntry {
 
   /**
-   * Get the file entry on this row
+   * Get the unique identifier of this entry.
    */
-  FileEntry getFileEntry();
-  
+  UUID getUuid();
+
   /**
-   * Returns the source name for the file on this row. 
-   * If no source name is found, null is returned.
+   * Get the source name of this entry.
    */
   String getSourceName();
-  
-  /**
-   * Returns all entries of the file result.
-   */
-  List<FileResultEntry> getAllFileResultEntries();
 
   /**
-   * close the result
+   * Gets the full file entry information by fetching it from the database. 
+   * Use only if the information in this basic file result entry is not sufficient.
    */
-  void close();
+  FileEntry getFullFileEntry();
 }

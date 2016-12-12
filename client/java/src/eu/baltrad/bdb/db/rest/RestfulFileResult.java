@@ -18,13 +18,16 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.baltrad.bdb.db.rest;
 
-import eu.baltrad.bdb.db.FileResult;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+
+import eu.baltrad.bdb.db.FileEntry;
+import eu.baltrad.bdb.db.FileResult;
+import eu.baltrad.bdb.db.FileResultEntry;
 
 public class RestfulFileResult implements FileResult {
   RestfulDatabase database;
@@ -64,9 +67,34 @@ public class RestfulFileResult implements FileResult {
     }
     throw new NoSuchElementException("RestfulFileResult exhausted");
   }
+  
+  @Override
+  public String getSourceName() {
+    if (currentRow != null) {
+      String sourceName = (String)currentRow.get("source_name");
+      return sourceName;
+    }
+    throw new NoSuchElementException("RestfulFileResult exhausted");
+  }  
 
+  @Override
+  public List<FileResultEntry> getAllFileResultEntries() {
+    List<FileResultEntry> entries = new ArrayList<FileResultEntry>();
+    
+    for (Map<String, Object> row : rows) {
+      String uuidString = (String)row.get("uuid");
+      UUID uuid = UUID.fromString(uuidString);
+      String sourceName = (String)row.get("source_name");
+      entries.add(new RestfulFileResultEntry(uuid, sourceName, database));
+    }
+    
+    return entries;
+  }
+  
   @Override
   public void close() {
     // no-op
   }
+
+
 }

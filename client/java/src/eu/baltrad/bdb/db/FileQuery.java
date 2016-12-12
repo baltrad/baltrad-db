@@ -28,12 +28,14 @@ public class FileQuery {
   private List<Expression> order;
   private Integer limit;
   private Integer skip;
+  private List<Expression> distinctOn;
 
   public FileQuery() {
     filter = null;
     order = new ArrayList<Expression>();
     limit = null;
     skip = null;
+    distinctOn = new ArrayList<Expression>();
   }
 
   public void setFilter(Expression filter) {
@@ -66,5 +68,13 @@ public class FileQuery {
 
   public Collection<Expression> getOrderClause() {
     return order;
+  }
+  
+  public void appendDistinctOnAttribute(Expression attribute) {
+    distinctOn.add(attribute);
+  }
+
+  public Collection<Expression> getDistinctOnAttribute() {
+    return distinctOn;
   }
 }
