@@ -18,8 +18,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.baltrad.bdb.db;
 
-import java.util.List;
-
 public interface FileResult {
   /**
    * Move to next row
@@ -33,17 +31,6 @@ public interface FileResult {
    * Get the file entry on this row
    */
   FileEntry getFileEntry();
-  
-  /**
-   * Returns the source name for the file on this row. 
-   * If no source name is found, null is returned.
-   */
-  String getSourceName();
-  
-  /**
-   * Returns all entries of the file result.
-   */
-  List<FileResultEntry> getAllFileResultEntries();
 
   /**
    * close the result

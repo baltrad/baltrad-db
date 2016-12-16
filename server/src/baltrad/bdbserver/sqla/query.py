@@ -211,8 +211,7 @@ def transform_file_query(query):
     order_by_clauses = query.order
     group_by_clauses = []
     distinct = False
-    select_columns = [schema.files.c.uuid,schema.sources.c.name]
-    distinct_on = query.distinct_on
+    select_columns = [schema.files.c.uuid]
 
     if order_by_clauses:
         order_by_clauses = [evaluator(xpr) for xpr in order_by_clauses]
@@ -230,12 +229,6 @@ def transform_file_query(query):
         select_columns.append(schema.files.c.id)
         order_by_clauses.append(schema.files.c.id.asc())
         distinct = True
-        
-    if distinct_on:
-        distinct_on = [evaluator(xpr) for xpr in distinct_on]
-        group_by_clauses.extend(distinct_on)
-        order_by_clauses = [attr.asc() for attr in distinct_on] + order_by_clauses
-        distinct = distinct_on
 
     return sql.select(
         select_columns,

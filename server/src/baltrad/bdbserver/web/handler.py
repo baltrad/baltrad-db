@@ -410,8 +410,7 @@ def query_file(ctx):
     query.order = [expr.unwrap_json(xpr) for xpr in data.get("order", [])]
     query.limit = data.get("limit", query.limit)
     query.skip = data.get("skip", query.skip)
-    query.distinct_on = [expr.unwrap_json(xpr) for xpr in data.get("distinct_on", [])]
-    
+
     result = query.execute(ctx.backend)
 
     return JsonResponse({"rows": result})

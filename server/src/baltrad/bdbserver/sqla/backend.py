@@ -221,14 +221,13 @@ class SqlAlchemyBackend(backend.Backend):
 
     def execute_file_query(self, qry):
         stmt = query.transform_file_query(qry)
-        
         conn = self.get_connection()
 
         r = []
         with self.get_connection() as conn:
             result = conn.execute(stmt).fetchall()
             for row in result:
-                r.append({"uuid" : row[schema.files.c.uuid], "source_name" : row[schema.sources.c.name]})
+                r.append({"uuid" : row[schema.files.c.uuid]})
         return r
     
     def execute_attribute_query(self, qry):
@@ -291,8 +290,6 @@ class SqlAlchemyBackend(backend.Backend):
             if _has_file_by_hash_and_source(conn, metadata_hash, source_id) and ignore_duplicate == False:
                 logger.warn("File with hash %s and source_id %s already existing in database." % (metadata_hash, source_id))
                 raise backend.DuplicateEntry()
-            else:
-              logger.debug("Storing file with hash %s and source_id %s to database." % (metadata_hash, source_id))
 
         meta.bdb_uuid = str(uuid.uuid4())
         meta.bdb_file_size = os.stat(path)[stat.ST_SIZE]

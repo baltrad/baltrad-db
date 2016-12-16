@@ -19,26 +19,31 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.db.rest;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-
-import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
-
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.FileQuery;
 import eu.baltrad.bdb.expr.Expression;
-import eu.baltrad.bdb.oh5.Attribute;
-import eu.baltrad.bdb.oh5.Dataset;
-import eu.baltrad.bdb.oh5.Group;
 import eu.baltrad.bdb.oh5.Metadata;
 import eu.baltrad.bdb.oh5.Node;
+import eu.baltrad.bdb.oh5.Attribute;
+import eu.baltrad.bdb.oh5.Group;
+import eu.baltrad.bdb.oh5.Dataset;
 import eu.baltrad.bdb.oh5.Source;
+
+import org.apache.commons.lang3.StringUtils;
+
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.BooleanNode;
+import org.codehaus.jackson.node.DoubleNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.LongNode;
+import org.codehaus.jackson.node.ObjectNode;
+import org.codehaus.jackson.node.TextNode;
+
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.Collection;
 
 public final class JsonUtil {
   private JsonNodeFactory nodeFactory;
@@ -144,31 +149,20 @@ public final class JsonUtil {
 
   public JsonNode toJson(FileQuery query) {
     ObjectNode result = nodeFactory.objectNode();
-    
     if (query.getFilter() != null) {
       result.put("filter", toJson(query.getFilter()));
     }
-    
     ArrayNode order = nodeFactory.arrayNode();
     for (Expression expr : query.getOrderClause()) {
       order.add(toJson(expr));
     }
     result.put("order", order);
-    
-    ArrayNode distinctOn = nodeFactory.arrayNode();
-    for (Expression attr : query.getDistinctOnAttribute()) {
-      distinctOn.add(toJson(attr));
-    }
-    result.put("distinct_on", distinctOn);
-    
     if (query.getLimit() != null) {
       result.put("limit", query.getLimit());
     }
-    
     if (query.getSkip() != null) {
       result.put("skip", query.getSkip());
     }
-    
     return result;
   }
 

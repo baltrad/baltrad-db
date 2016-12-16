@@ -345,7 +345,6 @@ class FileQuery(object):
         self.order = []
         self.limit = None
         self.skip = None
-        self.distinct_on = []
     
     def execute(self, backend):
         return backend.execute_file_query(self)
