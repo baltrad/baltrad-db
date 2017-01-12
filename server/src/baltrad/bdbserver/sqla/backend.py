@@ -321,6 +321,43 @@ class SqlAlchemyBackend(backend.Backend):
         )
         return bool(conn.execute(qry).rowcount)
 
+    # This is a method that only should be called from a script so don't add it to rest-api.
+    # 
+    def change_storage(self, conf, src_type, tgt_type):
+        if src_type == tgt_type:
+            raise AttributeError, "Can not specify same storage type for source and target (%s)"%src_type
+        
+        n_files = self.file_count()
+        src_storage=storage.FileStorage.impl_from_conf(src_type, conf)
+        tgt_storage=storage.FileStorage.impl_from_conf(tgt_type, conf)
+        print "Merging %d files from %s to %s"%(n_files, src_type, tgt_type)
+        print ""
+        
+        n_migrated = 0
+        n_failed = 0
+        qry = sql.select(
+            [schema.files.c.uuid]
+        )
+        with self.get_connection() as conn:
+            for row in conn.execute(qry):
+                uuid = row[schema.files.c.uuid]
+                try:
+                    obj = src_storage.read(self, uuid)
+                    tgt_storage.store_file(self, uuid, obj)
+                    src_storage.remove_file(self, uuid)
+                    n_migrated = n_migrated + 1
+                except storage.FileNotFound:
+                    n_failed = n_failed + 1
+                
+                n_total = n_migrated + n_failed
+                if n_total > 0 and n_total % 1000 == 0:
+                    print "Migrated %d/%d files"%(n_total, n_files)
+        print "Summary:"
+        print "Migrated from %s to %s"%(src_type, tgt_type)
+        print "Total number of files: %d"%(n_migrated + n_failed)
+        print "Migrated: %d"%n_migrated
+        print "Failed: %d"%n_failed
+        
 class SqlAlchemySourceManager(backend.SourceManager):
     def __init__(self, backend):
         self._backend = backend

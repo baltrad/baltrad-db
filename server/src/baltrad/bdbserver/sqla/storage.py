@@ -23,6 +23,7 @@ import shutil
 import pkg_resources
 
 from sqlalchemy import sql
+from tempfile import NamedTemporaryFile
 
 from baltrad.bdbcommon import util
 from baltrad.bdbserver import config
@@ -65,6 +66,23 @@ class FileStorage(object):
         raise NotImplementedError()
     
     @abc.abstractmethod
+    def store_file(self, backend, uuid, obj):
+        """store a file on the backend
+
+        :param backend: :class:`~sqla.backend.SqlAlchemyBackend` to work for
+        :param uuid: :class:`~.oh5.meta.Metadata` extracted from the file
+        :param obj: the file content.
+
+        .. note::
+
+          this method has to store both the metadata and file content! This
+          can be easily achieved by calling
+          :meth:`~.sqla.backend.SqlAlchemyBackend.store_metadata` on the
+          backend. This enables storing within one transaction.
+        """
+        raise NotImplementedError()
+        
+    @abc.abstractmethod
     def remove(self, backend, uuid):
         """remove a stored filed
 
@@ -78,6 +96,20 @@ class FileStorage(object):
           can be easily achieved by calling
           :meth:`~.sqla.backend.SqlAlchemyBackend.delete_metadata` on the
           backend. This enables removing within one transaction.
+        """
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def remove_file(self, backend, uuid):
+        """only removes the file without removing the metadata. Used when migrating between different storage types.
+
+        :param backend: :class:`~sqla.backend.SqlAlchemyBackend` to work for
+        :param uuid: :class:`~uuid.UUID` of the file to remove
+        :raise: :class:`FileNotFound` if the file is not stored
+
+        .. note::
+
+          this method has to ensure that the reference to the file content is removed from the affected tables.
         """
         raise NotImplementedError()
     
@@ -138,6 +170,10 @@ class DatabaseFileImporter(object):
     def remove(self, conn, oid):
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def remove_file(self, conn, oid):
+        raise NotImplementedError()
+    
 class GenericDatabaseFileImporter(DatabaseFileImporter):
     def store(self, conn, path):
         return conn.execute(
@@ -158,6 +194,9 @@ class GenericDatabaseFileImporter(DatabaseFileImporter):
             schema.file_data.delete().where(schema.file_data.c.id==oid)
         )
 
+    def remove_file(self, conn, oid):
+        self.remove(conn, oid)
+        
 class Psycopg2DatabaseFileImporter(DatabaseFileImporter):
     def store(self, conn, path):
         lobj = conn.connection.lobject(new_file=path)
@@ -171,6 +210,10 @@ class Psycopg2DatabaseFileImporter(DatabaseFileImporter):
         #lobj = conn.connection.lobject(oid=oid)
         #lobj.unlink()
         pass
+
+    def remove_file(self, conn, oid):
+        lobj = conn.connection.lobject(oid=oid)
+        lobj.unlink()
 
 class DatabaseStorage(FileStorage):
     """:class:`~FileStorage` storing the files in the database.
@@ -195,7 +238,19 @@ class DatabaseStorage(FileStorage):
                     schema.files.update().where(schema.files.c.id==file_id),
                     oid=oid
                 )
-    
+
+    def store_file(self, backend, uuid, obj):
+        with backend.get_connection() as conn:
+            with conn.begin():        
+                with NamedTemporaryFile() as tmp:
+                    tmp.write(obj)
+                    tmp.flush()
+                    importer = self.get_file_importer(backend)
+                    oid = importer.store(conn, tmp.name)
+                    conn.execute(schema.files.update().where(schema.files.c.uuid==uuid),
+                                 oid=oid)
+
+        
     def read(self, backend, uuid):
         with backend.get_connection() as conn:
             oid = self.get_oid(conn, uuid)
@@ -207,7 +262,6 @@ class DatabaseStorage(FileStorage):
     def remove(self, backend, uuid):
         with backend.get_connection() as conn:
             oid = self.get_oid(conn, uuid)
-            print oid
             if oid:
                 with conn.begin():
                     self.get_file_importer(backend).remove(conn, oid)
@@ -215,6 +269,16 @@ class DatabaseStorage(FileStorage):
             else:
                 raise FileNotFound("no oid mapped for %s" % uuid)
     
+    def remove_file(self, backend, uuid):
+        with backend.get_connection() as conn:
+            oid = self.get_oid(conn, uuid)
+            if oid:
+                with conn.begin():
+                    self.get_file_importer(backend).remove_file(conn, oid)
+                    conn.execute(schema.files.update().where(schema.files.c.uuid==uuid), oid=None)
+            else:
+                raise FileNotFound("no oid mapped for %s" % uuid)
+
     def get_file_importer(self, backend):
         if backend.driver == "psycopg2":
             return Psycopg2DatabaseFileImporter()
@@ -227,6 +291,7 @@ class DatabaseStorage(FileStorage):
             schema.files.c.uuid==str(uuid)
         )
         return conn.execute(qry).scalar()
+        
     
     @classmethod
     def from_conf(cls, conf):
@@ -255,6 +320,12 @@ class FileSystemStorage(FileStorage):
                 self.ensure_dir_exists(os.path.dirname(target))
                 shutil.copyfile(path, target)
     
+    def store_file(self, backend, uuid, obj):
+        target = self.path_from_uuid(uuid)
+        self.ensure_dir_exists(os.path.dirname(target))
+        with open(target, "w") as fp:
+            fp.write(obj)
+    
     def read(self, backend, uuid):
         target = self.path_from_uuid(uuid)
         try:
@@ -275,6 +346,15 @@ class FileSystemStorage(FileStorage):
                     raise FileNotFound(target)
                 raise
             backend.delete_metadata(conn, uuid)
+
+    def remove_file(self, backend, uuid):
+        target = self.path_from_uuid(uuid)
+        try:
+            os.unlink(target)
+        except OSError, e:
+            if e.errno == errno.ENOENT:
+                raise FileNotFound(target)
+            raise
 
     def path_from_uuid(self, uuid):
         uuid_str = str(uuid)

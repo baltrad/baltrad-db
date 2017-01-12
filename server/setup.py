@@ -47,6 +47,7 @@ setuptools.setup(name="baltrad.bdbserver",
             "baltrad-bdb-drop = baltrad.bdbserver.main:run_drop",
             "baltrad-bdb-server = baltrad.bdbserver.main:run_server",
             "baltrad-bdb-upgrade = baltrad.bdbserver.main:run_upgrade",
+            "baltrad-bdb-migrate-db = baltrad.bdbserver.main:run_migrate_db",
         ]
     },
     test_suite="nose.collector",

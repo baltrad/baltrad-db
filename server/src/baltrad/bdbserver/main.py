@@ -76,6 +76,28 @@ def run_upgrade():
     backend = create_backend(conf)
     backend.upgrade()
 
+def run_migrate_db():
+    optparser = create_optparser()
+    optparser.add_option(
+        "--from-storage", type="string", dest="from_storage", default="db", help="the from storage type (default db)",
+    )
+    optparser.add_option(
+        "--to-storage", type="string", dest="to_storage", default="fs", help="the storage type (default fs)",
+    )
+    
+    opts, args = optparser.parse_args()
+    
+    conf = read_config(opts.conffile)
+    
+    if conf.get("baltrad.bdb.server.backend.type") != "sqla":
+        raise Exception, "current backend.type in configuration not set to sqla"
+    if opts.from_storage == opts.to_storage:
+        raise Exception, "Cannot use same from and to storage type (%s)"%opts.from_storage
+    
+    b = create_backend(conf)
+
+    b.change_storage(conf, opts.from_storage, opts.to_storage)
+
 def get_logging_level(conf):
     v = conf.get("baltrad.bdb.server.log.level", "INFO")
     if v == "DEBUG":
