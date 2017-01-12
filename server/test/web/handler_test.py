@@ -77,7 +77,7 @@ class TestFileHandlers(object):
         
         uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
         response = handler.get_file(self.ctx, uuid)
-        self.backend.get_file.assert_call_once_with(uuid)
+        self.backend.get_file.assert_called_once_with(uuid)
 
         eq_(httplib.OK, response.status_code)
         eq_('filecontent', response.data)

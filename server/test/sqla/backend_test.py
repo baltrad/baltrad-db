@@ -99,6 +99,8 @@ class TestSqlaAlchemyBackend(object):
     
     def test_store_file(self):
         metadata = mock.sentinel.metadata
+        metadata.bdb_uuid = "TEST_UUID"
+        metadata.bdb_metadata_hash = "aabbcc123456789"
         path = "/path/to/file"
         self.backend.metadata_from_file = mock.Mock(return_value=metadata)
 
@@ -109,6 +111,7 @@ class TestSqlaAlchemyBackend(object):
         
     def test_store_file_fails(self):
         metadata = mock.sentinel.metadata
+        metadata.bdb_metadata_hash = "aabbcc123456789"
         path = "/path/to/file"
         self.backend.metadata_from_file = mock.Mock(return_value=metadata)
         
