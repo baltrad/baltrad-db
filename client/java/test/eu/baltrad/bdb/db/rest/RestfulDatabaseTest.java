@@ -40,6 +40,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHttpResponse;
+import org.easymock.Capture;
+import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.junit.Before;
 import org.junit.Test;
@@ -127,6 +129,36 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     
     FileEntry entry = classUnderTest.store(fileContent);
     verifyAll();
+    
+    assertTrue(entry != null);
+  }
+  
+  @Test
+  public void store_withCache() throws Exception {
+    InputStream fileContent = createMock(InputStream.class);
+    HttpUriRequest request = createMock(HttpUriRequest.class);
+    RestfulFileEntryCache fileEntryCache = createMock(RestfulFileEntryCache.class);
+    classUnderTest.setFileEntryCache(fileEntryCache);
+    RestfulResponse response = createRestfulResponse(
+      HttpStatus.SC_CREATED,
+      "{ \"metadata\" : [" +
+           "{\"path\": \"/\", \"type\": \"group\"}" +
+      "]}"
+    );
+    
+    expect(requestFactory.createStoreFileRequest(fileContent))
+      .andReturn(request);
+    expect(methods.executeRequest(request))
+      .andReturn(response);
+    Capture<RestfulFileEntry> capturedArgument = new Capture<RestfulFileEntry>();
+    fileEntryCache.addFileEntry(EasyMock.capture(capturedArgument));
+    
+    replayAll();
+    
+    FileEntry entry = classUnderTest.store(fileContent);
+    verifyAll();
+    
+    assertTrue(entry == capturedArgument.getValue());
   }
 
   @Test
@@ -394,6 +426,8 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
     FileResult result = classUnderTest.execute(query);
     verifyAll();
+    
+    assertTrue(result != null);
   }
 
   @Test
@@ -435,6 +469,8 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     AttributeResult result = classUnderTest.execute(query);
     
     verifyAll();
+    
+    assertTrue(result != null);
   }
 
   @Test

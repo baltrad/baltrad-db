@@ -18,6 +18,18 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.baltrad.bdb.db.rest;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.Database;
 import eu.baltrad.bdb.db.DatabaseError;
@@ -28,17 +40,6 @@ import eu.baltrad.bdb.oh5.Metadata;
 import eu.baltrad.bdb.oh5.Source;
 import eu.baltrad.bdb.util.DateTime;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-
-import java.io.*;
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-
 /**
  * 
  */
@@ -46,48 +47,60 @@ public class RestfulDatabase implements Database, SourceManager {
   private HttpClient httpClient;
   private RequestFactory requestFactory;
   private Authenticator authenticator;
-
-  public RestfulDatabase(String serverUri) {
-    this(serverUri, new NullAuthenticator());
-  }
-
+  private RestfulFileEntryCache fileEntryCache;
+  
+  private static final int defaultFileEntryCacheSize = 0;
+  
   public RestfulDatabase(String serverUri, int maxconnections) {
     this(serverUri, new NullAuthenticator(), maxconnections);
   }
 
-  public RestfulDatabase(URI serverUri) {
-    this(serverUri, new NullAuthenticator());
-  }
-
   public RestfulDatabase(URI serverUri, int maxconnections) {
-    this(serverUri, new NullAuthenticator(), maxconnections);
-  }
-
-  public RestfulDatabase(String serverUri, Authenticator authenticator) {
-    this(URI.create(serverUri), authenticator);
+    this(serverUri, new NullAuthenticator(), maxconnections, defaultFileEntryCacheSize);
   }
 
   public RestfulDatabase(String serverUri, Authenticator authenticator, int maxconnections) {
-    this(URI.create(serverUri), authenticator, maxconnections);
+    this(URI.create(serverUri), authenticator, maxconnections, defaultFileEntryCacheSize);
+  }
+  
+  public RestfulDatabase(String serverUri, Authenticator authenticator, int maxconnections, int fileEntryCacheSize) {
+    this(URI.create(serverUri), authenticator, maxconnections, fileEntryCacheSize);
   }
 
-  public RestfulDatabase(URI serverUri, Authenticator authenticator) {
-    this(
-      new DefaultRequestFactory(serverUri),
-      new DefaultHttpClient(
-        new ThreadSafeClientConnManager()
-      ),
-      authenticator
-    );
-  }
-
-  public RestfulDatabase(URI serverUri, Authenticator authenticator, int maxconnections) {
+  public RestfulDatabase(URI serverUri, Authenticator authenticator, int maxconnections, int fileEntryCacheSize) {
     this.requestFactory = new DefaultRequestFactory(serverUri);
     ThreadSafeClientConnManager tsccm = new ThreadSafeClientConnManager();
     tsccm.setDefaultMaxPerRoute(maxconnections);
     tsccm.setMaxTotal(maxconnections);
     this.httpClient = new DefaultHttpClient(tsccm);
     this.authenticator = authenticator;
+    if (fileEntryCacheSize > 0) {
+      this.fileEntryCache = new RestfulFileEntryCache(fileEntryCacheSize);      
+    } else {
+      this.fileEntryCache = null;
+    }
+  }
+  
+  public RestfulDatabase(String serverUri) {
+    this(serverUri, new NullAuthenticator());
+  }
+  
+  public RestfulDatabase(URI serverUri) {
+    this(serverUri, new NullAuthenticator());
+  }
+  
+  public RestfulDatabase(String serverUri, Authenticator authenticator) {
+    this(URI.create(serverUri), authenticator);
+  }
+  
+  public RestfulDatabase(URI serverUri, Authenticator authenticator) {
+    this(
+        new DefaultRequestFactory(serverUri),
+        new DefaultHttpClient(
+            new ThreadSafeClientConnManager()
+            ),
+        authenticator
+        );
   }
 
   public RestfulDatabase(RequestFactory requestFactory,
@@ -96,6 +109,15 @@ public class RestfulDatabase implements Database, SourceManager {
     this.requestFactory = requestFactory;
     this.httpClient = httpClient;
     this.authenticator = authenticator;
+    this.fileEntryCache = null;
+  }
+
+  public RestfulFileEntryCache getFileEntryCache() {
+    return fileEntryCache;
+  }
+
+  public void setFileEntryCache(RestfulFileEntryCache fileEntryCache) {
+    this.fileEntryCache = fileEntryCache;
   }
 
   /**
@@ -110,7 +132,11 @@ public class RestfulDatabase implements Database, SourceManager {
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_CREATED) {
-        return new RestfulFileEntry(this, response.getMetadata());
+        RestfulFileEntry newFileEntry = new RestfulFileEntry(this, response.getMetadata());
+        if (fileEntryCache != null) {
+          fileEntryCache.addFileEntry(newFileEntry);          
+        }
+        return newFileEntry;
       } else if (statusCode == HttpStatus.SC_CONFLICT) {
         throw new DuplicateEntry("file already stored");
       } else {
@@ -154,6 +180,9 @@ public class RestfulDatabase implements Database, SourceManager {
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_NO_CONTENT) {
+        if (fileEntryCache != null) {
+          fileEntryCache.removeFileEntry(uuid);          
+        }
         return true;
       } else if (statusCode == HttpStatus.SC_NOT_FOUND) {
         return false;
@@ -191,6 +220,14 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public RestfulFileEntry getFileEntry(UUID uuid) {
+    if (fileEntryCache != null) {
+      RestfulFileEntry cachedFileEntry = fileEntryCache.getFileEntry(uuid);
+      
+      if (cachedFileEntry != null) {
+        return cachedFileEntry;
+      }     
+    }
+    
     HttpUriRequest request = requestFactory.createGetFileEntryRequest(uuid);
     RestfulResponse response = executeRequest(request);
 
