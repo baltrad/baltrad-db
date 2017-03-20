@@ -1,4 +1,5 @@
 import logging
+import logging.handlers
 import os
 import sys
 
@@ -11,6 +12,9 @@ from baltrad.bdbserver import backend, config
 from baltrad.bdbserver.web import app
 
 logger = logging.getLogger("baltrad.bdbserver")
+
+SYSLOG_ADDRESS = "/dev/log"
+SYSLOG_FACILITY = "local3"
 
 def excepthook(*exc_info):
     logger.error("unhandled exception", exc_info=exc_info)
@@ -113,16 +117,24 @@ def get_logging_level(conf):
     else:
         return logging.INFO
 
-def configure_logging(opts, level=logging.INFO):
+def configure_logging(opts, logtype, logid, level=logging.INFO):
     logger = logging.getLogger()
     logger.setLevel(level)
 
-    if opts.foreground:
+    default_formatter = logging.Formatter('%(asctime)-15s %(levelname)-8s %(message)s')
+    if opts.foreground or logtype == 'stdout':
         handler = logging.StreamHandler(sys.stdout)
+        add_loghandler(logger, handler, default_formatter)
     if opts.logfile:
         handler = logging.FileHandler(opts.logfile)
+        add_loghandler(logger, handler, default_formatter)
+    if logtype == "syslog":
+        handler = logging.handlers.SysLogHandler(SYSLOG_ADDRESS, facility=SYSLOG_FACILITY)
+        formatter = logging.Formatter('python[' + logid + ']: %(name)s: %(message)s')
+        add_loghandler(logger, handler, formatter)
+
     
-    formatter = logging.Formatter('%(asctime)-15s %(levelname)-8s %(message)s')
+def add_loghandler(logger, handler, formatter=None):   
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
@@ -203,7 +215,9 @@ def run_server():
             raise SystemExit("lock timeout on pidfile: %s" % opts.pidfile)
             
     with daemon_ctx:
-        configure_logging(opts, get_logging_level(conf))
+        logtype = conf.get("baltrad.bdb.server.log.type", "logfile")
+        logid = conf.get("baltrad.bdb.server.log.id", "baltrad.bdb.server")
+        configure_logging(opts, logtype, logid, get_logging_level(conf))
         sys.excepthook = excepthook
         application = app.from_conf(conf)
         if server_type == "werkzeug":

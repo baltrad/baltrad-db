@@ -75,13 +75,19 @@ public class RestfulFileEntryCache {
   }
   
   private class CacheHitRateStatistics {
-    private static final int resetInterval = 100;
-    
+    private int resetInterval = 100;
+
     private int noOfHits;
     private int noOfMiss;
     
+    private double currentHitRate = 0.0;
+    
     public CacheHitRateStatistics() {
       resetHitStatistics();
+    }
+    
+    public int getResetInterval() {
+      return resetInterval;
     }
     
     private void resetHitStatistics() {
@@ -89,23 +95,31 @@ public class RestfulFileEntryCache {
       noOfMiss = 0;
     }
     
-    public void lookupExecuted(boolean cacheHit) {
+    public boolean lookupExecuted(boolean cacheHit) {
+      boolean statReset = false;
       if (cacheHit) {
         noOfHits++;
       } else {
         noOfMiss++;
       }
       
+      updateHitRate();
+      
       if (noOfHits + noOfMiss >= resetInterval) {
-        logger.debug("File entry cache hit rate for the last " + resetInterval + " cache lookups: " + getHitRate() + ". No of files in cache: " + getNoOfEntriesInCache());
+        statReset = true;
         resetHitStatistics();
       }
+      
+      return statReset;
+    }
+    
+    private void updateHitRate() {
+      int noOfLookups = noOfHits + noOfMiss;
+      currentHitRate = (double)noOfHits / (double)noOfLookups;
     }
     
     public double getHitRate() {
-      int noOfLookups = noOfHits + noOfMiss;
-      double hitRate = (double)noOfHits / (double)noOfLookups;
-      return hitRate;
+      return currentHitRate;
     }
     
   }
@@ -143,7 +157,12 @@ public class RestfulFileEntryCache {
   public synchronized RestfulFileEntry getFileEntry(UUID uuid) {
     RestfulFileEntry fileEntry = fileEntries.get(uuid);
     
-    hitRateStats.lookupExecuted(fileEntry != null);
+    boolean resetLimitReached = hitRateStats.lookupExecuted(fileEntry != null);
+    
+    if (resetLimitReached) {
+      logger.debug("File entry cache hit rate for the last " + hitRateStats.getResetInterval() + " cache lookups: " + hitRateStats.getHitRate() + 
+                   ". No of files in cache: " + getNoOfEntriesInCache());      
+    }
     
     return fileEntry;
   }

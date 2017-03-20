@@ -592,7 +592,7 @@ def _get_attribute_sql_values(node):
         if boolean is not None:
             values["value_boolean"] = boolean
     elif isinstance(value, list):
-        logger.error(
+        logger.debug(
             "ignoring array attribute value at %s", node.path()
         )
     else:
