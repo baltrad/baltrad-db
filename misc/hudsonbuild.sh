@@ -7,7 +7,6 @@ PREFIX=/home/hudson/installed/baltrad/db-devel
 create_env() {
   envpath=$1
   python $PROJECT_ROOT/misc/virtualenv/virtualenv.py \
-    --distribute \
     --system-site-packages \
     $envpath
 }
@@ -16,8 +15,7 @@ init_env() {
   envpath=$1
 
   if [ -e $envpath ]; then
-    echo "env already exists at $envpath"
-  else
+    \rm -fr "$envpath"
     create_env $envpath
   fi
 
