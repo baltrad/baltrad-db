@@ -85,12 +85,18 @@ class JsonResponse(BaseResponse,
 
 class HttpBadRequest(HTTPException):
     code = httplib.BAD_REQUEST
+    def __init__(self, description=None, response=None):
+        HTTPException.__init__(self, description, response)
 
 class HttpNotFound(HTTPException):
     code = httplib.NOT_FOUND
+    def __init__(self, description=None, response=None):
+        HTTPException.__init__(self, description, response)
     
 class HttpConflict(HTTPException):
     code = httplib.CONFLICT
+    def __init__(self, description=None, response=None):
+        HTTPException.__init__(self, description, response)
 
 class HttpUnauthorized(HTTPException):
     """401 Unauthorized
@@ -102,6 +108,7 @@ class HttpUnauthorized(HTTPException):
     code = httplib.UNAUTHORIZED
 
     def __init__(self, challenge):
+        HTTPException.__init__(self)
         if isinstance(challenge, basestring):
             challenge = [challenge]
         self._challenges = challenge
@@ -114,3 +121,6 @@ class HttpUnauthorized(HTTPException):
 
 class HttpForbidden(HTTPException):
     code = httplib.FORBIDDEN
+    def __init__(self, description=None, response=None):
+        HTTPException.__init__(self, description, response)
+

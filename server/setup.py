@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from ez_setup import use_setuptools
-use_setuptools(version="24.0.2")
+use_setuptools(version="38.4.0")
 
 import setuptools
 
@@ -26,9 +26,9 @@ setuptools.setup(name="baltrad.bdbserver",
         "pycrypto >= 2.4",
         "python-daemon >= 1.6",
         "python-keyczar >= 0.7b",
-        "SQLAlchemy >= 0.7",
-        "sqlalchemy-migrate >= 0.7.2",
-        "werkzeug >= 0.8",
+        "SQLAlchemy >= 1.0.13",
+        "sqlalchemy-migrate >= 0.10.0",
+        "werkzeug >= 0.14",
     ],
     entry_points = {
         "baltrad.bdbserver.backends": [
