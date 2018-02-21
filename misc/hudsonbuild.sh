@@ -1,8 +1,8 @@
 #!/bin/bash
 
 PROJECT_ROOT=$(dirname $(dirname $(readlink -f $0)))
-HLHDF_ROOT=/home/hudson/buildinstdir/hlhdf
-PREFIX=/home/hudson/installed/baltrad/db-devel
+HLHDF_ROOT=/home/hudson/installed/baltrad_3p/hlhdf
+PREFIX=/home/hudson/installed/baltrad_3p/baltrad-db
 
 create_env() {
   envpath=$1
@@ -16,12 +16,12 @@ init_env() {
 
   if [ -e $envpath ]; then
     \rm -fr "$envpath"
-    create_env $envpath
   fi
+  create_env $envpath
 
   source $envpath/bin/activate
 
-  cp $HLHDF_ROOT/hlhdf.pth $envpath/lib/python2.6/site-packages
+  cp $HLHDF_ROOT/hlhdf.pth $envpath/lib/python2.7/site-packages
   export LD_LIBRARY_PATH=$HLHDF_ROOT/lib:$LD_LIBRARY_PATH
 }
 
@@ -30,10 +30,10 @@ init_test_env() {
 
   init_env $envpath
 
-  $envpath/bin/pip install "nose >= 1.1"
-  $envpath/bin/pip install "sphinx >= 1.1"
-  $envpath/bin/pip install "mock >= 0.7"
-  $envpath/bin/pip install "cherrypy == 3.2.2"
+  $envpath/bin/pip install "nose >= 1.1" --trusted-host pypi.python.org
+  $envpath/bin/pip install "sphinx >= 1.1" --trusted-host pypi.python.org
+  $envpath/bin/pip install "mock >= 0.7" --trusted-host pypi.python.org
+  $envpath/bin/pip install "cherrypy == 3.2.2" --trusted-host pypi.python.org
 }
 
 install_python_package() {
@@ -56,7 +56,7 @@ test_python_package() {
 
 test_java_client() {
   property_file="$PROJECT_ROOT/misc/hudsonbuild.properties"
-  
+
   cd "$PROJECT_ROOT/client/java"
   ant hudson -propertyfile $property_file
 }
@@ -68,7 +68,7 @@ install_java_client() {
 
 run_tests() {
   test_python_package "$PROJECT_ROOT/common"
-  export BDB_TEST_DB 
+  export BDB_TEST_DB
   test_python_package "$PROJECT_ROOT/server"
   # Important that client api is tested after server since we need to start server for
   # integration tests
@@ -103,3 +103,5 @@ deactivate
 
 init_env "$PREFIX/env"
 deploy
+
+
