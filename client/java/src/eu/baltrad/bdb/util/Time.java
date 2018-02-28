@@ -103,4 +103,12 @@ public final class Time {
   public int hashCode() {
     return this.value.hashCode();
   }
+  
+  public boolean isAfter(Time anotherTime) {
+    return value.isAfter(anotherTime.value);
+  }
+  
+  public boolean isBefore(Time anotherTime) {
+    return value.isBefore(anotherTime.value);
+  }
 }

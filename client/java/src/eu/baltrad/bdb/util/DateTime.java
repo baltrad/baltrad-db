@@ -95,4 +95,12 @@ public final class DateTime {
   public int hashCode() {
     return this.value.hashCode();
   }
+  
+  public boolean isAfter(DateTime anotherDateTime) {
+    return value.isAfter(anotherDateTime.value);
+  }
+  
+  public boolean isBefore(DateTime anotherDateTime) {
+    return value.isBefore(anotherDateTime.value);
+  }
 }
