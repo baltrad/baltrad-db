@@ -21,7 +21,7 @@ import warnings
 
 try:
     import _pyhl as pyhl
-except ImportError, e:
+except ImportError as e:
     warnings.warn("couldn't import pyhl, hdf5 IO disabled: %s" % e)
     pyhl = None
 

@@ -66,7 +66,19 @@ class Node(object):
     def children(self):
         """list of this node's children
         """
-        return self._children.values()
+        children = list(self._children.values())
+        children.sort()
+        return children
+
+    def __lt__(self, other):
+        if other:
+            return self.name < other.name
+        return False  
+    
+    def __eq__(self, other):
+        if other:
+            return self.name == other.name
+        return False
     
     def _get_parent(self):
         if self._parent:
@@ -144,7 +156,7 @@ class NodeIterator(object):
     def __iter__(self):
         return self
     
-    def next(self):
+    def __next__(self):
         try:
             node = self._nodes.pop(0)
         except IndexError:
@@ -153,3 +165,7 @@ class NodeIterator(object):
         if node.children:
             self._nodes.extend(node.children())
         return node
+        
+    def next(self):
+        return self.__next__()
+

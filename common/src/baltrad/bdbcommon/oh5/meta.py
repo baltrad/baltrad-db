@@ -159,7 +159,7 @@ class Source(collections.MutableMapping):
         return self.to_string()
 
     def to_string(self):
-        return ",".join([":".join(kv) for kv in sorted(self._values.iteritems())])
+        return ",".join([":".join(kv) for kv in sorted(self._values.items())])
     
     @classmethod
     def from_string(cls, value):

@@ -48,14 +48,38 @@ class TestMetadata(object):
         eq_(None, self.meta.find_node("/a/b"))
 
     def test_iterator(self):
-       self.meta.add_node("/", Group("a"))
-       self.meta.add_node("/", Group("b"))
-       self.meta.add_node("/a", Group("b"))
-       self.meta.add_node("/a/b", Group("c"))
+        self.meta.add_node("/", Group("a"))
+        self.meta.add_node("/", Group("b"))
+        self.meta.add_node("/a", Group("b"))
+        self.meta.add_node("/a/b", Group("c"))
 
-       expected = ["/", "/a", "/b", "/a/b", "/a/b/c"]
-       nodepaths = [node.path() for node in self.meta.iternodes()]
-       eq_(expected, nodepaths)
+        expected = ["/", "/a", "/b", "/a/b", "/a/b/c"]
+        nodepaths = [node.path() for node in self.meta.iternodes()]
+        eq_(expected, nodepaths)
+
+    def test_iterator_2(self):
+        self.meta.add_node("/", Group("a"))
+        self.meta.add_node("/", Group("b"))
+        self.meta.add_node("/", Group("ab"))
+        self.meta.add_node("/", Group("ba"))
+        self.meta.add_node("/a", Group("b"))
+        self.meta.add_node("/a/b", Group("c"))
+
+        expected = ["/", "/a", "/ab", "/b", "/ba", "/a/b", "/a/b/c"]
+        nodepaths = [node.path() for node in self.meta.iternodes()]
+        eq_(expected, nodepaths)
+
+    def test_iterator_3(self):
+        self.meta.add_node("/", Group("a"))
+        self.meta.add_node("/", Group("b"))
+        self.meta.add_node("/", Attribute("a1", 1))
+        self.meta.add_node("/", Group("ba"))
+        self.meta.add_node("/a", Attribute("a2", 1))
+        self.meta.add_node("/a", Group("c"))
+
+        expected = ["/", "/a", "/a1", "/b", "/ba", "/a/a2", "/a/c"]
+        nodepaths = [node.path() for node in self.meta.iternodes()]
+        eq_(expected, nodepaths)
             
     def test_source(self):
         self.meta.add_node("/", Group("what"))
@@ -81,8 +105,8 @@ class TestMetadata(object):
             {"path": "/", "type": "group"},
             {"path": "/a", "type": "group"},
             {"path": "/attr1", "type": "attribute", "value": 1},
-            {"path": "/a/b", "type": "group"},
-            {"path": "/a/attr2", "type": "attribute", "value": 2}
+            {"path": "/a/attr2", "type": "attribute", "value": 2},
+            {"path": "/a/b", "type": "group"}
         ]
 
         eq_(expected, self.meta.json_repr())

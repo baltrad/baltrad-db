@@ -199,7 +199,7 @@ class Evaluator(object):
                 proc = xpr.pop(0)
                 try:
                     return proc(*xpr)
-                except TypeError, e:
+                except TypeError as e:
                     raise EvaluationError(str(e))
             else:
                 return xpr
