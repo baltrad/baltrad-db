@@ -97,4 +97,12 @@ public class Date {
   public int hashCode() {
     return this.value.hashCode();
   }
+  
+  public boolean isAfter(Date anotherDate) {
+    return value.isAfter(anotherDate.value);
+  }
+  
+  public boolean isBefore(Date anotherDate) {
+    return value.isBefore(anotherDate.value);
+  }
 }
