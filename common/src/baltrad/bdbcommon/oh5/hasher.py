@@ -12,6 +12,7 @@ class MetadataHasher(object):
         attribute_strings.sort()
         hashfunc = hashlib.sha1()
         for string in attribute_strings:
+            string = string.encode('utf-8')
             hashfunc.update(string)
         return hashfunc.hexdigest()
     

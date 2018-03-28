@@ -11,6 +11,13 @@ from baltrad.bdbcommon import optparse
 from baltrad.bdbserver import backend, config
 from baltrad.bdbserver.web import app
 
+
+if sys.version_info < (3,):
+  import urlparse
+else:
+  import urllib.parse as urlparse
+
+
 logger = logging.getLogger("baltrad.bdbserver")
 
 SYSLOG_ADDRESS = "/dev/log"
@@ -94,9 +101,9 @@ def run_migrate_db():
     conf = read_config(opts.conffile)
     
     if conf.get("baltrad.bdb.server.backend.type") != "sqla":
-        raise Exception, "current backend.type in configuration not set to sqla"
+        raise Exception("current backend.type in configuration not set to sqla")
     if opts.from_storage == opts.to_storage:
-        raise Exception, "Cannot use same from and to storage type (%s)"%opts.from_storage
+        raise Exception("Cannot use same from and to storage type (%s)"%opts.from_storage)
     
     b = create_backend(conf)
 
@@ -144,7 +151,7 @@ def add_loghandler(logger, handler, formatter=None):
 # @return True if a process with provided pid is running, otherwise False
 def isprocessrunning(pid):
     return os.path.exists("/proc/%d"%pid)
-    
+
 def run_server():
     optparser = create_optparser()
     optparser.add_option(
@@ -224,7 +231,6 @@ def run_server():
             app.serve(server_uri, application)
         elif server_type == "cherrypy":
             from cherrypy import wsgiserver
-            import urlparse
             parsedurl = urlparse.urlsplit(server_uri)
             cherryconf = conf.filter("baltrad.bdb.server.cherrypy.")
             nthreads = cherryconf.get_int("threads", 10)

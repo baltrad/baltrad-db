@@ -57,7 +57,7 @@ class AuthMiddleware(object):
         """
         try:
             provider_key, credentials = get_credentials(req)
-        except AuthError, e:
+        except AuthError as e:
             logger.error("failed to parse authorization credentials: %s" % e)
             return False
 
@@ -70,10 +70,10 @@ class AuthMiddleware(object):
         logger.info("authenticating with %s: %s", provider_key, credentials)
         try:
             return provider.authenticate(req, credentials)
-        except AuthError, e:
+        except AuthError as e:
             logger.warning("authentication failed: %s", e)
-        except Exception, e:
-            logger.exception("unhandled error while authenticating", e)
+        except Exception as e:
+            logger.exception("unhandled error while authenticating %s", e)
         return False
     
     def add_provider(self, name, provider):
@@ -213,8 +213,8 @@ class KeyczarAuth(Auth):
         signed_str = create_signable_string(req)
         try:
             return verifier.Verify(signed_str, signature)
-        except kzerrors.KeyczarError, e:
-            logger.exception("unhandled Keyczar error", e)
+        except kzerrors.KeyczarError as e:
+            logger.exception("unhandled Keyczar error %s", e.__str__())
             return False
 
     @classmethod

@@ -25,6 +25,12 @@ from baltrad.bdbcommon.expr import Evaluator
 
 from . import schema
 
+if sys.version_info > (3,):
+    operator_div = operator.floordiv
+else:
+    operator_div = operator.div
+
+
 class ExprToSql(object):
     def __init__(self):
         self.where_clause = sql.literal(True)
@@ -34,7 +40,7 @@ class ExprToSql(object):
         evaluator.add_procedure("+", operator.add)
         evaluator.add_procedure("-", operator.sub)
         evaluator.add_procedure("*", operator.mul)
-        evaluator.add_procedure("/", operator.div)
+        evaluator.add_procedure("/", operator_div)
 
         evaluator.add_procedure("=",   operator.eq)
         evaluator.add_procedure("!=",  operator.ne)
@@ -152,7 +158,7 @@ class ExprToSql(object):
         attrname = elems.pop()
         name = name.replace("/", "_")
         nelems = len(elems)
-        groupname = string.join(elems, "/")
+        groupname = "/".join(elems) #string.join(elems, "/")
         
         value_alias_t = self._value_tables.setdefault(
             name + "_values",
@@ -246,7 +252,7 @@ def transform_attribute_query(query):
 
     select_columns=[]
 
-    for key, xpr in query.fetch.iteritems():
+    for key, xpr in query.fetch.items():
         attr_column = evaluator(xpr)
         select_columns.append(attr_column.label(key))
 

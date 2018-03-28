@@ -15,9 +15,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-import urlparse
-
 from werkzeug import serving, exceptions as wzexc
+import sys
+if sys.version_info < (3,):
+    import httplib as httplibclient
+    import urlparse
+else:
+    from http import client as httplibclient
+    import urllib.parse as urlparse
 
 from baltrad.bdbserver import backend
 from baltrad.bdbserver.web import auth, routing, util as webutil
@@ -38,10 +43,10 @@ class Application(object):
             endpoint, values = adapter.match()
             handler = routing.get_handler(endpoint)
             return handler(ctx, **values)
-        except wzexc.HTTPException, e:
+        except wzexc.HTTPException as e:
             logger.warning("HTTPException occured: %s", e)
             return e
-        except Exception,e:
+        except Exception as e:
             logger.exception("Unknown exception")
             raise
     

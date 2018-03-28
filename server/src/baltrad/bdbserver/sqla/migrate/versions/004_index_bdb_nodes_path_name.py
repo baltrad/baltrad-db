@@ -20,7 +20,7 @@ idx = Index("bdb_nodes_path_name_key", nodes.c.path, nodes.c.name)
 
 def upgrade(engine):
     meta.bind = engine
-    print "Creating index on bdb_nodes(path, name)"
+    print("Creating index on bdb_nodes(path, name)")
     idx.create()
 
 def downgrade(engine):

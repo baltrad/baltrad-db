@@ -58,7 +58,7 @@ class Properties(object):
                 and no default value is provided.
         """
         value = self.get(key, default)
-        if not isinstance(value, basestring):
+        if not isinstance(value, str):
             return value
         
         try:
@@ -79,7 +79,7 @@ class Properties(object):
                 and no default value is provided.
         """
         value = self.get(key, default)
-        if not isinstance(value, basestring):
+        if not isinstance(value, str):
             return value
         
         return [part.strip() for part in value.split(sep)]
@@ -97,7 +97,7 @@ class Properties(object):
         """
         value = self.get(key, default)
 
-        if not isinstance(value, basestring):
+        if not isinstance(value, str):
             return value
 
         if value in ("True", "true", "yes", "on", "1"):

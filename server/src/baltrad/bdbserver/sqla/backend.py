@@ -24,6 +24,10 @@ import os
 import stat
 import time
 import uuid
+import sys
+if sys.version_info > (3,):
+    long = int
+    basestring = str
 
 import migrate.versioning.api
 import migrate.versioning.repository
@@ -247,7 +251,7 @@ class SqlAlchemyBackend(backend.Backend):
         with self.get_connection() as conn:
             for table in required_tables:
                 if not table.exists(conn):
-                    print table.name, "does not exist"
+                    print("%s does not exist"%table.name)
                     return False
         return True
     
@@ -327,13 +331,13 @@ class SqlAlchemyBackend(backend.Backend):
     # 
     def change_storage(self, conf, src_type, tgt_type):
         if src_type == tgt_type:
-            raise AttributeError, "Can not specify same storage type for source and target (%s)"%src_type
+            raise AttributeError("Can not specify same storage type for source and target (%s)"%src_type)
         
         n_files = self.file_count()
         src_storage=storage.FileStorage.impl_from_conf(src_type, conf)
         tgt_storage=storage.FileStorage.impl_from_conf(tgt_type, conf)
-        print "Merging %d files from %s to %s"%(n_files, src_type, tgt_type)
-        print ""
+        print("Merging %d files from %s to %s"%(n_files, src_type, tgt_type))
+        print("")
         
         n_migrated = 0
         n_failed = 0
@@ -353,12 +357,12 @@ class SqlAlchemyBackend(backend.Backend):
                 
                 n_total = n_migrated + n_failed
                 if n_total > 0 and n_total % 1000 == 0:
-                    print "Migrated %d/%d files"%(n_total, n_files)
-        print "Summary:"
-        print "Migrated from %s to %s"%(src_type, tgt_type)
-        print "Total number of files: %d"%(n_migrated + n_failed)
-        print "Migrated: %d"%n_migrated
-        print "Failed: %d"%n_failed
+                    print("Migrated %d/%d files"%(n_total, n_files))
+        print("Summary:")
+        print("Migrated from %s to %s"%(src_type, tgt_type))
+        print("Total number of files: %d"%(n_migrated + n_failed))
+        print("Migrated: %d"%n_migrated)
+        print("Failed: %d"%n_failed)
         
 class SqlAlchemySourceManager(backend.SourceManager):
     def __init__(self, backend):
@@ -456,7 +460,7 @@ class SqlAlchemySourceManager(backend.SourceManager):
                         schema.sources.c.name==name
                     )
                 ).rowcount
-            except sqlexc.IntegrityError, e:
+            except sqlexc.IntegrityError as e:
                 raise backend.IntegrityError(str(e))
             else:
                 return bool(affected_rows)
@@ -676,7 +680,7 @@ def get_source_id(conn, source):
         if "WMO" in keys or "NOD" in keys or "RAD" in keys or "PLC" in keys:
             ignoreORG=True
 
-    for key, value in source.iteritems():
+    for key, value in source.items():
         if ignoreORG and key == "ORG":
             continue
         where = sql.or_(
@@ -724,7 +728,7 @@ def get_source_by_id(conn, source_id):
 
 def insert_source_values(conn, source_id, source):
     kvs = []
-    for k, v in source.iteritems():
+    for k, v in source.items():
         kvs.append({
             "source_id": source_id,
             "key": k,
@@ -737,7 +741,7 @@ def insert_source_values(conn, source_id, source):
     )
 
 def associate_what_source(conn, file_id, source):
-    for key, value in source.iteritems():
+    for key, value in source.items():
         kv_id = insert_what_source_kv(conn, key, value)
         conn.execute(
             schema.file_what_source.insert(),

@@ -14,6 +14,7 @@
 # 
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
+from __future__ import print_function        
 
 import contextlib
 import datetime
@@ -82,7 +83,7 @@ class ImportFile(Command):
         for path in args: 
             with open(path, "r") as data:
                 entry = database.store(data)
-            print path, "stored with UUID", entry.uuid
+            print("%s stored with UUID %s"%(path,str(entry.uuid)))
 
 class ExportFile(Command):
     def update_optionparser(self, parser):
@@ -106,7 +107,7 @@ class ExportFile(Command):
                 with open(outfile, "w") as outf:
                     shutil.copyfileobj(content, outf)
         else:
-            print "file not found by UUID", uuid
+            print("file not found by UUID %s"%uuid)
 
 class RemoveFile(Command):
     def update_optionparser(self, parser):
@@ -115,9 +116,9 @@ class RemoveFile(Command):
     def execute(self, database, opts, args):
         for uuid in args:
             if database.remove_file_entry(uuid):
-                print uuid, "deleted"
+                print("%s deleted"%str(uuid))
             else:
-                print uuid, "not found"
+                print("%s not found"%str(uuid))
         
 class PrintMetadata(Command):
     def update_optionparser(self, parser):
@@ -134,9 +135,9 @@ class PrintMetadata(Command):
         if entry:
             for node in entry.metadata.iternodes():
                 if isinstance(node, oh5.Attribute):
-                    print "%s=%s" % (node.path(), node.value)
+                    print("%s=%s" % (node.path(), node.value))
         else:
-            print "file not found"
+            print("file not found")
 
 class PrintSources(Command):
     def update_optionparser(self, parser):
@@ -150,8 +151,7 @@ class PrintSources(Command):
 
         for source in sources:
             str = source.name + "\t" + source.to_string()
-            print unicode(str).encode('utf-8') #To get strings pipeable...
-            #print source.name + "\t" + source.to_string()
+            print(unicode(str).encode('utf-8')) #To get strings pipeable...
 
 class ImportSources(Command):
     def update_optionparser(self, parser):
@@ -348,16 +348,16 @@ class DataAvailabilityStatistics(Command):
         max_object_len = max(max_object_len, 6)
         
         head_tmpl = "%%-%ds %%-%ds" % (max_source_len, max_object_len)
-        print head_tmpl % ("source", "object"),
+        print(head_tmpl % ("source", "object"), end='')
         for eta in opts.etas:
-            print "%6d" % eta,
-        print ""
+            print("%6d" % eta, end='')
+        print("")
 
         for source, obj in itertools.product(opts.sources, opts.objects):
-            print head_tmpl % (source, obj),
+            print(head_tmpl % (source, obj), end='')
             for count in file_counts[(source, obj)]:
-                print "%5d%%" % (count / float(expected_count) * 100),
-            print ""
+                print("%5d%%" % (count / float(expected_count) * 100), end='')
+            print("")
 
     def create_base_query(self, opts):
         qry = db.AttributeQuery()

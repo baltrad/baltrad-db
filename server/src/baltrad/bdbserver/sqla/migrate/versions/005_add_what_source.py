@@ -74,10 +74,10 @@ def _upgrade_what_source(conn):
     rowcount = conn.execute(_what_source_qry.alias("cnt").count()).scalar()
     if rowcount == 0:
         return
-    print "Selecting %d /what/source attributes for update" % rowcount
+    print("Selecting %d /what/source attributes for update" % rowcount)
     result = conn.execute(_what_source_qry)
 
-    print "associating fine-grained /what/source values with files"
+    print("associating fine-grained /what/source values with files")
     pbar = progressbar.ProgressBar(
         widgets=[progressbar.Percentage()],
         maxval=rowcount

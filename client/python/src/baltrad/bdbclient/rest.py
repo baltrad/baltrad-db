@@ -16,11 +16,18 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 import abc
-import httplib
+import sys
+if sys.version_info < (3,):
+    import httplib as httplibclient
+    import urlparse
+else:
+    from http import client as httplibclient
+    import urllib.parse as urlparse
+    #from urllib.parse import urlparse
+
 import json
 import os
 import socket
-import urlparse
 
 from keyczar import keyczar
 
@@ -83,7 +90,7 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
         
-        if response.status == httplib.CREATED:
+        if response.status == httplibclient.CREATED:
             data = json.loads(response.read())
             metadata = metadata_from_json_repr(data["metadata"])
             return RestfulFileEntry(metadata)
@@ -102,7 +109,7 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
         
-        if response.status == httplib.OK:
+        if response.status == httplibclient.OK:
             data = json.loads(response.read())
             return metadata_from_json_repr(data["metadata"])
         else:
@@ -118,11 +125,11 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
 
-        if response.status == httplib.OK:
+        if response.status == httplibclient.OK:
             data = json.loads(response.read())
             metadata = metadata_from_json_repr(data["metadata"])
             return RestfulFileEntry(metadata)
-        elif response.status == httplib.NOT_FOUND:
+        elif response.status == httplibclient.NOT_FOUND:
             return None
         else:
             raise db.DatabaseError(
@@ -136,9 +143,9 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
     
-        if response.status == httplib.OK:
+        if response.status == httplibclient.OK:
             return response
-        elif response.status == httplib.NOT_FOUND:
+        elif response.status == httplibclient.NOT_FOUND:
             return None
         else:
             raise db.DatabaseError(
@@ -152,9 +159,9 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
     
-        if response.status == httplib.NO_CONTENT:
+        if response.status == httplibclient.NO_CONTENT:
             return True
-        elif response.status == httplib.NOT_FOUND:
+        elif response.status == httplibclient.NOT_FOUND:
             return False
         else:
             raise db.DatabaseError(
@@ -168,7 +175,7 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
 
-        if response.status == httplib.OK:
+        if response.status == httplibclient.OK:
             data = json.loads(response.read())
             result = []
             for src in data["sources"]:
@@ -189,7 +196,7 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
 
-        if response.status == httplib.OK:
+        if response.status == httplibclient.OK:
             data = json.loads(response.read())
             src = data["source"]
             if src.has_key("parent"):
@@ -214,9 +221,9 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
 
-        if response.status == httplib.CREATED:
+        if response.status == httplibclient.CREATED:
             pass
-        elif response.status == httplib.CONFLICT:
+        elif response.status == httplibclient.CONFLICT:
             raise db.DatabaseError("duplicate entry")
         else:
             raise db.DatabaseError(
@@ -236,7 +243,7 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
 
-        if response.status == httplib.NO_CONTENT:
+        if response.status == httplibclient.NO_CONTENT:
             return
         else:
             raise db.DatabaseError(
@@ -250,11 +257,11 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
 
-        if response.status == httplib.NO_CONTENT:
+        if response.status == httplibclient.NO_CONTENT:
             return True
-        elif response.status == httplib.NOT_FOUND:
+        elif response.status == httplibclient.NOT_FOUND:
             return False
-        elif response.status == httplib.CONFLICT:
+        elif response.status == httplibclient.CONFLICT:
             raise db.DatabaseError(
                 "couldn't remove source, (it might be associated with files)"
             )
@@ -270,7 +277,7 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
 
-        if response.status == httplib.OK:
+        if response.status == httplibclient.OK:
             data = json.loads(response.read())
             result = []
             for src in data["sources"]:
@@ -291,7 +298,7 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
 
-        if response.status == httplib.OK:
+        if response.status == httplibclient.OK:
             data = json.loads(response.read())
             result = []
             for src in data["sources"]:
@@ -316,7 +323,7 @@ class RestfulDatabase(db.Database):
 
         response = self.execute_request(request)
 
-        if response.status == httplib.OK:
+        if response.status == httplibclient.OK:
             return RestfulFileResult(
                 self,
                 rows=json.loads(response.read())["rows"]
@@ -337,7 +344,7 @@ class RestfulDatabase(db.Database):
         
         response = self.execute_request(request)
 
-        if response.status == httplib.OK:
+        if response.status == httplibclient.OK:
             return RestfulAttributeResult(
                 rows=json.loads(response.read())["rows"]
             )
@@ -348,7 +355,7 @@ class RestfulDatabase(db.Database):
 
     
     def execute_request(self, req):
-        conn = httplib.HTTPConnection(
+        conn = httplibclient.HTTPConnection(
             self._server_url.hostname,
             self._server_url.port
         )

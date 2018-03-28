@@ -143,7 +143,7 @@ class Source(collections.MutableMapping):
         return iter(self._values)
 
     def has_key(self, k):
-        return self._values.has_key(k)
+        return k in self._values
 
     def __eq__(self, other):
         if isinstance(other, Source):

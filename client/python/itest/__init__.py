@@ -12,7 +12,7 @@ def execute_command(cmd):
     """    
     code = subprocess.call(cmd, shell=True)
     if code != 0:
-        raise Exception, "Could not run command %s"%cmd
+        raise Exception("Could not run command %s"%cmd)
 
 def does_client_and_server_exist():
     """tests if the binaries baltrad-bdb-server and baltrad-bdb-client are on the path
@@ -44,7 +44,7 @@ def get_server_uri():
     
     properties = None
     
-    with open(config) as fp:
+    with open(config, 'rb') as fp:
         properties = jprops.load_properties(fp)
         
     return properties['baltrad.bdb.server.uri']
@@ -58,7 +58,7 @@ def pid_exists(pid):
         return False
     try:
         os.kill(pid, 0)
-    except OSError, e:
+    except OSError as e:
         return e.errno == errno.EPERM
     else:
         return True
@@ -87,7 +87,7 @@ def setup():
         os.unlink(LOGFILE)
     
     if not does_client_and_server_exist():
-        raise Exception, "Couldn't find client and server binaries"
+        raise Exception("Couldn't find client and server binaries")
 
     config = os.environ.get("BDB_PYCLIENT_ITEST_PROPERTYFILE", "")
     

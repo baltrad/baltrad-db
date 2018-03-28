@@ -102,7 +102,7 @@ def _insert_test_files(backend):
 
 def _insert_test_file(backend, file_):
     meta = oh5.Metadata()
-    for k, v in file_.iteritems():
+    for k, v in file_.items():
         if hasattr(meta, k):
             setattr(meta, k, v)
         else:
@@ -533,7 +533,7 @@ class TestAttributeQuery(object):
         eq_(4, len(result))
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        eq_(2, len(filter(lambda r: r == {"uuid": self.files[4]["bdb_uuid"]}, result)))
+        eq_(2, len(list(filter(lambda r: r == {"uuid": self.files[4]["bdb_uuid"]}, result))))
     
     @attr("dbtest")
     def test_fetch_distinct_uuid_filter_by_xsize(self):

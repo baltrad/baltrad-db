@@ -15,8 +15,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-import httplib
-
+import sys
+if sys.version_info < (3,):
+    import httplib as httplibclient
+    import urlparse
+else:
+    from http import client as httplibclient
+    from urllib.parse import urlparse
+    
 from nose.tools import eq_, ok_, raises
 import mock
 
@@ -200,7 +206,7 @@ class TestRestfulDatabase(object):
     @mock.patch("baltrad.bdbclient.rest.Request")
     def test_execute_file_query(self, request_ctor):
         response = mock.Mock()
-        response.status = httplib.OK
+        response.status = httplibclient.OK
         response.read.return_value = ('{"rows": ['
             '{"uuid": "00000000-0000-0000-0004-000000000001"},'
             '{"uuid": "00000000-0000-0000-0004-000000000002"}'
@@ -225,7 +231,7 @@ class TestRestfulDatabase(object):
     @mock.patch("baltrad.bdbclient.rest.Request")
     def test_execute_attribute_query(self, request_ctor):
         response = mock.Mock()
-        response.status = httplib.OK
+        response.status = httplibclient.OK
         response.read.return_value = ('{"rows": ['
             '{"uuid": "00000000-0000-0000-0004-000000000001"},'
             '{"uuid": "00000000-0000-0000-0004-000000000002"}'

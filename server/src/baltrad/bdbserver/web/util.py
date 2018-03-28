@@ -16,7 +16,14 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 import json
-import httplib
+import sys
+if sys.version_info < (3,):
+    import httplib as httplibclient
+    import urlparse
+else:
+    from http import client as httplibclient
+    import urllib.parse as urlparse
+
 
 from werkzeug.wrappers import (
     BaseRequest,
@@ -38,7 +45,10 @@ class JsonRequestMixin(object):
         :raise: :class:`HttpBadRequest` if decoding fails
         """
         try:
-            return json.loads(self.data)
+            jdata = self.data
+            if isinstance(jdata, bytes):
+                jdata = jdata.decode('utf-8')
+            return json.loads(jdata)
         except ValueError:
             raise HttpBadRequest("invalid json: " + self.data)
 
@@ -59,7 +69,7 @@ class RequestContext(object):
 
 class Response(BaseResponse,
                CommonResponseDescriptorsMixin):
-    def __init__(self, response, content_type="text/plain", status=httplib.OK):
+    def __init__(self, response, content_type="text/plain", status=httplibclient.OK):
         BaseResponse.__init__(
             self, response,
             content_type=content_type,
@@ -70,13 +80,14 @@ class NoContentResponse(BaseResponse,
                         CommonResponseDescriptorsMixin):
     
     def __init__(self):
-        BaseResponse.__init__(self, None, status=httplib.NO_CONTENT)
+        BaseResponse.__init__(self, None, status=httplibclient.NO_CONTENT)
 
 class JsonResponse(BaseResponse,
                    CommonResponseDescriptorsMixin):
-    def __init__(self, response, status=httplib.OK):
-        if not isinstance(response, basestring):
-            response = json.dumps(response, allow_nan=False)
+    def __init__(self, response, status=httplibclient.OK):
+        if not isinstance(response, str):
+            response = json.dumps(response, allow_nan=False, sort_keys=True)
+        
         BaseResponse.__init__(
             self, response,
             content_type="application/json",
@@ -84,17 +95,17 @@ class JsonResponse(BaseResponse,
         )
 
 class HttpBadRequest(HTTPException):
-    code = httplib.BAD_REQUEST
+    code = httplibclient.BAD_REQUEST
     def __init__(self, description=None, response=None):
         HTTPException.__init__(self, description, response)
 
 class HttpNotFound(HTTPException):
-    code = httplib.NOT_FOUND
+    code = httplibclient.NOT_FOUND
     def __init__(self, description=None, response=None):
         HTTPException.__init__(self, description, response)
     
 class HttpConflict(HTTPException):
-    code = httplib.CONFLICT
+    code = httplibclient.CONFLICT
     def __init__(self, description=None, response=None):
         HTTPException.__init__(self, description, response)
 
@@ -105,11 +116,11 @@ class HttpUnauthorized(HTTPException):
                       as a sequence of strings, multiple *www-authenticate*
                       headers will be set in the response.
     """
-    code = httplib.UNAUTHORIZED
+    code = httplibclient.UNAUTHORIZED
 
     def __init__(self, challenge):
         HTTPException.__init__(self)
-        if isinstance(challenge, basestring):
+        if isinstance(challenge, str):
             challenge = [challenge]
         self._challenges = challenge
     
@@ -120,7 +131,7 @@ class HttpUnauthorized(HTTPException):
         return headers
 
 class HttpForbidden(HTTPException):
-    code = httplib.FORBIDDEN
+    code = httplibclient.FORBIDDEN
     def __init__(self, description=None, response=None):
         HTTPException.__init__(self, description, response)
 

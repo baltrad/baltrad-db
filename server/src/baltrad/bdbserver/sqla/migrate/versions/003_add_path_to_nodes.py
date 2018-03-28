@@ -58,10 +58,10 @@ class Upgrader(object):
         ).scalar()
         if rowcount == 0:
             return
-        print "Selecting %d rows in bdb_nodes for update" % rowcount
+        print("Selecting %d rows in bdb_nodes for update" % rowcount)
         result = conn.execute(self.nodes_query)
 
-        print "Adding bdb_nodes.path"
+        print("Adding bdb_nodes.path")
         pbar = progressbar.ProgressBar(
             widgets=[progressbar.Percentage()],
             maxval=rowcount
@@ -96,7 +96,7 @@ class Upgrader(object):
     def update_paths(self, conn, paths):
         conn.execute(
             self.update_nodes_query,
-            [{"_parent_id": k, "_path": v} for k, v in paths.iteritems()]
+            [{"_parent_id": k, "_path": v} for k, v in paths.items()]
         )
 
 def upgrade(engine):

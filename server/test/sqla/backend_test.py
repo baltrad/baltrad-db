@@ -231,10 +231,10 @@ def test_attribute_sql_values_int():
     eq_(expected, result)
 
 def test_attribute_sql_values_long():
-    attr = oh5.Attribute("name", 123L)
+    attr = oh5.Attribute("name", 123)
     result = backend._get_attribute_sql_values(attr)
     expected = {
-        "value_long": 123L
+        "value_long": 123
     }
     eq_(expected, result)
 

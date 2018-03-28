@@ -15,9 +15,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-import httplib
 import shutil
 from tempfile import NamedTemporaryFile
+import sys
+if sys.version_info < (3,):
+    import httplib as httplibclient
+    import urlparse
+else:
+    from http import client as httplibclient
+    import urllib.parse as urlparse
 
 from baltrad.bdbcommon import expr, filter
 from baltrad.bdbcommon.oh5 import Source
@@ -63,7 +69,7 @@ def add_file(ctx):
 
     response = JsonResponse(
         {"metadata": metadata.json_repr()},
-        status=httplib.CREATED
+        status=httplibclient.CREATED
     )
     response.headers["Location"] = ctx.make_url("file/" + metadata.bdb_uuid)
 
@@ -232,11 +238,11 @@ def add_source(ctx):
     data = ctx.request.get_json_data()["source"]
 
     parent = None
-    if data.has_key("parent"):
+    if "parent" in data:
         parent = data["parent"]
     source = Source(data["name"], values=data["values"], parent=parent)
     ctx.backend.get_source_manager().add_source(source)
-    response = Response("", status=httplib.CREATED)
+    response = Response("", status=httplibclient.CREATED)
     response.headers["Location"] = ctx.make_url("source/" + source.name)
     return response
 
@@ -258,7 +264,7 @@ def update_source(ctx):
         response = NoContentResponse()
         response.headers["Location"] = ctx.make_url("source/" + source.name)
     except LookupError:
-        response = Response("", status=httplib.NOT_FOUND)
+        response = Response("", status=httplibclient.NOT_FOUND)
 
     return response
 
@@ -275,9 +281,9 @@ def remove_source(ctx, name):
         if ctx.backend.get_source_manager().remove_source(name):
             response = NoContentResponse()
         else:
-            response = Response("", status=httplib.NOT_FOUND)
+            response = Response("", status=httplibclient.NOT_FOUND)
     except IntegrityError:
-        response = Response("", status=httplib.CONFLICT)
+        response = Response("", status=httplibclient.CONFLICT)
     
     return response
 
@@ -354,7 +360,7 @@ def add_filter(ctx):
         expr.unwrap_json(data.get("expression")),
     )
     ctx.backend.get_filter_manager().add_filter(flt)
-    response = JsonResponse("", status=httplib.CREATED)
+    response = JsonResponse("", status=httplibclient.CREATED)
     response.headers["Location"] = ctx.make_url("filter/%s" % flt.name)
     return response
 
@@ -428,7 +434,7 @@ def query_attribute(ctx):
     data = ctx.request.get_json_data()
 
     query = AttributeQuery()
-    for key, value in data.get("fetch", {}).iteritems():
+    for key, value in data.get("fetch", {}).items():
         query.fetch[key] = expr.unwrap_json(value)
     if "filter" in data:
         query.filter = expr.unwrap_json(data.get("filter"))

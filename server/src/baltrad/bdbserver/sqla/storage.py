@@ -203,7 +203,7 @@ class Psycopg2DatabaseFileImporter(DatabaseFileImporter):
         return lobj.oid
 
     def read(self, conn, oid):
-        lobj = conn.connection.lobject(oid=oid, mode="r")
+        lobj = conn.connection.lobject(oid=oid, mode="rb")
         return lobj.read()
     
     def remove(self, conn, oid):
@@ -331,7 +331,7 @@ class FileSystemStorage(FileStorage):
         try:
             with open(target) as f:
                 return f.read()
-        except IOError, e:
+        except IOError as e:
             if e.errno == errno.ENOENT:
                 raise FileNotFound(target)
             raise
@@ -341,7 +341,7 @@ class FileSystemStorage(FileStorage):
         with backend.get_connection() as conn:
             try:
                 os.unlink(target)
-            except OSError, e:
+            except OSError as e:
                 if e.errno == errno.ENOENT:
                     raise FileNotFound(target)
                 raise
@@ -351,7 +351,7 @@ class FileSystemStorage(FileStorage):
         target = self.path_from_uuid(uuid)
         try:
             os.unlink(target)
-        except OSError, e:
+        except OSError as e:
             if e.errno == errno.ENOENT:
                 raise FileNotFound(target)
             raise

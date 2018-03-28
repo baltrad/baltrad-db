@@ -80,6 +80,9 @@ class Node(object):
             return self.name == other.name
         return False
     
+    def __hash__(self):
+        return id(self)  # We need to override __hash__ since it is set to None in python3 when __eq__ is overriden
+    
     def _get_parent(self):
         if self._parent:
             return self._parent()

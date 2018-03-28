@@ -37,7 +37,7 @@ class main_test(object):
     def test_read_config(self):
         configfile = "%s/baseconfig.conf"%self.fixtures
         conf = main.read_config(configfile)
-        print "TYPE: %s"%`type(conf)`
+        print("TYPE: %s"%str(type(conf)))
         eq_("werkzeug", conf["baltrad.bdb.server.type"])
         eq_("http://localhost:8090", conf["baltrad.bdb.server.uri"])
         eq_("sqla", conf["baltrad.bdb.server.backend.type"])

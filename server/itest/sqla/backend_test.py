@@ -343,7 +343,7 @@ class TestSqlAlchemyBackendItest(object):
         h5file = write_metadata(meta)
 
         meta = self.backend.store_file(h5file.name)
-        expected = open(h5file.name, "r").read()
+        expected = open(h5file.name, "rb").read()
         eq_(expected, self.backend.get_file(meta.bdb_uuid),
             "file content mismatch")
 
@@ -521,7 +521,7 @@ class TestSqlAlchemySourceManager(object):
         try:
             self.source_manager.get_source("sse")
             self.fail("Expected LookupError")
-        except LookupError, e:
+        except LookupError as e:
             eq_("Could not find source with name: sse", e.__str__())
     
     @attr("dbtest")

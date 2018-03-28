@@ -94,5 +94,5 @@ def run():
     
     try:
         return command.execute(database, opts, args)
-    except cmd.ExecutionError, e:
+    except cmd.ExecutionError as e:
         raise SystemExit(e)

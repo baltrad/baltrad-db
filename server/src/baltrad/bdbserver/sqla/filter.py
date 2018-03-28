@@ -83,7 +83,7 @@ class SqlAlchemyFilterManager(backend.FilterManager):
                 raise LookupError("no filter found by name: %s" % filter.name)
     
     def _to_storable_expr(self, xpr):
-        return json.dumps(expr.wrap_json(xpr))
+        return json.dumps(expr.wrap_json(xpr), sort_keys=True)
     
     def _from_storable_expr(self, xpr):
         return expr.unwrap_json(json.loads(xpr))

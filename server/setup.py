@@ -4,6 +4,37 @@ use_setuptools(version="38.4.0")
 
 import setuptools
 
+import sys
+
+REQUIRED_PACKAGES= [
+    "baltrad.bdbcommon",
+    "jprops >= 2.0.2",
+    "progressbar >= 2.0",
+    "psycopg2",
+    "pyasn1",
+    "pycrypto >= 2.4",
+    "python-daemon >= 1.6",
+    "python-keyczar >= 0.7b",
+    "SQLAlchemy >= 1.0.13",
+    "sqlalchemy-migrate >= 0.10.0",
+    "werkzeug >= 0.14"
+]
+if sys.version_info > (3,):
+    REQUIRED_PACKAGES= [
+        "baltrad.bdbcommon",
+        "jprops >= 2.0.2",
+        "progressbar33 >= 2.4",
+        "psycopg2",
+        "pyasn1",
+        "pycrypto >= 2.4",
+        "python-daemon >= 1.6",
+        "python3-keyczar >= 0.71rc0",
+        "SQLAlchemy >= 1.0.13",
+        "sqlalchemy-migrate >= 0.10.0",
+        "werkzeug >= 0.14"
+]
+
+
 setuptools.setup(name="baltrad.bdbserver",
     version="0.1-dev",
     namespace_packages=["baltrad"],
@@ -17,19 +48,7 @@ setuptools.setup(name="baltrad.bdbserver",
     package_data={
         "": ["*.sql", "*.cfg"]
     },
-    install_requires=[
-        "baltrad.bdbcommon",
-        "jprops >= 0.1",
-        "progressbar >= 2.0",
-        "psycopg2",
-        "pyasn1",
-        "pycrypto >= 2.4",
-        "python-daemon >= 1.6",
-        "python-keyczar >= 0.7b",
-        "SQLAlchemy >= 1.0.13",
-        "sqlalchemy-migrate >= 0.10.0",
-        "werkzeug >= 0.14",
-    ],
+    install_requires=REQUIRED_PACKAGES,
     entry_points = {
         "baltrad.bdbserver.backends": [
             "sqla = baltrad.bdbserver.sqla.backend:SqlAlchemyBackend",
