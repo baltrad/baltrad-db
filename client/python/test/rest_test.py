@@ -16,17 +16,21 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+patch_httpexception="httplib.HTTPConnection"
 if sys.version_info < (3,):
     import httplib as httplibclient
     import urlparse
+    patch_httpexception="httplib.HTTPConnection"    
 else:
     from http import client as httplibclient
     from urllib.parse import urlparse
+    patch_httpexception="http.client.HTTPConnection"    
     
 from nose.tools import eq_, ok_, raises
 import mock
 
 from baltrad.bdbclient import db, rest
+
 
 def test_create_signable_string():
     expected = "\n".join((
@@ -253,7 +257,7 @@ class TestRestfulDatabase(object):
         ok_(isinstance(result, rest.RestfulAttributeResult))
         eq_(2, result.size())
     
-    @mock.patch("httplib.HTTPConnection")
+    @mock.patch(patch_httpexception) #"httplib.HTTPConnection")
     def test_execute_request(self, conn_ctor):
         self.db = rest.RestfulDatabase("http://www.example.com", self.auth)
         req = mock.Mock(spec=rest.Request)

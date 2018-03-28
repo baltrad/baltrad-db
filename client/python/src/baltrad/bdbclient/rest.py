@@ -176,11 +176,11 @@ class RestfulDatabase(db.Database):
         response = self.execute_request(request)
 
         if response.status == httplibclient.OK:
-            data = json.loads(response.read())
+            data = json.loads(response.read().decode('utf-8'))
             result = []
             for src in data["sources"]:
                 parent = None
-                if src.has_key("parent"):
+                if "parent" in src:
                     parent = src["parent"]
                 result.append(oh5.Source(src["name"], values=src["values"], parent=parent))
             return result
@@ -197,9 +197,9 @@ class RestfulDatabase(db.Database):
         response = self.execute_request(request)
 
         if response.status == httplibclient.OK:
-            data = json.loads(response.read())
+            data = json.loads(response.read().decode('utf-8'))
             src = data["source"]
-            if src.has_key("parent"):
+            if "parent" in src:
                 parent = src["parent"]
             result = oh5.Source(src["name"], values=src["values"], parent=parent)
             return result
@@ -278,11 +278,11 @@ class RestfulDatabase(db.Database):
         response = self.execute_request(request)
 
         if response.status == httplibclient.OK:
-            data = json.loads(response.read())
+            data = json.loads(response.read().decode('utf-8'))
             result = []
             for src in data["sources"]:
                 parent = None
-                if src.has_key("parent"):
+                if "parent" in src:
                     parent = src["parent"]
                 result.append(oh5.Source(src["name"], values=src["values"], parent=parent))
             return result
@@ -299,11 +299,11 @@ class RestfulDatabase(db.Database):
         response = self.execute_request(request)
 
         if response.status == httplibclient.OK:
-            data = json.loads(response.read())
+            data = json.loads(response.read().decode('utf-8'))
             result = []
             for src in data["sources"]:
                 parent = None
-                if src.has_key("parent"):
+                if "parent" in src:
                     parent = src["parent"]
                 result.append(oh5.Source(src["name"], values=src["values"], parent=parent))
             return result
@@ -453,7 +453,7 @@ def create_signable_string(req):
     """
     fragments = [req.method, req.path]
     for key in ("content-md5", "content-type", "date"):
-        if req.headers.has_key(key):
+        if key in req.headers:
             value = req.headers[key].strip()
             if value:
                 fragments.append(value)

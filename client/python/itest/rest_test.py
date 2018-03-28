@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
-
 import os
 
 from keyczar import errors as kzerrors
@@ -27,6 +26,8 @@ from baltrad.bdbcommon import oh5
 from . import get_database
 
 class TestKeyczarAuth(object):
+    pass
+    
     @raises(kzerrors.KeyczarError)
     def test_ctor_nx_key(self):
         rest.KeyczarAuth("/path/to/nxkey")
@@ -92,7 +93,7 @@ class TestRestfulDatabase(object):
     def test_get_source(self):
         #<se CCCC="ESWI" org="82" cty="643">
         source = self.database.get_source("se")
-        print `source`
+        print(str(source))
         eq_('se', source.name)
         eq_('ESWI', source['CCCC'])
         eq_('82', source['ORG'])
@@ -171,5 +172,5 @@ class TestRestfulDatabase(object):
         eq_("Arlanda", source["PLC"])
         eq_("SE46", source["RAD"])
         eq_("02451", source["WMO"])
-        
+
  

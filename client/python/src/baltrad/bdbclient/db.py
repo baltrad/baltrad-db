@@ -235,7 +235,7 @@ class AttributeQuery(object):
     def to_json(self):
         json_repr = {}
         fetch = {}
-        for key, xpr in self._fetch.iteritems():
+        for key, xpr in self._fetch.items():
             fetch[key] = expr.wrap_json(xpr)
         json_repr["fetch"] = fetch
         if self.filter:

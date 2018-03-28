@@ -19,6 +19,7 @@ from nose.tools import eq_
 
 from baltrad.bdbclient.main import extract_command
 
+
 def test_extract_command():
     cmd, args = extract_command(["-v", "cmd", "arg", "--help"])
     eq_("cmd", cmd)
