@@ -48,10 +48,7 @@ test_python_package() {
 
   cd $package_dir
   python setup.py -q develop
-  python setup.py nosetests \
-    --first-package-wins \
-    --with-xunit \
-    --xunit-file=$package_dir/test-results.xml
+  python -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
 }
 
 test_java_client() {
