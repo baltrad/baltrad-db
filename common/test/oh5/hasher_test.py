@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*- 
 import datetime
 
 #from mock import patch, sentinel, Mock
@@ -39,5 +40,17 @@ class TestMetadataHasher(object):
         meta.add_node("/what", Attribute("object", "pvol"))
         eq_(
             "469fa750ff4f575f1c30c794bb80e16a6a99ed2c",
+            self.hasher.hash(meta)
+        )
+
+    def test_concrete_digest3(self):
+        meta = Metadata();
+        meta.add_node("/", Group("what"))
+        meta.add_node("/what", Attribute("source", "WMO:02606,PLC:Luleå"))
+        meta.add_node("/what", Attribute("date", datetime.date(2001, 1, 2)))
+        meta.add_node("/what", Attribute("time", datetime.time(12, 5)))
+        meta.add_node("/what", Attribute("object", "pvol"))
+        eq_(
+            "2c16830c04d40911c799c946f89278c58c0feeb8",
             self.hasher.hash(meta)
         )

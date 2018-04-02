@@ -30,6 +30,15 @@ import pkg_resources
 from baltrad.bdbcommon import expr, oh5
 from baltrad.bdbclient import db
 
+import sys
+
+##
+# In python27 it's not possible to pipe a string unless encoding it somewhat
+def fix_pipeable_string(s):
+    if sys.version_info < (3,):
+        return unicode(s).encode('utf-8')
+    return s
+
 logger = logging.getLogger("baltrad.bdbclient.cmd")
 
 class ExecutionError(RuntimeError):
@@ -146,12 +155,12 @@ class PrintSources(Command):
     def execute(self, database, opts, args):
         sources = sorted(
             database.get_sources(),
-            cmp=lambda x, y: cmp(x.name, y.name)
+            key=lambda x: x.name
         )
 
         for source in sources:
-            str = source.name + "\t" + source.to_string()
-            print(unicode(str).encode('utf-8')) #To get strings pipeable...
+            s = source.name + "\t" + source.to_string()
+            print(fix_pipeable_string(s))
 
 class ImportSources(Command):
     def update_optionparser(self, parser):
