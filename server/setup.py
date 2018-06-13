@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-from ez_setup import use_setuptools
-use_setuptools(version="38.4.0")
-
 import setuptools
 
 import sys
@@ -15,9 +12,9 @@ REQUIRED_PACKAGES= [
     "pycrypto >= 2.4",
     "python-daemon >= 1.6",
     "python-keyczar >= 0.7b",
-    "SQLAlchemy >= 1.0.13",
-    "sqlalchemy-migrate >= 0.10.0",
-    "werkzeug >= 0.14"
+    "SQLAlchemy >= 0.7",
+    "sqlalchemy-migrate >= 0.7.2",
+    "werkzeug >= 0.8"
 ]
 if sys.version_info > (3,):
     REQUIRED_PACKAGES= [

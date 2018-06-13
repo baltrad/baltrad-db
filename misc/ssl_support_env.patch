@@ -1,0 +1,26 @@
+--- ssl_support.py.old	2018-06-13 12:52:21.566108979 +0200
++++ ssl_support.py	2018-06-13 13:02:59.197734100 +0200
+@@ -18,7 +18,13 @@
+     'opener_for'
+ ]
+ 
+-cert_paths = """
++ssl_support_cert_path=os.getenv("SSL_SUPPORT_OVERRIDE_PATH")
++if ssl_support_cert_path is None:
++    ssl_support_cert_path=""
++else:
++    ssl_support_cert_path = ssl_support_cert_path + "\n"
++
++cert_paths = (ssl_support_cert_path + """
+ /etc/pki/tls/certs/ca-bundle.crt
+ /etc/ssl/certs/ca-certificates.crt
+ /usr/share/ssl/certs/ca-bundle.crt
+@@ -27,7 +33,7 @@
+ /System/Library/OpenSSL/certs/cert.pem
+ /usr/local/share/certs/ca-root-nss.crt
+ /etc/ssl/ca-bundle.pem
+-""".strip().split()
++""").strip().split()
+ 
+ try:
+     HTTPSHandler = urllib.request.HTTPSHandler

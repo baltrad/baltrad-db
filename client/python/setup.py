@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-from ez_setup import use_setuptools
-use_setuptools(version="38.4.0")
-
 import setuptools
 import sys
 

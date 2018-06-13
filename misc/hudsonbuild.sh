@@ -1,8 +1,11 @@
 #!/bin/bash
 
 PROJECT_ROOT=$(dirname $(dirname $(readlink -f $0)))
-HLHDF_ROOT=/home/hudson/installed/baltrad_3p/hlhdf
-PREFIX=/home/hudson/installed/baltrad_3p/baltrad-db
+HLHDF_ROOT=/home/hudson/py27installation/hlhdf
+PREFIX=/home/hudson/py27installation/baltrad-db
+CERTIFI_PEM_FILE=
+#HLHDF_ROOT=/home/hudson/installed/baltrad_3p/hlhdf
+#PREFIX=/home/hudson/installed/baltrad_3p/baltrad-db
 
 create_env() {
   envpath=$1
@@ -21,6 +24,12 @@ init_env() {
 
   source $envpath/bin/activate
 
+  PATCHED_FILE=`$envpath/bin/python -c "from setuptools import ssl_support;print(ssl_support.__file__.replace(\".pyc\",\".py\"))"`
+  if [ "$PATCHED_FILE" != "" ]; then
+    patch "$PATCHED_FILE" < $PROJECT_ROOT/misc/ssl_support_env.patch
+  fi
+  CERTIFI_PEM_FILE=`$envpath/bin/python -c "from pip._vendor import certifi;print(certifi.where())"`
+  
   cp $HLHDF_ROOT/hlhdf.pth $envpath/lib/python2.7/site-packages
   export LD_LIBRARY_PATH=$HLHDF_ROOT/lib:$LD_LIBRARY_PATH
 }
@@ -40,15 +49,15 @@ install_python_package() {
   package_dir=$1
 
   cd $package_dir
-  python setup.py -q install
+  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python setup.py -q install
 }
 
 test_python_package() {
   package_dir=$1
 
   cd $package_dir
-  python setup.py -q develop
-  python -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
+  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python setup.py -q develop
+  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
 }
 
 test_java_client() {
@@ -60,7 +69,7 @@ test_java_client() {
 
 install_java_client() {
   cd "$PROJECT_ROOT/client/java"
-  ant install -Dprefix=$PREFIX
+  ant install -Dprefix="$PREFIX/env"
 }
 
 run_tests() {
