@@ -62,6 +62,15 @@ public class SourceTest {
     assertEquals("12345", classUnderTest.get("WMO"));
     assertEquals("eefoo", classUnderTest.get("NOD"));
   }
+  
+  @Test
+  public void fromString_incompleteKeyValuePair() {
+    classUnderTest = Source.fromString("WMO:12345,NOD:eefoo,CMT:");
+    assertEquals(2, classUnderTest.getKeys().size());
+    assertEquals("12345", classUnderTest.get("WMO"));
+    assertEquals("eefoo", classUnderTest.get("NOD"));
+    assertEquals(null, classUnderTest.get("CMT"));
+  }
 
   @Test
   public void fromString_empty() {

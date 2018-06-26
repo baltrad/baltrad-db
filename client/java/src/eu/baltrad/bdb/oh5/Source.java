@@ -90,11 +90,11 @@ public class Source {
     String[] elements = StringUtils.split(source, ",");
     for (int i=0; i < elements.length; i++) {
       String[] keyValuePair = StringUtils.split(elements[i], ":");
-      if (keyValuePair.length != 2) {
-        throw new InvalidSource(source);
-      } else {
+      if (keyValuePair.length == 2) {
         result.put(keyValuePair[0], keyValuePair[1]);
-      }
+      } else if (keyValuePair.length != 1 || !elements[i].endsWith(":")) {
+        throw new InvalidSource(source);
+      } // else: we have a key without value - ignore without throwing exception
     }
     if (source.isEmpty()) {
       throw new InvalidSource();
