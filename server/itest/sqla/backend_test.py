@@ -44,7 +44,9 @@ class TestSqlAlchemyBackendItest(object):
 
     sources = [
         Source("eesur", values={"NOD": "eesur", "PLC": "Syrgavere"}),
-        Source("eehar", values={"NOD": "eehar", "PLC": "Harku"})
+        Source("eehar", values={"NOD": "eehar", "PLC": "Harku"}),
+        Source("dkaal", values={"WMO": "00000", "NOD": "dkaal", "PLC": "Aalborg"}),
+        Source("sebaa", values={"WMO": "00000", "NOD": "sebaa", "PLC": "Balsta"})
     ]
 
     source_ids = []
@@ -87,6 +89,12 @@ class TestSqlAlchemyBackendItest(object):
         source = {"NOD": "eesur"}
         with self.backend.get_connection() as conn:
             eq_(self.source_ids[0], get_source_id(conn, source))
+            
+    @attr("dbtest")
+    def test_get_source_id_multiple_wmo_matches(self):
+        source = {"WMO": "00000", "NOD": "sebaa"}
+        with self.backend.get_connection() as conn:
+            eq_(self.source_ids[3], get_source_id(conn, source))
     
     @attr("dbtest")
     def test_store_file(self):

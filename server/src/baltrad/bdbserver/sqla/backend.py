@@ -671,7 +671,6 @@ def _has_file_by_hash_and_source(conn, hash, source_id):
         )
     ).scalar()
 
-
 def get_source_id(conn, source):
     where = sql.literal(False)
     keys = source.keys()
@@ -679,7 +678,7 @@ def get_source_id(conn, source):
     if "ORG" in keys:
         if "WMO" in keys or "NOD" in keys or "RAD" in keys or "PLC" in keys:
             ignoreORG=True
-
+ 
     for key, value in source.items():
         if ignoreORG and key == "ORG":
             continue
@@ -690,14 +689,42 @@ def get_source_id(conn, source):
                 schema.source_kvs.c.value==value
             )
         )
-
+ 
     qry = sql.select(
-        [schema.source_kvs.c.source_id],
+        [schema.source_kvs.c.source_id, schema.source_kvs.c.key, schema.source_kvs.c.value],
         where,
         distinct=True
     )
-
-    return conn.execute(qry).scalar()
+     
+    result = conn.execute(qry)
+     
+    source_id_matches = {}
+    max_no_of_matches = 0
+    best_match_id = None
+    multiple_matches = False
+    for row in result:
+        source_id = row[schema.source_kvs.c.source_id]
+        if not source_id in source_id_matches:
+            source_id_matches[source_id] = 0
+        row_key = row[schema.source_kvs.c.key]
+        row_value = row[schema.source_kvs.c.value]
+        for key, value in source.items():
+            if ignoreORG and key == "ORG":
+                continue
+            elif key == row_key and value == row_value:
+                source_id_matches[source_id] += 1
+                if source_id_matches[source_id] > max_no_of_matches:
+                    max_no_of_matches = source_id_matches[source_id]
+                    best_match_id = source_id
+                    multiple_matches = False
+                elif source_id_matches[source_id] == max_no_of_matches:
+                    multiple_matches = True
+     
+    if multiple_matches:
+      logger.debug("Could not determine source due to multiple equally matching sources found for %s." % (str(source)))
+      best_match_id = None
+ 
+    return best_match_id
 
 def get_source_id_by_name(conn, name):
     qry = sql.select(
