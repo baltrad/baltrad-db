@@ -58,12 +58,15 @@ check_bdb_status() {
 if [ ! -d "$BALTRAD_DB_PID_DIR" ]; then
   echo "Creating dirname $BALTRAD_DB_PID_DIR"
   mkdir "$BALTRAD_DB_PID_DIR"
+fi
+if [ -d "$BALTRAD_DB_PID_DIR" ]; then
+  chown $BALTRAD_USER:$BALTRAD_GROUP "$BALTRAD_DB_PID_DIR"
   if [ $? -ne 0 ]; then
     echo "Failed to create pid file directory, defaulting to /tmp/baltrad-bdb-server.pid"
     BDBPID=/tmp/baltrad-bdb-server.pid
-  else
-    chown $BALTRAD_USER:$BALTRAD_GROUP "$BALTRAD_DB_PID_DIR"
   fi
+else
+  BDBPID=/tmp/baltrad-bdb-server.pid
 fi
 
 if [ ! -d "$BALTRAD_DB_LOG_DIR" ]; then
