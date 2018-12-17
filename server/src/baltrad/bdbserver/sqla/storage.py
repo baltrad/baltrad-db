@@ -329,7 +329,7 @@ class FileSystemStorage(FileStorage):
     def read(self, backend, uuid):
         target = self.path_from_uuid(uuid)
         try:
-            with open(target) as f:
+            with open(target, 'rb') as f:
                 return f.read()
         except IOError as e:
             if e.errno == errno.ENOENT:
