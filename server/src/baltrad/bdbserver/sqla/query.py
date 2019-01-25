@@ -159,40 +159,34 @@ class ExprToSql(object):
         name = name.replace("/", "_")
         nelems = len(elems)
         groupname = "/".join(elems) #string.join(elems, "/")
-        
+
         value_alias_t = self._value_tables.setdefault(
             name + "_values",
-            schema.attribute_values.alias(name + "_values")
+            schema.nodes.alias(name + "_values")
         )
-        
+
         if not self.from_clause_contains(value_alias_t):
-            l0_node_alias = schema.nodes.alias(name + "_l0")
-            
             onclause_l0 = sql.and_(
-                l0_node_alias.c.file_id==schema.files.c.id,
-                l0_node_alias.c.name==attrname
+                value_alias_t.c.file_id==schema.files.c.id,
+                value_alias_t.c.name==attrname
             )
 
             if nelems > 0 and elems[0] == "":  #Formulated as /x/y/z, use absolute path
                 onclause_l0 = sql.and_(
                     onclause_l0,
-                    l0_node_alias.c.path == groupname
+                    value_alias_t.c.path == groupname
                 )
             elif nelems > 0 and elems[0] != "": # Formulated as x/y/z, use like filter (but not x/y)
                 onclause_l0 = sql.and_(
                     onclause_l0,
-                    l0_node_alias.c.path.like("%/"+groupname)
+                    value_alias_t.c.path.like("%/"+groupname)
                 )
                 
             self.from_clause = self.from_clause.outerjoin(
-                l0_node_alias,
+                value_alias_t,
                 onclause=onclause_l0
             )
 
-            self.from_clause = self.from_clause.outerjoin(
-                value_alias_t,
-                onclause=value_alias_t.c.node_id==l0_node_alias.c.id
-            )
         return getattr(value_alias_t.c, "value_" + type_)
     
     def from_clause_contains(self, table):

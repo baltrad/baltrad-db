@@ -700,7 +700,6 @@ class TestAttributeQuery(object):
         self.query.fetch = {
             "count_ysize" : expr.count(expr.attribute("where/ysize", "long"))
         }
-
         result = self.query.execute(self.backend)
         eq_(1, len(result))
         eq_({"count_ysize": 6}, result[0])

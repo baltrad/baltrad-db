@@ -81,19 +81,13 @@ nodes = Table("bdb_nodes", meta,
     Column("path", Text, nullable=False),
     Column("name", Text, nullable=False),
     Column("type", Integer, nullable=False),
-    UniqueConstraint("parent_id", "name"),
-)
-
-attribute_values = Table("bdb_attribute_values", meta,
-    Column("node_id", Integer,
-        ForeignKey(nodes.c.id, ondelete="CASCADE"),
-        primary_key=True),
     Column("value_long", BigInteger),
     Column("value_string", Text),
     Column("value_double", Float),
     Column("value_boolean", Boolean),
     Column("value_date", Date),
     Column("value_time", Time),
+    UniqueConstraint("parent_id", "name"),
 )
 
 filters = Table("bdb_filters", meta,

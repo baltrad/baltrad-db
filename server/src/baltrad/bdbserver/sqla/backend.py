@@ -25,6 +25,7 @@ import stat
 import time
 import uuid
 import sys
+from sys import path
 if sys.version_info > (3,):
     long = int
     basestring = str
@@ -531,23 +532,34 @@ def insert_file(conn, meta, source_id):
         size=meta.bdb_file_size,
     ).inserted_primary_key[0]
 
-def insert_metadata(conn, meta, file_id):
-    node_ids = {}
+def merge_dictionaries(x, y):
+    result = x.copy()
+    result.update(y)
+    return result
 
+def insert_metadata(conn, meta, file_id):
+    bulk = []
     for node in meta.iternodes():
         if node.path().startswith("/_bdb"):
             continue
-        node_id = conn.execute(
-            schema.nodes.insert(),
-            file_id=file_id,
-            path=node.parent and node.parent.path() or "/",
-            parent_id=node_ids.get(node.parent, None),
-            name=node.name,
-            type=node.type_id,
-        ).inserted_primary_key[0]
-        node_ids[node] = node_id
+
+        values = {"value_long": None, "value_string": None, "value_double": None, "value_boolean": None, "value_date": None, "value_time": None}
         if isinstance(node, oh5.Attribute):
-            insert_attribute_value(conn, node, node_id)
+            values = merge_dictionaries(values, _get_attribute_sql_values(node))
+
+        bulk.append(
+            dict(
+                 file_id=file_id,
+                 path=node.parent and node.parent.path() or "/",
+                 name=node.name,
+                 type=node.type_id,
+                 **values
+            )
+        )
+    conn.execute(
+        schema.nodes.insert(),
+        bulk
+    )
 
 def _parse_date(datestr):
     if len(datestr) != 8 or not datestr.isdigit():
@@ -605,20 +617,21 @@ def _get_attribute_sql_values(node):
         )
     return values
 
-def insert_attribute_value(conn, node, node_id):
-    values = _get_attribute_sql_values(node)
-
-    conn.execute(
-        schema.attribute_values.insert(),
-        node_id=node_id,
-        **values
-    )
+def create_nodename(row):
+    name = row[schema.nodes.c.name]
+    path = row[schema.nodes.c.path]
+    result = path
+    if not name is None:
+        if path[-1] != "/":
+            result = "%s/%s"%(result, name)
+        else:
+            result = "%s%s"%(result, name)
+    return result
 
 def _select_metadata(conn, file_id):
     qry = sql.select(
-        [schema.nodes, schema.attribute_values],
+        [schema.nodes],
         schema.nodes.c.file_id==file_id,
-        from_obj=schema.nodes.outerjoin(schema.attribute_values),
         order_by=[
             schema.nodes.c.id.asc()
         ]
@@ -630,15 +643,15 @@ def _select_metadata(conn, file_id):
 
     result = conn.execute(qry)
     row = result.fetchone()
-    nodes[row[schema.nodes.c.id]] = meta.root()
+    nodes[create_nodename(row)] = meta.root()
 
     for row in result:
-        node_id = row[schema.nodes.c.id]
-        parent_id = row[schema.nodes.c.parent_id]
-        parent = nodes[parent_id]
+        parent_path = row[schema.nodes.c.path]
         node = _create_node_from_row(row)
-        parent.add_child(node)
-        nodes[node_id] = node
+        if parent_path in nodes.keys():
+            parent = nodes[parent_path]
+            parent.add_child(node)
+        nodes[create_nodename(row)] = node
     
     return meta
  
@@ -647,11 +660,11 @@ def _create_node_from_row(row):
     name = row[schema.nodes.c.name]
     if type_ == oh5.Attribute.type_id:
         node = oh5.Attribute(name, None)
-        node.value = row[schema.attribute_values.c.value_string]
+        node.value = row[schema.nodes.c.value_string]
         if node.value is None:
-            node.value = row[schema.attribute_values.c.value_long]
+            node.value = row[schema.nodes.c.value_long]
         if node.value is None:
-            node.value = row[schema.attribute_values.c.value_double]
+            node.value = row[schema.nodes.c.value_double]
         return node
     elif type_ == oh5.Group.type_id:
         return oh5.Group(name)
