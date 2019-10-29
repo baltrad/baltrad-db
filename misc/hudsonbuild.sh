@@ -43,6 +43,7 @@ init_test_env() {
   $envpath/bin/pip install "sphinx >= 1.1" --trusted-host pypi.python.org
   $envpath/bin/pip install "mock >= 0.7" --trusted-host pypi.python.org
   $envpath/bin/pip install "cherrypy == 8.9.1" --trusted-host pypi.python.org
+  $envpath/bin/pip install "psycopg2==2.7.7" --trusted-host pypi.python.org
 }
 
 install_python_package() {
