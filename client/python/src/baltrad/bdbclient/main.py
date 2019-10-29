@@ -14,6 +14,7 @@
 # 
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
+from __future__ import print_function
 
 import logging
 import os
@@ -61,14 +62,14 @@ def run():
     command_name, args = extract_command(sys.argv[1:])
 
     if not command_name:
-        print >> sys.stderr, "missing command\n"
+        print("missing command\n", file=sys.stderr)
         optparser.print_usage()
         raise SystemExit(1)
 
     try:
         command = cmd.Command.get_implementation_by_name(command_name)()
     except LookupError:
-        print >> sys.stderr, "'%s' is not a valid command." % command_name
+        print("'%s' is not a valid command." % command_name, file=sys.stderr)
         raise SystemExit(1)
     
     optparser.set_usage(
