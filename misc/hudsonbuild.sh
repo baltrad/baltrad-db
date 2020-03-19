@@ -1,11 +1,9 @@
 #!/bin/bash
 
 PROJECT_ROOT=$(dirname $(dirname $(readlink -f $0)))
-HLHDF_ROOT=/home/hudson/py27installation/hlhdf
-PREFIX=/home/hudson/py27installation/baltrad-db
+HLHDF_ROOT=/home/hudson/continuous/installation/hlhdf
+PREFIX=/home/hudson/continuous/installation/baltrad-db
 CERTIFI_PEM_FILE=
-#HLHDF_ROOT=/home/hudson/installed/baltrad_3p/hlhdf
-#PREFIX=/home/hudson/installed/baltrad_3p/baltrad-db
 
 create_env() {
   envpath=$1
@@ -30,8 +28,8 @@ init_env() {
   fi
   CERTIFI_PEM_FILE=`$envpath/bin/python -c "from pip._vendor import certifi;print(certifi.where())"`
   
-  cp $HLHDF_ROOT/hlhdf.pth $envpath/lib/python2.7/site-packages
-  export LD_LIBRARY_PATH=$HLHDF_ROOT/lib:$LD_LIBRARY_PATH
+  #cp $HLHDF_ROOT/hlhdf.pth $envpath/lib/python2.7/site-packages
+  #export LD_LIBRARY_PATH=$HLHDF_ROOT/lib:$LD_LIBRARY_PATH
 }
 
 init_test_env() {
@@ -44,6 +42,7 @@ init_test_env() {
   $envpath/bin/pip install "mock >= 0.7" --trusted-host pypi.python.org
   $envpath/bin/pip install "cherrypy == 8.9.1" --trusted-host pypi.python.org
   $envpath/bin/pip install "psycopg2==2.7.7" --trusted-host pypi.python.org
+  $envpath/bin/pip3 install "werkzeug==0.14" --trusted-host pypi.python.org
 }
 
 install_python_package() {

@@ -70,7 +70,7 @@ def stop_server(uri, removepid=False):
     if is_server_running(uri):
         if os.path.exists(PIDFILE):
             try:
-                pid = int(string.strip(open(PIDFILE).read()))
+                pid = int(open(PIDFILE).read().strip())
                 if pid_exists(pid):
                     os.kill(pid, 15) # TERM
             except:
