@@ -7,7 +7,7 @@ CERTIFI_PEM_FILE=
 
 create_env() {
   envpath=$1
-  python $PROJECT_ROOT/misc/virtualenv/virtualenv.py \
+  python3 $PROJECT_ROOT/misc/virtualenv/virtualenv.py \
     --system-site-packages \
     $envpath
 }
@@ -22,11 +22,11 @@ init_env() {
 
   source $envpath/bin/activate
 
-  PATCHED_FILE=`$envpath/bin/python -c "from setuptools import ssl_support;print(ssl_support.__file__.replace(\".pyc\",\".py\"))"`
+  PATCHED_FILE=`$envpath/bin/python3 -c "from setuptools import ssl_support;print(ssl_support.__file__.replace(\".pyc\",\".py\"))"`
   if [ "$PATCHED_FILE" != "" ]; then
     patch "$PATCHED_FILE" < $PROJECT_ROOT/misc/ssl_support_env.patch
   fi
-  CERTIFI_PEM_FILE=`$envpath/bin/python -c "from pip._vendor import certifi;print(certifi.where())"`
+  CERTIFI_PEM_FILE=`$envpath/bin/python3 -c "from pip._vendor import certifi;print(certifi.where())"`
   
   #cp $HLHDF_ROOT/hlhdf.pth $envpath/lib/python2.7/site-packages
   #export LD_LIBRARY_PATH=$HLHDF_ROOT/lib:$LD_LIBRARY_PATH
@@ -37,11 +37,11 @@ init_test_env() {
 
   init_env $envpath
 
-  $envpath/bin/pip install "nose >= 1.1" --trusted-host pypi.python.org
-  $envpath/bin/pip install "sphinx >= 1.1" --trusted-host pypi.python.org
-  $envpath/bin/pip install "mock >= 0.7" --trusted-host pypi.python.org
-  $envpath/bin/pip install "cherrypy == 8.9.1" --trusted-host pypi.python.org
-  $envpath/bin/pip install "psycopg2==2.7.7" --trusted-host pypi.python.org
+  $envpath/bin/pip3 install "nose >= 1.1" --trusted-host pypi.python.org
+  $envpath/bin/pip3 install "sphinx >= 1.1" --trusted-host pypi.python.org
+  $envpath/bin/pip3 install "mock >= 0.7" --trusted-host pypi.python.org
+  $envpath/bin/pip3 install "cherrypy == 8.9.1" --trusted-host pypi.python.org
+  $envpath/bin/pip3 install "psycopg2==2.7.7" --trusted-host pypi.python.org
   $envpath/bin/pip3 install "werkzeug==0.14" --trusted-host pypi.python.org
 }
 
@@ -56,8 +56,8 @@ test_python_package() {
   package_dir=$1
 
   cd $package_dir
-  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python setup.py -q develop
-  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
+  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 setup.py -q develop
+  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
 }
 
 test_java_client() {
