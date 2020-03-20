@@ -49,7 +49,7 @@ install_python_package() {
   package_dir=$1
 
   cd $package_dir
-  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python setup.py -q install
+  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 setup.py -q install
 }
 
 test_python_package() {
@@ -107,7 +107,7 @@ init_test_env "$PROJECT_ROOT/test-env/"
 run_tests
 deactivate
 
-init_env "$PREFIX/env"
+#init_env "$PREFIX/env"
 deploy
 
 
