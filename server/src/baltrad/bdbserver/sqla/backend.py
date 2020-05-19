@@ -103,17 +103,21 @@ class SqlAlchemyBackend(backend.Backend):
         )
 
     def store_file(self, path):
+        st = time.time()
         meta = self.metadata_from_file(path)
+        metadataTime = time.time()
         try:
             self._storage.store(self, meta, path)
+            storageTime = time.time()
             logger.debug("Stored file with uuid: %s. hash: %s", meta.bdb_uuid, meta.bdb_metadata_hash)
+            logger.info("sqla.backend.store_file: Metadata extraction time %d ms, storage time %d ms"%(int((metadataTime-st)*1000), int((storageTime-st)*1000)))
         except IntegrityError as e:
             message = str(e)
             if "duplicate key" in message:
                 logger.warn("File already added to database. uuid: %s, hash: %s. Exception caught: %s", meta.bdb_uuid, meta.bdb_metadata_hash, message.splitlines()[0])
                 raise backend.DuplicateEntry()
             else:
-              raise e
+                raise e
 
         return meta
     
@@ -226,11 +230,11 @@ class SqlAlchemyBackend(backend.Backend):
 
     def execute_file_query(self, qry):
         stmt = query.transform_file_query(qry)
-        conn = self.get_connection()
-
         r = []
         with self.get_connection() as conn:
+            st = time.time()
             result = conn.execute(stmt).fetchall()
+            logger.info("sqla.backend.execute_file_query: Took %d ms"%(int((time.time()-st)*1000)))
             for row in result:
                 r.append({"uuid" : row[schema.files.c.uuid]})
         return r
@@ -240,7 +244,9 @@ class SqlAlchemyBackend(backend.Backend):
         r = []
         
         with self.get_connection() as conn:
+            st = time.time()
             result = conn.execute(stmt)
+            logger.info("sqla.backend.execute_attribute_query: Took %d ms"%(int((time.time()-st)*1000)))
             for row in result.fetchall():
                 r.append(dict(zip(result.keys(), row)))
         return r
@@ -673,12 +679,12 @@ def _create_node_from_row(row):
     else:
         raise RuntimeError("unhandled node type: %s" % type_)
 
-def _has_file_by_hash_and_source(conn, hash, source_id):
+def _has_file_by_hash_and_source(conn, h, source_id):
     return conn.execute(
         sql.select(
             [sql.literal(True)],
             sql.and_(
-                schema.files.c.hash==hash,
+                schema.files.c.hash==h,
                 schema.files.c.source_id==source_id
             )
         )
@@ -734,8 +740,8 @@ def get_source_id(conn, source):
                     multiple_matches = True
      
     if multiple_matches:
-      logger.debug("Could not determine source due to multiple equally matching sources found for %s." % (str(source)))
-      best_match_id = None
+        logger.debug("Could not determine source due to multiple equally matching sources found for %s." % (str(source)))
+        best_match_id = None
  
     return best_match_id
 

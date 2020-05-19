@@ -29,6 +29,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.Database;
@@ -48,8 +50,9 @@ public class RestfulDatabase implements Database, SourceManager {
   private RequestFactory requestFactory;
   private Authenticator authenticator;
   private RestfulFileEntryCache fileEntryCache;
-  
+
   private static final int defaultFileEntryCacheSize = 0;
+  private static Logger logger = LogManager.getLogger(RestfulDatabase.class);
   
   public RestfulDatabase(String serverUri, int maxconnections) {
     this(serverUri, new NullAuthenticator(), maxconnections);
@@ -125,9 +128,14 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public RestfulFileEntry store(InputStream fileContent) {
+    long st = System.currentTimeMillis();
+    long queryTime = 0;
+
     HttpUriRequest request =
       requestFactory.createStoreFileRequest(fileContent);
     RestfulResponse response = executeRequest(request);
+    
+    queryTime = System.currentTimeMillis();
 
     try {
       int statusCode = response.getStatusCode();
@@ -136,6 +144,7 @@ public class RestfulDatabase implements Database, SourceManager {
         if (fileEntryCache != null) {
           fileEntryCache.addFileEntry(newFileEntry);          
         }
+        logger.info("bdb.RestfulDatabase.store: Took " + (queryTime - st) + " ms");
         return newFileEntry;
       } else if (statusCode == HttpStatus.SC_CONFLICT) {
         throw new DuplicateEntry("file already stored");
@@ -150,21 +159,25 @@ public class RestfulDatabase implements Database, SourceManager {
 
   @Override
   public Metadata queryFileMetadata(InputStream fileContent) {
+    long st = System.currentTimeMillis();
+    
     HttpUriRequest request =
         requestFactory.createQueryFileMetadata(fileContent);
-      RestfulResponse response = executeRequest(request);
+    RestfulResponse response = executeRequest(request);
 
-      try {
-        int statusCode = response.getStatusCode();
-        if (statusCode == HttpStatus.SC_OK) {
-          return response.getMetadata();
-        } else {
-          throw new DatabaseError("Failed to query file for metadata store file, status code: " +
-                                  Integer.toString(statusCode));
-        }
-      } finally {
-        response.close();
+    logger.debug("bdb.RestfulDatabase.queryFileMetadata: Took " + (System.currentTimeMillis() - st) + " ms");
+
+    try {
+      int statusCode = response.getStatusCode();
+      if (statusCode == HttpStatus.SC_OK) {
+        return response.getMetadata();
+      } else {
+        throw new DatabaseError("Failed to query file for metadata store file, status code: " +
+                                Integer.toString(statusCode));
       }
+    } finally {
+      response.close();
+    }
   }
 
   
@@ -173,10 +186,13 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public boolean removeFileEntry(UUID uuid) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request =
       requestFactory.createRemoveFileEntryRequest(uuid);
     RestfulResponse response = executeRequest(request);
     
+    logger.debug("bdb.RestfulDatabase.removeFileEntry: Took " + (System.currentTimeMillis() - st) + " ms");
+
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_NO_CONTENT) {
@@ -200,9 +216,11 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public void removeAllFileEntries() {
+    long st = System.currentTimeMillis();
     HttpUriRequest request =
       requestFactory.createRemoveAllFileEntriesRequest();
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.removeAllFileEntries: Took " + (System.currentTimeMillis() - st) + " ms");
     
     try {
       int statusCode = response.getStatusCode();
@@ -220,16 +238,19 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public RestfulFileEntry getFileEntry(UUID uuid) {
+    long st = System.currentTimeMillis();
     if (fileEntryCache != null) {
       RestfulFileEntry cachedFileEntry = fileEntryCache.getFileEntry(uuid);
       
       if (cachedFileEntry != null) {
+        logger.debug("bdb.RestfulDatabase.getFileEntry: Returning cache entry after " + (System.currentTimeMillis() - st) + " ms");
         return cachedFileEntry;
       }     
     }
     
     HttpUriRequest request = requestFactory.createGetFileEntryRequest(uuid);
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.getFileEntry: Executed request in " + (System.currentTimeMillis() - st) + " ms");
 
     try {
       int statusCode = response.getStatusCode();
@@ -251,8 +272,11 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public int removeFilesByCount(int limit, int nritems) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createRemoveFilesByCountRequest(limit, nritems);
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.removeFilesByCount: Executed request in " + (System.currentTimeMillis() - st) + " ms");
+
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_OK) {
@@ -267,8 +291,10 @@ public class RestfulDatabase implements Database, SourceManager {
   }
 
   public int removeFilesByAge(DateTime age, int nritems) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createRemoveFilesByAgeRequest(age, nritems);
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.removeFilesByAge: Executed request in " + (System.currentTimeMillis() - st) + " ms");
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_OK) {
@@ -287,8 +313,10 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public long getFileCount() {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createGetFileCountRequest();
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.getFileCount: Executed request in " + (System.currentTimeMillis() - st) + " ms");
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_OK) {
@@ -307,8 +335,10 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public InputStream getFileContent(UUID uuid) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createGetFileContentRequest(uuid);
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.getFileContent: Executed request in " + (System.currentTimeMillis() - st) + " ms");
 
     int statusCode = response.getStatusCode();
     if (statusCode == HttpStatus.SC_OK) {
@@ -328,8 +358,10 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public RestfulFileResult execute(FileQuery query) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createQueryFileRequest(query);
     RestfulResponse response = executeRequest(request);
+    logger.info("bdb.RestfulDatabase.execute(FileQuery): Executed request in " + (System.currentTimeMillis() - st) + " ms");
 
     try {
       int statusCode = response.getStatusCode();
@@ -348,9 +380,11 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public RestfulAttributeResult execute(AttributeQuery query) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request =
       requestFactory.createQueryAttributeRequest(query);
     RestfulResponse response = executeRequest(request);
+    logger.info("bdb.RestfulDatabase.execute(AttributeQuery): Executed request in " + (System.currentTimeMillis() - st) + " ms");
 
     try {
       int statusCode = response.getStatusCode();
@@ -385,8 +419,10 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override  
   public List<Source> getSources() {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createGetSourcesRequest();
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.getSources(): Executed request in " + (System.currentTimeMillis() - st) + " ms");
     
     try {
       int statusCode = response.getStatusCode();
@@ -403,8 +439,10 @@ public class RestfulDatabase implements Database, SourceManager {
 
   @Override
   public Source getSource(String name) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createGetSourceRequest(name);
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.getSource(String): Executed request in " + (System.currentTimeMillis() - st) + " ms");
     
     try {
       int statusCode = response.getStatusCode();
@@ -424,8 +462,10 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public void add(Source src) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createAddSourceRequest(src);
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.add(Source): Executed request in " + (System.currentTimeMillis() - st) + " ms");
     
     try {
       int statusCode = response.getStatusCode();
@@ -446,8 +486,10 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public void update(Source src) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createUpdateSourceRequest(src);
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.update(Source): Executed request in " + (System.currentTimeMillis() - st) + " ms");
     try {
       int statusCode = response.getStatusCode();
       if (statusCode != HttpStatus.SC_NO_CONTENT) {
@@ -463,9 +505,11 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public boolean remove(String src) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createDeleteSourceRequest(src);
     RestfulResponse response = executeRequest(request);
     boolean result = false;
+    logger.debug("bdb.RestfulDatabase.remove(String): Executed request in " + (System.currentTimeMillis() - st) + " ms");
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_NO_CONTENT) {
@@ -483,8 +527,10 @@ public class RestfulDatabase implements Database, SourceManager {
 
   @Override
   public List<Source> getParentSources() {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createGetParentSourcesRequest();
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.getParentSources(): Executed request in " + (System.currentTimeMillis() - st) + " ms");
 
     try {
       int statusCode = response.getStatusCode();
@@ -500,8 +546,10 @@ public class RestfulDatabase implements Database, SourceManager {
 
   @Override
   public List<Source> getSourcesWithParent(String parent) {
+    long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createGetSourcesWithParent(parent);
     RestfulResponse response = executeRequest(request);
+    logger.debug("bdb.RestfulDatabase.getSourcesWithParent(): Executed request in " + (System.currentTimeMillis() - st) + " ms");
 
     try {
       int statusCode = response.getStatusCode();

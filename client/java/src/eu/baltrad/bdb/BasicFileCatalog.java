@@ -64,6 +64,8 @@ public final class BasicFileCatalog implements FileCatalog {
     // since the stream is possibly used twice, read it to byte array
     // and create new InputStreams from that.
     // XXX: There might be more efficient ways to do this.
+    long st = System.currentTimeMillis();
+    long fileStoredDb = 0, fileStoredLocal = 0;
 
     byte[] fileContentBytes;
     try {
@@ -81,7 +83,8 @@ public final class BasicFileCatalog implements FileCatalog {
     } finally {
       IOUtils.closeQuietly(fileContentByteStream);
     }
-
+    fileStoredDb = System.currentTimeMillis();
+    
     fileContentByteStream = new ByteArrayInputStream(fileContentBytes);
     try {
       localStorage.store(fileEntry, fileContentByteStream);
@@ -90,21 +93,30 @@ public final class BasicFileCatalog implements FileCatalog {
     } finally {
       IOUtils.closeQuietly(fileContentByteStream);
     }
+    fileStoredLocal = System.currentTimeMillis();
     
     logger.debug("Stored file in database and in local storage. UUID: " + fileEntry.getUuid());
+    logger.info("bdb.Catalog.store: DB storage time " + (fileStoredDb - st)
+        + " ms, local storage time " + (fileStoredLocal - st) + " ms");
     
     return fileEntry;
   }
   
   @Override
   public void remove(FileEntry fileEntry) {
+    long st = System.currentTimeMillis();
+    long fileRemovedDb = 0, fileRemovedLocal = 0;
     database.removeFileEntry(fileEntry.getUuid());
+    fileRemovedDb = System.currentTimeMillis();
     try {
       localStorage.remove(fileEntry);
     } catch (Exception e) {
       logger.warn("Ignored exception thrown in LocalStorage::remove", e);
     }
+    fileRemovedLocal = System.currentTimeMillis();
     logger.debug("Removed file from database and local storage. UUID: " + fileEntry.getUuid());
+    logger.info("bdb.Catalog.remove: DB removal time " + (fileRemovedDb - st)
+        + " ms, local removal time " + (fileRemovedLocal - st) + " ms");
   }
   
   @Override

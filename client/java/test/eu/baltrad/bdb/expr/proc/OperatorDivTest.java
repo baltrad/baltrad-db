@@ -45,7 +45,7 @@ public class OperatorDivTest {
     
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isLong());
-    assertEquals(new Long(5), result.toLong());
+    assertEquals(Long.valueOf(5), result.toLong());
   }
 
   @Test
@@ -55,7 +55,7 @@ public class OperatorDivTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isDouble());
-    assertEquals(new Double(1.5), result.toDouble());
+    assertEquals(Double.valueOf(1.5), result.toDouble());
   }
 
   @Test
@@ -65,7 +65,7 @@ public class OperatorDivTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isDouble());
-    assertEquals(new Double(6.0), result.toDouble());
+    assertEquals(Double.valueOf(6.0), result.toDouble());
   }
 
   @Test
@@ -75,7 +75,7 @@ public class OperatorDivTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isDouble());
-    assertEquals(new Double(5.0), result.toDouble());
+    assertEquals(Double.valueOf(5.0), result.toDouble());
   }
 
   @Test

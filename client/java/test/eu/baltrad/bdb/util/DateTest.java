@@ -61,7 +61,7 @@ public class DateTest {
 
   @Test
   public void equals_otherType() {
-    assertFalse(classUnderTest.equals(new Double(1)));
+    assertFalse(classUnderTest.equals(Double.valueOf(1)));
   }
 
   @Test

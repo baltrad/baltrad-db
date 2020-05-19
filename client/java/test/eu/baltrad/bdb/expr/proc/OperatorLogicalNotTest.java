@@ -42,7 +42,7 @@ public class OperatorLogicalNotTest {
 
     Expression result = classUnderTest.executeUnary(expr);
     assertTrue(result.isBoolean());
-    assertEquals(new Boolean(false), result.toBoolean());
+    assertEquals(Boolean.valueOf(false), result.toBoolean());
   }
 
   @Test

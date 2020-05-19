@@ -43,7 +43,7 @@ public class OperatorLogicalAndTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isBoolean());
-    assertEquals(new Boolean(true), result.toBoolean());
+    assertEquals(Boolean.valueOf(true), result.toBoolean());
   }
 
   @Test

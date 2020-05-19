@@ -45,8 +45,8 @@ public class BinaryListCartesianTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertEquals(2, result.size());
-    assertEquals(new Long(2), result.get(0).toLong());
-    assertEquals(new Long(3), result.get(1).toLong());
+    assertEquals(Long.valueOf(2), result.get(0).toLong());
+    assertEquals(Long.valueOf(3), result.get(1).toLong());
   }
 
   @Test
@@ -59,8 +59,8 @@ public class BinaryListCartesianTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertEquals(2, result.size());
-    assertEquals(new Long(2), result.get(0).toLong());
-    assertEquals(new Long(3), result.get(1).toLong());
+    assertEquals(Long.valueOf(2), result.get(0).toLong());
+    assertEquals(Long.valueOf(3), result.get(1).toLong());
   }
 
   @Test
@@ -75,10 +75,10 @@ public class BinaryListCartesianTest {
     );
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertEquals(4, result.size());
-    assertEquals(new Long(4), result.get(0).toLong());
-    assertEquals(new Long(5), result.get(1).toLong());
-    assertEquals(new Long(5), result.get(2).toLong());
-    assertEquals(new Long(6), result.get(3).toLong());
+    assertEquals(Long.valueOf(4), result.get(0).toLong());
+    assertEquals(Long.valueOf(5), result.get(1).toLong());
+    assertEquals(Long.valueOf(5), result.get(2).toLong());
+    assertEquals(Long.valueOf(6), result.get(3).toLong());
   }
 
   @Test
@@ -87,6 +87,6 @@ public class BinaryListCartesianTest {
     Expression rhs = new LongExpression(2);
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
-    assertEquals(new Long(3), result.toLong());
+    assertEquals(Long.valueOf(3), result.toLong());
   }
 }

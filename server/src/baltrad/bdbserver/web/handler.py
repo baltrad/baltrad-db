@@ -18,6 +18,7 @@
 import shutil
 from tempfile import NamedTemporaryFile
 import sys
+
 if sys.version_info < (3,):
     import httplib as httplibclient
     import urlparse
@@ -59,6 +60,7 @@ def add_file(ctx):
 
     See :ref:`doc-rest-op-store-file` for details
     """
+    logger.debug("bdb.handler.add_file(ctx)")
     with NamedTemporaryFile() as tmp:
         shutil.copyfileobj(ctx.request.stream, tmp)
         tmp.flush()
@@ -85,6 +87,8 @@ def query_file_metadata(ctx):
 
     See :ref:`doc-rest-op-query-file-metadata-file` for details
     """
+    logger.debug("bdb.handler.query_file_metadata(ctx)")
+    
     with NamedTemporaryFile() as tmp:
         shutil.copyfileobj(ctx.request.stream, tmp)
         tmp.flush()
@@ -103,6 +107,7 @@ def get_file(ctx, uuid):
 
     See :ref:`doc-rest-op-get-file` for details
     """
+    logger.debug("bdb.handler.get_file(ctx, %s)"%uuid)
     data = ctx.backend.get_file(uuid)
     if data is None:
         raise HttpNotFound()
@@ -124,6 +129,7 @@ def remove_files_by_count(ctx, limit, nritems):
 
     See :ref:`doc-rest-op-get-file` for details
     """
+    logger.debug("bdb.handler.remove_files_by_count(ctx, %d, %d)"%(limit,nritems))
     nrentries = ctx.backend.remove_files_by_count(limit, nritems)
     return JsonResponse({"numberOfFilesRemoved": nrentries})
 
@@ -140,6 +146,7 @@ def remove_files_by_age(ctx, dt, nritems):
 
     See :ref:`doc-rest-op-get-file` for details
     """
+    logger.debug("bdb.handler.remove_files_by_count(ctx, %s, %d)"%(dt,nritems))
     nrentries = ctx.backend.remove_files_by_age(dt, nritems)
     return JsonResponse({"numberOfFilesRemoved": nrentries})
 
@@ -149,6 +156,7 @@ def file_count(ctx):
     :param ctx: the request context
     :return: :class:`~.util.Response` with status *200 OK* and number of files in body
     """
+    logger.debug("bdb.handler.file_count(ctx)")
     nrentries = ctx.backend.file_count()
     
     return JsonResponse({"numberOfFiles": nrentries })
@@ -164,6 +172,7 @@ def get_file_metadata(ctx, uuid):
 
     See :ref:`doc-rest-op-get-file-metadata` for details
     """
+    logger.debug("bdb.handler.get_file_metadata(ctx, %s)"%uuid)
     metadata = ctx.backend.get_file_metadata(uuid)
     if metadata is None:
         raise HttpNotFound()
@@ -179,6 +188,7 @@ def remove_file(ctx, uuid):
 
     See :ref:`doc-rest-op-remove-file` for details
     """
+    logger.debug("bdb.handler.remove_file(ctx, %s)"%uuid)
     found = ctx.backend.remove_file(uuid)
     if not found:
         raise HttpNotFound()
@@ -192,6 +202,7 @@ def remove_all_files(ctx):
     :type ctx: :class:`~.util.RequestContext`
     :return: :class:`~.util.NoContentResponse`
     """
+    logger.debug("bdb.handler.remove_all_files(ctx)")
     if not ctx.enable_remove_all_files:
         raise HttpForbidden()
     ctx.backend.remove_all_files()
@@ -206,6 +217,7 @@ def get_sources(ctx):
 
     See :ref:`doc-rest-op-get-sources` for details
     """
+    logger.debug("bdb.handler.get_sources(ctx)")
     sources = ctx.backend.get_source_manager().get_sources()
     return JsonResponse({
         "sources": [{"name": src.name, "values": dict(src), "parent": src.parent} for src in sources]
@@ -221,6 +233,7 @@ def get_source(ctx, name):
 
     See :ref:`doc-rest-op-get-sources` for details
     """
+    logger.debug("bdb.handler.get_source(ctx, %s)"%name)
     src = ctx.backend.get_source_manager().get_source(name)
     return JsonResponse({
         "source": {"name": src.name, "values": dict(src), "parent": src.parent}
@@ -235,6 +248,7 @@ def add_source(ctx):
 
     See :ref:`doc-rest-op-add-source` for details
     """
+    logger.debug("bdb.handler.add_source(ctx)")
     data = ctx.request.get_json_data()["source"]
 
     parent = None
@@ -255,6 +269,7 @@ def update_source(ctx):
 
     See :ref:`doc-rest-op-update-source` for details
     """
+    logger.debug("bdb.handler.update_source(ctx)")
     data = ctx.request.get_json_data()["source"]
 
     source = Source(data["name"], values=data["values"])
@@ -277,6 +292,7 @@ def remove_source(ctx, name):
 
     See :ref:`doc-rest-op-remove-source` for details
     """
+    logger.debug("bdb.handler.remove_source(ctx, %s)"%name)
     try:
         if ctx.backend.get_source_manager().remove_source(name):
             response = NoContentResponse()
@@ -295,6 +311,7 @@ def get_parent_sources(ctx):
 
     See :ref:`doc-rest-op-get-sources` for details
     """
+    logger.debug("bdb.handler.get_parent_sources(ctx)")
     parent_sources = ctx.backend.get_source_manager().get_parent_sources()
     return JsonResponse({
         "sources": [{"name": src.name, "values": dict(src)} for src in parent_sources]
@@ -309,6 +326,7 @@ def get_sources_with_parent(ctx, parent):
 
     See :ref:`doc-rest-op-get-sources` for details
     """
+    logger.debug("bdb.handler.get_sources_with_parent(ctx, parent)")
     sources = ctx.backend.get_source_manager().get_sources_with_parent(parent)
     return JsonResponse({
         "sources": [{"name": src.name, "values": dict(src), "parent": src.parent} for src in sources]
@@ -324,6 +342,7 @@ def get_filters(ctx):
 
     See :ref:`doc-rest-op-get-filters` for details
     """
+    logger.debug("bdb.handler.get_filters(ctx)")
     filter_names = ctx.backend.get_filter_manager().get_filter_names()
     return JsonResponse({
         "filters": filter_names
@@ -338,6 +357,7 @@ def get_filter(ctx, name):
     :param name: the name of the filter to fetch
     :return: :class:`~.util.JsonResponse` with status *200 OK*
     """
+    logger.debug("bdb.handler.get_filter(ctx, %s)"%name)
     flt = ctx.backend.get_filter_manager().get_filter(name)
     return JsonResponse({
         "filter": {
@@ -354,6 +374,7 @@ def add_filter(ctx):
     :param ctx: the :class:`~.util.RequestContext`
     :return: :class:`~.util.JsonResponse` with status *201 CREATED*
     """
+    logger.debug("bdb.handler.add_filter(ctx)")
     data = ctx.request.get_json_data().get("filter")
     flt = filter.Filter(
         data.get("name"),
@@ -373,6 +394,7 @@ def update_filter(ctx, name):
     :param name: name of the filter to update
     :return: :class:`~.util.NoContentResponse`
     """
+    logger.debug("bdb.handler.update_filter(ctx, %s)"%name)
     data = ctx.request.get_json_data().get("filter")
     flt = filter.Filter(
         name,
@@ -394,6 +416,7 @@ def remove_filter(ctx, name):
     :return: :class:`~.util.NoContentResponse`
     :raise: :class:`~.util.HttpNotFound` if filter didn't exist
     """
+    logger.debug("bdb.handler.remove_filter(ctx, %s)"%name)
     if not ctx.backend.get_filter_manager().remove_filter(name):
         raise HttpNotFound()
     return NoContentResponse()
@@ -407,6 +430,7 @@ def query_file(ctx):
 
     See :ref:`doc-rest-op-query-file` for details
     """
+    logger.debug("bdb.handler.query_file(ctx)")
 
     data = ctx.request.get_json_data()
 
@@ -430,6 +454,7 @@ def query_attribute(ctx):
 
     See :ref:`doc-rest-op-query-attribute` for details
     """
+    logger.debug("bdb.handler.query_attribute(ctx)")
 
     data = ctx.request.get_json_data()
 

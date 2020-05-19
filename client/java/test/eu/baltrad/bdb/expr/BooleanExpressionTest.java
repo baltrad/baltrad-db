@@ -38,7 +38,7 @@ public class BooleanExpressionTest {
 
   @Test
   public void equals_otherType() {
-    assertFalse(classUnderTest.equals(new Boolean(true)));
+    assertFalse(classUnderTest.equals(Boolean.valueOf(true)));
   }
 
   @Test

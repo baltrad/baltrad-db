@@ -55,7 +55,7 @@ public class OperatorAddTest {
     
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isLong());
-    assertEquals(new Long(3), result.toLong());
+    assertEquals(Long.valueOf(3), result.toLong());
   }
 
   @Test
@@ -65,7 +65,7 @@ public class OperatorAddTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isDouble());
-    assertEquals(new Double(3.0), result.toDouble());
+    assertEquals(Double.valueOf(3.0), result.toDouble());
   }
 
   @Test
@@ -75,7 +75,7 @@ public class OperatorAddTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isDouble());
-    assertEquals(new Double(2.8), result.toDouble());
+    assertEquals(Double.valueOf(2.8), result.toDouble());
   }
 
   @Test
@@ -85,7 +85,7 @@ public class OperatorAddTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isDouble());
-    assertEquals(new Double(2.8), result.toDouble());
+    assertEquals(Double.valueOf(2.8), result.toDouble());
   }
 
   @Test

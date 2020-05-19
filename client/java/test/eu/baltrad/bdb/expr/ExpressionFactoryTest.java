@@ -43,8 +43,8 @@ public class ExpressionFactoryTest {
     Expression result = classUnderTest.list(values);
 
     assertEquals(2, result.size());
-    assertEquals(new Long(1), result.get(0).toLong());
-    assertEquals(new Long(2), result.get(1).toLong());
+    assertEquals(Long.valueOf(1), result.get(0).toLong());
+    assertEquals(Long.valueOf(2), result.get(1).toLong());
   }
 
   @Test
@@ -56,8 +56,8 @@ public class ExpressionFactoryTest {
     Expression result = classUnderTest.list(values);
 
     assertEquals(2, result.size());
-    assertEquals(new Long(1), result.get(0).toLong());
-    assertEquals(new Long(2), result.get(1).toLong());
+    assertEquals(Long.valueOf(1), result.get(0).toLong());
+    assertEquals(Long.valueOf(2), result.get(1).toLong());
   }
 
   @Test

@@ -60,8 +60,8 @@ public class FindOh5AttributeTest {
   public void findAll_xsize() {
     ListExpression result = classUnderTest.findAll("xsize", "long");
     assertEquals(2, result.size());
-    assertEquals(new Long(1), result.get(0).toLong());
-    assertEquals(new Long(3), result.get(1).toLong());
+    assertEquals(Long.valueOf(1), result.get(0).toLong());
+    assertEquals(Long.valueOf(3), result.get(1).toLong());
   }
 
   @Test
@@ -74,7 +74,7 @@ public class FindOh5AttributeTest {
   public void findAll_dataset1_where_xsize() {
     ListExpression result = classUnderTest.findAll("dataset1/where/xsize", "long");
     assertEquals(1, result.size());
-    assertEquals(new Long(3), result.get(0).toLong());
+    assertEquals(Long.valueOf(3), result.get(0).toLong());
   }
 
   @Test

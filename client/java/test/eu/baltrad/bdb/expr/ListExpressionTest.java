@@ -42,8 +42,8 @@ public class ListExpressionTest {
     );
 
     assertEquals(2, classUnderTest.size());
-    assertEquals(new Long(1), classUnderTest.get(0).toLong());
-    assertEquals(new Long(2), classUnderTest.get(1).toLong());
+    assertEquals(Long.valueOf(1), classUnderTest.get(0).toLong());
+    assertEquals(Long.valueOf(2), classUnderTest.get(1).toLong());
   }
 
   @Test
@@ -67,8 +67,8 @@ public class ListExpressionTest {
     classUnderTest = new ListExpression(values);
 
     assertEquals(2, classUnderTest.size());
-    assertEquals(new Long(1), classUnderTest.get(0).toLong());
-    assertEquals(new Long(2), classUnderTest.get(1).toLong());
+    assertEquals(Long.valueOf(1), classUnderTest.get(0).toLong());
+    assertEquals(Long.valueOf(2), classUnderTest.get(1).toLong());
   }
 
   @Test
@@ -102,8 +102,8 @@ public class ListExpressionTest {
   @Test
   public void iteration() {
     List<Long> expected = new ArrayList<Long>();
-    expected.add(new Long(1));
-    expected.add(new Long(2));
+    expected.add(Long.valueOf(1));
+    expected.add(Long.valueOf(2));
     Expression v1 = new LongExpression(1);
     Expression v2 = new LongExpression(2);
     classUnderTest.add(v1);

@@ -38,7 +38,7 @@ public class LongExpressionTest {
 
   @Test
   public void equals_otherType() {
-    assertFalse(classUnderTest.equals(new Long(1)));
+    assertFalse(classUnderTest.equals(Long.valueOf(1)));
   }
 
   @Test

@@ -45,7 +45,7 @@ public class OperatorMulTest {
     
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isLong());
-    assertEquals(new Long(6), result.toLong());
+    assertEquals(Long.valueOf(6), result.toLong());
   }
 
   @Test
@@ -55,7 +55,7 @@ public class OperatorMulTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isDouble());
-    assertEquals(new Double(6.0), result.toDouble());
+    assertEquals(Double.valueOf(6.0), result.toDouble());
   }
 
   @Test
@@ -65,7 +65,7 @@ public class OperatorMulTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isDouble());
-    assertEquals(new Double(3.0), result.toDouble());
+    assertEquals(Double.valueOf(3.0), result.toDouble());
   }
 
   @Test
@@ -75,7 +75,7 @@ public class OperatorMulTest {
 
     Expression result = classUnderTest.executeBinary(lhs, rhs);
     assertTrue(result.isDouble());
-    assertEquals(new Double(3.6), result.toDouble());
+    assertEquals(Double.valueOf(3.6), result.toDouble());
   }
 
   @Test

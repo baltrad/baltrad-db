@@ -120,11 +120,11 @@ public final class RestfulResponse {
     if (node.isTextual()) {
       return node.getTextValue();
     } else if (node.isIntegralNumber()) {
-      return new Long(node.getValueAsLong());
+      return Long.valueOf(node.getValueAsLong());
     } else if (node.isFloatingPointNumber()) {
-      return new Double(node.getValueAsDouble());
+      return Double.valueOf(node.getValueAsDouble());
     } else if (node.isBoolean()) {
-      return new Boolean(node.getValueAsBoolean());
+      return Boolean.valueOf(node.getValueAsBoolean());
     } else if (node.isNull()) {
       return null;
     }
