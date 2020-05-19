@@ -97,7 +97,7 @@ public final class BasicFileCatalog implements FileCatalog {
     
     logger.debug("Stored file in database and in local storage. UUID: " + fileEntry.getUuid());
     logger.info("bdb.Catalog.store: DB storage time " + (fileStoredDb - st)
-        + " ms, local storage time " + (fileStoredLocal - st) + " ms");
+        + " ms, local storage time " + (fileStoredLocal - fileStoredDb) + " ms");
     
     return fileEntry;
   }
@@ -116,7 +116,7 @@ public final class BasicFileCatalog implements FileCatalog {
     fileRemovedLocal = System.currentTimeMillis();
     logger.debug("Removed file from database and local storage. UUID: " + fileEntry.getUuid());
     logger.info("bdb.Catalog.remove: DB removal time " + (fileRemovedDb - st)
-        + " ms, local removal time " + (fileRemovedLocal - st) + " ms");
+        + " ms, local removal time " + (fileRemovedLocal - fileRemovedDb) + " ms");
   }
   
   @Override
