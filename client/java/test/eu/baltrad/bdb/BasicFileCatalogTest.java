@@ -58,7 +58,7 @@ public class BasicFileCatalogTest extends EasyMockSupport {
       .andReturn(entry);
     expect(localStorage.store(same(entry), isA(ByteArrayInputStream.class)))
       .andReturn(null);
-    expect(entry.getUuid()).andReturn(uuid);
+    expect(entry.getUuid()).andReturn(uuid).anyTimes();
     replayAll();
 
     assertSame(entry, classUnderTest.store(fileContent));
@@ -76,7 +76,7 @@ public class BasicFileCatalogTest extends EasyMockSupport {
       .andReturn(entry);
     expect(localStorage.store(same(entry), isA(ByteArrayInputStream.class)))
       .andThrow(new RuntimeException());
-    expect(entry.getUuid()).andReturn(uuid);
+    expect(entry.getUuid()).andReturn(uuid).anyTimes();
     replayAll();
 
     assertSame(entry, classUnderTest.store(fileContent));
@@ -89,7 +89,7 @@ public class BasicFileCatalogTest extends EasyMockSupport {
     FileEntry entry = createMock(FileEntry.class);
     
     expect(entry.getUuid())
-      .andReturn(uuid).times(2);
+      .andReturn(uuid).anyTimes();
     expect(database.removeFileEntry(uuid))
       .andReturn(true);
     localStorage.remove(entry);
@@ -105,7 +105,7 @@ public class BasicFileCatalogTest extends EasyMockSupport {
     FileEntry entry = createMock(FileEntry.class);
 
     expect(entry.getUuid())
-      .andReturn(uuid).times(2);
+      .andReturn(uuid).anyTimes();
     expect(database.removeFileEntry(uuid))
       .andReturn(true);
     localStorage.remove(entry);

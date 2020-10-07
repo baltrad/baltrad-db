@@ -117,7 +117,9 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_CREATED,
       "{ \"metadata\" : [" +
-           "{\"path\": \"/\", \"type\": \"group\"}" +
+           "{\"path\": \"/\", \"type\": \"group\"}, " +
+           "{\"path\": \"/_bdb\", \"type\": \"group\"}, " +
+           "{\"path\": \"/_bdb/uuid\", \"type\": \"attribute\", \"value\": \"a-b-c-d-e\"} " +          
       "]}"
     );
     
@@ -142,7 +144,9 @@ public class RestfulDatabaseTest extends EasyMockSupport {
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_CREATED,
       "{ \"metadata\" : [" +
-           "{\"path\": \"/\", \"type\": \"group\"}" +
+           "{\"path\": \"/\", \"type\": \"group\"}, " +
+           "{\"path\": \"/_bdb\", \"type\": \"group\"}, " +
+           "{\"path\": \"/_bdb/uuid\", \"type\": \"attribute\", \"value\": \"a-b-c-d-e\"} " +
       "]}"
     );
     
