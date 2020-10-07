@@ -144,7 +144,7 @@ public class RestfulDatabase implements Database, SourceManager {
         if (fileEntryCache != null) {
           fileEntryCache.addFileEntry(newFileEntry);          
         }
-        logger.info("bdb.RestfulDatabase.store: Took " + (queryTime - st) + " ms");
+        logger.info("bdb.RestfulDatabase.store: Took " + (queryTime - st) + " ms" + ", thread: " + Thread.currentThread().getName() + ", file: " + newFileEntry.getUuid().toString());
         return newFileEntry;
       } else if (statusCode == HttpStatus.SC_CONFLICT) {
         throw new DuplicateEntry("file already stored");
@@ -165,7 +165,7 @@ public class RestfulDatabase implements Database, SourceManager {
         requestFactory.createQueryFileMetadata(fileContent);
     RestfulResponse response = executeRequest(request);
 
-    logger.debug("bdb.RestfulDatabase.queryFileMetadata: Took " + (System.currentTimeMillis() - st) + " ms");
+    logger.debug("bdb.RestfulDatabase.queryFileMetadata: Took " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
 
     try {
       int statusCode = response.getStatusCode();
@@ -243,14 +243,14 @@ public class RestfulDatabase implements Database, SourceManager {
       RestfulFileEntry cachedFileEntry = fileEntryCache.getFileEntry(uuid);
       
       if (cachedFileEntry != null) {
-        logger.debug("bdb.RestfulDatabase.getFileEntry: Returning cache entry after " + (System.currentTimeMillis() - st) + " ms");
+        logger.debug("bdb.RestfulDatabase.getFileEntry: Returning cache entry after " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName() + ", file: " + uuid.toString());
         return cachedFileEntry;
       }     
     }
     
     HttpUriRequest request = requestFactory.createGetFileEntryRequest(uuid);
     RestfulResponse response = executeRequest(request);
-    logger.debug("bdb.RestfulDatabase.getFileEntry: Executed request in " + (System.currentTimeMillis() - st) + " ms");
+    logger.debug("bdb.RestfulDatabase.getFileEntry: Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName() + ", file: " + uuid.toString());
 
     try {
       int statusCode = response.getStatusCode();
@@ -275,7 +275,7 @@ public class RestfulDatabase implements Database, SourceManager {
     long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createRemoveFilesByCountRequest(limit, nritems);
     RestfulResponse response = executeRequest(request);
-    logger.debug("bdb.RestfulDatabase.removeFilesByCount: Executed request in " + (System.currentTimeMillis() - st) + " ms");
+    logger.debug("bdb.RestfulDatabase.removeFilesByCount: Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
 
     try {
       int statusCode = response.getStatusCode();
@@ -294,7 +294,7 @@ public class RestfulDatabase implements Database, SourceManager {
     long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createRemoveFilesByAgeRequest(age, nritems);
     RestfulResponse response = executeRequest(request);
-    logger.debug("bdb.RestfulDatabase.removeFilesByAge: Executed request in " + (System.currentTimeMillis() - st) + " ms");
+    logger.debug("bdb.RestfulDatabase.removeFilesByAge: Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_OK) {
@@ -316,7 +316,7 @@ public class RestfulDatabase implements Database, SourceManager {
     long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createGetFileCountRequest();
     RestfulResponse response = executeRequest(request);
-    logger.debug("bdb.RestfulDatabase.getFileCount: Executed request in " + (System.currentTimeMillis() - st) + " ms");
+    logger.debug("bdb.RestfulDatabase.getFileCount: Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_OK) {
@@ -338,7 +338,7 @@ public class RestfulDatabase implements Database, SourceManager {
     long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createGetFileContentRequest(uuid);
     RestfulResponse response = executeRequest(request);
-    logger.debug("bdb.RestfulDatabase.getFileContent: Executed request in " + (System.currentTimeMillis() - st) + " ms");
+    logger.debug("bdb.RestfulDatabase.getFileContent: Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName() + ", file: " + uuid.toString());
 
     int statusCode = response.getStatusCode();
     if (statusCode == HttpStatus.SC_OK) {
@@ -361,7 +361,7 @@ public class RestfulDatabase implements Database, SourceManager {
     long st = System.currentTimeMillis();
     HttpUriRequest request = requestFactory.createQueryFileRequest(query);
     RestfulResponse response = executeRequest(request);
-    logger.info("bdb.RestfulDatabase.execute(FileQuery): Executed request in " + (System.currentTimeMillis() - st) + " ms");
+    logger.info("bdb.RestfulDatabase.execute(FileQuery): Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
 
     try {
       int statusCode = response.getStatusCode();
@@ -384,7 +384,7 @@ public class RestfulDatabase implements Database, SourceManager {
     HttpUriRequest request =
       requestFactory.createQueryAttributeRequest(query);
     RestfulResponse response = executeRequest(request);
-    logger.info("bdb.RestfulDatabase.execute(AttributeQuery): Executed request in " + (System.currentTimeMillis() - st) + " ms");
+    logger.info("bdb.RestfulDatabase.execute(AttributeQuery): Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
 
     try {
       int statusCode = response.getStatusCode();
