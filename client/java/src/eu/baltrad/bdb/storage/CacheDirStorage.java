@@ -59,11 +59,22 @@ public class CacheDirStorage implements LocalStorage {
    */
   public void init() {
     for (String fileName : listStorageRoot()) {
-      UUID uuid = UUID.fromString(fileName);
-      cache.put(uuid, new File(storageRoot, fileName));
+      if (isUUID(fileName)) {
+        UUID uuid = UUID.fromString(fileName);
+        cache.put(uuid, new File(storageRoot, fileName));
+      }
     }
   }
 
+  protected boolean isUUID(String uuid) {
+    try {
+      UUID.fromString(uuid);
+      return true;
+    } catch (Exception e) {
+    }
+    return false;
+  }
+  
   @Override
   public File store(FileEntry entry, InputStream fileContent) {
     UUID uuid = entry.getUuid();

@@ -154,4 +154,22 @@ public class CacheDirStorageTest extends EasyMockSupport {
     classUnderTest.init();
     verifyAll();
   }
+
+  @Test
+  public void init_with_invalidUuids() {
+    UUID uuid2 = UUID.fromString("abcdef00-0000-0000-0004-000000000002");
+    String[] files = new String[]{
+      "a",
+      uuid2.toString(),
+      "c"
+    };
+    expect(methods.listStorageRoot())
+      .andReturn(files);
+    cache.put(uuid2, new File("/path", uuid2.toString()));
+    replayAll();
+
+    classUnderTest.init();
+    verifyAll();
+  }
+
 }
