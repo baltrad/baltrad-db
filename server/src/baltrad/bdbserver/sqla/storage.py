@@ -339,22 +339,24 @@ class FileSystemStorage(FileStorage):
     def remove(self, backend, uuid):
         target = self.path_from_uuid(uuid)
         with backend.get_connection() as conn:
+            if os.path.exists(target): # If file doesn't exist there is nothing to remove.
+                try:
+                    os.unlink(target)
+                except OSError as e:
+                    if e.errno == errno.ENOENT:
+                        raise FileNotFound(target)
+                    raise
+            backend.delete_metadata(conn, uuid)
+
+    def remove_file(self, backend, uuid):
+        target = self.path_from_uuid(uuid)
+        if os.path.exists(target):
             try:
                 os.unlink(target)
             except OSError as e:
                 if e.errno == errno.ENOENT:
                     raise FileNotFound(target)
                 raise
-            backend.delete_metadata(conn, uuid)
-
-    def remove_file(self, backend, uuid):
-        target = self.path_from_uuid(uuid)
-        try:
-            os.unlink(target)
-        except OSError as e:
-            if e.errno == errno.ENOENT:
-                raise FileNotFound(target)
-            raise
 
     def path_from_uuid(self, uuid):
         uuid_str = str(uuid)
