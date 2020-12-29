@@ -562,10 +562,7 @@ def insert_metadata(conn, meta, file_id):
                  **values
             )
         )
-    conn.execute(
-        schema.nodes.insert(),
-        bulk
-    )
+    conn.execute(schema.nodes.insert().values(bulk))
 
 def _parse_date(datestr):
     if len(datestr) != 8 or not datestr.isdigit():
