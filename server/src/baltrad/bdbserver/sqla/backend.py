@@ -67,9 +67,9 @@ class SqlAlchemyBackend(backend.Backend):
     :param engine_or_url: an SqlAlchemy engine or a database url
     :param storage: a `~.storage.FileStorage` instance to use.
     """
-    def __init__(self, engine_or_url, storage):
+    def __init__(self, engine_or_url, storage, poolsize=10):
         if isinstance(engine_or_url, basestring):
-            self._engine = engine.create_engine(engine_or_url, echo=False)
+            self._engine = engine.create_engine(engine_or_url, echo=False, pool_size=poolsize)
         else:
             self._engine = engine_or_url
         self._hasher = oh5.MetadataHasher()
@@ -97,9 +97,12 @@ class SqlAlchemyBackend(backend.Backend):
         """
         fconf = conf.filter("baltrad.bdb.server.backend.sqla.")
         storage_type = fconf.get("storage.type", default="db")
+        pool_size = fconf.get_int("pool_size", default=10)
+        
         return SqlAlchemyBackend(
             conf["baltrad.bdb.server.backend.sqla.uri"],
-            storage=storage.FileStorage.impl_from_conf(storage_type, conf)
+            storage=storage.FileStorage.impl_from_conf(storage_type, conf),
+            poolsize=pool_size
         )
 
     def store_file(self, path):
