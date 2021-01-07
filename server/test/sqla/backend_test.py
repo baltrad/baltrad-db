@@ -70,7 +70,7 @@ class TestSqlaAlchemyBackend(object):
             ctor.assert_called_once_with(
                 mock.sentinel.uri,
                 storage=mock.sentinel.storage,
-                pool_size=10
+                poolsize=10
             )
             storage_from_conf.assert_called_with("mock", conf)
             eq_(mock.sentinel.backend, result)
