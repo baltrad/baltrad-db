@@ -59,6 +59,7 @@ class TestSqlaAlchemyBackend(object):
         conf = config.Properties({
             "baltrad.bdb.server.backend.sqla.uri": mock.sentinel.uri,
             "baltrad.bdb.server.backend.sqla.storage.type": "mock",
+            "baltrad.bdb.server.backend.sqla.pool_size": "10",
         })
 
         with mock.patch(
@@ -68,7 +69,8 @@ class TestSqlaAlchemyBackend(object):
             result = from_conf(conf)
             ctor.assert_called_once_with(
                 mock.sentinel.uri,
-                storage=mock.sentinel.storage
+                storage=mock.sentinel.storage,
+                pool_size=10
             )
             storage_from_conf.assert_called_with("mock", conf)
             eq_(mock.sentinel.backend, result)
@@ -86,6 +88,7 @@ class TestSqlaAlchemyBackend(object):
         from_conf = self.backend.from_conf
         conf = config.Properties({
             "baltrad.bdb.server.backend.sqla.uri": mock.sentinel.uri,
+            "baltrad.bdb.server.backend.sqla.pool_size": "10"            
         })
 
         with mock.patch(
@@ -93,7 +96,7 @@ class TestSqlaAlchemyBackend(object):
         ) as ctor:
             ctor.return_value = mock.sentinel.backend
             result = from_conf(conf)
-            ctor.assert_called_once_with(mock.sentinel.uri, storage=mock.sentinel.storage)
+            ctor.assert_called_once_with(mock.sentinel.uri, storage=mock.sentinel.storage,poolsize=10)
             storage_from_conf.assert_called_with("db", conf)
             eq_(mock.sentinel.backend, result)        
     
