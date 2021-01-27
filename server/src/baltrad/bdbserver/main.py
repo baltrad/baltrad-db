@@ -180,6 +180,7 @@ def run_server():
         stdout=sys.stdout if opts.foreground else None,
         stderr=sys.stderr if opts.foreground else None,
         detach_process=not opts.foreground,
+        prevent_core=False,
         pidfile=pidfile
     )
     
