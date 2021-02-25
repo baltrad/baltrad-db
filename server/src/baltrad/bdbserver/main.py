@@ -133,7 +133,7 @@ def configure_logging(opts, logtype, logid, level=logging.INFO):
         handler = logging.StreamHandler(sys.stdout)
         add_loghandler(logger, handler, default_formatter)
     if opts.logfile:
-        handler = logging.FileHandler(opts.logfile)
+        handler = logging.handlers.WatchedFileHandler(opts.logfile)
         add_loghandler(logger, handler, default_formatter)
     if logtype == "syslog":
         handler = logging.handlers.SysLogHandler(SYSLOG_ADDRESS, facility=SYSLOG_FACILITY)
