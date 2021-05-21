@@ -110,7 +110,7 @@ init_test_env "$PROJECT_ROOT/test-env/"
 run_tests
 deactivate
 
-#init_env "$PREFIX/env"
+init_env "$PREFIX/env"
 deploy
 
 
