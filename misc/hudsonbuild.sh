@@ -1,9 +1,9 @@
 #!/bin/bash
 
 PROJECT_ROOT=$(dirname $(dirname $(readlink -f $0)))
-HLHDF_ROOT=/home/hudson/continuous/installation/hlhdf
-PREFIX=/home/hudson/continuous/installation/baltrad-db
-CERTIFI_PEM_FILE=
+#HLHDF_ROOT=/home/hudson/continuous/installation/hlhdf
+#PREFIX=/home/hudson/continuous/installation/baltrad-db
+#CERTIFI_PEM_FILE=
 
 create_env() {
   envpath=$1
@@ -22,11 +22,11 @@ init_env() {
 
   source $envpath/bin/activate
 
-  PATCHED_FILE=`$envpath/bin/python3 -c "from setuptools import ssl_support;print(ssl_support.__file__.replace(\".pyc\",\".py\"))"`
-  if [ "$PATCHED_FILE" != "" ]; then
-    patch "$PATCHED_FILE" < $PROJECT_ROOT/misc/ssl_support_env.patch
-  fi
-  CERTIFI_PEM_FILE=`$envpath/bin/python3 -c "from pip._vendor import certifi;print(certifi.where())"`
+  #PATCHED_FILE=`$envpath/bin/python3 -c "from setuptools import ssl_support;print(ssl_support.__file__.replace(\".pyc\",\".py\"))"`
+  #if [ "$PATCHED_FILE" != "" ]; then
+  #  patch "$PATCHED_FILE" < $PROJECT_ROOT/misc/ssl_support_env.patch
+  #fi
+  #CERTIFI_PEM_FILE=`$envpath/bin/python3 -c "from pip._vendor import certifi;print(certifi.where())"`
   
   #cp $HLHDF_ROOT/hlhdf.pth $envpath/lib/python2.7/site-packages
   #export LD_LIBRARY_PATH=$HLHDF_ROOT/lib:$LD_LIBRARY_PATH
@@ -49,15 +49,18 @@ install_python_package() {
   package_dir=$1
 
   cd $package_dir
-  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 setup.py -q install
+  #SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 setup.py -q install
+  python3 setup.py -q install  
 }
 
 test_python_package() {
   package_dir=$1
 
   cd $package_dir
-  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 setup.py -q develop
-  SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
+  #SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 setup.py -q develop
+  #SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
+  python3 setup.py -q develop
+  python3 -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
 }
 
 test_java_client() {
