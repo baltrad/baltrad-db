@@ -25,8 +25,6 @@ class UuidConverter(BaseConverter):
     def __init__(self, url_map):
         super(UuidConverter, self).__init__(url_map)
         self.url_map = url_map
-        import sys
-        sys.exit(0)
         self.regex = "[0-9a-fA-F]{8,8}-([0-9a-fA-F]{4,4}-){3,3}[0-9a-fA-F]{12,12}"
     
     def to_python(self, value):
