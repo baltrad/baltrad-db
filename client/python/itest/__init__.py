@@ -1,7 +1,7 @@
 from baltrad.bdbclient import rest
 import os, errno, subprocess, time, string
 import jprops
- 
+
 PIDFILE="./build/bdb.pid"
 LOGFILE="./build/bdb.log"
  
@@ -83,6 +83,7 @@ def stop_server(uri, removepid=False):
 def setup():
     """executed by the nose tests before running the test suite
     """
+
     if os.path.exists(LOGFILE):
         os.unlink(LOGFILE)
      
@@ -92,7 +93,7 @@ def setup():
     config = os.environ.get("BDB_PYCLIENT_ITEST_PROPERTYFILE", "")
      
     uri = get_server_uri()
-     
+
     stop_server(uri, True)
      
     execute_command("baltrad-bdb-drop --conf=%s"%config)

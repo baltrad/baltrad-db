@@ -92,7 +92,46 @@ FILES = [{
     "/dataset2/data1/what/nodata":253.0,
     "/dataset2/data2/what/nodata":252.0,
     "/dataset2/data2/where/nodata":252.0,
-}]
+}, {
+    "what_object": "SCAN",
+    "what_date": datetime.date(2021, 5, 26),
+    "what_time": datetime.time(12, 0),
+    "what_source": "PLC:Kiruna,NOD:sekrn",
+    "bdb_uuid": "00000000-0000-0000-0004-00000000000a",
+    "bdb_metadata_hash": "hash6",
+    "bdb_stored_date": datetime.date(2021, 5, 26),
+    "bdb_stored_time": datetime.time(12, 0, 5),
+    "bdb_file_size": 6000,
+    "/dataset1/where/xsize": 7,
+    "/dataset1/where/ysize": 7,
+    "/dataset2/where/xsize": 7,
+    "/dataset2/where/ysize": 7,
+    "/dataset1/data1/what/nodata":255.0,
+    "/dataset1/data2/what/nodata":254.0,
+    "/dataset2/data1/what/nodata":253.0,
+    "/dataset2/data2/what/nodata":252.0,
+    "/dataset2/data2/where/nodata":252.0,
+}, {
+    "what_object": "SCAN",
+    "what_date": datetime.date(2021, 5, 26),
+    "what_time": datetime.time(12, 1),
+    "what_source": "WIGOS:0-20000-0-2600",
+    "bdb_uuid": "00000000-0000-0000-0004-00000000000b",
+    "bdb_metadata_hash": "hash6",
+    "bdb_stored_date": datetime.date(2021, 5, 26),
+    "bdb_stored_time": datetime.time(12, 0, 5),
+    "bdb_file_size": 6000,
+    "/dataset1/where/xsize": 8,
+    "/dataset1/where/ysize": 8,
+    "/dataset2/where/xsize": 8,
+    "/dataset2/where/ysize": 8,
+    "/dataset1/data1/what/nodata":255.0,
+    "/dataset1/data2/what/nodata":254.0,
+    "/dataset2/data1/what/nodata":253.0,
+    "/dataset2/data2/what/nodata":252.0,
+    "/dataset2/data2/where/nodata":252.0,
+}
+]
 
 def _insert_test_files(backend):
     global FILES
@@ -107,6 +146,7 @@ def _insert_test_file(backend, file_):
             setattr(meta, k, v)
         else:
             _add_attribute(meta, k, v)
+
     with backend.get_connection() as conn:
         source_id = sqla_backend.get_source_id(conn, meta.source())
         file_id =  sqla_backend.insert_file(conn, meta, source_id)
@@ -130,7 +170,9 @@ class TestFileQuery(object):
 
     sources = [
         oh5.Source("eesur", values={"NOD": "eesur", "PLC": "Syrgavere"}),
-        oh5.Source("eehar", values={"NOD": "eehar", "PLC": "Harku"})
+        oh5.Source("eehar", values={"NOD": "eehar", "PLC": "Harku"}),
+        oh5.Source("sekrn", values={"NOD": "sekrn", "WIGOS": "0-20000-0-2032", "PLC": "Kiruna"}),
+        oh5.Source("sevax", values={"NOD": "sevax", "WMO": "02600", "WIGOS": "0-20000-0-2600", "PLC": "Vara"})
     ]
 
     @classmethod
@@ -157,16 +199,18 @@ class TestFileQuery(object):
             raise SkipTest("no backend defined")
 
         self.query = backend.FileQuery()
-    
+
     @attr("dbtest")
     def test_all_files(self):
         result = self.backend.execute_file_query(self.query)
-        eq_(5, len(result))
+        eq_(7, len(result))
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
 
     @attr("dbtest")
     def test_filter_by_uuid(self):
@@ -276,10 +320,12 @@ class TestFileQuery(object):
             expr.literal(datetime.timedelta(days=4017, seconds=86342))
         )
         result = self.backend.execute_file_query(self.query)
-        eq_(3, len(result)) 
+        eq_(5, len(result)) 
         ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
     
     @attr("dbtest")
     def test_filter_by_file_size(self):
@@ -324,7 +370,30 @@ class TestFileQuery(object):
         eq_(2, len(result)) 
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-    
+
+    @attr("dbtest")
+    def test_filter_by_WIGOS(self):
+        self.query.filter = expr.eq(
+          expr.attribute("_bdb/source:WIGOS", "string"),
+          expr.literal("0-20000-0-2032")
+        )
+
+        result = self.backend.execute_file_query(self.query)
+        eq_(1, len(result)) 
+        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
+
+    @attr("dbtest")
+    def test_filter_by_WIGOS_2(self):
+        self.query.filter = expr.eq(
+          expr.attribute("_bdb/source:WIGOS", "string"),
+          expr.literal("0-20000-0-2600")
+        )
+
+        result = self.backend.execute_file_query(self.query)
+        eq_(1, len(result)) 
+        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
+
+
     @attr("dbtest")
     def test_filter_by_bdb_source_name_like(self):
         self.query.filter = expr.like(
@@ -374,9 +443,11 @@ class TestFileQuery(object):
         )
 
         result = self.backend.execute_file_query(self.query)
-        eq_(2, len(result))
+        eq_(4, len(result))
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
     
     @attr("dbtest")
     def test_filter_by_ysize_not_in(self):
@@ -388,9 +459,11 @@ class TestFileQuery(object):
         )
 
         result = self.backend.execute_file_query(self.query)
-        eq_(2, len(result))
+        eq_(4, len(result))
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
     
     @attr("dbtest")
     def test_order_by(self):
@@ -399,12 +472,14 @@ class TestFileQuery(object):
         ]
 
         result = self.backend.execute_file_query(self.query)
-        eq_(5, len(result))
-        eq_(self.files[3]["bdb_uuid"], result[0]["uuid"])
-        eq_(self.files[4]["bdb_uuid"], result[1]["uuid"])
-        eq_(self.files[2]["bdb_uuid"], result[2]["uuid"])
-        eq_(self.files[1]["bdb_uuid"], result[3]["uuid"])
-        eq_(self.files[0]["bdb_uuid"], result[4]["uuid"])
+        eq_(7, len(result))
+        eq_(self.files[6]["bdb_uuid"], result[0]["uuid"])
+        eq_(self.files[5]["bdb_uuid"], result[1]["uuid"])
+        eq_(self.files[3]["bdb_uuid"], result[2]["uuid"])
+        eq_(self.files[4]["bdb_uuid"], result[3]["uuid"])
+        eq_(self.files[2]["bdb_uuid"], result[4]["uuid"])
+        eq_(self.files[1]["bdb_uuid"], result[5]["uuid"])
+        eq_(self.files[0]["bdb_uuid"], result[6]["uuid"])
     
     @attr("dbtest")
     def test_limit(self):
@@ -420,9 +495,11 @@ class TestFileQuery(object):
         self.query.skip = 3
 
         result = self.backend.execute_file_query(self.query)
-        eq_(2, len(result))
+        eq_(4, len(result))
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
     
     @attr("dbtest")
     def test_skip_with_limit(self):
@@ -440,7 +517,9 @@ class TestAttributeQuery(object):
 
     sources = [
         oh5.Source("eesur", {"NOD": "eesur", "PLC": "Syrgavere"}),
-        oh5.Source("eehar", {"NOD": "eehar", "PLC": "Harku"})
+        oh5.Source("eehar", {"NOD": "eehar", "PLC": "Harku"}),
+        oh5.Source("sekrn", values={"NOD": "sekrn", "WIGOS": "0-20000-0-2032", "PLC": "Kiruna"}),
+        oh5.Source("sevax", values={"NOD": "sevax", "WMO": "02600", "WIGOS": "0-20000-0-2600", "PLC": "Vara"})
     ]
 
     @classmethod
@@ -475,12 +554,14 @@ class TestAttributeQuery(object):
         }
         
         result = self.query.execute(self.backend)
-        eq_(5, len(result))
+        eq_(7, len(result))
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
     
     @attr("dbtest")
     def test_fetch_uuid_filter_by_object(self):
@@ -658,12 +739,14 @@ class TestAttributeQuery(object):
         ]
 
         result = self.query.execute(self.backend)
-        eq_(5, len(result))
-        eq_({"uuid": self.files[4]["bdb_uuid"]}, result[0])
-        eq_({"uuid": self.files[3]["bdb_uuid"]}, result[1])
-        eq_({"uuid": self.files[2]["bdb_uuid"]}, result[2])
-        eq_({"uuid": self.files[1]["bdb_uuid"]}, result[3])
-        eq_({"uuid": self.files[0]["bdb_uuid"]}, result[4])
+        eq_(7, len(result))
+        eq_({"uuid": self.files[6]["bdb_uuid"]}, result[0])
+        eq_({"uuid": self.files[5]["bdb_uuid"]}, result[1])
+        eq_({"uuid": self.files[4]["bdb_uuid"]}, result[2])
+        eq_({"uuid": self.files[3]["bdb_uuid"]}, result[3])
+        eq_({"uuid": self.files[2]["bdb_uuid"]}, result[4])
+        eq_({"uuid": self.files[1]["bdb_uuid"]}, result[5])
+        eq_({"uuid": self.files[0]["bdb_uuid"]}, result[6])
     
     @attr("dbtest")
     def test_limit(self):
@@ -682,8 +765,8 @@ class TestAttributeQuery(object):
 
         result = self.query.execute(self.backend)
         eq_(2, len(result))
-        eq_({"uuid": self.files[4]["bdb_uuid"]}, result[0])
-        eq_({"uuid": self.files[3]["bdb_uuid"]}, result[1])
+        eq_({"uuid": self.files[6]["bdb_uuid"]}, result[0])
+        eq_({"uuid": self.files[5]["bdb_uuid"]}, result[1])
     
     @attr("dbtest")
     def test_fetch_max_xsize(self):
@@ -693,7 +776,7 @@ class TestAttributeQuery(object):
 
         result = self.query.execute(self.backend)
         eq_(1, len(result))
-        eq_({"max_xsize": 6}, result[0])
+        eq_({"max_xsize": 8}, result[0])
     
     @attr("dbtest")
     def test_fetch_count_ysize(self):
@@ -702,7 +785,7 @@ class TestAttributeQuery(object):
         }
         result = self.query.execute(self.backend)
         eq_(1, len(result))
-        eq_({"count_ysize": 6}, result[0])
+        eq_({"count_ysize": 10}, result[0])
     
     @attr("dbtest")
     def test_fetch_min_ysize_filter_by_what_object(self):
@@ -729,9 +812,11 @@ class TestAttributeQuery(object):
         ]
 
         result = self.query.execute(self.backend)
-        eq_(2, len(result))
+        eq_(4, len(result))
         ok_({"source": "eesur", "sum_xsize": 14} in result)
         ok_({"source": "eehar", "sum_xsize": 8} in result)
+        ok_({"source": "sekrn", "sum_xsize": 14} in result)
+        ok_({"source": "sevax", "sum_xsize": 16} in result)
     
     @attr("dbtest")
     def test_fetch_sum_xsize_group_by_source_name_filter_by_date(self):
@@ -763,9 +848,11 @@ class TestAttributeQuery(object):
         ]
 
         result = self.query.execute(self.backend)
-        eq_(2, len(result))
+        eq_(4, len(result))
         ok_({"source": "eesur", "max_xsize": 5} in result)
         ok_({"source": "eehar", "max_xsize": 6} in result)
+        ok_({"source": "sekrn", "max_xsize": 7} in result)
+        ok_({"source": "sevax", "max_xsize": 8} in result)
     
     @attr("dbtest")
     def test_fetch_max_xsize_min_ysize_group_by_source_name(self):
@@ -779,9 +866,11 @@ class TestAttributeQuery(object):
         ]
 
         result = self.query.execute(self.backend)
-        eq_(2, len(result))
+        eq_(4, len(result))
         ok_({"source": "eesur", "max_xsize": 5, "min_ysize": 2} in result)
         ok_({"source": "eehar", "max_xsize": 6, "min_ysize": 2} in result)
+        ok_({"source": "sekrn", "max_xsize": 7, "min_ysize": 7} in result)
+        ok_({"source": "sevax", "max_xsize": 8, "min_ysize": 8} in result)
     
     @attr("dbtest")
     def test_fetch_missing_value_group_by_source_name(self):
@@ -794,9 +883,11 @@ class TestAttributeQuery(object):
         ]
 
         result = self.query.execute(self.backend)
-        eq_(2, len(result))
+        eq_(4, len(result))
         ok_({"source": "eesur", "min_elangle": None} in result)
         ok_({"source": "eehar", "min_elangle": None} in result)
+        ok_({"source": "sekrn", "min_elangle": None} in result)
+        ok_({"source": "sevax", "min_elangle": None} in result)
     
     @attr("dbtest")
     def test_fetch_uuid_filter_by_what_object_in(self):
@@ -809,9 +900,11 @@ class TestAttributeQuery(object):
         )
 
         result = self.query.execute(self.backend)
-        eq_(2, len(result))
+        eq_(4, len(result))
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
     
     @attr("dbtest")
     def test_fetch_uuid_filter_by_xsize_not_in(self):
@@ -824,12 +917,17 @@ class TestAttributeQuery(object):
                 expr.literal([2, 3])
             )
         )
-
+ 
         result = self.query.execute(self.backend)
-        eq_(3, len(result))
+
+        eq_(7, len(result))
         ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
         ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[5]["bdb_uuid"]} in result) # We have two datasets with same xsize?
+        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
+        ok_({"uuid": self.files[6]["bdb_uuid"]} in result) # We have two datasets with same xsize?
 
     @attr("dbtest")
     def test_fetch_xsize_by_what_object_and_dataset_absolute(self):
@@ -897,8 +995,10 @@ class TestAttributeQuery(object):
         )
 
         result = self.query.execute(self.backend)
-        eq_(1, len(result))
+        eq_(3, len(result))
         eq_(255.0, result[0]['nodata'])
+        eq_(255.0, result[1]['nodata'])
+        eq_(255.0, result[2]['nodata'])
 
     @attr("dbtest")
     def test_fetch_nodata_by_what_object_and_dataset_absolue_fetch_nomatch(self):
@@ -928,19 +1028,4 @@ class TestAttributeQuery(object):
         )
 
         result = self.query.execute(self.backend)
-        eq_(4, len(result))
-
-    @attr("dbtest")
-    def test_fetch_nodata_by_what_object_and_dataset_relative_many_match(self):
-        self.query.fetch = {
-            "nodata": expr.attribute("what/nodata", "double")
-        }
-        self.query.filter = expr.and_(
-            expr.eq(expr.attribute("what/nodata", "double"),
-                    expr.literal(252.0)),
-            expr.eq(expr.attribute("what/object", "string"),
-                    expr.literal("SCAN"))
-        )
-
-        result = self.query.execute(self.backend)
-        eq_(1, len(result))
+        eq_(12, len(result))

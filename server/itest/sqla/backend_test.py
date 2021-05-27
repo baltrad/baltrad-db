@@ -46,7 +46,9 @@ class TestSqlAlchemyBackendItest(object):
         Source("eesur", values={"NOD": "eesur", "PLC": "Syrgavere"}),
         Source("eehar", values={"NOD": "eehar", "PLC": "Harku"}),
         Source("dkaal", values={"WMO": "00000", "NOD": "dkaal", "PLC": "Aalborg"}),
-        Source("sebaa", values={"WMO": "00000", "NOD": "sebaa", "PLC": "Balsta"})
+        Source("sebaa", values={"WMO": "00000", "NOD": "sebaa", "PLC": "Balsta"}),
+        Source("sekrn", values={"WIGOS": "0-20000-0-2032", "NOD": "sekrn", "PLC": "Kiruna"}),
+        Source("sekaa", values={"WIGOS": "0-20000-0-2666","WMO": "02666", "NOD": "sekaa", "PLC": "Karlskrona"})
     ]
 
     source_ids = []
@@ -536,3 +538,13 @@ class TestSqlAlchemySourceManager(object):
     def test_get_sources_empty(self):
         sources = self.source_manager.get_sources()
         eq_(0, len(sources))
+
+    @attr("dbtest")
+    def test_add_with_wigos(self):
+        source1 = Source("se", values={"bar": "baz"})
+        source2 = Source("sekrn", values={"NOD":"sekrn","WIGOS": "0-20000-0-2032"}, parent="se")
+
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
+
+        eq_(source2, self.source_manager.get_source("sekrn"))

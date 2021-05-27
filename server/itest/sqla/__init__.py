@@ -17,7 +17,6 @@ def setup_package():
     if _backend:
         _backend.drop()
         _backend.create()
-
 def teardown_package():
     global _backend
     if _backend:

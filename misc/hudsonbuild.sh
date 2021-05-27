@@ -15,10 +15,10 @@ create_env() {
 init_env() {
   envpath=$1
 
-  if [ -e $envpath ]; then
-    \rm -fr "$envpath"
-  fi
-  create_env $envpath
+  #if [ -e $envpath ]; then
+  #  \rm -fr "$envpath"
+  #fi
+  #create_env $envpath
 
   source $envpath/bin/activate
 
@@ -37,12 +37,12 @@ init_test_env() {
 
   init_env $envpath
 
-  $envpath/bin/pip3 install "nose >= 1.1" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "sphinx >= 1.1" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "mock >= 0.7" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "cherrypy == 8.9.1" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "psycopg2==2.7.7" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "werkzeug==0.14" --trusted-host pypi.python.org
+  #$envpath/bin/pip3 install "nose >= 1.1" --trusted-host pypi.python.org
+  #$envpath/bin/pip3 install "sphinx >= 1.1" --trusted-host pypi.python.org
+  #$envpath/bin/pip3 install "mock >= 0.7" --trusted-host pypi.python.org
+  #$envpath/bin/pip3 install "cherrypy == 8.9.1" --trusted-host pypi.python.org
+  #$envpath/bin/pip3 install "psycopg2==2.7.7" --trusted-host pypi.python.org
+  #$envpath/bin/pip3 install "werkzeug==0.14" --trusted-host pypi.python.org
 }
 
 install_python_package() {
@@ -57,6 +57,7 @@ test_python_package() {
   package_dir=$1
 
   cd $package_dir
+  echo "TESTING $package_dir"
   #SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 setup.py -q develop
   #SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
   python3 setup.py -q develop
@@ -81,9 +82,9 @@ run_tests() {
   test_python_package "$PROJECT_ROOT/server"
   # Important that client api is tested after server since we need to start server for
   # integration tests
-  export BDB_PYCLIENT_ITEST_PROPERTYFILE="$PROJECT_ROOT/misc/hudsonbuild.properties"
-  test_python_package "$PROJECT_ROOT/client/python"
-  test_java_client
+#  export BDB_PYCLIENT_ITEST_PROPERTYFILE="$PROJECT_ROOT/misc/hudsonbuild.properties"
+#  test_python_package "$PROJECT_ROOT/client/python"
+#  test_java_client
 }
 
 deploy() {
@@ -110,7 +111,7 @@ init_test_env "$PROJECT_ROOT/test-env/"
 run_tests
 deactivate
 
-init_env "$PREFIX/env"
-deploy
+#init_env "$PREFIX/env"
+#deploy
 
 

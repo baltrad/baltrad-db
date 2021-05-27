@@ -695,7 +695,7 @@ def get_source_id(conn, source):
     keys = source.keys()
     ignoreORG=False
     if "ORG" in keys:
-        if "WMO" in keys or "NOD" in keys or "RAD" in keys or "PLC" in keys:
+        if "WMO" in keys or "NOD" in keys or "RAD" in keys or "PLC" in keys or "WIGOS" in keys:
             ignoreORG=True
  
     for key, value in source.items():
