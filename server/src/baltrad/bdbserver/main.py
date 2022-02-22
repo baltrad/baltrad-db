@@ -231,13 +231,16 @@ def run_server():
         if server_type == "werkzeug":
             app.serve(server_uri, application)
         elif server_type == "cherrypy":
-            from cherrypy import wsgiserver
+            try:
+                from cheroot.wsgi import WSGIServer
+            except:
+                from cherrypy.wsgiserver import CherryPyWSGIServer as WSGIServer
             parsedurl = urlparse.urlsplit(server_uri)
             cherryconf = conf.filter("baltrad.bdb.server.cherrypy.")
             nthreads = cherryconf.get_int("threads", 10)
             nbacklog = cherryconf.get_int("backlog", 5)
             ntimeout = cherryconf.get_int("timeout", 10)            
-            server = wsgiserver.CherryPyWSGIServer((parsedurl.hostname, parsedurl.port), application,
+            server = WSGIServer((parsedurl.hostname, parsedurl.port), application,
                 numthreads=nthreads, request_queue_size=nbacklog, timeout=ntimeout)
             try:
                 server.start()
