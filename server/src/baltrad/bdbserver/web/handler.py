@@ -33,6 +33,7 @@ from .util import (
     HttpConflict,
     HttpForbidden,
     HttpNotFound,
+    HttpNotAcceptable,
     JsonResponse,
     NoContentResponse,
     Response,
@@ -66,6 +67,8 @@ def add_file(ctx):
         tmp.flush()
         try:
             metadata = ctx.backend.store_file(tmp.name)
+        except LookupError as e:
+            raise HttpNotAcceptable(str(e))
         except DuplicateEntry:
             raise HttpConflict("duplicate file entry")
 

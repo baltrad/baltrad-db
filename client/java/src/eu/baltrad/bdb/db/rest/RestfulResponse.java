@@ -33,6 +33,10 @@ public final class RestfulResponse {
   public int getStatusCode() {
     return httpResponse.getStatusLine().getStatusCode();
   }
+
+  public String getReason() {
+    return httpResponse.getStatusLine().getReasonPhrase();
+  }
   
   /**
    * get the root json node of the response body

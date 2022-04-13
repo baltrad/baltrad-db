@@ -35,6 +35,7 @@ import org.apache.log4j.Logger;
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.Database;
 import eu.baltrad.bdb.db.DatabaseError;
+import eu.baltrad.bdb.db.DatabaseIOError;
 import eu.baltrad.bdb.db.DuplicateEntry;
 import eu.baltrad.bdb.db.FileQuery;
 import eu.baltrad.bdb.db.SourceManager;
@@ -136,7 +137,6 @@ public class RestfulDatabase implements Database, SourceManager {
     RestfulResponse response = executeRequest(request);
     
     queryTime = System.currentTimeMillis();
-
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_CREATED) {
@@ -148,6 +148,26 @@ public class RestfulDatabase implements Database, SourceManager {
         return newFileEntry;
       } else if (statusCode == HttpStatus.SC_CONFLICT) {
         throw new DuplicateEntry("file already stored");
+      } else if (statusCode == HttpStatus.SC_NOT_ACCEPTABLE) {
+        try {
+          byte arr[] = new byte[8192];
+          int len = response.getContentStream().read(arr);
+          String msg = new String(arr, 0, len);
+          String errorMessage = "";
+          int startIndex = msg.indexOf("<p>");
+          if (startIndex >= 0) {
+            int endIndex = msg.indexOf("</p>", startIndex+3);
+            if (endIndex >= 0) {
+              errorMessage = msg.substring(startIndex + 3, endIndex);
+            } else {
+              errorMessage = msg.substring(startIndex + 3);
+            }
+          }
+          throw new DatabaseError(errorMessage);
+        } catch (IOException x) {
+        }
+        throw new DatabaseError("Failed to store file, status code: " +
+            Integer.toString(statusCode));
       } else {
         throw new DatabaseError("Failed to store file, status code: " +
                                 Integer.toString(statusCode));
@@ -568,7 +588,7 @@ public class RestfulDatabase implements Database, SourceManager {
     try {
       return new RestfulResponse(httpClient.execute(request));
     } catch (IOException e) {
-      throw new DatabaseError(
+      throw new DatabaseIOError(
         "HTTP " + request.getMethod() + " to " + request.getURI() + " failed",
         e
       );
