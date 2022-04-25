@@ -42,7 +42,7 @@ from sqlalchemy.types import (
     Text,
 )
 
-def get_server_version(c):
+def get_server_version(conn):
     try:
         v = conn.execute("show server_version").fetchall()
         if len(v) > 0 and len(v[0]) > 0:
