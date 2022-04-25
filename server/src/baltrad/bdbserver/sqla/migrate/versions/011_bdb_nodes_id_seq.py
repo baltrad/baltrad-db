@@ -45,7 +45,7 @@ from sqlalchemy.types import (
 def get_server_version(c):
     try:
         v = conn.execute("show server_version").fetchall()
-        if len(v) > 0 && and len(v[0]) > 0:
+        if len(v) > 0 and len(v[0]) > 0:
             s = v[0][0].split(" ")
             if len(s) > 0 and s[0].find(".") > 0:
                 return int(s[0].split(".")[0])
