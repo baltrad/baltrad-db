@@ -42,15 +42,28 @@ from sqlalchemy.types import (
     Text,
 )
 
+def get_server_version(c):
+    try:
+        v = conn.execute("show server_version").fetchall()
+        if len(v) > 0 && and len(v[0]) > 0:
+            s = v[0][0].split(" ")
+            if len(s) > 0 and s[0].find(".") > 0:
+                return int(s[0].split(".")[0])
+    except:
+        pass
+        
+    return 10 # Psql 9 has been deprecated
+
+
 def upgrade(engine):
     with contextlib.closing(engine.connect()) as conn:
-        conn.execute("ALTER SEQUENCE bdb_nodes_id_seq as BIGINT"); # MAXVALUE 9223372036854775807
+        v = get_server_version(conn)
+        if v >= 10:
+            conn.execute("ALTER SEQUENCE bdb_nodes_id_seq as BIGINT") # MAXVALUE 9223372036854775807
+        conn.execute("ALTER SEQUENCE bdb_nodes_id_seq CYCLE")
+
 
 def downgrade(engine):
     with contextlib.closing(engine.connect()) as conn:
-        r = conn.execute("select data_type from information_schema.columns where table_name='bdb_nodes' and column_name='id'").fetchall()
-        if len(r) > 0 and len(r[0]) > 0:
-            dt = r[0][0]
-            if td.lower()  == "integer":
-                conn.execute("ALTER SEQUENCE bdb_nodes_id_seq as INTEGER");
+        conn.execute("ALTER SEQUENCE bdb_nodes_id_seq NOCYCLE")
       
