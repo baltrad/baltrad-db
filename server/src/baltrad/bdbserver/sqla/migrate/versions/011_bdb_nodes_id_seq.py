@@ -65,5 +65,5 @@ def upgrade(engine):
 
 def downgrade(engine):
     with contextlib.closing(engine.connect()) as conn:
-        conn.execute("ALTER SEQUENCE bdb_nodes_id_seq NOCYCLE")
+        conn.execute("ALTER SEQUENCE bdb_nodes_id_seq NO CYCLE")
       
