@@ -39,7 +39,7 @@ init_test_env() {
 
   $envpath/bin/pip3 install "nose >= 1.1" --trusted-host pypi.python.org
   $envpath/bin/pip3 install "sphinx >= 1.1" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "mock >= 0.7" --trusted-host pypi.python.org
+  $envpath/bin/pip3 install "mock>=0.7,<=4.0.3" --trusted-host pypi.python.org
   $envpath/bin/pip3 install "cherrypy == 8.9.1" --trusted-host pypi.python.org
   $envpath/bin/pip3 install "psycopg2==2.7.7" --trusted-host pypi.python.org
   $envpath/bin/pip3 install "werkzeug==0.14" --trusted-host pypi.python.org
