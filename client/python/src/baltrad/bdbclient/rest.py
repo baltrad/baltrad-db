@@ -29,7 +29,8 @@ import json
 import os
 import socket
 
-from keyczar import keyczar
+# from keyczar import keyczar
+from baltradcrypto.crypto import keyczarcrypto
 
 from baltrad.bdbcommon import oh5
 from baltrad.bdbclient import db
@@ -434,7 +435,7 @@ class KeyczarAuth(Auth):
     """authenicate by signing messages with Keyczar
     """
     def __init__(self, key_path, key_name=None):
-        self._signer = keyczar.Signer.Read(key_path)
+        self._signer = keyczarcrypto.keyczar_signer.read(key_path)
         if key_name:
             self._key_name = key_name
         else:

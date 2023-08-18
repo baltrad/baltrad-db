@@ -19,16 +19,16 @@ REQUIRED_PACKAGES= [
 if sys.version_info > (3,):
     REQUIRED_PACKAGES= [
         "baltrad.bdbcommon",
-        "jprops >= 2.0.2",
-        "progressbar33 >= 2.4",
-        "psycopg2",
-        "pyasn1",
+        "SMHI-python3-radar_pyutils",
+        "python3-progressbar2 >= 2.4",
+        "python3-psycopg2",
+        "python3-pyasn1",
 #        "pycrypto >= 2.4",
-        "python-daemon >= 1.6",
+        "python3-daemon >= 1.6",
         "baltrad-crypto >= 0.71rc0",
-        "SQLAlchemy >= 1.0.13",
+        "python3-sqlalchemy >= 1.0.13",
 #       "sqlalchemy-migrate >= 0.10.0",
-        "werkzeug >= 0.14"
+        "python3-werkzeug >= 0.14"
 ]
 
 

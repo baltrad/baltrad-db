@@ -1,4 +1,4 @@
-import jprops
+import radar_utils.jprops
 
 _undefined = object()
 
@@ -147,4 +147,4 @@ class Properties(object):
     @classmethod
     def load(cls, path):
         with open(path) as fp:
-           return Properties(jprops.load_properties(fp))
+           return Properties(radar_utils.jprops.load_properties(fp))

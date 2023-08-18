@@ -1,6 +1,6 @@
 from baltrad.bdbclient import rest
 import os, errno, subprocess, time, string
-import jprops
+import radar_utils.jprops
 
 PIDFILE="./build/bdb.pid"
 LOGFILE="./build/bdb.log"
@@ -45,7 +45,7 @@ def get_server_uri():
     properties = None
      
     with open(config, 'rb') as fp:
-        properties = jprops.load_properties(fp)
+        properties = radar_utils.jprops.load_properties(fp)
          
     return properties['baltrad.bdb.server.uri']
  
