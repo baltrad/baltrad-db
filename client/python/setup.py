@@ -12,8 +12,7 @@ if sys.version_info > (3,):
     REQUIRED_PACKAGES= [
     "baltrad.bdbcommon",
     "pyasn1",
-    "pycrypto >= 2.4",
-    "python3-keyczar >= 0.71rc0",
+    "baltrad-crypto"
 ]
 
 setuptools.setup(name="baltrad.bdbclient",
@@ -47,6 +46,6 @@ setuptools.setup(name="baltrad.bdbclient",
     test_suite="nose.collector",
     tests_require=[
         "mock >= 0.7",
-        "jprops >= 2.0.2"
+        "SMHI-python3-radar_pyutils"
     ],
 )
