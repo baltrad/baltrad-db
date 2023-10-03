@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-from keyczar import keyczar
+from baltradcrypto.crypto import keyczarcrypto as keyczar
 
 import mock
 
@@ -48,13 +48,13 @@ class TestAuth(object):
 class TestKeyczarAuth(object):
     def setup(self):
         self.auth = auth.KeyczarAuth("/path/to/keys")
-        self.verifier = mock.Mock(spec=keyczar.Verifier)
+        self.verifier = mock.Mock(spec=keyczar.keyczar_verifier)
     
     @raises(ValueError)
     def test_construct_relative_keystore_root(self):
         auth.KeyczarAuth("relpath")
     
-    @mock.patch("keyczar.keyczar.Verifier.Read")
+    @mock.patch("baltradcrypto.crypto.keyczarcrypto.keyczar_verifier.read")
     def test_add_key_abspath(self, load_verifier):
         load_verifier.return_value = self.verifier
 
@@ -63,7 +63,7 @@ class TestKeyczarAuth(object):
         assert_called_once_with(load_verifier, "/path/to/key")
         eq_(self.verifier, self.auth._verifiers["keyname"])
 
-    @mock.patch("keyczar.keyczar.Verifier.Read")
+    @mock.patch("baltradcrypto.crypto.keyczarcrypto.keyczar_verifier.read")
     def test_add_key_relpath(self, load_verifier):
         load_verifier.return_value = self.verifier
 
@@ -101,13 +101,13 @@ class TestKeyczarAuth(object):
     def test_authenticate(self, create_signable_string):
         req = mock.Mock(spec=webutil.Request)
         self.auth._verifiers["keyname"] = self.verifier
-        self.verifier.Verify.return_value = True
+        self.verifier.verify.return_value = True
         create_signable_string.return_value = "signable_string"
 
         ok_(self.auth.authenticate(req, "keyname:signature"))
         ok_(called_once_with(create_signable_string, req))
         ok_(called_once_with(
-            self.verifier.Verify, "signable_string", "signature"
+            self.verifier.verify, "signable_string", "signature"
         ))
     
     @raises(auth.AuthError)

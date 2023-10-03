@@ -5,30 +5,15 @@ import sys
 
 REQUIRED_PACKAGES= [
     "baltrad.bdbcommon",
-    "jprops >= 2.0.2",
-    "progressbar >= 2.0",
+    "baltradutils",
+    "progressbar2 >= 2.4",
     "psycopg2",
     "pyasn1",
-    "pycrypto >= 2.4",
     "python-daemon >= 1.6",
-    "python-keyczar >= 0.7b",
-    "SQLAlchemy >= 1.0.13",
+    "baltradcrypto",
+    "sqlalchemy >= 1.0.13",
     "sqlalchemy-migrate >= 0.10.0",
     "werkzeug >= 0.14"
-]
-if sys.version_info > (3,):
-    REQUIRED_PACKAGES= [
-        "baltrad.bdbcommon",
-        "radar_utils",
-        "progressbar2 >= 2.4",
-        "psycopg2",
-        "pyasn1",
-#        "pycrypto >= 2.4",
-        "python-daemon >= 1.6",
-        "baltradcrypto",
-        "sqlalchemy >= 1.0.13",
-#       "sqlalchemy-migrate >= 0.10.0",
-        "werkzeug >= 0.14"
 ]
 
 

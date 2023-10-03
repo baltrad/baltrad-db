@@ -20,10 +20,7 @@ import logging
 import pkg_resources
 import os
 
-from keyczar import (
-    errors as kzerrors,
-    keyczar,
-)
+from baltradcrypto.crypto import keyczarcrypto as keyczar
 
 from baltrad.bdbcommon import util
 
@@ -198,7 +195,7 @@ class KeyczarAuth(Auth):
         if not os.path.isabs(path):
             path = os.path.join(self._keystore_root, path)
         logger.info("adding key %s from %s", name, path)
-        verifier = keyczar.Verifier.Read(path)
+        verifier = keyczar.keyczar_verifier.read(path)
         self._verifiers[name] = verifier
     
     def authenticate(self, req, credentials):
@@ -212,9 +209,9 @@ class KeyczarAuth(Auth):
             raise AuthError("no verifier for key: %s" % keyname)
         signed_str = create_signable_string(req)
         try:
-            return verifier.Verify(signed_str, signature)
-        except kzerrors.KeyczarError as e:
-            logger.exception("unhandled Keyczar error %s", e.__str__())
+            return verifier.verify(signed_str, signature)
+        except Exception as e:
+            logger.exception("unhandled keyczar error %s", e.__str__())
             return False
 
     @classmethod

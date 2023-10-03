@@ -129,7 +129,7 @@ class HttpUnauthorized(HTTPException):
             challenge = [challenge]
         self._challenges = challenge
     
-    def get_headers(self, environ):
+    def get_headers(self, environ, scope):
         headers = HTTPException.get_headers(self, environ)
         for challenge in self._challenges:
             headers.append(("www-authenticate", challenge))

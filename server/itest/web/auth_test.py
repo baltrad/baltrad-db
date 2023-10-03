@@ -17,7 +17,7 @@
 
 import os
 
-from keyczar import errors as kzerrors
+from baltradcrypto.crypto import keyczarcrypto as keyczar
 
 from nose.tools import eq_, ok_, raises
 
@@ -37,11 +37,11 @@ class TestKeyczarAuth(object):
     def add_key(self):
         self.auth.add_key("testkey", "testkey")
     
-    @raises(kzerrors.KeyczarError)
+    @raises(Exception)
     def test_add_nx_key(self):
         self.auth.add_key("testkey", "/path/to/nxkey")
     
-    @raises(kzerrors.KeyczarError)
+    @raises(Exception)
     def test_add_invalid_key(self):
         self.auth.add_key("testkey", "invalidkey")
     

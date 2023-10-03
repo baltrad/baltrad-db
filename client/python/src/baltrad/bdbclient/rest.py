@@ -29,7 +29,6 @@ import json
 import os
 import socket
 
-# from keyczar import keyczar
 from baltradcrypto.crypto import keyczarcrypto
 
 from baltrad.bdbcommon import oh5
@@ -443,7 +442,7 @@ class KeyczarAuth(Auth):
 
     def add_credentials(self, req):
         signable = create_signable_string(req)
-        signature = self._signer.Sign(signable)
+        signature = self._signer.sign(signable)
         auth = "bdb-keyczar %s:%s" % (self._key_name, signature)
         req.headers["authorization"] = auth
 

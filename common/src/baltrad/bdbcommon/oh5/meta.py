@@ -17,11 +17,14 @@
 
 import collections
 import os.path
+import sys
 from xml.etree import ElementTree
 import logging
 
 from . node import Attribute, Group, NodeIterator
 from . io import HlHdfMetadataReader
+
+from collections.abc import MutableMapping, Mapping
 
 logger = logging.getLogger("baltrad.bdbcommon")
 
@@ -121,7 +124,7 @@ class Metadata(object):
     def json_repr(self):
         return [node.json_repr() for node in self.iternodes()]
 
-class Source(collections.MutableMapping):
+class Source(MutableMapping):
     def __init__(self, name=None, values={}, parent=None):
         self.name = name
         self._values = dict(values)
@@ -148,7 +151,7 @@ class Source(collections.MutableMapping):
     def __eq__(self, other):
         if isinstance(other, Source):
             return self.name == other.name and self._values == other._values and self.parent == other.parent
-        elif isinstance(other, collections.Mapping):
+        elif isinstance(other, Mapping):
             return self._values == other
         return False
     

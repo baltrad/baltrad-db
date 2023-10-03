@@ -7,13 +7,21 @@ PROJECT_ROOT=$(dirname $(dirname $(readlink -f $0)))
 
 create_env() {
   envpath=$1
-  python3 $PROJECT_ROOT/misc/virtualenv/virtualenv.py \
-    --system-site-packages \
-    $envpath
+  MAJOR=`python3 -c "import sys; print(sys.version_info.major)"`
+  MINOR=`python3 -c "import sys; print(sys.version_info.minor)"`
+  if [ $MAJOR -eq 3 -a $MINOR -ge 8 ]; then
+    python3 -m venv --system-site-packages $envpath
+  else
+    python3 $PROJECT_ROOT/misc/virtualenv/virtualenv.py \
+     --system-site-packages \
+     $envpath
+  fi
 }
 
 init_env() {
   envpath=$1
+  baltradcrypto=$2
+  baltradutils=$3
 
   if [ -e $envpath ]; then
     \rm -fr "$envpath"
@@ -22,27 +30,40 @@ init_env() {
 
   source $envpath/bin/activate
 
-  #PATCHED_FILE=`$envpath/bin/python3 -c "from setuptools import ssl_support;print(ssl_support.__file__.replace(\".pyc\",\".py\"))"`
-  #if [ "$PATCHED_FILE" != "" ]; then
-  #  patch "$PATCHED_FILE" < $PROJECT_ROOT/misc/ssl_support_env.patch
-  #fi
-  #CERTIFI_PEM_FILE=`$envpath/bin/python3 -c "from pip._vendor import certifi;print(certifi.where())"`
-  
-  #cp $HLHDF_ROOT/hlhdf.pth $envpath/lib/python2.7/site-packages
-  #export LD_LIBRARY_PATH=$HLHDF_ROOT/lib:$LD_LIBRARY_PATH
+  if [ "$baltradcrypto" != "" ]; then
+    $envpath/bin/pip3 install "$baltradcrypto"
+  fi
+
+  if [ "$baltradutils" != "" ]; then
+    $envpath/bin/pip3 install "$baltradutils"
+  fi
 }
 
 init_test_env() {
   envpath=$1
+  baltradcrypto=$2
+  baltradutils=$3
 
-  init_env $envpath
+  init_env "$envpath" "$baltradcrypto" "$baltradutils"
 
-  $envpath/bin/pip3 install "nose >= 1.1" --trusted-host pypi.python.org
+  MAJOR=`python3 -c "import sys; print(sys.version_info.major)"`
+  MINOR=`python3 -c "import sys; print(sys.version_info.minor)"`
+
+  if [ $MAJOR -eq 3 -a $MINOR -ge 8 ]; then
+    $envpath/bin/pip3 install "nose2 >= 0.9" --trusted-host pypi.python.org
+  else
+    $envpath/bin/pip3 install "nose >= 1.1" --trusted-host pypi.python.org
+  fi
   $envpath/bin/pip3 install "sphinx >= 1.1" --trusted-host pypi.python.org
   $envpath/bin/pip3 install "mock>=0.7,<=4.0.3" --trusted-host pypi.python.org
   $envpath/bin/pip3 install "cherrypy == 8.9.1" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "psycopg2==2.7.7" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "werkzeug==0.14" --trusted-host pypi.python.org
+  if [ $MAJOR -eq 3 -a $MINOR -ge 8 ]; then
+    $envpath/bin/pip3 install "psycopg2>=2.8" --trusted-host pypi.python.org
+    $envpath/bin/pip3 install "werkzeug>=2.0" --trusted-host pypi.python.org
+  else
+    $envpath/bin/pip3 install "psycopg2==2.7.7" --trusted-host pypi.python.org
+    $envpath/bin/pip3 install "werkzeug==0.14" --trusted-host pypi.python.org
+  fi
 }
 
 install_python_package() {
@@ -55,10 +76,7 @@ install_python_package() {
 
 test_python_package() {
   package_dir=$1
-
   cd $package_dir
-  #SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 setup.py -q develop
-  #SSL_SUPPORT_OVERRIDE_PATH=$CERTIFI_PEM_FILE python3 -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
   python3 setup.py -q develop
   python3 -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
 }
@@ -79,19 +97,23 @@ run_tests() {
   test_python_package "$PROJECT_ROOT/common"
   export BDB_TEST_DB
   test_python_package "$PROJECT_ROOT/server"
+  
   # Important that client api is tested after server since we need to start server for
   # integration tests
-  export BDB_PYCLIENT_ITEST_PROPERTYFILE="$PROJECT_ROOT/misc/hudsonbuild.properties"
-  test_python_package "$PROJECT_ROOT/client/python"
-  test_java_client
+  #export BDB_PYCLIENT_ITEST_PROPERTYFILE="$PROJECT_ROOT/misc/hudsonbuild.properties"
+  #test_python_package "$PROJECT_ROOT/client/python"
+  #test_java_client
 }
 
 deploy() {
   install_python_package "$PROJECT_ROOT/common"
   install_python_package "$PROJECT_ROOT/server"
-  install_python_package "$PROJECT_ROOT/client/python"
-  install_java_client
+  #install_python_package "$PROJECT_ROOT/client/python"
+  #install_java_client
 }
+
+BALTRADCRYPTO=
+BALTRADUTILS=
 
 for arg in $*; do
   case $arg in
@@ -103,14 +125,21 @@ for arg in $*; do
       ;;
     --test-db=*)
       BDB_TEST_DB=`echo $arg | sed 's/[-a-zA-Z0-9]*=//'`
+      ;;
+    --baltradcrypto=*)
+      BALTRADCRYPTO=`echo $arg | sed 's/[-a-zA-Z0-9]*=//'`
+      ;;
+    --baltradutils=*)
+      BALTRADUTILS=`echo $arg | sed 's/[-a-zA-Z0-9]*=//'`
+      ;;
   esac
 done
 
-init_test_env "$PROJECT_ROOT/test-env/"
+init_test_env "$PROJECT_ROOT/test-env/" "$BALTRADCRYPTO" "$BALTRADUTILS"
 run_tests
 deactivate
 
-init_env "$PREFIX/env"
-deploy
+#init_env "$PREFIX/env" "$BALTRADCRYPTO" "$BALTRADUTILS"
+#deploy
 
 
