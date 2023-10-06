@@ -1,4 +1,4 @@
-import os
+import os,sys
 from baltrad.bdbserver.sqla import storage, backend
 
 _backend = None
@@ -17,6 +17,7 @@ def setup_package():
     if _backend:
         _backend.drop()
         _backend.create()
+
 def teardown_package():
     global _backend
     if _backend:

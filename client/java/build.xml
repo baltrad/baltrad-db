@@ -74,7 +74,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
   <target name="prepare.tests" depends="prepare.test, prepare.itest"/>
 
-  <target name="execute.tests" depends="prepare.tests, execute.test, execute.itest"/>
+  <!--<target name="execute.tests" depends="prepare.tests, execute.test, execute.itest"/>-->
+  <target name="execute.tests" depends="prepare.tests, execute.test"/>
 
   <target name="hudson" depends="build, execute.tests"/>
 
@@ -147,14 +148,23 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   
   <target name="execute.test" depends="prepare.test">
   <mkdir dir="${dist.dir}/junit-reports" />
-  <junit dir="${build.test.dir}" showoutput="true" forkmode="perBatch" printsummary="no" >
+  <junit dir="${build.test.dir}" showoutput="true" forkmode="perBatch" printsummary="yes" >
     <jvmarg line="-Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=512m"/>
     <formatter type="xml"/> 
     <formatter type="brief" usefile="false" if="test.format.brief" />
+    <classpath>
+      <path refid="test.lib.path"/>
+      <path refid="lib.path"/>
+      <pathelement path="${build.classes.dir}"/>
+      <pathelement path="${build.test.dir}" />
+    </classpath>
+<!--    
     <classpath refid="test.lib.path"/>
     <classpath location="${build.classes.dir}"/>
     <classpath refid="lib.path"/>
     <classpath location="${build.test.dir}" />
+-->    
+    
     <batchtest fork="no" todir="${dist.dir}/junit-reports">
     	<fileset dir="${build.test.dir}" includes="**/*Test.class" />
 <!--

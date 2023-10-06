@@ -11,8 +11,8 @@ REQUIRED_PACKAGES= [
     "pyasn1",
     "python-daemon >= 1.6",
     "baltradcrypto",
-    "sqlalchemy >= 1.0.13",
-    "sqlalchemy-migrate >= 0.10.0",
+    "sqlalchemy >= 1.4.31",
+    "sqlalchemy-migrate >= 0.13.0",
     "werkzeug >= 0.14"
 ]
 

@@ -10,6 +10,7 @@ from sqlalchemy import (
     Table,
     UniqueConstraint,
     sql,
+    func,
 )
 
 meta = MetaData()
@@ -61,17 +62,17 @@ file_what_source = Table("bdb_file_what_source", meta,
     PrimaryKeyConstraint("file_id", "source_kv_id"),
 )
 
-_what_source_qry = sql.select(
+_what_source_qry = sql.select(func.count()).select_from(sql.select(
     [files.c.id, attribute_values.c.value_string],
     whereclause=sql.and_(
         nodes.c.path=="/what",
         nodes.c.name=="source"
     ),
     from_obj=files.join(nodes).join(attribute_values),
-)
+))
 
 def _upgrade_what_source(conn):
-    rowcount = conn.execute(_what_source_qry.alias("cnt").count()).scalar()
+    rowcount = conn.execute(_what_source_qry.alias("cnt")).scalar_one()
     if rowcount == 0:
         return
     print("Selecting %d /what/source attributes for update" % rowcount)

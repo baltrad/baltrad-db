@@ -24,6 +24,8 @@ from baltrad.bdbcommon.oh5.node import Attribute, Group
 
 from . import get_backend
 
+from sqlalchemy import func, sql
+
 def create_metadata(what_object, what_date, what_time, what_source):
     meta = Metadata()
     meta.add_node("/", Group("what"))
@@ -402,7 +404,7 @@ class TestSqlAlchemyBackendItest(object):
         self.backend.remove_all_files()
 
         with self.backend.get_connection() as conn:
-            delete_count = conn.execute(schema.files.count()).scalar()
+            delete_count = conn.execute(sql.select(func.count()).select_from(schema.files)).scalar_one()
         eq_(0, delete_count) 
     
 class TestSqlAlchemySourceManager(object):

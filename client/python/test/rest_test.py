@@ -56,7 +56,7 @@ def test_create_signable_string():
     eq_(expected, result)
 
 class TestKeyczarAuth(object):
-    @mock.patch("keyczar.keyczar.Signer.Read")
+    @mock.patch("baltradcrypto.crypto.keyczarcrypto.keyczar_signer.read")
     def test_ctor(self, signer_read):
         signer_read.return_value = mock.sentinel.signer
 
@@ -65,7 +65,7 @@ class TestKeyczarAuth(object):
         eq_(mock.sentinel.signer, result._signer)
         signer_read.assert_called_with("/path/to/key")
     
-    @mock.patch("keyczar.keyczar.Signer.Read")
+    @mock.patch("baltradcrypto.crypto.keyczarcrypto.keyczar_signer.read")
     def test_ctor_default_keyname(self, signer_read):
         signer_read.return_value = mock.sentinel.signer
 
@@ -75,11 +75,11 @@ class TestKeyczarAuth(object):
         signer_read.assert_called_with("/path/to/key")
     
     @mock.patch("baltrad.bdbclient.rest.create_signable_string")
-    @mock.patch("keyczar.keyczar.Signer.Read")
+    @mock.patch("baltradcrypto.crypto.keyczarcrypto.keyczar_signer.read")
     def test_sign(self, signer_read, create_signable):
         signer = mock.Mock()
         create_signable.return_value = "signable"
-        signer.Sign.return_value = "signature"
+        signer.sign.return_value = "signature"
         signer_read.return_value = signer
         auth = rest.KeyczarAuth("/path/to/key")
         req = rest.Request(
@@ -95,7 +95,7 @@ class TestKeyczarAuth(object):
         auth.add_credentials(req)
         eq_("bdb-keyczar key:signature", req.headers["authorization"])
         create_signable.assert_called_with(req)
-        signer.Sign.assert_called_with("signable")
+        signer.sign.assert_called_with("signable")
 
 class TestRestfulFileResult(object):
     def setup(self):

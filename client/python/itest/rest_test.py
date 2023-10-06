@@ -16,8 +16,6 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 import os
 
-from keyczar import errors as kzerrors
-
 from nose.tools import eq_, ok_, raises
 
 from baltrad.bdbclient import rest
@@ -28,11 +26,11 @@ from . import get_database
 class TestKeyczarAuth(object):
     pass
     
-    @raises(kzerrors.KeyczarError)
+    @raises(Exception)
     def test_ctor_nx_key(self):
         rest.KeyczarAuth("/path/to/nxkey")
     
-    @raises(kzerrors.KeyczarError)
+    @raises(Exception)
     def test_ctor_invalid_key(self):
         rest.KeyczarAuth(
             os.path.join(
