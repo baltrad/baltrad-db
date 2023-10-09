@@ -142,7 +142,7 @@ init_test_env "$TEST_ENV/test-env" "$BALTRADCRYPTO" "$BALTRADUTILS"
 run_tests
 deactivate
 
-#init_env "$PREFIX/env" "$BALTRADCRYPTO" "$BALTRADUTILS"
-#deploy
+init_env "$PREFIX/env" "$BALTRADCRYPTO" "$BALTRADUTILS"
+deploy
 
 

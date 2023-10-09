@@ -7,7 +7,7 @@ REQUIRED_PACKAGES= [
     "baltrad.bdbcommon",
     "baltradutils",
     "progressbar2 >= 2.4",
-    "psycopg2",
+    "psycopg2 >= 2.8",
     "pyasn1",
     "python-daemon >= 1.6",
     "baltradcrypto",
