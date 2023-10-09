@@ -112,6 +112,7 @@ deploy() {
 
 BALTRADCRYPTO=
 BALTRADUTILS=
+TEST_ENV=$PROJECT_ROOT
 
 for arg in $*; do
   case $arg in
@@ -136,8 +137,7 @@ for arg in $*; do
   esac
 done
 
-init_test_env "$PROJECT_ROOT/test-env/" "$BALTRADCRYPTO" "$BALTRADUTILS"
-#init_test_env "$TEST_ENV/test-env" "$BALTRADCRYPTO" "$BALTRADUTILS"
+init_test_env "$TEST_ENV/test-env" "$BALTRADCRYPTO" "$BALTRADUTILS"
 
 run_tests
 deactivate
