@@ -22,16 +22,59 @@ import warnings
 try:
     import _pyhl as pyhl
 except ImportError as e:
-    warnings.warn("couldn't import pyhl, hdf5 IO disabled: %s" % e)
     pyhl = None
 
+try:
+    import h5py
+except ImportError as e:
+    h5py = None
+
+if not pyhl and not h5py:
+    warnings.debug("could not import pyhl and h5py. H5 io support disabled!")
+
 from . node import Attribute, Group, Dataset
+
+class h5metadatavisitor:
+    def __init__(self):
+        self._meta = None
+        
+    def add_attributes(self, obj, name):
+        for k in obj.attrs.keys():
+            value = self._attribute_value("%s/%s"%(name, k), obj.attrs[k])
+            self._meta.add_node(name, Attribute(k, value))
+            
+    def visitor(self, name, obj):
+        if isinstance(obj, h5py.Group) or isinstance(obj, h5py.File):
+            parent_path, nodename = os.path.split("/%s"%name)
+            self._meta.add_node(parent_path, Group(nodename))
+            self.add_attributes(obj, "/%s"%name)
+        elif isinstance(obj, h5py.Dataset):
+            parent_path, nodename = os.path.split("/%s"%name)
+            self._meta.add_node(parent_path, Dataset(nodename))
+            self.add_attributes(obj, "/%s"%name)
+
+    def _attribute_value(self, name, value):
+        if isinstance(value, numpy.ndarray):
+            assert value.ndim == 1, "%s has ndim != 1" % name
+            return value.tolist()
+        elif isinstance(value, bytes):
+            return value.decode('UTF-8')
+        else:
+            return value.item()
+
+    def metadata(self, filepath):
+        from . meta import Metadata
+        self._meta = Metadata()
+        fp = h5py.File(filepath)
+        self.add_attributes(fp, "")
+        fp.visititems(self.visitor)  
+        return self._meta
 
 class HlHdfMetadataReader(object):
     def __init__(self):
         pass
     
-    def read(self, filepath):
+    def read_pyhl(self, filepath):
         if pyhl is None:
             raise RuntimeError("pyhl not available")
         nodelist = pyhl.read_nodelist(filepath)
@@ -61,6 +104,20 @@ class HlHdfMetadataReader(object):
             else:
                 raise RuntimeError("unhandled hlhdf node type: %s" % node_type)
         return metadata
+
+    def read_h5py(self, filepath):
+        if h5py is None:
+            raise RuntimeError("h5py not available")
+        mvisitor = h5metadatavisitor()
+        return mvisitor.metadata(filepath)
+    
+    def read(self, filepath):
+        if pyhl is not None:
+            return self.read_pyhl(filepath)
+        elif h5py is not None:
+            return self.read_h5py(filepath)
+        else:
+            raise RuntimeError("H5 i/o not available")
 
     def _attribute_value(self, hlnode):
         data = hlnode.data()
