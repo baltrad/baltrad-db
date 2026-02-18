@@ -31,6 +31,7 @@ if sys.version_info > (3,):
     basestring = str
 
 from sqlalchemy import engine, event, exc as sqlexc, sql, inspect, select, literal, or_, and_, insert, update
+from sqlalchemy import MetaData, Table
 from alembic.config import Config
 from alembic import command
 
@@ -67,7 +68,9 @@ class SqlAlchemyBackend(backend.Backend):
     :param storage: a `~.storage.FileStorage` instance to use.
     """
     def __init__(self, engine_or_url, storage, poolsize=10):
+        self._url = None
         if isinstance(engine_or_url, basestring):
+            self._url = engine_or_url
             self._engine = engine.create_engine(engine_or_url, echo=False, pool_size=poolsize)
         else:
             self._engine = engine_or_url
@@ -106,7 +109,6 @@ class SqlAlchemyBackend(backend.Backend):
 
     def store_file(self, path):
         st = time.time()
-        print("Getting metadata from %s"%path)
         meta = self.metadata_from_file(path)
         metadataTime = time.time()
         try:
@@ -274,7 +276,7 @@ class SqlAlchemyBackend(backend.Backend):
             if inspect(self._engine).has_table('bdb_migrate_version'):
                 alembic_cfg = Config()
                 alembic_cfg.set_main_option("script_location", ALEMBIC_REPO_PATH)
-                alembic_cfg.set_main_option("sqlalchemy.url", str(self._engine.url))
+                alembic_cfg.set_main_option("sqlalchemy.url", self._url)
 
                 dbversion = self._engine.execute("select version from bdb_migrate_version").fetchone()['version']
                 command.stamp(alembic_cfg, "%03d"%dbversion)
@@ -289,7 +291,7 @@ class SqlAlchemyBackend(backend.Backend):
 
         alembic_cfg = Config()
         alembic_cfg.set_main_option("script_location", ALEMBIC_REPO_PATH)
-        alembic_cfg.set_main_option("sqlalchemy.url", str(self._engine.url))
+        alembic_cfg.set_main_option("sqlalchemy.url", self._url)
         alembic_cfg.set_section_option("logger_alembic", "level", "DEBUG")
         command.upgrade(alembic_cfg, "head")        
 
@@ -298,7 +300,7 @@ class SqlAlchemyBackend(backend.Backend):
 
         alembic_cfg = Config()
         alembic_cfg.set_main_option("script_location", ALEMBIC_REPO_PATH)
-        alembic_cfg.set_main_option("sqlalchemy.url", str(self._engine.url))
+        alembic_cfg.set_main_option("sqlalchemy.url", self._url)
         command.downgrade(alembic_cfg, "base")
     
     def upgrade(self):
@@ -306,7 +308,7 @@ class SqlAlchemyBackend(backend.Backend):
 
         alembic_cfg = Config()
         alembic_cfg.set_main_option("script_location", ALEMBIC_REPO_PATH)
-        alembic_cfg.set_main_option("sqlalchemy.url", str(self._engine.url))
+        alembic_cfg.set_main_option("sqlalchemy.url", self._url)
         command.upgrade(alembic_cfg, "head")
 
     def metadata_from_file(self, path, ignore_duplicate=False):
