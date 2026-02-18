@@ -14,22 +14,22 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
-from nose.tools import eq_, ok_, raises
+import pytest
 import mock
 
 from baltrad.bdbcommon import expr
 from baltrad.bdbclient import db
 
 class TestAttributeQuery(object):
-    def setup(self):
+    def setup_method(self, method):
         self.query = db.AttributeQuery()
 
     def test_append_filter(self):
         self.query.append_filter(mock.sentinel.expr1)
-        eq_(mock.sentinel.expr1, self.query.filter)
+        assert(self.query.filter == mock.sentinel.expr1)
         self.query.append_filter(mock.sentinel.expr2)
         expected = expr.and_(mock.sentinel.expr1, mock.sentinel.expr2)
-        eq_(expected, self.query.filter)
+        assert(self.query.filter == expected)
     
     @mock.patch("json.dumps")
     def test_to_json(self, json_dumps):
@@ -59,5 +59,5 @@ class TestAttributeQuery(object):
             "skip": 20,
         }
 
-        eq_(mock.sentinel.json, self.query.to_json())
+        assert(self.query.to_json() == mock.sentinel.json)
         json_dumps.assert_called_once_with(json_repr)

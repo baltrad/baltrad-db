@@ -15,28 +15,23 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-from nose.tools import eq_, ok_, raises
-from nose.plugins.attrib import attr
-from nose.plugins.skip import SkipTest
+import pytest
 
 from baltrad.bdbcommon import expr
 from baltrad.bdbcommon.filter import Filter
 from baltrad.bdbserver.sqla import filter, schema
 
-from . import get_backend
+from .conftest import bdb_backend
 
+@pytest.mark.dbtest
 class TestSqlAlchemyFilterManager(object):
-    backend = None
     
-    @classmethod
-    def setup_class(cls):
-        cls.backend = get_backend()
-    
-    def setup(self):
-        if not self.backend:
-            raise SkipTest("no backend defined")
+    @pytest.fixture(autouse=True)
+    def setup(self, bdb_backend):
+        if not bdb_backend:
+            pytest.skip("no backend defined")
 
-        self.filter_manager = filter.SqlAlchemyFilterManager(self.backend)
+        self.filter_manager = filter.SqlAlchemyFilterManager(bdb_backend)
         self.filter1 = Filter(
             "filter1",
             expr.eq(
@@ -52,38 +47,41 @@ class TestSqlAlchemyFilterManager(object):
             )
         )
         self.filter_manager.add_filter(self.filter1)
-    
-    def teardown(self):
-        with self.backend.get_connection() as conn:
+        
+        yield
+        
+        with bdb_backend.get_connection() as conn:
             conn.execute(schema.filters.delete())
+            conn.commit()
     
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_get_filter(self):
         result = self.filter_manager.get_filter("filter1")
-        eq_(self.filter1, result)
+        assert(self.filter1 == result)
     
+    @pytest.mark.dbtest
     def test_get_filter_invalid(self):
-        eq_(None, self.filter_manager.get_filter("invalid"))
+        assert(None == self.filter_manager.get_filter("invalid"))
     
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_get_filter_names(self):
-        result = self.filter_manager.get_filter_names()
         self.filter_manager.add_filter(self.filter2)
-        ok_(["filter1", "filter2"], sorted(result))
+        result = self.filter_manager.get_filter_names()
+        assert(["filter1", "filter2"] == sorted(result))
     
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_remove_filter(self):
         self.filter_manager.add_filter(self.filter2)
         result = self.filter_manager.remove_filter("filter1")
-        eq_(True, result)
+        assert(True == result)
         filters = self.filter_manager.get_filter_names()
-        eq_(["filter2"], filters)
+        assert(["filter2"] == filters)
     
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_remove_filter_nx(self):
-        eq_(False, self.filter_manager.remove_filter("filter2"))
+        assert(False == self.filter_manager.remove_filter("filter2"))
     
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_update_filter(self):
         self.filter_manager.add_filter(self.filter2)
         self.filter1.expression = expr.eq(
@@ -92,11 +90,11 @@ class TestSqlAlchemyFilterManager(object):
         )
         self.filter_manager.update_filter(self.filter1)
         result = self.filter_manager.get_filter("filter1")
-        eq_(self.filter1, result)
+        assert(self.filter1 == result)
         result = self.filter_manager.get_filter("filter2")
-        eq_(self.filter2, result)
+        assert(self.filter2 == result)
     
-    @attr("dbtest")
-    @raises(LookupError)
+    @pytest.mark.dbtest
     def test_update_filter_nx(self):
-        self.filter_manager.update_filter(self.filter2)
+        with pytest.raises(LookupError):
+            self.filter_manager.update_filter(self.filter2)

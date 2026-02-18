@@ -21,6 +21,11 @@ from sqlalchemy.types import (
     Time,
 )
 
+from alembic import op
+
+revision = '001'
+down_revision = None
+
 meta = MetaData()
 
 sources = Table("bdb_sources", meta,
@@ -120,13 +125,8 @@ event.listen(
 Index("bdb_nodes_id_name_key", nodes.c.id, nodes.c.name)
 Index("bdb_nodes_file_id_name_key", nodes.c.file_id, nodes.c.name)
 
-def upgrade(migrate_engine):
-    # Upgrade operations go here. Don't create your own engine; bind
-    # migrate_engine to your metadata
-    meta.bind = migrate_engine
-    meta.create_all()
+def upgrade():
+    meta.create_all(bind = op.get_bind())
 
-def downgrade(migrate_engine):
-    # Operations to reverse the above upgrade go here.
-    meta.bind = migrate_engine
-    meta.drop_all()
+def downgrade():
+    meta.drop_all(bind = op.get_bind())

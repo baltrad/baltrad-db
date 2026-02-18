@@ -15,17 +15,17 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-from nose.tools import eq_
+import pytest
 
 from baltrad.bdbclient.main import extract_command
 
 
 def test_extract_command():
     cmd, args = extract_command(["-v", "cmd", "arg", "--help"])
-    eq_("cmd", cmd)
-    eq_(["-v", "arg", "--help"], args)
+    assert(cmd == "cmd")
+    assert(args == ["-v", "arg", "--help"])
 
 def test_extract_command_empty():
     cmd, args = extract_command([])
-    eq_(None, cmd)
-    eq_([], args)
+    assert(cmd is None)
+    assert(args == [])

@@ -15,23 +15,22 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-from nose.tools import ok_, eq_
+import pytest
 
 from baltrad.bdbserver.sqla import query
 
-class TestExprToSql(object):
+
+class TestExprToSql:
+    @pytest.fixture(autouse=True)
     def setup(self):
         self.evaluator = query.ExprToSql()
     
     def test_get_what_source_attr_column(self):
         col1 = self.evaluator.get_what_source_attr_column("what_source:name")
         col2 = self.evaluator.get_what_source_attr_column("what_source:name")
-        # always accessed by the same column
-        ok_(col1 is col2)
+        assert(col1 is col2)
     
     def test_get_bdb_source_attr_column(self):
         col1 = self.evaluator.get_bdb_source_attr_column("_bdb/source:NOD")
         col2 = self.evaluator.get_bdb_source_attr_column("_bdb/source:NOD")
-        # always accessed by the same column
-        ok_(col1 is col2)
-
+        assert(col1 is col2)

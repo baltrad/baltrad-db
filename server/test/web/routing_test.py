@@ -17,7 +17,7 @@
 
 import uuid
 
-from nose.tools import eq_, raises
+import pytest
 
 from baltrad.bdbserver.web.routing import URL_MAP, get_handler
 
@@ -29,61 +29,60 @@ class TestFileRoutes(object):
         cls.adapter = URL_MAP.bind("/")
         cls.uuid = uuid.uuid4()
     
-    @raises(MethodNotAllowed)
     def test_fileroot_GET(self):
-        self.adapter.match("/file/", "GET")
+        with pytest.raises(MethodNotAllowed):
+            self.adapter.match("/file/", "GET")
     
     def test_fileroot_POST(self):
         endpoint, args = self.adapter.match("/file/", "POST")
-        eq_("handler.add_file", endpoint)
+        assert("handler.add_file"==endpoint)
 
-    @raises(MethodNotAllowed)
     def test_fileroot_PUT(self):
-        self.adapter.match("/file/", "PUT")
+        with pytest.raises(MethodNotAllowed):
+            self.adapter.match("/file/", "PUT")
      
     def test_fileroot_DELETE(self):
         endpoint, args = self.adapter.match("/file/", "DELETE")
-        eq_("handler.remove_all_files", endpoint)
+        assert("handler.remove_all_files"==endpoint)
     
     def test_file_GET(self):
         endpoint, args = self.adapter.match("/file/" + str(self.uuid), "GET")
-        eq_("handler.get_file", endpoint)
-        eq_(self.uuid, args["uuid"])
+        assert("handler.get_file"==endpoint)
+        assert(self.uuid==args["uuid"])
      
-    @raises(MethodNotAllowed)
     def test_file_PUT(self):
-        endpoint, args = self.adapter.match("/file/" + str(self.uuid), "PUT")
+        with pytest.raises(MethodNotAllowed):
+            endpoint, args = self.adapter.match("/file/" + str(self.uuid), "PUT")
 
-    @raises(MethodNotAllowed)
     def test_file_POST(self):
-        endpoint, args = self.adapter.match("/file/" + str(self.uuid), "POST")
-    
+        with pytest.raises(MethodNotAllowed):
+            endpoint, args = self.adapter.match("/file/" + str(self.uuid), "POST")
     
     def test_file_DELETE(self):
         endpoint, args = self.adapter.match("/file/" + str(self.uuid), "DELETE")
-        eq_("handler.remove_file", endpoint)
-        eq_(self.uuid, args["uuid"])
+        assert("handler.remove_file"==endpoint)
+        assert(self.uuid==args["uuid"])
     
     def test_file_metadata_GET(self):
         url = "/file/" + str(self.uuid) + "/metadata"
         endpoint, args = self.adapter.match(url, "GET")
-        eq_("handler.get_file_metadata", endpoint)
-        eq_(self.uuid, args["uuid"])
+        assert("handler.get_file_metadata"==endpoint)
+        assert(self.uuid==args["uuid"])
     
-    @raises(MethodNotAllowed)
     def test_file_metadata_POST(self):
-        url = "/file/" + str(self.uuid) + "/metadata"
-        self.adapter.match(url, "POST")
+        with pytest.raises(MethodNotAllowed):
+            url = "/file/" + str(self.uuid) + "/metadata"
+            self.adapter.match(url, "POST")
 
-    @raises(MethodNotAllowed)
     def test_file_metadata_PUT(self):
-        url = "/file/" + str(self.uuid) + "/metadata"
-        self.adapter.match(url, "PUT")
+        with pytest.raises(MethodNotAllowed):
+            url = "/file/" + str(self.uuid) + "/metadata"
+            self.adapter.match(url, "PUT")
 
-    @raises(MethodNotAllowed)
     def test_file_metadata_DELETE(self):
-        url = "/file/" + str(self.uuid) + "/metadata"
-        self.adapter.match(url, "DELETE")
+        with pytest.raises(MethodNotAllowed):
+            url = "/file/" + str(self.uuid) + "/metadata"
+            self.adapter.match(url, "DELETE")
     
 class TestSourceRoutes(object):
     @classmethod
@@ -92,20 +91,20 @@ class TestSourceRoutes(object):
     
     def test_sourceroot_GET(self):
         endpoint, args = self.adapter.match("/source/", "GET")
-        eq_("handler.get_sources", endpoint)
+        assert("handler.get_sources"==endpoint)
     
     def test_sourceroot_POST(self):
         endpoint, args = self.adapter.match("/source/", "POST")
-        eq_("handler.add_source", endpoint)
+        assert("handler.add_source"==endpoint)
 
     def test_source_PUT(self):
         endpoint, args = self.adapter.match("/source/", "PUT")
-        eq_("handler.update_source", endpoint)
+        assert("handler.update_source"==endpoint)
 
     def test_source_DELETE(self):
         endpoint, args = self.adapter.match("/source/srcname", "DELETE")
-        eq_("handler.remove_source", endpoint)
-        eq_("srcname", args["name"])
+        assert("handler.remove_source"==endpoint)
+        assert("srcname"==args["name"])
 
 class TestFilterRoutes(object):
     @classmethod
@@ -114,68 +113,65 @@ class TestFilterRoutes(object):
 
     def test_filterroot_GET(self):
         endpoint, args = self.adapter.match("/filter/", "GET")
-        eq_("handler.get_filters", endpoint)
+        assert("handler.get_filters"==endpoint)
     
     def test_filterroot_POST(self):
         endpoint, args = self.adapter.match("/filter/", "POST")
-        eq_("handler.add_filter", endpoint)
+        assert("handler.add_filter"==endpoint)
     
     def test_filter_GET(self):
         endpoint, args = self.adapter.match("/filter/FOO", "GET")
-        eq_("handler.get_filter", endpoint)
-        eq_("FOO", args["name"])
+        assert("handler.get_filter"==endpoint)
+        assert("FOO"==args["name"])
 
     def test_filter_PUT(self):
         endpoint, args = self.adapter.match("/filter/FOO", "PUT")
-        eq_("handler.update_filter", endpoint)
-        eq_("FOO", args["name"])
+        assert("handler.update_filter"==endpoint)
+        assert("FOO"==args["name"])
     
     def test_filter_DELETE(self):
         endpoint, args = self.adapter.match("/filter/FOO", "DELETE")
-        eq_("handler.remove_filter", endpoint)
-        eq_("FOO", args["name"])
+        assert("handler.remove_filter"==endpoint)
+        assert("FOO"==args["name"])
 
 class TestQueryRoutes(object):
     @classmethod
     def setup_class(cls):
         cls.adapter = URL_MAP.bind("/")
     
-    @raises(MethodNotAllowed)
     def test_query_file_GET(self):
-        self.adapter.match("/query/file", "GET")
+        with pytest.raises(MethodNotAllowed):
+            self.adapter.match("/query/file", "GET")
     
     def test_query_file_POST(self):
         endpoint, args = self.adapter.match("/query/file", "POST")
-        eq_("handler.query_file", endpoint)
+        assert("handler.query_file"==endpoint)
 
-    @raises(MethodNotAllowed)
     def test_query_file_PUT(self):
-        self.adapter.match("/query/file", "PUT")
+        with pytest.raises(MethodNotAllowed):
+            self.adapter.match("/query/file", "PUT")
 
-    @raises(MethodNotAllowed)
     def test_query_file_DELETE(self):
-        self.adapter.match("/query/file", "DELETE")
+        with pytest.raises(MethodNotAllowed):
+            self.adapter.match("/query/file", "DELETE")
 
-    @raises(MethodNotAllowed)
     def test_query_attribute_GET(self):
-        self.adapter.match("/query/attribute", "GET")
+        with pytest.raises(MethodNotAllowed):
+            self.adapter.match("/query/attribute", "GET")
     
     def test_query_attribute_POST(self):
         endpoint, args = self.adapter.match("/query/attribute", "POST")
-        eq_("handler.query_attribute", endpoint)
+        assert("handler.query_attribute"==endpoint)
 
-    @raises(MethodNotAllowed)
     def test_query_attribute_PUT(self):
-        self.adapter.match("/query/attribute", "PUT")
+        with pytest.raises(MethodNotAllowed):
+            self.adapter.match("/query/attribute", "PUT")
 
-    @raises(MethodNotAllowed)
     def test_query_attribute_DELETE(self):
-        self.adapter.match("/query/attribute", "DELETE")
+        with pytest.raises(MethodNotAllowed):
+            self.adapter.match("/query/attribute", "DELETE")
 
 def test_get_handler():
     import baltrad.bdbserver.web.handler
 
-    eq_(
-      baltrad.bdbserver.web.handler.get_file,
-      get_handler("handler.get_file")
-    )
+    assert(baltrad.bdbserver.web.handler.get_file==get_handler("handler.get_file"))

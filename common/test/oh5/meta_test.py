@@ -4,7 +4,7 @@ import collections
 import datetime
 import os
 
-from nose.tools import eq_, raises
+import pytest
 
 from baltrad.bdbcommon.oh5 import (
     Attribute,
@@ -14,38 +14,38 @@ from baltrad.bdbcommon.oh5 import (
 )
 
 class TestMetadata(object):
-    def setUp(self):
+    def setup_method(self, method):
         self.meta = Metadata()
     
     def test_add_node_group(self):
         grp = self.meta.add_node("/", Group("group"))
-        eq_(grp.name, "group")
-        eq_(self.meta.root(), grp.parent)
+        assert(grp.name == "group")
+        assert(self.meta.root() == grp.parent)
     
     def test_add_node_attribute(self):
         attr = self.meta.add_node("/", Attribute("attr", "value"))
-        eq_(attr.name, "attr")
-        eq_(attr.value, "value")
+        assert(attr.name == "attr")
+        assert(attr.value == "value")
     
     def test_find_node(self):
         self.meta.add_node("/", Group("a"))
         self.meta.add_node("/a", Group("b"))
         c = self.meta.add_node("/a/b", Group("c"))
 
-        eq_(c, self.meta.find_node("/a/b/c"))
+        assert(c == self.meta.find_node("/a/b/c"))
     
     def test_find_node_root(self):
-        eq_(self.meta.root(), self.meta.find_node("/"))
+        assert(self.meta.root() == self.meta.find_node("/"))
     
-    @raises(LookupError)
     def test_node_nx(self):
-        self.meta.node("/a/b/c")
+        with pytest.raises(LookupError):
+            self.meta.node("/a/b/c")
 
     def test_find_node_nx(self):
-        eq_(None, self.meta.find_node("/a/b"))
+        assert(self.meta.find_node("/a/b") is None)
     
     def test_find_root(self):
-        eq_(None, self.meta.find_node("/a/b"))
+        assert(self.meta.find_node("/a/b") is None)
 
     def test_iterator(self):
         self.meta.add_node("/", Group("a"))
@@ -55,7 +55,7 @@ class TestMetadata(object):
 
         expected = ["/", "/a", "/b", "/a/b", "/a/b/c"]
         nodepaths = [node.path() for node in self.meta.iternodes()]
-        eq_(expected, nodepaths)
+        assert(nodepaths == expected)
 
     def test_iterator_2(self):
         self.meta.add_node("/", Group("a"))
@@ -67,7 +67,7 @@ class TestMetadata(object):
 
         expected = ["/", "/a", "/ab", "/b", "/ba", "/a/b", "/a/b/c"]
         nodepaths = [node.path() for node in self.meta.iternodes()]
-        eq_(expected, nodepaths)
+        assert(nodepaths == expected)
 
     def test_iterator_3(self):
         self.meta.add_node("/", Group("a"))
@@ -79,7 +79,7 @@ class TestMetadata(object):
 
         expected = ["/", "/a", "/a1", "/b", "/ba", "/a/a2", "/a/c"]
         nodepaths = [node.path() for node in self.meta.iternodes()]
-        eq_(expected, nodepaths)
+        assert(nodepaths == expected)
             
     def test_source(self):
         self.meta.add_node("/", Group("what"))
@@ -88,12 +88,12 @@ class TestMetadata(object):
             Attribute("source", "NOD:eesur,PLC:Sürgavere")
         )
 
-        eq_({"NOD": "eesur", "PLC": "Sürgavere"}, self.meta.source())
+        assert(self.meta.source() == {"NOD": "eesur", "PLC": "Sürgavere"})
 
     def test_json_repr_empty(self):
         expected = [{"path": "/", "type": "group"}]
 
-        eq_(expected, self.meta.json_repr())
+        assert(self.meta.json_repr() == expected)
 
     def test_json_repr(self):
         self.meta.add_node("/", Group("a"))
@@ -109,7 +109,7 @@ class TestMetadata(object):
             {"path": "/a/b", "type": "group"}
         ]
 
-        eq_(expected, self.meta.json_repr())
+        assert(self.meta.json_repr() == expected)
 
 class TestMetadataAttributeShortcuts(object):
     PropDef = collections.namedtuple(
@@ -143,7 +143,7 @@ class TestMetadataAttributeShortcuts(object):
                 datetime.time(13, 14, 15), "131415"),
     ]
 
-    def setUp(self):
+    def setup_method(self, method):
         self.meta = Metadata()
 
     def check_get_property(self, propdef):
@@ -152,26 +152,26 @@ class TestMetadataAttributeShortcuts(object):
         self.meta.add_node(group_parent_path, Group(group_name))
         self.meta.add_node(group_path, Attribute(attr_name, propdef.oh5value))
 
-        eq_(propdef.pyvalue, getattr(self.meta, propdef.attrname))
+        assert(getattr(self.meta, propdef.attrname) == propdef.pyvalue)
     
     def test_get_property(self):
         for propdef in self.propdefs:
-            yield self.check_get_property, propdef
+            self.check_get_property(propdef)
 
     def check_get_property_nx(self, propdef):
-        eq_(None, getattr(self.meta, propdef.attrname))
+        assert(getattr(self.meta, propdef.attrname) is None)
     
     def test_get_property_nx(self):
         for propdef in self.propdefs:
-            yield self.check_get_property_nx, propdef
+            self.check_get_property_nx(propdef)
     
     def check_set_property(self, propdef):
         setattr(self.meta, propdef.attrname, propdef.pyvalue)
-        eq_(propdef.oh5value, self.meta.node(propdef.oh5attr).value)
+        assert(self.meta.node(propdef.oh5attr).value == propdef.oh5value)
 
     def test_set_property(self):
         for propdef in self.propdefs:
-            yield self.check_set_property, propdef
+            self.check_set_property(propdef)
 
 class TestSource(object):
     def test_to_string(self):
@@ -179,21 +179,21 @@ class TestSource(object):
         src["key1"] = "value1"
         src["key2"] = "value2"
         src["_key3"] = "value3"
-        eq_("_key3:value3,key1:value1,key2:value2", src.to_string())
+        assert(src.to_string() == "_key3:value3,key1:value1,key2:value2")
     
     def test_dict_copy(self):
         copy = dict(Source("foo", values={"bar": "baz"}))
-        eq_({"bar": "baz"}, copy)
+        assert(copy == {"bar": "baz"})
     
     def test_get(self):
         src = Source()
-        eq_(None, src.get("qwe"))
-        eq_("asd", src.get("qwe", "asd"))
+        assert(src.get("qwe") is None)
+        assert(src.get("qwe", "asd") == "asd")
 
     def test_from_string(self):
         src = Source.from_string("asd:qwe,key:value")
-        eq_("qwe", src["asd"])
-        eq_("value", src["key"])
+        assert(src["asd"] == "qwe")
+        assert(src["key"] == "value")
     
     def test_from_rave_xml(self):
         xml = """<?xml version='1.0' encoding='utf-8'?>
@@ -208,54 +208,9 @@ class TestSource(object):
             </radar-db>
         """
         result = Source.from_rave_xml(xml)
-        eq_(
-            Source("ee",
-                values={"CCCC": "EEMH", "ORG": "231"},
-            ),
-            result[0]
-        )
-        eq_(
-            Source("eehar",
-                values={
-                    "NOD": "eehar",
-                    "PLC": "Harku",
-                    "RAD": "EE40",
-                    "WMO": "26038"
-                },
-                parent = "ee"
-            ),
-            result[1]
-        )
-        eq_(
-            Source("eesur",
-                values={
-                    "NOD": "eesur",
-                    "PLC": u"Sürgavere",
-                    "RAD": "EE41",
-                    "WMO": "26232",
-                },
-                parent = "ee"
-            ),
-            result[2]
-        )
-        eq_(
-            Source("fi",
-                values= {
-                    "CCCC": "EFKL",
-                    "ORG": "86",
-            }),
-            result[3]
-        )
-        eq_(
-            Source("fivan",
-                values={
-                    "NOD": "fivan",
-                    "PLC": "Vantaa",
-                    "RAD": "FI42",
-                    "WMO": "02975",
-                },
-                parent = "fi"
-            ),
-            result[4]
-        )
-        eq_(5, len(result))
+        assert(result[0] == Source("ee", values={"CCCC": "EEMH", "ORG": "231"},))
+        assert(result[1] == Source("eehar", values={"NOD": "eehar","PLC": "Harku","RAD": "EE40","WMO": "26038"}, parent = "ee"))
+        assert(result[2] == Source("eesur", values={"NOD": "eesur","PLC": u"Sürgavere","RAD": "EE41","WMO": "26232",}, parent = "ee"))
+        assert(result[3] == Source("fi", values={"CCCC": "EFKL","ORG": "86",}))
+        assert(result[4] == Source("fivan", values={"NOD": "fivan","PLC": "Vantaa","RAD": "FI42","WMO": "02975",}, parent = "fi"))
+        assert(len(result) == 5)

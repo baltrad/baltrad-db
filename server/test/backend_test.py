@@ -17,9 +17,9 @@
 
 import mock
 
-from nose.tools import eq_, ok_, raises
-
 from baltrad.bdbserver import backend, config
+
+import pytest
 
 from .test_util import called_once_with
 
@@ -31,16 +31,16 @@ def test_from_conf(get_impl):
         "baltrad.bdb.server.backend.type": "mock"
     })
 
-    eq_(mock.sentinel.backend, backend.from_conf(conf))
-    ok_(called_once_with(get_impl, "mock"))
-    ok_(called_once_with(impl_cls.from_conf, conf))
+    assert(mock.sentinel.backend==backend.from_conf(conf))
+    assert(called_once_with(get_impl, "mock"))
+    assert(called_once_with(impl_cls.from_conf, conf))
 
-@raises(config.Error)
 @mock.patch("baltrad.bdbserver.backend.Backend.get_impl")
 def test_from_conf_invalid_impl(get_impl):
+
     get_impl.side_effect = LookupError
     conf = config.Properties({
         "baltrad.bdb.server.backend.type": "mock"
     })
-
-    backend.from_conf(conf)
+    with pytest.raises(config.Error):
+        backend.from_conf(conf)

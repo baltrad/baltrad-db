@@ -25,7 +25,7 @@ import itertools
 
 from abc import abstractmethod, ABCMeta
 
-import pkg_resources
+from baltradutils import resources
 
 from baltrad.bdbcommon import expr, oh5
 from baltrad.bdbclient import db
@@ -76,7 +76,7 @@ class Command(object):
         :raise: :class:`LookupError` if not found
         """
         try:
-            return pkg_resources.load_entry_point(
+            return resources.load_entry_point(
                 "baltrad.bdbclient",
                 "baltrad.bdbclient.commands",
                 name
@@ -113,7 +113,7 @@ class ExportFile(Command):
 
         if content:
             with contextlib.closing(content):
-                with open(outfile, "w") as outf:
+                with open(outfile, "wb") as outf:
                     shutil.copyfileobj(content, outf)
         else:
             print("file not found by UUID %s"%uuid)

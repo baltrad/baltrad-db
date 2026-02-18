@@ -2,7 +2,6 @@
 import datetime
 
 #from mock import patch, sentinel, Mock
-from nose.tools import eq_
 
 from baltrad.bdbcommon.oh5 import (
     Attribute,
@@ -12,7 +11,7 @@ from baltrad.bdbcommon.oh5 import (
 )
 
 class TestMetadataHasher(object):
-    def setUp(self):
+    def setup_method(self, method):
         self.hasher = MetadataHasher()
 
     def test_attribute_string(self):
@@ -26,10 +25,7 @@ class TestMetadataHasher(object):
         meta.add_node("/what", Attribute("time", datetime.time(12, 5)))
         meta.add_node("/what", Attribute("object", "pvol"))
 
-        eq_(
-            "2fe7e00e5c5fb6fa98c8b07154d1e4d2fcde7811",
-            self.hasher.hash(meta)
-        )
+        assert(self.hasher.hash(meta) == "2fe7e00e5c5fb6fa98c8b07154d1e4d2fcde7811")
     
     def test_concrete_digest2(self):
         meta = Metadata();
@@ -38,10 +34,7 @@ class TestMetadataHasher(object):
         meta.add_node("/what", Attribute("date", datetime.date(2001, 1, 2)))
         meta.add_node("/what", Attribute("time", datetime.time(12, 5)))
         meta.add_node("/what", Attribute("object", "pvol"))
-        eq_(
-            "469fa750ff4f575f1c30c794bb80e16a6a99ed2c",
-            self.hasher.hash(meta)
-        )
+        assert(self.hasher.hash(meta) == "469fa750ff4f575f1c30c794bb80e16a6a99ed2c")
 
     def test_concrete_digest3(self):
         meta = Metadata();
@@ -50,7 +43,4 @@ class TestMetadataHasher(object):
         meta.add_node("/what", Attribute("date", datetime.date(2001, 1, 2)))
         meta.add_node("/what", Attribute("time", datetime.time(12, 5)))
         meta.add_node("/what", Attribute("object", "pvol"))
-        eq_(
-            "2c16830c04d40911c799c946f89278c58c0feeb8",
-            self.hasher.hash(meta)
-        )
+        assert(self.hasher.hash(meta) == "2c16830c04d40911c799c946f89278c58c0feeb8")

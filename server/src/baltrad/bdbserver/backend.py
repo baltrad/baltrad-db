@@ -17,7 +17,7 @@
 
 from abc import abstractmethod, ABCMeta
 
-import pkg_resources
+from baltradutils import resources
 
 from baltrad.bdbcommon.util import abstractclassmethod
 
@@ -205,11 +205,9 @@ class Backend(object):
         :raise: :class:`LookupError` if not found
         """
         try:
-            return pkg_resources.load_entry_point(
-                "baltrad.bdbserver",
-                "baltrad.bdbserver.backends",
-                name
-            )
+            return resources.load_entry_point("baltrad.bdbserver",
+                    "baltrad.bdbserver.backends",
+                    name)
         except ImportError:
             raise LookupError(name)
     

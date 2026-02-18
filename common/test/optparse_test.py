@@ -19,7 +19,7 @@ import datetime
 import optparse as pyoptparse
 import os
 
-from nose.tools import eq_, raises
+import pytest
 
 from baltrad.bdbcommon import optparse
 
@@ -27,17 +27,17 @@ def test_check_iso8601_datetime():
     result = optparse.check_iso8601_datetime(
         "option", None, "20120208T120102Z"
     )
-    eq_(datetime.datetime(2012, 2, 8, 12, 1, 2), result)
+    assert(result == datetime.datetime(2012, 2, 8, 12, 1, 2))
 
-@raises(pyoptparse.OptionValueError)
 def test_check_iso8601_datetime_invalid():
-    optparse.check_iso8601_datetime("option", None, "foo")
+    with pytest.raises(pyoptparse.OptionValueError):
+        optparse.check_iso8601_datetime("option", None, "foo")
 
 def test_check_list():
     result = optparse.check_list("option", None, "foo,bar,baz")
-    eq_(["foo", "bar", "baz"], result)
+    assert(result == ["foo", "bar", "baz"])
 
 def test_check_path():
     result = optparse.check_path("option", None, "./path/to/dir")
     expected = os.path.join(os.getcwd(), "path/to/dir")
-    eq_(expected, result)
+    assert(result == expected)

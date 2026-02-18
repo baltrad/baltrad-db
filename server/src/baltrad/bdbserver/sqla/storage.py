@@ -20,14 +20,14 @@ import errno
 import os
 import shutil
 
-import pkg_resources
-
-from sqlalchemy import sql
+from sqlalchemy import sql, select, update
 from tempfile import NamedTemporaryFile
 
 from baltrad.bdbcommon import util
 from baltrad.bdbserver import config
 from baltrad.bdbserver.sqla import schema
+
+from baltradutils import resources
 
 class Error(Exception):
     pass
@@ -138,7 +138,7 @@ class FileStorage(object):
         :raise: :class:`LookupError` if not found
         """
         try:
-            return pkg_resources.load_entry_point(
+            return resources.load_entry_point(
                 "baltrad.bdbserver",
                 "baltrad.bdbserver.sqla.storage",
                 name
@@ -178,16 +178,18 @@ class GenericDatabaseFileImporter(DatabaseFileImporter):
     def store(self, conn, path):
         return conn.execute(
             schema.file_data.insert(),
-            data=open(path, "r").read()
+            {"data":open(path, "r").read()}
         ).inserted_primary_key[0]
     
     def read(self, conn, oid):
-        return conn.execute(
-            sql.select(
-                [schema.file_data.c.data],
-                schema.file_data.c.id==oid
-            )
-        ).scalar()
+        return conn.execute(select(schema.file_data.c.data)
+                            .where(schema.file_data.c.id == oid)).scalar()
+        #return conn.execute(
+        #    sql.select(
+        #        [schema.file_data.c.data],
+        #        schema.file_data.c.id==oid
+        #    )
+        #).scalar()
     
     def remove(self, conn, oid):
         conn.execute(
@@ -234,10 +236,9 @@ class DatabaseStorage(FileStorage):
                 importer = self.get_file_importer(backend)
 
                 oid = importer.store(conn, path)
-                conn.execute(
-                    schema.files.update().where(schema.files.c.id==file_id),
-                    oid=oid
-                )
+
+                stmt = update(schema.files).where(schema.files.c.id == file_id)
+                conn.execute(stmt,{"oid": oid})
 
     def store_file(self, backend, uuid, obj):
         with backend.get_connection() as conn:
@@ -248,7 +249,7 @@ class DatabaseStorage(FileStorage):
                     importer = self.get_file_importer(backend)
                     oid = importer.store(conn, tmp.name)
                     conn.execute(schema.files.update().where(schema.files.c.uuid==uuid),
-                                 oid=oid)
+                                 {"oid":oid})
 
         
     def read(self, backend, uuid):
@@ -261,23 +262,23 @@ class DatabaseStorage(FileStorage):
 
     def remove(self, backend, uuid):
         with backend.get_connection() as conn:
-            oid = self.get_oid(conn, uuid)
-            if oid:
-                with conn.begin():
+            with conn.begin():
+                oid = self.get_oid(conn, uuid)
+                if oid:
                     self.get_file_importer(backend).remove(conn, oid)
                     backend.delete_metadata(conn, uuid)
-            else:
-                raise FileNotFound("no oid mapped for %s" % uuid)
+                else:
+                    raise FileNotFound("no oid mapped for %s" % uuid)
     
     def remove_file(self, backend, uuid):
         with backend.get_connection() as conn:
-            oid = self.get_oid(conn, uuid)
-            if oid:
-                with conn.begin():
+            with conn.begin():
+                oid = self.get_oid(conn, uuid)
+                if oid:
                     self.get_file_importer(backend).remove_file(conn, oid)
-                    conn.execute(schema.files.update().where(schema.files.c.uuid==uuid), oid=None)
-            else:
-                raise FileNotFound("no oid mapped for %s" % uuid)
+                    conn.execute(schema.files.update().where(schema.files.c.uuid==uuid), {"oid":None})
+                else:
+                    raise FileNotFound("no oid mapped for %s" % uuid)
 
     def get_file_importer(self, backend):
         if backend.driver == "psycopg2":
@@ -286,12 +287,8 @@ class DatabaseStorage(FileStorage):
             return GenericDatabaseFileImporter()
     
     def get_oid(self, conn, uuid):
-        qry = sql.select(
-            [schema.files.c.oid],
-            schema.files.c.uuid==str(uuid)
-        )
+        qry = select(schema.files.c.oid).where(schema.files.c.uuid == str(uuid))
         return conn.execute(qry).scalar()
-        
     
     @classmethod
     def from_conf(cls, conf):

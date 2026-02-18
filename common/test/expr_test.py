@@ -17,23 +17,23 @@
 
 import datetime
 
-from nose.tools import eq_, ok_, assert_not_equal as ne_
+import pytest
 
 from baltrad.bdbcommon import expr
 
 def test_symbol_ctor():
     result = expr.symbol("foo")
-    ok_(isinstance(result, expr.Symbol))
-    eq_("foo", result.value)
+    assert(isinstance(result, expr.Symbol))
+    assert(result.value == "foo")
 
 def test_symbol_eq():
     sym1 = expr.symbol("foo")
     sym2 = expr.symbol("bar")
     sym3 = expr.symbol("foo")
-    eq_(sym1, sym1)
-    eq_(sym1, sym3)
-    ne_(sym1, sym2)
-    ne_(sym2, sym3)
+    assert(sym1 == sym1)
+    assert(sym1 == sym3)
+    assert(sym1 != sym2)
+    assert(sym2 != sym3)
 
 def test_unwrap_json():
     json = ["list", 
@@ -46,7 +46,7 @@ def test_unwrap_json():
         [expr.symbol("attr"), "what/object", "string"],
         ["PVOL", "SCAN"]
     ]
-    eq_(expected, expr.unwrap_json(json))
+    assert(expr.unwrap_json(json) == expected)
 
 def test_wrap_json():
     xpr = [
@@ -59,21 +59,21 @@ def test_wrap_json():
         ["list", ["symbol", "attr"], "what/object", "string"],
         ["list", "PVOL", "SCAN"]
     ]
-    eq_(expected, expr.wrap_json(xpr))
+    assert(expr.wrap_json(xpr) == expected)
 
 def test_literal_date():
     result = expr.literal(datetime.date(2011, 12, 13))
-    eq_([expr.symbol("date"), 2011, 12, 13], result)
+    assert(result == [expr.symbol("date"), 2011, 12, 13])
 
 def test_literal_time():
     result = expr.literal(datetime.time(13, 14, 15))
-    eq_([expr.symbol("time"), 13, 14, 15], result)
+    assert(result == [expr.symbol("time"), 13, 14, 15])
 
 def test_literal_datetime():
     result = expr.literal(datetime.datetime(2011, 12, 13, 14, 15, 16))
-    eq_([expr.symbol("datetime"), 2011, 12, 13, 14, 15, 16], result)
+    assert(result == [expr.symbol("datetime"), 2011, 12, 13, 14, 15, 16])
 
 def test_literal_timedelta():
     result = expr.literal(datetime.timedelta(123, 456))
-    eq_([expr.symbol("interval"), 123, 456], result)
+    assert(result == [expr.symbol("interval"), 123, 456])
 

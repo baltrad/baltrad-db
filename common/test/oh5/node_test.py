@@ -17,58 +17,58 @@
 
 import datetime
 
-from nose.tools import eq_, raises
+import pytest
 
 from baltrad.bdbcommon.oh5.node import Attribute, Group, Dataset, Node
 
 class TestNode(object):
     def test_path_no_parent(self):
         node = Node("name")
-        eq_("/name", node.path())
+        assert(node.path() == "/name")
     
     def test_path(self):
         a = Node("a")
         b = Node("b")
         a.add_child(b)
-        eq_("/a/b", b.path())
+        assert(b.path() == "/a/b")
 
        
 class TestAttribute(object):
     def test_ctor_date_value(self):
         attr = Attribute("attr", datetime.date(2000, 1, 2))
-        eq_("20000102", attr.value)
+        assert(attr.value == "20000102")
     
     def test_ctor_time_value(self):
         attr = Attribute("attr", datetime.time(13, 1, 2))
-        eq_("130102", attr.value)
+        assert(attr.value == "130102")
     
     def test_set_value_date(self):
         attr = Attribute("attr")
         attr.value = datetime.datetime(2000, 1, 2)
-        eq_("20000102", attr.value)
+        assert(attr.value == "20000102")
     
     def test_set_value_time(self):
         attr = Attribute("attr")
         attr.value = datetime.time(13, 14, 15)
-        eq_("131415", attr.value)
+        assert(attr.value == "131415")
     
     def test_value_date(self):
         attr = Attribute("attr", "20000102")
-        eq_(datetime.date(2000, 1, 2), attr.value_date())
+        assert(attr.value_date() == datetime.date(2000, 1, 2))
     
-    @raises(ValueError)
     def test_value_date_invalid(self):
         attr = Attribute("attr", "asd")
-        attr.value_date()
+        with pytest.raises(ValueError):
+            attr.value_date()
 
     def test_value_time(self):
         attr = Attribute("attr", "130102")
-        eq_(datetime.time(13, 1, 2), attr.value_time())
+        assert(attr.value_time() == datetime.time(13, 1, 2))
         
-    @raises(ValueError)
     def test_value_time_invalid(self):
         attr = Attribute("attr", "asd")
-        attr.value_time()
+        with pytest.raises(ValueError):
+            attr.value_time()
 
 class TestNodeJsonRepr(object):
     def test_group(self):
@@ -78,7 +78,7 @@ class TestNodeJsonRepr(object):
             "path": "/a",
             "type": "group",
         }
-        eq_(expected, a.json_repr())
+        assert(a.json_repr() == expected)
     
     def test_attribute(self):
         a = Attribute("a", 1)
@@ -87,7 +87,7 @@ class TestNodeJsonRepr(object):
             "type": "attribute",
             "value": 1
         }
-        eq_(expected, a.json_repr())
+        assert(a.json_repr() == expected)
     
     def test_dataset(self):
         a = Dataset("a")
@@ -96,4 +96,4 @@ class TestNodeJsonRepr(object):
             "path": "/a",
             "type": "dataset",
         }
-        eq_(expected, a.json_repr())
+        assert(a.json_repr() == expected)

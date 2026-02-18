@@ -26,7 +26,7 @@ else:
     from urllib.parse import urlparse
     patch_httpexception="http.client.HTTPConnection"    
     
-from nose.tools import eq_, ok_, raises
+import pytest
 import mock
 
 from baltrad.bdbclient import db, rest
@@ -53,7 +53,7 @@ def test_create_signable_string():
     )
     result = rest.create_signable_string(req)
 
-    eq_(expected, result)
+    assert(expected == result)
 
 class TestKeyczarAuth(object):
     @mock.patch("baltradcrypto.crypto.keyczarcrypto.keyczar_signer.read")
@@ -61,8 +61,8 @@ class TestKeyczarAuth(object):
         signer_read.return_value = mock.sentinel.signer
 
         result = rest.KeyczarAuth("/path/to/key", key_name="keyname")
-        eq_("keyname", result._key_name)
-        eq_(mock.sentinel.signer, result._signer)
+        assert(result._key_name == "keyname")
+        assert(result._signer == mock.sentinel.signer)
         signer_read.assert_called_with("/path/to/key")
     
     @mock.patch("baltradcrypto.crypto.keyczarcrypto.keyczar_signer.read")
@@ -70,8 +70,8 @@ class TestKeyczarAuth(object):
         signer_read.return_value = mock.sentinel.signer
 
         result = rest.KeyczarAuth("/path/to/key")
-        eq_("key", result._key_name)
-        eq_(mock.sentinel.signer, result._signer)
+        assert(result._key_name == "key")
+        assert(result._signer == mock.sentinel.signer)
         signer_read.assert_called_with("/path/to/key")
     
     @mock.patch("baltrad.bdbclient.rest.create_signable_string")
@@ -93,12 +93,12 @@ class TestKeyczarAuth(object):
         )
 
         auth.add_credentials(req)
-        eq_("bdb-keyczar key:signature", req.headers["authorization"])
+        assert(req.headers["authorization"] == "bdb-keyczar key:signature")
         create_signable.assert_called_with(req)
         signer.sign.assert_called_with("signable")
 
 class TestRestfulFileResult(object):
-    def setup(self):
+    def setup_method(self, method):
         self.db = mock.Mock(spec=rest.RestfulDatabase)
         self.result = rest.RestfulFileResult(
             self.db,
@@ -109,60 +109,60 @@ class TestRestfulFileResult(object):
         )
     
     def test_next(self):
-        ok_(self.result.next())
-        ok_(self.result.next())
-        ok_(not self.result.next())
-        ok_(not self.result.next())
+        assert(self.result.next())
+        assert(self.result.next())
+        assert(not self.result.next())
+        assert(not self.result.next())
     
     def test_size(self):
-        eq_(2, self.result.size())
+        assert(self.result.size() == 2)
     
     def test_get_file_entry(self):
         self.result.next()
         self.db.get_file_entry.return_value = mock.sentinel.entry1
-        eq_(mock.sentinel.entry1, self.result.get_file_entry())
+        assert(self.result.get_file_entry() == mock.sentinel.entry1)
         self.db.get_file_entry.assert_called_once_with(
             "00000000-0000-0000-0004-000000000001"
         )
         self.result.next()
         self.db.get_file_entry.reset_mock()
         self.db.get_file_entry.return_value = mock.sentinel.entry2
-        eq_(mock.sentinel.entry2, self.result.get_file_entry())
+        assert(self.result.get_file_entry() == mock.sentinel.entry2)
         self.db.get_file_entry.assert_called_once_with(
             "00000000-0000-0000-0004-000000000002"
         )
     
-    @raises(LookupError)
     def test_get_file_entry_before_next(self):
-        self.result.get_file_entry()
+        with pytest.raises(LookupError):
+            self.result.get_file_entry()
         
-    @raises(LookupError)
     def test_get_file_entry_after_exhaustion(self):
         self.result.next()
         self.result.next()
         self.result.next()
-        self.result.get_file_entry()
+        with pytest.raises(LookupError):
+            self.result.get_file_entry()
     
     def test_get_uuid(self):
         self.result.next()
-        eq_("00000000-0000-0000-0004-000000000001", self.result.get_uuid())
+        assert(self.result.get_uuid() == "00000000-0000-0000-0004-000000000001")
         self.result.next()
-        eq_("00000000-0000-0000-0004-000000000002", self.result.get_uuid())
+        assert(self.result.get_uuid() == "00000000-0000-0000-0004-000000000002")
     
-    @raises(LookupError)
     def test_get_uuid_before_next(self):
-        self.result.get_uuid()
+        with pytest.raises(LookupError):
+            self.result.get_uuid()
     
-    @raises(LookupError)
     def test_get_uuid_after_exhaustion(self):
         self.result.next()
         self.result.next()
         self.result.next()
-        self.result.get_uuid()
+        with pytest.raises(LookupError):
+            self.result.get_uuid()
         
 
 class TestRestfulAttributeResult(object):
-    def setup(self):
+    def setup_method(self):
         self.result = rest.RestfulAttributeResult(
             rows=[
                 {"uuid": "00000000-0000-0000-0004-000000000001"},
@@ -171,38 +171,38 @@ class TestRestfulAttributeResult(object):
         )
     
     def test_next(self):
-        ok_(self.result.next())
-        ok_(self.result.next())
-        ok_(not self.result.next())
-        ok_(not self.result.next())
+        assert(self.result.next())
+        assert(self.result.next())
+        assert(not self.result.next())
+        assert(not self.result.next())
     
     def test_size(self):
-        eq_(2, self.result.size())
+        assert(self.result.size() == 2)
     
     def test_get(self):
         self.result.next()
-        eq_("00000000-0000-0000-0004-000000000001", self.result.get("uuid"))
+        assert(self.result.get("uuid") == "00000000-0000-0000-0004-000000000001")
         self.result.next()
-        eq_("00000000-0000-0000-0004-000000000002", self.result.get("uuid"))
+        assert(self.result.get("uuid") == "00000000-0000-0000-0004-000000000002")
     
-    @raises(LookupError)
     def test_get_invalid_key(self):
         self.result.next()
-        self.result.get("invalid key")
+        with pytest.raises(LookupError):
+            self.result.get("invalid key")
     
-    @raises(LookupError)
     def test_get_before_next(self):
-        self.result.get("uuid")
+        with pytest.raises(LookupError):
+            self.result.get("uuid")
     
-    @raises(LookupError)
     def test_get_after_exhaustion(self):
         self.result.next()
         self.result.next()
         self.result.next()
-        self.result.get("uuid")
+        with pytest.raises(LookupError):
+            self.result.get("uuid")
 
 class TestRestfulDatabase(object):
-    def setup(self):
+    def setup_method(self):
         self.auth = mock.Mock(spec=rest.Auth)
         self.db = rest.RestfulDatabase("http://www.example.com", self.auth)
         self.db.execute_request = mock.Mock()
@@ -229,8 +229,8 @@ class TestRestfulDatabase(object):
             }
         )
         self.db.execute_request.assert_called_once_with(mock.sentinel.request)
-        ok_(isinstance(result, rest.RestfulFileResult))
-        eq_(2, result.size())
+        assert(isinstance(result, rest.RestfulFileResult))
+        assert(result.size() == 2)
 
     @mock.patch("baltrad.bdbclient.rest.Request")
     def test_execute_attribute_query(self, request_ctor):
@@ -254,8 +254,8 @@ class TestRestfulDatabase(object):
             }
         )
         self.db.execute_request.assert_called_once_with(mock.sentinel.request)
-        ok_(isinstance(result, rest.RestfulAttributeResult))
-        eq_(2, result.size())
+        assert(isinstance(result, rest.RestfulAttributeResult))
+        assert(result.size() == 2)
     
     @mock.patch(patch_httpexception) #"httplib.HTTPConnection")
     def test_execute_request(self, conn_ctor):
@@ -269,7 +269,7 @@ class TestRestfulDatabase(object):
         conn.getresponse.return_value = mock.sentinel.response
         conn_ctor.return_value = conn
 
-        eq_(mock.sentinel.response, self.db.execute_request(req))
+        assert(self.db.execute_request(req) == mock.sentinel.response)
 
         conn_ctor.assert_called_with("www.example.com", None)
         self.auth.add_credentials.assert_called_with(req)

@@ -19,7 +19,7 @@ import os
 
 from baltradcrypto.crypto import keyczarcrypto as keyczar
 
-from nose.tools import eq_, ok_, raises
+import pytest
 
 from werkzeug import (
     test as wztest,
@@ -29,7 +29,7 @@ from werkzeug import (
 from baltrad.bdbserver.web import auth
 
 class TestKeyczarAuth(object):
-    def setup(self):
+    def setup_method(self):
         self.keystore = os.path.join(os.path.dirname(__file__), "fixture")
         self.key = os.path.join(self.keystore, "testkey")
         self.auth = auth.KeyczarAuth(self.keystore)
@@ -37,13 +37,14 @@ class TestKeyczarAuth(object):
     def add_key(self):
         self.auth.add_key("testkey", "testkey")
     
-    @raises(Exception)
-    def test_add_nx_key(self):
-        self.auth.add_key("testkey", "/path/to/nxkey")
     
-    @raises(Exception)
+    def test_add_nx_key(self):
+        with pytest.raises(Exception):
+            self.auth.add_key("testkey", "/path/to/nxkey")
+    
     def test_add_invalid_key(self):
-        self.auth.add_key("testkey", "invalidkey")
+        with pytest.raises(Exception):
+            self.auth.add_key("testkey", "invalidkey")
     
     def test_authenticate(self):
         self.auth.add_key("testkey", "testkey")
@@ -63,8 +64,8 @@ class TestKeyczarAuth(object):
         )
 
         provider, credentials = auth.get_credentials(req)
-        eq_("keyczar", provider)
-        ok_(self.auth.authenticate(req, credentials))
+        assert("keyczar" == provider)
+        assert(self.auth.authenticate(req, credentials))
     
     def test_authenticate_invalid_signature(self):
         self.auth.add_key("testkey", "testkey")
@@ -84,5 +85,5 @@ class TestKeyczarAuth(object):
         )
 
         provider, credentials = auth.get_credentials(req)
-        eq_("keyczar", provider)
-        eq_(False, self.auth.authenticate(req, credentials))
+        assert("keyczar" == provider)
+        assert(False == self.auth.authenticate(req, credentials))

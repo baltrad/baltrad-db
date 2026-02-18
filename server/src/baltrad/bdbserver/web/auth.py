@@ -17,10 +17,11 @@
 
 import abc
 import logging
-import pkg_resources
+import importlib.metadata
 import os
 
 from baltradcrypto.crypto import keyczarcrypto as keyczar
+from baltradutils import resources
 
 from baltrad.bdbcommon import util
 
@@ -150,7 +151,7 @@ class Auth(object):
     
     @classmethod
     def get_impl(cls, name):
-        return pkg_resources.load_entry_point(
+        return resources.load_entry_point(
             "baltrad.bdbserver",
             "baltrad.bdbserver.web.auth",
             name
@@ -271,7 +272,7 @@ def create_signable_string(req):
     """
     fragments = [req.method, req.path]
     for key in ("content-md5", "content-type", "date"):
-        if req.headers.has_key(key):
+        if key in req.headers:
             value = req.headers[key].strip()
             if value:
                 fragments.append(value)

@@ -23,46 +23,34 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 ## @author Anders Henja, SMHI
 ## @date 2022-05-18
 
-import contextlib
-import os
+from alembic import op
+from sqlalchemy import text
 
-import progressbar
+# revision identifiers, used by Alembic.
+revision = '012'
+down_revision = '011'
 
-from sqlalchemy import (
-    Column,
-    MetaData,
-    Table,
-    sql,
-    Sequence
-)
-
-from sqlalchemy.types import (
-    Integer,
-    BigInteger,
-    Text,
-)
 
 def get_server_version(conn):
     try:
-        v = conn.execute("show server_version").fetchall()
+        v = conn.execute(text("show server_version")).fetchall()
         if len(v) > 0 and len(v[0]) > 0:
             s = v[0][0].split(" ")
             if len(s) > 0 and s[0].find(".") > 0:
                 return int(s[0].split(".")[0])
     except:
         pass
-    return 10 # Psql 9 has been deprecated
+    return 10  # Psql 9 has been deprecated
 
 
-def upgrade(engine):
-    with contextlib.closing(engine.connect()) as conn:
-        v = get_server_version(conn)
-        if v >= 10:
-            conn.execute("ALTER SEQUENCE bdb_files_id_seq as BIGINT") # MAXVALUE 9223372036854775807
-        conn.execute("ALTER SEQUENCE bdb_files_id_seq CYCLE")
+def upgrade():
+    connection = op.get_bind()
+    v = get_server_version(connection)
+    if v >= 10:
+        connection.execute(text("ALTER SEQUENCE bdb_files_id_seq as BIGINT"))  # MAXVALUE 9223372036854775807
+    connection.execute(text("ALTER SEQUENCE bdb_files_id_seq CYCLE"))
 
 
-def downgrade(engine):
-    with contextlib.closing(engine.connect()) as conn:
-        conn.execute("ALTER SEQUENCE bdb_files_id_seq NO CYCLE")
-
+def downgrade():
+    connection = op.get_bind()
+    connection.execute(text("ALTER SEQUENCE bdb_files_id_seq NO CYCLE"))

@@ -17,8 +17,8 @@
 
 import datetime
 
-import mock
-from nose.tools import eq_, raises
+import pytest
+from unittest import mock
 from sqlalchemy import engine, sql
 from sqlalchemy.exc import IntegrityError
 
@@ -30,7 +30,7 @@ import baltrad.bdbserver.backend as bdb_backend
 from ..test_util import check_instance, pop_last_call
 
 class TestSqlaAlchemyBackend(object):
-    def setup(self):
+    def setup_method(self):
         self.conn = mock.MagicMock(spec=[
             "begin", "close", "execute", "__exit__", "__enter__"
         ])
@@ -49,7 +49,7 @@ class TestSqlaAlchemyBackend(object):
         )
 
     def test_driver(self):
-        eq_("drivername", self.backend.driver)
+        assert("drivername" == self.backend.driver)
     
     @mock.patch("baltrad.bdbserver.sqla.storage.FileStorage.impl_from_conf")
     def test_from_conf(self, storage_from_conf):
@@ -73,13 +73,13 @@ class TestSqlaAlchemyBackend(object):
                 poolsize=10
             )
             storage_from_conf.assert_called_with("mock", conf)
-            eq_(mock.sentinel.backend, result)
+            assert(mock.sentinel.backend == result)
     
-    @raises(config.Error)
     def test_from_conf_missing_uri(self):
         conf = config.Properties({
         })
-        backend.SqlAlchemyBackend.from_conf(conf)
+        with pytest.raises(config.Error):
+            backend.SqlAlchemyBackend.from_conf(conf)
     
     @mock.patch("baltrad.bdbserver.sqla.storage.FileStorage.impl_from_conf")
     def test_from_conf_default_storage(self, storage_from_conf):
@@ -98,7 +98,7 @@ class TestSqlaAlchemyBackend(object):
             result = from_conf(conf)
             ctor.assert_called_once_with(mock.sentinel.uri, storage=mock.sentinel.storage,poolsize=10)
             storage_from_conf.assert_called_with("db", conf)
-            eq_(mock.sentinel.backend, result)        
+            assert(mock.sentinel.backend == result)
     
     def test_store_file(self):
         metadata = mock.sentinel.metadata
@@ -109,8 +109,8 @@ class TestSqlaAlchemyBackend(object):
 
         result = self.backend.store_file(path)
         self.backend.metadata_from_file.assert_called_once_with(path)
-        self.storage.store.called_once_with(self.backend, metadata, path)
-        eq_(metadata, result)
+        self.storage.store.assert_called_once_with(self.backend, metadata, path)
+        assert(metadata == result)
         
     def test_store_file_fails(self):
         metadata = mock.sentinel.metadata
@@ -129,7 +129,7 @@ class TestSqlaAlchemyBackend(object):
         assert(duplicate_exception_thrown)
         
         self.backend.metadata_from_file.assert_called_once_with(path)
-        self.storage.store.called_once_with(self.backend, metadata, path)
+        self.storage.store.assert_called_once_with(self.backend, metadata, path)
  
     
     def test_get_file(self):
@@ -138,13 +138,13 @@ class TestSqlaAlchemyBackend(object):
 
         result = self.backend.get_file(uuid)
         self.storage.read.assert_called_once_with(self.backend, uuid)
-        eq_(mock.sentinel.content, result)
+        assert(mock.sentinel.content == result)
     
     def test_get_file_not_found(self):
         uuid = mock.sentinel.uuid
         self.storage.read.side_effect = storage.FileNotFound()
 
-        eq_(None, self.backend.get_file(uuid))
+        assert(None == self.backend.get_file(uuid))
     
     def _test_remove_file(self):
         uuid = mock.sentinel.uuid
@@ -163,14 +163,14 @@ class TestSqlaAlchemyBackend(object):
         )
         self.tx.__exit__.assert_called_once()
         self.conn.__exit__.assert_called_once()
-        eq_(True, result)
+        assert(True == result)
     
     def test_remove_file(self):
         uuid = mock.sentinel.uuid
 
         result = self.backend.remove_file(uuid)
         self.storage.remove.assert_called_once_with(self.backend, uuid)
-        eq_(True, result)
+        assert(True == result)
         
     def test_remove_file_not_found(self):
         uuid = mock.sentinel.uuid
@@ -178,7 +178,7 @@ class TestSqlaAlchemyBackend(object):
 
         result = self.backend.remove_file(uuid)
         self.storage.remove.assert_called_once_with(self.backend, uuid)
-        eq_(False, result)
+        assert(False == result)
     
     def test_remove_all_files(self):
         self.backend.get_connection = mock.Mock(return_value=self.conn)
@@ -205,7 +205,7 @@ class TestSqlaAlchemyBackend(object):
         self.conn.execute.assert_called_once_with(
             check_instance(sql.expression.Delete)
         )
-        eq_(True, result)
+        assert(True == result)
         
     def test_delete_metadata_not_found(self):
         sqlresult = self.conn.execute.return_value
@@ -215,7 +215,7 @@ class TestSqlaAlchemyBackend(object):
         self.conn.execute.assert_called_once_with(
             check_instance(sql.expression.Delete)
         )
-        eq_(False, result)
+        assert(False == result)
 
 def test_attribute_sql_values_str():
     attr = oh5.Attribute("name", "strval")
@@ -223,7 +223,7 @@ def test_attribute_sql_values_str():
     expected = {
         "value_string": "strval"
     }
-    eq_(expected, result)
+    assert(expected == result)
 
 def test_attribute_sql_values_int():
     attr = oh5.Attribute("name", 123)
@@ -231,7 +231,7 @@ def test_attribute_sql_values_int():
     expected = {
         "value_long": 123
     }
-    eq_(expected, result)
+    assert(expected == result)
 
 def test_attribute_sql_values_long():
     attr = oh5.Attribute("name", 123)
@@ -239,7 +239,7 @@ def test_attribute_sql_values_long():
     expected = {
         "value_long": 123
     }
-    eq_(expected, result)
+    assert(expected == result)
 
 def test_attribute_sql_values_float():
     attr = oh5.Attribute("name", 1.23)
@@ -247,7 +247,7 @@ def test_attribute_sql_values_float():
     expected = {
         "value_double": 1.23
     }
-    eq_(expected, result)
+    assert(expected == result)
 
 def test_attribute_sql_values_date():
     attr = oh5.Attribute("name", "20111213")
@@ -256,7 +256,7 @@ def test_attribute_sql_values_date():
         "value_string": "20111213",
         "value_date": datetime.date(2011, 12, 13)
     }
-    eq_(expected, result)
+    assert(expected == result)
 
 def test_attribute_sql_values_invalid_date():
     attr = oh5.Attribute("name", "20111313")
@@ -264,7 +264,7 @@ def test_attribute_sql_values_invalid_date():
     expected = {
         "value_string": "20111313",
     }
-    eq_(expected, result)
+    assert(expected == result)
 
 def test_attribute_sql_values_time():
     attr = oh5.Attribute("name", "131415")
@@ -273,7 +273,7 @@ def test_attribute_sql_values_time():
         "value_string": "131415",
         "value_time": datetime.time(13, 14, 15)
     }
-    eq_(expected, result)
+    assert(expected == result)
 
 def test_attribute_sql_values_invalid_time():
     attr = oh5.Attribute("name", "241415")
@@ -281,7 +281,7 @@ def test_attribute_sql_values_invalid_time():
     expected = {
         "value_string": "241415",
     }
-    eq_(expected, result)
+    assert(expected == result)
 
 def test_attribute_sql_values_bool_true():
     attr = oh5.Attribute("name", "True")
@@ -290,7 +290,7 @@ def test_attribute_sql_values_bool_true():
         "value_string": "True",
         "value_boolean": True,
     }
-    eq_(expected, result)
+    assert(expected == result)
 
 def test_attribute_sql_values_bool_false():
     attr = oh5.Attribute("name", "False")
@@ -299,7 +299,7 @@ def test_attribute_sql_values_bool_false():
         "value_string": "False",
         "value_boolean": False,
     }
-    eq_(expected, result)
+    assert(expected == result)
 
 def test_attribute_sql_values_bool_invalid():
     attr = oh5.Attribute("name", "not_a_bool")
@@ -307,4 +307,4 @@ def test_attribute_sql_values_bool_invalid():
     expected = {
         "value_string": "not_a_bool",
     }
-    eq_(expected, result)
+    assert(expected == result)

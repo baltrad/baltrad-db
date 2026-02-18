@@ -19,7 +19,7 @@ import datetime
 import operator
 import string, sys
 
-from sqlalchemy import sql
+from sqlalchemy import sql, select
 
 from baltrad.bdbcommon.expr import Evaluator
 
@@ -211,6 +211,7 @@ def transform_file_query(query):
     order_by_clauses = query.order
     group_by_clauses = []
     distinct = False
+    
     select_columns = [schema.files.c.uuid]
 
     if order_by_clauses:
@@ -218,33 +219,32 @@ def transform_file_query(query):
         order_by_clauses = [_order_clause(clause) for clause in order_by_clauses]
         group_by_clauses.append(schema.files.c.uuid)
     else:
-        #stored_timestamp = (
-        #    schema.files.c.stored_date + schema.files.c.stored_time
-        #).label("stored_timestamp")
-        #select_columns.append(stored_timestamp)
-        #order_by_clauses.append(stored_timestamp.asc())        
-
-        # XXX: since the stored timestamp is only with a second precision,
-        #      use id to order the files.
         select_columns.append(schema.files.c.id)
-        order_by_clauses.append(schema.files.c.id.asc())
+        order_by_clauses = [schema.files.c.id.asc()]
         distinct = True
 
-    return sql.select(
-        select_columns,
-        where_clause,
-        from_obj=evaluator.from_clause,
-        distinct=distinct,
-        order_by=order_by_clauses,
-        group_by=group_by_clauses,
-        limit=query.limit,
-        offset=query.skip,
-    )
+    stmt = select(*select_columns)
+    if evaluator.from_clause is not None:
+        stmt = stmt.select_from(evaluator.from_clause)
+    if where_clause is not None:
+        stmt = stmt.where(where_clause)
+    if distinct:
+        stmt = stmt.distinct()
+    if group_by_clauses:
+        stmt = stmt.group_by(*group_by_clauses)
+    if order_by_clauses:
+        stmt = stmt.order_by(*order_by_clauses)
+    if query.limit is not None:
+        stmt = stmt.limit(query.limit)
+    if query.skip is not None:
+        stmt = stmt.offset(query.skip)
+
+    return stmt    
 
 def transform_attribute_query(query):
     evaluator = ExprToSql()
 
-    select_columns=[]
+    select_columns = []
 
     for key, xpr in query.fetch.items():
         attr_column = evaluator(xpr)
@@ -254,12 +254,19 @@ def transform_attribute_query(query):
     order_by_clauses = [evaluator(xpr) for xpr in query.order]
     group_by_clauses = [evaluator(xpr) for xpr in query.group]
 
-    return sql.select(
-        select_columns,
-        where_clause,
-        from_obj=evaluator.from_clause,
-        distinct=query.distinct,
-        order_by=order_by_clauses,
-        group_by=group_by_clauses,
-        limit=query.limit,
-    )
+    stmt = select(*select_columns)
+
+    if evaluator.from_clause is not None:
+        stmt = stmt.select_from(evaluator.from_clause)
+    if where_clause is not None:
+        stmt = stmt.where(where_clause)
+    if query.distinct:
+        stmt = stmt.distinct()
+    if group_by_clauses:
+        stmt = stmt.group_by(*group_by_clauses)
+    if order_by_clauses:
+        stmt = stmt.order_by(*order_by_clauses)
+    if query.limit is not None:
+        stmt = stmt.limit(query.limit)
+
+    return stmt

@@ -22,19 +22,25 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 ## @file
 ## @author Mats Vernersson, SMHI
 ## @date 2016-06-30
+from alembic import op
 
-def upgrade(engine):
+revision = '009'
+down_revision = '008'
+
+def upgrade():
+  engine = op.get_context().connection.engine
   dialect = engine.url.get_dialect().name
   if dialect == "postgresql":
-    engine.execute("drop rule remove_lo on bdb_files")
-    engine.execute("alter table bdb_files ALTER COLUMN lo_id TYPE oid")
-    engine.execute("create rule remove_lo as on delete to bdb_files do select " + 
+    op.execute("drop rule remove_lo on bdb_files")
+    op.execute("alter table bdb_files ALTER COLUMN lo_id TYPE oid")
+    op.execute("create rule remove_lo as on delete to bdb_files do select " + 
                            "lo_unlink(old.lo_id::oid) as lo_unlink")
 
-def downgrade(engine):
+def downgrade():
+  engine = op.get_context().connection.engine
   dialect = engine.url.get_dialect().name
   if dialect == "postgresql":
-    engine.execute("drop rule remove_lo on bdb_files")
-    engine.execute("alter table bdb_files ALTER COLUMN lo_id TYPE integer")
-    engine.execute("create rule remove_lo as on delete to bdb_files do select " + 
+    op.execute("drop rule remove_lo on bdb_files")
+    op.execute("alter table bdb_files ALTER COLUMN lo_id TYPE integer")
+    op.execute("create rule remove_lo as on delete to bdb_files do select " + 
                            "lo_unlink(old.lo_id::oid) as lo_unlink")

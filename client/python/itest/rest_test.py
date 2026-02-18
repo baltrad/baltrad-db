@@ -16,29 +16,27 @@
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 import os
 
-from nose.tools import eq_, ok_, raises
+import pytest
 
 from baltrad.bdbclient import rest
 from baltrad.bdbcommon import oh5
 
-from . import get_database
+from .conftest import get_database
 
 class TestKeyczarAuth(object):
-    pass
-    
-    @raises(Exception)
     def test_ctor_nx_key(self):
-        rest.KeyczarAuth("/path/to/nxkey")
+        with pytest.raises(Exception):
+            rest.KeyczarAuth("/path/to/nxkey")
     
-    @raises(Exception)
     def test_ctor_invalid_key(self):
-        rest.KeyczarAuth(
-            os.path.join(
-                os.path.dirname(__file__),
-                "fixture",
-                "invalidkey"
+        with pytest.raises(Exception):
+            rest.KeyczarAuth(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "fixture",
+                    "invalidkey"
+                )
             )
-        )
     
     def test_sign(self):
         auth = rest.KeyczarAuth(
@@ -60,13 +58,13 @@ class TestKeyczarAuth(object):
         )
         auth.add_credentials(req)
         credentials = req.headers["authorization"]
-        ok_(credentials.startswith("bdb-keyczar testkey:AH"))
+        assert(credentials.startswith("bdb-keyczar testkey:AH"))
 
 class TestRestfulDatabase(object):
-    def setup(self):
+    def setup_method(self):
         self.database = get_database()
     
-    def teardown(self):
+    def teardown_method(self):
         self.database.remove_source('nisse')
         self.database = None
     
@@ -83,25 +81,24 @@ class TestRestfulDatabase(object):
     def test_get_sources(self):
         sources = self.database.get_sources()
         source = self.get_source_from_sources(sources, 'sevil')
-        eq_('sevil', source['NOD'])
-        eq_('Vilebo', source['PLC'])
-        eq_('SE48', source['RAD'])
-        eq_('02570', source['WMO'])
+        assert(source['NOD'] == 'sevil')
+        assert(source['PLC'] == 'Vilebo')
+        assert(source['RAD'] == 'SE48')
+        assert(source['WMO'] == '02570')
 
     def test_get_source(self):
         #<se CCCC="ESWI" org="82" cty="643">
         source = self.database.get_source("se")
-        print(str(source))
-        eq_('se', source.name)
-        eq_('ESWI', source['CCCC'])
-        eq_('82', source['ORG'])
-        eq_('643', source['CTY'])
+        assert(source.name == 'se')
+        assert(source['CCCC'] == 'ESWI')
+        assert(source['ORG'] == '82')
+        assert(source['CTY'] == '643')
 
         source = self.database.get_source("sevil")
-        eq_('sevil', source['NOD'])
-        eq_('Vilebo', source['PLC'])
-        eq_('SE48', source['RAD'])
-        eq_('02570', source['WMO'])
+        assert(source['NOD'] == 'sevil')
+        assert(source['PLC'] == 'Vilebo')
+        assert(source['RAD'] == 'SE48')
+        assert(source['WMO'] == '02570')
 
     def test_add_source(self):
         values = {'NOD':'nisse', 'PLC':'Nisse town'}
@@ -109,8 +106,8 @@ class TestRestfulDatabase(object):
         self.database.add_source(source)
         
         result = self.get_source('nisse')
-        eq_('nisse', source['NOD'])
-        eq_('Nisse town', source['PLC'])
+        assert(source['NOD'] == 'nisse')
+        assert(source['PLC'] == 'Nisse town')
         
     def test_update_source(self):
         values = {'NOD':'nisse', 'PLC':'Nisse town'}
@@ -121,8 +118,8 @@ class TestRestfulDatabase(object):
         self.database.update_source(source)
 
         result = self.get_source('nisse')
-        eq_('nisse', source['NOD'])
-        eq_('Nisses super town', source['PLC'])
+        assert(source['NOD'] == 'nisse')
+        assert(source['PLC'] == 'Nisses super town')
 
     def test_remove_source(self):
         values = {'NOD':'nisse', 'PLC':'Nisse town'}
@@ -131,44 +128,44 @@ class TestRestfulDatabase(object):
 
         self.database.remove_source('nisse')
         result = self.get_source('nisse')
-        eq_(None, result)
+        assert(result is None)
 
 
     def test_get_parent_sources(self):
         parent_sources = self.database.get_parent_sources()
-        eq_(3, len(parent_sources))
+        assert(len(parent_sources) == 3)
         source = self.get_source_from_sources(parent_sources, 'by')
-        eq_("by", source.name)
-        eq_(None, source.parent)
-        eq_('226', source['ORG'])
-        eq_('UMMS', source['CCCC'])
+        assert(source.name == "by")
+        assert(source.parent is None)
+        assert(source['ORG'] == '226')
+        assert(source['CCCC'] == 'UMMS')
         
         source = self.get_source_from_sources(parent_sources, 'se')
-        eq_("se", source.name)
-        eq_(None, source.parent)
-        eq_('82', source['ORG'])
-        eq_('ESWI', source['CCCC'])
+        assert(source.name == "se")
+        assert(source.parent is None)
+        assert(source['ORG'] == '82')
+        assert(source['CCCC'] == 'ESWI')
 
         source = self.get_source_from_sources(parent_sources, 'pl')
-        eq_("pl", source.name)
-        eq_(None, source.parent)
-        eq_('220', source['ORG'])
-        eq_('SOWR', source['CCCC'])
+        assert(source.name == "pl")
+        assert(source.parent is None)
+        assert(source['ORG'] == '220')
+        assert(source['CCCC'] == 'SOWR')
         
     def test_get_sources_with_parent(self):
         sources = self.database.get_sources_with_parent("se")
-        eq_(12, len(sources))
+        assert(len(sources) == 12)
         source = self.get_source_from_sources(sources, 'sekir')
-        eq_("sekir", source.name)
-        eq_("se", source.parent)
-        eq_("Kiruna", source["PLC"])
-        eq_("SE40", source["RAD"])
-        eq_("02032", source["WMO"])
+        assert(source.name == "sekir")
+        assert(source.parent == "se")
+        assert(source["PLC"] == "Kiruna")
+        assert(source["RAD"] == "SE40")
+        assert(source["WMO"] == "02032")
         source = self.get_source_from_sources(sources, 'searl')
-        eq_("searl", source.name)
-        eq_("se", source.parent)
-        eq_("Arlanda", source["PLC"])
-        eq_("SE46", source["RAD"])
-        eq_("02451", source["WMO"])
+        assert(source.name == "searl")
+        assert(source.parent == "se")
+        assert(source["PLC"] == "Arlanda")
+        assert(source["RAD"] == "SE46")
+        assert(source["WMO"] == "02451")
 
  

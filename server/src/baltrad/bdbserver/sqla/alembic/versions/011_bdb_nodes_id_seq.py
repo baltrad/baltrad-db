@@ -21,30 +21,20 @@ along with baltrad-db.  If not, see <http://www.gnu.org/licenses/>.
 ## 2^31 limit.
 ## @file
 ## @author Anders Henja, SMHI
-## @date 2014-04-28
+## @date 2022-04-25
 
-import contextlib
-import os
+from alembic import op
+from sqlalchemy import text
 
-import progressbar
+# revision identifiers, used by Alembic.
+revision = '011'
+down_revision = '010'
 
-from sqlalchemy import (
-    Column,
-    MetaData,
-    Table,
-    sql,
-    Sequence
-)
-
-from sqlalchemy.types import (
-    Integer,
-    BigInteger,
-    Text,
-)
 
 def get_server_version(conn):
+    """Get PostgreSQL server version."""
     try:
-        v = conn.execute("show server_version").fetchall()
+        v = conn.execute(text("show server_version")).fetchall()
         if len(v) > 0 and len(v[0]) > 0:
             s = v[0][0].split(" ")
             if len(s) > 0 and s[0].find(".") > 0:
@@ -52,18 +42,19 @@ def get_server_version(conn):
     except:
         pass
         
-    return 10 # Psql 9 has been deprecated
+    return 10  # Psql 9 has been deprecated
 
 
-def upgrade(engine):
-    with contextlib.closing(engine.connect()) as conn:
-        v = get_server_version(conn)
-        if v >= 10:
-            conn.execute("ALTER SEQUENCE bdb_nodes_id_seq as BIGINT") # MAXVALUE 9223372036854775807
-        conn.execute("ALTER SEQUENCE bdb_nodes_id_seq CYCLE")
+def upgrade():
+    """Change bdb_nodes_id_seq to BIGINT and enable CYCLE."""
+    connection = op.get_bind()
+    v = get_server_version(connection)
+    if v >= 10:
+        connection.execute(text("ALTER SEQUENCE bdb_nodes_id_seq as BIGINT"))  # MAXVALUE 9223372036854775807
+    connection.execute(text("ALTER SEQUENCE bdb_nodes_id_seq CYCLE"))
 
 
-def downgrade(engine):
-    with contextlib.closing(engine.connect()) as conn:
-        conn.execute("ALTER SEQUENCE bdb_nodes_id_seq NO CYCLE")
-      
+def downgrade():
+    """Disable CYCLE on bdb_nodes_id_seq."""
+    connection = op.get_bind()
+    connection.execute(text("ALTER SEQUENCE bdb_nodes_id_seq NO CYCLE"))

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
-from nose.tools import eq_, ok_, raises
+import pytest
 
 from werkzeug import (
     test as wztest,
@@ -24,17 +24,17 @@ from werkzeug import (
 from baltrad.bdbserver.web import util
 
 class TestJsonRequest(object):
-    @raises(ValueError)
     def test_float_nan_in_json(self):
-        util.JsonResponse(float("nan"))
+        with pytest.raises(ValueError):        
+            util.JsonResponse(float("nan"))
         
-    @raises(ValueError)
     def test_float_inf_in_json(self):
-        util.JsonResponse(float("inf"))
+        with pytest.raises(ValueError):        
+            util.JsonResponse(float("inf"))
     
-    @raises(ValueError)
     def test_float_neginf_in_json(self):
-        util.JsonResponse(float("-inf"))
+        with pytest.raises(ValueError):        
+            util.JsonResponse(float("-inf"))
 
 class TestHttpUnauthorized(object):
     def test_adds_www_authenticate_header(self):
@@ -42,11 +42,11 @@ class TestHttpUnauthorized(object):
         env = wztest.EnvironBuilder().get_environ()
         response = err.get_response(env)
         expected = ["bdb-keyczar"]
-        eq_(expected, response.headers.get_all("www-authenticate"))
+        assert(expected==response.headers.get_all("www-authenticate"))
     
     def test_add_multiple_www_authenticate_headers(self):
         err =util.HttpUnauthorized(challenge=["bdb-keyczar", "bdb-noauth"])
         env = wztest.EnvironBuilder().get_environ()
         response = err.get_response(env)
         expected = ["bdb-keyczar", "bdb-noauth"]
-        eq_(expected, response.headers.get_all("www-authenticate"))
+        assert(expected==response.headers.get_all("www-authenticate"))

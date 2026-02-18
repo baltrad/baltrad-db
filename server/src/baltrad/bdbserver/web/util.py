@@ -25,12 +25,33 @@ else:
     import urllib.parse as urlparse
 
 
-from werkzeug.wrappers import (
-    BaseRequest,
-    BaseResponse,
-    CommonRequestDescriptorsMixin,
-    CommonResponseDescriptorsMixin,
-)
+#from werkzeug.wrappers import (
+#    CommonRequestDescriptorsMixin,
+#    CommonResponseDescriptorsMixin,
+#)
+try:
+    from werkzeug.wrappers import CommonRequestDescriptorsMixin
+except:
+    class CommonRequestDescriptorsMixin(object):
+        def __init__(self):
+            pass
+
+try:
+    from werkzeug.wrappers import CommonResponseDescriptorsMixin
+except:
+    class CommonResponseDescriptorsMixin(object):
+        def __init__(self):
+            pass
+
+try:
+    from werkzeug.wrappers import BaseRequest
+except: # werkzeug >= 2.1.x
+    from werkzeug.wrappers import Request as BaseRequest
+
+try:
+    from werkzeug.wrappers import BaseResponse
+except: # werkzeug >= 2.1.x
+    from werkzeug.wrappers import Response as BaseResponse
 
 from werkzeug.exceptions import HTTPException
 

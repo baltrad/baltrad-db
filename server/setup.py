@@ -12,7 +12,7 @@ REQUIRED_PACKAGES= [
     "python-daemon >= 1.6",
     "baltradcrypto",
     "sqlalchemy >= 1.4.31",
-    "sqlalchemy-migrate >= 0.13.0",
+    "alembic >= 1.13.1",
     "werkzeug >= 0.14"
 ]
 

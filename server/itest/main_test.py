@@ -25,62 +25,61 @@ Copyright (C) 2010- Swedish Meteorological and Hydrological Institute (SMHI)
 from baltrad.bdbserver import main
 from baltrad.bdbserver import config
 import os, logging
-from nose.tools import eq_, ok_, raises
+import pytest
 
-class main_test(object):
-    def setup(self):
+class TestMain:
+    def setup_method(self):
         self.fixtures = os.path.join(os.path.dirname(__file__), "fixtures")
 
-    def tearDown(self):
+    def teardown_method(self):
         pass
 
     def test_read_config(self):
         configfile = "%s/baseconfig.conf"%self.fixtures
         conf = main.read_config(configfile)
         print("TYPE: %s"%str(type(conf)))
-        eq_("werkzeug", conf["baltrad.bdb.server.type"])
-        eq_("http://localhost:8090", conf["baltrad.bdb.server.uri"])
-        eq_("sqla", conf["baltrad.bdb.server.backend.type"])
-        eq_("postgresql://baltrad:baltrad@127.0.0.1/baltrad", conf["baltrad.bdb.server.backend.sqla.uri"])
-        eq_("10", conf["baltrad.bdb.server.backend.sqla.pool_size"])
-        eq_("db", conf["baltrad.bdb.server.backend.sqla.storage.type"])
-        eq_("noauth, keyczar", conf["baltrad.bdb.server.auth.providers"])
-        eq_("/tmp", conf["baltrad.bdb.server.auth.keyczar.keystore_root"])
-        eq_("smurf.pub", conf["baltrad.bdb.server.auth.keyczar.keys.smurf"])
-        ok_(conf["baltrad.bdb.server.enable_remove_all_files"])
+        assert(conf["baltrad.bdb.server.type"] == "werkzeug")
+        assert(conf["baltrad.bdb.server.uri"] == "http://localhost:8090")
+        assert(conf["baltrad.bdb.server.backend.type"] == "sqla")
+        assert(conf["baltrad.bdb.server.backend.sqla.uri"] == "postgresql://baltrad:baltrad@127.0.0.1/baltrad")
+        assert(conf["baltrad.bdb.server.backend.sqla.pool_size"] == "10")
+        assert(conf["baltrad.bdb.server.backend.sqla.storage.type"] == "db")
+        assert(conf["baltrad.bdb.server.auth.providers"] == "noauth, keyczar")
+        assert(conf["baltrad.bdb.server.auth.keyczar.keystore_root"] == "/tmp")
+        assert(conf["baltrad.bdb.server.auth.keyczar.keys.smurf"] == "smurf.pub")
+        assert(conf["baltrad.bdb.server.enable_remove_all_files"])
         
     def test_get_logging_level_no_property(self):
         conf = config.Properties({})
         result = main.get_logging_level(conf)
-        eq_(logging.INFO, result)
+        assert(result == logging.INFO)
 
     def test_get_logging_level_unknown_value(self):
         conf = config.Properties({"baltrad.bdb.server.log.level":"SIG"})
         result = main.get_logging_level(conf)
-        eq_(logging.INFO, result)
+        assert(result == logging.INFO)
         
     def test_get_logging_level_DEBUG(self):
         conf = config.Properties({"baltrad.bdb.server.log.level":"DEBUG"})
         result = main.get_logging_level(conf)
-        eq_(logging.DEBUG, result)
+        assert(result == logging.DEBUG)
 
     def test_get_logging_level_INFO(self):
         conf = config.Properties({"baltrad.bdb.server.log.level":"INFO"})
         result = main.get_logging_level(conf)
-        eq_(logging.INFO, result)
+        assert(result == logging.INFO)
 
     def test_get_logging_level_WARN(self):
         conf = config.Properties({"baltrad.bdb.server.log.level":"WARN"})
         result = main.get_logging_level(conf)
-        eq_(logging.WARN, result)
+        assert(result == logging.WARN)
 
     def test_get_logging_level_WARNING(self):
         conf = config.Properties({"baltrad.bdb.server.log.level":"WARNING"})
         result = main.get_logging_level(conf)
-        eq_(logging.WARNING, result)
+        assert(result == logging.WARNING)
 
     def test_get_logging_level_ERROR(self):
         conf = config.Properties({"baltrad.bdb.server.log.level":"ERROR"})
         result = main.get_logging_level(conf)
-        eq_(logging.ERROR, result)
-        
+        assert(result == logging.ERROR)

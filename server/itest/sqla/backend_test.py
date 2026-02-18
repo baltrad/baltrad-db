@@ -2,9 +2,10 @@ import tempfile
 import uuid
 import datetime
 
-from nose.tools import eq_, ok_, raises
-from nose.plugins.attrib import attr
-from nose.plugins.skip import SkipTest
+#from nose.tools import eq_, ok_, raises
+#from nose.plugins.attrib import attr
+#from nose.plugins.skip import SkipTest
+import pytest
 
 from baltrad.bdbserver.sqla import schema
 from baltrad.bdbserver.sqla.backend import (
@@ -21,8 +22,8 @@ from baltrad.bdbserver.backend import (
 from baltrad.bdbcommon.oh5.meta import Metadata, Source
 from baltrad.bdbcommon.oh5.io import HlHdfMetadataWriter 
 from baltrad.bdbcommon.oh5.node import Attribute, Group
-
-from . import get_backend
+from .conftest import bdb_backend
+#from . import get_backend
 
 from sqlalchemy import func, sql
 
@@ -41,6 +42,7 @@ def write_metadata(meta):
     writer.write(meta, h5file.name)
     return h5file
 
+@pytest.mark.dbtest
 class TestSqlAlchemyBackendItest(object):
     backend = None
 
@@ -55,172 +57,180 @@ class TestSqlAlchemyBackendItest(object):
 
     source_ids = []
 
-    @classmethod
-    def setup_class(cls):
-        cls.backend = get_backend()
-        if not cls.backend:
-            return
+    @pytest.fixture(scope="class", autouse=True)
+    def setup_class_fixture(self, bdb_backend):
+        if not bdb_backend:
+            pytest.skip("no backend defined")
 
-        for src in cls.sources:
-            cls.source_ids.append(
-                cls.backend.get_source_manager().add_source(src)
+        for src in self.sources:
+            self.source_ids.append(
+                bdb_backend.get_source_manager().add_source(src)
             )
-    
-    @classmethod
-    def teardown_class(cls):
-        if not cls.backend:
-            return
 
-        with cls.backend.get_connection() as conn:
-            conn.execute(schema.sources.delete())
-    
-    def setup(self):
-        if not self.backend:
-            raise SkipTest("no backend defined")
-
-    def tearDown(self):
-        with self.backend.get_connection() as conn:
+        yield
+        
+        with bdb_backend.get_connection() as conn:
+            conn.execute(schema.file_what_source.delete())
+            conn.execute(schema.nodes.delete())
             conn.execute(schema.files.delete())
-    
-    @attr("dbtest")
-    def test_get_source_by_id(self):
-        with self.backend.get_connection() as conn:
+            conn.execute(schema.sources.delete())
+            conn.commit()
+
+    @pytest.fixture(autouse=True)
+    def teardown(self, bdb_backend):
+        with bdb_backend.get_connection() as conn:    
+            conn.execute(schema.file_what_source.delete())
+            conn.execute(schema.nodes.delete())
+            conn.execute(schema.files.delete())
+            conn.commit()
+
+        yield
+
+        with bdb_backend.get_connection() as conn:    
+            conn.execute(schema.file_what_source.delete())
+            conn.execute(schema.nodes.delete())
+            conn.execute(schema.files.delete())
+            conn.commit()
+
+    @pytest.mark.dbtest
+    def test_get_source_by_id(self, bdb_backend):
+        with bdb_backend.get_connection() as conn:
             source = get_source_by_id(conn, self.source_ids[0])
-            eq_(self.sources[0], source)
+            assert(self.sources[0]==source)
 
-    @attr("dbtest")
-    def test_get_source_id(self):
+    @pytest.mark.dbtest
+    def test_get_source_id(self, bdb_backend):
         source = {"NOD": "eesur"}
-        with self.backend.get_connection() as conn:
-            eq_(self.source_ids[0], get_source_id(conn, source))
+        with bdb_backend.get_connection() as conn:
+            assert(self.source_ids[0]==get_source_id(conn, source))
             
-    @attr("dbtest")
-    def test_get_source_id_multiple_wmo_matches(self):
+    @pytest.mark.dbtest
+    def test_get_source_id_multiple_wmo_matches(self, bdb_backend):
         source = {"WMO": "00000", "NOD": "sebaa"}
-        with self.backend.get_connection() as conn:
-            eq_(self.source_ids[3], get_source_id(conn, source))
+        with bdb_backend.get_connection() as conn:
+            assert(self.source_ids[3] == get_source_id(conn, source))
     
-    @attr("dbtest")
-    def test_store_file(self):
+    @pytest.mark.dbtest
+    def test_store_file(self, bdb_backend):
         meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
         h5file = write_metadata(meta)
 
-        stored_meta = self.backend.store_file(h5file.name)
-        ok_(stored_meta.bdb_uuid)
-        ok_(stored_meta.bdb_metadata_hash)
-        ok_(stored_meta.bdb_file_size)
-        ok_(stored_meta.bdb_stored_date)
-        ok_(stored_meta.bdb_stored_time)
-        eq_("NOD:eesur,PLC:Syrgavere", stored_meta.bdb_source)
-        eq_("eesur", stored_meta.bdb_source_name)
+        stored_meta = bdb_backend.store_file(h5file.name)
+        assert(stored_meta.bdb_uuid)
+        assert(stored_meta.bdb_metadata_hash)
+        assert(stored_meta.bdb_file_size)
+        assert(stored_meta.bdb_stored_date)
+        assert(stored_meta.bdb_stored_time)
+        assert("NOD:eesur,PLC:Syrgavere"==stored_meta.bdb_source)
+        assert("eesur"==stored_meta.bdb_source_name)
     
-    @attr("dbtest")
-    @raises(DuplicateEntry)
-    def test_store_file_duplicate(self):
+    @pytest.mark.dbtest
+    def test_store_file_duplicate(self, bdb_backend):
         meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
         h5file = write_metadata(meta)
 
-        self.backend.store_file(h5file.name)
-        self.backend.store_file(h5file.name)
+        bdb_backend.store_file(h5file.name)
+        with pytest.raises(DuplicateEntry):
+            bdb_backend.store_file(h5file.name)
     
-    @attr("dbtest")
-    def test_get_file_metadata_nx(self):
+    @pytest.mark.dbtest
+    def test_get_file_metadata_nx(self, bdb_backend):
         uuid_ = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
-        eq_(None, self.backend.get_file_metadata(uuid_))
+        assert(bdb_backend.get_file_metadata(uuid_) == None)
     
-    @attr("dbtest")
-    def test_get_file_metadata(self):
+    @pytest.mark.dbtest
+    def test_get_file_metadata(self, bdb_backend):
         float_max = 1.7976931348623157e+308
         meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
         meta.add_node("/", Attribute("double", float_max))
         h5file = write_metadata(meta)
 
-        meta = self.backend.store_file(h5file.name)
+        meta = bdb_backend.store_file(h5file.name)
 
-        stored_meta = self.backend.get_file_metadata(meta.bdb_uuid)
-        ok_(stored_meta, "no metadata returned")
-        eq_(meta.what_object, stored_meta.what_object)
-        eq_(meta.what_date, stored_meta.what_date)
-        eq_(meta.what_time, stored_meta.what_time)
-        eq_(meta.bdb_uuid, stored_meta.bdb_uuid)
-        eq_(meta.bdb_file_size, stored_meta.bdb_file_size)
-        eq_(meta.bdb_source, stored_meta.bdb_source)
-        eq_(meta.bdb_stored_date, stored_meta.bdb_stored_date)
-        eq_(meta.bdb_stored_time, stored_meta.bdb_stored_time)
-        eq_(float_max, stored_meta.node("/double").value)
+        stored_meta = bdb_backend.get_file_metadata(meta.bdb_uuid)
+        assert(stored_meta), "no metadata returned"
+        assert(stored_meta.what_object == meta.what_object)
+        assert(stored_meta.what_date == meta.what_date)
+        assert(stored_meta.what_time == meta.what_time)
+        assert(stored_meta.bdb_uuid == meta.bdb_uuid)
+        assert(stored_meta.bdb_file_size == meta.bdb_file_size)
+        assert(stored_meta.bdb_source == meta.bdb_source)
+        assert(stored_meta.bdb_stored_date == meta.bdb_stored_date)
+        assert(stored_meta.bdb_stored_time == meta.bdb_stored_time)
+        assert(stored_meta.node("/double").value == float_max )
 
-    @attr("dbtest")
-    def test_query_file_metadata(self):
+    @pytest.mark.dbtest
+    def test_query_file_metadata(self, bdb_backend):
         meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
         h5file = write_metadata(meta)
 
-        filemeta = self.backend.query_file_metadata(h5file.name)
-        ok_(filemeta.bdb_uuid)
-        ok_(filemeta.bdb_metadata_hash)
-        ok_(filemeta.bdb_file_size)
-        ok_(filemeta.bdb_stored_date)
-        ok_(filemeta.bdb_stored_time)
-        eq_("NOD:eesur,PLC:Syrgavere", filemeta.bdb_source)
-        eq_("eesur", filemeta.bdb_source_name)
+        filemeta = bdb_backend.query_file_metadata(h5file.name)
+        assert(filemeta.bdb_uuid)
+        assert(filemeta.bdb_metadata_hash)
+        assert(filemeta.bdb_file_size)
+        assert(filemeta.bdb_stored_date)
+        assert(filemeta.bdb_stored_time)
+        assert(filemeta.bdb_source == "NOD:eesur,PLC:Syrgavere")
+        assert(filemeta.bdb_source_name == "eesur")
 
-        eq_(0, self.backend.file_count())
+        assert(bdb_backend.file_count() == 0)
 
-    @attr("dbtest")
-    def test_remove_files_by_count_1(self):
+    @pytest.mark.dbtest
+    def test_remove_files_by_count_1(self, bdb_backend):
         h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
         h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
         h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
         h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
 
-        self.backend.store_file(h5file1.name)
-        self.backend.store_file(h5file2.name)
-        self.backend.store_file(h5file3.name)
-        self.backend.store_file(h5file4.name)
+        bdb_backend.store_file(h5file1.name)
+        bdb_backend.store_file(h5file2.name)
+        bdb_backend.store_file(h5file3.name)
+        bdb_backend.store_file(h5file4.name)
 
-        eq_(4, self.backend.file_count())
+        assert(bdb_backend.file_count() == 4)
     
-        result = self.backend.remove_files_by_count(3,2)
-        eq_(1, result)
-        eq_(3, self.backend.file_count())
+        result = bdb_backend.remove_files_by_count(3,2)
+        assert(result == 1)
+        assert(bdb_backend.file_count() == 3)
 
-    @attr("dbtest")
-    def test_remove_files_by_count_2(self):
+    @pytest.mark.dbtest
+    def test_remove_files_by_count_2(self, bdb_backend):
         h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
         h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
         h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
         h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
 
-        self.backend.store_file(h5file1.name)
-        self.backend.store_file(h5file2.name)
-        self.backend.store_file(h5file3.name)
-        self.backend.store_file(h5file4.name)
+        bdb_backend.store_file(h5file1.name)
+        bdb_backend.store_file(h5file2.name)
+        bdb_backend.store_file(h5file3.name)
+        bdb_backend.store_file(h5file4.name)
 
-        eq_(4, self.backend.file_count())
+        assert(bdb_backend.file_count() == 4)
     
-        result = self.backend.remove_files_by_count(4,2)
-        eq_(0, result)
-        eq_(4, self.backend.file_count())
+        result = bdb_backend.remove_files_by_count(4,2)
+        assert(result == 0)
+        assert(bdb_backend.file_count() == 4)
 
-    @attr("dbtest")
-    def test_remove_files_by_count_3(self):
+    @pytest.mark.dbtest
+    def test_remove_files_by_count_3(self, bdb_backend):
         h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
         h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
         h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
         h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
 
-        self.backend.store_file(h5file1.name)
-        self.backend.store_file(h5file2.name)
-        self.backend.store_file(h5file3.name)
-        self.backend.store_file(h5file4.name)
+        bdb_backend.store_file(h5file1.name)
+        bdb_backend.store_file(h5file2.name)
+        bdb_backend.store_file(h5file3.name)
+        bdb_backend.store_file(h5file4.name)
 
-        eq_(4, self.backend.file_count())
+        assert(bdb_backend.file_count() == 4)
     
-        result = self.backend.remove_files_by_count(1,2)
-        eq_(2, result)
-        eq_(2, self.backend.file_count())
+        result = bdb_backend.remove_files_by_count(1,2)
+        assert(result == 2)
+        assert(bdb_backend.file_count() == 2)
     
-    @attr("dbtest")
-    def test_remove_files_by_count_4(self):
+    @pytest.mark.dbtest
+    def test_remove_files_by_count_4(self, bdb_backend):
         h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
         h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
         h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
@@ -232,217 +242,213 @@ class TestSqlAlchemyBackendItest(object):
         h5file9 = write_metadata(create_metadata("pvol", "20000131", "131615", "NOD:eesur"))
         h5file10 = write_metadata(create_metadata("pvol", "20000131", "131630", "NOD:eesur"))
 
-        self.backend.store_file(h5file1.name)
-        self.backend.store_file(h5file2.name)
-        self.backend.store_file(h5file3.name)
-        self.backend.store_file(h5file4.name)
-        self.backend.store_file(h5file5.name)
-        self.backend.store_file(h5file6.name)
-        self.backend.store_file(h5file7.name)
-        self.backend.store_file(h5file8.name)
-        self.backend.store_file(h5file9.name)
-        self.backend.store_file(h5file10.name)
+        bdb_backend.store_file(h5file1.name)
+        bdb_backend.store_file(h5file2.name)
+        bdb_backend.store_file(h5file3.name)
+        bdb_backend.store_file(h5file4.name)
+        bdb_backend.store_file(h5file5.name)
+        bdb_backend.store_file(h5file6.name)
+        bdb_backend.store_file(h5file7.name)
+        bdb_backend.store_file(h5file8.name)
+        bdb_backend.store_file(h5file9.name)
+        bdb_backend.store_file(h5file10.name)
 
-        eq_(10, self.backend.file_count())
+        assert(bdb_backend.file_count() == 10)
         
-        result = self.backend.remove_files_by_count(10,2)
-        eq_(0, result)
-        eq_(10, self.backend.file_count())
+        result = bdb_backend.remove_files_by_count(10,2)
+        assert(result == 0)
+        assert(bdb_backend.file_count() == 10)
     
-        result = self.backend.remove_files_by_count(8,10)
-        eq_(2, result)
-        eq_(8, self.backend.file_count())
+        result = bdb_backend.remove_files_by_count(8,10)
+        assert(result == 2)
+        assert(bdb_backend.file_count() == 8)
 
-        result = self.backend.remove_files_by_count(6,1)
-        eq_(1, result)
-        eq_(7, self.backend.file_count())
+        result = bdb_backend.remove_files_by_count(6,1)
+        assert(result == 1)
+        assert(bdb_backend.file_count() == 7)
 
-        result = self.backend.remove_files_by_count(6,1)
-        eq_(1, result)
-        eq_(6, self.backend.file_count())
+        result = bdb_backend.remove_files_by_count(6,1)
+        assert(result == 1)
+        assert(bdb_backend.file_count() == 6)
 
-        result = self.backend.remove_files_by_count(6,1)
-        eq_(0, result)
-        eq_(6, self.backend.file_count())
+        result = bdb_backend.remove_files_by_count(6,1)
+        assert(result == 0)
+        assert(bdb_backend.file_count() == 6)
 
-        result = self.backend.remove_files_by_count(0,1000)
-        eq_(6, result)
-        eq_(0, self.backend.file_count())
+        result = bdb_backend.remove_files_by_count(0,1000)
+        assert(result == 6)
+        assert(bdb_backend.file_count() == 0)
     
-    @attr("dbtest")
-    def test_remove_files_by_age_1(self):
+    @pytest.mark.dbtest
+    def test_remove_files_by_age_1(self, bdb_backend):
         h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
         h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
         h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
         h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
 
-        self.backend.store_file(h5file1.name)
-        self.backend.store_file(h5file2.name)
-        self.backend.store_file(h5file3.name)
-        self.backend.store_file(h5file4.name)
+        bdb_backend.store_file(h5file1.name)
+        bdb_backend.store_file(h5file2.name)
+        bdb_backend.store_file(h5file3.name)
+        bdb_backend.store_file(h5file4.name)
 
-        eq_(4, self.backend.file_count())
+        assert(bdb_backend.file_count() == 4)
     
-        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,30,0),2)
-        eq_(1, result)
-        eq_(3, self.backend.file_count())
+        result = bdb_backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,30,0),2)
+        assert(result == 1)
+        assert(bdb_backend.file_count() == 3)
 
-    @attr("dbtest")
-    def test_remove_files_by_age_2(self):
+    @pytest.mark.dbtest
+    def test_remove_files_by_age_2(self, bdb_backend):
         h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
         h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
         h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
         h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
 
-        self.backend.store_file(h5file1.name)
-        self.backend.store_file(h5file2.name)
-        self.backend.store_file(h5file3.name)
-        self.backend.store_file(h5file4.name)
+        bdb_backend.store_file(h5file1.name)
+        bdb_backend.store_file(h5file2.name)
+        bdb_backend.store_file(h5file3.name)
+        bdb_backend.store_file(h5file4.name)
 
-        eq_(4, self.backend.file_count())
+        assert(bdb_backend.file_count() == 4)
     
-        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,0,0),2)
-        eq_(0, result)
-        eq_(4, self.backend.file_count())
+        result = bdb_backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,0,0),2)
+        assert(result == 0)
+        assert(bdb_backend.file_count() == 4)
 
-    @attr("dbtest")
-    def test_remove_files_by_age_3(self):
+    @pytest.mark.dbtest
+    def test_remove_files_by_age_3(self, bdb_backend):
         h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
         h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
         h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
         h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
 
-        self.backend.store_file(h5file1.name)
-        self.backend.store_file(h5file2.name)
-        self.backend.store_file(h5file3.name)
-        self.backend.store_file(h5file4.name)
+        bdb_backend.store_file(h5file1.name)
+        bdb_backend.store_file(h5file2.name)
+        bdb_backend.store_file(h5file3.name)
+        bdb_backend.store_file(h5file4.name)
 
-        eq_(4, self.backend.file_count())
+        assert(bdb_backend.file_count() == 4)
     
-        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,45,0),2)
-        eq_(2, result)
-        eq_(2, self.backend.file_count())
+        result = bdb_backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,45,0),2)
+        assert(result == 2)
+        assert(bdb_backend.file_count() == 2)
 
-    @attr("dbtest")
-    def test_remove_files_by_age_4(self):
+    @pytest.mark.dbtest
+    def test_remove_files_by_age_4(self, bdb_backend):
         h5file1 = write_metadata(create_metadata("pvol", "20000131", "131415", "NOD:eesur"))
         h5file2 = write_metadata(create_metadata("pvol", "20000131", "131430", "NOD:eesur"))
         h5file3 = write_metadata(create_metadata("pvol", "20000131", "131445", "NOD:eesur"))
         h5file4 = write_metadata(create_metadata("pvol", "20000131", "131500", "NOD:eesur"))
 
-        self.backend.store_file(h5file1.name)
-        self.backend.store_file(h5file2.name)
-        self.backend.store_file(h5file3.name)
-        self.backend.store_file(h5file4.name)
+        bdb_backend.store_file(h5file1.name)
+        bdb_backend.store_file(h5file2.name)
+        bdb_backend.store_file(h5file3.name)
+        bdb_backend.store_file(h5file4.name)
 
-        eq_(4, self.backend.file_count())
+        assert(bdb_backend.file_count() == 4)
     
-        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,30,0),2)
-        eq_(1, result)
-        eq_(3, self.backend.file_count())
+        result = bdb_backend.remove_files_by_age(datetime.datetime(2000,1,31,13,14,30,0),2)
+        assert(result == 1)
+        assert(bdb_backend.file_count() == 3)
 
-        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,15,00,0),2)
-        eq_(2, result)
-        eq_(1, self.backend.file_count())
+        result = bdb_backend.remove_files_by_age(datetime.datetime(2000,1,31,13,15,00,0),2)
+        assert(result == 2)
+        assert(bdb_backend.file_count() == 1)
 
-        result = self.backend.remove_files_by_age(datetime.datetime(2000,1,31,13,16,00,0),2)
-        eq_(1, result)
-        eq_(0, self.backend.file_count())
+        result = bdb_backend.remove_files_by_age(datetime.datetime(2000,1,31,13,16,00,0),2)
+        assert(result == 1)
+        assert(bdb_backend.file_count() == 0)
     
-    @attr("dbtest")
-    def test_get_file(self):
+    @pytest.mark.dbtest
+    def test_get_file(self, bdb_backend):
         meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
         h5file = write_metadata(meta)
 
-        meta = self.backend.store_file(h5file.name)
+        meta = bdb_backend.store_file(h5file.name)
         expected = open(h5file.name, "rb").read()
-        eq_(expected, self.backend.get_file(meta.bdb_uuid),
-            "file content mismatch")
-
+        assert(bdb_backend.get_file(meta.bdb_uuid) == expected)
     
-    @attr("dbtest")
-    def test_file_count(self):
+    @pytest.mark.dbtest
+    def test_file_count(self, bdb_backend):
         meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
         h5file = write_metadata(meta)
         meta2 = create_metadata("pvol", "20000131", "131430", "NOD:eesur")
         h5file2 = write_metadata(meta2)
         
-        meta = self.backend.store_file(h5file.name)
-        meta2 = self.backend.store_file(h5file2.name)
+        meta = bdb_backend.store_file(h5file.name)
+        meta2 = bdb_backend.store_file(h5file2.name)
 
-        eq_(2, self.backend.file_count())
+        assert(bdb_backend.file_count() == 2)
     
-    @attr("dbtest")
-    def test_get_file_nx(self):
+    @pytest.mark.dbtest
+    def test_get_file_nx(self, bdb_backend):
         uuid_ = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
-        eq_(None, self.backend.get_file(uuid_))
+        assert(bdb_backend.get_file(uuid_) == None)
     
-    @attr("dbtest")
-    def test_remove_file_nx(self):
+    @pytest.mark.dbtest
+    def test_remove_file_nx(self, bdb_backend):
         uuid_ = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
-        eq_(False, self.backend.remove_file(uuid_))
+        assert(bdb_backend.remove_file(uuid_) == False)
     
-    @attr("dbtest")
-    def test_remove_file(self):
+    @pytest.mark.dbtest
+    def test_remove_file(self, bdb_backend):
         meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
         h5file = write_metadata(meta)
 
-        stored_meta = self.backend.store_file(h5file.name)
+        stored_meta = bdb_backend.store_file(h5file.name)
 
-        eq_(True, self.backend.remove_file(stored_meta.bdb_uuid))
+        assert(bdb_backend.remove_file(stored_meta.bdb_uuid) == True)
     
-    @attr("dbtest")
-    def test_remove_files(self):        
+    @pytest.mark.dbtest
+    def test_remove_files(self, bdb_backend):        
         meta = create_metadata("pvol", "20000131", "131415", "NOD:eesur")
         h5file = write_metadata(meta)
 
         meta = create_metadata("pvol", "20000131", "131416", "NOD:eesur")
         h5file = write_metadata(meta)
 
-        self.backend.store_file(h5file.name)
+        bdb_backend.store_file(h5file.name)
 
-        self.backend.remove_all_files()
+        bdb_backend.remove_all_files()
 
-        with self.backend.get_connection() as conn:
+        with bdb_backend.get_connection() as conn:
             delete_count = conn.execute(sql.select(func.count()).select_from(schema.files)).scalar_one()
-        eq_(0, delete_count) 
-    
+        assert(delete_count == 0) 
+
+@pytest.mark.dbtest
 class TestSqlAlchemySourceManager(object):
-    backend = None
+    @pytest.fixture(autouse=True)
+    def setup_test(self, bdb_backend):
+        if not bdb_backend:
+            pytest.skip("no backend defined")
 
-    @classmethod
-    def setup_class(cls):
-        cls.backend = get_backend()
+        self.source_manager = SqlAlchemySourceManager(bdb_backend)
 
-    def setup(self):
-        if not self.backend:
-            raise SkipTest("no backend defined")
-        self.source_manager = SqlAlchemySourceManager(self.backend)
-    
-    def tearDown(self):
-        with self.backend.get_connection() as conn:
+        yield
+
+        with bdb_backend.get_connection() as conn:
             conn.execute(schema.files.delete())
             conn.execute(schema.sources.delete())
+            conn.commit()
     
-    @attr("dbtest")
-    def test_add_source(self):
+    @pytest.mark.dbtest
+    def test_add_source(self, bdb_backend):
         source = Source("foo", values={"bar": "baz"})
         self.source_manager.add_source(source)
 
         sources = self.source_manager.get_sources()
-        eq_(1, len(sources))
-        eq_(source, sources[0])
+        assert(len(sources) == 1)
+        assert(sources[0] == source)
     
-    @attr("dbtest")
-    @raises(DuplicateEntry)
+    @pytest.mark.dbtest
     def test_add_source_duplicate(self):
         source1 = Source("foo", values={"bar": "baz"})
         source2 = Source("foo", values={"qwe": "asd"})
-
         self.source_manager.add_source(source1)
-        self.source_manager.add_source(source2)
+        with pytest.raises(DuplicateEntry):
+            self.source_manager.add_source(source2)
 
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_update_source(self):
         source1 = Source("foo", values={"bar": "baz"})
         source2 = Source("foo", values={"asd": "qaz"})
@@ -451,34 +457,33 @@ class TestSqlAlchemySourceManager(object):
         self.source_manager.update_source(source2)
 
         sources = self.source_manager.get_sources()
-        eq_(1, len(sources))
-        eq_(source2, sources[0])
+        assert(len(sources == 1))
+        assert(sources[0] == source2)
     
-    @attr("dbtest")
-    @raises(LookupError)
+    @pytest.mark.dbtest
     def test_update_source_not_found(self):
         source1 = Source("qwe", values={"bar": "baz"})
-        self.source_manager.update_source(source1)
+        with pytest.raises(LookupError):
+            self.source_manager.update_source(source1)
     
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_remove_source(self):
         source1 = Source("foo", values={"bar": "baz"})
         source2 = Source("qwe", values={"asd": "qaz"})
         self.source_manager.add_source(source1)
         self.source_manager.add_source(source2)
         
-        eq_(True, self.source_manager.remove_source("foo"))
+        assert(self.source_manager.remove_source("foo" == True))
 
         sources = self.source_manager.get_sources()
-        eq_(1, len(sources))
-        eq_(source2, sources[0])
+        assert(len(sources == 1))
+        assert(sources[0] == source2)
     
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_remove_source_not_found(self):
-        eq_(False, self.source_manager.remove_source("foo"))
+        assert(self.source_manager.remove_source("foo" == False))
 
-    @attr("dbtest")
-    @raises(IntegrityError)
+    @pytest.mark.dbtest
     def test_remove_source_files_attached(self):
         source1 = Source("foo", values={"bar": "baz"})
         self.source_manager.add_source(source1)
@@ -486,11 +491,12 @@ class TestSqlAlchemySourceManager(object):
         meta = create_metadata("pvol", "20000131", "131415", "bar:baz")
         h5file = write_metadata(meta)
 
-        self.backend.store_file(h5file.name)
+        bdb_backend.store_file(h5file.name)
 
-        self.source_manager.remove_source("foo")
+        with pytest.raises(IntegrityError):
+            self.source_manager.remove_source("foo")
 
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_get_sources(self):
         source1 = Source("foo", values={"bar": "baz"})
         source2 = Source("bar", values={"qwe": "asd"})
@@ -498,12 +504,12 @@ class TestSqlAlchemySourceManager(object):
         self.source_manager.add_source(source2)
 
         sources = self.source_manager.get_sources()
-        eq_(2, len(sources))
+        assert(len(sources) == 2)
         # in alphabetical order by name
-        eq_(source2, sources[0])
-        eq_(source1, sources[1])
+        assert(sources[0] == source2)
+        assert(sources[1] == source1)
         
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_get_source(self):
         source1 = Source("se", values={"bar": "baz"})
         source2 = Source("sekir", values={"qwe": "asd"}, parent="se")
@@ -514,12 +520,101 @@ class TestSqlAlchemySourceManager(object):
         self.source_manager.add_source(source3)
         self.source_manager.add_source(source4)
 
-        eq_(source1, self.source_manager.get_source("se"))
-        eq_(source2, self.source_manager.get_source("sekir"))
-        eq_(source3, self.source_manager.get_source("pl"))
-        eq_(source4, self.source_manager.get_source("plika"))
+        assert(self.source_manager.get_source("se") == source1)
+        assert(self.source_manager.get_source("sekir") == source2)
+        assert(self.source_manager.get_source("pl") == source3)
+        assert(self.source_manager.get_source("plika") == source4)
 
-    @attr("dbtest")
+    @pytest.mark.dbtest
+    def test_get_source_not_found(self):
+        source1 = Source("se", values={"bar": "baz"})
+
+    @pytest.mark.dbtest
+    def test_add_source_duplicate(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        source2 = Source("foo", values={"qwe": "asd"})
+
+        self.source_manager.add_source(source1)
+        with pytest.raises(DuplicateEntry):
+            self.source_manager.add_source(source2)
+
+    @pytest.mark.dbtest
+    def test_update_source(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        source2 = Source("foo", values={"asd": "qaz"})
+        self.source_manager.add_source(source1)
+
+        self.source_manager.update_source(source2)
+
+        sources = self.source_manager.get_sources()
+        assert(len(sources) == 1)
+        assert(sources[0] == source2)
+    
+    @pytest.mark.dbtest
+    def test_update_source_not_found(self):
+        source1 = Source("qwe", values={"bar": "baz"})
+        with pytest.raises(LookupError):
+            self.source_manager.update_source(source1)
+    
+    @pytest.mark.dbtest
+    def test_remove_source(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        source2 = Source("qwe", values={"asd": "qaz"})
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
+        
+        assert(self.source_manager.remove_source("foo") == True)
+
+        sources = self.source_manager.get_sources()
+        assert(len(sources) == 1)
+        assert(sources[0] == source2)
+    
+    @pytest.mark.dbtest
+    def test_remove_source_not_found(self):
+        assert(self.source_manager.remove_source("foo") == False)
+
+    @pytest.mark.dbtest
+    def test_remove_source_files_attached(self, bdb_backend):
+        source1 = Source("foo", values={"bar": "baz"})
+        self.source_manager.add_source(source1)
+
+        meta = create_metadata("pvol", "20000131", "131415", "bar:baz")
+        h5file = write_metadata(meta)
+
+        bdb_backend.store_file(h5file.name)
+        with pytest.raises(IntegrityError):
+            self.source_manager.remove_source("foo")
+
+    @pytest.mark.dbtest
+    def test_get_sources(self):
+        source1 = Source("foo", values={"bar": "baz"})
+        source2 = Source("bar", values={"qwe": "asd"})
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
+
+        sources = self.source_manager.get_sources()
+        assert(len(sources) == 2)
+        # in alphabetical order by name
+        assert(sources[0] == source2)
+        assert(sources[1] == source1)
+        
+    @pytest.mark.dbtest
+    def test_get_source(self):
+        source1 = Source("se", values={"bar": "baz"})
+        source2 = Source("sekir", values={"qwe": "asd"}, parent="se")
+        source3 = Source("pl", values={"bar": "boo"})
+        source4 = Source("plika", values={"qwe": "moha"}, parent="pl")
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
+        self.source_manager.add_source(source3)
+        self.source_manager.add_source(source4)
+
+        assert(self.source_manager.get_source("se") == source1)
+        assert(self.source_manager.get_source("sekir") == source2)
+        assert(self.source_manager.get_source("pl") == source3)
+        assert(self.source_manager.get_source("plika") == source4)
+
+    @pytest.mark.dbtest
     def test_get_source_not_found(self):
         source1 = Source("se", values={"bar": "baz"})
         source2 = Source("sekir", values={"qwe": "asd"}, parent="se")
@@ -534,14 +629,14 @@ class TestSqlAlchemySourceManager(object):
             self.source_manager.get_source("sse")
             self.fail("Expected LookupError")
         except LookupError as e:
-            eq_("Could not find source with name: sse", e.__str__())
+            assert(e.__str__() == "Could not find source with name: sse")
     
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_get_sources_empty(self):
         sources = self.source_manager.get_sources()
-        eq_(0, len(sources))
+        assert(len(sources) == 0)
 
-    @attr("dbtest")
+    @pytest.mark.dbtest
     def test_add_with_wigos(self):
         source1 = Source("se", values={"bar": "baz"})
         source2 = Source("sekrn", values={"NOD":"sekrn","WIGOS": "0-20000-0-2032"}, parent="se")
@@ -549,4 +644,32 @@ class TestSqlAlchemySourceManager(object):
         self.source_manager.add_source(source1)
         self.source_manager.add_source(source2)
 
-        eq_(source2, self.source_manager.get_source("sekrn"))
+        assert(self.source_manager.get_source("sekrn") == source2)
+        source2 = Source("sekir", values={"qwe": "asd"}, parent="se")
+        source3 = Source("pl", values={"bar": "boo"})
+        source4 = Source("plika", values={"qwe": "moha"}, parent="pl")
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
+        self.source_manager.add_source(source3)
+        self.source_manager.add_source(source4)
+
+        try:
+            self.source_manager.get_source("sse")
+            self.fail("Expected LookupError")
+        except LookupError as e:
+            assert(e.__str__() == "Could not find source with name: sse")
+    
+    @pytest.mark.dbtest
+    def test_get_sources_empty(self):
+        sources = self.source_manager.get_sources()
+        assert(len(sources) == 0)
+
+    @pytest.mark.dbtest
+    def test_add_with_wigos(self):
+        source1 = Source("se", values={"bar": "baz"})
+        source2 = Source("sekrn", values={"NOD":"sekrn","WIGOS": "0-20000-0-2032"}, parent="se")
+
+        self.source_manager.add_source(source1)
+        self.source_manager.add_source(source2)
+
+        assert(self.source_manager.get_source("sekrn") == source2)

@@ -17,21 +17,15 @@
 
 import json
 
-from sqlalchemy import sql
+from sqlalchemy import select, bindparam, insert, update, delete
 
 from baltrad.bdbcommon import expr, filter
 from baltrad.bdbserver import backend
 from baltrad.bdbserver.sqla import schema
 
 class SqlAlchemyFilterManager(backend.FilterManager):
-    _select_filter_qry = sql.select(
-        [schema.filters.c.expression],
-        schema.filters.c.name==sql.bindparam("name")
-    )
-
-    _select_filter_names_qry = sql.select(
-        [schema.filters.c.name],
-    )
+    _select_filter_qry = select(schema.filters.c.expression).where(schema.filters.c.name == bindparam("name"))
+    _select_filter_names_qry = select(schema.filters.c.name)
 
     def __init__(self, backend):
         self._backend = backend
@@ -39,12 +33,12 @@ class SqlAlchemyFilterManager(backend.FilterManager):
     def get_filter_names(self):
         with self.get_connection() as conn:
             result = conn.execute(self._select_filter_names_qry)
-            return [row[schema.filters.c.name] for row in result]
+            return [row.name for row in result]
 
     def get_filter(self, name):
         with self.get_connection() as conn:
             stored_expr = conn.execute(
-                self._select_filter_qry, name=name
+                self._select_filter_qry, {"name":name}
             ).scalar()
             if not stored_expr:
                 return None
@@ -57,30 +51,26 @@ class SqlAlchemyFilterManager(backend.FilterManager):
         with self.get_connection() as conn:
             conn.execute(
                 schema.filters.insert(),
-                name=filter.name,
-                expression=self._to_storable_expr(filter.expression)
+                {"name":filter.name,
+                 "expression":self._to_storable_expr(filter.expression)}
             )
+            conn.commit()
     
     def remove_filter(self, name):
         with self.get_connection() as conn:
-            result = conn.execute(
-                schema.filters.delete(
-                    whereclause=schema.filters.c.name==name
-                )
-            )
-            return bool(result.rowcount)
+            rowcount = conn.execute(delete(schema.filters).where(schema.filters.c.name == name)).rowcount
+            conn.commit()
+            return bool(rowcount)
     
     def update_filter(self, filter):
         with self.get_connection() as conn:
-            result = conn.execute(
-                sql.update(
-                    schema.filters,
-                    whereclause=schema.filters.c.name==filter.name
-                ),
-                expression=self._to_storable_expr(filter.expression)
-            )
-            if not result.rowcount:
+            rowcount = conn.execute(
+                update(schema.filters).where(schema.filters.c.name == filter.name),
+                {"expression":self._to_storable_expr(filter.expression)}
+            ).rowcount
+            if not rowcount:
                 raise LookupError("no filter found by name: %s" % filter.name)
+            conn.commit()
     
     def _to_storable_expr(self, xpr):
         return json.dumps(expr.wrap_json(xpr), sort_keys=True)

@@ -18,7 +18,7 @@
 import errno
 import uuid
 
-from nose.tools import eq_, ok_, raises
+import pytest
 import mock
 from sqlalchemy import sql
 
@@ -58,7 +58,8 @@ class MockTransaction(mock.Mock):
         else:
             self.commit()
 
-class TestDatabaseStorage(object):
+class TestDatabaseStorage:
+    @pytest.fixture(autouse=True)
     def setup(self):
         self.backend = mock.Mock(spec=backend.SqlAlchemyBackend)
         self.metadata = mock.Mock(spec=oh5.Metadata)
@@ -85,7 +86,7 @@ class TestDatabaseStorage(object):
         )
         self.conn.execute.assert_called_once_with(
             check_instance(sql.expression.Update),
-            oid=mock.sentinel.oid
+            {"oid":mock.sentinel.oid}
         )
         self.tx.commit.assert_called_once_with()
         self.conn.close.assert_called_once_with()
@@ -93,12 +94,8 @@ class TestDatabaseStorage(object):
     def test_store_importer_failure(self):
         self.importer.store.side_effect = Exception()
 
-        try:
+        with pytest.raises(Exception):
             self.storage.store(self.backend, self.metadata, "/path/to/file")
-        except Exception:
-            pass
-        else:
-            ok_(False, "expected Exception to be propagated")
 
         self.backend.get_connection.assert_called_once_with()
         self.conn.begin.assert_called_once_with()
@@ -106,7 +103,7 @@ class TestDatabaseStorage(object):
         self.backend.insert_metadata.assert_called_once_with(
             self.conn, self.metadata
         )
-        eq_(0, self.conn.execute.call_count)
+        assert(0 == self.conn.execute.call_count)
         self.tx.rollback.assert_called_once_with()
         self.conn.close.assert_called_once_with()
 
@@ -122,14 +119,14 @@ class TestDatabaseStorage(object):
         self.conn.execute(check_instance(sql.expression.Select))
         self.importer.read.assert_called_with(self.conn, mock.sentinel.oid)
         self.conn.close.assert_called_once_with()
-        eq_(mock.sentinel.content, result)
+        assert(mock.sentinel.content == result)
     
-    @raises(storage.FileNotFound)
     def test_read_no_oid(self):
         self.storage.get_oid = mock.Mock(return_value=None)
         uuid_ = uuid.UUID("00000000-0000-0000-0004-000000000001")
 
-        self.storage.read(self.backend, uuid_)
+        with pytest.raises(storage.FileNotFound):
+            self.storage.read(self.backend, uuid_)
    
     def test_remove(self):
         uuid_ = uuid.UUID("00000000-0000-0000-0004-000000000001")
@@ -145,12 +142,12 @@ class TestDatabaseStorage(object):
         self.tx.commit.assert_called_once_with()
         self.conn.close.assert_called_once_with()
     
-    @raises(storage.FileNotFound)
     def test_remove_no_oid(self):
         self.storage.get_oid = mock.Mock(return_value=None)
         uuid_ = uuid.UUID("00000000-0000-0000-0004-000000000001")
 
-        self.storage.remove(self.backend, uuid_)
+        with pytest.raises(storage.FileNotFound):
+            self.storage.remove(self.backend, uuid_)
     
     def test_get_oid(self):
         result = mock.Mock(spec_set=["scalar"])
@@ -158,12 +155,13 @@ class TestDatabaseStorage(object):
         result.scalar.return_value = mock.sentinel.oid
         self.conn.execute.return_value = result
 
-        eq_(mock.sentinel.oid, self.storage.get_oid(self.conn, uuid_))
+        assert(mock.sentinel.oid == self.storage.get_oid(self.conn, uuid_))
         self.conn.execute.assert_called_with(
             check_instance(sql.expression.Select)
         )
 
-class TestFileSystemStorage(object):
+class TestFileSystemStorage:
+    @pytest.fixture(autouse=True)
     def setup(self):
         self.backend = mock.Mock(spec=backend.SqlAlchemyBackend)
         self.metadata = mock.Mock(spec=oh5.Metadata)
@@ -186,7 +184,7 @@ class TestFileSystemStorage(object):
         self.backend.insert_metadata.assert_called_once_with(
             self.conn, self.metadata
         )
-        self.storage.ensure_dir_exists.called_once_with("/stor/a/")
+        self.storage.ensure_dir_exists.assert_called_once_with("/stor/a")
         copyfile.assert_called_with(
             "/infile", "/stor/a/abc00000-0000-0000-0004-000000000001"
         )
@@ -198,19 +196,15 @@ class TestFileSystemStorage(object):
         self.storage.ensure_dir_exists = mock.Mock()
         copyfile.side_effect = Exception()
         
-        try:
+        with pytest.raises(Exception):
             self.storage.store(self.backend, self.metadata, "/infile")
-        except Exception:
-            pass
-        else:
-            ok_(False, "expect Exception to propagate")
         
         self.backend.get_connection.assert_called_once_with()
         self.conn.begin.assert_called_once_with()
         self.backend.insert_metadata.assert_called_once_with(
             self.conn, self.metadata
         )
-        self.storage.ensure_dir_exists.called_once_with("/stor/a/")
+        self.storage.ensure_dir_exists.assert_called_once_with("/stor/a")
         copyfile.assert_called_with(
             "/infile", "/stor/a/abc00000-0000-0000-0004-000000000001"
         )
@@ -231,23 +225,23 @@ class TestFileSystemStorage(object):
 #             "/stor/0/00000000-0000-0000-0004-000000000001"
 #         )
 #         file_handle.read.assert_called_once_with()
-#         eq_("content", result)
+#         assert("content" == result)
     
-    @raises(storage.FileNotFound)
     @mock.patch(patch_string)
     def test_read_nx(self, mock_open):
         uuid_ = uuid.UUID("00000000-0000-0000-0004-000000000001")
         mock_open.side_effect = IOError(errno.ENOENT, "msg", "filename")
 
-        self.storage.read(self.backend, uuid_)
+        with pytest.raises(storage.FileNotFound):
+            self.storage.read(self.backend, uuid_)
     
-    @raises(IOError)
     @mock.patch(patch_string)
     def test_read_other_exceptions(self, mock_open):
         uuid_ = uuid.UUID("00000000-0000-0000-0004-000000000001")
         mock_open.side_effect = IOError(errno.EPERM, "msg", "filename")
 
-        self.storage.read(self.backend, uuid_)
+        with pytest.raises(IOError):
+            self.storage.read(self.backend, uuid_)
 
     @mock.patch("os.unlink")
     def test_remove(self, unlink):
@@ -260,27 +254,27 @@ class TestFileSystemStorage(object):
         
         self.backend.delete_metadata.assert_called_once_with(self.conn, uuid_)
     
-    #@raises(storage.FileNotFound)
     #@mock.patch("os.unlink")
     #def test_remove_nx_file(self, unlink):
     #    uuid_ = uuid.UUID("00000000-0000-0000-0004-000000000001")
     #    unlink.side_effect = OSError(errno.ENOENT, "msg", "filename")
     #    
-    #    self.storage.remove(self.backend, uuid_)
+    #    with pytest.raises(storage.FileNotFound):
+    #        self.storage.remove(self.backend, uuid_)
     
-    #@raises(OSError)
     #@mock.patch("os.unlink")
     #def test_remove_other_exceptions(self, unlink):
     #    uuid_ = uuid.UUID("00000000-0000-0000-0004-000000000001")
     #    unlink.side_effect = OSError(errno.EPERM, "msg", "filename")
     #    
-    #    self.storage.remove(self.backend, uuid_)
+    #    with pytest.raises(OSError):
+    #        self.storage.remove(self.backend, uuid_)
 
     def test_path_from_uuid(self):
         strg = storage.FileSystemStorage("/stor", layers=3)
         expected = "/stor/a/b/c/abc00000-0000-0000-0004-000000000001"
         result = strg.path_from_uuid("abc00000-0000-0000-0004-000000000001")
-        eq_(expected, result)
+        assert(expected == result)
     
     @mock.patch("os.makedirs")
     @mock.patch("os.path.exists")
@@ -289,7 +283,7 @@ class TestFileSystemStorage(object):
 
         self.storage.ensure_dir_exists(mock.sentinel.path)
         exists.assert_called_once_with(mock.sentinel.path)
-        eq_(0, makedirs.call_count)
+        assert(0 == makedirs.call_count)
     
     @mock.patch("os.makedirs")
     @mock.patch("os.path.exists")
@@ -314,7 +308,7 @@ class TestFileSystemStorage(object):
             ctor.return_value = mock.sentinel.storage
             result = from_conf(conf)
             ctor.assert_called_once_with("/root", layers=2)
-            eq_(mock.sentinel.storage, result)
+            assert(mock.sentinel.storage == result)
     
     def test_from_conf_default_layers(self):
         # store original method, we are going to patch the class
@@ -329,16 +323,16 @@ class TestFileSystemStorage(object):
             ctor.return_value = mock.sentinel.storage
             result = from_conf(conf)
             ctor.assert_called_once_with("/root", layers=3)
-            eq_(mock.sentinel.storage, result)
+            assert(mock.sentinel.storage == result)
     
-    @raises(config.Error)
     def test_from_conf_relative_path(self):
         conf = config.Properties({
             "baltrad.bdb.server.backend.sqla.storage.fs.path": "relpath",
         })
-        storage.FileSystemStorage.from_conf(conf)
+        with pytest.raises(config.Error):
+            storage.FileSystemStorage.from_conf(conf)
 
-class TestFileStorage(object):
+class TestFileStorage:
     @mock.patch("baltrad.bdbserver.sqla.storage.FileStorage.get_impl")
     def test_impl_from_conf(self, get_impl):
         impl_cls = get_impl.return_value
@@ -347,11 +341,11 @@ class TestFileStorage(object):
         result = storage.FileStorage.impl_from_conf("mock", mock.sentinel.conf)
         get_impl.assert_called_once_with("mock")
         impl_cls.from_conf.assert_called_once_with(mock.sentinel.conf)
-        eq_(mock.sentinel.storage, result)
+        assert(mock.sentinel.storage == result)
     
-    @raises(config.Error)
     @mock.patch("baltrad.bdbserver.sqla.storage.FileStorage.get_impl")
     def test_impl_from_conf_nx_impl(self, get_impl):
         get_impl.side_effect = LookupError
 
-        storage.FileStorage.impl_from_conf("mock", mock.sentinel.conf)
+        with pytest.raises(config.Error):
+            storage.FileStorage.impl_from_conf("mock", mock.sentinel.conf)

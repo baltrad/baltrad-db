@@ -1,8 +1,5 @@
 import datetime
-
-from nose.plugins.attrib import attr
-from nose.plugins.skip import SkipTest
-from nose.tools import eq_, ok_
+import pytest
 
 from baltrad.bdbcommon import expr, oh5
 from baltrad.bdbserver import backend
@@ -12,7 +9,7 @@ from baltrad.bdbserver.sqla import (
     schema
 )
 
-from . import get_backend
+from .conftest import bdb_backend
 
 ###
 # src name obj  date       time  xsize ysize
@@ -152,6 +149,7 @@ def _insert_test_file(backend, file_):
         file_id =  sqla_backend.insert_file(conn, meta, source_id)
         sqla_backend.associate_what_source(conn, file_id, meta.source())
         sqla_backend.insert_metadata(conn, meta, file_id)
+        conn.commit()
 
 def _add_attribute(meta, path, value):
     path = path.split("/")
@@ -165,6 +163,7 @@ def _add_attribute(meta, path, value):
     
     node.add_child(oh5.Attribute(path[-1], value=value))
 
+@pytest.mark.dbtest
 class TestFileQuery(object):
     backend = None
 
@@ -175,82 +174,74 @@ class TestFileQuery(object):
         oh5.Source("sevax", values={"NOD": "sevax", "WMO": "02600", "WIGOS": "0-20000-0-2600", "PLC": "Vara"})
     ]
 
-    @classmethod
-    def setup_class(cls):
-        cls.backend = get_backend()
-        if not cls.backend:
-            return
+    @pytest.fixture(autouse=True)
+    def setup_class_fixture(self, bdb_backend):
+        if not bdb_backend:
+            pytest.skip("no backend defined")
 
-        for src in cls.sources:
-            cls.backend.get_source_manager().add_source(src)
-        cls.files = _insert_test_files(cls.backend)
-    
-    @classmethod
-    def teardown_class(cls):
-        if not cls.backend:
-            return
-
-        with cls.backend.get_connection() as conn:
-            conn.execute(schema.files.delete())
-            conn.execute(schema.sources.delete())
-    
-    def setup(self):
-        if not self.backend:
-            raise SkipTest("no backend defined")
-
+        for src in self.sources:
+            bdb_backend.get_source_manager().add_source(src)
+        self.files = _insert_test_files(bdb_backend)
         self.query = backend.FileQuery()
 
-    @attr("dbtest")
-    def test_all_files(self):
-        result = self.backend.execute_file_query(self.query)
-        eq_(7, len(result))
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
+        yield
 
-    @attr("dbtest")
-    def test_filter_by_uuid(self):
+        with bdb_backend.get_connection() as conn:
+            conn.execute(schema.files.delete())
+            conn.execute(schema.sources.delete())
+            conn.commit()
+
+    @pytest.mark.dbtest
+    def test_all_files(self, bdb_backend):
+        result = bdb_backend.execute_file_query(self.query)
+        assert(7 == len(result))
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[5]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[6]["bdb_uuid"]} in result)
+
+    @pytest.mark.dbtest
+    def test_filter_by_uuid(self, bdb_backend):
         uuid = "00000000-0000-0000-0004-000000000004"
         self.query.filter = expr.eq(
             expr.attribute("_bdb/uuid", "string"),
             expr.literal(uuid)
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(1, len(result))
-        ok_({"uuid": uuid} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(1 == len(result))
+        assert({"uuid": uuid} in result)
     
-    @attr("dbtest")
-    def test_filter_by_object(self):
+    @pytest.mark.dbtest
+    def test_filter_by_object(self, bdb_backend):
         self.query.filter = expr.eq(
             expr.attribute("what/object", "string"),
             expr.literal("PVOL")
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(3, len(result))
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(3 == len(result))
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_filter_by_xsize(self):
+    @pytest.mark.dbtest
+    def test_filter_by_xsize(self, bdb_backend):
         self.query.filter = expr.eq(
             expr.attribute("where/xsize", "long"),
             expr.literal(2)
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(2, len(result))
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(2 == len(result))
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_file_by_xsize_or_ysize(self):
+    @pytest.mark.dbtest
+    def test_file_by_xsize_or_ysize(self, bdb_backend):
         self.query.filter = expr.or_(
             expr.eq(
                 expr.attribute("where/xsize", "long"),
@@ -262,14 +253,14 @@ class TestFileQuery(object):
             )
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(3, len(result))
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(3 == len(result))
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_filter_by_nominal_datetime(self):
+    @pytest.mark.dbtest
+    def test_filter_by_nominal_datetime(self, bdb_backend):
         self.query.filter = expr.between(
             expr.add(
                 expr.attribute("what/date", "date"),
@@ -279,14 +270,14 @@ class TestFileQuery(object):
             expr.literal(datetime.datetime(2001, 1, 1, 12, 1))
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(3, len(result)) 
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(3 == len(result)) 
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
 
-    @attr("dbtest")
-    def test_filter_by_stored_datetime(self):
+    @pytest.mark.dbtest
+    def test_filter_by_stored_datetime(self, bdb_backend):
         self.query.filter = expr.between(
             expr.add(
                 expr.attribute("_bdb/stored_date", "date"),
@@ -296,14 +287,14 @@ class TestFileQuery(object):
             expr.literal(datetime.datetime(2011, 1, 1, 12, 0, 5))
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(3, len(result)) 
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(3 == len(result)) 
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
 
-    @attr("dbtest")
-    def test_filter_by_stored_and_nominal_datetime_interval(self):
+    @pytest.mark.dbtest
+    def test_filter_by_stored_and_nominal_datetime_interval(self, bdb_backend):
         # XXX the difference between the stored and nominal time in the
         # fixtures is a bit big for sanely testing this. They should be
         # moved closer together.
@@ -319,42 +310,42 @@ class TestFileQuery(object):
             expr.sub(stored_dt_attr, nominal_dt_attr),
             expr.literal(datetime.timedelta(days=4017, seconds=86342))
         )
-        result = self.backend.execute_file_query(self.query)
-        eq_(5, len(result)) 
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(5 == len(result)) 
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[5]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[6]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_filter_by_file_size(self):
+    @pytest.mark.dbtest
+    def test_filter_by_file_size(self, bdb_backend):
         self.query.filter = expr.le(
             expr.attribute("_bdb/file_size", "long"),
             expr.literal(3000)
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(3, len(result)) 
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(3 == len(result)) 
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
 
  
-    @attr("dbtest")
-    def test_filter_by_bdb_source_PLC(self):
+    @pytest.mark.dbtest
+    def test_filter_by_bdb_source_PLC(self, bdb_backend):
         self.query.filter = expr.eq(
             expr.attribute("_bdb/source:PLC", "string"),
             expr.literal("Harku")
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(2, len(result)) 
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(2==len(result)) 
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_filter_by_bdb_source_name_or_source_NOD(self):
+    @pytest.mark.dbtest
+    def test_filter_by_bdb_source_name_or_source_NOD(self, bdb_backend):
         self.query.filter = expr.or_(
             expr.eq(
                 expr.attribute("_bdb/source_name", "string"),
@@ -366,61 +357,61 @@ class TestFileQuery(object):
             )
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(2, len(result)) 
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(2==len(result)) 
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
 
-    @attr("dbtest")
-    def test_filter_by_WIGOS(self):
+    @pytest.mark.dbtest
+    def test_filter_by_WIGOS(self, bdb_backend):
         self.query.filter = expr.eq(
           expr.attribute("_bdb/source:WIGOS", "string"),
           expr.literal("0-20000-0-2032")
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(1, len(result)) 
-        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(1==len(result)) 
+        assert({"uuid": self.files[5]["bdb_uuid"]} in result)
 
-    @attr("dbtest")
-    def test_filter_by_WIGOS_2(self):
+    @pytest.mark.dbtest
+    def test_filter_by_WIGOS_2(self, bdb_backend):
         self.query.filter = expr.eq(
           expr.attribute("_bdb/source:WIGOS", "string"),
           expr.literal("0-20000-0-2600")
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(1, len(result)) 
-        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(1==len(result)) 
+        assert({"uuid": self.files[6]["bdb_uuid"]} in result)
 
 
-    @attr("dbtest")
-    def test_filter_by_bdb_source_name_like(self):
+    @pytest.mark.dbtest
+    def test_filter_by_bdb_source_name_like(self, bdb_backend):
         self.query.filter = expr.like(
             expr.attribute("_bdb/source_name", "string"),
             "ee*"
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(5, len(result))
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(5==len(result))
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_filter_by_what_source_CMT(self):
+    @pytest.mark.dbtest
+    def test_filter_by_what_source_CMT(self, bdb_backend):
         self.query.filter = expr.eq(
             expr.attribute("what/source:CMT", "string"),
             expr.literal("file3")
         )
-        result =  self.backend.execute_file_query(self.query)
-        eq_(1, len(result))
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        result =  bdb_backend.execute_file_query(self.query)
+        assert(1==len(result))
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
 
-    @attr("dbtest")
-    def test_filter_by_what_source_CMT_or_NOD(self):
+    @pytest.mark.dbtest
+    def test_filter_by_what_source_CMT_or_NOD(self, bdb_backend):
         self.query.filter = expr.or_(
             expr.eq(
                 expr.attribute("what/source:CMT", "string"),
@@ -431,26 +422,26 @@ class TestFileQuery(object):
                 expr.literal("eehar")
             )
         )
-        result = self.backend.execute_file_query(self.query)
-        eq_(3, len(result))
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(3==len(result))
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
 
-    @attr("dbtest")
-    def test_filter_by_object_in(self):
+    @pytest.mark.dbtest
+    def test_filter_by_object_in(self, bdb_backend):
         self.query.filter = expr.in_(
             expr.attribute("what/object", "string"),
             expr.literal(["CVOL", "SCAN"])
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(4, len(result))
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(4==len(result))
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[5]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[6]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_filter_by_ysize_not_in(self):
+    @pytest.mark.dbtest
+    def test_filter_by_ysize_not_in(self, bdb_backend):
         self.query.filter = expr.not_(
             expr.in_(
                 expr.attribute("where/ysize", "long"),
@@ -458,60 +449,60 @@ class TestFileQuery(object):
             )
         )
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(4, len(result))
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(4==len(result))
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[5]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[6]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_order_by(self):
+    @pytest.mark.dbtest
+    def test_order_by(self, bdb_backend):
         self.query.order = [
             expr.desc(expr.attribute("where/xsize", "long"))
         ]
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(7, len(result))
-        eq_(self.files[6]["bdb_uuid"], result[0]["uuid"])
-        eq_(self.files[5]["bdb_uuid"], result[1]["uuid"])
-        eq_(self.files[3]["bdb_uuid"], result[2]["uuid"])
-        eq_(self.files[4]["bdb_uuid"], result[3]["uuid"])
-        eq_(self.files[2]["bdb_uuid"], result[4]["uuid"])
-        eq_(self.files[1]["bdb_uuid"], result[5]["uuid"])
-        eq_(self.files[0]["bdb_uuid"], result[6]["uuid"])
+        result = bdb_backend.execute_file_query(self.query)
+        assert(7==len(result))
+        assert(self.files[6]["bdb_uuid"]==result[0]["uuid"])
+        assert(self.files[5]["bdb_uuid"]==result[1]["uuid"])
+        assert(self.files[3]["bdb_uuid"]==result[2]["uuid"])
+        assert(self.files[4]["bdb_uuid"]==result[3]["uuid"])
+        assert(self.files[2]["bdb_uuid"]==result[4]["uuid"])
+        assert(self.files[1]["bdb_uuid"]==result[5]["uuid"])
+        assert(self.files[0]["bdb_uuid"]==result[6]["uuid"])
     
-    @attr("dbtest")
-    def test_limit(self):
+    @pytest.mark.dbtest
+    def test_limit(self, bdb_backend):
         self.query.limit = 2
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(2, len(result))
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(2==len(result))
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_skip(self):
+    @pytest.mark.dbtest
+    def test_skip(self, bdb_backend):
         self.query.skip = 3
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(4, len(result))
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(4==len(result))
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[5]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[6]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_skip_with_limit(self):
+    @pytest.mark.dbtest
+    def test_skip_with_limit(self, bdb_backend):
         self.query.skip = 2
         self.query.limit = 2
 
-        result = self.backend.execute_file_query(self.query)
-        eq_(2, len(result))
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        result = bdb_backend.execute_file_query(self.query)
+        assert(2==len(result))
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
 
-
+@pytest.mark.dbtest
 class TestAttributeQuery(object):
     backend = None
 
@@ -522,49 +513,72 @@ class TestAttributeQuery(object):
         oh5.Source("sevax", values={"NOD": "sevax", "WMO": "02600", "WIGOS": "0-20000-0-2600", "PLC": "Vara"})
     ]
 
-    @classmethod
-    def setup_class(cls):
-        cls.backend = get_backend()
-        if not cls.backend:
-            return
+    @pytest.fixture(autouse=True)
+    def setup_fixture(self, bdb_backend):
+        if not bdb_backend:
+            pytest.skip("no backend defined")
 
-        for src in cls.sources:
-            cls.backend.get_source_manager().add_source(src)
-        cls.files = _insert_test_files(cls.backend)
-        
-    @classmethod
-    def teardown_class(cls):
-        if not cls.backend:
-            return
-
-        with cls.backend.get_connection() as conn:
+        with bdb_backend.get_connection() as conn:
             conn.execute(schema.files.delete())
             conn.execute(schema.sources.delete())
-    
-    def setup(self):
-        if not self.backend:
-            raise SkipTest("no backend defined")
+            conn.commit()
 
+        for src in self.sources:
+            bdb_backend.get_source_manager().add_source(src)
+
+        self.files = _insert_test_files(bdb_backend)
         self.query = backend.AttributeQuery()
+
+        yield
+
+        with bdb_backend.get_connection() as conn:
+            conn.execute(schema.files.delete())
+            conn.execute(schema.sources.delete())
+            conn.commit()
+
+    # @classmethod
+    # def setup_class(cls):
+    #     cls.backend = get_backend()
+    #     if not cls.backend:
+    #         return
+
+    #     for src in cls.sources:
+    #         cls.backend.get_source_manager().add_source(src)
+    #     cls.files = _insert_test_files(cls.backend)
+        
+    # @classmethod
+    # def teardown_class(cls):
+    #     if not cls.backend:
+    #         return
+
+    #     with cls.backend.get_connection() as conn:
+    #         conn.execute(schema.files.delete())
+    #         conn.execute(schema.sources.delete())
     
-    @attr("dbtest")
-    def test_fetch_uuid(self):
+    # def setup(self):
+    #     if not self.backend:
+    #         pytest.skip("no backend defined")
+
+    #     self.query = backend.AttributeQuery()
+    
+    @pytest.mark.dbtest
+    def test_fetch_uuid(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
         
-        result = self.query.execute(self.backend)
-        eq_(7, len(result))
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
+        result = self.query.execute(bdb_backend)
+        assert(7==len(result))
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[5]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[6]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_fetch_uuid_filter_by_object(self):
+    @pytest.mark.dbtest
+    def test_fetch_uuid_filter_by_object(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -573,14 +587,14 @@ class TestAttributeQuery(object):
             expr.literal("PVOL")
         )
 
-        result = self.query.execute(self.backend)
-        eq_(3, len(result))
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        result = self.query.execute(bdb_backend)
+        assert(3 == len(result))
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
         
-    @attr("dbtest")
-    def test_fetch_xsize_filter_by_xsize(self):
+    @pytest.mark.dbtest
+    def test_fetch_xsize_filter_by_xsize(self, bdb_backend):
         self.query.fetch = {
             "xsize": expr.attribute("where/xsize", "long")
         }
@@ -589,13 +603,13 @@ class TestAttributeQuery(object):
             expr.literal(2)
         )
 
-        result = self.query.execute(self.backend)
-        eq_(2, len(result))
-        eq_({"xsize": 2}, result[0])
-        eq_({"xsize": 2}, result[1])
+        result = self.query.execute(bdb_backend)
+        assert(2 == len(result))
+        assert({"xsize": 2} == result[0])
+        assert({"xsize": 2} == result[1])
     
-    @attr("dbtest")
-    def test_fetch_uuid_filter_by_xsize_or_ysize(self):
+    @pytest.mark.dbtest
+    def test_fetch_uuid_filter_by_xsize_or_ysize(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -610,14 +624,14 @@ class TestAttributeQuery(object):
             )
         )
 
-        result = self.query.execute(self.backend)
-        eq_(4, len(result))
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        eq_(2, len(list(filter(lambda r: r == {"uuid": self.files[4]["bdb_uuid"]}, result))))
+        result = self.query.execute(bdb_backend)
+        assert(4==len(result))
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert(2 == len(list(filter(lambda r: r == {"uuid": self.files[4]["bdb_uuid"]}, result))))
     
-    @attr("dbtest")
-    def test_fetch_distinct_uuid_filter_by_xsize(self):
+    @pytest.mark.dbtest
+    def test_fetch_distinct_uuid_filter_by_xsize(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -627,12 +641,12 @@ class TestAttributeQuery(object):
             expr.literal(3)
         )
 
-        result = self.query.execute(self.backend)
-        eq_(1, len(result))
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
+        result = self.query.execute(bdb_backend)
+        assert(1==len(result))
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
 
-    @attr("dbtest")
-    def test_fetch_uuid_filter_by_nominal_datetime(self):
+    @pytest.mark.dbtest
+    def test_fetch_uuid_filter_by_nominal_datetime(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -645,14 +659,14 @@ class TestAttributeQuery(object):
             expr.literal(datetime.datetime(2001, 1, 1, 12, 1))
         )
 
-        result = self.query.execute(self.backend)
-        eq_(3, len(result))
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        result = self.query.execute(bdb_backend)
+        assert(3 == len(result))
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
 
-    @attr("dbtest")
-    def test_fetch_uuid_filter_by_source_PLC(self):
+    @pytest.mark.dbtest
+    def test_fetch_uuid_filter_by_source_PLC(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -661,13 +675,13 @@ class TestAttributeQuery(object):
             expr.literal("Harku")
         )
 
-        result = self.query.execute(self.backend)
-        eq_(2, len(result))
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        result = self.query.execute(bdb_backend)
+        assert (2 == len(result))
+        assert ({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert ({"uuid": self.files[3]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_fetch_uuid_filter_by_source_name_or_source_name(self):
+    @pytest.mark.dbtest
+    def test_fetch_uuid_filter_by_source_name_or_source_name(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -682,16 +696,16 @@ class TestAttributeQuery(object):
             )
         )
 
-        result = self.query.execute(self.backend)
-        eq_(5, len(result))
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[2]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
+        result = self.query.execute(bdb_backend)
+        assert(5 == len(result))
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[2]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_fetch_uuid_filter_by_source_name_and_source_name(self):
+    @pytest.mark.dbtest
+    def test_fetch_uuid_filter_by_source_name_and_source_name(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -706,11 +720,11 @@ class TestAttributeQuery(object):
             )
         )
 
-        result = self.query.execute(self.backend)
-        eq_(0, len(result))
+        result = self.query.execute(bdb_backend)
+        assert(0 == len(result))
     
-    @attr("dbtest")
-    def test_fetch_uuid_filter_by_source_name_like(self):
+    @pytest.mark.dbtest
+    def test_fetch_uuid_filter_by_source_name_like(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -719,13 +733,13 @@ class TestAttributeQuery(object):
             "eeh*",
         )
 
-        result = self.query.execute(self.backend)
-        eq_(2, len(result))
-        ok_({"uuid": self.files[1]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
+        result = self.query.execute(bdb_backend)
+        assert(2 == len(result))
+        assert({"uuid": self.files[1]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_order_by(self):
+    @pytest.mark.dbtest
+    def test_order_by(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "long")
         }
@@ -738,18 +752,18 @@ class TestAttributeQuery(object):
             )
         ]
 
-        result = self.query.execute(self.backend)
-        eq_(7, len(result))
-        eq_({"uuid": self.files[6]["bdb_uuid"]}, result[0])
-        eq_({"uuid": self.files[5]["bdb_uuid"]}, result[1])
-        eq_({"uuid": self.files[4]["bdb_uuid"]}, result[2])
-        eq_({"uuid": self.files[3]["bdb_uuid"]}, result[3])
-        eq_({"uuid": self.files[2]["bdb_uuid"]}, result[4])
-        eq_({"uuid": self.files[1]["bdb_uuid"]}, result[5])
-        eq_({"uuid": self.files[0]["bdb_uuid"]}, result[6])
+        result = self.query.execute(bdb_backend)
+        assert(7 == len(result))
+        assert({"uuid": self.files[6]["bdb_uuid"]} == result[0])
+        assert({"uuid": self.files[5]["bdb_uuid"]} == result[1])
+        assert({"uuid": self.files[4]["bdb_uuid"]} == result[2])
+        assert({"uuid": self.files[3]["bdb_uuid"]} == result[3])
+        assert({"uuid": self.files[2]["bdb_uuid"]} == result[4])
+        assert({"uuid": self.files[1]["bdb_uuid"]} == result[5])
+        assert({"uuid": self.files[0]["bdb_uuid"]} == result[6])
     
-    @attr("dbtest")
-    def test_limit(self):
+    @pytest.mark.dbtest
+    def test_limit(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -763,32 +777,32 @@ class TestAttributeQuery(object):
         ]
         self.query.limit = 2
 
-        result = self.query.execute(self.backend)
-        eq_(2, len(result))
-        eq_({"uuid": self.files[6]["bdb_uuid"]}, result[0])
-        eq_({"uuid": self.files[5]["bdb_uuid"]}, result[1])
+        result = self.query.execute(bdb_backend)
+        assert(2 == len(result))
+        assert({"uuid": self.files[6]["bdb_uuid"]} == result[0])
+        assert({"uuid": self.files[5]["bdb_uuid"]} == result[1])
     
-    @attr("dbtest")
-    def test_fetch_max_xsize(self):
+    @pytest.mark.dbtest
+    def test_fetch_max_xsize(self, bdb_backend):
         self.query.fetch = {
             "max_xsize": expr.max(expr.attribute("where/xsize", "long"))
         }
 
-        result = self.query.execute(self.backend)
-        eq_(1, len(result))
-        eq_({"max_xsize": 8}, result[0])
+        result = self.query.execute(bdb_backend)
+        assert(1 == len(result))
+        assert({"max_xsize": 8} == result[0])
     
-    @attr("dbtest")
-    def test_fetch_count_ysize(self):
+    @pytest.mark.dbtest
+    def test_fetch_count_ysize(self, bdb_backend):
         self.query.fetch = {
             "count_ysize" : expr.count(expr.attribute("where/ysize", "long"))
         }
-        result = self.query.execute(self.backend)
-        eq_(1, len(result))
-        eq_({"count_ysize": 10}, result[0])
+        result = self.query.execute(bdb_backend)
+        assert(1 == len(result))
+        assert({"count_ysize": 10} == result[0])
     
-    @attr("dbtest")
-    def test_fetch_min_ysize_filter_by_what_object(self):
+    @pytest.mark.dbtest
+    def test_fetch_min_ysize_filter_by_what_object(self, bdb_backend):
         self.query.fetch = {
             "min_ysize" : expr.min(expr.attribute("where/ysize", "long"))
         }
@@ -797,12 +811,12 @@ class TestAttributeQuery(object):
             expr.literal("CVOL")
         )
 
-        result = self.query.execute(self.backend)
-        eq_(1, len(result))
-        eq_({"min_ysize": 4}, result[0])
+        result = self.query.execute(bdb_backend)
+        assert(1 == len(result))
+        assert({"min_ysize": 4} == result[0])
     
-    @attr("dbtest")
-    def test_fetch_sum_xsize_group_by_source_name(self):
+    @pytest.mark.dbtest
+    def test_fetch_sum_xsize_group_by_source_name(self, bdb_backend):
         self.query.fetch = {
             "source": expr.attribute("_bdb/source_name", "string"),
             "sum_xsize": expr.sum(expr.attribute("where/xsize", "long"))
@@ -811,15 +825,15 @@ class TestAttributeQuery(object):
             expr.attribute("_bdb/source_name", "string")
         ]
 
-        result = self.query.execute(self.backend)
-        eq_(4, len(result))
-        ok_({"source": "eesur", "sum_xsize": 14} in result)
-        ok_({"source": "eehar", "sum_xsize": 8} in result)
-        ok_({"source": "sekrn", "sum_xsize": 14} in result)
-        ok_({"source": "sevax", "sum_xsize": 16} in result)
+        result = self.query.execute(bdb_backend)
+        assert(4 == len(result))
+        assert({"source": "eesur", "sum_xsize": 14} in result)
+        assert({"source": "eehar", "sum_xsize": 8} in result)
+        assert({"source": "sekrn", "sum_xsize": 14} in result)
+        assert({"source": "sevax", "sum_xsize": 16} in result)
     
-    @attr("dbtest")
-    def test_fetch_sum_xsize_group_by_source_name_filter_by_date(self):
+    @pytest.mark.dbtest
+    def test_fetch_sum_xsize_group_by_source_name_filter_by_date(self, bdb_backend):
         self.query.fetch = {
             "source": expr.attribute("_bdb/source_name", "string"),
             "sum_xsize": expr.sum(expr.attribute("where/xsize", "long"))
@@ -832,13 +846,13 @@ class TestAttributeQuery(object):
             expr.literal(datetime.date(2000, 1, 1))
         )
 
-        result = self.query.execute(self.backend)
-        eq_(2, len(result))
-        ok_({"source": "eesur", "sum_xsize": 7} in result)
-        ok_({"source": "eehar", "sum_xsize": 2} in result)
+        result = self.query.execute(bdb_backend)
+        assert(2 == len(result))
+        assert({"source": "eesur", "sum_xsize": 7} in result)
+        assert({"source": "eehar", "sum_xsize": 2} in result)
     
-    @attr("dbtest")
-    def test_fetch_max_xsize_group_by_source_name(self):
+    @pytest.mark.dbtest
+    def test_fetch_max_xsize_group_by_source_name(self, bdb_backend):
         self.query.fetch = {
             "source": expr.attribute("_bdb/source_name", "string"),
             "max_xsize": expr.max(expr.attribute("where/xsize", "long"))
@@ -847,15 +861,15 @@ class TestAttributeQuery(object):
             expr.attribute("_bdb/source_name", "string")
         ]
 
-        result = self.query.execute(self.backend)
-        eq_(4, len(result))
-        ok_({"source": "eesur", "max_xsize": 5} in result)
-        ok_({"source": "eehar", "max_xsize": 6} in result)
-        ok_({"source": "sekrn", "max_xsize": 7} in result)
-        ok_({"source": "sevax", "max_xsize": 8} in result)
+        result = self.query.execute(bdb_backend)
+        assert(4 == len(result))
+        assert({"source": "eesur", "max_xsize": 5} in result)
+        assert({"source": "eehar", "max_xsize": 6} in result)
+        assert({"source": "sekrn", "max_xsize": 7} in result)
+        assert({"source": "sevax", "max_xsize": 8} in result)
     
-    @attr("dbtest")
-    def test_fetch_max_xsize_min_ysize_group_by_source_name(self):
+    @pytest.mark.dbtest
+    def test_fetch_max_xsize_min_ysize_group_by_source_name(self, bdb_backend):
         self.query.fetch = {
             "source": expr.attribute("_bdb/source_name", "string"),
             "max_xsize": expr.max(expr.attribute("where/xsize", "long")),
@@ -865,15 +879,15 @@ class TestAttributeQuery(object):
             expr.attribute("_bdb/source_name", "string")
         ]
 
-        result = self.query.execute(self.backend)
-        eq_(4, len(result))
-        ok_({"source": "eesur", "max_xsize": 5, "min_ysize": 2} in result)
-        ok_({"source": "eehar", "max_xsize": 6, "min_ysize": 2} in result)
-        ok_({"source": "sekrn", "max_xsize": 7, "min_ysize": 7} in result)
-        ok_({"source": "sevax", "max_xsize": 8, "min_ysize": 8} in result)
+        result = self.query.execute(bdb_backend)
+        assert(4 == len(result))
+        assert({"source": "eesur", "max_xsize": 5, "min_ysize": 2} in result)
+        assert({"source": "eehar", "max_xsize": 6, "min_ysize": 2} in result)
+        assert({"source": "sekrn", "max_xsize": 7, "min_ysize": 7} in result)
+        assert({"source": "sevax", "max_xsize": 8, "min_ysize": 8} in result)
     
-    @attr("dbtest")
-    def test_fetch_missing_value_group_by_source_name(self):
+    @pytest.mark.dbtest
+    def test_fetch_missing_value_group_by_source_name(self, bdb_backend):
         self.query.fetch = {
             "source": expr.attribute("_bdb/source_name", "string"),
             "min_elangle": expr.min(expr.attribute("where/elangle", "double")),
@@ -882,15 +896,15 @@ class TestAttributeQuery(object):
             expr.attribute("_bdb/source_name", "string")
         ]
 
-        result = self.query.execute(self.backend)
-        eq_(4, len(result))
-        ok_({"source": "eesur", "min_elangle": None} in result)
-        ok_({"source": "eehar", "min_elangle": None} in result)
-        ok_({"source": "sekrn", "min_elangle": None} in result)
-        ok_({"source": "sevax", "min_elangle": None} in result)
+        result = self.query.execute(bdb_backend)
+        assert(4 == len(result))
+        assert({"source": "eesur", "min_elangle": None} in result)
+        assert({"source": "eehar", "min_elangle": None} in result)
+        assert({"source": "sekrn", "min_elangle": None} in result)
+        assert({"source": "sevax", "min_elangle": None} in result)
     
-    @attr("dbtest")
-    def test_fetch_uuid_filter_by_what_object_in(self):
+    @pytest.mark.dbtest
+    def test_fetch_uuid_filter_by_what_object_in(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -899,15 +913,15 @@ class TestAttributeQuery(object):
             expr.literal(["CVOL", "SCAN"])
         )
 
-        result = self.query.execute(self.backend)
-        eq_(4, len(result))
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
+        result = self.query.execute(bdb_backend)
+        assert(4 == len(result))
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[5]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[6]["bdb_uuid"]} in result)
     
-    @attr("dbtest")
-    def test_fetch_uuid_filter_by_xsize_not_in(self):
+    @pytest.mark.dbtest
+    def test_fetch_uuid_filter_by_xsize_not_in(self, bdb_backend):
         self.query.fetch = {
             "uuid": expr.attribute("_bdb/uuid", "string")
         }
@@ -918,19 +932,19 @@ class TestAttributeQuery(object):
             )
         )
  
-        result = self.query.execute(self.backend)
+        result = self.query.execute(bdb_backend)
 
-        eq_(7, len(result))
-        ok_({"uuid": self.files[0]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[3]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[4]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[5]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[5]["bdb_uuid"]} in result) # We have two datasets with same xsize?
-        ok_({"uuid": self.files[6]["bdb_uuid"]} in result)
-        ok_({"uuid": self.files[6]["bdb_uuid"]} in result) # We have two datasets with same xsize?
+        assert(7 == len(result))
+        assert({"uuid": self.files[0]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[3]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[4]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[5]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[5]["bdb_uuid"]} in result) # We have two datasets with same xsize?
+        assert({"uuid": self.files[6]["bdb_uuid"]} in result)
+        assert({"uuid": self.files[6]["bdb_uuid"]} in result) # We have two datasets with same xsize?
 
-    @attr("dbtest")
-    def test_fetch_xsize_by_what_object_and_dataset_absolute(self):
+    @pytest.mark.dbtest
+    def test_fetch_xsize_by_what_object_and_dataset_absolute(self, bdb_backend):
         self.query.fetch = {
             "xsize": expr.attribute("/dataset1/where/xsize", "long")
         }
@@ -941,14 +955,12 @@ class TestAttributeQuery(object):
                     expr.literal("SCAN"))
         )
 
-        result = self.query.execute(self.backend)
-        #import sys
-        #sys.stderr.write("%s\n"%`result`)
-        eq_(1, len(result))
-        eq_(5, result[0]['xsize'])
+        result = self.query.execute(bdb_backend)
+        assert(1 == len(result))
+        assert(5 == result[0]['xsize'])
 
-    @attr("dbtest")
-    def test_fetch_xsize_by_what_object_and_dataset_absolute_fetch(self):
+    @pytest.mark.dbtest
+    def test_fetch_xsize_by_what_object_and_dataset_absolute_fetch(self, bdb_backend):
         self.query.fetch = {
             "xsize": expr.attribute("/dataset1/where/xsize", "long")
         }
@@ -959,12 +971,12 @@ class TestAttributeQuery(object):
                     expr.literal("SCAN"))
         )
 
-        result = self.query.execute(self.backend)
-        eq_(1, len(result))
-        eq_(5, result[0]['xsize'])
+        result = self.query.execute(bdb_backend)
+        assert(1 == len(result))
+        assert(5 == result[0]['xsize'])
 
-    @attr("dbtest")
-    def test_fetch_xsize_by_what_object_and_dataset_relative_fetch_and_filter(self):
+    @pytest.mark.dbtest
+    def test_fetch_xsize_by_what_object_and_dataset_relative_fetch_and_filter(self, bdb_backend):
         self.query.fetch = {
             "xsize": expr.attribute("where/xsize", "long")
         }
@@ -975,15 +987,13 @@ class TestAttributeQuery(object):
                     expr.literal("SCAN"))
         )
 
-        result = self.query.execute(self.backend)
-        #import sys
-        #sys.stderr.write("%s\n"%`result`)
-        eq_(2, len(result))
-        eq_(True, ((result[0]['xsize'] == 2 and result[1]['xsize'] == 5) or
+        result = self.query.execute(bdb_backend)
+        assert(2 == len(result))
+        assert(True == ((result[0]['xsize'] == 2 and result[1]['xsize'] == 5) or
                    (result[0]['xsize'] == 5 and result[1]['xsize'] == 2)))
         
-    @attr("dbtest")
-    def test_fetch_nodata_by_what_object_and_dataset_relative_fetch_and_filter(self):
+    @pytest.mark.dbtest
+    def test_fetch_nodata_by_what_object_and_dataset_relative_fetch_and_filter(self, bdb_backend):
         self.query.fetch = {
             "nodata": expr.attribute("data1/what/nodata", "double")
         }
@@ -994,14 +1004,14 @@ class TestAttributeQuery(object):
                     expr.literal("SCAN"))
         )
 
-        result = self.query.execute(self.backend)
-        eq_(3, len(result))
-        eq_(255.0, result[0]['nodata'])
-        eq_(255.0, result[1]['nodata'])
-        eq_(255.0, result[2]['nodata'])
+        result = self.query.execute(bdb_backend)
+        assert(3 == len(result))
+        assert(255.0 == result[0]['nodata'])
+        assert(255.0 == result[1]['nodata'])
+        assert(255.0 == result[2]['nodata'])
 
-    @attr("dbtest")
-    def test_fetch_nodata_by_what_object_and_dataset_absolue_fetch_nomatch(self):
+    @pytest.mark.dbtest
+    def test_fetch_nodata_by_what_object_and_dataset_absolue_fetch_nomatch(self, bdb_backend):
         self.query.fetch = {
             "nodata": expr.attribute("data1/what/nodata", "double")
         }
@@ -1012,11 +1022,11 @@ class TestAttributeQuery(object):
                     expr.literal("SCAN"))
         )
 
-        result = self.query.execute(self.backend)
-        eq_(0, len(result))
+        result = self.query.execute(bdb_backend)
+        assert(0 == len(result))
 
-    @attr("dbtest")
-    def test_fetch_nodata_by_what_object_and_dataset_relative_many_match(self):
+    @pytest.mark.dbtest
+    def test_fetch_nodata_by_what_object_and_dataset_relative_many_match(self, bdb_backend):
         self.query.fetch = {
             "nodata": expr.attribute("what/nodata", "double")
         }
@@ -1027,5 +1037,5 @@ class TestAttributeQuery(object):
                     expr.literal("SCAN"))
         )
 
-        result = self.query.execute(self.backend)
-        eq_(12, len(result))
+        result = self.query.execute(bdb_backend)
+        assert(12 == len(result))

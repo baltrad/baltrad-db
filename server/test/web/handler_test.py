@@ -6,9 +6,9 @@ else:
     from http import client as httplibclient
     import urllib.parse as urlparse
 
-import mock
 import json
-from nose.tools import eq_, raises
+from unittest import mock
+import pytest
 
 from werkzeug.test import EnvironBuilder
 
@@ -31,7 +31,7 @@ from baltrad.bdbcommon import expr, filter
 from baltrad.bdbcommon.oh5 import Metadata, Source
 
 class TestFileHandlers(object):
-    def setup(self):
+    def setup_method(self):
         self.backend = mock.Mock(spec_set=Backend)
         self.ctx = RequestContext(None, self.backend)
     
@@ -51,20 +51,20 @@ class TestFileHandlers(object):
         self.backend.store_file.return_value = metadata
         response = handler.add_file(self.ctx)
         self.backend.store_file.assert_called_once()
-        eq_(httplibclient.CREATED, response.status_code)
-        eq_("/file/6ba7b810-9dad-11d1-80b4-00c04fd430c8", response.headers["Location"])
-        eq_(json.loads('{"metadata": {"key": "value"}}'), json.loads(response.data.decode('utf-8')))
+        assert(httplibclient.CREATED==response.status_code)
+        assert("/file/6ba7b810-9dad-11d1-80b4-00c04fd430c8"==response.headers["Location"])
+        assert(json.loads('{"metadata": {"key": "value"}}')==json.loads(response.data.decode('utf-8')))
     
-    @raises(HttpConflict)
     def test_add_file_duplicate(self):
-        self.ctx.request = self.create_request("POST",
-            data='filecontent'
-        )
+        with pytest.raises(HttpConflict):        
+            self.ctx.request = self.create_request("POST",
+                data='filecontent'
+            )
 
-        metadata = Metadata()
-        metadata.bdb_uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
-        self.backend.store_file.side_effect = DuplicateEntry()
-        handler.add_file(self.ctx)
+            metadata = Metadata()
+            metadata.bdb_uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+            self.backend.store_file.side_effect = DuplicateEntry()
+            handler.add_file(self.ctx)
     
     def test_query_file_metadata(self):
         self.ctx.request = self.create_request("POST", data="filecontent")
@@ -76,8 +76,8 @@ class TestFileHandlers(object):
         self.backend.query_file_metadata.return_value = metadata
         response = handler.query_file_metadata(self.ctx)
         self.backend.query_file_metadata.assert_called_once()
-        eq_(httplibclient.OK, response.status_code)
-        eq_(b'{"metadata": {"key": "value"}}', response.data)    
+        assert(httplibclient.OK==response.status_code)
+        assert(b'{"metadata": {"key": "value"}}'==response.data)    
     
     def test_get_file(self):
         self.backend.get_file.return_value = "filecontent"
@@ -86,15 +86,15 @@ class TestFileHandlers(object):
         response = handler.get_file(self.ctx, uuid)
         self.backend.get_file.assert_called_once_with(uuid)
 
-        eq_(httplibclient.OK, response.status_code)
-        eq_(b'filecontent', response.data)
+        assert(httplibclient.OK==response.status_code)
+        assert(b'filecontent'==response.data)
     
-    @raises(HttpNotFound)
     def test_get_file_nx(self):
-        self.backend.get_file.return_value = None
+        with pytest.raises(HttpNotFound):        
+            self.backend.get_file.return_value = None
 
-        uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
-        handler.get_file(self.ctx, uuid)
+            uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+            handler.get_file(self.ctx, uuid)
     
     def test_get_file_metadata(self):
         metadata = mock.Mock(spec_set=Metadata)
@@ -103,38 +103,38 @@ class TestFileHandlers(object):
 
         uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
         response = handler.get_file_metadata(self.ctx, uuid)
-        eq_(httplibclient.OK, response.status_code)
-        eq_(b'{"metadata": {"key": "value"}}', response.data)
+        assert(httplibclient.OK==response.status_code)
+        assert(b'{"metadata": {"key": "value"}}'==response.data)
 
-    @raises(HttpNotFound)
     def test_get_file_metadata_nx(self):
-        self.backend.get_file_metadata.return_value = None
-        uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
-        handler.get_file_metadata(self.ctx, uuid)
+        with pytest.raises(HttpNotFound):        
+            self.backend.get_file_metadata.return_value = None
+            uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+            handler.get_file_metadata(self.ctx, uuid)
     
     def test_remove_file(self):
         self.backend.remove_file.return_value = True
         uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
         response = handler.remove_file(self.ctx, uuid)
-        eq_(httplibclient.NO_CONTENT, response.status_code)
+        assert(httplibclient.NO_CONTENT==response.status_code)
  
-    @raises(HttpNotFound)
     def test_remove_file_nx(self):
-        self.backend.remove_file.return_value = False
-        uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
-        handler.remove_file(self.ctx, uuid)
+        with pytest.raises(HttpNotFound):        
+            self.backend.remove_file.return_value = False
+            uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+            handler.remove_file(self.ctx, uuid)
     
     def test_remove_all_files(self):
         self.ctx.enable_remove_all_files = True
         response = handler.remove_all_files(self.ctx)
-        eq_(httplibclient.NO_CONTENT, response.status_code)
+        assert(httplibclient.NO_CONTENT==response.status_code)
     
-    @raises(HttpForbidden)
     def test_remove_all_files_not_enabled(self):
-        handler.remove_all_files(self.ctx)
+        with pytest.raises(HttpForbidden):        
+            handler.remove_all_files(self.ctx)
 
 class TestSourceHandlers(object):
-    def setup(self):
+    def setup_method(self):
         self.backend = mock.Mock(spec_set=Backend)
         self.source_manager = mock.Mock(spec_set=SourceManager)
         self.backend.get_source_manager.return_value = self.source_manager
@@ -153,16 +153,14 @@ class TestSourceHandlers(object):
         ]
         
         response = handler.get_sources(self.ctx)
-        eq_(httplibclient.OK, response.status_code) 
+        assert(httplibclient.OK==response.status_code) 
         expected = (
             b'{"sources": ['
                 b'{"values": {"key1": "value1"}, "name": "src1", "parent": null}, '
                 b'{"values": {"key2": "value2"}, "name": "src2", "parent": "src1"}'
             b']}'
         )
-        print("TYPE=%s"%str(type(response.data)))
-        
-        eq_(json.loads(expected.decode("utf-8")), json.loads(response.data.decode("utf-8")))
+        assert(json.loads(expected.decode("utf-8"))==json.loads(response.data.decode("utf-8")))
     
     def test_add_source(self):
         self.ctx.request = self.create_request("POST",
@@ -174,8 +172,8 @@ class TestSourceHandlers(object):
         self.source_manager.add_source.assert_called_with(
             Source("foo", values={"bar": "baz"})
         )
-        eq_(httplibclient.CREATED, response.status_code)
-        eq_("/source/foo", response.headers["Location"])
+        assert(httplibclient.CREATED==response.status_code)
+        assert("/source/foo"==response.headers["Location"])
     
     def test_add_source_duplicate(self):
         pass
@@ -189,8 +187,8 @@ class TestSourceHandlers(object):
         self.source_manager.update_source.assert_called_with(
             Source("foo", values={"bar": "baz"})
         )
-        eq_(httplibclient.NO_CONTENT, response.status_code)
-        eq_("/source/foo", response.headers["Location"])
+        assert(httplibclient.NO_CONTENT==response.status_code)
+        assert("/source/foo"==response.headers["Location"])
     
     def test_update_source_not_found(self):
         self.ctx.request = self.create_request("PUT",
@@ -199,7 +197,7 @@ class TestSourceHandlers(object):
         self.source_manager.update_source.side_effect = LookupError()
 
         response = handler.update_source(self.ctx)
-        eq_(httplibclient.NOT_FOUND, response.status_code)
+        assert(httplibclient.NOT_FOUND==response.status_code)
     
     def test_remove_source(self):
         self.ctx.request = self.create_request("DELETE", data="")
@@ -207,7 +205,7 @@ class TestSourceHandlers(object):
 
         response = handler.remove_source(self.ctx, "foo")
         self.source_manager.remove_source.assert_called_with("foo")
-        eq_(httplibclient.NO_CONTENT, response.status_code)
+        assert(httplibclient.NO_CONTENT==response.status_code)
     
     def test_remove_source_not_found(self):
         self.ctx.request = self.create_request("DELETE", data="")
@@ -215,7 +213,7 @@ class TestSourceHandlers(object):
 
         response = handler.remove_source(self.ctx, "foo")
         self.source_manager.remove_source.assert_called_with("foo")
-        eq_(httplibclient.NOT_FOUND, response.status_code)
+        assert(httplibclient.NOT_FOUND==response.status_code)
     
     def test_remove_source_associated_files(self):
         self.ctx.request = self.create_request("DELETE", data="")
@@ -223,10 +221,10 @@ class TestSourceHandlers(object):
 
         response = handler.remove_source(self.ctx, "foo")
         self.source_manager.remove_source.assert_called_with("foo")
-        eq_(httplibclient.CONFLICT, response.status_code)
+        assert(httplibclient.CONFLICT==response.status_code)
         
 class TestFilterHandlers(object):
-    def setup(self):
+    def setup_method(self):
         self.backend = mock.Mock(spec_set=Backend)
         self.ctx = RequestContext(None, self.backend)
         self.filter_manager = mock.Mock(spec_set=FilterManager)
@@ -265,25 +263,25 @@ class TestFilterHandlers(object):
         ]
 
         response = handler.get_filters(self.ctx)
-        eq_(httplibclient.OK, response.status_code)
+        assert(httplibclient.OK==response.status_code)
         expected = b'{"filters": ["filter1", "filter2"]}'
-        eq_(expected, response.data)
+        assert(expected==response.data)
     
     def test_get_filter(self):
         self.ctx.request = self.create_request("GET", data="")
         self.filter_manager.get_filter.return_value = self.filter1
 
         response = handler.get_filter(self.ctx, "filter1")
-        eq_(httplibclient.OK, response.status_code)
+        assert(httplibclient.OK==response.status_code)
         self.filter_manager.get_filter.assert_called_once_with("filter1")
-        eq_(self.filter1_repr, response.data)
+        assert(self.filter1_repr==response.data)
     
     def test_add_filter(self):
         self.ctx.request = self.create_request("POST", data=self.filter1_repr)
         
         response = handler.add_filter(self.ctx)
-        eq_(httplibclient.CREATED, response.status_code)
-        eq_("/filter/filter1", response.headers["Location"])
+        assert(httplibclient.CREATED==response.status_code)
+        assert("/filter/filter1"==response.headers["Location"])
         self.filter_manager.add_filter.assert_called_once_with(self.filter1)
     
     def test_update_filter(self):
@@ -295,34 +293,33 @@ class TestFilterHandlers(object):
         )
 
         response = handler.update_filter(self.ctx, "filter2")
-        eq_(httplibclient.NO_CONTENT, response.status_code)
+        assert(httplibclient.NO_CONTENT==response.status_code)
         self.filter_manager.update_filter.assert_called_once_with(filter2)
      
-    @raises(HttpNotFound)
     def test_update_filter_not_found(self):
-        self.ctx.request = self.create_request("PUT", data=self.filter1_repr)
-        self.filter_manager.update_filter.side_effect = LookupError()
+        with pytest.raises(HttpNotFound):        
+            self.ctx.request = self.create_request("PUT", data=self.filter1_repr)
+            self.filter_manager.update_filter.side_effect = LookupError()
 
-        handler.update_filter(self.ctx, "filter2")
+            handler.update_filter(self.ctx, "filter2")
     
     def test_remove_filter(self):
         self.ctx.request = self.create_request("DELETE", data="")
         self.filter_manager.remove_filter.return_value = True
 
         response = handler.remove_filter(self.ctx, "filter1")
-        eq_(httplibclient.NO_CONTENT, response.status_code)
+        assert(httplibclient.NO_CONTENT==response.status_code)
         self.filter_manager.remove_filter.assert_called_once_with("filter1")
     
-    @raises(HttpNotFound)
     def test_remove_filter_not_found(self):
-        self.ctx.request = self.create_request("DELETE", data="")
-        self.filter_manager.remove_filter.return_value = False
-
-        handler.remove_filter(self.ctx, "filter1")
+        with pytest.raises(HttpNotFound):        
+            self.ctx.request = self.create_request("DELETE", data="")
+            self.filter_manager.remove_filter.return_value = False
+            handler.remove_filter(self.ctx, "filter1")
 
     
 class TestQueryHandlers(object):
-    def setup(self):
+    def setup_method(self):
         self.backend = mock.Mock(spec_set=Backend)
         self.ctx = RequestContext(None, self.backend)
 
@@ -350,21 +347,20 @@ class TestQueryHandlers(object):
         ]
 
         response = handler.query_file(self.ctx)
-        eq_(httplibclient.OK, response.status_code)
+        assert(httplibclient.OK==response.status_code)
         expected = (
             b'{"rows": ['
                 b'"00000000-0000-0000-0004-000000000001", '
                 b'"00000000-0000-0000-0004-000000000002"'
             b']}'
         )
-        eq_(expected, response.data)
-        eq_(
+        assert(expected==response.data)
+        assert(
             [
                 (("mockfilter",), {}),
                 (("mockorder1",), {}),
                 (("mockorder2",), {}),
-            ],
-            unwrap_json.call_args_list
+            ]==unwrap_json.call_args_list
         )
     
     @mock.patch("baltrad.bdbcommon.expr.unwrap_json")

@@ -30,10 +30,9 @@ if sys.version_info > (3,):
     long = int
     basestring = str
 
-import migrate.versioning.api
-import migrate.versioning.repository
-from migrate import exceptions as migrateexc
-from sqlalchemy import engine, event, exc as sqlexc, sql
+from sqlalchemy import engine, event, exc as sqlexc, sql, inspect, select, literal, or_, and_, insert, update
+from alembic.config import Config
+from alembic import command
 
 from baltrad.bdbcommon import oh5
 from baltrad.bdbserver import backend
@@ -43,7 +42,7 @@ from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger("baltrad.bdbserver.sqla")
 
-MIGRATION_REPO_PATH = os.path.join(os.path.dirname(__file__), "migrate")
+ALEMBIC_REPO_PATH = os.path.join(os.path.dirname(__file__), "alembic")
 
 def force_sqlite_foreign_keys(dbapi_con, con_record):
     try:
@@ -107,6 +106,7 @@ class SqlAlchemyBackend(backend.Backend):
 
     def store_file(self, path):
         st = time.time()
+        print("Getting metadata from %s"%path)
         meta = self.metadata_from_file(path)
         metadataTime = time.time()
         try:
@@ -116,8 +116,8 @@ class SqlAlchemyBackend(backend.Backend):
             logger.info("sqla.backend.store_file: Metadata extraction time %d ms, storage time %d ms"%(int((metadataTime-st)*1000), int((storageTime-st)*1000)))
         except IntegrityError as e:
             message = str(e)
-            if "duplicate key" in message:
-                logger.warn("File already added to database. uuid: %s, hash: %s. Exception caught: %s", meta.bdb_uuid, meta.bdb_metadata_hash, message.splitlines()[0])
+            if "duplicate keself.backendy" in message:
+                logger.warning("File already added to database. uuid: %s, hash: %s. Exception caught: %s", meta.bdb_uuid, meta.bdb_metadata_hash, message.splitlines()[0])
                 raise backend.DuplicateEntry()
             else:
                 raise e
@@ -134,36 +134,38 @@ class SqlAlchemyBackend(backend.Backend):
             return None
     
     def remove_files_by_count(self, limit, nritems):
-        sqry = sql.select([schema.files.c.id,schema.files.c.uuid]).order_by(schema.files.c.id.desc()).offset(limit).alias("sqry")
-        qry = sql.select([sqry.c.uuid]).order_by(sqry.c.id).limit(nritems)
+        sqry = sql.select(schema.files.c.id,schema.files.c.uuid).order_by(schema.files.c.id.desc()).offset(limit).alias("sqry")
+        qry = sql.select(sqry.c.uuid).order_by(sqry.c.id).limit(nritems)
         result = 0
         with self.get_connection() as conn:
             for row in conn.execute(qry):
-                if self.remove_file(row[schema.files.c.uuid]):
+                if self.remove_file(row.uuid):
                     result = result + 1
+            conn.commit()
         return result
  
     def remove_files_by_age(self, age, nritems):
-        sqry = sql.select([schema.files.c.id,schema.files.c.uuid])
+        sqry = sql.select(schema.files.c.id,schema.files.c.uuid)
         sqry = sqry.where((schema.files.c.what_date+schema.files.c.what_time) < age)
         sqry = sqry.order_by(schema.files.c.what_date+schema.files.c.what_time).limit(nritems)
         
         result = 0
         with self.get_connection() as conn:
             for row in conn.execute(sqry):
-                if self.remove_file(row[schema.files.c.uuid]):
+                if self.remove_file(row.uuid):
                     result = result + 1
+            conn.commit()
         return result
     
     def file_count(self):
-        qry = sql.select([sql.func.count(schema.files.c.id)])
+        qry = sql.select(sql.func.count(schema.files.c.id))
         with self.get_connection() as conn:
             return conn.execute(qry).scalar()
     
     def get_file_metadata(self, uuid):
-        qry = sql.select(
-            [schema.files],
-            schema.files.c.uuid==str(uuid)
+        qry = (
+            select(schema.files)
+            .where(schema.files.c.uuid == str(uuid))
         )
 
         with self.get_connection() as conn:
@@ -171,20 +173,22 @@ class SqlAlchemyBackend(backend.Backend):
             if not row:
                 return None
 
-        file_id = row[schema.files.c.id]
-        
+        file_id = row.id
+    
         with self.get_connection() as conn:
             meta = _select_metadata(conn, file_id)
 
-        meta.bdb_uuid = row[schema.files.c.uuid]
-        meta.bdb_file_size = row[schema.files.c.size]
-        source_id = row[schema.files.c.source_id]
+        meta.bdb_uuid = row.uuid
+        meta.bdb_file_size = row.size
+        source_id = row.source_id
+    
         with self.get_connection() as conn:
             source = get_source_by_id(conn, source_id)
+        
         meta.bdb_source = source.to_string()
         meta.bdb_source_name = source.name
-        meta.bdb_stored_date = row[schema.files.c.stored_date]
-        meta.bdb_stored_time = row[schema.files.c.stored_time]
+        meta.bdb_stored_date = row.stored_date
+        meta.bdb_stored_time = row.stored_time
 
         return meta
      
@@ -197,26 +201,23 @@ class SqlAlchemyBackend(backend.Backend):
             return True
     
     def remove_all_files(self):
-        qry = sql.select(
-            [schema.files.c.uuid]
-        )
+        qry = select(schema.files.c.uuid)
         with self.get_connection() as conn:
             for row in conn.execute(qry):
-                self.remove_file(row[schema.files.c.uuid])
+                self.remove_file(row.uuid)
+            conn.commit()
 
     def file_source(self, uuid):
-        qry = sql.select(
-            [schema.source_kvs],
-            from_obj=[schema.files.join(schema.sources).join(schema.source_kvs)],
-        )
-        qry = qry.where(schema.files.c.uuid==str(uuid))
+        qry = select(schema.source_kvs).select_from(
+                     schema.files.join(schema.sources).join(schema.source_kvs)
+                    ).where(schema.files.c.uuid == str(uuid))
 
         d = {}
         with self.get_connection() as conn:
             result = conn.execute(qry).fetchall()
             for row in result:
-                key = row[schema.source_kvs.key]
-                value = row[schema.source_kvs.value]
+                key = row.key
+                value = row.value
                 d[key] = value
         return d
     
@@ -239,7 +240,7 @@ class SqlAlchemyBackend(backend.Backend):
             result = conn.execute(stmt).fetchall()
             logger.info("sqla.backend.execute_file_query: Took %d ms"%(int((time.time()-st)*1000)))
             for row in result:
-                r.append({"uuid" : row[schema.files.c.uuid]})
+                r.append({"uuid" : row.uuid})
         return r
     
     def execute_attribute_query(self, qry):
@@ -255,41 +256,59 @@ class SqlAlchemyBackend(backend.Backend):
         return r
     
     def is_operational(self):
+        inspector = inspect(self._engine)
+
         required_tables = [table for table in schema.meta.sorted_tables]
         required_tables.remove(schema.file_data)
 
-        with self.get_connection() as conn:
-            for table in required_tables:
-                if not table.exists(conn):
-                    print("%s does not exist"%table.name)
-                    return False
+        for table in required_tables:
+            if not inspector.has_table(table.name):
+                return False
         return True
-    
-    def create(self):
-        repo = migrate.versioning.repository.Repository(MIGRATION_REPO_PATH)
-        migrate.versioning.api.version_control(self._engine, repo)
-        migrate.versioning.api.upgrade(self._engine, repo)
-    
-    def drop(self):
-        repo = migrate.versioning.repository.Repository(MIGRATION_REPO_PATH)
+
+    def migrate_to_alembic(self):
         try:
-            migrate.versioning.api.downgrade(self._engine, repo, 0)
-            migrate.versioning.api.drop_version_control(self._engine, repo)
-        except migrateexc.DatabaseNotControlledError:
-            pass
+            # Handle migration from sqlalchemy migrate to alembic. We get the current version from ravedb_migrate and
+            # converts it into a value that can be handled by alembic and stamps it. After that it's up to alembic
+            # to handle rest of migration in create_alembic (if any)
+            if inspect(self._engine).has_table('bdb_migrate_version'):
+                alembic_cfg = Config()
+                alembic_cfg.set_main_option("script_location", ALEMBIC_REPO_PATH)
+                alembic_cfg.set_main_option("sqlalchemy.url", str(self._engine.url))
+
+                dbversion = self._engine.execute("select version from bdb_migrate_version").fetchone()['version']
+                command.stamp(alembic_cfg, "%03d"%dbversion)
+                metadata = MetaData()
+                bdb_migrate = Table('bdb_migrate_version', metadata)
+                metadata.tables['bdb_migrate_version'].drop(self._engine)
+        except:
+            logger.exception("Failed to migrate database versioning to alembic")
+
+    def create(self):
+        self.migrate_to_alembic()
+
+        alembic_cfg = Config()
+        alembic_cfg.set_main_option("script_location", ALEMBIC_REPO_PATH)
+        alembic_cfg.set_main_option("sqlalchemy.url", str(self._engine.url))
+        alembic_cfg.set_section_option("logger_alembic", "level", "DEBUG")
+        command.upgrade(alembic_cfg, "head")        
+
+    def drop(self):
+        self.migrate_to_alembic()
+
+        alembic_cfg = Config()
+        alembic_cfg.set_main_option("script_location", ALEMBIC_REPO_PATH)
+        alembic_cfg.set_main_option("sqlalchemy.url", str(self._engine.url))
+        command.downgrade(alembic_cfg, "base")
     
     def upgrade(self):
-        repo = migrate.versioning.repository.Repository(MIGRATION_REPO_PATH)
+        self.migrate_to_alembic()
 
-        # try setting up version control for the databases created before
-        # we started using sqlalchemy-migrate
-        try:
-            migrate.versioning.api.version_control(self._engine, repo, version=1)
-        except migrateexc.DatabaseAlreadyControlledError:
-            pass
+        alembic_cfg = Config()
+        alembic_cfg.set_main_option("script_location", ALEMBIC_REPO_PATH)
+        alembic_cfg.set_main_option("sqlalchemy.url", str(self._engine.url))
+        command.upgrade(alembic_cfg, "head")
 
-        migrate.versioning.api.upgrade(self._engine, repo)
-    
     def metadata_from_file(self, path, ignore_duplicate=False):
         meta = oh5.Metadata.from_file(path)
 
@@ -302,13 +321,13 @@ class SqlAlchemyBackend(backend.Backend):
                 raise LookupError("failed to look up source for " +
                                   meta.source().to_string())
             if _has_file_by_hash_and_source(conn, metadata_hash, source_id) and ignore_duplicate == False:
-                logger.warn("File with hash %s and source_id %s already existing in database." % (metadata_hash, source_id))
+                logger.warning("File with hash %s and source_id %s already existing in database." % (metadata_hash, source_id))
                 raise backend.DuplicateEntry()
 
         meta.bdb_uuid = str(uuid.uuid4())
         meta.bdb_file_size = os.stat(path)[stat.ST_SIZE]
         meta.bdb_metadata_hash = metadata_hash
-        stored_timestamp = datetime.datetime.utcnow()
+        stored_timestamp = datetime.datetime.now(datetime.UTC)
         meta.bdb_stored_date = stored_timestamp.date()
         meta.bdb_stored_time = stored_timestamp.time()
         with self.get_connection() as conn:
@@ -332,9 +351,7 @@ class SqlAlchemyBackend(backend.Backend):
         return file_id 
     
     def delete_metadata(self, conn, uuid):
-        qry = schema.files.delete(
-            schema.files.c.uuid==str(uuid)
-        )
+        qry = schema.files.delete().where(schema.files.c.uuid==str(uuid)        )
         return bool(conn.execute(qry).rowcount)
 
     # This is a method that only should be called from a script so don't add it to rest-api.
@@ -368,6 +385,7 @@ class SqlAlchemyBackend(backend.Backend):
                 n_total = n_migrated + n_failed
                 if n_total > 0 and n_total % 1000 == 0:
                     print("Migrated %d/%d files"%(n_total, n_files))
+            conn.commit()
         print("Summary:")
         print("Migrated from %s to %s"%(src_type, tgt_type))
         print("Total number of files: %d"%(n_migrated + n_failed))
@@ -379,11 +397,9 @@ class SqlAlchemySourceManager(backend.SourceManager):
         self._backend = backend
 
     def get_sources(self):
-        qry = sql.select(
-            [schema.sources, schema.source_kvs],
-            from_obj=schema.source_kvs.join(schema.sources),
-            order_by=[sql.asc(schema.sources.c.name)]
-        )
+        qry = (select(schema.sources, schema.source_kvs)
+               .select_from(schema.source_kvs.join(schema.sources))
+               .order_by(sql.asc(schema.sources.c.name)))
 
         result = []
 
@@ -392,12 +408,12 @@ class SqlAlchemySourceManager(backend.SourceManager):
         with self.get_connection() as conn:
             for row in conn.execute(qry):
                 if not source:
-                    source = oh5.Source(row["name"])
-                if source.name != row["name"]:
+                    source = oh5.Source(row.name)
+                if source.name != row.name:
                     result.append(source)
-                    source = oh5.Source(row["name"])
-                source[row["key"]] = row["value"]
-                source.parent = row["parent"]
+                    source = oh5.Source(row.name)
+                source[row.key] = row.value
+                source.parent = row.parent
         if source:
             result.append(source)
         return result
@@ -406,12 +422,10 @@ class SqlAlchemySourceManager(backend.SourceManager):
         if not name:
             raise ValueError("name must not be None")
 
-        qry = sql.select(
-            [schema.sources, schema.source_kvs],
-            from_obj=schema.source_kvs.join(schema.sources),
-            order_by=[sql.asc(schema.sources.c.name)]
-        )
-        qry = qry.where(schema.sources.c.name==name)
+        qry = (select(schema.sources, schema.source_kvs)
+               .select_from(schema.source_kvs.join(schema.sources))
+               .where(schema.sources.c.name == name)
+               .order_by(sql.asc(schema.sources.c.name)))
 
         result = []
 
@@ -420,12 +434,12 @@ class SqlAlchemySourceManager(backend.SourceManager):
         with self.get_connection() as conn:
             for row in conn.execute(qry):
                 if not source:
-                    source = oh5.Source(row["name"])
-                if source.name != row["name"]:
+                    source = oh5.Source(row.name)
+                if source.name != row.name:
                     result.append(source)
-                    source = oh5.Source(row["name"])
-                source[row["key"]] = row["value"]
-                source.parent = row["parent"]
+                    source = oh5.Source(row.name)
+                source[row.key] = row.value
+                source.parent = row.parent
         if source:
             result.append(source)
 
@@ -439,13 +453,13 @@ class SqlAlchemySourceManager(backend.SourceManager):
             try:
                 source_id = conn.execute(
                     schema.sources.insert(),
-                    name=source.name,
-                    parent=source.parent
-                ).inserted_primary_key[0]
+                    {"name":source.name,
+                     "parent":source.parent}).inserted_primary_key[0]
             except sqlexc.IntegrityError:
                 raise backend.DuplicateEntry()
         
             insert_source_values(conn, source_id, source)
+            conn.commit()
         return source_id
     
     def update_source(self, source):
@@ -454,34 +468,27 @@ class SqlAlchemySourceManager(backend.SourceManager):
             if not source_id:
                 raise LookupError("source '%s' not found" % source.name)
 
-            with conn.begin():
-                conn.execute(
-                    schema.source_kvs.delete(
-                        schema.source_kvs.c.source_id==source_id
-                    )
-                )
-                insert_source_values(conn, source_id, source)
+            conn.execute(schema.source_kvs.delete()
+                         .where(schema.source_kvs.c.source_id == source_id))
+
+            insert_source_values(conn, source_id, source)
+            conn.commit()
             
     def remove_source(self, name):
         with self.get_connection() as conn:
             try:
-                affected_rows = conn.execute(
-                    schema.sources.delete(
-                        schema.sources.c.name==name
-                    )
-                ).rowcount
+                affected_rows = conn.execute(schema.sources.delete().where(schema.sources.c.name==name)).rowcount
+                conn.commit()
             except sqlexc.IntegrityError as e:
                 raise backend.IntegrityError(str(e))
             else:
                 return bool(affected_rows)
     
     def get_parent_sources(self):
-        qry = sql.select(
-            [schema.sources, schema.source_kvs],
-            from_obj=schema.source_kvs.join(schema.sources),
-            order_by=[sql.asc(schema.sources.c.name)]
-        )
-        qry = qry.where(schema.sources.c.parent==None)
+        qry = (select(schema.sources, schema.source_kvs)
+                .select_from(schema.source_kvs.join(schema.sources))
+                .where(schema.sources.c.parent.is_(None))
+                .order_by(sql.asc(schema.sources.c.name)))
 
         result = []
 
@@ -490,22 +497,23 @@ class SqlAlchemySourceManager(backend.SourceManager):
         with self.get_connection() as conn:
             for row in conn.execute(qry):
                 if not source:
-                    source = oh5.Source(row["name"])
-                if source.name != row["name"]:
+                    source = oh5.Source(row.name)
+                if source.name != row.name:
                     result.append(source)
-                    source = oh5.Source(row["name"])
-                source[row["key"]] = row["value"]
+                    source = oh5.Source(row.name)
+                source[row.key] = row.value
         if source:
             result.append(source)
         return result  
           
     def get_sources_with_parent(self, parent):
-        qry = sql.select(
-            [schema.sources, schema.source_kvs],
-            from_obj=schema.source_kvs.join(schema.sources),
-            order_by=[sql.asc(schema.sources.c.name)]
-        )
-        qry = qry.where(schema.sources.c.parent==parent)
+        qry = (select(schema.sources, schema.source_kvs)
+                .select_from(schema.source_kvs.join(schema.sources))
+                .where(
+                    schema.sources.c.parent.is_(None) if parent is None 
+                    else schema.sources.c.parent == parent
+                )
+                .order_by(sql.asc(schema.sources.c.name)))
 
         result = []
 
@@ -514,12 +522,12 @@ class SqlAlchemySourceManager(backend.SourceManager):
         with self.get_connection() as conn:
             for row in conn.execute(qry):
                 if not source:
-                    source = oh5.Source(row["name"])
-                if source.name != row["name"]:
+                    source = oh5.Source(row.name)
+                if source.name != row.name:
                     result.append(source)
-                    source = oh5.Source(row["name"])
-                source[row["key"]] = row["value"]
-                source.parent = row["parent"]
+                    source = oh5.Source(row.name)
+                source[row.key] = row.value
+                source.parent = row.parent
         if source:
             result.append(source)
         return result
@@ -528,18 +536,22 @@ class SqlAlchemySourceManager(backend.SourceManager):
         return self._backend.get_connection()
 
 def insert_file(conn, meta, source_id):
-    return conn.execute(
-        schema.files.insert(),
-        uuid=meta.bdb_uuid,
-        hash=meta.bdb_metadata_hash,
-        source_id=source_id,
-        stored_date=meta.bdb_stored_date,
-        stored_time=meta.bdb_stored_time,
-        what_object=meta.what_object,
-        what_date=meta.what_date,
-        what_time=meta.what_time,
-        size=meta.bdb_file_size,
-    ).inserted_primary_key[0]
+    stmt = insert(schema.files)
+    result = conn.execute(
+        stmt,
+        {
+            "uuid": meta.bdb_uuid,
+            "hash": meta.bdb_metadata_hash,
+            "source_id": source_id,
+            "stored_date": meta.bdb_stored_date,
+            "stored_time": meta.bdb_stored_time,
+            "what_object": meta.what_object,
+            "what_date": meta.what_date,
+            "what_time": meta.what_time,
+            "size": meta.bdb_file_size,
+        }
+    )
+    return result.inserted_primary_key[0]
 
 def merge_dictionaries(x, y):
     result = x.copy()
@@ -624,8 +636,8 @@ def _get_attribute_sql_values(node):
     return values
 
 def create_nodename(row):
-    name = row[schema.nodes.c.name]
-    path = row[schema.nodes.c.path]
+    name=row.name
+    path=row.path
     result = path
     if not name is None:
         if path[-1] != "/":
@@ -635,14 +647,7 @@ def create_nodename(row):
     return result
 
 def _select_metadata(conn, file_id):
-    qry = sql.select(
-        [schema.nodes],
-        schema.nodes.c.file_id==file_id,
-        order_by=[
-            schema.nodes.c.id.asc()
-        ]
-    )
-
+    qry = select(schema.nodes).where(schema.nodes.c.file_id==file_id).order_by(schema.nodes.c.id.asc())
     meta = oh5.Metadata()
 
     nodes = {}
@@ -652,7 +657,7 @@ def _select_metadata(conn, file_id):
     nodes[create_nodename(row)] = meta.root()
 
     for row in result:
-        parent_path = row[schema.nodes.c.path]
+        parent_path = row.path
         node = _create_node_from_row(row)
         if parent_path in nodes.keys():
             parent = nodes[parent_path]
@@ -662,15 +667,15 @@ def _select_metadata(conn, file_id):
     return meta
  
 def _create_node_from_row(row):
-    type_ = row[schema.nodes.c.type]
-    name = row[schema.nodes.c.name]
+    type_ = row.type
+    name = row.name
     if type_ == oh5.Attribute.type_id:
         node = oh5.Attribute(name, None)
-        node.value = row[schema.nodes.c.value_string]
+        node.value=row.value_string
         if node.value is None:
-            node.value = row[schema.nodes.c.value_long]
+            node.value = row.value_long
         if node.value is None:
-            node.value = row[schema.nodes.c.value_double]
+            node.value = row.value_double
         return node
     elif type_ == oh5.Group.type_id:
         return oh5.Group(name)
@@ -679,96 +684,98 @@ def _create_node_from_row(row):
     else:
         raise RuntimeError("unhandled node type: %s" % type_)
 
+
 def _has_file_by_hash_and_source(conn, h, source_id):
-    return conn.execute(
-        sql.select(
-            [sql.literal(True)],
-            sql.and_(
-                schema.files.c.hash==h,
-                schema.files.c.source_id==source_id
-            )
+    stmt = select(literal(True)).where(
+        and_(
+            schema.files.c.hash == h,
+            schema.files.c.source_id == source_id
         )
-    ).scalar()
+    )
+    result = conn.execute(stmt).scalar()
+    print("has file: %s"%result)
+    return result
 
 def get_source_id(conn, source):
-    where = sql.literal(False)
     keys = source.keys()
-    ignoreORG=False
+    ignoreORG = False
     if "ORG" in keys:
-        if "WMO" in keys or "NOD" in keys or "RAD" in keys or "PLC" in keys or "WIGOS" in keys:
-            ignoreORG=True
- 
+        if any(k in keys for k in ["WMO", "NOD", "RAD", "PLC", "WIGOS"]):
+            ignoreORG = True
+
+    where_clause = literal(False)
     for key, value in source.items():
         if ignoreORG and key == "ORG":
             continue
-        where = sql.or_(
-            where,
-            sql.and_(
-                schema.source_kvs.c.key==key,
-                schema.source_kvs.c.value==value
+        where_clause = or_(
+            where_clause,
+            and_(
+                schema.source_kvs.c.key == key,
+                schema.source_kvs.c.value == value
             )
         )
- 
-    qry = sql.select(
-        [schema.source_kvs.c.source_id, schema.source_kvs.c.key, schema.source_kvs.c.value],
-        where,
-        distinct=True
+
+    qry = (
+        select(
+            schema.source_kvs.c.source_id, 
+            schema.source_kvs.c.key, 
+            schema.source_kvs.c.value
+        )
+        .where(where_clause)
+        .distinct()
     )
-     
+
     result = conn.execute(qry)
-     
+    
     source_id_matches = {}
     max_no_of_matches = 0
     best_match_id = None
     multiple_matches = False
+
     for row in result:
-        source_id = row[schema.source_kvs.c.source_id]
-        if not source_id in source_id_matches:
+        source_id = row.source_id
+        
+        if source_id not in source_id_matches:
             source_id_matches[source_id] = 0
-        row_key = row[schema.source_kvs.c.key]
-        row_value = row[schema.source_kvs.c.value]
+            
+        row_key = row.key
+        row_value = row.value
+        
         for key, value in source.items():
             if ignoreORG and key == "ORG":
                 continue
             elif key == row_key and value == row_value:
                 source_id_matches[source_id] += 1
-                if source_id_matches[source_id] > max_no_of_matches:
-                    max_no_of_matches = source_id_matches[source_id]
+                
+                current_matches = source_id_matches[source_id]
+                if current_matches > max_no_of_matches:
+                    max_no_of_matches = current_matches
                     best_match_id = source_id
                     multiple_matches = False
-                elif source_id_matches[source_id] == max_no_of_matches:
+                elif current_matches == max_no_of_matches:
                     multiple_matches = True
-     
+
     if multiple_matches:
-        logger.debug("Could not determine source due to multiple equally matching sources found for %s." % (str(source)))
+        logger.debug(f"Could not determine source due to multiple equally matching sources found for {source}.")
         best_match_id = None
- 
+
     return best_match_id
 
 def get_source_id_by_name(conn, name):
-    qry = sql.select(
-        [schema.sources.c.id],
-        schema.sources.c.name==name
-    )
-
+    qry = select(schema.sources.c.id).where(schema.sources.c.name == name)
     return conn.execute(qry).scalar()
 
 def get_source_by_id(conn, source_id):
-    name_qry = sql.select(
-        [schema.sources.c.name],
-        schema.sources.c.id==source_id
-    )
-
-    kv_qry = sql.select(
-        [schema.source_kvs],
-        schema.source_kvs.c.source_id==source_id
-    )
+    name_qry = select(schema.sources.c.name).where(schema.sources.c.id == source_id)
+    kv_qry = select(schema.source_kvs).where(schema.source_kvs.c.source_id == source_id)
     
     source = oh5.Source()
 
     source.name = conn.execute(name_qry).scalar()
-    for row in conn.execute(kv_qry).fetchall():
-        source[row["key"]] = row["value"]
+
+    result = conn.execute(kv_qry)
+    for row in result:
+        source[row.key] = row.value
 
     return source
 
@@ -791,21 +798,25 @@ def associate_what_source(conn, file_id, source):
         kv_id = insert_what_source_kv(conn, key, value)
         conn.execute(
             schema.file_what_source.insert(),
-            file_id=file_id, source_kv_id=kv_id
+            {
+                "file_id": file_id, 
+                "source_kv_id": kv_id
+            }
         )
 
 def insert_what_source_kv(conn, key, value):
-    kv_qry = sql.select(
-        [schema.what_source_kvs.c.id],
-        sql.and_(
-            schema.what_source_kvs.c.key==key,
-            schema.what_source_kvs.c.value==value
-        )
-    )
+    kv_qry = select(schema.what_source_kvs.c.id).where(
+                    and_(
+                        schema.what_source_kvs.c.key == key,
+                        schema.what_source_kvs.c.value == value)
+                    )
     kv_id = conn.execute(kv_qry).scalar()
+    
     if not kv_id:
-        kv_id = conn.execute(
+        result = conn.execute(
             schema.what_source_kvs.insert(),
-            key=key, value=value
-        ).inserted_primary_key[0]
+            {"key": key, "value": value}
+        )
+        kv_id = result.inserted_primary_key[0]
+        
     return kv_id
