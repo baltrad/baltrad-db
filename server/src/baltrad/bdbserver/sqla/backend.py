@@ -278,7 +278,9 @@ class SqlAlchemyBackend(backend.Backend):
                 alembic_cfg.set_main_option("script_location", ALEMBIC_REPO_PATH)
                 alembic_cfg.set_main_option("sqlalchemy.url", self._url)
 
-                dbversion = self._engine.execute("select version from bdb_migrate_version").fetchone()['version']
+                with self.get_connection() as conn:
+                    dbversion = conn.execute(sql.text("select version from bdb_migrate_version")).scalar()
+
                 command.stamp(alembic_cfg, "%03d"%dbversion)
                 metadata = MetaData()
                 bdb_migrate = Table('bdb_migrate_version', metadata)
