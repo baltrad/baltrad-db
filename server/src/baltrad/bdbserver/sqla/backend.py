@@ -331,7 +331,7 @@ class SqlAlchemyBackend(backend.Backend):
         meta.bdb_uuid = str(uuid.uuid4())
         meta.bdb_file_size = os.stat(path)[stat.ST_SIZE]
         meta.bdb_metadata_hash = metadata_hash
-        stored_timestamp = datetime.datetime.now(datetime.UTC)
+        stored_timestamp = datetime.datetime.now(datetime.timezone.utc)
         meta.bdb_stored_date = stored_timestamp.date()
         meta.bdb_stored_time = stored_timestamp.time()
         with self.get_connection() as conn:
