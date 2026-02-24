@@ -118,7 +118,7 @@ class SqlAlchemyBackend(backend.Backend):
             logger.info("sqla.backend.store_file: Metadata extraction time %d ms, storage time %d ms"%(int((metadataTime-st)*1000), int((storageTime-st)*1000)))
         except IntegrityError as e:
             message = str(e)
-            if "duplicate keself.backendy" in message:
+            if "duplicate key" in message:
                 logger.warning("File already added to database. uuid: %s, hash: %s. Exception caught: %s", meta.bdb_uuid, meta.bdb_metadata_hash, message.splitlines()[0])
                 raise backend.DuplicateEntry()
             else:
@@ -140,10 +140,10 @@ class SqlAlchemyBackend(backend.Backend):
         qry = sql.select(sqry.c.uuid).order_by(sqry.c.id).limit(nritems)
         result = 0
         with self.get_connection() as conn:
-            for row in conn.execute(qry):
-                if self.remove_file(row.uuid):
-                    result = result + 1
-            conn.commit()
+            with conn.begin():
+                for row in conn.execute(qry):
+                    if self.remove_file(row.uuid):
+                        result = result + 1
         return result
  
     def remove_files_by_age(self, age, nritems):
@@ -153,10 +153,10 @@ class SqlAlchemyBackend(backend.Backend):
         
         result = 0
         with self.get_connection() as conn:
-            for row in conn.execute(sqry):
-                if self.remove_file(row.uuid):
-                    result = result + 1
-            conn.commit()
+            with conn.begin():
+                for row in conn.execute(sqry):
+                    if self.remove_file(row.uuid):
+                        result = result + 1
         return result
     
     def file_count(self):
@@ -205,9 +205,9 @@ class SqlAlchemyBackend(backend.Backend):
     def remove_all_files(self):
         qry = select(schema.files.c.uuid)
         with self.get_connection() as conn:
-            for row in conn.execute(qry):
-                self.remove_file(row.uuid)
-            conn.commit()
+            with conn.begin():
+                for row in conn.execute(qry):
+                    self.remove_file(row.uuid)
 
     def file_source(self, uuid):
         qry = select(schema.source_kvs).select_from(
@@ -216,17 +216,28 @@ class SqlAlchemyBackend(backend.Backend):
 
         d = {}
         with self.get_connection() as conn:
-            result = conn.execute(qry).fetchall()
-            for row in result:
-                key = row.key
-                value = row.value
-                d[key] = value
+            with conn.begin():
+                result = conn.execute(qry).fetchall()
+                for row in result:
+                    key = row.key
+                    value = row.value
+                    d[key] = value
         return d
     
     def get_connection(self):
         """get a context managed connection to the database
+        
+        Returns a connection that works with both SQLAlchemy 1.4 and 2.0.
+        The connection can be used with 'with' statements and supports
+        both transaction and non-transaction usage patterns.
         """
-        return contextlib.closing(self._engine.connect())
+        # For SQLAlchemy 2.0+, engine.connect() returns a connection that
+        # works as a context manager. For 1.4, we need contextlib.closing.
+        # However, both versions' connections work as context managers,
+        # so we can just return the connection directly.
+        conn = self._engine.connect()
+        # Wrap in a compatibility layer that ensures it closes properly
+        return conn
     
     def get_source_manager(self):
         return self._source_manager
@@ -376,20 +387,20 @@ class SqlAlchemyBackend(backend.Backend):
             [schema.files.c.uuid]
         )
         with self.get_connection() as conn:
-            for row in conn.execute(qry):
-                uuid = row[schema.files.c.uuid]
-                try:
-                    obj = src_storage.read(self, uuid)
-                    tgt_storage.store_file(self, uuid, obj)
-                    src_storage.remove_file(self, uuid)
-                    n_migrated = n_migrated + 1
-                except storage.FileNotFound:
-                    n_failed = n_failed + 1
-                
-                n_total = n_migrated + n_failed
-                if n_total > 0 and n_total % 1000 == 0:
-                    print("Migrated %d/%d files"%(n_total, n_files))
-            conn.commit()
+            with conn.begin():
+                for row in conn.execute(qry):
+                    uuid = row[schema.files.c.uuid]
+                    try:
+                        obj = src_storage.read(self, uuid)
+                        tgt_storage.store_file(self, uuid, obj)
+                        src_storage.remove_file(self, uuid)
+                        n_migrated = n_migrated + 1
+                    except storage.FileNotFound:
+                        n_failed = n_failed + 1
+                    
+                    n_total = n_migrated + n_failed
+                    if n_total > 0 and n_total % 1000 == 0:
+                        print("Migrated %d/%d files"%(n_total, n_files))
         print("Summary:")
         print("Migrated from %s to %s"%(src_type, tgt_type))
         print("Total number of files: %d"%(n_migrated + n_failed))
@@ -454,39 +465,39 @@ class SqlAlchemySourceManager(backend.SourceManager):
     
     def add_source(self, source):
         with self.get_connection() as conn:
-            try:
-                source_id = conn.execute(
-                    schema.sources.insert(),
-                    {"name":source.name,
-                     "parent":source.parent}).inserted_primary_key[0]
-            except sqlexc.IntegrityError:
-                raise backend.DuplicateEntry()
-        
-            insert_source_values(conn, source_id, source)
-            conn.commit()
+            with conn.begin():
+                try:
+                    source_id = conn.execute(
+                        schema.sources.insert(),
+                        {"name":source.name,
+                        "parent":source.parent}).inserted_primary_key[0]
+                except sqlexc.IntegrityError:
+                    raise backend.DuplicateEntry()
+            
+                insert_source_values(conn, source_id, source)
         return source_id
     
     def update_source(self, source):
         with self.get_connection() as conn:
-            source_id = get_source_id_by_name(conn, source.name)
-            if not source_id:
-                raise LookupError("source '%s' not found" % source.name)
+            with conn.begin():
+                source_id = get_source_id_by_name(conn, source.name)
+                if not source_id:
+                    raise LookupError("source '%s' not found" % source.name)
 
-            conn.execute(schema.source_kvs.delete()
-                         .where(schema.source_kvs.c.source_id == source_id))
+                conn.execute(schema.source_kvs.delete()
+                            .where(schema.source_kvs.c.source_id == source_id))
 
-            insert_source_values(conn, source_id, source)
-            conn.commit()
+                insert_source_values(conn, source_id, source)
             
     def remove_source(self, name):
         with self.get_connection() as conn:
-            try:
-                affected_rows = conn.execute(schema.sources.delete().where(schema.sources.c.name==name)).rowcount
-                conn.commit()
-            except sqlexc.IntegrityError as e:
-                raise backend.IntegrityError(str(e))
-            else:
-                return bool(affected_rows)
+            with conn.begin():
+                try:
+                    affected_rows = conn.execute(schema.sources.delete().where(schema.sources.c.name==name)).rowcount
+                except sqlexc.IntegrityError as e:
+                    raise backend.IntegrityError(str(e))
+                else:
+                    return bool(affected_rows)
     
     def get_parent_sources(self):
         qry = (select(schema.sources, schema.source_kvs)

@@ -70,27 +70,27 @@ class TestSqlAlchemyBackendItest(object):
         yield
         
         with bdb_backend.get_connection() as conn:
-            conn.execute(schema.file_what_source.delete())
-            conn.execute(schema.nodes.delete())
-            conn.execute(schema.files.delete())
-            conn.execute(schema.sources.delete())
-            conn.commit()
+            with conn.begin():
+                conn.execute(schema.file_what_source.delete())
+                conn.execute(schema.nodes.delete())
+                conn.execute(schema.files.delete())
+                conn.execute(schema.sources.delete())
 
     @pytest.fixture(autouse=True)
     def teardown(self, bdb_backend):
         with bdb_backend.get_connection() as conn:    
-            conn.execute(schema.file_what_source.delete())
-            conn.execute(schema.nodes.delete())
-            conn.execute(schema.files.delete())
-            conn.commit()
+            with conn.begin():
+                conn.execute(schema.file_what_source.delete())
+                conn.execute(schema.nodes.delete())
+                conn.execute(schema.files.delete())
 
         yield
 
-        with bdb_backend.get_connection() as conn:    
-            conn.execute(schema.file_what_source.delete())
-            conn.execute(schema.nodes.delete())
-            conn.execute(schema.files.delete())
-            conn.commit()
+        with bdb_backend.get_connection() as conn:
+            with conn.begin():
+                conn.execute(schema.file_what_source.delete())
+                conn.execute(schema.nodes.delete())
+                conn.execute(schema.files.delete())
 
     @pytest.mark.dbtest
     def test_get_source_by_id(self, bdb_backend):
@@ -427,9 +427,9 @@ class TestSqlAlchemySourceManager(object):
         yield
 
         with bdb_backend.get_connection() as conn:
-            conn.execute(schema.files.delete())
-            conn.execute(schema.sources.delete())
-            conn.commit()
+            with conn.begin():
+                conn.execute(schema.files.delete())
+                conn.execute(schema.sources.delete())
     
     @pytest.mark.dbtest
     def test_add_source(self, bdb_backend):

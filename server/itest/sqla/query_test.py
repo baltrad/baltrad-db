@@ -145,11 +145,11 @@ def _insert_test_file(backend, file_):
             _add_attribute(meta, k, v)
 
     with backend.get_connection() as conn:
-        source_id = sqla_backend.get_source_id(conn, meta.source())
-        file_id =  sqla_backend.insert_file(conn, meta, source_id)
-        sqla_backend.associate_what_source(conn, file_id, meta.source())
-        sqla_backend.insert_metadata(conn, meta, file_id)
-        conn.commit()
+        with conn.begin():
+            source_id = sqla_backend.get_source_id(conn, meta.source())
+            file_id =  sqla_backend.insert_file(conn, meta, source_id)
+            sqla_backend.associate_what_source(conn, file_id, meta.source())
+            sqla_backend.insert_metadata(conn, meta, file_id)
 
 def _add_attribute(meta, path, value):
     path = path.split("/")
@@ -187,9 +187,9 @@ class TestFileQuery(object):
         yield
 
         with bdb_backend.get_connection() as conn:
-            conn.execute(schema.files.delete())
-            conn.execute(schema.sources.delete())
-            conn.commit()
+            with conn.begin():
+                conn.execute(schema.files.delete())
+                conn.execute(schema.sources.delete())
 
     @pytest.mark.dbtest
     def test_all_files(self, bdb_backend):
@@ -519,9 +519,9 @@ class TestAttributeQuery(object):
             pytest.skip("no backend defined")
 
         with bdb_backend.get_connection() as conn:
-            conn.execute(schema.files.delete())
-            conn.execute(schema.sources.delete())
-            conn.commit()
+            with conn.begin():
+                conn.execute(schema.files.delete())
+                conn.execute(schema.sources.delete())
 
         for src in self.sources:
             bdb_backend.get_source_manager().add_source(src)
@@ -532,34 +532,9 @@ class TestAttributeQuery(object):
         yield
 
         with bdb_backend.get_connection() as conn:
-            conn.execute(schema.files.delete())
-            conn.execute(schema.sources.delete())
-            conn.commit()
-
-    # @classmethod
-    # def setup_class(cls):
-    #     cls.backend = get_backend()
-    #     if not cls.backend:
-    #         return
-
-    #     for src in cls.sources:
-    #         cls.backend.get_source_manager().add_source(src)
-    #     cls.files = _insert_test_files(cls.backend)
-        
-    # @classmethod
-    # def teardown_class(cls):
-    #     if not cls.backend:
-    #         return
-
-    #     with cls.backend.get_connection() as conn:
-    #         conn.execute(schema.files.delete())
-    #         conn.execute(schema.sources.delete())
-    
-    # def setup(self):
-    #     if not self.backend:
-    #         pytest.skip("no backend defined")
-
-    #     self.query = backend.AttributeQuery()
+            with conn.begin():
+                conn.execute(schema.files.delete())
+                conn.execute(schema.sources.delete())
     
     @pytest.mark.dbtest
     def test_fetch_uuid(self, bdb_backend):

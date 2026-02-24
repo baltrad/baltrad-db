@@ -114,6 +114,7 @@ class TestSqlaAlchemyBackend(object):
         
     def test_store_file_fails(self):
         metadata = mock.sentinel.metadata
+        metadata.bdb_uuid = "TEST_UUID"
         metadata.bdb_metadata_hash = "aabbcc123456789"
         path = "/path/to/file"
         self.backend.metadata_from_file = mock.Mock(return_value=metadata)
@@ -183,10 +184,14 @@ class TestSqlaAlchemyBackend(object):
     def test_remove_all_files(self):
         self.backend.get_connection = mock.Mock(return_value=self.conn)
         self.backend.remove_file = mock.Mock()
-        self.conn.execute.return_value = [
-            {schema.files.c.uuid: mock.sentinel.uuid1},
-            {schema.files.c.uuid: mock.sentinel.uuid2},
-        ]
+        
+        # Create mock row objects with uuid attribute instead of dictionaries
+        row1 = mock.Mock()
+        row1.uuid = mock.sentinel.uuid1
+        row2 = mock.Mock()
+        row2.uuid = mock.sentinel.uuid2
+        
+        self.conn.execute.return_value = [row1, row2]
 
         self.backend.remove_all_files()
         self.conn.execute.assert_called_once_with(

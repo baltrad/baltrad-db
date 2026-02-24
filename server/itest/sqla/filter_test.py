@@ -51,9 +51,9 @@ class TestSqlAlchemyFilterManager(object):
         yield
         
         with bdb_backend.get_connection() as conn:
-            conn.execute(schema.filters.delete())
-            conn.commit()
-    
+            with conn.begin():
+                conn.execute(schema.filters.delete())
+
     @pytest.mark.dbtest
     def test_get_filter(self):
         result = self.filter_manager.get_filter("filter1")

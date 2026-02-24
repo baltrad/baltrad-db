@@ -49,28 +49,28 @@ class SqlAlchemyFilterManager(backend.FilterManager):
     
     def add_filter(self, filter):
         with self.get_connection() as conn:
-            conn.execute(
-                schema.filters.insert(),
-                {"name":filter.name,
-                 "expression":self._to_storable_expr(filter.expression)}
-            )
-            conn.commit()
+            with conn.begin():
+                conn.execute(
+                    schema.filters.insert(),
+                    {"name":filter.name,
+                    "expression":self._to_storable_expr(filter.expression)}
+                )
     
     def remove_filter(self, name):
         with self.get_connection() as conn:
-            rowcount = conn.execute(delete(schema.filters).where(schema.filters.c.name == name)).rowcount
-            conn.commit()
+            with conn.begin():
+                rowcount = conn.execute(delete(schema.filters).where(schema.filters.c.name == name)).rowcount
             return bool(rowcount)
     
     def update_filter(self, filter):
         with self.get_connection() as conn:
-            rowcount = conn.execute(
-                update(schema.filters).where(schema.filters.c.name == filter.name),
-                {"expression":self._to_storable_expr(filter.expression)}
-            ).rowcount
-            if not rowcount:
-                raise LookupError("no filter found by name: %s" % filter.name)
-            conn.commit()
+            with conn.begin():
+                rowcount = conn.execute(
+                    update(schema.filters).where(schema.filters.c.name == filter.name),
+                    {"expression":self._to_storable_expr(filter.expression)}
+                ).rowcount
+                if not rowcount:
+                    raise LookupError("no filter found by name: %s" % filter.name)
     
     def _to_storable_expr(self, xpr):
         return json.dumps(expr.wrap_json(xpr), sort_keys=True)
