@@ -52,15 +52,17 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
       <exclude name="easymock/*.jar"/>
       <exclude name="junit/*.jar"/>
       <exclude name="objenesis/*.jar"/>
+      <exclude name="bytebuddy/*.jar"/>
     </fileset>
   </path>
 
   <path id="test.lib.path">
     <fileset dir="${lib.dir}">
-      <include name="cglib/*.jar"/>
+      <exclude name="cglib/*.jar"/>
       <include name="easymock/*.jar"/>
       <include name="junit/*.jar"/>
       <include name="objenesis/*.jar"/>
+      <include name="bytebuddy/*.jar"/>
     </fileset>
   </path>
 
@@ -92,6 +94,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
         <exclude name="junit/*.jar"/>
         <exclude name="easymock/*.jar"/>
         <exclude name="objenesis/*.jar"/>
+        <exclude name="bytebuddy/*.jar"/>
         <exclude name="cglib/*.jar/"/>
       </fileset>
     </copy>
