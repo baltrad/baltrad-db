@@ -1,21 +1,10 @@
 #!/bin/bash
 
 PROJECT_ROOT=$(dirname $(dirname $(readlink -f $0)))
-#HLHDF_ROOT=/home/hudson/continuous/installation/hlhdf
-#PREFIX=/home/hudson/continuous/installation/baltrad-db
-#CERTIFI_PEM_FILE=
 
 create_env() {
   envpath=$1
-  MAJOR=`python3 -c "import sys; print(sys.version_info.major)"`
-  MINOR=`python3 -c "import sys; print(sys.version_info.minor)"`
-  if [ $MAJOR -eq 3 -a $MINOR -ge 8 ]; then
-    python3 -m venv --system-site-packages $envpath
-  else
-    python3 $PROJECT_ROOT/misc/virtualenv/virtualenv.py \
-     --system-site-packages \
-     $envpath
-  fi
+  python3 -m venv --system-site-packages $envpath || exit 127
 }
 
 init_env() {
@@ -45,25 +34,15 @@ init_test_env() {
 
   init_env "$envpath" "$baltradcrypto" "$baltradutils"
 
-  MAJOR=`python3 -c "import sys; print(sys.version_info.major)"`
-  MINOR=`python3 -c "import sys; print(sys.version_info.minor)"`
-
-  $envpath/bin/pip3 install "nose >= 1.1" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "sphinx >= 1.1" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "mock>=0.7,<=4.0.3" --trusted-host pypi.python.org
-  $envpath/bin/pip3 install "cherrypy == 8.9.1" --trusted-host pypi.python.org
-  if [ $MAJOR -eq 3 -a $MINOR -ge 8 ]; then
-    $envpath/bin/pip3 install "psycopg2>=2.8" --trusted-host pypi.python.org
-    $envpath/bin/pip3 install "werkzeug>=2.0" --trusted-host pypi.python.org
-  else
-    $envpath/bin/pip3 install "psycopg2==2.7.7" --trusted-host pypi.python.org
-    $envpath/bin/pip3 install "werkzeug==0.14" --trusted-host pypi.python.org
-  fi
+  python3 -m pip install "sphinx >= 1.1" --trusted-host pypi.python.org
+  python3 -m pip install "cherrypy >= 18.10.0" --trusted-host pypi.python.org
+  python3 -m pip install "psycopg2 >= 2.8" --trusted-host pypi.python.org
+  python3 -m pip install "werkzeug >= 2.0" --trusted-host pypi.python.org
+  python3 -m pip install "pytest >= 7.4.3" --trusted-host pypi.python.org  
 }
 
 install_python_package() {
   package_dir=$1
-
   cd $package_dir
   python3 -m pip install .
 }
@@ -72,7 +51,7 @@ test_python_package() {
   package_dir=$1
   cd $package_dir
   python3 -m pip install -e .
-  python3 -m nose --first-package-wins --with-xunit --xunit-file=$package_dir/test-results.xml
+  python3 -m pytest --junitxml=$package_dir/test-results.xml
 }
 
 test_java_client() {
