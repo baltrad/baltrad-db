@@ -155,7 +155,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
       .andReturn(request);
     expect(methods.executeRequest(request))
       .andReturn(response);
-    Capture<RestfulFileEntry> capturedArgument = new Capture<RestfulFileEntry>();
+    Capture<RestfulFileEntry> capturedArgument = EasyMock.newCapture();
     fileEntryCache.addFileEntry(EasyMock.capture(capturedArgument));
     
     replayAll();
