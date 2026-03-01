@@ -38,7 +38,8 @@ init_test_env() {
   python3 -m pip install "cherrypy >= 18.10.0" --trusted-host pypi.python.org
   python3 -m pip install "psycopg2 >= 2.8" --trusted-host pypi.python.org
   python3 -m pip install "werkzeug >= 2.0" --trusted-host pypi.python.org
-  python3 -m pip install "pytest >= 7.4.3" --trusted-host pypi.python.org  
+  python3 -m pip install "pytest >= 7.4.3" --trusted-host pypi.python.org
+  python3 -m pip install "mock>=0.7,<=4.0.3" --trusted-host pypi.python.org
 }
 
 install_python_package() {
