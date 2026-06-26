@@ -31,19 +31,20 @@ import eu.baltrad.bdb.oh5.Source;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.BooleanNode;
-import org.codehaus.jackson.node.DoubleNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.LongNode;
-import org.codehaus.jackson.node.ObjectNode;
-import org.codehaus.jackson.node.TextNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.LongNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Iterator;
 
 public final class JsonUtil {
   private JsonNodeFactory nodeFactory;
@@ -63,7 +64,7 @@ public final class JsonUtil {
   }
 
   public void addOh5Node(Metadata metadata, JsonNode jsonNode) {
-    String path = jsonNode.get("path").getValueAsText();
+    String path = jsonNode.get("path").asText();
 
     if ("/".equals(path)) {
       return;
@@ -83,7 +84,7 @@ public final class JsonUtil {
   }
 
   public Node createOh5Node(String name, JsonNode jsonNode) {
-    String type = jsonNode.get("type").getValueAsText();
+    String type = jsonNode.get("type").asText();
     if ("attribute".equals(type)) {
       return createOh5Attribute(name, jsonNode);
     } else if ("group".equals(type)) {
@@ -100,11 +101,11 @@ public final class JsonUtil {
     if (valueNode == null) {
       throw new RuntimeException("no value associated with attribute");
     } else if (valueNode.isFloatingPointNumber()) {
-      return new Attribute(name, valueNode.getDoubleValue());
+      return new Attribute(name, valueNode.asDouble());
     } else if (valueNode.isIntegralNumber()) {
-      return new Attribute(name, valueNode.getLongValue());
+      return new Attribute(name, valueNode.asLong());
     } else if (valueNode.isTextual()) {
-      return new Attribute(name, valueNode.getTextValue());
+      return new Attribute(name, valueNode.asText());
     } else if (valueNode.isArray()) {
       // XXX: properly handle arrays!
       return new Attribute(name);
@@ -150,13 +151,13 @@ public final class JsonUtil {
   public JsonNode toJson(FileQuery query) {
     ObjectNode result = nodeFactory.objectNode();
     if (query.getFilter() != null) {
-      result.put("filter", toJson(query.getFilter()));
+      result.set("filter", toJson(query.getFilter()));
     }
     ArrayNode order = nodeFactory.arrayNode();
     for (Expression expr : query.getOrderClause()) {
       order.add(toJson(expr));
     }
-    result.put("order", order);
+    result.set("order", order);
     if (query.getLimit() != null) {
       result.put("limit", query.getLimit());
     }
@@ -171,12 +172,12 @@ public final class JsonUtil {
 
     ObjectNode fetch = nodeFactory.objectNode();
     for (String key : query.getFetchKeys()) {
-      fetch.put(key, toJson(query.getFetchExpression(key)));
+      fetch.set(key, toJson(query.getFetchExpression(key)));
     }
-    result.put("fetch", fetch);
+    result.set("fetch", fetch);
 
     if (query.getFilter() != null) {
-      result.put("filter", toJson(query.getFilter()));
+      result.set("filter", toJson(query.getFilter()));
     }
 
     ArrayNode order = nodeFactory.arrayNode();
@@ -184,14 +185,14 @@ public final class JsonUtil {
       order.add(toJson(expr));
     }
     if (order.size() > 0)
-      result.put("order", order);
+      result.set("order", order);
 
     ArrayNode group = nodeFactory.arrayNode();
     for (Expression expr : query.getGroupClause()) {
       group.add(toJson(expr));
     }
     if (group.size() > 0)
-      result.put("group", group);
+      result.set("group", group);
 
     if (query.getLimit() != null) {
       result.put("limit", query.getLimit());
@@ -219,9 +220,9 @@ public final class JsonUtil {
     }
     
     src.put("name", source.getName());
-    src.put("values", values);
+    src.set("values", values);
     
-    result.put("source", src);
+    result.set("source", src);
     
     return result;
   }

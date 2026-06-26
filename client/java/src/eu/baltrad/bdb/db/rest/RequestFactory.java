@@ -19,50 +19,50 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.db.rest;
 
+import java.io.InputStream;
+import java.util.UUID;
+
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.FileQuery;
 import eu.baltrad.bdb.oh5.Source;
 import eu.baltrad.bdb.util.DateTime;
 
-import org.apache.http.client.methods.HttpUriRequest;
-
-import java.io.InputStream;
-import java.util.UUID;
-
 public interface RequestFactory {
-  HttpUriRequest createStoreFileRequest(InputStream fileContent);
+  HttpUriRequestBase createStoreFileRequest(InputStream fileContent);
   
-  HttpUriRequest createQueryFileMetadata(InputStream fileContent);  
-  
-  HttpUriRequest createRemoveFileEntryRequest(UUID uuid);
+  HttpUriRequestBase createQueryFileMetadata(InputStream fileContent);  
 
-  HttpUriRequest createRemoveAllFileEntriesRequest();
-
-  HttpUriRequest createGetFileEntryRequest(UUID uuid);
-
-  HttpUriRequest createRemoveFilesByCountRequest(int limit, int nritems);
+  HttpUriRequestBase createRemoveFileEntryRequest(UUID uuid);
   
-  HttpUriRequest createRemoveFilesByAgeRequest(DateTime age, int nritems);
+  HttpUriRequestBase createRemoveAllFileEntriesRequest();
   
-  HttpUriRequest createGetFileCountRequest();
+  HttpUriRequestBase createGetFileEntryRequest(UUID uuid);
   
-  HttpUriRequest createGetFileContentRequest(UUID uuid);
-
-  HttpUriRequest createQueryFileRequest(FileQuery query);
-
-  HttpUriRequest createQueryAttributeRequest(AttributeQuery query);
-
-  HttpUriRequest createGetSourcesRequest();
-
-  HttpUriRequest createGetSourceRequest(String name);
+  HttpUriRequestBase createRemoveFilesByCountRequest(int limit, int nritems);
   
-  HttpUriRequest createAddSourceRequest(Source source);
+  HttpUriRequestBase createRemoveFilesByAgeRequest(DateTime age, int nritems);
   
-  HttpUriRequest createUpdateSourceRequest(Source source);
+  HttpUriRequestBase createGetFileCountRequest();
   
-  HttpUriRequest createDeleteSourceRequest(String source);
+  HttpUriRequestBase createGetFileContentRequest(UUID uuid);
   
-  HttpUriRequest createGetParentSourcesRequest();
-
-  HttpUriRequest createGetSourcesWithParent(String parent);
+  HttpUriRequestBase createQueryFileRequest(FileQuery query);
+  
+  HttpUriRequestBase createQueryAttributeRequest(AttributeQuery query);
+  
+  HttpUriRequestBase createGetSourcesRequest();
+  
+  HttpUriRequestBase createGetSourceRequest(String name);
+  
+  HttpUriRequestBase createAddSourceRequest(Source source);
+  
+  HttpUriRequestBase createUpdateSourceRequest(Source source);
+  
+  HttpUriRequestBase createDeleteSourceRequest(String source);
+  
+  HttpUriRequestBase createGetParentSourcesRequest();
+  
+  HttpUriRequestBase createGetSourcesWithParent(String parent);
 }

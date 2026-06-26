@@ -19,8 +19,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.db.rest;
 
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
 
 import static org.easymock.EasyMock.*;
 import org.easymock.EasyMockSupport;
@@ -33,7 +33,7 @@ import org.keyczar.Signer;
 
 public class KeyczarAuthenticatorTest extends EasyMockSupport {
   private static interface KeyczarAuthenticatorMethods {
-    public String createSignableString(HttpUriRequest request);
+    public String createSignableString(HttpUriRequestBase request);
   }
 
   KeyczarAuthenticatorMethods methods;
@@ -51,12 +51,12 @@ public class KeyczarAuthenticatorTest extends EasyMockSupport {
   public void addCredentials() throws Exception {
     classUnderTest = new KeyczarAuthenticator(signer, "keyname") {
       @Override
-      public String createSignableString(HttpUriRequest request) {
+      public String createSignableString(HttpUriRequestBase request) {
         return methods.createSignableString(request);
       }
     };
 
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     expect(methods.createSignableString(request))
       .andReturn("signable");
     expect(signer.sign("signable"))

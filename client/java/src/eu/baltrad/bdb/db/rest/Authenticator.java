@@ -19,15 +19,13 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.db.rest;
 
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+
+import org.apache.commons.io.IOUtils;
 
 /**
- * authenticate HTTP requests
+ * Interface for adding authentication details to HTTP requests
  */
 public interface Authenticator {
-
-  /**
-   * Add authentication credentials to the request.
-   */
-  void addCredentials(HttpUriRequest message);
+  void addCredentials(HttpUriRequestBase message);
 }

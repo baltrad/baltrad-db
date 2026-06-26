@@ -30,7 +30,8 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   <property name="build.instrument.dir" value="${build.dir}/instrument" />
   <property name="dist.dir" value="${basedir}/dist" />
   <property name="source.dir" value="${basedir}/src" />
-  <property name="lib.dir" value="${basedir}/lib" />
+  <property name="lib.dir" value="${basedir}/lib/maven/libs/runtime" />
+  <property name="test.lib.dir" value="${basedir}/lib/maven/libs/test" />
   <property name="examples.dir" value="${basedir}/examples" />
   <property name="compile.debug" value="true" />
   <property name="compile.optimize" value="true" />
@@ -47,24 +48,68 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
   <path id="lib.path">
     <fileset dir="${lib.dir}">
-      <include name="**/*.jar"/>
-      <exclude name="cglib/*.jar"/>
-      <exclude name="easymock/*.jar"/>
-      <exclude name="junit/*.jar"/>
-      <exclude name="objenesis/*.jar"/>
-      <exclude name="bytebuddy/*.jar"/>
+      <include name="*.jar"/>
+    </fileset>
+
+    <fileset dir="${basedir}/lib/keyczar">
+      <include name="*.jar"/>
     </fileset>
   </path>
 
   <path id="test.lib.path">
-    <fileset dir="${lib.dir}">
-      <exclude name="cglib/*.jar"/>
-      <include name="easymock/*.jar"/>
-      <include name="junit/*.jar"/>
-      <include name="objenesis/*.jar"/>
-      <include name="bytebuddy/*.jar"/>
+    <!-- Include runtime JARs needed by tests -->
+    <path refid="lib.path"/>
+    <!-- Include test-only JARs -->
+    <fileset dir="${test.lib.dir}">
+      <include name="*.jar"/>
     </fileset>
   </path>
+
+  <!-- Fetch Maven dependencies -->
+  <target name="fetch-jars" description="Download all Maven dependencies (runtime and test separated)">
+    <echo message="Fetching dependencies via Maven..."/>
+    <exec executable="mvn" dir="${basedir}/lib/maven" failonerror="true">
+      <arg value="package"/>
+    </exec>
+    
+    <!-- Remove runtime JARs from test directory to keep only test-specific JARs -->
+    <delete>
+      <fileset dir="${test.lib.dir}">
+        <present present="both" targetdir="${lib.dir}"/>
+      </fileset>
+    </delete>
+    
+    <echo message="Runtime dependencies in: lib/maven/libs/runtime/"/>
+    <echo message="Test-only dependencies in: lib/maven/libs/test/"/>
+  </target>
+
+  <!-- Generate third-party license information -->
+  <target name="third-party-licenses" description="Generate third-party license information file">
+    <echo message="Generating third-party license information..."/>
+    <exec executable="mvn" dir="${basedir}/lib/maven" failonerror="true">
+      <arg value="license:add-third-party"/>
+      <arg value="-DskipPomPackaging=false"/>
+    </exec>
+    <echo message="License file created at: lib/maven/libs/THIRD-PARTY-LICENSES.txt"/>
+  </target>
+
+  <!-- Check if dependencies need to be fetched -->
+  <target name="check-jars">
+    <condition property="jars.present">
+      <and>
+        <available file="${lib.dir}" type="dir"/>
+        <available file="${test.lib.dir}" type="dir"/>
+        <resourcecount when="gt" count="0">
+          <fileset dir="${lib.dir}" includes="*.jar"/>
+        </resourcecount>
+      </and>
+    </condition>
+  </target>
+
+  <!-- Fetch dependencies only if needed -->
+  <target name="ensure-jars" depends="check-jars" unless="jars.present">
+    <antcall target="fetch-jars"/>
+  </target>
 
   <!-- Generates the deliverables -->
   <target name="build" depends="clean,compile">
@@ -76,7 +121,6 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
   <target name="prepare.tests" depends="prepare.test, prepare.itest"/>
 
-  <!--<target name="execute.tests" depends="prepare.tests, execute.test, execute.itest"/>-->
   <target name="execute.tests" depends="prepare.tests, execute.test"/>
 
   <target name="hudson" depends="build, execute.tests"/>
@@ -87,15 +131,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
   <target name="install-files">
     <mkdir dir="${prefix}/share/baltrad-bdb/java/" />
+    <!-- Only copy runtime dependencies, not test dependencies -->
     <copy todir="${prefix}/share/baltrad-bdb/java/libs" flatten="true">
       <fileset dir="${lib.dir}">
-        <include name="**/*.jar"/>
-        <exclude name="ant/*.jar" />
-        <exclude name="junit/*.jar"/>
-        <exclude name="easymock/*.jar"/>
-        <exclude name="objenesis/*.jar"/>
-        <exclude name="bytebuddy/*.jar"/>
-        <exclude name="cglib/*.jar/"/>
+        <include name="*.jar"/>
       </fileset>
     </copy>
     <copy file="${dist.dir}/${app.name}.jar"
@@ -103,7 +142,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   </target>
 
   <!-- Compile the code -->
-  <target name="compile" depends="prepare">
+  <target name="compile" depends="ensure-jars,prepare">
     <mkdir dir="${build.classes.dir}"/>
     <javac srcdir="${source.dir}"
            encoding="utf-8"
@@ -150,10 +189,15 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   </target> 
   
   <target name="execute.test" depends="prepare.test">
+  <!-- Echo lib.path for debugging
+  <pathconvert property="lib.path.string" refid="lib.path" pathsep="${line.separator}  "/>
+  <echo level="info" message="lib.path contains:${line.separator}  ${lib.path.string}"/>
+   -->
+
   <mkdir dir="${dist.dir}/junit-reports" />
   <junit dir="${build.test.dir}" showoutput="true" forkmode="perBatch" printsummary="yes" >
-    <jvmarg line="-Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=512m"/>
-    <formatter type="xml"/> 
+    <jvmarg line="-Djava.awt.headless=true -Xmx512m"/>
+    <formatter type="xml"/>
     <formatter type="brief" usefile="false" if="test.format.brief" />
     <classpath>
       <path refid="test.lib.path"/>
@@ -161,7 +205,7 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
       <pathelement path="${build.classes.dir}"/>
       <pathelement path="${build.test.dir}" />
     </classpath>
-    <batchtest fork="no" todir="${dist.dir}/junit-reports">
+    <batchtest fork="yes" todir="${dist.dir}/junit-reports">
     	<fileset dir="${build.test.dir}" includes="**/*Test.class" />
 <!--
         <fileset dir="${build.test.dir}" includes="**/TemplateMetadataNamerTest.class" />
@@ -264,6 +308,10 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
   <!-- clean directories for building -->
   <target name="clean">
     <delete dir="${build.dir}" />
+    <delete dir="${lib.dir}" />
+    <delete dir="${test.lib.dir}" />
+    <delete file="${basedir}/lib/maven/libs/THIRD-PARTY-LICENSES.txt" />
+    <delete dir="${basedir}/lib/maven/target" />
   </target>
   
   <!-- Prepare for compilation and jar-generation, copy files -->

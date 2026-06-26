@@ -32,8 +32,8 @@ public class ListExpression extends BaseExpression {
 
   public ListExpression(List<Expression> values) {
     this();
-    for (Expression value: values) {
-      add(value);
+    for (Expression value : values) {
+      addInternal(value);
     }
   }
 
@@ -86,6 +86,15 @@ public class ListExpression extends BaseExpression {
    * @throws IllegalArgumentException if value is null
    */
   public void add(Expression value) {
+    addInternal(value);
+  }
+
+  /**
+   * Add a value to this list.
+   *
+   * @throws IllegalArgumentException if value is null
+   */
+  private void addInternal(Expression value) {
     if (value == null)
       throw new IllegalArgumentException(
         "ExpressionList can't contain null values"

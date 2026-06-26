@@ -24,13 +24,14 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.Database;
@@ -47,7 +48,7 @@ import eu.baltrad.bdb.util.DateTime;
  * 
  */
 public class RestfulDatabase implements Database, SourceManager {
-  private HttpClient httpClient;
+  private CloseableHttpClient httpClient;
   private RequestFactory requestFactory;
   private Authenticator authenticator;
   private RestfulFileEntryCache fileEntryCache;
@@ -73,10 +74,10 @@ public class RestfulDatabase implements Database, SourceManager {
 
   public RestfulDatabase(URI serverUri, Authenticator authenticator, int maxconnections, int fileEntryCacheSize) {
     this.requestFactory = new DefaultRequestFactory(serverUri);
-    ThreadSafeClientConnManager tsccm = new ThreadSafeClientConnManager();
-    tsccm.setDefaultMaxPerRoute(maxconnections);
-    tsccm.setMaxTotal(maxconnections);
-    this.httpClient = new DefaultHttpClient(tsccm);
+    PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+    cm.setDefaultMaxPerRoute(maxconnections);
+    cm.setMaxTotal(maxconnections);
+    this.httpClient = HttpClients.custom().setConnectionManager(cm).build();
     this.authenticator = authenticator;
     if (fileEntryCacheSize > 0) {
       this.fileEntryCache = new RestfulFileEntryCache(fileEntryCacheSize);      
@@ -100,15 +101,15 @@ public class RestfulDatabase implements Database, SourceManager {
   public RestfulDatabase(URI serverUri, Authenticator authenticator) {
     this(
         new DefaultRequestFactory(serverUri),
-        new DefaultHttpClient(
-            new ThreadSafeClientConnManager()
-            ),
+        HttpClients.custom()
+            .setConnectionManager(new PoolingHttpClientConnectionManager())
+            .build(),
         authenticator
         );
   }
 
   public RestfulDatabase(RequestFactory requestFactory,
-                         HttpClient httpClient,
+                         CloseableHttpClient httpClient,
                          Authenticator authenticator) {
     this.requestFactory = requestFactory;
     this.httpClient = httpClient;
@@ -132,7 +133,7 @@ public class RestfulDatabase implements Database, SourceManager {
     long st = System.currentTimeMillis();
     long queryTime = 0;
 
-    HttpUriRequest request =
+    HttpUriRequestBase request =
       requestFactory.createStoreFileRequest(fileContent);
     RestfulResponse response = executeRequest(request);
     
@@ -181,7 +182,7 @@ public class RestfulDatabase implements Database, SourceManager {
   public Metadata queryFileMetadata(InputStream fileContent) {
     long st = System.currentTimeMillis();
     
-    HttpUriRequest request =
+    HttpUriRequestBase request =
         requestFactory.createQueryFileMetadata(fileContent);
     RestfulResponse response = executeRequest(request);
 
@@ -207,7 +208,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public boolean removeFileEntry(UUID uuid) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request =
+    HttpUriRequestBase request =
       requestFactory.createRemoveFileEntryRequest(uuid);
     RestfulResponse response = executeRequest(request);
     
@@ -237,7 +238,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public void removeAllFileEntries() {
     long st = System.currentTimeMillis();
-    HttpUriRequest request =
+    HttpUriRequestBase request =
       requestFactory.createRemoveAllFileEntriesRequest();
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.removeAllFileEntries: Took " + (System.currentTimeMillis() - st) + " ms");
@@ -268,7 +269,7 @@ public class RestfulDatabase implements Database, SourceManager {
       }     
     }
     
-    HttpUriRequest request = requestFactory.createGetFileEntryRequest(uuid);
+    HttpUriRequestBase request = requestFactory.createGetFileEntryRequest(uuid);
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.getFileEntry: Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName() + ", file: " + uuid.toString());
 
@@ -293,14 +294,14 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public int removeFilesByCount(int limit, int nritems) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createRemoveFilesByCountRequest(limit, nritems);
+    HttpUriRequestBase request = requestFactory.createRemoveFilesByCountRequest(limit, nritems);
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.removeFilesByCount: Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
 
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_OK) {
-        return response.getJsonContent().get("numberOfFilesRemoved").getValueAsInt();
+        return response.getJsonContent().get("numberOfFilesRemoved").asInt();
       } else {
         throw new DatabaseError("unhandled response code: " +
             Integer.toString(statusCode));
@@ -312,13 +313,13 @@ public class RestfulDatabase implements Database, SourceManager {
 
   public int removeFilesByAge(DateTime age, int nritems) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createRemoveFilesByAgeRequest(age, nritems);
+    HttpUriRequestBase request = requestFactory.createRemoveFilesByAgeRequest(age, nritems);
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.removeFilesByAge: Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_OK) {
-        return response.getJsonContent().get("numberOfFilesRemoved").getValueAsInt();
+        return response.getJsonContent().get("numberOfFilesRemoved").asInt();
       } else {
         throw new DatabaseError("unhandled response code: " +
             Integer.toString(statusCode));
@@ -334,13 +335,13 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public long getFileCount() {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createGetFileCountRequest();
+    HttpUriRequestBase request = requestFactory.createGetFileCountRequest();
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.getFileCount: Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
     try {
       int statusCode = response.getStatusCode();
       if (statusCode == HttpStatus.SC_OK) {
-        return response.getJsonContent().get("numberOfFiles").getValueAsLong();
+        return response.getJsonContent().get("numberOfFiles").asLong();
       } else {
         throw new DatabaseError("unhandled response code: " +
             Integer.toString(statusCode));
@@ -356,7 +357,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public InputStream getFileContent(UUID uuid) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createGetFileContentRequest(uuid);
+    HttpUriRequestBase request = requestFactory.createGetFileContentRequest(uuid);
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.getFileContent: Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName() + ", file: " + uuid.toString());
 
@@ -379,7 +380,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public RestfulFileResult execute(FileQuery query) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createQueryFileRequest(query);
+    HttpUriRequestBase request = requestFactory.createQueryFileRequest(query);
     RestfulResponse response = executeRequest(request);
     logger.info("bdb.RestfulDatabase.execute(FileQuery): Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
 
@@ -401,7 +402,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public RestfulAttributeResult execute(AttributeQuery query) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request =
+    HttpUriRequestBase request =
       requestFactory.createQueryAttributeRequest(query);
     RestfulResponse response = executeRequest(request);
     logger.info("bdb.RestfulDatabase.execute(AttributeQuery): Executed request in " + (System.currentTimeMillis() - st) + " ms" + ", thread: " + Thread.currentThread().getName());
@@ -424,7 +425,11 @@ public class RestfulDatabase implements Database, SourceManager {
    */
   @Override
   public void close() {
-    httpClient.getConnectionManager().shutdown();
+    try {
+      httpClient.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -440,7 +445,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override  
   public List<Source> getSources() {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createGetSourcesRequest();
+    HttpUriRequestBase request = requestFactory.createGetSourcesRequest();
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.getSources(): Executed request in " + (System.currentTimeMillis() - st) + " ms");
     
@@ -460,7 +465,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public Source getSource(String name) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createGetSourceRequest(name);
+    HttpUriRequestBase request = requestFactory.createGetSourceRequest(name);
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.getSource(String): Executed request in " + (System.currentTimeMillis() - st) + " ms");
     
@@ -483,7 +488,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public void add(Source src) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createAddSourceRequest(src);
+    HttpUriRequestBase request = requestFactory.createAddSourceRequest(src);
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.add(Source): Executed request in " + (System.currentTimeMillis() - st) + " ms");
     
@@ -507,7 +512,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public void update(Source src) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createUpdateSourceRequest(src);
+    HttpUriRequestBase request = requestFactory.createUpdateSourceRequest(src);
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.update(Source): Executed request in " + (System.currentTimeMillis() - st) + " ms");
     try {
@@ -526,7 +531,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public boolean remove(String src) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createDeleteSourceRequest(src);
+    HttpUriRequestBase request = requestFactory.createDeleteSourceRequest(src);
     RestfulResponse response = executeRequest(request);
     boolean result = false;
     logger.debug("bdb.RestfulDatabase.remove(String): Executed request in " + (System.currentTimeMillis() - st) + " ms");
@@ -548,7 +553,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public List<Source> getParentSources() {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createGetParentSourcesRequest();
+    HttpUriRequestBase request = requestFactory.createGetParentSourcesRequest();
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.getParentSources(): Executed request in " + (System.currentTimeMillis() - st) + " ms");
 
@@ -567,7 +572,7 @@ public class RestfulDatabase implements Database, SourceManager {
   @Override
   public List<Source> getSourcesWithParent(String parent) {
     long st = System.currentTimeMillis();
-    HttpUriRequest request = requestFactory.createGetSourcesWithParent(parent);
+    HttpUriRequestBase request = requestFactory.createGetSourcesWithParent(parent);
     RestfulResponse response = executeRequest(request);
     logger.debug("bdb.RestfulDatabase.getSourcesWithParent(): Executed request in " + (System.currentTimeMillis() - st) + " ms");
 
@@ -583,15 +588,19 @@ public class RestfulDatabase implements Database, SourceManager {
     }
   }
 
-  protected RestfulResponse executeRequest(HttpUriRequest request) {
+  protected RestfulResponse executeRequest(HttpUriRequestBase request) {
     authenticator.addCredentials(request);
     try {
-      return new RestfulResponse(httpClient.execute(request));
+      org.apache.hc.core5.http.ClassicHttpResponse response = httpClient.execute(request);
+      return new RestfulResponse(response);
     } catch (IOException e) {
-      throw new DatabaseIOError(
-        "HTTP " + request.getMethod() + " to " + request.getURI() + " failed",
-        e
-      );
+      String uri = "";
+      try {
+        uri = request.getUri().toString();
+      } catch (Exception ex) {
+        uri = "unknown";
+      }
+      throw new DatabaseIOError("HTTP " + request.getMethod() + " to " + uri + " failed", e);
     }
   }
 }

@@ -33,13 +33,14 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ProtocolVersion;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
@@ -59,24 +60,22 @@ import eu.baltrad.bdb.oh5.Source;
 
 public class RestfulDatabaseTest extends EasyMockSupport {
   private static interface RestfulDatabaseMethods {
-    public RestfulResponse executeRequest(HttpUriRequest request);
+    public RestfulResponse executeRequest(HttpUriRequestBase request);
   }
 
   RequestFactory requestFactory;
-  HttpClient httpClient;
+  CloseableHttpClient httpClient;
   Authenticator authenticator;
   RestfulDatabaseMethods methods;
   RestfulDatabase classUnderTest;
   
-  HttpResponse createResponse(int code) throws Exception {
+  ClassicHttpResponse createResponse(int code) throws Exception {
     return createResponse(code, null);
   }
 
 
-  HttpResponse createResponse(int code, String content) throws Exception {
-    HttpResponse response =  new BasicHttpResponse(
-      new ProtocolVersion("HTTP", 1, 1), code, ""
-    );
+  ClassicHttpResponse createResponse(int code, String content) throws Exception {
+    ClassicHttpResponse response =  new BasicClassicHttpResponse(code, "");
     if (content != null) {
       response.setEntity(new StringEntity(content));
     }
@@ -95,7 +94,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Before
   public void setUp() {
     requestFactory = createMock(RequestFactory.class);
-    httpClient = createMock(HttpClient.class);
+    httpClient = createMock(CloseableHttpClient.class);
     authenticator = createMock(Authenticator.class);
     methods = createMock(RestfulDatabaseMethods.class);
 
@@ -104,7 +103,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
         httpClient,
         authenticator) {
       @Override
-      protected RestfulResponse executeRequest(HttpUriRequest request) {
+      protected RestfulResponse executeRequest(HttpUriRequestBase request) {
         return methods.executeRequest(request);
       }
     };
@@ -114,7 +113,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void store() throws Exception {
     InputStream fileContent = createMock(InputStream.class);
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_CREATED,
       "{ \"metadata\" : [" +
@@ -139,7 +138,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void store_withCache() throws Exception {
     InputStream fileContent = createMock(InputStream.class);
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulFileEntryCache fileEntryCache = createMock(RestfulFileEntryCache.class);
     classUnderTest.setFileEntryCache(fileEntryCache);
     RestfulResponse response = createRestfulResponse(
@@ -169,7 +168,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void store_duplicateEntry() throws Exception {
     InputStream fileContent = createMock(InputStream.class);
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_CONFLICT);
     
     expect(requestFactory.createStoreFileRequest(fileContent))
@@ -188,7 +187,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void store_serverFailure() throws Exception {
     InputStream fileContent = createMock(InputStream.class);
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
@@ -209,7 +208,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void removeFileEntry() throws Exception {
     UUID uuid = UUID.randomUUID();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_NO_CONTENT);
 
     expect(requestFactory.createRemoveFileEntryRequest(uuid))
@@ -225,7 +224,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void removeFileEntry_notFound() throws Exception {
     UUID uuid = UUID.randomUUID();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_NOT_FOUND);
 
     expect(requestFactory.createRemoveFileEntryRequest(uuid))
@@ -241,7 +240,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void removeFileEntry_serverFailure() throws Exception {
     UUID uuid = UUID.randomUUID();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
@@ -261,7 +260,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
   @Test
   public void removeAllFileEntries() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_NO_CONTENT);
 
     expect(requestFactory.createRemoveAllFileEntriesRequest())
@@ -276,7 +275,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
   @Test
   public void removeAllFileEntries_serverFailure() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
@@ -299,7 +298,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void getFileEntry() throws Exception {
     UUID uuid = UUID.randomUUID();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "{ \"metadata\" : [" +
@@ -321,7 +320,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void getFileEntry_notFound() throws Exception {
     UUID uuid = UUID.randomUUID();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_NOT_FOUND);
 
     expect(requestFactory.createGetFileEntryRequest(uuid))
@@ -338,7 +337,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void getFileEntry_serverFailure() throws Exception {
     UUID uuid = UUID.randomUUID();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
@@ -359,7 +358,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void getFileContent() throws Exception {
     UUID uuid = UUID.randomUUID();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "filecontent"
@@ -379,7 +378,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void getFileContent_notFound() throws Exception {
     UUID uuid = UUID.randomUUID();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_NOT_FOUND);
 
     expect(requestFactory.createGetFileContentRequest(uuid))
@@ -396,7 +395,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void getFileContent_serverFailure() throws Exception {
     UUID uuid = UUID.randomUUID();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
@@ -417,7 +416,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void execute_FileQuery() throws Exception {
     FileQuery query = new FileQuery();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "{ \"rows\" : []}"
@@ -438,7 +437,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void execute_FileQuery_serverFailure() throws Exception {
     FileQuery query = new FileQuery();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
@@ -459,7 +458,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void execute_AttributeQuery() throws Exception {
     AttributeQuery query = new AttributeQuery();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "{\"rows\" : []}"
@@ -481,7 +480,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   @Test
   public void execute_AttriuteQuery_serverFailure() throws Exception {
     AttributeQuery query = new AttributeQuery();
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
@@ -507,7 +506,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   
   @Test
   public void getSources() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "{\"sources\" : [" +
@@ -535,7 +534,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
   @Test
   public void getSources_serverFailure() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_INTERNAL_SERVER_ERROR
     );
@@ -555,7 +554,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   
   @Test
   public void getSource() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(
       HttpStatus.SC_OK,
       "{\"source\" : {\"name\": \"src1\", \"values\": {\"key1\": \"value1\"}, \"parent\": \"se\"}}"
@@ -576,7 +575,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   }
   @Test
   public void add() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_CREATED);
     Source source = new Source("foo");
     source.put("smo", "ba");
@@ -594,7 +593,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
   @Test
   public void add_duplicate() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_CONFLICT);
     Source source = new Source("foo");
     source.put("smo", "ba");
@@ -617,7 +616,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   
   @Test
   public void add_unknown() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR);
     Source source = new Source("foo");
     source.put("smo", "ba");
@@ -640,7 +639,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   
   @Test
   public void update() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_NO_CONTENT);
 
     Source source = new Source("foo");
@@ -659,7 +658,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   
   @Test
   public void update_notFound() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_NOT_FOUND);
 
     Source source = new Source("foo");
@@ -683,7 +682,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   
   @Test
   public void remove() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_NO_CONTENT);
 
     expect(requestFactory.createDeleteSourceRequest("nisse")).andReturn(request);
@@ -699,7 +698,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
   @Test
   public void remove_noSuchFile() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_NOT_FOUND);
 
     expect(requestFactory.createDeleteSourceRequest("nisse")).andReturn(request);
@@ -715,7 +714,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
   @Test
   public void remove_otherError() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_OK);
 
     expect(requestFactory.createDeleteSourceRequest("nisse")).andReturn(request);
@@ -735,7 +734,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
   
   @Test
   public void getParentSources() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_OK,
         "{\"sources\" : [" + 
           "{\"name\": \"src1\", \"values\": {\"key1\": \"value1\"}, \"parent\": null}," + 
@@ -761,7 +760,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
   @Test
   public void getSourcesWithParent() throws Exception {
-    HttpUriRequest request = createMock(HttpUriRequest.class);
+    HttpUriRequestBase request = createMock(HttpUriRequestBase.class);
     RestfulResponse response = createRestfulResponse(HttpStatus.SC_OK,
         "{\"sources\" : [" + 
           "{\"name\": \"src1\", \"values\": {\"key1\": \"value1\"}, \"parent\": \"by\"}," +
@@ -793,11 +792,10 @@ public class RestfulDatabaseTest extends EasyMockSupport {
       authenticator
     );
 
-    HttpUriRequest httpRequest = createMock(HttpUriRequest.class);
-    HttpResponse httpResponse = createResponse(
-      HttpStatus.SC_OK,
-      "content"
-    );
+    HttpUriRequestBase httpRequest = createMock(HttpUriRequestBase.class);
+    BasicClassicHttpResponse basicResponse = new BasicClassicHttpResponse(HttpStatus.SC_OK, "");
+    basicResponse.setEntity(new StringEntity("content"));
+    CloseableHttpResponse httpResponse = CloseableHttpResponse.adapt(basicResponse);
 
     authenticator.addCredentials(httpRequest);
     expect(httpClient.execute(httpRequest))
@@ -806,7 +804,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
 
     RestfulResponse response = classUnderTest.executeRequest(httpRequest);
     assertEquals(HttpStatus.SC_OK, response.getStatusCode());
-    assertEquals("content", IOUtils.toString(response.getContentStream()));
+    assertEquals("content", IOUtils.toString(response.getContentStream(), java.nio.charset.StandardCharsets.UTF_8));
     verifyAll();
   }
 
@@ -817,7 +815,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
       httpClient,
       authenticator
     );
-    HttpUriRequest httpRequest = createMock(HttpUriRequest.class);
+    HttpUriRequestBase httpRequest = createMock(HttpUriRequestBase.class);
     
     IOException exception = new IOException();
     authenticator.addCredentials(httpRequest);
@@ -825,7 +823,7 @@ public class RestfulDatabaseTest extends EasyMockSupport {
       .andThrow(exception);
     expect(httpRequest.getMethod())
       .andReturn("GET");
-    expect(httpRequest.getURI())
+    expect(httpRequest.getUri())
       .andReturn(java.net.URI.create("http://example.com/"));
     replayAll();
 

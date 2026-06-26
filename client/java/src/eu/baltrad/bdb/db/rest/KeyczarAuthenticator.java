@@ -22,8 +22,8 @@ package eu.baltrad.bdb.db.rest;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 import org.keyczar.Signer;
 import org.keyczar.exceptions.KeyczarException;
@@ -75,7 +75,7 @@ public class KeyczarAuthenticator implements Authenticator {
   }
   
   @Override
-  public void addCredentials(HttpUriRequest request) {
+  public void addCredentials(HttpUriRequestBase request) {
     String signable = createSignableString(request);
     String signature;
     try {
@@ -89,10 +89,14 @@ public class KeyczarAuthenticator implements Authenticator {
     );
   }
 
-  protected String createSignableString(HttpUriRequest request) {
+  protected String createSignableString(HttpUriRequestBase request) {
     List<String> result = new ArrayList<String>();
     result.add(request.getMethod());
-    result.add(request.getURI().getPath());
+    try {
+      result.add(request.getUri().getPath());
+    } catch (java.net.URISyntaxException e) {
+      throw new RuntimeException("Invalid URI", e);
+    }
     for (String headerName : INTERESTING_HEADERS) {
       Header header = request.getFirstHeader(headerName);
       if (header != null) {

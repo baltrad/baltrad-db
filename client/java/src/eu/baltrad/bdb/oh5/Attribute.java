@@ -31,17 +31,17 @@ public class Attribute extends BaseNode implements AttributeValue {
 
   public Attribute(String name, double value) {
     super(name);
-    setValue(value);
+    this.value = new AttributeValueDouble(value);
   }
 
   public Attribute(String name, long value) {
     super(name);
-    setValue(value);
+    this.value = new AttributeValueLong(value);
   }
 
   public Attribute(String name, String value) {
     super(name);
-    setValue(value);
+    this.value = new AttributeValueString(value);
   }
 
   public void setValue(double value) {

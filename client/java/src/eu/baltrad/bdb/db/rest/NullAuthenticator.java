@@ -19,13 +19,11 @@ along with baltrad-db. If not, see <http://www.gnu.org/licenses/>.
 
 package eu.baltrad.bdb.db.rest;
 
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
- * Do no authentication
+ * placeholder authenticator that doesn't add any credentials
  */
 public class NullAuthenticator implements Authenticator {
-
-  @Override
-  public void addCredentials(HttpUriRequest message) { }
+  public void addCredentials(HttpUriRequestBase message) { }
 }

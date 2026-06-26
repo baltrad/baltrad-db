@@ -23,10 +23,9 @@ import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.FileQuery;
 import eu.baltrad.bdb.oh5.Source;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -46,7 +45,7 @@ public class DefaultRequestFactoryTest {
     );
   }
 
-  protected String getHeader(HttpUriRequest request, String name) {
+  protected String getHeader(HttpUriRequestBase request, String name) {
     Header header = request.getFirstHeader(name);
     if (header != null) {
       return header.getValue();
@@ -55,17 +54,18 @@ public class DefaultRequestFactoryTest {
     }
   }
 
-  protected HttpEntity getEntity(HttpUriRequest req) {
-    HttpEntityEnclosingRequest entityReq = null;
+  protected HttpEntity getEntity(HttpUriRequestBase req) {
     try {
-      entityReq = (HttpEntityEnclosingRequest)req;
-    } catch (ClassCastException e) {
+      if (req instanceof org.apache.hc.core5.http.HttpEntityContainer) {
+        return ((org.apache.hc.core5.http.HttpEntityContainer)req).getEntity();
+      }
+    } catch (Exception e) {
       return null;
     }
-    return entityReq.getEntity();
+    return null;
   }
 
-  protected String getContentType(HttpUriRequest req) {
+  protected String getContentType(HttpUriRequestBase req) {
     Header header = req.getFirstHeader("content-type");
     if (header != null)
       return header.getValue();
@@ -73,119 +73,119 @@ public class DefaultRequestFactoryTest {
   }
 
   @Test
-  public void createStoreFileRequest() {
+  public void createStoreFileRequest() throws Exception {
     InputStream input = new ByteArrayInputStream("filecontent".getBytes());
-    HttpUriRequest req = classUnderTest.createStoreFileRequest(input);
+    HttpUriRequestBase req = classUnderTest.createStoreFileRequest(input);
     
     assertEquals("POST", req.getMethod());
-    assertEquals(URI.create("http://example.com/file/"), req.getURI());
+    assertEquals(URI.create("http://example.com/file/"), req.getUri());
     assertEquals("application/x-hdf5", getContentType(req));
   }
 
   @Test
-  public void createRemoveFileEntryRequest() {
+  public void createRemoveFileEntryRequest() throws Exception {
     UUID uuid = UUID.fromString("00000000-0000-0000-0004-000000000001");
-    HttpUriRequest req = classUnderTest.createRemoveFileEntryRequest(uuid);
+    HttpUriRequestBase req = classUnderTest.createRemoveFileEntryRequest(uuid);
 
     assertEquals("DELETE", req.getMethod());
-    assertEquals(URI.create("http://example.com/file/00000000-0000-0000-0004-000000000001"), req.getURI());
+    assertEquals(URI.create("http://example.com/file/00000000-0000-0000-0004-000000000001"), req.getUri());
   }
 
   @Test
-  public void createRemoveAllFileEntriesRequest() {
-    HttpUriRequest req = classUnderTest.createRemoveAllFileEntriesRequest();
+  public void createRemoveAllFileEntriesRequest() throws Exception {
+    HttpUriRequestBase req = classUnderTest.createRemoveAllFileEntriesRequest();
 
     assertEquals("DELETE", req.getMethod());
-    assertEquals(URI.create("http://example.com/file/"), req.getURI());
+    assertEquals(URI.create("http://example.com/file/"), req.getUri());
   }
 
   @Test
-  public void createGetFileEntryRequest() {
+  public void createGetFileEntryRequest() throws Exception {
     UUID uuid = UUID.fromString("00000000-0000-0000-0004-000000000001");
-    HttpUriRequest req = classUnderTest.createGetFileEntryRequest(uuid);
+    HttpUriRequestBase req = classUnderTest.createGetFileEntryRequest(uuid);
 
     assertEquals("GET", req.getMethod());
-    assertEquals(URI.create("http://example.com/file/00000000-0000-0000-0004-000000000001/metadata"), req.getURI());
+    assertEquals(URI.create("http://example.com/file/00000000-0000-0000-0004-000000000001/metadata"), req.getUri());
   }
 
   @Test
-  public void createGetFileContentRequest() {
+  public void createGetFileContentRequest() throws Exception {
     UUID uuid = UUID.fromString("00000000-0000-0000-0004-000000000001");
-    HttpUriRequest req = classUnderTest.createGetFileContentRequest(uuid);
+    HttpUriRequestBase req = classUnderTest.createGetFileContentRequest(uuid);
 
     assertEquals("GET", req.getMethod());
-    assertEquals(URI.create("http://example.com/file/00000000-0000-0000-0004-000000000001"), req.getURI());
+    assertEquals(URI.create("http://example.com/file/00000000-0000-0000-0004-000000000001"), req.getUri());
   }
 
   @Test
-  public void createQueryFileRequest() {
+  public void createQueryFileRequest() throws Exception {
     FileQuery query = new FileQuery();
-    HttpUriRequest req = classUnderTest.createQueryFileRequest(query);
+    HttpUriRequestBase req = classUnderTest.createQueryFileRequest(query);
     
     assertEquals("POST", req.getMethod());
-    assertEquals(URI.create("http://example.com/query/file"), req.getURI());
+    assertEquals(URI.create("http://example.com/query/file"), req.getUri());
     assertEquals("application/json; charset=utf-8", getContentType(req));
   }
 
   @Test
-  public void createQueryAttributeRequest() {
+  public void createQueryAttributeRequest() throws Exception {
     AttributeQuery query = new AttributeQuery();
-    HttpUriRequest req = classUnderTest.createQueryAttributeRequest(query);
+    HttpUriRequestBase req = classUnderTest.createQueryAttributeRequest(query);
     
     assertEquals("POST", req.getMethod());
-    assertEquals(URI.create("http://example.com/query/attribute"), req.getURI());
+    assertEquals(URI.create("http://example.com/query/attribute"), req.getUri());
     assertEquals("application/json; charset=utf-8", getContentType(req));
   }
 
   @Test
-  public void createGetSourcesRequest() {
-    HttpUriRequest req = classUnderTest.createGetSourcesRequest();
+  public void createGetSourcesRequest() throws Exception {
+    HttpUriRequestBase req = classUnderTest.createGetSourcesRequest();
 
     assertEquals("GET", req.getMethod());
-    assertEquals(URI.create("http://example.com/source/"), req.getURI());
+    assertEquals(URI.create("http://example.com/source/"), req.getUri());
   }
   
   @Test
-  public void createGetSourceRequest() {
-    HttpUriRequest req = classUnderTest.createGetSourceRequest("se");
+  public void createGetSourceRequest() throws Exception {
+    HttpUriRequestBase req = classUnderTest.createGetSourceRequest("se");
     assertEquals("GET", req.getMethod());
-    assertEquals(URI.create("http://example.com/source/by_name/se"), req.getURI());
+    assertEquals(URI.create("http://example.com/source/by_name/se"), req.getUri());
   }
   
   @Test
-  public void createAddSourceRequest() {
+  public void createAddSourceRequest() throws Exception {
     Source source = new Source("mysource");
     source.put("oh", "ohvalue");
     source.put("ah", "ahvalue");
     
-    HttpUriRequest req = classUnderTest.createAddSourceRequest(source);
+    HttpUriRequestBase req = classUnderTest.createAddSourceRequest(source);
     assertEquals("POST", req.getMethod());
-    assertEquals(URI.create("http://example.com/source/"), req.getURI());
+    assertEquals(URI.create("http://example.com/source/"), req.getUri());
     assertEquals("application/json; charset=utf-8", getContentType(req));
   }
   
   @Test
-  public void createUpdateSourceRequest() {
+  public void createUpdateSourceRequest() throws Exception {
     Source source = new Source("mysource");
     source.put("oh", "ohvalue");
     source.put("ah", "ahvalue");
     
-    HttpUriRequest req = classUnderTest.createUpdateSourceRequest(source);
+    HttpUriRequestBase req = classUnderTest.createUpdateSourceRequest(source);
     assertEquals("PUT", req.getMethod());
-    assertEquals(URI.create("http://example.com/source/"), req.getURI());
+    assertEquals(URI.create("http://example.com/source/"), req.getUri());
     assertEquals("application/json; charset=utf-8", getContentType(req));
   }
   
   @Test
-  public void createDeleteSourceRequest() {
-    HttpUriRequest req = classUnderTest.createDeleteSourceRequest("nisse");
+  public void createDeleteSourceRequest() throws Exception {
+    HttpUriRequestBase req = classUnderTest.createDeleteSourceRequest("nisse");
     assertEquals("DELETE", req.getMethod());
-    assertEquals(URI.create("http://example.com/source/nisse"), req.getURI());
+    assertEquals(URI.create("http://example.com/source/nisse"), req.getUri());
     assertEquals("application/json; charset=utf-8", getContentType(req));
   }
   
   @Test
-  public void getRequestUri_serverWithoutSlash() {
+  public void getRequestUri_serverWithoutSlash() throws Exception {
     classUnderTest = new DefaultRequestFactory(
       URI.create("http://example.com:8080")
     );
@@ -197,7 +197,7 @@ public class DefaultRequestFactoryTest {
   }
 
   @Test
-  public void getRequestUri_serverWithSlash() {
+  public void getRequestUri_serverWithSlash() throws Exception {
     classUnderTest = new DefaultRequestFactory(
       URI.create("http://example.com:8080/")
     );
@@ -209,7 +209,7 @@ public class DefaultRequestFactoryTest {
   }
 
   @Test
-  public void getRequestUri_serverWithPath() {
+  public void getRequestUri_serverWithPath() throws Exception {
       classUnderTest = new DefaultRequestFactory(
       URI.create("http://example.com:8080/path/")
     );

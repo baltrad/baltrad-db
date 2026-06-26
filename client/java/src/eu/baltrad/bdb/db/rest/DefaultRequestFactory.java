@@ -22,17 +22,19 @@ package eu.baltrad.bdb.db.rest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URIUtils;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.net.URIBuilder;
 
 import eu.baltrad.bdb.db.AttributeQuery;
 import eu.baltrad.bdb.db.FileQuery;
@@ -45,178 +47,194 @@ public final class DefaultRequestFactory implements RequestFactory {
   
   public DefaultRequestFactory(URI serverUri) {
     try {
-      this.serverUri = URIUtils.createURI(
-        serverUri.getScheme(),
-        serverUri.getHost(),
-        serverUri.getPort(),
-        serverUri.getPath() != null ? serverUri.getPath() : "/",
-        "",
-        ""
-      );
-    } catch (java.net.URISyntaxException e) {
+      this.serverUri = new URIBuilder(serverUri)
+        .setPath(serverUri.getPath() != null ? serverUri.getPath() : "/")
+        .clearParameters()
+        .setFragment(null)
+        .build();
+    } catch (URISyntaxException e) {
       throw new IllegalArgumentException("invalid serverUri: " + serverUri);
     }
     this.jsonUtil = new JsonUtil();
   }
 
   @Override
-  public HttpUriRequest createStoreFileRequest(InputStream fileContent) {
+  public HttpUriRequestBase createStoreFileRequest(InputStream fileContent) {
     HttpPost result = new HttpPost(getRequestUri("file/"));
+    result.addHeader("content-type", "application/x-hdf5");
     
     // XXX: this should be InputStreamEntity, but the server side
     //      has trouble with chunked encoding ATM.
     ByteArrayEntity entity = null;
     try {
-      entity = new ByteArrayEntity(IOUtils.toByteArray(fileContent));
+      entity = new ByteArrayEntity(IOUtils.toByteArray(fileContent), ContentType.create("application/x-hdf5"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
     result.setEntity(entity);
-    result.addHeader("content-type", "application/x-hdf5");
     return result;
   }
 
   @Override
-  public HttpUriRequest createQueryFileMetadata(InputStream fileContent) {
+  public HttpUriRequestBase createQueryFileMetadata(InputStream fileContent) {
     HttpPost result = new HttpPost(getRequestUri("file/metadata"));
     // XXX: this should be InputStreamEntity, but the server side
     //      has trouble with chunked encoding ATM.
     ByteArrayEntity entity = null;
     try {
-      entity = new ByteArrayEntity(IOUtils.toByteArray(fileContent));
+      entity = new ByteArrayEntity(IOUtils.toByteArray(fileContent), ContentType.create("application/x-hdf5"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
     result.setEntity(entity);
-    result.addHeader("content-type", "application/x-hdf5");
     return result;
   }
 
   
   @Override
-  public HttpUriRequest createRemoveFileEntryRequest(UUID uuid) {
+  public HttpUriRequestBase createRemoveFileEntryRequest(UUID uuid) {
     String uuidString = uuid.toString();
     return new HttpDelete(getRequestUri("file/" + uuidString));
   }
 
   @Override
-  public HttpUriRequest createRemoveAllFileEntriesRequest() {
+  public HttpUriRequestBase createRemoveAllFileEntriesRequest() {
     return new HttpDelete(getRequestUri("file/"));
   }
   
   @Override
-  public HttpUriRequest createGetFileEntryRequest(UUID uuid) {
+  public HttpUriRequestBase createGetFileEntryRequest(UUID uuid) {
     String uuidString = uuid.toString();
     return new HttpGet(getRequestUri("file/" + uuidString + "/metadata"));
   }
 
   @Override
-  public HttpUriRequest createRemoveFilesByCountRequest(int limit, int nritems) {
+  public HttpUriRequestBase createRemoveFilesByCountRequest(int limit, int nritems) {
     return new HttpDelete(getRequestUri("file/count/"+limit+"/"+nritems));
   }
   
   @Override
-  public HttpUriRequest createRemoveFilesByAgeRequest(DateTime age, int nritems) {
+  public HttpUriRequestBase createRemoveFilesByAgeRequest(DateTime age, int nritems) {
     String dstr = age.getDate().toIsoString() + age.getTime().toIsoString();
     return new HttpDelete(getRequestUri("file/age/"+dstr+"/"+nritems));
   }
   
   @Override
-  public HttpUriRequest createGetFileCountRequest() {
+  public HttpUriRequestBase createGetFileCountRequest() {
     return new HttpGet(getRequestUri("file/count"));
   }
   
   @Override
-  public HttpUriRequest createGetFileContentRequest(UUID uuid) {
+  public HttpUriRequestBase createGetFileContentRequest(UUID uuid) {
     String uuidString = uuid.toString();
     return new HttpGet(getRequestUri("file/" + uuidString));
   }
 
   @Override
-  public HttpUriRequest createQueryFileRequest(FileQuery query) {
+  public HttpUriRequestBase createQueryFileRequest(FileQuery query) {
     HttpPost result = new HttpPost(getRequestUri("query/file"));
+    result.addHeader("content-type", "application/json; charset=utf-8");
     try {
       String queryJson = jsonUtil.jsonToString(jsonUtil.toJson(query));
-      StringEntity entity = new StringEntity(queryJson, "utf-8");
+      StringEntity entity = new StringEntity(queryJson, ContentType.APPLICATION_JSON);
       result.setEntity(entity);
-      result.addHeader("content-type", "application/json; charset=utf-8");
-    } catch (java.io.UnsupportedEncodingException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
     return result;
   }
 
   @Override
-  public HttpUriRequest createQueryAttributeRequest(AttributeQuery query) {
+  public HttpUriRequestBase createQueryAttributeRequest(AttributeQuery query) {
     HttpPost result = new HttpPost(getRequestUri("query/attribute"));
+    result.addHeader("content-type", "application/json; charset=utf-8");
     try {
       String queryJson = jsonUtil.jsonToString(jsonUtil.toJson(query));
-      StringEntity entity = new StringEntity(queryJson, "utf-8");
+      StringEntity entity = new StringEntity(queryJson, ContentType.APPLICATION_JSON);
       result.setEntity(entity);
-      result.addHeader("content-type", "application/json; charset=utf-8");
-    } catch (java.io.UnsupportedEncodingException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
     return result;
   }
 
   @Override
-  public HttpUriRequest createGetSourcesRequest() {
+  public HttpUriRequestBase createGetSourcesRequest() {
     return new HttpGet(getRequestUri("source/"));
   }
 
   @Override
-  public HttpUriRequest createGetSourceRequest(String name) {
+  public HttpUriRequestBase createGetSourceRequest(String name) {
     return new HttpGet(getRequestUri("source/by_name/"+name));
   }
   
   @Override
-  public HttpUriRequest createAddSourceRequest(Source source) {
+  public HttpUriRequestBase createAddSourceRequest(Source source) {
     HttpPost result = new HttpPost(getRequestUri("source/"));
+    result.addHeader("content-type", "application/json; charset=utf-8");
     try {
       String jsonSource = jsonUtil.jsonToString(jsonUtil.toJson(source));
-      StringEntity entity = new StringEntity(jsonSource, "utf-8");
+      StringEntity entity = new StringEntity(jsonSource, ContentType.APPLICATION_JSON);
       result.setEntity(entity);
-      result.addHeader("content-type", "application/json; charset=utf-8");
-    } catch (java.io.UnsupportedEncodingException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
     return result;
   }
   
   @Override
-  public HttpUriRequest createUpdateSourceRequest(Source source) {
+  public HttpUriRequestBase createUpdateSourceRequest(Source source) {
     HttpPut result = new HttpPut(getRequestUri("source/"));
+    result.addHeader("content-type", "application/json; charset=utf-8");
     try {
       String jsonSource = jsonUtil.jsonToString(jsonUtil.toJson(source));
-      StringEntity entity = new StringEntity(jsonSource, "utf-8");
+      StringEntity entity = new StringEntity(jsonSource, ContentType.APPLICATION_JSON);
       result.setEntity(entity);
-      result.addHeader("content-type", "application/json; charset=utf-8");
-    } catch (java.io.UnsupportedEncodingException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
     return result;
   }
   
   @Override
-  public HttpUriRequest createDeleteSourceRequest(String source) {
+  public HttpUriRequestBase createDeleteSourceRequest(String source) {
     HttpDelete result = new HttpDelete(getRequestUri("source/"+source));
     result.addHeader("content-type", "application/json; charset=utf-8");
     return result;
   }
   
   @Override
-  public HttpUriRequest createGetParentSourcesRequest() {
+  public HttpUriRequestBase createGetParentSourcesRequest() {
 	return new HttpGet(getRequestUri("source/parents"));
   }
 
   @Override
-  public HttpUriRequest createGetSourcesWithParent(String parent) {
+  public HttpUriRequestBase createGetSourcesWithParent(String parent) {
 	return new HttpGet(getRequestUri("source/with_parent/"+parent));
   }
   
   protected URI getRequestUri(String path) {
-    return URIUtils.resolve(serverUri, path);
+    try {
+      // Normalize: ensure base path doesn't end with / and path doesn't start with /
+      String basePath = serverUri.getPath();
+      if (basePath == null || basePath.isEmpty()) {
+        basePath = "";
+      }
+      // Remove trailing slash from base
+      if (basePath.endsWith("/")) {
+        basePath = basePath.substring(0, basePath.length() - 1);
+      }
+      // Ensure path starts with /
+      if (!path.startsWith("/")) {
+        path = "/" + path;
+      }
+      
+      return new URIBuilder(serverUri)
+        .setPath(basePath + path)
+        .build();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException("Failed to build URI", e);
+    }
   }
   
 }

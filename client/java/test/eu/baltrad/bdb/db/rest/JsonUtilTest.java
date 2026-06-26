@@ -24,10 +24,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -73,7 +73,7 @@ public class JsonUtilTest {
   public void createOh5Attribute_arrayValue() {
     ObjectNode jsonObj = nodeFactory.objectNode();
     ArrayNode value = nodeFactory.arrayNode();
-    jsonObj.put("value", value);
+    jsonObj.set("value", value);
 
     Attribute result = classUnderTest.createOh5Attribute("attrname", jsonObj);
     assertTrue(result.isNull());
@@ -82,7 +82,7 @@ public class JsonUtilTest {
   @Test
   public void createOh5Attribute_nullValue() {
     ObjectNode jsonObj = nodeFactory.objectNode();
-    jsonObj.put("value", nodeFactory.nullNode());
+    jsonObj.set("value", nodeFactory.nullNode());
 
     Attribute result = classUnderTest.createOh5Attribute("attrname", jsonObj);
     assertTrue(result.isNull());
@@ -99,14 +99,14 @@ public class JsonUtilTest {
     );
     JsonNode result = classUnderTest.toJson(expr);
     assertEquals(6, result.size());
-    assertEquals("list", result.get(0).getTextValue());
-    assertEquals("foo", result.get(1).getTextValue());
-    assertEquals(1, result.get(2).getLongValue());
-    assertEquals(1.1, result.get(3).getDoubleValue(), 0.00000001);
-    assertEquals(true, result.get(4).getBooleanValue());
+    assertEquals("list", result.get(0).asText());
+    assertEquals("foo", result.get(1).asText());
+    assertEquals(1, result.get(2).asLong());
+    assertEquals(1.1, result.get(3).asDouble(), 0.00000001);
+    assertEquals(true, result.get(4).asBoolean());
     assertEquals(2, result.get(5).size());
-    assertEquals("symbol", result.get(5).get(0).getTextValue());
-    assertEquals("bar", result.get(5).get(1).getTextValue());
+    assertEquals("symbol", result.get(5).get(0).asText());
+    assertEquals("bar", result.get(5).get(1).asText());
   }
 
   @Test
@@ -163,10 +163,10 @@ public class JsonUtilTest {
     
     JsonNode result = classUnderTest.toJson(source);
     JsonNode srcnode = result.get("source");
-    assertEquals("nisse", srcnode.get("name").getTextValue());
+    assertEquals("nisse", srcnode.get("name").asText());
     
     JsonNode values = srcnode.get("values");
-    assertEquals("ahvalue", values.get("ah").getTextValue());
-    assertEquals("ohvalue", values.get("oh").getTextValue());
+    assertEquals("ahvalue", values.get("ah").asText());
+    assertEquals("ohvalue", values.get("oh").asText());
   }
 }

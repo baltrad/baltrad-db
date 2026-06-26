@@ -221,7 +221,7 @@ def run_server():
             raise SystemExit("failed to lock pidfile: %s" % opts.pidfile)
         except lockfile.LockTimeout:
             raise SystemExit("lock timeout on pidfile: %s" % opts.pidfile)
-            
+
     with daemon_ctx:
         logtype = conf.get("baltrad.bdb.server.log.type", "logfile")
         logid = conf.get("baltrad.bdb.server.log.id", "baltrad.bdb.server")

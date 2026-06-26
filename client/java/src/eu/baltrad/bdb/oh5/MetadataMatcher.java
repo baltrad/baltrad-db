@@ -49,7 +49,7 @@ public class MetadataMatcher {
     initProcedures();
   }
   
-  protected void initProcedures() {
+  protected final void initProcedures() {
     procedures.put("+", new BinaryListCartesian(new OperatorAdd()));
     procedures.put("-", new BinaryListCartesian(new OperatorSub()));
     procedures.put("/", new BinaryListCartesian(new OperatorMul()));

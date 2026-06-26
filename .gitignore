@@ -6,6 +6,8 @@ test-results.xml
 client/java/build
 client/java/etc/develop.properties
 client/java/dist
+client/java/lib/maven/libs
+client/java/lib/maven/target
 client/python/build/
 client/python/dist/
 common/build

@@ -4,11 +4,11 @@ import eu.baltrad.bdb.oh5.Metadata;
 import eu.baltrad.bdb.oh5.Source;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 
-import org.codehaus.jackson.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -19,10 +19,10 @@ import java.util.*;
  * Wrapper for server responses
  */
 public final class RestfulResponse {
-  HttpResponse httpResponse;
+  ClassicHttpResponse httpResponse;
   JsonUtil jsonUtil;
 
-  public RestfulResponse(HttpResponse httpResponse) {
+  public RestfulResponse(ClassicHttpResponse httpResponse) {
     this.httpResponse = httpResponse;
     this.jsonUtil = new JsonUtil();
   }
@@ -31,11 +31,11 @@ public final class RestfulResponse {
    * get the HTTP status code for this response
    */
   public int getStatusCode() {
-    return httpResponse.getStatusLine().getStatusCode();
+    return httpResponse.getCode();
   }
 
   public String getReason() {
-    return httpResponse.getStatusLine().getReasonPhrase();
+    return httpResponse.getReasonPhrase();
   }
   
   /**
@@ -76,7 +76,7 @@ public final class RestfulResponse {
     List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
     for (JsonNode rowNode : rowsNode) {
       Map<String, Object> row = new HashMap<String, Object>();
-      Iterator<Map.Entry<String, JsonNode>> fieldIterator = rowNode.getFields();
+      Iterator<Map.Entry<String, JsonNode>> fieldIterator = rowNode.fields();
       while (fieldIterator.hasNext()) {
         Map.Entry<String, JsonNode> field = fieldIterator.next();
         Object value = getObjectFromValueNode(field.getValue());
@@ -104,14 +104,14 @@ public final class RestfulResponse {
 
   protected Source getSourceFromNode(JsonNode node) {
     Source result = new Source();
-    result.setName(node.get("name").getTextValue());
-    if (node.has("parent")) {
-      result.setParent(node.get("parent").getTextValue());
+    result.setName(node.get("name").asText());
+    if (node.has("parent") && !node.get("parent").isNull()) {
+      result.setParent(node.get("parent").asText());
     }
-    Iterator<Map.Entry<String, JsonNode>> fieldIterator = node.get("values").getFields();
+    Iterator<Map.Entry<String, JsonNode>> fieldIterator = node.get("values").fields();
     while (fieldIterator.hasNext()) {
       Map.Entry<String, JsonNode> field = fieldIterator.next();
-      result.put(field.getKey(), field.getValue().getTextValue());
+      result.put(field.getKey(), field.getValue().asText());
     }
     return result;
   }
@@ -122,18 +122,18 @@ public final class RestfulResponse {
     }
     
     if (node.isTextual()) {
-      return node.getTextValue();
+      return node.asText();
     } else if (node.isIntegralNumber()) {
-      return Long.valueOf(node.getValueAsLong());
+      return Long.valueOf(node.asLong());
     } else if (node.isFloatingPointNumber()) {
-      return Double.valueOf(node.getValueAsDouble());
+      return Double.valueOf(node.asDouble());
     } else if (node.isBoolean()) {
-      return Boolean.valueOf(node.getValueAsBoolean());
+      return Boolean.valueOf(node.asBoolean());
     } else if (node.isNull()) {
       return null;
     }
 
-    throw new RuntimeException("unhandled value: " + node.getValueAsText());
+    throw new RuntimeException("unhandled value: " + node.asText());
   }
   
 
