@@ -19,7 +19,7 @@
 
         <!-- Dependency versions -->
         <mime4j.version>0.8.14</mime4j.version>
-        <log4j.version>2.23.1</log4j.version>
+        <log4j.version>2.26.0</log4j.version>
         <slf4j.version>2.0.18</slf4j.version>
         <bytebuddy.version>1.18.10</bytebuddy.version>
         <dom4j.version>2.1.4</dom4j.version>
