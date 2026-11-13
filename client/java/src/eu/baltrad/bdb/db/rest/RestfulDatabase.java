@@ -76,8 +76,9 @@ public class RestfulDatabase implements Database, SourceManager {
     this.requestFactory = new DefaultRequestFactory(serverUri);
     PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
     cm.setDefaultMaxPerRoute(maxconnections);
+    
     cm.setMaxTotal(maxconnections);
-    this.httpClient = HttpClients.custom().setConnectionManager(cm).build();
+    this.httpClient = HttpClients.custom().setConnectionManager(cm).setConnectionManagerShared(true).build();
     this.authenticator = authenticator;
     if (fileEntryCacheSize > 0) {
       this.fileEntryCache = new RestfulFileEntryCache(fileEntryCacheSize);      
@@ -103,6 +104,7 @@ public class RestfulDatabase implements Database, SourceManager {
         new DefaultRequestFactory(serverUri),
         HttpClients.custom()
             .setConnectionManager(new PoolingHttpClientConnectionManager())
+            .setConnectionManagerShared(true)
             .build(),
         authenticator
         );
